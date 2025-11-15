@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Redirect;
 use Illuminate\Http\Request;
 
-class RedirectController extends Controller
+class RedirectController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -26,7 +26,7 @@ class RedirectController extends Controller
 
         $redirects = $query->latest()->paginate(20);
 
-        return response()->json($redirects);
+        return $this->paginated($redirects, 'Redirects retrieved successfully');
     }
 
     public function store(Request $request)
@@ -45,12 +45,12 @@ class RedirectController extends Controller
 
         $redirect = Redirect::create($validated);
 
-        return response()->json($redirect, 201);
+        return $this->success($redirect, 'Redirect created successfully', 201);
     }
 
     public function show(Redirect $redirect)
     {
-        return response()->json($redirect);
+        return $this->success($redirect, 'Redirect retrieved successfully');
     }
 
     public function update(Request $request, Redirect $redirect)
@@ -69,14 +69,14 @@ class RedirectController extends Controller
 
         $redirect->update($validated);
 
-        return response()->json($redirect);
+        return $this->success($redirect, 'Redirect updated successfully');
     }
 
     public function destroy(Redirect $redirect)
     {
         $redirect->delete();
 
-        return response()->json(['message' => 'Redirect deleted successfully']);
+        return $this->success(null, 'Redirect deleted successfully');
     }
 
     public function statistics()
@@ -91,7 +91,7 @@ class RedirectController extends Controller
                 ->get(['from_url', 'to_url', 'hits', 'type']),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Redirect statistics retrieved successfully');
     }
 }
 

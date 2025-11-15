@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
-class ActivityLogController extends Controller
+class ActivityLogController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -34,12 +34,12 @@ class ActivityLogController extends Controller
 
         $logs = $query->latest()->paginate(50);
 
-        return response()->json($logs);
+        return $this->paginated($logs, 'Activity logs retrieved successfully');
     }
 
     public function show(ActivityLog $activityLog)
     {
-        return response()->json($activityLog->load('user'));
+        return $this->success($activityLog->load('user'), 'Activity log retrieved successfully');
     }
 
     public function userActivity(Request $request, $userId)
@@ -49,7 +49,7 @@ class ActivityLogController extends Controller
             ->latest()
             ->paginate(50);
 
-        return response()->json($logs);
+        return $this->paginated($logs, 'User activity logs retrieved successfully');
     }
 
     public function recent(Request $request)
@@ -61,7 +61,7 @@ class ActivityLogController extends Controller
             ->limit($limit)
             ->get();
 
-        return response()->json($logs);
+        return $this->success($logs, 'Recent activity logs retrieved successfully');
     }
 
     public function statistics(Request $request)
@@ -98,6 +98,6 @@ class ActivityLogController extends Controller
                 ->pluck('count', 'model_type'),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Activity log statistics retrieved successfully');
     }
 }

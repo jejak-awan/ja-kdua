@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Theme;
 use Illuminate\Http\Request;
 
-class ThemeController extends Controller
+class ThemeController extends BaseApiController
 {
     public function index()
     {
         $themes = Theme::latest()->get();
-        return response()->json($themes);
+        return $this->success($themes, 'Themes retrieved successfully');
     }
 
     public function store(Request $request)
@@ -30,12 +30,12 @@ class ThemeController extends Controller
 
         $theme = Theme::create($validated);
 
-        return response()->json($theme, 201);
+        return $this->success($theme, 'Theme created successfully', 201);
     }
 
     public function show(Theme $theme)
     {
-        return response()->json($theme);
+        return $this->success($theme, 'Theme retrieved successfully');
     }
 
     public function update(Request $request, Theme $theme)
@@ -54,28 +54,27 @@ class ThemeController extends Controller
 
         $theme->update($validated);
 
-        return response()->json($theme);
+        return $this->success($theme, 'Theme updated successfully');
     }
 
     public function destroy(Theme $theme)
     {
         if ($theme->is_active) {
-            return response()->json(['message' => 'Cannot delete active theme'], 422);
+            return $this->validationError(['theme' => ['Cannot delete active theme']], 'Cannot delete active theme');
         }
 
         $theme->delete();
 
-        return response()->json(['message' => 'Theme deleted successfully']);
+        return $this->success(null, 'Theme deleted successfully');
     }
 
     public function activate(Theme $theme)
     {
         $theme->activate();
 
-        return response()->json([
-            'message' => 'Theme activated successfully',
+        return $this->success([
             'theme' => $theme->fresh(),
-        ]);
+        ], 'Theme activated successfully');
     }
 
     public function getActive()
@@ -83,10 +82,10 @@ class ThemeController extends Controller
         $theme = Theme::getActiveTheme();
         
         if (!$theme) {
-            return response()->json(['message' => 'No active theme'], 404);
+            return $this->notFound('Active theme');
         }
 
-        return response()->json($theme);
+        return $this->success($theme, 'Active theme retrieved successfully');
     }
 
     public function updateSettings(Request $request, Theme $theme)
@@ -97,7 +96,7 @@ class ThemeController extends Controller
 
         $theme->update(['settings' => $validated['settings']]);
 
-        return response()->json($theme);
+        return $this->success($theme, 'Theme settings updated successfully');
     }
 
     public function updateCustomCss(Request $request, Theme $theme)
@@ -108,6 +107,6 @@ class ThemeController extends Controller
 
         $theme->update(['custom_css' => $validated['custom_css'] ?? '']);
 
-        return response()->json($theme);
+        return $this->success($theme, 'Theme custom CSS updated successfully');
     }
 }

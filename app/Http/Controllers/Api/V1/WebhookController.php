@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Webhook;
 use Illuminate\Http\Request;
 
-class WebhookController extends Controller
+class WebhookController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -22,7 +22,7 @@ class WebhookController extends Controller
 
         $webhooks = $query->latest()->get();
 
-        return response()->json($webhooks);
+        return $this->success($webhooks, 'Webhooks retrieved successfully');
     }
 
     public function store(Request $request)
@@ -40,12 +40,12 @@ class WebhookController extends Controller
 
         $webhook = Webhook::create($validated);
 
-        return response()->json($webhook, 201);
+        return $this->success($webhook, 'Webhook created successfully', 201);
     }
 
     public function show(Webhook $webhook)
     {
-        return response()->json($webhook);
+        return $this->success($webhook, 'Webhook retrieved successfully');
     }
 
     public function update(Request $request, Webhook $webhook)
@@ -64,14 +64,14 @@ class WebhookController extends Controller
 
         $webhook->update($validated);
 
-        return response()->json($webhook);
+        return $this->success($webhook, 'Webhook updated successfully');
     }
 
     public function destroy(Webhook $webhook)
     {
         $webhook->delete();
 
-        return response()->json(['message' => 'Webhook deleted successfully']);
+        return $this->success(null, 'Webhook deleted successfully');
     }
 
     public function test(Webhook $webhook)
@@ -83,10 +83,9 @@ class WebhookController extends Controller
 
         $result = $webhook->trigger($testData);
 
-        return response()->json([
+        return $this->success([
             'success' => $result,
-            'message' => $result ? 'Webhook triggered successfully' : 'Webhook failed',
-        ]);
+        ], $result ? 'Webhook triggered successfully' : 'Webhook failed');
     }
 
     public function statistics()
@@ -102,6 +101,6 @@ class WebhookController extends Controller
                 ->get(),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Webhook statistics retrieved successfully');
     }
 }

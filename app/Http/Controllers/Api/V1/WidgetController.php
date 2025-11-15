@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Widget;
 use Illuminate\Http\Request;
 
-class WidgetController extends Controller
+class WidgetController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -18,7 +18,7 @@ class WidgetController extends Controller
 
         $widgets = $query->orderBy('sort_order')->get();
 
-        return response()->json($widgets);
+        return $this->success($widgets, 'Widgets retrieved successfully');
     }
 
     public function store(Request $request)
@@ -34,12 +34,12 @@ class WidgetController extends Controller
 
         $widget = Widget::create($validated);
 
-        return response()->json($widget, 201);
+        return $this->success($widget, 'Widget created successfully', 201);
     }
 
     public function show(Widget $widget)
     {
-        return response()->json($widget);
+        return $this->success($widget, 'Widget retrieved successfully');
     }
 
     public function update(Request $request, Widget $widget)
@@ -56,20 +56,20 @@ class WidgetController extends Controller
 
         $widget->update($validated);
 
-        return response()->json($widget);
+        return $this->success($widget, 'Widget updated successfully');
     }
 
     public function destroy(Widget $widget)
     {
         $widget->delete();
 
-        return response()->json(['message' => 'Widget deleted successfully']);
+        return $this->success(null, 'Widget deleted successfully');
     }
 
     public function getByLocation(Request $request, $location)
     {
         $widgets = Widget::getByLocation($location);
-        return response()->json($widgets);
+        return $this->success($widgets, 'Widgets retrieved successfully');
     }
 
     public function reorder(Request $request)
@@ -85,6 +85,6 @@ class WidgetController extends Controller
                 ->update(['sort_order' => $widgetData['sort_order']]);
         }
 
-        return response()->json(['message' => 'Widgets reordered successfully']);
+        return $this->success(null, 'Widgets reordered successfully');
     }
 }

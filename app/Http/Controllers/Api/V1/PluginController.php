@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Plugin;
 use Illuminate\Http\Request;
 
-class PluginController extends Controller
+class PluginController extends BaseApiController
 {
     public function index()
     {
         $plugins = Plugin::latest()->get();
-        return response()->json($plugins);
+        return $this->success($plugins, 'Plugins retrieved successfully');
     }
 
     public function store(Request $request)
@@ -31,12 +31,12 @@ class PluginController extends Controller
 
         $plugin = Plugin::create($validated);
 
-        return response()->json($plugin, 201);
+        return $this->success($plugin, 'Plugin created successfully', 201);
     }
 
     public function show(Plugin $plugin)
     {
-        return response()->json($plugin);
+        return $this->success($plugin, 'Plugin retrieved successfully');
     }
 
     public function update(Request $request, Plugin $plugin)
@@ -56,38 +56,36 @@ class PluginController extends Controller
 
         $plugin->update($validated);
 
-        return response()->json($plugin);
+        return $this->success($plugin, 'Plugin updated successfully');
     }
 
     public function destroy(Plugin $plugin)
     {
         if ($plugin->is_active) {
-            return response()->json(['message' => 'Cannot delete active plugin. Deactivate it first.'], 422);
+            return $this->validationError(['plugin' => ['Cannot delete active plugin. Deactivate it first.']], 'Cannot delete active plugin. Deactivate it first.');
         }
 
         $plugin->delete();
 
-        return response()->json(['message' => 'Plugin deleted successfully']);
+        return $this->success(null, 'Plugin deleted successfully');
     }
 
     public function activate(Plugin $plugin)
     {
         $plugin->activate();
 
-        return response()->json([
-            'message' => 'Plugin activated successfully',
+        return $this->success([
             'plugin' => $plugin->fresh(),
-        ]);
+        ], 'Plugin activated successfully');
     }
 
     public function deactivate(Plugin $plugin)
     {
         $plugin->deactivate();
 
-        return response()->json([
-            'message' => 'Plugin deactivated successfully',
+        return $this->success([
             'plugin' => $plugin->fresh(),
-        ]);
+        ], 'Plugin deactivated successfully');
     }
 
     public function updateSettings(Request $request, Plugin $plugin)
@@ -98,12 +96,12 @@ class PluginController extends Controller
 
         $plugin->update(['settings' => $validated['settings']]);
 
-        return response()->json($plugin);
+        return $this->success($plugin, 'Plugin settings updated successfully');
     }
 
     public function getActive()
     {
         $plugins = Plugin::getActivePlugins();
-        return response()->json($plugins);
+        return $this->success($plugins, 'Active plugins retrieved successfully');
     }
 }

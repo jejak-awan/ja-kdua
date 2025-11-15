@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
 use App\Models\ContentRevision;
 use Illuminate\Http\Request;
 
-class ContentRevisionController extends Controller
+class ContentRevisionController extends BaseApiController
 {
     public function index(Content $content)
     {

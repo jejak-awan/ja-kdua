@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\AnalyticsVisit;
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class AnalyticsController extends Controller
+class AnalyticsController extends BaseApiController
 {
     public function overview(Request $request)
     {

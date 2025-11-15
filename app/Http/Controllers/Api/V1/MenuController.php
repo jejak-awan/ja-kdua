@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 
-class MenuController extends Controller
+class MenuController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -19,7 +19,7 @@ class MenuController extends Controller
 
         $menus = $query->latest()->get();
 
-        return response()->json($menus);
+        return $this->success($menus, 'Menus retrieved successfully');
     }
 
     public function store(Request $request)
@@ -33,12 +33,12 @@ class MenuController extends Controller
 
         $menu = Menu::create($validated);
 
-        return response()->json($menu->load('items'), 201);
+        return $this->success($menu->load('items'), 'Menu created successfully', 201);
     }
 
     public function show(Menu $menu)
     {
-        return response()->json($menu->load(['items.children']));
+        return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
     }
 
     public function update(Request $request, Menu $menu)
@@ -53,14 +53,14 @@ class MenuController extends Controller
 
         $menu->update($validated);
 
-        return response()->json($menu->load('items'));
+        return $this->success($menu->load('items'), 'Menu updated successfully');
     }
 
     public function destroy(Menu $menu)
     {
         $menu->delete();
 
-        return response()->json(['message' => 'Menu deleted successfully']);
+        return $this->success(null, 'Menu deleted successfully');
     }
 
     public function addItem(Request $request, Menu $menu)
@@ -80,13 +80,13 @@ class MenuController extends Controller
 
         $item = $menu->items()->create($validated);
 
-        return response()->json($item->load('children'), 201);
+        return $this->success($item->load('children'), 'Menu item created successfully', 201);
     }
 
     public function updateItem(Request $request, Menu $menu, MenuItem $menuItem)
     {
         if ($menuItem->menu_id !== $menu->id) {
-            return response()->json(['message' => 'Menu item does not belong to this menu'], 422);
+            return $this->validationError(['menu_item' => ['Menu item does not belong to this menu']], 'Menu item does not belong to this menu');
         }
 
         $validated = $request->validate([
@@ -105,18 +105,18 @@ class MenuController extends Controller
 
         $menuItem->update($validated);
 
-        return response()->json($menuItem->load('children'));
+        return $this->success($menuItem->load('children'), 'Menu item updated successfully');
     }
 
     public function deleteItem(Menu $menu, MenuItem $menuItem)
     {
         if ($menuItem->menu_id !== $menu->id) {
-            return response()->json(['message' => 'Menu item does not belong to this menu'], 422);
+            return $this->validationError(['menu_item' => ['Menu item does not belong to this menu']], 'Menu item does not belong to this menu');
         }
 
         $menuItem->delete();
 
-        return response()->json(['message' => 'Menu item deleted successfully']);
+        return $this->success(null, 'Menu item deleted successfully');
     }
 
     public function reorderItems(Request $request, Menu $menu)
@@ -137,7 +137,7 @@ class MenuController extends Controller
                 ]);
         }
 
-        return response()->json(['message' => 'Menu items reordered successfully']);
+        return $this->success(null, 'Menu items reordered successfully');
     }
 
     public function getByLocation(Request $request, $location)
@@ -145,9 +145,9 @@ class MenuController extends Controller
         $menu = Menu::getByLocation($location);
         
         if (!$menu) {
-            return response()->json(['message' => 'Menu not found for location'], 404);
+            return $this->notFound('Menu');
         }
 
-        return response()->json($menu->load(['items.children']));
+        return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
     }
 }

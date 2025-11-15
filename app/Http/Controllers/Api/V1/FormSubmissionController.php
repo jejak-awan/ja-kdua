@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Form;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 
-class FormSubmissionController extends Controller
+class FormSubmissionController extends BaseApiController
 {
     public function index(Request $request, Form $form = null)
     {

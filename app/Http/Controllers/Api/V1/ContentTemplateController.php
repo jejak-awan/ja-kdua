@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\ContentTemplate;
 use Illuminate\Http\Request;
 
-class ContentTemplateController extends Controller
+class ContentTemplateController extends BaseApiController
 {
     public function index(Request $request)
     {

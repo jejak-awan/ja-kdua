@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Services\SearchService;
 use App\Models\SearchQuery;
 use Illuminate\Http\Request;
 
-class SearchController extends Controller
+class SearchController extends BaseApiController
 {
     protected $searchService;
 
@@ -41,7 +41,7 @@ class SearchController extends Controller
 
         $results = $this->searchService->search($request->q, $filters, $limit);
 
-        return response()->json($results);
+        return $this->success($results, 'Search results retrieved successfully');
     }
 
     public function suggestions(Request $request)
@@ -54,9 +54,9 @@ class SearchController extends Controller
         $limit = $request->input('limit', 5);
         $suggestions = $this->searchService->getSuggestions($request->q, $limit);
 
-        return response()->json([
+        return $this->success([
             'suggestions' => $suggestions,
-        ]);
+        ], 'Search suggestions retrieved successfully');
     }
 
     public function popularQueries(Request $request)
@@ -66,7 +66,7 @@ class SearchController extends Controller
 
         $queries = SearchQuery::getPopularQueries($limit, $days);
 
-        return response()->json($queries);
+        return $this->success($queries, 'Popular queries retrieved successfully');
     }
 
     public function noResultsQueries(Request $request)
@@ -76,7 +76,7 @@ class SearchController extends Controller
 
         $queries = SearchQuery::getNoResultsQueries($limit, $days);
 
-        return response()->json($queries);
+        return $this->success($queries, 'No results queries retrieved successfully');
     }
 
     public function searchStats(Request $request)
@@ -96,21 +96,20 @@ class SearchController extends Controller
             'popular_queries' => SearchQuery::getPopularQueries(10, $days),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Search statistics retrieved successfully');
     }
 
     public function reindex(Request $request)
     {
         // Only allow admins to reindex
         if (!$request->user()->hasRole('admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return $this->forbidden('Unauthorized');
         }
 
         $result = $this->searchService->reindexAll();
 
-        return response()->json([
-            'message' => 'Search index rebuilt successfully',
+        return $this->success([
             'indexed' => $result,
-        ]);
+        ], 'Search index rebuilt successfully');
     }
 }

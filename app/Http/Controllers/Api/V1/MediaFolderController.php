@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\MediaFolder;
 use Illuminate\Http\Request;
 
-class MediaFolderController extends Controller
+class MediaFolderController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -29,14 +29,14 @@ class MediaFolderController extends Controller
                 ->orderBy('sort_order')
                 ->get();
             
-            return response()->json($folders);
+            return $this->success($folders, 'Media folders tree retrieved successfully');
         }
 
         $folders = $query->with('parent')
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json($folders);
+        return $this->success($folders, 'Media folders retrieved successfully');
     }
 
     public function store(Request $request)
@@ -70,17 +70,17 @@ class MediaFolderController extends Controller
 
         // Prevent setting self as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $request->input('id')) {
-            return response()->json(['message' => 'Folder cannot be its own parent'], 422);
+            return $this->validationError(['parent_id' => ['Folder cannot be its own parent']], 'Folder cannot be its own parent');
         }
 
         $folder = MediaFolder::create($validated);
 
-        return response()->json($folder->load('parent'), 201);
+        return $this->success($folder->load('parent'), 'Media folder created successfully', 201);
     }
 
     public function show(MediaFolder $mediaFolder)
     {
-        return response()->json($mediaFolder->load(['parent', 'children', 'media']));
+        return $this->success($mediaFolder->load(['parent', 'children', 'media']), 'Media folder retrieved successfully');
     }
 
     public function update(Request $request, MediaFolder $mediaFolder)
@@ -94,7 +94,7 @@ class MediaFolderController extends Controller
 
         // Prevent setting self as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $mediaFolder->id) {
-            return response()->json(['message' => 'Folder cannot be its own parent'], 422);
+            return $this->validationError(['parent_id' => ['Folder cannot be its own parent']], 'Folder cannot be its own parent');
         }
 
         // Prevent circular reference
@@ -104,7 +104,7 @@ class MediaFolderController extends Controller
                 $checkParent = $parent;
                 while ($checkParent->parent_id) {
                     if ($checkParent->parent_id == $mediaFolder->id) {
-                        return response()->json(['message' => 'Cannot set parent to a child folder'], 422);
+                        return $this->validationError(['parent_id' => ['Cannot set parent to a child folder']], 'Cannot set parent to a child folder');
                     }
                     $checkParent = MediaFolder::find($checkParent->parent_id);
                 }
@@ -113,30 +113,30 @@ class MediaFolderController extends Controller
 
         $mediaFolder->update($validated);
 
-        return response()->json($mediaFolder->load(['parent', 'children']));
+        return $this->success($mediaFolder->load(['parent', 'children']), 'Media folder updated successfully');
     }
 
     public function destroy(MediaFolder $mediaFolder)
     {
         // Check if has children
         if ($mediaFolder->children()->count() > 0) {
-            return response()->json([
-                'message' => 'Cannot delete folder with child folders',
+            return $this->validationError([
+                'folder' => ['Cannot delete folder with child folders'],
                 'children_count' => $mediaFolder->children()->count(),
-            ], 422);
+            ], 'Cannot delete folder with child folders');
         }
 
         // Check if has media
         if ($mediaFolder->media()->count() > 0) {
-            return response()->json([
-                'message' => 'Cannot delete folder with media files',
+            return $this->validationError([
+                'folder' => ['Cannot delete folder with media files'],
                 'media_count' => $mediaFolder->media()->count(),
-            ], 422);
+            ], 'Cannot delete folder with media files');
         }
 
         $mediaFolder->delete();
 
-        return response()->json(['message' => 'Folder deleted successfully']);
+        return $this->success(null, 'Folder deleted successfully');
     }
 
     public function move(Request $request, MediaFolder $mediaFolder)
@@ -167,6 +167,6 @@ class MediaFolderController extends Controller
 
         $mediaFolder->update($validated);
 
-        return response()->json($mediaFolder->load(['parent', 'children']));
+        return $this->success($mediaFolder->load(['parent', 'children']), 'Media folder moved successfully');
     }
 }

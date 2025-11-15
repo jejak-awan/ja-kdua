@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
 use App\Models\Redirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
-class SeoController extends Controller
+class SeoController extends BaseApiController
 {
     public function generateSitemap()
     {
         // Sitemap is generated on-the-fly by SitemapController
-        return response()->json([
-            'message' => 'Sitemap is available at /sitemap.xml',
+        return $this->success([
             'url' => url('/sitemap.xml'),
-        ]);
+        ], 'Sitemap is available at /sitemap.xml');
     }
 
     public function getRobotsTxt()
@@ -30,9 +29,9 @@ class SeoController extends Controller
             $content = "User-agent: *\nAllow: /\n\nSitemap: " . url('/sitemap.xml');
         }
 
-        return response()->json([
+        return $this->success([
             'content' => $content,
-        ]);
+        ], 'Robots.txt retrieved successfully');
     }
 
     public function updateRobotsTxt(Request $request)
@@ -44,10 +43,9 @@ class SeoController extends Controller
         $path = public_path('robots.txt');
         File::put($path, $validated['content']);
 
-        return response()->json([
-            'message' => 'Robots.txt updated successfully',
+        return $this->success([
             'content' => $validated['content'],
-        ]);
+        ], 'Robots.txt updated successfully');
     }
 
     public function analyzeContent(Content $content)
@@ -147,14 +145,14 @@ class SeoController extends Controller
             $suggestions[] = 'Add meta keywords for better SEO';
         }
 
-        return response()->json([
+        return $this->success([
             'score' => $score,
             'max_score' => $maxScore,
             'percentage' => round(($score / $maxScore) * 100, 2),
             'grade' => $this->getGrade($score, $maxScore),
             'issues' => $issues,
             'suggestions' => $suggestions,
-        ]);
+        ], 'Content SEO analysis completed');
     }
 
     protected function getGrade($score, $maxScore)
@@ -195,6 +193,6 @@ class SeoController extends Controller
             $schema['articleSection'] = $content->category->name;
         }
 
-        return response()->json($schema);
+        return $this->success($schema, 'Schema generated successfully');
     }
 }

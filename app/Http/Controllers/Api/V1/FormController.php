@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Form;
 use App\Models\FormField;
 use Illuminate\Http\Request;
 
-class FormController extends Controller
+class FormController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -19,7 +19,7 @@ class FormController extends Controller
 
         $forms = $query->latest()->get();
 
-        return response()->json($forms);
+        return $this->success($forms, 'Forms retrieved successfully');
     }
 
     public function store(Request $request)
@@ -42,12 +42,12 @@ class FormController extends Controller
             }
         }
 
-        return response()->json($form->load('fields'), 201);
+        return $this->success($form->load('fields'), 'Form created successfully', 201);
     }
 
     public function show(Form $form)
     {
-        return response()->json($form->load('fields'));
+        return $this->success($form->load('fields'), 'Form retrieved successfully');
     }
 
     public function update(Request $request, Form $form)
@@ -64,14 +64,14 @@ class FormController extends Controller
 
         $form->update($validated);
 
-        return response()->json($form->load('fields'));
+        return $this->success($form->load('fields'), 'Form updated successfully');
     }
 
     public function destroy(Form $form)
     {
         $form->delete();
 
-        return response()->json(['message' => 'Form deleted successfully']);
+        return $this->success(null, 'Form deleted successfully');
     }
 
     public function addField(Request $request, Form $form)
@@ -90,13 +90,13 @@ class FormController extends Controller
 
         $field = $form->fields()->create($validated);
 
-        return response()->json($field, 201);
+        return $this->success($field, 'Form field created successfully', 201);
     }
 
     public function updateField(Request $request, Form $form, FormField $formField)
     {
         if ($formField->form_id !== $form->id) {
-            return response()->json(['message' => 'Field does not belong to this form'], 422);
+            return $this->validationError(['field' => ['Field does not belong to this form']], 'Field does not belong to this form');
         }
 
         $validated = $request->validate([
@@ -113,18 +113,18 @@ class FormController extends Controller
 
         $formField->update($validated);
 
-        return response()->json($formField);
+        return $this->success($formField, 'Form field updated successfully');
     }
 
     public function deleteField(Form $form, FormField $formField)
     {
         if ($formField->form_id !== $form->id) {
-            return response()->json(['message' => 'Field does not belong to this form'], 422);
+            return $this->validationError(['field' => ['Field does not belong to this form']], 'Field does not belong to this form');
         }
 
         $formField->delete();
 
-        return response()->json(['message' => 'Field deleted successfully']);
+        return $this->success(null, 'Field deleted successfully');
     }
 
     public function reorderFields(Request $request, Form $form)
@@ -141,13 +141,13 @@ class FormController extends Controller
                 ->update(['sort_order' => $fieldData['sort_order']]);
         }
 
-        return response()->json(['message' => 'Fields reordered successfully']);
+        return $this->success(null, 'Fields reordered successfully');
     }
 
     public function submit(Request $request, Form $form)
     {
         if (!$form->is_active) {
-            return response()->json(['message' => 'Form is not active'], 422);
+            return $this->validationError(['form' => ['Form is not active']], 'Form is not active');
         }
 
         // Build validation rules from form fields
@@ -182,11 +182,10 @@ class FormController extends Controller
             'data' => $validated,
         ]);
 
-        return response()->json([
-            'message' => $form->success_message ?? 'Form submitted successfully',
+        return $this->success([
             'submission_id' => $submission->id,
             'redirect_url' => $form->redirect_url,
-        ], 201);
+        ], $form->success_message ?? 'Form submitted successfully', 201);
     }
 
     protected function sendFormNotification(Form $form, $submission)
