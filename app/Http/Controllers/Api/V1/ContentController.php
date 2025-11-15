@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
 use App\Models\ContentRevision;
 use App\Models\ContentCustomField;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
-class ContentController extends Controller
+class ContentController extends BaseApiController
 {
     public function index(Request $request)
     {
