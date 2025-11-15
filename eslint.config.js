@@ -18,6 +18,10 @@ export default [
         rules: {
             'vue/multi-word-component-names': 'off',
             'vue/no-v-html': 'warn',
+            'vue/html-indent': 'off',
+            'vue/singleline-html-element-content-newline': 'off',
+            'vue/max-attributes-per-line': 'off',
+            'vue/attributes-order': 'off',
             'no-console': ['warn', { allow: ['warn', 'error'] }],
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
         },
