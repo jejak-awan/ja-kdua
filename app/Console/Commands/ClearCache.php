@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Services\CacheService;
+use Illuminate\Console\Command;
+
+class ClearCache extends Command
+{
+    protected $signature = 'cms:clear-cache {--type=all : Type of cache to clear (all, content, category, media, seo)}';
+    protected $description = 'Clear CMS caches';
+
+    public function handle()
+    {
+        $cacheService = new CacheService();
+        $type = $this->option('type');
+
+        switch ($type) {
+            case 'content':
+                $cacheService->clearContentCaches();
+                $this->info('Content caches cleared');
+                break;
+            case 'category':
+                $cacheService->clearCategoryCaches();
+                $this->info('Category caches cleared');
+                break;
+            case 'media':
+                $cacheService->clearMediaCaches();
+                $this->info('Media caches cleared');
+                break;
+            case 'seo':
+                $cacheService->clearSeoCaches();
+                $this->info('SEO caches cleared');
+                break;
+            case 'all':
+            default:
+                $cacheService->clearAll();
+                $this->info('All caches cleared');
+                break;
+        }
+
+        return 0;
+    }
+}

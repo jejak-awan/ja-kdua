@@ -1,0 +1,55 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
+class RolePermissionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Create permissions
+        $permissions = [
+            'create content',
+            'edit content',
+            'delete content',
+            'publish content',
+            'manage categories',
+            'manage tags',
+            'manage media',
+            'manage comments',
+            'manage users',
+            'manage forms',
+            'manage settings',
+            'view analytics',
+            'manage themes',
+            'manage plugins',
+            'manage menus',
+            'manage widgets',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        // Create roles
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->givePermissionTo(Permission::all());
+
+        $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+        $editorRole->givePermissionTo([
+            'create content',
+            'edit content',
+            'publish content',
+            'manage categories',
+            'manage tags',
+            'manage media',
+            'manage comments',
+        ]);
+
+        $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+        // Members have no special permissions by default
+    }
+}
