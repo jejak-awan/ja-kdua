@@ -40,7 +40,7 @@ class ContentController extends BaseApiController
 
             $contents = $query->latest('published_at')->paginate(12);
 
-            return response()->json($contents);
+            return $this->paginated($contents, 'Contents retrieved successfully');
         });
     }
 
@@ -59,7 +59,7 @@ class ContentController extends BaseApiController
 
         $content->increment('views');
 
-        return response()->json($content);
+        return $this->success($content, 'Content retrieved successfully');
     }
 
     public function preview(Request $request, Content $content)
@@ -67,11 +67,11 @@ class ContentController extends BaseApiController
         // Allow preview for draft content if user is the author or admin
         if ($content->status === 'draft' && $content->author_id !== $request->user()->id) {
             if (!$request->user()->hasRole('admin')) {
-                return response()->json(['message' => 'Unauthorized'], 403);
+                return $this->forbidden('Unauthorized to preview this content');
             }
         }
 
-        return response()->json($content->load(['author', 'category', 'tags', 'customFields.customField']));
+        return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content preview retrieved successfully');
     }
 
     public function adminIndex(Request $request)
@@ -84,12 +84,12 @@ class ContentController extends BaseApiController
 
         $contents = $query->latest()->paginate(12);
 
-        return response()->json($contents);
+        return $this->paginated($contents, 'Contents retrieved successfully');
     }
 
     public function adminShow(Content $content)
     {
-        return response()->json($content->load(['author', 'category', 'tags', 'allComments', 'customFields.customField.fieldGroup']));
+        return $this->success($content->load(['author', 'category', 'tags', 'allComments', 'customFields.customField.fieldGroup']), 'Content retrieved successfully');
     }
 
     public function store(Request $request)
@@ -176,7 +176,7 @@ class ContentController extends BaseApiController
         // Trigger webhook
         \App\Models\Webhook::triggerForEvent('content.created', $content->toArray());
 
-        return response()->json($content->load(['author', 'category', 'tags', 'customFields.customField']), 201);
+        return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content created successfully', 201);
     }
 
     protected function trackMediaUsage(Content $content, $fieldName)
@@ -194,11 +194,16 @@ class ContentController extends BaseApiController
         // Check if content is locked by another user
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
             $lockedBy = $content->lockedBy;
-            return response()->json([
-                'message' => 'Content is currently being edited by ' . $lockedBy->name,
-                'locked_by' => $lockedBy,
-                'locked_at' => $content->locked_at,
-            ], 423); // 423 Locked
+            return $this->error(
+                'Content is currently being edited by ' . $lockedBy->name,
+                423,
+                [],
+                'CONTENT_LOCKED',
+                [
+                    'locked_by' => $lockedBy,
+                    'locked_at' => $content->locked_at,
+                ]
+            );
         }
 
         $validated = $request->validate([
@@ -286,7 +291,7 @@ class ContentController extends BaseApiController
         // Trigger webhook
         \App\Models\Webhook::triggerForEvent('content.updated', $content->toArray());
 
-        return response()->json($content->load(['author', 'category', 'tags', 'customFields.customField']));
+        return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content updated successfully');
     }
 
     protected function saveCustomFields(Content $content, array $customFields)
@@ -322,7 +327,7 @@ class ContentController extends BaseApiController
         $cacheService->clearContentCaches($contentId);
         $cacheService->clearSeoCaches();
 
-        return response()->json(['message' => 'Content deleted successfully']);
+        return $this->success(null, 'Content deleted successfully');
     }
 
     public function duplicate(Request $request, Content $content)
@@ -341,7 +346,7 @@ class ContentController extends BaseApiController
             $newContent->tags()->sync($content->tags->pluck('id'));
         }
 
-        return response()->json($newContent->load(['author', 'category', 'tags']), 201);
+        return $this->success($newContent->load(['author', 'category', 'tags']), 'Content duplicated successfully', 201);
     }
 
     public function bulkAction(Request $request)
@@ -375,10 +380,9 @@ class ContentController extends BaseApiController
             }
         }
 
-        return response()->json([
-            'message' => 'Bulk action completed successfully',
+        return $this->success([
             'affected' => $contents->count(),
-        ]);
+        ], 'Bulk action completed successfully');
     }
 
     public function lock(Request $request, Content $content)
@@ -386,11 +390,16 @@ class ContentController extends BaseApiController
         // Check if already locked by another user
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
             $lockedBy = $content->lockedBy;
-            return response()->json([
-                'message' => 'Content is currently being edited by ' . $lockedBy->name,
-                'locked_by' => $lockedBy,
-                'locked_at' => $content->locked_at,
-            ], 423); // 423 Locked
+            return $this->error(
+                'Content is currently being edited by ' . $lockedBy->name,
+                423,
+                [],
+                'CONTENT_LOCKED',
+                [
+                    'locked_by' => $lockedBy,
+                    'locked_at' => $content->locked_at,
+                ]
+            );
         }
 
         $content->update([
@@ -398,11 +407,10 @@ class ContentController extends BaseApiController
             'locked_at' => now(),
         ]);
 
-        return response()->json([
-            'message' => 'Content locked successfully',
+        return $this->success([
             'locked_by' => $request->user(),
             'locked_at' => $content->locked_at,
-        ]);
+        ], 'Content locked successfully');
     }
 
     public function unlock(Request $request, Content $content)
@@ -410,7 +418,7 @@ class ContentController extends BaseApiController
         // Only unlock if locked by current user or admin
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
             if (!$request->user()->hasRole('admin')) {
-                return response()->json(['message' => 'You can only unlock content you locked'], 403);
+                return $this->forbidden('You can only unlock content you locked');
             }
         }
 
@@ -419,6 +427,6 @@ class ContentController extends BaseApiController
             'locked_at' => null,
         ]);
 
-        return response()->json(['message' => 'Content unlocked successfully']);
+        return $this->success(null, 'Content unlocked successfully');
     }
 }
