@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Media;
 use App\Models\MediaUsage;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class MediaController extends Controller
+class MediaController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -49,7 +49,7 @@ class MediaController extends Controller
         $perPage = $request->input('view', 'grid') === 'list' ? 50 : 24;
         $media = $query->latest()->paginate($perPage);
 
-        return response()->json($media);
+        return $this->paginated($media, 'Media retrieved successfully');
     }
 
     public function upload(Request $request)
@@ -123,15 +123,15 @@ class MediaController extends Controller
         $cacheService = new CacheService();
         $cacheService->clearMediaCaches();
 
-        return response()->json([
+        return $this->success([
             'media' => $media->fresh()->load(['folder', 'usages']),
             'url' => $media->url,
-        ], 201);
+        ], 'Media uploaded successfully', 201);
     }
 
     public function show(Media $media)
     {
-        return response()->json($media->load(['folder', 'usages.model']));
+        return $this->success($media->load(['folder', 'usages.model']), 'Media retrieved successfully');
     }
 
     public function update(Request $request, Media $media)
@@ -148,7 +148,7 @@ class MediaController extends Controller
         $cacheService = new CacheService();
         $cacheService->clearMediaCaches();
 
-        return response()->json($media->load(['folder', 'usages']));
+        return $this->success($media->load(['folder', 'usages']), 'Media updated successfully');
     }
 
     public function destroy(Media $media)
@@ -157,11 +157,11 @@ class MediaController extends Controller
         $usageCount = $media->usages()->count();
         
         if ($usageCount > 0 && !$request->input('force', false)) {
-            return response()->json([
-                'message' => 'Media is currently in use. Use force=true to delete anyway.',
+            return $this->validationError([
+                'media' => ['Media is currently in use. Use force=true to delete anyway.'],
                 'usage_count' => $usageCount,
                 'usages' => $media->usages()->with('model')->get(),
-            ], 422);
+            ], 'Media is currently in use. Use force=true to delete anyway.');
         }
 
         // Delete all thumbnails/variants if exist
@@ -179,7 +179,7 @@ class MediaController extends Controller
         $cacheService = new CacheService();
         $cacheService->clearMediaCaches();
 
-        return response()->json(['message' => 'Media deleted successfully']);
+        return $this->success(null, 'Media deleted successfully');
     }
 
     protected function deleteMediaVariants(Media $media)
@@ -261,10 +261,7 @@ class MediaController extends Controller
 
         // Validate IDs separately first
         if (empty($ids) || !is_array($ids)) {
-            return response()->json([
-                'message' => 'The selected action is invalid.',
-                'errors' => ['ids' => ['Media IDs are required.']],
-            ], 422);
+            return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
         // Validate that all IDs exist
@@ -272,10 +269,7 @@ class MediaController extends Controller
         $missingIds = array_diff($ids, $existingIds);
         
         if (!empty($missingIds)) {
-            return response()->json([
-                'message' => 'The selected action is invalid.',
-                'errors' => ['ids' => ['Some media IDs do not exist.']],
-            ], 422);
+            return $this->validationError(['ids' => ['Some media IDs do not exist.']], 'The selected action is invalid.');
         }
 
         // Now validate action and folder_id
@@ -315,10 +309,9 @@ class MediaController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Bulk action completed successfully',
+        return $this->success([
             'affected' => $media->count(),
-        ]);
+        ], 'Bulk action completed successfully');
     }
 
     public function usage(Media $media)
@@ -358,20 +351,18 @@ class MediaController extends Controller
             ];
         });
 
-        return response()->json([
+        return $this->success([
             'media_id' => $media->id,
             'total_usage' => $usages->count(),
             'usages' => $usageData,
-        ]);
+        ], 'Media usage retrieved successfully');
     }
 
     public function generateThumbnail(Request $request, Media $media)
     {
         // Only for images
         if (!str_starts_with($media->mime_type, 'image/')) {
-            return response()->json([
-                'message' => 'Thumbnail can only be generated for images',
-            ], 422);
+            return $this->validationError(['media' => ['Thumbnail can only be generated for images']], 'Thumbnail can only be generated for images');
         }
 
         try {
@@ -387,22 +378,17 @@ class MediaController extends Controller
                     ? '/storage/' . ltrim($thumbnailPath, '/')
                     : Storage::disk($media->disk)->url($thumbnailPath);
                 
-                return response()->json([
-                    'message' => 'Thumbnail generated successfully',
+                return $this->success([
                     'thumbnail_url' => $thumbnailUrl,
                     'thumbnail_path' => $thumbnailPath,
                     'media' => $media->fresh()->load(['folder', 'usages']),
-                ]);
+                ], 'Thumbnail generated successfully');
             }
             
-            return response()->json([
-                'message' => 'Image processing library not available',
-            ], 500);
+            return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
         } catch (\Exception $e) {
             \Log::error('Thumbnail generation failed: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to generate thumbnail: ' . $e->getMessage(),
-            ], 500);
+            return $this->error('Failed to generate thumbnail: ' . $e->getMessage(), 500, [], 'THUMBNAIL_GENERATION_ERROR');
         }
     }
 
@@ -410,9 +396,7 @@ class MediaController extends Controller
     {
         // Only for images
         if (!str_starts_with($media->mime_type, 'image/')) {
-            return response()->json([
-                'message' => 'Resize can only be performed on images',
-            ], 422);
+            return $this->validationError(['media' => ['Resize can only be performed on images']], 'Resize can only be performed on images');
         }
 
         $validated = $request->validate([
@@ -455,24 +439,19 @@ class MediaController extends Controller
                         'size' => filesize($fullPath),
                     ]);
                     
-                    return response()->json([
-                        'message' => 'Image resized successfully',
+                    return $this->success([
                         'media' => $media->fresh()->load(['folder', 'usages']),
                         'url' => $media->disk === 'public' 
                             ? '/storage/' . ltrim($media->path, '/')
                             : Storage::disk($media->disk)->url($media->path),
-                    ]);
+                    ], 'Image resized successfully');
                 }
             }
             
-            return response()->json([
-                'message' => 'Image processing library not available',
-            ], 500);
+            return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
         } catch (\Exception $e) {
             \Log::error('Image resize failed: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to resize image: ' . $e->getMessage(),
-            ], 500);
+            return $this->error('Failed to resize image: ' . $e->getMessage(), 500, [], 'IMAGE_RESIZE_ERROR');
         }
     }
 }
