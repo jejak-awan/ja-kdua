@@ -22,8 +22,11 @@ export default [
             'vue/singleline-html-element-content-newline': 'off',
             'vue/max-attributes-per-line': 'off',
             'vue/attributes-order': 'off',
+            'vue/html-self-closing': 'off',
+            'vue/no-multiple-template-root': 'off',
             'no-console': ['warn', { allow: ['warn', 'error'] }],
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+            'no-undef': 'off',
         },
     },
     {
