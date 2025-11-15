@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 
 class FileManagerController extends BaseApiController
 {
@@ -24,10 +22,12 @@ class FileManagerController extends BaseApiController
                 $items = scandir($fullPath);
 
                 foreach ($items as $item) {
-                    if ($item === '.' || $item === '..') continue;
+                    if ($item === '.' || $item === '..') {
+                        continue;
+                    }
 
-                    $itemPath = $path === '/' ? $item : $path . '/' . $item;
-                    $fullItemPath = $fullPath . '/' . $item;
+                    $itemPath = $path === '/' ? $item : $path.'/'.$item;
+                    $fullItemPath = $fullPath.'/'.$item;
 
                     if (is_dir($fullItemPath)) {
                         $directories[] = [
@@ -48,7 +48,7 @@ class FileManagerController extends BaseApiController
                 }
             }
         } catch (\Exception $e) {
-            return $this->error('Error reading directory: ' . $e->getMessage(), 500, [], 'DIRECTORY_READ_ERROR');
+            return $this->error('Error reading directory: '.$e->getMessage(), 500, [], 'DIRECTORY_READ_ERROR');
         }
 
         return $this->success([
@@ -70,7 +70,7 @@ class FileManagerController extends BaseApiController
         $path = $request->input('path', '/');
         $disk = $request->input('disk', 'public');
 
-        $filePath = $path === '/' ? $file->getClientOriginalName() : $path . '/' . $file->getClientOriginalName();
+        $filePath = $path === '/' ? $file->getClientOriginalName() : $path.'/'.$file->getClientOriginalName();
 
         Storage::disk($disk)->put($filePath, file_get_contents($file));
 
@@ -91,6 +91,7 @@ class FileManagerController extends BaseApiController
 
         if (Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
+
             return $this->success(null, 'File deleted successfully');
         }
 
@@ -109,7 +110,7 @@ class FileManagerController extends BaseApiController
         $path = $request->input('path', '/');
         $disk = $request->input('disk', 'public');
 
-        $folderPath = $path === '/' ? $name : $path . '/' . $name;
+        $folderPath = $path === '/' ? $name : $path.'/'.$name;
 
         Storage::disk($disk)->makeDirectory($folderPath);
 

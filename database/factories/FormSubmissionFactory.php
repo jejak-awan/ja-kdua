@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\FormSubmission;
 use App\Models\Form;
+use App\Models\FormSubmission;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -55,4 +55,3 @@ class FormSubmissionFactory extends Factory
         ]);
     }
 }
-

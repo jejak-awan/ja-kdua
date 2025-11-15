@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Backup;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
@@ -47,9 +46,10 @@ class BackupController extends BaseApiController
 
             return $this->success($backup, 'Backup created successfully', 201);
         } catch (\Exception $e) {
-            \Log::error('Backup creation error: ' . $e->getMessage());
+            \Log::error('Backup creation error: '.$e->getMessage());
+
             return $this->error(
-                'Failed to create backup: ' . $e->getMessage(),
+                'Failed to create backup: '.$e->getMessage(),
                 500,
                 [],
                 'BACKUP_ERROR'
@@ -64,42 +64,45 @@ class BackupController extends BaseApiController
 
     public function restore(Request $request, Backup $backup)
     {
-        if (!$backup->isCompleted()) {
+        if (! $backup->isCompleted()) {
             return $this->validationError(['backup' => ['Cannot restore incomplete backup']], 'Cannot restore incomplete backup');
         }
 
         try {
             $this->backupService->restoreDatabaseBackup($backup);
+
             return $this->success(null, 'Backup restored successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to restore backup: ' . $e->getMessage(), 500, [], 'RESTORE_ERROR');
+            return $this->error('Failed to restore backup: '.$e->getMessage(), 500, [], 'RESTORE_ERROR');
         }
     }
 
     public function destroy(Backup $backup)
     {
         $this->backupService->deleteBackup($backup);
+
         return $this->success(null, 'Backup deleted successfully');
     }
 
     public function download(Backup $backup)
     {
-        if (!$backup->isCompleted()) {
+        if (! $backup->isCompleted()) {
             return $this->notFound('Backup');
         }
 
         $path = \Storage::disk($backup->disk)->path($backup->path);
-        
-        if (!file_exists($path)) {
+
+        if (! file_exists($path)) {
             return $this->notFound('Backup file');
         }
 
-        return response()->download($path, $backup->name . '.sql');
+        return response()->download($path, $backup->name.'.sql');
     }
 
     public function stats()
     {
         $stats = $this->backupService->getBackupStats();
+
         return $this->success($stats, 'Backup statistics retrieved successfully');
     }
 }

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
-use App\Services\SearchService;
 use App\Models\SearchQuery;
+use App\Services\SearchService;
 use Illuminate\Http\Request;
 
 class SearchController extends BaseApiController
@@ -102,7 +101,7 @@ class SearchController extends BaseApiController
     public function reindex(Request $request)
     {
         // Only allow admins to reindex
-        if (!$request->user()->hasRole('admin')) {
+        if (! $request->user()->hasRole('admin')) {
             return $this->forbidden('Unauthorized');
         }
 

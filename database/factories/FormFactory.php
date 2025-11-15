@@ -21,10 +21,10 @@ class FormFactory extends Factory
     public function definition(): array
     {
         $name = fake()->words(3, true);
-        
+
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . uniqid(),
+            'slug' => Str::slug($name).'-'.uniqid(),
             'description' => fake()->paragraph(),
             'success_message' => 'Thank you for your submission!',
             'redirect_url' => null,
@@ -44,4 +44,3 @@ class FormFactory extends Factory
         ]);
     }
 }
-

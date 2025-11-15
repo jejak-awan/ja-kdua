@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,8 +12,8 @@ class NotificationController extends BaseApiController
     {
         try {
             $user = $request->user();
-            
-            if (!$user) {
+
+            if (! $user) {
                 return $this->unauthorized('Unauthenticated');
             }
 
@@ -30,7 +29,7 @@ class NotificationController extends BaseApiController
             }
 
             $limit = $request->input('limit', 20);
-            
+
             // Always use pagination for consistency, but limit results if limit is specified
             if ($limit && $limit < 100) {
                 $notifications = $query->latest()->limit($limit)->get();
@@ -42,6 +41,7 @@ class NotificationController extends BaseApiController
                     1,
                     ['path' => $request->url(), 'query' => $request->query()]
                 );
+
                 return $this->paginated($paginator, 'Notifications retrieved successfully');
             }
 
@@ -49,9 +49,10 @@ class NotificationController extends BaseApiController
 
             return $this->paginated($notifications, 'Notifications retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Notifications index error: ' . $e->getMessage(), [
+            Log::error('Notifications index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty array instead of error
             return $this->success([], 'Notifications retrieved successfully');
         }
@@ -60,8 +61,8 @@ class NotificationController extends BaseApiController
     public function unreadCount(Request $request)
     {
         $user = $request->user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return $this->success(['count' => 0], 'Unread count retrieved');
         }
 
@@ -75,11 +76,11 @@ class NotificationController extends BaseApiController
     public function markAsRead(Request $request, Notification $notification)
     {
         $user = $request->user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }
-        
+
         if ($notification->user_id !== $user->id) {
             return $this->forbidden('Unauthorized');
         }
@@ -92,11 +93,11 @@ class NotificationController extends BaseApiController
     public function markAllAsRead(Request $request)
     {
         $user = $request->user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }
-        
+
         Notification::where('user_id', $user->id)
             ->where('is_read', false)
             ->update([
@@ -110,11 +111,11 @@ class NotificationController extends BaseApiController
     public function destroy(Request $request, Notification $notification)
     {
         $user = $request->user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return $this->unauthorized('Unauthenticated');
         }
-        
+
         if ($notification->user_id !== $user->id) {
             return $this->forbidden('Unauthorized');
         }

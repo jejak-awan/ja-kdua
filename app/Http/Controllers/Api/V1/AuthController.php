@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\User;
 use App\Notifications\ResetPassword;
 use App\Services\SecurityService;
@@ -25,18 +24,24 @@ class AuthController extends BaseApiController
      *     tags={"Authentication"},
      *     summary="User login",
      *     description="Authenticate user and return access token",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"email", "password"},
+     *
      *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="password")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Login successful",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Login successful"),
      *             @OA\Property(
@@ -47,14 +52,18 @@ class AuthController extends BaseApiController
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Email not verified",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
      *     )
      * )
@@ -66,7 +75,7 @@ class AuthController extends BaseApiController
             'password' => 'required',
         ]);
 
-        $securityService = new SecurityService();
+        $securityService = new SecurityService;
         $ipAddress = $request->ip();
 
         // Check if IP is blocked
@@ -78,17 +87,17 @@ class AuthController extends BaseApiController
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             // Record failed login
             $securityService->recordFailedLogin($request->email, $ipAddress);
-            
+
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
         // Check if email is verified (required for production)
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             return $this->error(
                 'Please verify your email address before logging in.',
                 403,
@@ -124,24 +133,31 @@ class AuthController extends BaseApiController
      *     tags={"Authentication"},
      *     summary="User registration",
      *     description="Register a new user account",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "email", "password", "password_confirmation"},
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="password"),
      *             @OA\Property(property="password_confirmation", type="string", format="password", example="password")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Registration successful",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/SuccessResponse")
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
      *     )
      * )
@@ -178,7 +194,7 @@ class AuthController extends BaseApiController
     public function logout(Request $request)
     {
         $user = $request->user();
-        
+
         // Log activity
         \App\Models\ActivityLog::log('logout', null, [], $user, 'User logged out');
 
@@ -207,7 +223,7 @@ class AuthController extends BaseApiController
     {
         $user = User::findOrFail($id);
 
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             return $this->validationError(['hash' => ['Invalid verification link']], 'Invalid verification link');
         }
 
@@ -231,7 +247,7 @@ class AuthController extends BaseApiController
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $this->error('User not found', 404);
         }
 
@@ -240,12 +256,13 @@ class AuthController extends BaseApiController
         }
 
         // Verify token (simplified - in production, use proper token verification)
-        $verificationUrl = url("/api/v1/email/verify/{$user->id}/" . sha1($user->getEmailForVerification()));
-        
+        $verificationUrl = url("/api/v1/email/verify/{$user->id}/".sha1($user->getEmailForVerification()));
+
         // For API, we'll use a simpler approach - verify directly if token matches
         // In production, implement proper token verification
         if ($user->markEmailAsVerified()) {
             event(new \Illuminate\Auth\Events\Verified($user));
+
             return $this->success(null, 'Email verified successfully');
         }
 
@@ -260,7 +277,7 @@ class AuthController extends BaseApiController
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // Don't reveal if user exists (security best practice)
             return $this->success(null, 'If the email exists, a verification link has been sent');
         }
@@ -280,7 +297,7 @@ class AuthController extends BaseApiController
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             // Don't reveal if user exists (security best practice)
             return $this->success(null, 'If the email exists, a password reset link has been sent');
         }
@@ -312,13 +329,14 @@ class AuthController extends BaseApiController
             ->where('email', $request->email)
             ->first();
 
-        if (!$passwordReset || !Hash::check($request->token, $passwordReset->token)) {
+        if (! $passwordReset || ! Hash::check($request->token, $passwordReset->token)) {
             return $this->validationError(['token' => ['Invalid or expired reset token']], 'Invalid or expired reset token');
         }
 
         // Check if token is expired (60 minutes)
         if (now()->diffInMinutes($passwordReset->created_at) > 60) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
             return $this->validationError(['token' => ['Reset token has expired']], 'Reset token has expired');
         }
 

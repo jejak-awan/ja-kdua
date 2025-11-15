@@ -23,9 +23,11 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           # Linter warning is a false positive - secrets are configured in GitHub
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY || '' }}
+        continue-on-error: true
 
       - name: Deploy to Server
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.SSH_USER != '' && secrets.SSH_HOST != '' }}
         env:
           # Linter warnings are false positives - secrets are configured in GitHub
           SSH_USER: ${{ secrets.SSH_USER }}

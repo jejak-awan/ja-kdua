@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Form;
 use App\Models\FormField;
 use Illuminate\Http\Request;
@@ -54,7 +53,7 @@ class FormController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:forms,slug,' . $form->id,
+            'slug' => 'sometimes|required|string|unique:forms,slug,'.$form->id,
             'description' => 'nullable|string',
             'success_message' => 'nullable|string',
             'redirect_url' => 'nullable|url',
@@ -146,7 +145,7 @@ class FormController extends BaseApiController
 
     public function submit(Request $request, Form $form)
     {
-        if (!$form->is_active) {
+        if (! $form->is_active) {
             return $this->validationError(['form' => ['Form is not active']], 'Form is not active');
         }
 

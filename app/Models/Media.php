@@ -46,39 +46,39 @@ class Media extends Model
 
     public function getUrlAttribute()
     {
-        if (!$this->path) {
+        if (! $this->path) {
             return null;
         }
-        
+
         // Use CDN if enabled
         if (CdnHelper::isEnabled()) {
             return CdnHelper::mediaUrl($this->path);
         }
-        
+
         // For public disk, use relative path to avoid localhost URL issues
         // This ensures URLs work regardless of APP_URL configuration
         if ($this->disk === 'public') {
-            return '/storage/' . ltrim($this->path, '/');
+            return '/storage/'.ltrim($this->path, '/');
         }
-        
+
         // For other disks, use Storage URL
         return Storage::disk($this->disk)->url($this->path);
     }
 
     public function getThumbnailUrlAttribute()
     {
-        if (!$this->path || !str_starts_with($this->mime_type, 'image/')) {
+        if (! $this->path || ! str_starts_with($this->mime_type, 'image/')) {
             return null;
         }
 
         // Check if thumbnail exists
         $fileName = pathinfo($this->path, PATHINFO_FILENAME);
         $extension = pathinfo($this->path, PATHINFO_EXTENSION);
-        
+
         // For SVG files, thumbnail is saved as PNG
         $isSvg = $this->mime_type === 'image/svg+xml' || str_ends_with($this->path, '.svg');
         $thumbnailExtension = $isSvg ? 'png' : $extension;
-        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $thumbnailExtension;
+        $thumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.'.$thumbnailExtension;
 
         // Check if thumbnail file actually exists
         if (Storage::disk($this->disk)->exists($thumbnailPath)) {
@@ -86,12 +86,12 @@ class Media extends Model
             if (CdnHelper::isEnabled()) {
                 return CdnHelper::thumbnailUrl($thumbnailPath);
             }
-            
+
             // For public disk, use relative path
             if ($this->disk === 'public') {
-                return '/storage/' . ltrim($thumbnailPath, '/');
+                return '/storage/'.ltrim($thumbnailPath, '/');
             }
-            
+
             return Storage::disk($this->disk)->url($thumbnailPath);
         }
 

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('notifications')) {
+        if (! Schema::hasTable('notifications')) {
             Schema::create('notifications', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -21,7 +21,7 @@ return new class extends Migration
                 $table->timestamp('read_at')->nullable();
                 $table->json('data')->nullable(); // Additional data
                 $table->timestamps();
-                
+
                 $table->index(['user_id', 'is_read']);
                 $table->index('created_at');
             });
@@ -33,4 +33,3 @@ return new class extends Migration
         Schema::dropIfExists('notifications');
     }
 };
-

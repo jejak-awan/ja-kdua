@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Add Rate Limit Headers Middleware
- * 
+ *
  * Adds rate limit information to API responses.
  */
 class AddRateLimitHeaders
@@ -56,4 +56,3 @@ class AddRateLimitHeaders
         return null;
     }
 }
-

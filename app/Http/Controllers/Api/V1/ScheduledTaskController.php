@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +51,7 @@ class ScheduledTaskController extends BaseApiController
     {
         $task = DB::table('scheduled_tasks')->where('id', $id)->first();
 
-        if (!$task) {
+        if (! $task) {
             return $this->notFound('Task');
         }
 
@@ -80,7 +79,7 @@ class ScheduledTaskController extends BaseApiController
                 'output' => $e->getMessage(),
             ]);
 
-            return $this->error('Task failed: ' . $e->getMessage(), 500, [], 'TASK_EXECUTION_ERROR');
+            return $this->error('Task failed: '.$e->getMessage(), 500, [], 'TASK_EXECUTION_ERROR');
         }
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -14,7 +13,7 @@ class LogController extends BaseApiController
         $lines = $request->input('lines', 100);
         $level = $request->input('level'); // error, warning, info, etc.
 
-        if (!File::exists($logFile)) {
+        if (! File::exists($logFile)) {
             return $this->success(['logs' => []], 'Log file not found');
         }
 
@@ -33,6 +32,7 @@ class LogController extends BaseApiController
 
         if (File::exists($logFile)) {
             File::put($logFile, '');
+
             return $this->success(null, 'Log file cleared successfully');
         }
 
@@ -60,20 +60,22 @@ class LogController extends BaseApiController
             if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.+?)\.(.+?): (.+)$/', $line, $matches)) {
                 if ($currentEntry) {
                     $entry = $this->parseLogEntry($currentEntry);
-                    if (!$level || $entry['level'] === $level) {
+                    if (! $level || $entry['level'] === $level) {
                         $entries[] = $entry;
-                        if (count($entries) >= $limit) break;
+                        if (count($entries) >= $limit) {
+                            break;
+                        }
                     }
                 }
                 $currentEntry = $line;
             } else {
-                $currentEntry .= "\n" . $line;
+                $currentEntry .= "\n".$line;
             }
         }
 
         if ($currentEntry && count($entries) < $limit) {
             $entry = $this->parseLogEntry($currentEntry);
-            if (!$level || $entry['level'] === $level) {
+            if (! $level || $entry['level'] === $level) {
                 $entries[] = $entry;
             }
         }

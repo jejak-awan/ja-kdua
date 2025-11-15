@@ -32,13 +32,13 @@ class Webhook extends Model
 
     public function trigger($data)
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
         try {
             $payload = $this->buildPayload($data);
-            
+
             $response = Http::timeout($this->timeout)
                 ->withHeaders($this->headers ?? [])
                 ->{strtolower($this->method)}($this->url, $payload);
@@ -49,14 +49,14 @@ class Webhook extends Model
             return $response->successful();
         } catch (\Exception $e) {
             $this->increment('failure_count');
-            
+
             // Retry if not exceeded max retries
             if ($this->retry_count < $this->max_retries) {
                 $this->increment('retry_count');
                 // Could implement retry queue here
             }
 
-            \Log::error('Webhook failed: ' . $e->getMessage(), [
+            \Log::error('Webhook failed: '.$e->getMessage(), [
                 'webhook_id' => $this->id,
                 'url' => $this->url,
             ]);
@@ -73,6 +73,7 @@ class Webhook extends Model
             foreach ($this->payload_template as $key => $template) {
                 $payload[$key] = $this->resolveTemplate($template, $data);
             }
+
             return $payload;
         }
 
@@ -91,7 +92,7 @@ class Webhook extends Model
         if (is_string($template)) {
             return str_replace('{data}', json_encode($data), $template);
         }
-        
+
         return $template;
     }
 

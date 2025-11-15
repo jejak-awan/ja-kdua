@@ -55,11 +55,10 @@ class CommentFactory extends Factory
     /**
      * Indicate that the comment is a reply.
      */
-    public function reply(Comment $parent = null): static
+    public function reply(?Comment $parent = null): static
     {
         return $this->state(fn (array $attributes) => [
             'parent_id' => $parent?->id ?? Comment::factory()->create()->id,
         ]);
     }
 }
-

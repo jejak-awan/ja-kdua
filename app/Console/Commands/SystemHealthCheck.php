@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class SystemHealthCheck extends Command
 {
     protected $signature = 'cms:health-check';
+
     protected $description = 'Check system health status';
 
     public function handle()
@@ -55,34 +56,37 @@ class SystemHealthCheck extends Command
         $usedPercent = (($totalSpace - $freeSpace) / $totalSpace) * 100;
 
         if ($usedPercent > 90) {
-            $issues[] = 'Disk space critical: ' . round($usedPercent, 2) . '% used';
-            $this->error('❌ Disk space: CRITICAL (' . round($usedPercent, 2) . '% used)');
+            $issues[] = 'Disk space critical: '.round($usedPercent, 2).'% used';
+            $this->error('❌ Disk space: CRITICAL ('.round($usedPercent, 2).'% used)');
         } elseif ($usedPercent > 80) {
-            $warnings[] = 'Disk space high: ' . round($usedPercent, 2) . '% used';
-            $this->warn('⚠️  Disk space: WARNING (' . round($usedPercent, 2) . '% used)');
+            $warnings[] = 'Disk space high: '.round($usedPercent, 2).'% used';
+            $this->warn('⚠️  Disk space: WARNING ('.round($usedPercent, 2).'% used)');
         } else {
-            $this->info('✅ Disk space: OK (' . round($usedPercent, 2) . '% used)');
+            $this->info('✅ Disk space: OK ('.round($usedPercent, 2).'% used)');
         }
 
         $this->newLine();
 
         if (count($issues) > 0) {
-            $this->error('Issues found: ' . count($issues));
+            $this->error('Issues found: '.count($issues));
             foreach ($issues as $issue) {
                 $this->error("  - {$issue}");
             }
+
             return 1;
         }
 
         if (count($warnings) > 0) {
-            $this->warn('Warnings: ' . count($warnings));
+            $this->warn('Warnings: '.count($warnings));
             foreach ($warnings as $warning) {
                 $this->warn("  - {$warning}");
             }
+
             return 0;
         }
 
         $this->info('✅ All checks passed!');
+
         return 0;
     }
 }

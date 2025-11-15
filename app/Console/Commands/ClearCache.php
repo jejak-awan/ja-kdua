@@ -8,11 +8,12 @@ use Illuminate\Console\Command;
 class ClearCache extends Command
 {
     protected $signature = 'cms:clear-cache {--type=all : Type of cache to clear (all, content, category, media, seo)}';
+
     protected $description = 'Clear CMS caches';
 
     public function handle()
     {
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $type = $this->option('type');
 
         switch ($type) {

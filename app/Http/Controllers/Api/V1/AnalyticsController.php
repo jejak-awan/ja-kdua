@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
-use App\Models\AnalyticsVisit;
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
+use App\Models\AnalyticsVisit;
 use App\Models\Content;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class AnalyticsController extends BaseApiController
 {
@@ -78,9 +76,10 @@ class AnalyticsController extends BaseApiController
             ->get()
             ->map(function ($content) use ($dateFrom, $dateTo) {
                 $visits = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
-                    ->where('url', 'like', '%' . $content->slug . '%')
+                    ->where('url', 'like', '%'.$content->slug.'%')
                     ->count();
                 $content->visits_count = $visits;
+
                 return $content;
             })
             ->sortByDesc('visits_count')
@@ -96,7 +95,7 @@ class AnalyticsController extends BaseApiController
             $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-            if (!Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_visits')) {
                 return $this->success([], 'No analytics data available');
             }
 
@@ -108,7 +107,8 @@ class AnalyticsController extends BaseApiController
 
             return $this->success($devices, 'Device analytics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Analytics devices error: ' . $e->getMessage());
+            Log::error('Analytics devices error: '.$e->getMessage());
+
             return $this->success([], 'Device analytics retrieved successfully');
         }
     }
@@ -119,7 +119,7 @@ class AnalyticsController extends BaseApiController
             $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-            if (!Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_visits')) {
                 return $this->success([], 'No analytics data available');
             }
 
@@ -132,7 +132,8 @@ class AnalyticsController extends BaseApiController
 
             return $this->success($browsers, 'Browser analytics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Analytics browsers error: ' . $e->getMessage());
+            Log::error('Analytics browsers error: '.$e->getMessage());
+
             return $this->success([], 'Browser analytics retrieved successfully');
         }
     }
@@ -144,12 +145,12 @@ class AnalyticsController extends BaseApiController
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
             // Check if table exists
-            if (!Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_visits')) {
                 return $this->success([], 'No analytics data available');
             }
 
             // Check if country column exists
-            if (!Schema::hasColumn('analytics_visits', 'country')) {
+            if (! Schema::hasColumn('analytics_visits', 'country')) {
                 return $this->success([], 'Country data not available');
             }
 
@@ -165,9 +166,10 @@ class AnalyticsController extends BaseApiController
 
             return $this->success($countries, 'Country analytics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Analytics countries error: ' . $e->getMessage(), [
+            Log::error('Analytics countries error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty array instead of error to prevent frontend issues
             return $this->success([], 'Country analytics retrieved successfully');
         }
@@ -228,7 +230,7 @@ class AnalyticsController extends BaseApiController
     {
         try {
             // Check if tables exist
-            if (!Schema::hasTable('analytics_sessions') || !Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_sessions') || ! Schema::hasTable('analytics_visits')) {
                 return $this->success([
                     'active_sessions' => 0,
                     'visits_last_hour' => 0,
@@ -256,9 +258,10 @@ class AnalyticsController extends BaseApiController
                 'top_pages_now' => $topPagesNow,
             ], 'Real-time analytics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Analytics realTime error: ' . $e->getMessage(), [
+            Log::error('Analytics realTime error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty data instead of error to prevent frontend issues
             return $this->success([
                 'active_sessions' => 0,
@@ -289,13 +292,13 @@ class AnalyticsController extends BaseApiController
             case 'hour':
                 return "DATE_FORMAT(visited_at, '%Y-%m-%d %H:00:00') as period, count(*) as visits";
             case 'day':
-                return "DATE(visited_at) as period, count(*) as visits";
+                return 'DATE(visited_at) as period, count(*) as visits';
             case 'week':
-                return "YEARWEEK(visited_at) as period, count(*) as visits";
+                return 'YEARWEEK(visited_at) as period, count(*) as visits';
             case 'month':
                 return "DATE_FORMAT(visited_at, '%Y-%m') as period, count(*) as visits";
             default:
-                return "DATE(visited_at) as period, count(*) as visits";
+                return 'DATE(visited_at) as period, count(*) as visits';
         }
     }
 
@@ -305,13 +308,13 @@ class AnalyticsController extends BaseApiController
             case 'hour':
                 return "DATE_FORMAT(visited_at, '%Y-%m-%d %H:00:00')";
             case 'day':
-                return "DATE(visited_at)";
+                return 'DATE(visited_at)';
             case 'week':
-                return "YEARWEEK(visited_at)";
+                return 'YEARWEEK(visited_at)';
             case 'month':
                 return "DATE_FORMAT(visited_at, '%Y-%m')";
             default:
-                return "DATE(visited_at)";
+                return 'DATE(visited_at)';
         }
     }
 }

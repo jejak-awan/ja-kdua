@@ -43,6 +43,7 @@ class CustomField extends Model
     public function getValueForContent($contentId)
     {
         $value = $this->contentValues()->where('content_id', $contentId)->first();
+
         return $value ? $value->value : $this->default_value;
     }
 }

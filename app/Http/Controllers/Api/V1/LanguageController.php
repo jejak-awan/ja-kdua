@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Language;
 use App\Models\Translation;
 use Illuminate\Http\Request;
@@ -41,7 +40,7 @@ class LanguageController extends BaseApiController
     public function update(Request $request, Language $language)
     {
         $validated = $request->validate([
-            'code' => 'sometimes|required|string|max:10|unique:languages,code,' . $language->id,
+            'code' => 'sometimes|required|string|max:10|unique:languages,code,'.$language->id,
             'name' => 'sometimes|required|string|max:255',
             'native_name' => 'nullable|string|max:255',
             'flag' => 'nullable|string',
@@ -76,7 +75,7 @@ class LanguageController extends BaseApiController
         $languageCode = $request->input('language');
         $language = $languageCode ? Language::where('code', $languageCode)->first() : Language::getDefault();
 
-        if (!$language) {
+        if (! $language) {
             return $this->notFound('Language');
         }
 

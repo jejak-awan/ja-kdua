@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class CreateBackup extends Command
 {
     protected $signature = 'cms:backup {--type=database : Type of backup (database, files, full)}';
+
     protected $description = 'Create a backup of the CMS';
 
     public function handle(BackupService $backupService)
@@ -24,6 +25,7 @@ class CreateBackup extends Command
             $this->info("Path: {$backup->path}");
         } else {
             $this->error("Backup failed: {$backup->error_message}");
+
             return 1;
         }
 

@@ -27,7 +27,7 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('status');
             $table->index('type');
             $table->index('published_at');

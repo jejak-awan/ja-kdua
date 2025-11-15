@@ -38,8 +38,8 @@ class EmailTemplate extends Model
     protected function replaceVariables($template, array $data)
     {
         foreach ($data as $key => $value) {
-            $template = str_replace('{{' . $key . '}}', $value, $template);
-            $template = str_replace('{{ $' . $key . ' }}', $value, $template);
+            $template = str_replace('{{'.$key.'}}', $value, $template);
+            $template = str_replace('{{ $'.$key.' }}', $value, $template);
         }
 
         // Replace common variables

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 class SecurityService
 {
     protected $maxFailedAttempts = 5;
+
     protected $lockoutDuration = 15; // minutes
 
     public function recordFailedLogin($email, $ipAddress)
@@ -46,14 +47,14 @@ class SecurityService
     public function blockIp($ipAddress, $reason = null)
     {
         Cache::put("blocked_ip_{$ipAddress}", true, now()->addHours(24));
-        
+
         SecurityLog::log('ip_blocked', null, $ipAddress, $reason ?? 'IP address blocked');
     }
 
     public function unblockIp($ipAddress)
     {
         Cache::forget("blocked_ip_{$ipAddress}");
-        
+
         SecurityLog::log('ip_unblocked', null, $ipAddress, 'IP address unblocked');
     }
 
@@ -105,4 +106,3 @@ class SecurityService
         ];
     }
 }
-

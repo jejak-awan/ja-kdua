@@ -16,7 +16,9 @@ class SendEmailJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
     public $timeout = 60;
+
     public $backoff = [30, 60, 120]; // Retry after 30s, 1min, 2min
 
     /**
@@ -60,12 +62,12 @@ class SendEmailJob implements ShouldQueue
                 }
             });
 
-            Log::info("SendEmailJob: Email sent successfully", [
+            Log::info('SendEmailJob: Email sent successfully', [
                 'to' => $this->to,
                 'subject' => $this->subject,
             ]);
         } catch (\Exception $e) {
-            Log::error("SendEmailJob failed: " . $e->getMessage(), [
+            Log::error('SendEmailJob failed: '.$e->getMessage(), [
                 'to' => $this->to,
                 'subject' => $this->subject,
                 'error' => $e->getMessage(),
@@ -79,7 +81,7 @@ class SendEmailJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error("SendEmailJob permanently failed", [
+        Log::error('SendEmailJob permanently failed', [
             'to' => $this->to,
             'subject' => $this->subject,
             'error' => $exception->getMessage(),

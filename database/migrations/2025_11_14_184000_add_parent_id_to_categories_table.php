@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            if (!Schema::hasColumn('categories', 'parent_id')) {
+            if (! Schema::hasColumn('categories', 'parent_id')) {
                 $table->foreignId('parent_id')->nullable()->after('id')->constrained('categories')->onDelete('cascade');
             }
-            if (!Schema::hasColumn('categories', 'image')) {
+            if (! Schema::hasColumn('categories', 'image')) {
                 $table->string('image')->nullable()->after('description');
             }
         });
@@ -26,4 +26,3 @@ return new class extends Migration
         });
     }
 };
-

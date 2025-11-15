@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AnalyticsVisit extends Model
 {
@@ -43,17 +42,18 @@ class AnalyticsVisit extends Model
     {
         // Try to find content by URL slug
         $slug = basename(parse_url($this->url, PHP_URL_PATH));
+
         return \App\Models\Content::where('slug', $slug)->first();
     }
 
     public static function trackVisit($request, $sessionId = null)
     {
         $sessionId = $sessionId ?? session()->getId();
-        
+
         // Parse user agent
         $userAgent = $request->userAgent();
         $deviceInfo = self::parseUserAgent($userAgent);
-        
+
         // Get location (simplified - in production use GeoIP service)
         $location = self::getLocation($request->ip());
 

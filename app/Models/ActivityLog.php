@@ -37,7 +37,7 @@ class ActivityLog extends Model
     public static function log(string $action, $model = null, array $changes = [], $user = null, $description = null): self
     {
         $user = $user ?? auth()->user();
-        
+
         return self::create([
             'user_id' => $user?->id,
             'action' => $action,
@@ -53,15 +53,15 @@ class ActivityLog extends Model
     protected static function generateDescription(string $action, $model = null): string
     {
         $modelName = $model ? class_basename($model) : 'item';
-        
-        return match($action) {
+
+        return match ($action) {
             'created' => "Created {$modelName}",
             'updated' => "Updated {$modelName}",
             'deleted' => "Deleted {$modelName}",
             'viewed' => "Viewed {$modelName}",
             'published' => "Published {$modelName}",
             'unpublished' => "Unpublished {$modelName}",
-            default => ucfirst($action) . " {$modelName}",
+            default => ucfirst($action)." {$modelName}",
         };
     }
 }

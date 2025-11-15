@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Category;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
@@ -25,7 +24,7 @@ class CategoryController extends BaseApiController
                     ->orderBy('sort_order')
                     ->get();
             });
-            
+
             return $this->success($categories, 'Categories tree retrieved successfully');
         }
 
@@ -60,7 +59,7 @@ class CategoryController extends BaseApiController
         $category = Category::create($validated);
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearCategoryCaches();
         $cacheService->clearSeoCaches();
 
@@ -76,7 +75,7 @@ class CategoryController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:categories,slug,' . $category->id,
+            'slug' => 'sometimes|required|string|unique:categories,slug,'.$category->id,
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'is_active' => 'boolean',
@@ -131,7 +130,7 @@ class CategoryController extends BaseApiController
         $category->delete();
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearCategoryCaches($categoryId);
         $cacheService->clearSeoCaches();
 

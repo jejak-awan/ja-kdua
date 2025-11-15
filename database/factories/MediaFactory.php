@@ -20,15 +20,15 @@ class MediaFactory extends Factory
      */
     public function definition(): array
     {
-        $fileName = fake()->word() . '.' . fake()->randomElement(['jpg', 'png', 'gif', 'pdf', 'doc']);
+        $fileName = fake()->word().'.'.fake()->randomElement(['jpg', 'png', 'gif', 'pdf', 'doc']);
         $mimeType = $this->getMimeType($fileName);
-        
+
         return [
             'name' => fake()->words(2, true),
             'file_name' => $fileName,
             'mime_type' => $mimeType,
             'disk' => 'public',
-            'path' => 'media/' . $fileName,
+            'path' => 'media/'.$fileName,
             'size' => fake()->numberBetween(1000, 10000000),
             'alt' => fake()->optional()->sentence(),
             'description' => fake()->optional()->paragraph(),
@@ -41,12 +41,12 @@ class MediaFactory extends Factory
      */
     public function image(): static
     {
-        $fileName = fake()->word() . '.' . fake()->randomElement(['jpg', 'png', 'gif']);
-        
+        $fileName = fake()->word().'.'.fake()->randomElement(['jpg', 'png', 'gif']);
+
         return $this->state(fn (array $attributes) => [
             'file_name' => $fileName,
             'mime_type' => $this->getMimeType($fileName),
-            'path' => 'media/' . $fileName,
+            'path' => 'media/'.$fileName,
         ]);
     }
 
@@ -55,19 +55,19 @@ class MediaFactory extends Factory
      */
     public function document(): static
     {
-        $fileName = fake()->word() . '.' . fake()->randomElement(['pdf', 'doc', 'docx']);
-        
+        $fileName = fake()->word().'.'.fake()->randomElement(['pdf', 'doc', 'docx']);
+
         return $this->state(fn (array $attributes) => [
             'file_name' => $fileName,
             'mime_type' => $this->getMimeType($fileName),
-            'path' => 'media/' . $fileName,
+            'path' => 'media/'.$fileName,
         ]);
     }
 
     /**
      * Indicate that the media is in a folder.
      */
-    public function inFolder(MediaFolder $folder = null): static
+    public function inFolder(?MediaFolder $folder = null): static
     {
         return $this->state(fn (array $attributes) => [
             'folder_id' => $folder?->id ?? MediaFolder::factory()->create()->id,
@@ -80,7 +80,7 @@ class MediaFactory extends Factory
     protected function getMimeType(string $fileName): string
     {
         $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        
+
         $mimeTypes = [
             'jpg' => 'image/jpeg',
             'jpeg' => 'image/jpeg',
@@ -90,8 +90,7 @@ class MediaFactory extends Factory
             'doc' => 'application/msword',
             'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
-        
+
         return $mimeTypes[$extension] ?? 'application/octet-stream';
     }
 }
-

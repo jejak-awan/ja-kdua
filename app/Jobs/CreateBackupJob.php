@@ -16,7 +16,9 @@ class CreateBackupJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 1; // Backup should only run once
+
     public $timeout = 1800; // 30 minutes
+
     public $backoff = [300]; // Retry after 5 minutes if failed
 
     /**
@@ -36,7 +38,7 @@ class CreateBackupJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            $backupService = new BackupService();
+            $backupService = new BackupService;
 
             switch ($this->type) {
                 case 'database':
@@ -56,13 +58,13 @@ class CreateBackupJob implements ShouldQueue
                 $backup->update(['description' => $this->description]);
             }
 
-            Log::info("CreateBackupJob: Backup created successfully", [
+            Log::info('CreateBackupJob: Backup created successfully', [
                 'backup_id' => $backup->id ?? null,
                 'type' => $this->type,
                 'name' => $this->name,
             ]);
         } catch (\Exception $e) {
-            Log::error("CreateBackupJob failed: " . $e->getMessage(), [
+            Log::error('CreateBackupJob failed: '.$e->getMessage(), [
                 'type' => $this->type,
                 'name' => $this->name,
                 'error' => $e->getMessage(),
@@ -86,7 +88,7 @@ class CreateBackupJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error("CreateBackupJob permanently failed", [
+        Log::error('CreateBackupJob permanently failed', [
             'type' => $this->type,
             'name' => $this->name,
             'error' => $exception->getMessage(),

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Theme;
 use Illuminate\Http\Request;
 
@@ -11,6 +10,7 @@ class ThemeController extends BaseApiController
     public function index()
     {
         $themes = Theme::latest()->get();
+
         return $this->success($themes, 'Themes retrieved successfully');
     }
 
@@ -42,7 +42,7 @@ class ThemeController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:themes,slug,' . $theme->id,
+            'slug' => 'sometimes|required|string|unique:themes,slug,'.$theme->id,
             'version' => 'nullable|string',
             'description' => 'nullable|string',
             'author' => 'nullable|string',
@@ -80,8 +80,8 @@ class ThemeController extends BaseApiController
     public function getActive()
     {
         $theme = Theme::getActiveTheme();
-        
-        if (!$theme) {
+
+        if (! $theme) {
             return $this->notFound('Active theme');
         }
 

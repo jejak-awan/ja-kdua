@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
@@ -45,7 +44,7 @@ class MenuController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:menus,slug,' . $menu->id,
+            'slug' => 'sometimes|required|string|unique:menus,slug,'.$menu->id,
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -143,8 +142,8 @@ class MenuController extends BaseApiController
     public function getByLocation(Request $request, $location)
     {
         $menu = Menu::getByLocation($location);
-        
-        if (!$menu) {
+
+        if (! $menu) {
             return $this->notFound('Menu');
         }
 

@@ -71,8 +71,8 @@ class ContentTemplate extends Model
     protected function replaceTemplateVariables($template, array $data)
     {
         foreach ($data as $key => $value) {
-            $template = str_replace('{{' . $key . '}}', $value, $template);
-            $template = str_replace('{{ $' . $key . ' }}', $value, $template);
+            $template = str_replace('{{'.$key.'}}', $value, $template);
+            $template = str_replace('{{ $'.$key.' }}', $value, $template);
         }
 
         return $template;

@@ -14,11 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Enable Sanctum stateful API for SPA
         $middleware->statefulApi();
-        
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleRedirects::class,
         ]);
-        
+
         // Register permission middleware alias
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,

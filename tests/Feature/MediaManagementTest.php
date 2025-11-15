@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Tests\Helpers\TestHelpers;
-use App\Models\User;
 use App\Models\Media;
 use App\Models\MediaFolder;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Helpers\TestHelpers;
+use Tests\TestCase;
 
 class MediaManagementTest extends TestCase
 {
@@ -243,7 +243,7 @@ class MediaManagementTest extends TestCase
         ]);
 
         TestHelpers::assertApiSuccess($response);
-        
+
         foreach ($media as $item) {
             $this->assertDatabaseHas('media', [
                 'id' => $item->id,
@@ -418,4 +418,3 @@ class MediaManagementTest extends TestCase
         $response->assertJsonValidationErrors(['file']);
     }
 }
-

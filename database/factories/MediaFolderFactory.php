@@ -21,10 +21,10 @@ class MediaFolderFactory extends Factory
     public function definition(): array
     {
         $name = fake()->words(2, true);
-        
+
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . uniqid(),
+            'slug' => Str::slug($name).'-'.uniqid(),
             'parent_id' => null,
             'sort_order' => fake()->numberBetween(0, 100),
         ];
@@ -33,11 +33,10 @@ class MediaFolderFactory extends Factory
     /**
      * Indicate that the folder has a parent.
      */
-    public function withParent(MediaFolder $parent = null): static
+    public function withParent(?MediaFolder $parent = null): static
     {
         return $this->state(fn (array $attributes) => [
             'parent_id' => $parent?->id ?? MediaFolder::factory()->create()->id,
         ]);
     }
 }
-

@@ -11,7 +11,7 @@ class HookService
      */
     public static function addHook(string $hookName, callable $callback, int $priority = 10)
     {
-        if (!isset(self::$hooks[$hookName])) {
+        if (! isset(self::$hooks[$hookName])) {
             self::$hooks[$hookName] = [];
         }
 
@@ -31,7 +31,7 @@ class HookService
      */
     public static function doHook(string $hookName, ...$args)
     {
-        if (!isset(self::$hooks[$hookName])) {
+        if (! isset(self::$hooks[$hookName])) {
             return $args[0] ?? null;
         }
 
@@ -63,14 +63,15 @@ class HookService
     /**
      * Remove a hook
      */
-    public static function removeHook(string $hookName, callable $callback = null)
+    public static function removeHook(string $hookName, ?callable $callback = null)
     {
-        if (!isset(self::$hooks[$hookName])) {
+        if (! isset(self::$hooks[$hookName])) {
             return;
         }
 
         if ($callback === null) {
             unset(self::$hooks[$hookName]);
+
             return;
         }
 
@@ -82,4 +83,3 @@ class HookService
         );
     }
 }
-

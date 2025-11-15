@@ -2,17 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Category;
-use App\Models\Tag;
+use App\Models\Comment;
 use App\Models\Content;
 use App\Models\Media;
 use App\Models\MediaFolder;
-use App\Models\Comment;
-use App\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\Tag;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class TestDatabaseSeeder extends Seeder
 {
@@ -23,31 +22,31 @@ class TestDatabaseSeeder extends Seeder
     {
         // Clear existing data
         $this->command->info('Clearing existing test data...');
-        
+
         // Seed permissions and roles
         $this->seedPermissionsAndRoles();
-        
+
         // Create test users
         $this->seedUsers();
-        
+
         // Create test categories
         $this->seedCategories();
-        
+
         // Create test tags
         $this->seedTags();
-        
+
         // Create test media folders
         $this->seedMediaFolders();
-        
+
         // Create test media
         $this->seedMedia();
-        
+
         // Create test content
         $this->seedContent();
-        
+
         // Create test comments
         $this->seedComments();
-        
+
         $this->command->info('Test database seeded successfully!');
     }
 
@@ -241,4 +240,3 @@ class TestDatabaseSeeder extends Seeder
         }
     }
 }
-

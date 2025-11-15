@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Tests\Helpers\TestHelpers;
-use App\Models\User;
+use App\Models\Category;
 use App\Models\Content;
 use App\Models\Media;
-use App\Models\Category;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Tests\Helpers\TestHelpers;
+use Tests\TestCase;
 
 class PermissionTest extends TestCase
 {
@@ -273,7 +273,7 @@ class PermissionTest extends TestCase
     public function test_admin_role_has_all_permissions(): void
     {
         $admin = $this->createAdminUser();
-        
+
         $permissions = [
             'create content',
             'edit content',
@@ -295,7 +295,7 @@ class PermissionTest extends TestCase
     {
         $user = $this->createUser();
         $role = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
-        
+
         // Give role some permissions
         $permission = Permission::firstOrCreate(['name' => 'edit content', 'guard_name' => 'web']);
         $role->givePermissionTo($permission);
@@ -325,7 +325,7 @@ class PermissionTest extends TestCase
     public function test_user_can_have_multiple_permissions(): void
     {
         $user = $this->createUser();
-        
+
         $permissions = [
             Permission::firstOrCreate(['name' => 'create content', 'guard_name' => 'web']),
             Permission::firstOrCreate(['name' => 'edit content', 'guard_name' => 'web']),
@@ -345,7 +345,7 @@ class PermissionTest extends TestCase
     public function test_user_can_have_multiple_roles(): void
     {
         $user = $this->createUser();
-        
+
         $role1 = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
         $role2 = Role::firstOrCreate(['name' => 'author', 'guard_name' => 'web']);
 
@@ -412,4 +412,3 @@ class PermissionTest extends TestCase
         TestHelpers::assertApiSuccess($response);
     }
 }
-

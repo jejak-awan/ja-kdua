@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\FieldGroup;
 use Illuminate\Http\Request;
 
@@ -50,7 +49,7 @@ class FieldGroupController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:field_groups,slug,' . $fieldGroup->id,
+            'slug' => 'sometimes|required|string|unique:field_groups,slug,'.$fieldGroup->id,
             'description' => 'nullable|string',
             'applies_to' => 'sometimes|required|string',
             'conditions' => 'nullable|array',

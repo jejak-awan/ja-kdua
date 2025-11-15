@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\SecurityLog;
 use App\Services\SecurityService;
 use Illuminate\Http\Request;
@@ -100,6 +99,6 @@ class SecurityController extends BaseApiController
         $this->securityService->clearFailedAttempts($ipAddress);
         $this->securityService->unblockIp($ipAddress);
 
-        return $this->success(null, 'Failed attempts and block status cleared for IP: ' . $ipAddress);
+        return $this->success(null, 'Failed attempts and block status cleared for IP: '.$ipAddress);
     }
 }

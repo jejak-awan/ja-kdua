@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Form;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 
 class FormSubmissionController extends BaseApiController
 {
-    public function index(Request $request, Form $form = null)
+    public function index(Request $request, ?Form $form = null)
     {
         $query = FormSubmission::with(['form', 'user']);
 
@@ -95,7 +94,7 @@ class FormSubmissionController extends BaseApiController
         ], 'Form submissions exported successfully');
     }
 
-    public function statistics(Request $request, Form $form = null)
+    public function statistics(Request $request, ?Form $form = null)
     {
         $query = FormSubmission::query();
 

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('translations')) {
+        if (! Schema::hasTable('translations')) {
             Schema::create('translations', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('language_id')->constrained('languages')->onDelete('cascade');
@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->string('field'); // title, body, description, etc.
                 $table->text('value');
                 $table->timestamps();
-                
+
                 $table->index(['translatable_type', 'translatable_id']);
                 $table->index('language_id');
                 $table->unique(['language_id', 'translatable_type', 'translatable_id', 'field']);
@@ -30,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('translations');
     }
 };
-

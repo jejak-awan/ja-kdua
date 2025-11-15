@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('analytics_events')) {
+        if (! Schema::hasTable('analytics_events')) {
             Schema::create('analytics_events', function (Blueprint $table) {
                 $table->id();
                 $table->string('session_id')->index();
@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->string('ip_address')->nullable();
                 $table->timestamp('occurred_at');
                 $table->timestamps();
-                
+
                 $table->index(['event_type', 'occurred_at']);
                 $table->index(['content_id', 'occurred_at']);
             });
@@ -34,4 +34,3 @@ return new class extends Migration
         Schema::dropIfExists('analytics_events');
     }
 };
-

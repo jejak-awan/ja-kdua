@@ -3,20 +3,18 @@
 namespace App\Services;
 
 use App\Models\Backup;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class BackupService
 {
     public function createDatabaseBackup($name = null)
     {
-        $name = $name ?? 'backup_' . now()->format('Y-m-d_His');
-        
+        $name = $name ?? 'backup_'.now()->format('Y-m-d_His');
+
         // Prepare path first
-        $filename = $name . '.sql';
-        $path = 'backups/' . date('Y/m') . '/' . $filename;
-        
+        $filename = $name.'.sql';
+        $path = 'backups/'.date('Y/m').'/'.$filename;
+
         // Create backup record with temporary path
         $backup = Backup::create([
             'name' => $name,
@@ -27,11 +25,11 @@ class BackupService
         ]);
 
         try {
-            $database = config('database.connections.' . config('database.default') . '.database');
-            $username = config('database.connections.' . config('database.default') . '.username');
-            $password = config('database.connections.' . config('database.default') . '.password');
-            $host = config('database.connections.' . config('database.default') . '.host');
-            
+            $database = config('database.connections.'.config('database.default').'.database');
+            $username = config('database.connections.'.config('database.default').'.username');
+            $password = config('database.connections.'.config('database.default').'.password');
+            $host = config('database.connections.'.config('database.default').'.host');
+
             // For SQLite
             if (config('database.default') === 'sqlite') {
                 // Check if database path is already absolute
@@ -40,26 +38,26 @@ class BackupService
                 } else {
                     $dbPath = database_path($database);
                 }
-                
+
                 // Try with .sqlite extension if not found
-                if (!file_exists($dbPath)) {
+                if (! file_exists($dbPath)) {
                     if (str_starts_with($database, '/')) {
-                        $dbPath = $database . '.sqlite';
+                        $dbPath = $database.'.sqlite';
                     } else {
-                        $dbPath = database_path($database . '.sqlite');
+                        $dbPath = database_path($database.'.sqlite');
                     }
                 }
-                
+
                 if (file_exists($dbPath)) {
                     // Ensure backup directory exists
                     $backupDir = dirname(Storage::disk('local')->path($path));
-                    if (!is_dir($backupDir)) {
+                    if (! is_dir($backupDir)) {
                         mkdir($backupDir, 0755, true);
                     }
-                    
+
                     Storage::disk('local')->put($path, file_get_contents($dbPath));
                 } else {
-                    throw new \Exception('Database file not found: ' . $dbPath);
+                    throw new \Exception('Database file not found: '.$dbPath);
                 }
             } else {
                 // For MySQL/PostgreSQL - would need mysqldump/pg_dump
@@ -68,6 +66,7 @@ class BackupService
                     'status' => 'failed',
                     'error_message' => 'MySQL/PostgreSQL backup requires mysqldump/pg_dump command',
                 ]);
+
                 return $backup;
             }
 
@@ -88,23 +87,24 @@ class BackupService
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
             ]);
+
             return $backup;
         }
     }
 
     public function restoreDatabaseBackup(Backup $backup)
     {
-        if ($backup->type !== 'database' || !$backup->isCompleted()) {
+        if ($backup->type !== 'database' || ! $backup->isCompleted()) {
             throw new \Exception('Invalid backup or backup not completed');
         }
 
         try {
             $fullPath = Storage::disk($backup->disk)->path($backup->path);
-            
+
             if (config('database.default') === 'sqlite') {
-                $database = config('database.connections.' . config('database.default') . '.database');
+                $database = config('database.connections.'.config('database.default').'.database');
                 $dbPath = database_path($database);
-                
+
                 if (file_exists($fullPath)) {
                     copy($fullPath, $dbPath);
                 }
@@ -114,7 +114,7 @@ class BackupService
 
             return true;
         } catch (\Exception $e) {
-            throw new \Exception('Restore failed: ' . $e->getMessage());
+            throw new \Exception('Restore failed: '.$e->getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ class BackupService
     public function listBackups($type = null)
     {
         $query = Backup::query();
-        
+
         if ($type) {
             $query->where('type', $type);
         }
@@ -151,4 +151,3 @@ class BackupService
         ];
     }
 }
-

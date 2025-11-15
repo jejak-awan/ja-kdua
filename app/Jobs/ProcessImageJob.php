@@ -16,7 +16,9 @@ class ProcessImageJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
     public $timeout = 300; // 5 minutes
+
     public $backoff = [60, 120, 300]; // Retry after 1min, 2min, 5min
 
     /**
@@ -40,8 +42,9 @@ class ProcessImageJob implements ShouldQueue
         try {
             $media = Media::findOrFail($this->mediaId);
 
-            if (!str_starts_with($media->mime_type, 'image/')) {
+            if (! str_starts_with($media->mime_type, 'image/')) {
                 Log::warning("ProcessImageJob: Media {$this->mediaId} is not an image");
+
                 return;
             }
 
@@ -59,7 +62,7 @@ class ProcessImageJob implements ShouldQueue
                     Log::warning("ProcessImageJob: Unknown action {$this->action}");
             }
         } catch (\Exception $e) {
-            Log::error("ProcessImageJob failed: " . $e->getMessage(), [
+            Log::error('ProcessImageJob failed: '.$e->getMessage(), [
                 'media_id' => $this->mediaId,
                 'action' => $this->action,
                 'trace' => $e->getTraceAsString(),
@@ -76,41 +79,42 @@ class ProcessImageJob implements ShouldQueue
 
         // Create thumbnails directory
         $thumbnailDir = Storage::disk($media->disk)->path('media/thumbnails');
-        if (!is_dir($thumbnailDir)) {
+        if (! is_dir($thumbnailDir)) {
             mkdir($thumbnailDir, 0755, true);
         }
 
         // Generate thumbnail filename
         $fileName = pathinfo($media->path, PATHINFO_FILENAME);
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        
+
         // For SVG files, convert to PNG for thumbnail
         $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
         $thumbnailExtension = $isSvg ? 'png' : $extension;
-        $thumbnailFileName = $fileName . '_thumb.' . $thumbnailExtension;
-        $thumbnailPath = 'media/thumbnails/' . $thumbnailFileName;
+        $thumbnailFileName = $fileName.'_thumb.'.$thumbnailExtension;
+        $thumbnailPath = 'media/thumbnails/'.$thumbnailFileName;
         $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
 
         // Handle SVG files - convert to PNG using Imagick (if available)
         if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
             try {
-                $imagick = new \Imagick();
+                $imagick = new \Imagick;
                 $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
                 $imagick->readImage($fullPath);
                 $imagick->setImageFormat('png');
-                
+
                 // Resize SVG to thumbnail size
                 $imagick->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
-                
+
                 // Save as PNG
                 $imagick->writeImage($thumbnailFullPath);
                 $imagick->clear();
                 $imagick->destroy();
-                
+
                 Log::info("ProcessImageJob: SVG thumbnail generated for media {$media->id}");
+
                 return;
             } catch (\Exception $e) {
-                Log::warning("ProcessImageJob: SVG thumbnail generation failed with Imagick: " . $e->getMessage());
+                Log::warning('ProcessImageJob: SVG thumbnail generation failed with Imagick: '.$e->getMessage());
                 // Fall through to try Intervention Image
             }
         }
@@ -118,9 +122,9 @@ class ProcessImageJob implements ShouldQueue
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
             if (extension_loaded('gd')) {
-                $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                $driver = new \Intervention\Image\Drivers\Gd\Driver;
             } elseif (extension_loaded('imagick')) {
-                $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                $driver = new \Intervention\Image\Drivers\Imagick\Driver;
             }
 
             if ($driver) {
@@ -128,7 +132,7 @@ class ProcessImageJob implements ShouldQueue
                     $manager = new \Intervention\Image\ImageManager($driver);
                     $image = $manager->read($fullPath);
                     $image->cover($width, $height);
-                    
+
                     // For SVG converted to PNG, save as PNG
                     if ($isSvg) {
                         $image->toPng()->save($thumbnailFullPath);
@@ -138,7 +142,7 @@ class ProcessImageJob implements ShouldQueue
 
                     Log::info("ProcessImageJob: Thumbnail generated for media {$media->id}");
                 } catch (\Exception $e) {
-                    Log::warning("ProcessImageJob: Thumbnail generation failed: " . $e->getMessage());
+                    Log::warning('ProcessImageJob: Thumbnail generation failed: '.$e->getMessage());
                 }
             }
         }
@@ -146,8 +150,9 @@ class ProcessImageJob implements ShouldQueue
 
     protected function resizeImage(Media $media): void
     {
-        if (!$this->width && !$this->height) {
-            Log::warning("ProcessImageJob: Resize requires width or height");
+        if (! $this->width && ! $this->height) {
+            Log::warning('ProcessImageJob: Resize requires width or height');
+
             return;
         }
 
@@ -156,9 +161,9 @@ class ProcessImageJob implements ShouldQueue
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
             if (extension_loaded('gd')) {
-                $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                $driver = new \Intervention\Image\Drivers\Gd\Driver;
             } elseif (extension_loaded('imagick')) {
-                $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                $driver = new \Intervention\Image\Drivers\Imagick\Driver;
             }
 
             if ($driver) {
@@ -190,9 +195,9 @@ class ProcessImageJob implements ShouldQueue
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
             if (extension_loaded('gd')) {
-                $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                $driver = new \Intervention\Image\Drivers\Gd\Driver;
             } elseif (extension_loaded('imagick')) {
-                $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                $driver = new \Intervention\Image\Drivers\Imagick\Driver;
             }
 
             if ($driver) {
@@ -219,7 +224,7 @@ class ProcessImageJob implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error("ProcessImageJob permanently failed", [
+        Log::error('ProcessImageJob permanently failed', [
             'media_id' => $this->mediaId,
             'action' => $this->action,
             'error' => $exception->getMessage(),

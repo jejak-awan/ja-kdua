@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Log;
  * Provides convenient methods for caching operations including
  * content, media, categories, statistics, and API responses.
  * Supports tagged cache for grouped invalidation (Redis only).
- *
- * @package App\Helpers
  */
 class CacheHelper
 {
@@ -20,20 +18,30 @@ class CacheHelper
      * Cache key prefixes
      */
     const PREFIX_CONTENT = 'content:';
+
     const PREFIX_MEDIA = 'media:';
+
     const PREFIX_CATEGORY = 'category:';
+
     const PREFIX_TAG = 'tag:';
+
     const PREFIX_USER = 'user:';
+
     const PREFIX_SETTINGS = 'settings:';
+
     const PREFIX_STATISTICS = 'statistics:';
+
     const PREFIX_API = 'api:';
 
     /**
      * Default cache TTL (Time To Live) in seconds
      */
     const TTL_SHORT = 300;      // 5 minutes
+
     const TTL_MEDIUM = 1800;    // 30 minutes
+
     const TTL_LONG = 3600;      // 1 hour
+
     const TTL_VERY_LONG = 86400; // 24 hours
 
     /**
@@ -41,7 +49,7 @@ class CacheHelper
      */
     public static function key(string $prefix, string $key): string
     {
-        return $prefix . $key;
+        return $prefix.$key;
     }
 
     /**
@@ -50,12 +58,12 @@ class CacheHelper
     public static function rememberApiResponse(string $key, int $ttl, callable $callback)
     {
         $cacheKey = self::key(self::PREFIX_API, $key);
-        
+
         return Cache::remember($cacheKey, $ttl, function () use ($callback) {
             try {
                 return $callback();
             } catch (\Exception $e) {
-                Log::error('Cache callback error: ' . $e->getMessage());
+                Log::error('Cache callback error: '.$e->getMessage());
                 throw $e;
             }
         });
@@ -67,7 +75,7 @@ class CacheHelper
     public static function rememberContent(int $id, int $ttl, callable $callback)
     {
         $cacheKey = self::key(self::PREFIX_CONTENT, $id);
-        
+
         return Cache::tags(['content'])->remember($cacheKey, $ttl, $callback);
     }
 
@@ -77,7 +85,7 @@ class CacheHelper
     public static function rememberMedia(int $id, int $ttl, callable $callback)
     {
         $cacheKey = self::key(self::PREFIX_MEDIA, $id);
-        
+
         return Cache::tags(['media'])->remember($cacheKey, $ttl, $callback);
     }
 
@@ -87,7 +95,7 @@ class CacheHelper
     public static function rememberCategory(int $id, int $ttl, callable $callback)
     {
         $cacheKey = self::key(self::PREFIX_CATEGORY, $id);
-        
+
         return Cache::tags(['categories'])->remember($cacheKey, $ttl, $callback);
     }
 
@@ -97,7 +105,7 @@ class CacheHelper
     public static function rememberStatistics(string $type, int $ttl, callable $callback)
     {
         $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
-        
+
         return Cache::remember($cacheKey, $ttl, $callback);
     }
 
@@ -158,7 +166,7 @@ class CacheHelper
     /**
      * Invalidate statistics cache
      */
-    public static function invalidateStatistics(string $type = null): void
+    public static function invalidateStatistics(?string $type = null): void
     {
         if ($type) {
             $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
@@ -195,9 +203,11 @@ class CacheHelper
             Cache::put('cache_test', 'test', 1);
             $result = Cache::get('cache_test') === 'test';
             Cache::forget('cache_test');
+
             return $result;
         } catch (\Exception $e) {
-            Log::warning('Cache not available: ' . $e->getMessage());
+            Log::warning('Cache not available: '.$e->getMessage());
+
             return false;
         }
     }
@@ -214,4 +224,3 @@ class CacheHelper
         ];
     }
 }
-

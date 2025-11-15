@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
 
@@ -52,7 +51,7 @@ class EmailTemplateController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:email_templates,slug,' . $emailTemplate->id,
+            'slug' => 'sometimes|required|string|unique:email_templates,slug,'.$emailTemplate->id,
             'subject' => 'sometimes|required|string|max:255',
             'body' => 'sometimes|required|string',
             'text_body' => 'nullable|string',
@@ -99,7 +98,7 @@ class EmailTemplateController extends BaseApiController
 
             return $this->success(null, 'Test email sent successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to send test email: ' . $e->getMessage(), 500, [], 'EMAIL_SEND_ERROR');
+            return $this->error('Failed to send test email: '.$e->getMessage(), 500, [], 'EMAIL_SEND_ERROR');
         }
     }
 }

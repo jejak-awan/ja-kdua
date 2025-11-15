@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Tests\Helpers\TestHelpers;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Helpers\TestHelpers;
+use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
@@ -118,7 +118,7 @@ class AuthenticationTest extends TestCase
                 'token',
             ],
         ]);
-        
+
         $this->assertDatabaseHas('users', [
             'email' => $userData['email'],
         ]);
@@ -180,7 +180,7 @@ class AuthenticationTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $response = $this->postJson('/api/v1/logout', [], [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         TestHelpers::assertApiSuccess($response);
@@ -295,7 +295,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         TestHelpers::assertApiSuccess($response);
-        
+
         // Verify password was changed
         $user->refresh();
         $this->assertTrue(Hash::check('new-password', $user->password));
@@ -348,4 +348,3 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(429);
     }
 }
-

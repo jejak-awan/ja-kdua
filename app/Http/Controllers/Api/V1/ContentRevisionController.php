@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
 use App\Models\ContentRevision;
 use Illuminate\Http\Request;
@@ -17,10 +16,11 @@ class ContentRevisionController extends BaseApiController
 
             return $this->paginated($revisions, 'Content revisions retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Content revisions index error: ' . $e->getMessage(), [
+            Log::error('Content revisions index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'content_id' => $content->id,
             ]);
+
             // Return empty paginated response instead of error
             return $this->paginated(
                 \Illuminate\Pagination\LengthAwarePaginator::make([], 0, 20),

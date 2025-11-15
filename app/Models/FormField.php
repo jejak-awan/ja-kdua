@@ -34,7 +34,7 @@ class FormField extends Model
     public function getValidationRules()
     {
         $rules = $this->validation_rules ?? [];
-        
+
         if ($this->is_required) {
             $rules[] = 'required';
         }

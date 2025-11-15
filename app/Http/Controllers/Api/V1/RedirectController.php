@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Redirect;
 use Illuminate\Http\Request;
 
@@ -20,7 +19,7 @@ class RedirectController extends BaseApiController
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('from_url', 'like', "%{$search}%")
-                  ->orWhere('to_url', 'like', "%{$search}%");
+                    ->orWhere('to_url', 'like', "%{$search}%");
             });
         }
 
@@ -39,8 +38,8 @@ class RedirectController extends BaseApiController
         ]);
 
         // Ensure from_url starts with /
-        if (!str_starts_with($validated['from_url'], '/')) {
-            $validated['from_url'] = '/' . $validated['from_url'];
+        if (! str_starts_with($validated['from_url'], '/')) {
+            $validated['from_url'] = '/'.$validated['from_url'];
         }
 
         $redirect = Redirect::create($validated);
@@ -56,15 +55,15 @@ class RedirectController extends BaseApiController
     public function update(Request $request, Redirect $redirect)
     {
         $validated = $request->validate([
-            'from_url' => 'sometimes|required|string|unique:redirects,from_url,' . $redirect->id,
+            'from_url' => 'sometimes|required|string|unique:redirects,from_url,'.$redirect->id,
             'to_url' => 'sometimes|required|string',
             'type' => 'sometimes|required|in:301,302,307,308',
             'is_active' => 'boolean',
         ]);
 
         // Ensure from_url starts with /
-        if (isset($validated['from_url']) && !str_starts_with($validated['from_url'], '/')) {
-            $validated['from_url'] = '/' . $validated['from_url'];
+        if (isset($validated['from_url']) && ! str_starts_with($validated['from_url'], '/')) {
+            $validated['from_url'] = '/'.$validated['from_url'];
         }
 
         $redirect->update($validated);
@@ -94,4 +93,3 @@ class RedirectController extends BaseApiController
         return $this->success($stats, 'Redirect statistics retrieved successfully');
     }
 }
-

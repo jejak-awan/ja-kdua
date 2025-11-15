@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +37,7 @@ class ActivityLogController extends BaseApiController
 
             return $this->paginated($logs, 'Activity logs retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Activity logs index error: ' . $e->getMessage(), [
+            Log::error('Activity logs index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
             // Return empty paginated response instead of error
@@ -72,7 +71,7 @@ class ActivityLogController extends BaseApiController
     public function recent(Request $request)
     {
         $limit = $request->input('limit', 20);
-        
+
         $logs = ActivityLog::with('user')
             ->latest()
             ->limit($limit)
@@ -94,7 +93,7 @@ class ActivityLogController extends BaseApiController
         }
 
         $baseQuery = clone $query;
-        
+
         $stats = [
             'total' => $baseQuery->count(),
             'today' => $baseQuery->whereDate('created_at', today())->count(),
@@ -109,6 +108,7 @@ class ActivityLogController extends BaseApiController
                 ->get()
                 ->map(function ($item) {
                     $user = \App\Models\User::find($item->user_id);
+
                     return [
                         'user' => $user ? ['id' => $user->id, 'name' => $user->name, 'email' => $user->email] : null,
                         'count' => $item->count,

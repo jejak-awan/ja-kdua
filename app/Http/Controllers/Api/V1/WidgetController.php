@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Widget;
 use Illuminate\Http\Request;
 
@@ -69,6 +68,7 @@ class WidgetController extends BaseApiController
     public function getByLocation(Request $request, $location)
     {
         $widgets = Widget::getByLocation($location);
+
         return $this->success($widgets, 'Widgets retrieved successfully');
     }
 

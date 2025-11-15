@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             Schema::create('settings', function (Blueprint $table) {
                 $table->id();
                 $table->string('key')->unique();
@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->text('description')->nullable();
                 $table->boolean('is_public')->default(false); // Can be accessed via public API
                 $table->timestamps();
-                
+
                 $table->index(['group', 'key']);
             });
         }
@@ -29,4 +29,3 @@ return new class extends Migration
         Schema::dropIfExists('settings');
     }
 };
-

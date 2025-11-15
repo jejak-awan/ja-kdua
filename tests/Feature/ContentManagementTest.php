@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Tests\Helpers\TestHelpers;
-use App\Models\User;
-use App\Models\Content;
 use App\Models\Category;
-use App\Models\Tag;
+use App\Models\Content;
 use App\Models\ContentRevision;
+use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Helpers\TestHelpers;
+use Tests\TestCase;
 
 class ContentManagementTest extends TestCase
 {
@@ -180,9 +180,9 @@ class ContentManagementTest extends TestCase
         $response = $this->postJson("/api/v1/admin/cms/contents/{$content->id}/duplicate");
 
         TestHelpers::assertApiSuccess($response);
-        
+
         $this->assertDatabaseHas('contents', [
-            'title' => $content->title . ' (Copy)',
+            'title' => $content->title.' (Copy)',
         ]);
     }
 
@@ -202,7 +202,7 @@ class ContentManagementTest extends TestCase
         ]);
 
         TestHelpers::assertApiSuccess($response);
-        
+
         foreach ($contents as $content) {
             $this->assertSoftDeleted('contents', ['id' => $content->id]);
         }
@@ -312,7 +312,7 @@ class ContentManagementTest extends TestCase
         $response = $this->postJson("/api/v1/admin/cms/contents/{$content->id}/revisions/{$revision->id}/restore");
 
         TestHelpers::assertApiSuccess($response);
-        
+
         $content->refresh();
         $this->assertEquals('Revision Title', $content->title);
         $this->assertEquals('Revision body', $content->body);
@@ -352,7 +352,7 @@ class ContentManagementTest extends TestCase
         $response = $this->postJson("/api/v1/admin/cms/contents/{$content->id}/lock");
 
         TestHelpers::assertApiSuccess($response);
-        
+
         $content->refresh();
         $this->assertEquals($admin->id, $content->locked_by);
         $this->assertNotNull($content->locked_at);
@@ -374,7 +374,7 @@ class ContentManagementTest extends TestCase
         $response = $this->postJson("/api/v1/admin/cms/contents/{$content->id}/unlock");
 
         TestHelpers::assertApiSuccess($response);
-        
+
         $content->refresh();
         $this->assertNull($content->locked_by);
         $this->assertNull($content->locked_at);
@@ -447,4 +447,3 @@ class ContentManagementTest extends TestCase
         $response->assertStatus(403);
     }
 }
-

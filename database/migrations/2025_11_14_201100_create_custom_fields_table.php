@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('custom_fields')) {
+        if (! Schema::hasTable('custom_fields')) {
             Schema::create('custom_fields', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('field_group_id')->nullable()->constrained('field_groups')->onDelete('cascade');
@@ -24,7 +24,7 @@ return new class extends Migration
                 $table->boolean('is_searchable')->default(false);
                 $table->integer('sort_order')->default(0);
                 $table->timestamps();
-                
+
                 $table->index('field_group_id');
                 $table->index('type');
                 $table->unique(['field_group_id', 'slug']);
@@ -37,4 +37,3 @@ return new class extends Migration
         Schema::dropIfExists('custom_fields');
     }
 };
-

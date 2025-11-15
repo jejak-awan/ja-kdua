@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('form_fields')) {
+        if (! Schema::hasTable('form_fields')) {
             Schema::create('form_fields', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('form_id')->constrained('forms')->onDelete('cascade');
@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->boolean('is_required')->default(false);
                 $table->integer('sort_order')->default(0);
                 $table->timestamps();
-                
+
                 $table->index('form_id');
                 $table->index('sort_order');
             });
@@ -34,4 +34,3 @@ return new class extends Migration
         Schema::dropIfExists('form_fields');
     }
 };
-

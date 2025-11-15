@@ -7,8 +7,6 @@ namespace App\Helpers;
  *
  * Provides methods for CDN URL generation and image optimization.
  * Supports multiple CDN providers and automatic URL generation.
- *
- * @package App\Helpers
  */
 class CdnHelper
 {
@@ -17,7 +15,7 @@ class CdnHelper
      */
     public static function isEnabled(): bool
     {
-        return config('cdn.enabled', false) && !empty(config('cdn.url'));
+        return config('cdn.enabled', false) && ! empty(config('cdn.url'));
     }
 
     /**
@@ -25,9 +23,9 @@ class CdnHelper
      */
     public static function url(string $path, ?string $domain = null): string
     {
-        if (!self::isEnabled()) {
+        if (! self::isEnabled()) {
             // Return relative path if CDN is disabled
-            return '/' . ltrim($path, '/');
+            return '/'.ltrim($path, '/');
         }
 
         $cdnUrl = $domain ? config("cdn.domains.{$domain}", config('cdn.url')) : config('cdn.url');
@@ -37,7 +35,7 @@ class CdnHelper
         $path = ltrim($path, '/');
 
         // Build CDN URL
-        $url = rtrim($cdnUrl, '/') . '/' . ltrim($pathPrefix, '/') . '/' . $path;
+        $url = rtrim($cdnUrl, '/').'/'.ltrim($pathPrefix, '/').'/'.$path;
 
         return $url;
     }
@@ -77,7 +75,7 @@ class CdnHelper
     public static function optimizedImageUrl(string $path, ?int $width = null, ?int $height = null, ?int $quality = null): string
     {
         $url = self::url($path);
-        
+
         // Add query parameters for image optimization (CDN-specific)
         $params = self::getImageParams($width, $height, $quality);
         $queryParams = [];
@@ -95,8 +93,8 @@ class CdnHelper
             $queryParams['f'] = $params['format'];
         }
 
-        if (!empty($queryParams)) {
-            $url .= '?' . http_build_query($queryParams);
+        if (! empty($queryParams)) {
+            $url .= '?'.http_build_query($queryParams);
         }
 
         return $url;
@@ -120,4 +118,3 @@ class CdnHelper
         return $config['default'] ?? 'public, max-age=86400';
     }
 }
-

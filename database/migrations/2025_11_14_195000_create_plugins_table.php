@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('plugins')) {
+        if (! Schema::hasTable('plugins')) {
             Schema::create('plugins', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -23,7 +23,7 @@ return new class extends Migration
                 $table->boolean('is_active')->default(false);
                 $table->integer('priority')->default(10); // Execution priority
                 $table->timestamps();
-                
+
                 $table->index('is_active');
                 $table->index('priority');
             });
@@ -35,4 +35,3 @@ return new class extends Migration
         Schema::dropIfExists('plugins');
     }
 };
-

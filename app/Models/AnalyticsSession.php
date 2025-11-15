@@ -51,7 +51,7 @@ class AnalyticsSession extends Model
     public static function start($request, $sessionId = null)
     {
         $sessionId = $sessionId ?? session()->getId();
-        
+
         $userAgent = $request->userAgent();
         $deviceInfo = \App\Models\AnalyticsVisit::parseUserAgent($userAgent);
         $location = \App\Models\AnalyticsVisit::getLocation($request->ip());

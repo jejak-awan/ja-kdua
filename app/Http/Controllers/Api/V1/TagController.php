@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
@@ -37,7 +36,7 @@ class TagController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:tags,slug,' . $tag->id,
+            'slug' => 'sometimes|required|string|unique:tags,slug,'.$tag->id,
             'description' => 'nullable|string',
         ]);
 
@@ -56,17 +55,17 @@ class TagController extends BaseApiController
     public function statistics()
     {
         $tags = Tag::withCount('contents')->get();
-        
+
         $stats = [
             'total_tags' => $tags->count(),
-            'used_tags' => $tags->filter(function($tag) {
+            'used_tags' => $tags->filter(function ($tag) {
                 return $tag->contents_count > 0;
             })->count(),
-            'unused_tags' => $tags->filter(function($tag) {
+            'unused_tags' => $tags->filter(function ($tag) {
                 return $tag->contents_count === 0;
             })->count(),
             'total_usage' => $tags->sum('contents_count'),
-            'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(function($tag) {
+            'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(function ($tag) {
                 return [
                     'id' => $tag->id,
                     'name' => $tag->name,

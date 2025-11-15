@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Media;
-use App\Models\MediaUsage;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +14,7 @@ class MediaController extends BaseApiController
         $query = Media::with(['folder', 'usages']);
 
         if ($request->has('mime_type')) {
-            $query->where('mime_type', 'like', $request->mime_type . '%');
+            $query->where('mime_type', 'like', $request->mime_type.'%');
         }
 
         if ($request->has('folder_id')) {
@@ -31,8 +29,8 @@ class MediaController extends BaseApiController
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('file_name', 'like', "%{$search}%")
-                  ->orWhere('alt', 'like', "%{$search}%");
+                    ->orWhere('file_name', 'like', "%{$search}%")
+                    ->orWhere('alt', 'like', "%{$search}%");
             });
         }
 
@@ -72,27 +70,27 @@ class MediaController extends BaseApiController
                     // Try GD driver first, fallback to Imagick if available
                     $driver = null;
                     if (extension_loaded('gd')) {
-                        $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                        $driver = new \Intervention\Image\Drivers\Gd\Driver;
                     } elseif (extension_loaded('imagick')) {
-                        $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                        $driver = new \Intervention\Image\Drivers\Imagick\Driver;
                     }
-                    
+
                     if ($driver) {
                         $manager = new \Intervention\Image\ImageManager($driver);
                         $image = $manager->read($fullPath);
-                        
+
                         // Resize if too large (max 1920px width)
                         if ($image->width() > 1920) {
                             $image->scale(width: 1920);
                         }
-                        
+
                         // Save with quality optimization
                         $image->save($fullPath, quality: 85);
                     }
                 }
             } catch (\Exception $e) {
                 // If optimization fails, continue with original
-                \Log::warning('Image optimization failed: ' . $e->getMessage());
+                \Log::warning('Image optimization failed: '.$e->getMessage());
             }
         }
 
@@ -115,12 +113,12 @@ class MediaController extends BaseApiController
             try {
                 $this->generateThumbnailForMedia($media);
             } catch (\Exception $e) {
-                \Log::warning('Auto-thumbnail generation failed: ' . $e->getMessage());
+                \Log::warning('Auto-thumbnail generation failed: '.$e->getMessage());
             }
         }
 
         // Clear media cache
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearMediaCaches();
 
         return $this->success([
@@ -145,7 +143,7 @@ class MediaController extends BaseApiController
         $media->update($validated);
 
         // Clear cache
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearMediaCaches();
 
         return $this->success($media->load(['folder', 'usages']), 'Media updated successfully');
@@ -155,8 +153,8 @@ class MediaController extends BaseApiController
     {
         // Check if media is in use
         $usageCount = $media->usages()->count();
-        
-        if ($usageCount > 0 && !$request->input('force', false)) {
+
+        if ($usageCount > 0 && ! $request->input('force', false)) {
             return $this->validationError([
                 'media' => ['Media is currently in use. Use force=true to delete anyway.'],
                 'usage_count' => $usageCount,
@@ -169,14 +167,14 @@ class MediaController extends BaseApiController
 
         // Delete file from storage
         Storage::disk($media->disk)->delete($media->path);
-        
+
         // Delete usage records
         $media->usages()->delete();
-        
+
         $media->delete();
 
         // Clear cache
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearMediaCaches();
 
         return $this->success(null, 'Media deleted successfully');
@@ -187,8 +185,8 @@ class MediaController extends BaseApiController
         // Delete thumbnail if exists
         $fileName = pathinfo($media->path, PATHINFO_FILENAME);
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $extension;
-        
+        $thumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.'.$extension;
+
         if (Storage::disk($media->disk)->exists($thumbnailPath)) {
             Storage::disk($media->disk)->delete($thumbnailPath);
         }
@@ -206,43 +204,43 @@ class MediaController extends BaseApiController
     protected function generateThumbnailForMedia(Media $media, $width = 300, $height = 300)
     {
         $fullPath = Storage::disk($media->disk)->path($media->path);
-        
+
         // Create thumbnails directory in storage
         $thumbnailDir = Storage::disk($media->disk)->path('media/thumbnails');
-        if (!is_dir($thumbnailDir)) {
+        if (! is_dir($thumbnailDir)) {
             mkdir($thumbnailDir, 0755, true);
         }
 
         // Generate thumbnail filename
         $fileName = pathinfo($media->path, PATHINFO_FILENAME);
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        
+
         // For SVG files, convert to PNG for thumbnail
         $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
         $thumbnailExtension = $isSvg ? 'png' : $extension;
-        $thumbnailFileName = $fileName . '_thumb.' . $thumbnailExtension;
-        $thumbnailPath = 'media/thumbnails/' . $thumbnailFileName;
+        $thumbnailFileName = $fileName.'_thumb.'.$thumbnailExtension;
+        $thumbnailPath = 'media/thumbnails/'.$thumbnailFileName;
         $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
 
         // Handle SVG files - convert to PNG using Imagick (if available)
         if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
             try {
-                $imagick = new \Imagick();
+                $imagick = new \Imagick;
                 $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
                 $imagick->readImage($fullPath);
                 $imagick->setImageFormat('png');
-                
+
                 // Resize SVG to thumbnail size
                 $imagick->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
-                
+
                 // Save as PNG
                 $imagick->writeImage($thumbnailFullPath);
                 $imagick->clear();
                 $imagick->destroy();
-                
+
                 return $thumbnailPath;
             } catch (\Exception $e) {
-                \Log::warning('SVG thumbnail generation failed with Imagick: ' . $e->getMessage());
+                \Log::warning('SVG thumbnail generation failed with Imagick: '.$e->getMessage());
                 // Fall through to try Intervention Image
             }
         }
@@ -251,19 +249,19 @@ class MediaController extends BaseApiController
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
             if (extension_loaded('gd')) {
-                $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                $driver = new \Intervention\Image\Drivers\Gd\Driver;
             } elseif (extension_loaded('imagick')) {
-                $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                $driver = new \Intervention\Image\Drivers\Imagick\Driver;
             }
-            
+
             if ($driver) {
                 try {
                     $manager = new \Intervention\Image\ImageManager($driver);
                     $image = $manager->read($fullPath);
-                    
+
                     // Create thumbnail (crop to fit)
                     $image->cover($width, $height);
-                    
+
                     // For SVG converted to PNG, save as PNG
                     if ($isSvg) {
                         $image->toPng()->save($thumbnailFullPath);
@@ -271,10 +269,10 @@ class MediaController extends BaseApiController
                         // Save thumbnail with original format
                         $image->save($thumbnailFullPath, quality: 85);
                     }
-                    
+
                     return $thumbnailPath;
                 } catch (\Exception $e) {
-                    \Log::warning('Thumbnail generation failed with Intervention Image: ' . $e->getMessage());
+                    \Log::warning('Thumbnail generation failed with Intervention Image: '.$e->getMessage());
                     // If SVG and both methods failed, return null (will use original)
                     if ($isSvg) {
                         return null;
@@ -282,7 +280,7 @@ class MediaController extends BaseApiController
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -291,7 +289,7 @@ class MediaController extends BaseApiController
         // Accept both 'ids' and 'media_ids' for compatibility
         $ids = $request->input('ids', $request->input('media_ids', []));
         $action = $request->input('action');
-        
+
         // Normalize action: 'move' -> 'move_folder'
         if ($action === 'move') {
             $action = 'move_folder';
@@ -300,38 +298,38 @@ class MediaController extends BaseApiController
         }
 
         // Validate IDs separately first
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
         // Validate that all IDs exist
         $existingIds = Media::whereIn('id', $ids)->pluck('id')->toArray();
         $missingIds = array_diff($ids, $existingIds);
-        
-        if (!empty($missingIds)) {
+
+        if (! empty($missingIds)) {
             return $this->validationError(['ids' => ['Some media IDs do not exist.']], 'The selected action is invalid.');
         }
 
         // Now validate action and folder_id
         $folderId = $request->input('folder_id', null);
-        
+
         // Convert string "null" to actual null
         if ($folderId === 'null') {
             $folderId = null;
         }
-        
+
         // Validate action
         $validated = $request->validate([
             'action' => 'required|in:delete,move_folder',
         ]);
-        
+
         // Validate folder_id only if it's not null
         if ($folderId !== null) {
             $request->validate([
                 'folder_id' => 'exists:media_folders,id',
             ]);
         }
-        
+
         $validated['folder_id'] = $folderId;
 
         $media = Media::whereIn('id', $ids)->get();
@@ -357,7 +355,7 @@ class MediaController extends BaseApiController
     public function usage(Media $media)
     {
         $usages = $media->usages()->get();
-        
+
         $usageData = $usages->map(function ($usage) {
             $model = null;
             try {
@@ -368,9 +366,9 @@ class MediaController extends BaseApiController
                 }
             } catch (\Exception $e) {
                 // Model might be deleted or class doesn't exist
-                \Log::warning('Failed to load model for usage: ' . $e->getMessage());
+                \Log::warning('Failed to load model for usage: '.$e->getMessage());
             }
-            
+
             return [
                 'id' => $usage->id,
                 'model_type' => $usage->model_type,
@@ -401,7 +399,7 @@ class MediaController extends BaseApiController
     public function generateThumbnail(Request $request, Media $media)
     {
         // Only for images
-        if (!str_starts_with($media->mime_type, 'image/')) {
+        if (! str_starts_with($media->mime_type, 'image/')) {
             return $this->validationError(['media' => ['Thumbnail can only be generated for images']], 'Thumbnail can only be generated for images');
         }
 
@@ -411,31 +409,32 @@ class MediaController extends BaseApiController
             $height = $request->input('height', 300);
 
             $thumbnailPath = $this->generateThumbnailForMedia($media, $width, $height);
-            
+
             if ($thumbnailPath) {
                 // Use relative path for public disk to avoid localhost URL issues
-                $thumbnailUrl = $media->disk === 'public' 
-                    ? '/storage/' . ltrim($thumbnailPath, '/')
+                $thumbnailUrl = $media->disk === 'public'
+                    ? '/storage/'.ltrim($thumbnailPath, '/')
                     : Storage::disk($media->disk)->url($thumbnailPath);
-                
+
                 return $this->success([
                     'thumbnail_url' => $thumbnailUrl,
                     'thumbnail_path' => $thumbnailPath,
                     'media' => $media->fresh()->load(['folder', 'usages']),
                 ], 'Thumbnail generated successfully');
             }
-            
+
             return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
         } catch (\Exception $e) {
-            \Log::error('Thumbnail generation failed: ' . $e->getMessage());
-            return $this->error('Failed to generate thumbnail: ' . $e->getMessage(), 500, [], 'THUMBNAIL_GENERATION_ERROR');
+            \Log::error('Thumbnail generation failed: '.$e->getMessage());
+
+            return $this->error('Failed to generate thumbnail: '.$e->getMessage(), 500, [], 'THUMBNAIL_GENERATION_ERROR');
         }
     }
 
     public function resize(Request $request, Media $media)
     {
         // Only for images
-        if (!str_starts_with($media->mime_type, 'image/')) {
+        if (! str_starts_with($media->mime_type, 'image/')) {
             return $this->validationError(['media' => ['Resize can only be performed on images']], 'Resize can only be performed on images');
         }
 
@@ -455,43 +454,44 @@ class MediaController extends BaseApiController
             if (class_exists(\Intervention\Image\ImageManager::class)) {
                 $driver = null;
                 if (extension_loaded('gd')) {
-                    $driver = new \Intervention\Image\Drivers\Gd\Driver();
+                    $driver = new \Intervention\Image\Drivers\Gd\Driver;
                 } elseif (extension_loaded('imagick')) {
-                    $driver = new \Intervention\Image\Drivers\Imagick\Driver();
+                    $driver = new \Intervention\Image\Drivers\Imagick\Driver;
                 }
-                
+
                 if ($driver) {
                     $manager = new \Intervention\Image\ImageManager($driver);
                     $image = $manager->read($fullPath);
-                    
+
                     // Resize image
                     if ($height) {
                         $image->resize($width, $height);
                     } else {
                         $image->scale(width: $width);
                     }
-                    
+
                     // Save resized image
                     $image->save($fullPath, quality: $quality);
-                    
+
                     // Update file size
                     $media->update([
                         'size' => filesize($fullPath),
                     ]);
-                    
+
                     return $this->success([
                         'media' => $media->fresh()->load(['folder', 'usages']),
-                        'url' => $media->disk === 'public' 
-                            ? '/storage/' . ltrim($media->path, '/')
+                        'url' => $media->disk === 'public'
+                            ? '/storage/'.ltrim($media->path, '/')
                             : Storage::disk($media->disk)->url($media->path),
                     ], 'Image resized successfully');
                 }
             }
-            
+
             return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
         } catch (\Exception $e) {
-            \Log::error('Image resize failed: ' . $e->getMessage());
-            return $this->error('Failed to resize image: ' . $e->getMessage(), 500, [], 'IMAGE_RESIZE_ERROR');
+            \Log::error('Image resize failed: '.$e->getMessage());
+
+            return $this->error('Failed to resize image: '.$e->getMessage(), 500, [], 'IMAGE_RESIZE_ERROR');
         }
     }
 }

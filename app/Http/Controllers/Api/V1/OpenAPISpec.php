@@ -7,9 +7,11 @@ namespace App\Http\Controllers\Api\V1;
  *     title="JA-CMS API Documentation",
  *     version="1.0.0",
  *     description="Comprehensive API documentation for JA-CMS Content Management System",
+ *
  *     @OA\Contact(
  *         email="support@jejakawan.com"
  *     ),
+ *
  *     @OA\License(
  *         name="MIT",
  *         url="https://opensource.org/licenses/MIT"
@@ -33,32 +35,26 @@ namespace App\Http\Controllers\Api\V1;
  *     name="Authentication",
  *     description="User authentication endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Content",
  *     description="Content management endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Media",
  *     description="Media management endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Categories",
  *     description="Category management endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Tags",
  *     description="Tag management endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Users",
  *     description="User management endpoints"
  * )
- *
  * @OA\Tag(
  *     name="Settings",
  *     description="System settings endpoints"
@@ -67,6 +63,7 @@ namespace App\Http\Controllers\Api\V1;
  * @OA\Schema(
  *     schema="SuccessResponse",
  *     type="object",
+ *
  *     @OA\Property(property="success", type="boolean", example=true),
  *     @OA\Property(property="message", type="string", example="Operation successful"),
  *     @OA\Property(property="data", type="object")
@@ -75,6 +72,7 @@ namespace App\Http\Controllers\Api\V1;
  * @OA\Schema(
  *     schema="ErrorResponse",
  *     type="object",
+ *
  *     @OA\Property(property="success", type="boolean", example=false),
  *     @OA\Property(property="message", type="string", example="An error occurred"),
  *     @OA\Property(property="error_code", type="string", example="ERROR"),
@@ -85,6 +83,7 @@ namespace App\Http\Controllers\Api\V1;
  * @OA\Schema(
  *     schema="ValidationErrorResponse",
  *     type="object",
+ *
  *     @OA\Property(property="success", type="boolean", example=false),
  *     @OA\Property(property="message", type="string", example="Validation failed"),
  *     @OA\Property(property="error_code", type="string", example="VALIDATION_ERROR"),
@@ -94,6 +93,7 @@ namespace App\Http\Controllers\Api\V1;
  *         @OA\Property(
  *             property="field_name",
  *             type="array",
+ *
  *             @OA\Items(type="string", example="The field name is required.")
  *         )
  *     )
@@ -102,6 +102,7 @@ namespace App\Http\Controllers\Api\V1;
  * @OA\Schema(
  *     schema="PaginatedResponse",
  *     type="object",
+ *
  *     @OA\Property(property="success", type="boolean", example=true),
  *     @OA\Property(property="message", type="string", example="Data retrieved successfully"),
  *     @OA\Property(
@@ -121,9 +122,7 @@ namespace App\Http\Controllers\Api\V1;
  *     )
  * )
  */
-
 class OpenAPISpec
 {
     // This class serves as a container for OpenAPI annotations
 }
-

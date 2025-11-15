@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('webhooks')) {
+        if (! Schema::hasTable('webhooks')) {
             Schema::create('webhooks', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -25,7 +25,7 @@ return new class extends Migration
                 $table->integer('success_count')->default(0);
                 $table->integer('failure_count')->default(0);
                 $table->timestamps();
-                
+
                 $table->index('event');
                 $table->index('is_active');
             });
@@ -37,4 +37,3 @@ return new class extends Migration
         Schema::dropIfExists('webhooks');
     }
 };
-

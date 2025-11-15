@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('menus')) {
+        if (! Schema::hasTable('menus')) {
             Schema::create('menus', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->text('description')->nullable();
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
-                
+
                 $table->index('location');
                 $table->index('is_active');
             });
@@ -29,4 +29,3 @@ return new class extends Migration
         Schema::dropIfExists('menus');
     }
 };
-

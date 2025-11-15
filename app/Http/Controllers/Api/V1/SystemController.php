@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Services\SecurityService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SystemController extends BaseApiController
@@ -33,18 +30,18 @@ class SystemController extends BaseApiController
 
     public function health()
     {
-        $securityService = new SecurityService();
+        $securityService = new SecurityService;
         $health = $securityService->checkSystemHealth();
 
         // Add additional checks
         $health['php'] = [
             'status' => 'ok',
-            'message' => 'PHP ' . PHP_VERSION,
+            'message' => 'PHP '.PHP_VERSION,
         ];
 
         $health['laravel'] = [
             'status' => 'ok',
-            'message' => 'Laravel ' . app()->version(),
+            'message' => 'Laravel '.app()->version(),
         ];
 
         // Check queue connection
@@ -52,7 +49,7 @@ class SystemController extends BaseApiController
             Cache::put('health_check_queue', 'test', 10);
             $health['queue'] = ['status' => 'ok', 'message' => 'Queue connection working'];
         } catch (\Exception $e) {
-            $health['queue'] = ['status' => 'error', 'message' => 'Queue connection failed: ' . $e->getMessage()];
+            $health['queue'] = ['status' => 'error', 'message' => 'Queue connection failed: '.$e->getMessage()];
         }
 
         return $this->success($health, 'System health check completed');
@@ -84,9 +81,10 @@ class SystemController extends BaseApiController
 
             return $this->success($stats, 'System statistics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('System statistics error: ' . $e->getMessage(), [
+            Log::error('System statistics error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return default stats on error
             return $this->success([
                 'contents' => ['total' => 0, 'published' => 0, 'draft' => 0],
@@ -111,7 +109,8 @@ class SystemController extends BaseApiController
 
             return $this->success($cacheInfo, 'Cache information retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('System cache info error: ' . $e->getMessage());
+            Log::error('System cache info error: '.$e->getMessage());
+
             return $this->success([
                 'driver' => config('cache.default', 'file'),
                 'size' => 0,
@@ -123,11 +122,11 @@ class SystemController extends BaseApiController
     {
         try {
             $cacheDriver = config('cache.default', 'file');
-            
+
             // Try to get cache stats if available
             $hits = 0;
             $misses = 0;
-            
+
             // For Redis cache, we can get more detailed stats
             if ($cacheDriver === 'redis') {
                 try {
@@ -155,7 +154,8 @@ class SystemController extends BaseApiController
 
             return $this->success($status, 'Cache status retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('System cache status error: ' . $e->getMessage());
+            Log::error('System cache status error: '.$e->getMessage());
+
             return $this->success([
                 'status' => 'Active',
                 'driver' => config('cache.default', 'file'),
@@ -189,8 +189,10 @@ class SystemController extends BaseApiController
                     $size += $file->getSize();
                 }
             }
+
             return $this->formatBytes($size);
         }
+
         return '0 B';
     }
 
@@ -201,6 +203,7 @@ class SystemController extends BaseApiController
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
-        return round($bytes, $precision) . ' ' . $units[$pow];
+
+        return round($bytes, $precision).' '.$units[$pow];
     }
 }

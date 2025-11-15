@@ -3,10 +3,8 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
 
 class ResetPassword extends Notification
 {
@@ -26,7 +24,7 @@ class ResetPassword extends Notification
 
     public function toMail($notifiable)
     {
-        $url = url('/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email));
+        $url = url('/reset-password?token='.$this->token.'&email='.urlencode($notifiable->email));
 
         return (new MailMessage)
             ->subject('Reset Password Notification')

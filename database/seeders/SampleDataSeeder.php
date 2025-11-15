@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use App\Models\Category;
-use App\Models\Tag;
-use App\Models\Content;
 use App\Models\Comment;
+use App\Models\Content;
+use App\Models\Tag;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class SampleDataSeeder extends Seeder
@@ -23,16 +23,16 @@ class SampleDataSeeder extends Seeder
 
         // Create users
         $users = $this->createUsers();
-        
+
         // Create categories
         $categories = $this->createCategories();
-        
+
         // Create tags
         $tags = $this->createTags();
-        
+
         // Create contents
         $contents = $this->createContents($users, $categories, $tags);
-        
+
         // Create comments
         $this->createComments($contents, $users);
 
@@ -42,7 +42,7 @@ class SampleDataSeeder extends Seeder
     private function createUsers()
     {
         $this->command->info('Creating users...');
-        
+
         $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
         $authorRole = Role::firstOrCreate(['name' => 'author', 'guard_name' => 'web']);
 
@@ -84,7 +84,7 @@ class SampleDataSeeder extends Seeder
     private function createCategories()
     {
         $this->command->info('Creating categories...');
-        
+
         $categories = [];
 
         // Main categories
@@ -164,12 +164,12 @@ class SampleDataSeeder extends Seeder
     private function createTags()
     {
         $this->command->info('Creating tags...');
-        
+
         $tagNames = [
             'PHP', 'Laravel', 'Vue.js', 'JavaScript', 'React',
             'Tutorial', 'Guide', 'Tips', 'News', 'Update',
             'Web Design', 'UI/UX', 'Mobile', 'API', 'Database',
-            'Security', 'Performance', 'SEO', 'Marketing', 'Business'
+            'Security', 'Performance', 'SEO', 'Marketing', 'Business',
         ];
 
         $tags = [];
@@ -190,7 +190,7 @@ class SampleDataSeeder extends Seeder
     private function createContents($users, $categories, $tags)
     {
         $this->command->info('Creating contents...');
-        
+
         $sampleContents = [
             [
                 'title' => 'Getting Started with Laravel 11',
@@ -316,7 +316,7 @@ class SampleDataSeeder extends Seeder
 
         $contents = [];
         foreach ($sampleContents as $index => $contentData) {
-            $category = $contentData['category_slug'] 
+            $category = $contentData['category_slug']
                 ? Category::where('slug', $contentData['category_slug'])->first()
                 : null;
 
@@ -332,8 +332,8 @@ class SampleDataSeeder extends Seeder
                     'status' => $contentData['status'],
                     'author_id' => $author->id,
                     'category_id' => $category?->id,
-                    'published_at' => $contentData['status'] === 'published' 
-                        ? now()->subDays(rand(1, 90)) 
+                    'published_at' => $contentData['status'] === 'published'
+                        ? now()->subDays(rand(1, 90))
                         : null,
                     'views' => $contentData['views'],
                     'meta_title' => $contentData['title'],
@@ -342,7 +342,7 @@ class SampleDataSeeder extends Seeder
             );
 
             // Attach tags
-            if (!empty($contentData['tags'])) {
+            if (! empty($contentData['tags'])) {
                 $tagIds = [];
                 foreach ($contentData['tags'] as $tagName) {
                     $tag = Tag::where('name', $tagName)->first();
@@ -362,8 +362,8 @@ class SampleDataSeeder extends Seeder
     private function createComments($contents, $users)
     {
         $this->command->info('Creating comments...');
-        
-        $publishedContents = array_filter($contents, function($content) {
+
+        $publishedContents = array_filter($contents, function ($content) {
             return $content->status === 'published';
         });
 
@@ -383,11 +383,11 @@ class SampleDataSeeder extends Seeder
         foreach ($publishedContents as $content) {
             // Create 2-5 comments per content
             $commentCount = rand(2, 5);
-            
+
             for ($i = 0; $i < $commentCount; $i++) {
                 $user = $users[array_rand($users)];
                 $commentText = $commentTexts[array_rand($commentTexts)];
-                
+
                 Comment::create([
                     'content_id' => $content->id,
                     'user_id' => $user->id,

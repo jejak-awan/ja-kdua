@@ -9,24 +9,21 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Base API Controller
- * 
+ *
  * Provides standardized response methods for all API controllers.
  * All API controllers should extend this class to ensure consistent
  * response format across the application.
- * 
- * @package App\Http\Controllers\Api\V1
  */
 class BaseApiController extends Controller
 {
     /**
      * Success response
-     * 
+     *
      * Returns a standardized success response with optional data.
-     * 
-     * @param mixed $data Response data (optional)
-     * @param string $message Success message
-     * @param int $status HTTP status code (default: 200)
-     * @return JsonResponse
+     *
+     * @param  mixed  $data  Response data (optional)
+     * @param  string  $message  Success message
+     * @param  int  $status  HTTP status code (default: 200)
      */
     protected function success($data = null, string $message = 'Success', int $status = 200): JsonResponse
     {
@@ -34,26 +31,25 @@ class BaseApiController extends Controller
             'success' => true,
             'message' => $message,
         ];
-        
+
         if ($data !== null) {
             $response['data'] = $data;
         }
-        
+
         return response()->json($response, $status);
     }
-    
+
     /**
      * Error response
-     * 
+     *
      * Returns standardized error response with error code and trace ID.
      * Automatically logs error with context for debugging.
-     * 
-     * @param string $message Error message
-     * @param int $status HTTP status code (default: 400)
-     * @param array $errors Validation errors (optional)
-     * @param string $code Error code (optional, default: 'ERROR')
-     * @param array $context Additional context for logging (optional)
-     * @return JsonResponse
+     *
+     * @param  string  $message  Error message
+     * @param  int  $status  HTTP status code (default: 400)
+     * @param  array  $errors  Validation errors (optional)
+     * @param  string  $code  Error code (optional, default: 'ERROR')
+     * @param  array  $context  Additional context for logging (optional)
      */
     protected function error(
         string $message = 'Error',
@@ -63,7 +59,7 @@ class BaseApiController extends Controller
         array $context = []
     ): JsonResponse {
         $traceId = uniqid('err_', true);
-        
+
         // Log error with context
         Log::warning('API Error', array_merge([
             'message' => $message,
@@ -74,32 +70,31 @@ class BaseApiController extends Controller
             'url' => request()->fullUrl(),
             'method' => request()->method(),
         ], $context));
-        
+
         $response = [
             'success' => false,
             'message' => $message,
             'error_code' => $code,
             'trace_id' => $traceId,
         ];
-        
-        if (!empty($errors)) {
+
+        if (! empty($errors)) {
             $response['errors'] = $errors;
         }
-        
+
         return response()->json($response, $status);
     }
 
     /**
      * Validation error response
-     * 
+     *
      * Returns a standardized validation error response (422 status).
      * Should be used when ValidationException is caught.
-     * 
-     * @param array $errors Validation errors from ValidationException
-     * @param string|null $message Custom error message (optional)
-     * @return JsonResponse
+     *
+     * @param  array  $errors  Validation errors from ValidationException
+     * @param  string|null  $message  Custom error message (optional)
      */
-    protected function validationError(array $errors, string $message = null): JsonResponse
+    protected function validationError(array $errors, ?string $message = null): JsonResponse
     {
         return $this->error(
             $message ?? 'Validation failed. Please check your input.',
@@ -111,11 +106,10 @@ class BaseApiController extends Controller
 
     /**
      * Not found error response
-     * 
+     *
      * Returns a standardized 404 not found response.
-     * 
-     * @param string $resource Resource name (default: 'Resource')
-     * @return JsonResponse
+     *
+     * @param  string  $resource  Resource name (default: 'Resource')
      */
     protected function notFound(string $resource = 'Resource'): JsonResponse
     {
@@ -129,11 +123,10 @@ class BaseApiController extends Controller
 
     /**
      * Unauthorized error response
-     * 
+     *
      * Returns a standardized 401 unauthorized response.
-     * 
-     * @param string $message Error message (optional)
-     * @return JsonResponse
+     *
+     * @param  string  $message  Error message (optional)
      */
     protected function unauthorized(string $message = 'Unauthorized'): JsonResponse
     {
@@ -147,11 +140,10 @@ class BaseApiController extends Controller
 
     /**
      * Forbidden error response
-     * 
+     *
      * Returns a standardized 403 forbidden response.
-     * 
-     * @param string $message Error message (optional)
-     * @return JsonResponse
+     *
+     * @param  string  $message  Error message (optional)
      */
     protected function forbidden(string $message = 'Forbidden'): JsonResponse
     {
@@ -165,12 +157,11 @@ class BaseApiController extends Controller
 
     /**
      * Paginated response
-     * 
+     *
      * Returns a standardized paginated response.
-     * 
-     * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator
-     * @param string $message Success message
-     * @return JsonResponse
+     *
+     * @param  \Illuminate\Contracts\Pagination\LengthAwarePaginator  $paginator
+     * @param  string  $message  Success message
      */
     protected function paginated($paginator, string $message = 'Data retrieved successfully'): JsonResponse
     {
@@ -189,28 +180,27 @@ class BaseApiController extends Controller
 
     /**
      * Handle exception with standardized error response
-     * 
+     *
      * Helper method to catch and handle exceptions consistently.
      * Automatically handles ValidationException and other exceptions.
-     * 
-     * @param \Exception $e Exception to handle
-     * @param string $defaultMessage Default error message
-     * @param string $logContext Additional context for logging
-     * @return JsonResponse
+     *
+     * @param  \Exception  $e  Exception to handle
+     * @param  string  $defaultMessage  Default error message
+     * @param  string  $logContext  Additional context for logging
      */
     protected function handleException(\Exception $e, string $defaultMessage = 'An error occurred', string $logContext = ''): JsonResponse
     {
         if ($e instanceof ValidationException) {
             return $this->validationError($e->errors());
         }
-        
-        Log::error($logContext . ' API error: ' . $e->getMessage(), [
+
+        Log::error($logContext.' API error: '.$e->getMessage(), [
             'exception' => get_class($e),
             'trace' => $e->getTraceAsString(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
         ]);
-        
+
         return $this->error(
             $defaultMessage,
             500,
@@ -219,4 +209,3 @@ class BaseApiController extends Controller
         );
     }
 }
-

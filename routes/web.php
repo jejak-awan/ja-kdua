@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SitemapController;
+use Illuminate\Support\Facades\Route;
 
 // Sitemap routes (must be before SPA route)
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
@@ -17,7 +17,8 @@ Route::get('/robots.txt', function () {
             'Content-Type' => 'text/plain',
         ]);
     }
-    return response("User-agent: *\nAllow: /\n\nSitemap: " . url('/sitemap.xml'), 200, [
+
+    return response("User-agent: *\nAllow: /\n\nSitemap: ".url('/sitemap.xml'), 200, [
         'Content-Type' => 'text/plain',
     ]);
 });

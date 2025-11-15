@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\ContentRevision;
 use App\Models\Content;
+use App\Models\ContentRevision;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -23,12 +23,12 @@ class ContentRevisionFactory extends Factory
     public function definition(): array
     {
         $title = fake()->sentence();
-        
+
         return [
             'content_id' => Content::factory(),
             'user_id' => User::factory(),
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . uniqid(),
+            'slug' => Str::slug($title).'-'.uniqid(),
             'body' => fake()->paragraphs(5, true),
             'excerpt' => fake()->paragraph(),
             'meta' => [],
@@ -37,4 +37,3 @@ class ContentRevisionFactory extends Factory
         ];
     }
 }
-

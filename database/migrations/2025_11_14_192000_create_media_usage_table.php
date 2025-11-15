@@ -8,17 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('media_usage')) {
+        if (! Schema::hasTable('media_usage')) {
             Schema::create('media_usage', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('media_id')->constrained('media')->onDelete('cascade');
-            $table->string('model_type'); // Content, Category, etc.
-            $table->unsignedBigInteger('model_id');
-            $table->string('field_name')->nullable(); // featured_image, og_image, etc.
-            $table->timestamps();
-            
-            $table->index(['media_id', 'model_type', 'model_id']);
-            $table->index('model_type');
+                $table->id();
+                $table->foreignId('media_id')->constrained('media')->onDelete('cascade');
+                $table->string('model_type'); // Content, Category, etc.
+                $table->unsignedBigInteger('model_id');
+                $table->string('field_name')->nullable(); // featured_image, og_image, etc.
+                $table->timestamps();
+
+                $table->index(['media_id', 'model_type', 'model_id']);
+                $table->index('model_type');
             });
         }
     }
@@ -28,4 +28,3 @@ return new class extends Migration
         Schema::dropIfExists('media_usage');
     }
 };
-

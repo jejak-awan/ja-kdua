@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\MediaFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +29,7 @@ class MediaFolderController extends BaseApiController
                     }])
                     ->orderBy('sort_order')
                     ->get();
-                
+
                 return $this->success($folders, 'Media folders tree retrieved successfully');
             }
 
@@ -58,9 +57,10 @@ class MediaFolderController extends BaseApiController
 
             return $this->success($foldersData, 'Media folders retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Media folders index error: ' . $e->getMessage(), [
+            Log::error('Media folders index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             // Return empty array instead of error
             return $this->success([], 'Media folders retrieved successfully');
         }
@@ -78,18 +78,18 @@ class MediaFolderController extends BaseApiController
         // Auto-generate slug from name if not provided
         if (empty($validated['slug'])) {
             $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']);
-            
+
             // Ensure slug is unique
             $originalSlug = $validated['slug'];
             $counter = 1;
             while (MediaFolder::where('slug', $validated['slug'])->exists()) {
-                $validated['slug'] = $originalSlug . '-' . $counter;
+                $validated['slug'] = $originalSlug.'-'.$counter;
                 $counter++;
             }
         }
 
         // Set default sort_order if not provided
-        if (!isset($validated['sort_order'])) {
+        if (! isset($validated['sort_order'])) {
             $maxOrder = MediaFolder::where('parent_id', $validated['parent_id'] ?? null)
                 ->max('sort_order') ?? 0;
             $validated['sort_order'] = $maxOrder + 1;
@@ -114,7 +114,7 @@ class MediaFolderController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:media_folders,slug,' . $mediaFolder->id,
+            'slug' => 'sometimes|required|string|unique:media_folders,slug,'.$mediaFolder->id,
             'parent_id' => 'nullable|exists:media_folders,id',
             'sort_order' => 'integer|min:0',
         ]);

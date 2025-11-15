@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Content extends Model
@@ -87,16 +86,21 @@ class Content extends Model
     public function getCustomFieldValue($fieldSlug)
     {
         $field = \App\Models\CustomField::where('slug', $fieldSlug)->first();
-        if (!$field) return null;
+        if (! $field) {
+            return null;
+        }
 
         $value = $this->customFields()->where('custom_field_id', $field->id)->first();
+
         return $value ? $value->value : $field->default_value;
     }
 
     public function setCustomFieldValue($fieldSlug, $value)
     {
         $field = \App\Models\CustomField::where('slug', $fieldSlug)->first();
-        if (!$field) return false;
+        if (! $field) {
+            return false;
+        }
 
         $this->customFields()->updateOrCreate(
             ['custom_field_id' => $field->id],
@@ -109,6 +113,6 @@ class Content extends Model
     public function analyticsVisits()
     {
         // Match visits by URL slug - using where clause
-        return AnalyticsVisit::where('url', 'like', '%' . $this->slug . '%');
+        return AnalyticsVisit::where('url', 'like', '%'.$this->slug.'%');
     }
 }

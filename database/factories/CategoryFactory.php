@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Category;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,7 +21,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $name = fake()->words(2, true);
-        
+
         return [
             'name' => $name,
             'slug' => Str::slug($name),
@@ -46,11 +45,10 @@ class CategoryFactory extends Factory
     /**
      * Indicate that the category has a parent.
      */
-    public function withParent(Category $parent = null): static
+    public function withParent(?Category $parent = null): static
     {
         return $this->state(fn (array $attributes) => [
             'parent_id' => $parent?->id ?? Category::factory()->create()->id,
         ]);
     }
 }
-

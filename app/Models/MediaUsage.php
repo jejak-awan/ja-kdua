@@ -54,7 +54,7 @@ class MediaUsage extends Model
 
         if ($model) {
             $query->where('model_type', get_class($model))
-                  ->where('model_id', $model->id);
+                ->where('model_id', $model->id);
         }
 
         if ($fieldName) {

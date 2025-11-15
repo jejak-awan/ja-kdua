@@ -76,6 +76,7 @@ class SearchIndex extends Model
         $score = 0;
         $score += strlen($title) * 10; // Title weight
         $score += strlen($content) * 1; // Content weight
+
         return $score;
     }
 }

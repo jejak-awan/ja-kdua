@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('menu_items')) {
+        if (! Schema::hasTable('menu_items')) {
             Schema::create('menu_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('menu_id')->constrained('menus')->onDelete('cascade');
@@ -24,7 +24,7 @@ return new class extends Migration
                 $table->boolean('open_in_new_tab')->default(false);
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
-                
+
                 $table->index(['menu_id', 'parent_id']);
                 $table->index('sort_order');
             });
@@ -36,4 +36,3 @@ return new class extends Migration
         Schema::dropIfExists('menu_items');
     }
 };
-

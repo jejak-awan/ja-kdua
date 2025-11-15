@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\CustomField;
-use App\Models\FieldGroup;
 use Illuminate\Http\Request;
 
 class CustomFieldController extends BaseApiController
@@ -48,7 +46,7 @@ class CustomFieldController extends BaseApiController
             $exists = CustomField::where('field_group_id', $validated['field_group_id'])
                 ->where('slug', $validated['slug'])
                 ->exists();
-            
+
             if ($exists) {
                 return $this->validationError(['slug' => ['Slug already exists in this field group']], 'Slug already exists in this field group');
             }
@@ -88,7 +86,7 @@ class CustomFieldController extends BaseApiController
                 ->where('slug', $validated['slug'])
                 ->where('id', '!=', $customField->id)
                 ->exists();
-            
+
             if ($exists) {
                 return $this->validationError(['slug' => ['Slug already exists in this field group']], 'Slug already exists in this field group');
             }

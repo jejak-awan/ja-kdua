@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('content_tag')) {
+        if (! Schema::hasTable('content_tag')) {
             Schema::create('content_tag', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('content_id')->constrained('contents')->onDelete('cascade');
                 $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
                 $table->timestamps();
-                
+
                 $table->unique(['content_id', 'tag_id']);
             });
         }

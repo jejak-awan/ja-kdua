@@ -12,8 +12,8 @@ class HandleRedirects
     public function handle(Request $request, Closure $next): Response
     {
         // Skip API routes and static files
-        if ($request->is('api/*') || 
-            $request->is('build/*') || 
+        if ($request->is('api/*') ||
+            $request->is('build/*') ||
             $request->is('storage/*') ||
             $request->is('sitemap.xml*') ||
             $request->is('robots.txt')) {
@@ -27,6 +27,7 @@ class HandleRedirects
 
         if ($redirect) {
             $redirect->recordHit();
+
             return redirect($redirect->to_url, $redirect->type);
         }
 

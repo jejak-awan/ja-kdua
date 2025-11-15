@@ -28,14 +28,18 @@ class Translation extends Model
 
     public static function getTranslation($model, $field, $languageCode = null)
     {
-        if (!$languageCode) {
+        if (! $languageCode) {
             $language = Language::getDefault();
-            if (!$language) return null;
+            if (! $language) {
+                return null;
+            }
             $languageCode = $language->code;
         }
 
         $language = Language::where('code', $languageCode)->first();
-        if (!$language) return null;
+        if (! $language) {
+            return null;
+        }
 
         $translation = static::where('translatable_type', get_class($model))
             ->where('translatable_id', $model->id)
@@ -49,7 +53,9 @@ class Translation extends Model
     public static function setTranslation($model, $field, $value, $languageCode)
     {
         $language = Language::where('code', $languageCode)->first();
-        if (!$language) return false;
+        if (! $language) {
+            return false;
+        }
 
         return static::updateOrCreate(
             [

@@ -33,7 +33,7 @@ class Theme extends Model
     {
         // Deactivate all other themes
         self::where('id', '!=', $this->id)->update(['is_active' => false]);
-        
+
         // Activate this theme
         $this->update(['is_active' => true]);
     }

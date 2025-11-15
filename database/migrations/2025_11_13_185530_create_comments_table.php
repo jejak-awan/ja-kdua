@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('content_id');
             $table->index('status');
         });
@@ -30,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('comments');
     }
 };
-

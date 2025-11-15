@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('search_indexes')) {
+        if (! Schema::hasTable('search_indexes')) {
             Schema::create('search_indexes', function (Blueprint $table) {
                 $table->id();
                 $table->string('searchable_type'); // Content, Category, Tag, etc.
@@ -21,7 +21,7 @@ return new class extends Migration
                 $table->string('type')->nullable(); // post, page, category, tag
                 $table->integer('relevance_score')->default(0);
                 $table->timestamps();
-                
+
                 $table->index(['searchable_type', 'searchable_id']);
                 $table->index('type');
                 $table->index(['title', 'content']); // Regular index for search
@@ -34,4 +34,3 @@ return new class extends Migration
         Schema::dropIfExists('search_indexes');
     }
 };
-

@@ -46,6 +46,7 @@ class Widget extends Model
     protected function getRecentPosts()
     {
         $limit = $this->settings['limit'] ?? 5;
+
         return \App\Models\Content::where('status', 'published')
             ->where('type', 'post')
             ->latest('published_at')

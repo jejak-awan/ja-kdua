@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Content;
 use App\Models\Category;
+use App\Models\Content;
 use Illuminate\Support\Facades\Cache;
 
 class CacheService
@@ -26,7 +26,7 @@ class CacheService
         // Clear content list cache
         Cache::forget('contents_list');
         Cache::forget('contents_published');
-        
+
         // Clear specific content cache
         if ($contentId) {
             Cache::forget("content_{$contentId}");
@@ -47,7 +47,7 @@ class CacheService
     {
         Cache::forget('categories_list');
         Cache::forget('categories_tree');
-        
+
         if ($categoryId) {
             Cache::forget("category_{$categoryId}");
         }
@@ -93,4 +93,3 @@ class CacheService
         Content::where('status', 'published')->limit(20)->get();
     }
 }
-

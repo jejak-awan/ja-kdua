@@ -2,12 +2,12 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -20,6 +20,7 @@ abstract class TestCase extends BaseTestCase
     {
         $app = require __DIR__.'/../bootstrap/app.php';
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
         return $app;
     }
 
@@ -29,7 +30,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Seed permissions and roles
         $this->seedPermissionsAndRoles();
     }
@@ -75,24 +76,27 @@ abstract class TestCase extends BaseTestCase
     {
         $user = $this->createUser($attributes);
         $user->assignRole('admin');
+
         return $user;
     }
 
     /**
      * Act as a user for testing.
      */
-    protected function actingAsUser(User $user = null): self
+    protected function actingAsUser(?User $user = null): self
     {
         $user = $user ?? $this->createUser();
+
         return $this->actingAs($user, 'sanctum');
     }
 
     /**
      * Act as an admin user for testing.
      */
-    protected function actingAsAdmin(User $user = null): self
+    protected function actingAsAdmin(?User $user = null): self
     {
         $user = $user ?? $this->createAdminUser();
+
         return $this->actingAs($user, 'sanctum');
     }
 }

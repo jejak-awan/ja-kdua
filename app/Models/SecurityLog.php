@@ -26,7 +26,7 @@ class SecurityLog extends Model
     }
 
     // Helper method to log security events
-    public static function log(string $eventType, $user = null, string $ipAddress = null, string $description = null, array $metadata = [])
+    public static function log(string $eventType, $user = null, ?string $ipAddress = null, ?string $description = null, array $metadata = [])
     {
         return self::create([
             'user_id' => $user?->id,
@@ -40,7 +40,7 @@ class SecurityLog extends Model
 
     protected static function getDefaultDescription(string $eventType): string
     {
-        return match($eventType) {
+        return match ($eventType) {
             'login_failed' => 'Failed login attempt',
             'login_success' => 'Successful login',
             'login_blocked' => 'Login blocked due to too many failed attempts',

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\SearchIndex;
 use App\Models\SearchQuery;
-use Illuminate\Support\Facades\DB;
 
 class SearchService
 {
@@ -23,7 +22,7 @@ class SearchService
         // Full-text search (MySQL/MariaDB)
         if (config('database.default') === 'mysql' || config('database.default') === 'mariadb') {
             $searchQuery->whereRaw(
-                "MATCH(title, content) AGAINST(? IN BOOLEAN MODE)",
+                'MATCH(title, content) AGAINST(? IN BOOLEAN MODE)',
                 [$this->prepareSearchQuery($query)]
             );
         } else {
@@ -32,7 +31,7 @@ class SearchService
             $searchQuery->where(function ($q) use ($terms) {
                 foreach ($terms as $term) {
                     $q->where('title', 'like', "%{$term}%")
-                      ->orWhere('content', 'like', "%{$term}%");
+                        ->orWhere('content', 'like', "%{$term}%");
                 }
             });
         }
@@ -109,7 +108,7 @@ class SearchService
         // Prepare query for MySQL FULLTEXT search
         $terms = explode(' ', trim($query));
         $prepared = [];
-        
+
         foreach ($terms as $term) {
             $term = trim($term);
             if (strlen($term) >= 3) {
@@ -129,7 +128,7 @@ class SearchService
                 'title' => $content->title,
                 'content' => strip_tags($content->body),
                 'excerpt' => $content->excerpt,
-                'url' => url('/content/' . $content->slug),
+                'url' => url('/content/'.$content->slug),
                 'type' => $content->type,
             ]);
         }
@@ -140,7 +139,7 @@ class SearchService
             SearchIndex::index($category, [
                 'title' => $category->name,
                 'content' => $category->description ?? '',
-                'url' => url('/category/' . $category->slug),
+                'url' => url('/category/'.$category->slug),
                 'type' => 'category',
             ]);
         }
@@ -151,7 +150,7 @@ class SearchService
             SearchIndex::index($tag, [
                 'title' => $tag->name,
                 'content' => $tag->description ?? '',
-                'url' => url('/tag/' . $tag->slug),
+                'url' => url('/tag/'.$tag->slug),
                 'type' => 'tag',
             ]);
         }
@@ -163,4 +162,3 @@ class SearchService
         ];
     }
 }
-

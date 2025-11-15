@@ -2,13 +2,12 @@
 
 namespace Tests\Helpers;
 
-use App\Models\User;
-use App\Models\Content;
 use App\Models\Category;
+use App\Models\Content;
 use App\Models\Tag;
-use App\Models\Media;
-use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class TestHelpers
 {
@@ -114,9 +113,9 @@ class TestHelpers
     public static function getAuthHeaders(User $user): array
     {
         $token = $user->createToken('test-token')->plainTextToken;
-        
+
         return [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
             'Accept' => 'application/json',
         ];
     }
@@ -128,7 +127,7 @@ class TestHelpers
     {
         return array_merge([
             'title' => 'Test Content',
-            'slug' => 'test-content-' . uniqid(),
+            'slug' => 'test-content-'.uniqid(),
             'body' => 'Test content body',
             'excerpt' => 'Test excerpt',
             'status' => 'draft',
@@ -143,7 +142,7 @@ class TestHelpers
     {
         return array_merge([
             'name' => 'Test Category',
-            'slug' => 'test-category-' . uniqid(),
+            'slug' => 'test-category-'.uniqid(),
             'description' => 'Test category description',
         ], $overrides);
     }
@@ -155,7 +154,7 @@ class TestHelpers
     {
         return array_merge([
             'name' => 'Test Tag',
-            'slug' => 'test-tag-' . uniqid(),
+            'slug' => 'test-tag-'.uniqid(),
         ], $overrides);
     }
 
@@ -166,7 +165,7 @@ class TestHelpers
     {
         return array_merge([
             'name' => 'Test User',
-            'email' => 'test' . uniqid() . '@example.com',
+            'email' => 'test'.uniqid().'@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ], $overrides);
@@ -180,4 +179,3 @@ class TestHelpers
         Storage::disk('public')->deleteDirectory('test');
     }
 }
-

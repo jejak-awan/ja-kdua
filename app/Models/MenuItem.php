@@ -53,11 +53,11 @@ class MenuItem extends Model
     {
         // If type is page or category, generate URL from target
         if ($this->type === 'page' && $this->target) {
-            return '/content/' . $this->target->slug;
+            return '/content/'.$this->target->slug;
         }
-        
+
         if ($this->type === 'category' && $this->target) {
-            return '/category/' . $this->target->slug;
+            return '/category/'.$this->target->slug;
         }
 
         return $value;

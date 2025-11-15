@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +18,7 @@ class UserController extends BaseApiController
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -34,13 +33,14 @@ class UserController extends BaseApiController
         // Ensure roles and permissions are always arrays (not null)
         $users->getCollection()->transform(function ($user) {
             // Ensure roles is always a collection (will be serialized as array in JSON)
-            if (!$user->relationLoaded('roles') || $user->roles === null) {
+            if (! $user->relationLoaded('roles') || $user->roles === null) {
                 $user->setRelation('roles', collect([]));
             }
             // Ensure permissions is always a collection (will be serialized as array in JSON)
-            if (!$user->relationLoaded('permissions') || $user->permissions === null) {
+            if (! $user->relationLoaded('permissions') || $user->permissions === null) {
                 $user->setRelation('permissions', collect([]));
             }
+
             return $user;
         });
 
@@ -63,7 +63,7 @@ class UserController extends BaseApiController
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',
@@ -107,7 +107,7 @@ class UserController extends BaseApiController
 
         $user = $request->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return $this->validationError(['current_password' => ['Current password is incorrect']], 'Current password is incorrect');
         }
 
@@ -122,7 +122,7 @@ class UserController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',

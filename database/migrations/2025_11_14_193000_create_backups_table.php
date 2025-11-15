@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('backups')) {
+        if (! Schema::hasTable('backups')) {
             Schema::create('backups', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->text('error_message')->nullable();
                 $table->timestamp('completed_at')->nullable();
                 $table->timestamps();
-                
+
                 $table->index('type');
                 $table->index('status');
                 $table->index('created_at');
@@ -33,4 +33,3 @@ return new class extends Migration
         Schema::dropIfExists('backups');
     }
 };
-

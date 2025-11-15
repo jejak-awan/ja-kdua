@@ -8,14 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('content_custom_fields')) {
+        if (! Schema::hasTable('content_custom_fields')) {
             Schema::create('content_custom_fields', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('content_id')->constrained('contents')->onDelete('cascade');
                 $table->foreignId('custom_field_id')->constrained('custom_fields')->onDelete('cascade');
                 $table->text('value')->nullable();
                 $table->timestamps();
-                
+
                 $table->unique(['content_id', 'custom_field_id']);
                 $table->index('content_id');
             });
@@ -27,4 +27,3 @@ return new class extends Migration
         Schema::dropIfExists('content_custom_fields');
     }
 };
-

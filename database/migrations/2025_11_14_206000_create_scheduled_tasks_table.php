@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('scheduled_tasks')) {
+        if (! Schema::hasTable('scheduled_tasks')) {
             Schema::create('scheduled_tasks', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->text('output')->nullable();
                 $table->json('options')->nullable();
                 $table->timestamps();
-                
+
                 $table->index('is_active');
                 $table->index('next_run_at');
             });
@@ -34,4 +34,3 @@ return new class extends Migration
         Schema::dropIfExists('scheduled_tasks');
     }
 };
-

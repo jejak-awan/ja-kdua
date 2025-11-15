@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('search_queries')) {
+        if (! Schema::hasTable('search_queries')) {
             Schema::create('search_queries', function (Blueprint $table) {
                 $table->id();
                 $table->string('query');
@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->json('filters')->nullable(); // Applied filters
                 $table->timestamp('searched_at');
                 $table->timestamps();
-                
+
                 $table->index(['query', 'searched_at']);
                 $table->index('searched_at');
             });
@@ -31,4 +31,3 @@ return new class extends Migration
         Schema::dropIfExists('search_queries');
     }
 };
-

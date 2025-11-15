@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Plugin;
 use Illuminate\Http\Request;
 
@@ -11,6 +10,7 @@ class PluginController extends BaseApiController
     public function index()
     {
         $plugins = Plugin::latest()->get();
+
         return $this->success($plugins, 'Plugins retrieved successfully');
     }
 
@@ -43,7 +43,7 @@ class PluginController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:plugins,slug,' . $plugin->id,
+            'slug' => 'sometimes|required|string|unique:plugins,slug,'.$plugin->id,
             'version' => 'nullable|string',
             'description' => 'nullable|string',
             'author' => 'nullable|string',
@@ -102,6 +102,7 @@ class PluginController extends BaseApiController
     public function getActive()
     {
         $plugins = Plugin::getActivePlugins();
+
         return $this->success($plugins, 'Active plugins retrieved successfully');
     }
 }

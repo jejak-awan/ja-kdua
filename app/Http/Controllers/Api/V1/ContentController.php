@@ -2,28 +2,26 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
-use App\Models\ContentRevision;
 use App\Models\ContentCustomField;
-use App\Models\MediaUsage;
+use App\Models\ContentRevision;
 use App\Services\CacheService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
 class ContentController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $cacheKey = 'contents_published_' . md5($request->getQueryString());
-        
+        $cacheKey = 'contents_published_'.md5($request->getQueryString());
+
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($request) {
             $query = Content::with(['author', 'category', 'tags'])
                 ->where('status', 'published')
                 ->where(function ($q) {
                     $q->whereNull('published_at')
-                      ->orWhere('published_at', '<=', Carbon::now());
+                        ->orWhere('published_at', '<=', Carbon::now());
                 });
 
             if ($request->has('category')) {
@@ -53,7 +51,7 @@ class ContentController extends BaseApiController
             ->where('status', 'published')
             ->where(function ($q) {
                 $q->whereNull('published_at')
-                  ->orWhere('published_at', '<=', Carbon::now());
+                    ->orWhere('published_at', '<=', Carbon::now());
             })
             ->firstOrFail();
 
@@ -66,7 +64,7 @@ class ContentController extends BaseApiController
     {
         // Allow preview for draft content if user is the author or admin
         if ($content->status === 'draft' && $content->author_id !== $request->user()->id) {
-            if (!$request->user()->hasRole('admin')) {
+            if (! $request->user()->hasRole('admin')) {
                 return $this->forbidden('Unauthorized to preview this content');
             }
         }
@@ -153,7 +151,7 @@ class ContentController extends BaseApiController
         }
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearContentCaches($content->id);
         $cacheService->clearSeoCaches();
 
@@ -168,7 +166,7 @@ class ContentController extends BaseApiController
                 'title' => $content->title,
                 'content' => strip_tags($content->body),
                 'excerpt' => $content->excerpt,
-                'url' => url('/content/' . $content->slug),
+                'url' => url('/content/'.$content->slug),
                 'type' => $content->type,
             ]);
         }
@@ -182,7 +180,9 @@ class ContentController extends BaseApiController
     protected function trackMediaUsage(Content $content, $fieldName)
     {
         $imagePath = $content->$fieldName;
-        if (!$imagePath) return;
+        if (! $imagePath) {
+            return;
+        }
 
         // Extract media ID from path if stored in database
         // For now, we'll track by path pattern
@@ -194,8 +194,9 @@ class ContentController extends BaseApiController
         // Check if content is locked by another user
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
             $lockedBy = $content->lockedBy;
+
             return $this->error(
-                'Content is currently being edited by ' . $lockedBy->name,
+                'Content is currently being edited by '.$lockedBy->name,
                 423,
                 [],
                 'CONTENT_LOCKED',
@@ -208,7 +209,7 @@ class ContentController extends BaseApiController
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:contents,slug,' . $content->id,
+            'slug' => 'sometimes|required|string|unique:contents,slug,'.$content->id,
             'excerpt' => 'nullable|string',
             'body' => 'sometimes|required|string',
             'featured_image' => 'nullable|string',
@@ -265,7 +266,7 @@ class ContentController extends BaseApiController
         }
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearContentCaches($content->id);
         $cacheService->clearSeoCaches();
 
@@ -280,7 +281,7 @@ class ContentController extends BaseApiController
                 'title' => $content->title,
                 'content' => strip_tags($content->body),
                 'excerpt' => $content->excerpt,
-                'url' => url('/content/' . $content->slug),
+                'url' => url('/content/'.$content->slug),
                 'type' => $content->type,
             ]);
         } else {
@@ -313,17 +314,17 @@ class ContentController extends BaseApiController
     public function destroy(Content $content)
     {
         $contentId = $content->id;
-        
+
         // Remove from search index
         \App\Models\SearchIndex::remove($content);
-        
+
         $content->delete();
 
         // Trigger webhook before deletion
         \App\Models\Webhook::triggerForEvent('content.deleted', ['id' => $contentId]);
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearContentCaches($contentId);
         $cacheService->clearSeoCaches();
 
@@ -333,8 +334,8 @@ class ContentController extends BaseApiController
     public function duplicate(Request $request, Content $content)
     {
         $newContent = $content->replicate();
-        $newContent->title = $content->title . ' (Copy)';
-        $newContent->slug = $content->slug . '-copy-' . time();
+        $newContent->title = $content->title.' (Copy)';
+        $newContent->slug = $content->slug.'-copy-'.time();
         $newContent->status = 'draft';
         $newContent->author_id = $request->user()->id;
         $newContent->views = 0;
@@ -390,8 +391,9 @@ class ContentController extends BaseApiController
         // Check if already locked by another user
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
             $lockedBy = $content->lockedBy;
+
             return $this->error(
-                'Content is currently being edited by ' . $lockedBy->name,
+                'Content is currently being edited by '.$lockedBy->name,
                 423,
                 [],
                 'CONTENT_LOCKED',
@@ -417,7 +419,7 @@ class ContentController extends BaseApiController
     {
         // Only unlock if locked by current user or admin
         if ($content->locked_by && $content->locked_by !== $request->user()->id) {
-            if (!$request->user()->hasRole('admin')) {
+            if (! $request->user()->hasRole('admin')) {
                 return $this->forbidden('You can only unlock content you locked');
             }
         }

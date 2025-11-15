@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('field_groups')) {
+        if (! Schema::hasTable('field_groups')) {
             Schema::create('field_groups', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->integer('sort_order')->default(0);
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
-                
+
                 $table->index('applies_to');
                 $table->index('is_active');
             });
@@ -31,4 +31,3 @@ return new class extends Migration
         Schema::dropIfExists('field_groups');
     }
 };
-

@@ -20,8 +20,8 @@ class RedirectFactory extends Factory
     public function definition(): array
     {
         return [
-            'from_url' => '/' . fake()->slug(),
-            'to_url' => '/' . fake()->slug(),
+            'from_url' => '/'.fake()->slug(),
+            'to_url' => '/'.fake()->slug(),
             'type' => fake()->randomElement([301, 302]),
             'is_active' => true,
         ];
@@ -57,4 +57,3 @@ class RedirectFactory extends Factory
         ]);
     }
 }
-

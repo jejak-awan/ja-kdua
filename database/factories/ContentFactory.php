@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Content;
 use App\Models\User;
-use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -23,10 +23,10 @@ class ContentFactory extends Factory
     public function definition(): array
     {
         $title = fake()->sentence();
-        
+
         return [
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . uniqid(),
+            'slug' => Str::slug($title).'-'.uniqid(),
             'excerpt' => fake()->paragraph(),
             'body' => fake()->paragraphs(5, true),
             'status' => fake()->randomElement(['draft', 'published', 'archived']),
@@ -84,4 +84,3 @@ class ContentFactory extends Factory
         ]);
     }
 }
-

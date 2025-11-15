@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
-use App\Models\Redirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class SeoController extends BaseApiController
 {
@@ -22,11 +19,11 @@ class SeoController extends BaseApiController
     public function getRobotsTxt()
     {
         $path = public_path('robots.txt');
-        
+
         if (File::exists($path)) {
             $content = File::get($path);
         } else {
-            $content = "User-agent: *\nAllow: /\n\nSitemap: " . url('/sitemap.xml');
+            $content = "User-agent: *\nAllow: /\n\nSitemap: ".url('/sitemap.xml');
         }
 
         return $this->success([
@@ -158,12 +155,23 @@ class SeoController extends BaseApiController
     protected function getGrade($score, $maxScore)
     {
         $percentage = ($score / $maxScore) * 100;
-        
-        if ($percentage >= 90) return 'A+';
-        if ($percentage >= 80) return 'A';
-        if ($percentage >= 70) return 'B';
-        if ($percentage >= 60) return 'C';
-        if ($percentage >= 50) return 'D';
+
+        if ($percentage >= 90) {
+            return 'A+';
+        }
+        if ($percentage >= 80) {
+            return 'A';
+        }
+        if ($percentage >= 70) {
+            return 'B';
+        }
+        if ($percentage >= 60) {
+            return 'C';
+        }
+        if ($percentage >= 50) {
+            return 'D';
+        }
+
         return 'F';
     }
 

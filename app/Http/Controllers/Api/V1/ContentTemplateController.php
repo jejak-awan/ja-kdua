@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\ContentTemplate;
 use Illuminate\Http\Request;
 
@@ -55,7 +54,7 @@ class ContentTemplateController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:content_templates,slug,' . $contentTemplate->id,
+            'slug' => 'sometimes|required|string|unique:content_templates,slug,'.$contentTemplate->id,
             'description' => 'nullable|string',
             'type' => 'sometimes|required|in:post,page,custom',
             'title_template' => 'nullable|string',
