@@ -21,7 +21,7 @@ class BackupController extends Controller
         $type = $request->input('type');
         $backups = $this->backupService->listBackups($type);
 
-        return response()->json($backups);
+        return $this->success($backups, 'Backups retrieved successfully');
     }
 
     public function store(Request $request)
@@ -36,56 +36,62 @@ class BackupController extends Controller
             $backup = $this->backupService->createDatabaseBackup($name);
 
             if ($backup->status === 'failed') {
-                return response()->json([
-                    'message' => $backup->error_message ?? 'Backup creation failed',
-                    'backup' => $backup,
-                ], 500);
+                return $this->error(
+                    $backup->error_message ?? 'Backup creation failed',
+                    500,
+                    [],
+                    'BACKUP_FAILED',
+                    ['backup' => $backup]
+                );
             }
 
-            return response()->json($backup, 201);
+            return $this->success($backup, 'Backup created successfully', 201);
         } catch (\Exception $e) {
             \Log::error('Backup creation error: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to create backup: ' . $e->getMessage(),
-            ], 500);
+            return $this->error(
+                'Failed to create backup: ' . $e->getMessage(),
+                500,
+                [],
+                'BACKUP_ERROR'
+            );
         }
     }
 
     public function show(Backup $backup)
     {
-        return response()->json($backup);
+        return $this->success($backup, 'Backup retrieved successfully');
     }
 
     public function restore(Request $request, Backup $backup)
     {
         if (!$backup->isCompleted()) {
-            return response()->json(['message' => 'Cannot restore incomplete backup'], 422);
+            return $this->validationError(['backup' => ['Cannot restore incomplete backup']], 'Cannot restore incomplete backup');
         }
 
         try {
             $this->backupService->restoreDatabaseBackup($backup);
-            return response()->json(['message' => 'Backup restored successfully']);
+            return $this->success(null, 'Backup restored successfully');
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return $this->error('Failed to restore backup: ' . $e->getMessage(), 500, [], 'RESTORE_ERROR');
         }
     }
 
     public function destroy(Backup $backup)
     {
         $this->backupService->deleteBackup($backup);
-        return response()->json(['message' => 'Backup deleted successfully']);
+        return $this->success(null, 'Backup deleted successfully');
     }
 
     public function download(Backup $backup)
     {
         if (!$backup->isCompleted()) {
-            return response()->json(['message' => 'Backup not available'], 404);
+            return $this->notFound('Backup');
         }
 
         $path = \Storage::disk($backup->disk)->path($backup->path);
         
         if (!file_exists($path)) {
-            return response()->json(['message' => 'Backup file not found'], 404);
+            return $this->notFound('Backup file');
         }
 
         return response()->download($path, $backup->name . '.sql');
@@ -94,6 +100,6 @@ class BackupController extends Controller
     public function stats()
     {
         $stats = $this->backupService->getBackupStats();
-        return response()->json($stats);
+        return $this->success($stats, 'Backup statistics retrieved successfully');
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
-class NotificationController extends Controller
+class NotificationController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -30,15 +30,15 @@ class NotificationController extends Controller
         
         if ($limit && $limit < 100) {
             $notifications = $query->latest()->limit($limit)->get();
-            return response()->json([
+            return $this->success([
                 'data' => $notifications,
                 'total' => $notifications->count(),
-            ]);
+            ], 'Notifications retrieved successfully');
         }
 
         $notifications = $query->latest()->paginate($limit ?: 20);
 
-        return response()->json($notifications);
+        return $this->paginated($notifications, 'Notifications retrieved successfully');
     }
 
     public function unreadCount(Request $request)
@@ -46,12 +46,12 @@ class NotificationController extends Controller
         $user = $request->user();
         
         if (!$user) {
-            return response()->json(['count' => 0]);
+            return $this->success(['count' => 0], 'Unread count retrieved');
         }
 
         $count = $user->notifications()->where('is_read', false)->count();
 
-        return response()->json(['count' => $count]);
+        return $this->success(['count' => $count], 'Unread count retrieved');
     }
 
     public function markAsRead(Request $request, Notification $notification)
@@ -59,16 +59,16 @@ class NotificationController extends Controller
         $user = $request->user();
         
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->unauthorized('Unauthenticated');
         }
         
         if ($notification->user_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return $this->forbidden('Unauthorized');
         }
 
         $notification->markAsRead();
 
-        return response()->json($notification);
+        return $this->success($notification, 'Notification marked as read');
     }
 
     public function markAllAsRead(Request $request)
@@ -76,7 +76,7 @@ class NotificationController extends Controller
         $user = $request->user();
         
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->unauthorized('Unauthenticated');
         }
         
         $user->notifications()->where('is_read', false)->update([
@@ -84,7 +84,7 @@ class NotificationController extends Controller
             'read_at' => now(),
         ]);
 
-        return response()->json(['message' => 'All notifications marked as read']);
+        return $this->success(null, 'All notifications marked as read');
     }
 
     public function destroy(Request $request, Notification $notification)
@@ -92,15 +92,15 @@ class NotificationController extends Controller
         $user = $request->user();
         
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->unauthorized('Unauthenticated');
         }
         
         if ($notification->user_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return $this->forbidden('Unauthorized');
         }
 
         $notification->delete();
 
-        return response()->json(['message' => 'Notification deleted successfully']);
+        return $this->success(null, 'Notification deleted successfully');
     }
 }

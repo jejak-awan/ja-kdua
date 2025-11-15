@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Services\SecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
-class SystemController extends Controller
+class SystemController extends BaseApiController
 {
     public function info()
     {
@@ -27,7 +27,7 @@ class SystemController extends Controller
             'session_driver' => config('session.driver'),
         ];
 
-        return response()->json($info);
+        return $this->success($info, 'System information retrieved successfully');
     }
 
     public function health()
@@ -54,7 +54,7 @@ class SystemController extends Controller
             $health['queue'] = ['status' => 'error', 'message' => 'Queue connection failed: ' . $e->getMessage()];
         }
 
-        return response()->json($health);
+        return $this->success($health, 'System health check completed');
     }
 
     public function statistics()
@@ -80,7 +80,7 @@ class SystemController extends Controller
             'form_submissions' => \App\Models\FormSubmission::count(),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'System statistics retrieved successfully');
     }
 
     public function cache()
@@ -90,7 +90,7 @@ class SystemController extends Controller
             'size' => $this->getCacheSize(),
         ];
 
-        return response()->json($cacheInfo);
+        return $this->success($cacheInfo, 'Cache information retrieved successfully');
     }
 
     public function clearCache()
@@ -100,7 +100,7 @@ class SystemController extends Controller
         \Artisan::call('route:clear');
         \Artisan::call('view:clear');
 
-        return response()->json(['message' => 'All caches cleared successfully']);
+        return $this->success(null, 'All caches cleared successfully');
     }
 
     protected function getCacheSize()

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\SecurityLog;
 use App\Services\SecurityService;
 use Illuminate\Http\Request;
 
-class SecurityController extends Controller
+class SecurityController extends BaseApiController
 {
     protected $securityService;
 
@@ -42,12 +42,12 @@ class SecurityController extends Controller
 
         $logs = $query->latest()->paginate(50);
 
-        return response()->json($logs);
+        return $this->paginated($logs, 'Security logs retrieved successfully');
     }
 
     public function show(SecurityLog $securityLog)
     {
-        return response()->json($securityLog->load('user'));
+        return $this->success($securityLog->load('user'), 'Security log retrieved successfully');
     }
 
     public function stats(Request $request)
@@ -55,7 +55,7 @@ class SecurityController extends Controller
         $days = $request->input('days', 30);
         $stats = $this->securityService->getSecurityStats($days);
 
-        return response()->json($stats);
+        return $this->success($stats, 'Security statistics retrieved successfully');
     }
 
     public function blockIp(Request $request)
@@ -67,7 +67,7 @@ class SecurityController extends Controller
 
         $this->securityService->blockIp($request->ip_address, $request->reason);
 
-        return response()->json(['message' => 'IP address blocked successfully']);
+        return $this->success(null, 'IP address blocked successfully');
     }
 
     public function unblockIp(Request $request)
@@ -78,7 +78,7 @@ class SecurityController extends Controller
 
         $this->securityService->unblockIp($request->ip_address);
 
-        return response()->json(['message' => 'IP address unblocked successfully']);
+        return $this->success(null, 'IP address unblocked successfully');
     }
 
     public function checkIp(Request $request)
@@ -87,11 +87,11 @@ class SecurityController extends Controller
         $isBlocked = $this->securityService->isIpBlocked($ipAddress);
         $failedAttempts = $this->securityService->getFailedAttempts($ipAddress);
 
-        return response()->json([
+        return $this->success([
             'ip_address' => $ipAddress,
             'is_blocked' => $isBlocked,
             'failed_attempts' => $failedAttempts,
-        ]);
+        ], 'IP status retrieved successfully');
     }
 
     public function clearFailedAttempts(Request $request)
@@ -100,6 +100,6 @@ class SecurityController extends Controller
         $this->securityService->clearFailedAttempts($ipAddress);
         $this->securityService->unblockIp($ipAddress);
 
-        return response()->json(['message' => 'Failed attempts and block status cleared for IP: ' . $ipAddress]);
+        return $this->success(null, 'Failed attempts and block status cleared for IP: ' . $ipAddress);
     }
 }

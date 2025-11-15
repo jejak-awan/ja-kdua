@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Comment;
 use App\Models\Content;
 use Illuminate\Http\Request;
 
-class CommentController extends Controller
+class CommentController extends BaseApiController
 {
     public function index(Content $content)
     {
@@ -20,7 +20,7 @@ class CommentController extends Controller
             ->latest()
             ->get();
 
-        return response()->json($comments);
+        return $this->success($comments, 'Comments retrieved successfully');
     }
 
     public function store(Request $request, Content $content)
@@ -48,7 +48,7 @@ class CommentController extends Controller
 
         $comment = Comment::create($validated);
 
-        return response()->json($comment->load('user'), 201);
+        return $this->success($comment->load('user'), 'Comment created successfully', 201);
     }
 
     public function adminIndex(Request $request)
@@ -61,27 +61,27 @@ class CommentController extends Controller
 
         $comments = $query->latest()->paginate(20);
 
-        return response()->json($comments);
+        return $this->paginated($comments, 'Comments retrieved successfully');
     }
 
     public function approve(Comment $comment)
     {
         $comment->update(['status' => 'approved']);
 
-        return response()->json($comment->load(['content', 'user']));
+        return $this->success($comment->load(['content', 'user']), 'Comment approved successfully');
     }
 
     public function reject(Comment $comment)
     {
         $comment->update(['status' => 'rejected']);
 
-        return response()->json($comment->load(['content', 'user']));
+        return $this->success($comment->load(['content', 'user']), 'Comment rejected successfully');
     }
 
     public function destroy(Comment $comment)
     {
         $comment->delete();
 
-        return response()->json(['message' => 'Comment deleted successfully']);
+        return $this->success(null, 'Comment deleted successfully');
     }
 }
