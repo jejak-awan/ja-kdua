@@ -22,7 +22,7 @@ class ContentTemplateController extends BaseApiController
 
         $templates = $query->latest()->get();
 
-        return response()->json($templates);
+        return $this->success($templates, 'Content templates retrieved successfully');
     }
 
     public function store(Request $request)
@@ -43,12 +43,12 @@ class ContentTemplateController extends BaseApiController
 
         $template = ContentTemplate::create($validated);
 
-        return response()->json($template->load('category'), 201);
+        return $this->success($template->load('category'), 'Content template created successfully', 201);
     }
 
     public function show(ContentTemplate $contentTemplate)
     {
-        return response()->json($contentTemplate->load('category'));
+        return $this->success($contentTemplate->load('category'), 'Content template retrieved successfully');
     }
 
     public function update(Request $request, ContentTemplate $contentTemplate)
@@ -69,14 +69,14 @@ class ContentTemplateController extends BaseApiController
 
         $contentTemplate->update($validated);
 
-        return response()->json($contentTemplate->load('category'));
+        return $this->success($contentTemplate->load('category'), 'Content template updated successfully');
     }
 
     public function destroy(ContentTemplate $contentTemplate)
     {
         $contentTemplate->delete();
 
-        return response()->json(['message' => 'Content template deleted successfully']);
+        return $this->success(null, 'Content template deleted successfully');
     }
 
     public function createContent(Request $request, ContentTemplate $contentTemplate)
@@ -86,6 +86,6 @@ class ContentTemplateController extends BaseApiController
 
         $content = $contentTemplate->createContent($data);
 
-        return response()->json($content->load(['author', 'category', 'tags']), 201);
+        return $this->success($content->load(['author', 'category', 'tags']), 'Content created from template successfully', 201);
     }
 }

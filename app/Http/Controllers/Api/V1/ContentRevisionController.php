@@ -13,16 +13,16 @@ class ContentRevisionController extends BaseApiController
     {
         $revisions = $content->revisions()->with('user')->latest()->paginate(20);
 
-        return response()->json($revisions);
+        return $this->paginated($revisions, 'Content revisions retrieved successfully');
     }
 
     public function show(Content $content, ContentRevision $revision)
     {
         if ($revision->content_id !== $content->id) {
-            return response()->json(['message' => 'Revision not found'], 404);
+            return $this->notFound('Revision');
         }
 
-        return response()->json($revision->load('user'));
+        return $this->success($revision->load('user'), 'Content revision retrieved successfully');
     }
 
     public function store(Request $request, Content $content)
@@ -44,13 +44,13 @@ class ContentRevisionController extends BaseApiController
             'note' => $validated['note'] ?? 'Auto-saved revision',
         ]);
 
-        return response()->json($revision->load('user'), 201);
+        return $this->success($revision->load('user'), 'Content revision created successfully', 201);
     }
 
     public function restore(Request $request, Content $content, ContentRevision $revision)
     {
         if ($revision->content_id !== $content->id) {
-            return response()->json(['message' => 'Revision not found'], 404);
+            return $this->notFound('Revision');
         }
 
         // Create a new revision of current state before restoring
@@ -76,20 +76,19 @@ class ContentRevisionController extends BaseApiController
             'status' => $revision->status,
         ]);
 
-        return response()->json([
-            'message' => 'Content restored successfully',
+        return $this->success([
             'content' => $content->load(['author', 'category', 'tags']),
-        ]);
+        ], 'Content restored successfully');
     }
 
     public function destroy(Content $content, ContentRevision $revision)
     {
         if ($revision->content_id !== $content->id) {
-            return response()->json(['message' => 'Revision not found'], 404);
+            return $this->notFound('Revision');
         }
 
         $revision->delete();
 
-        return response()->json(['message' => 'Revision deleted successfully']);
+        return $this->success(null, 'Revision deleted successfully');
     }
 }

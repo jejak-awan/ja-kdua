@@ -119,16 +119,11 @@ const handleLogin = async () => {
     message.value = '';
     messageType.value = '';
 
-    // Debug logging
-    console.log('Attempting login with:', { email: form.email.trim(), password: '***' });
-
     try {
         const result = await authStore.login({
             email: form.email.trim(),
             password: form.password,
         });
-        
-        console.log('Login result:', result);
 
         if (result.success) {
             message.value = 'Login successful!';

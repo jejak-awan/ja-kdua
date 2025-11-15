@@ -154,12 +154,11 @@
                             />
                         </div>
                         <div class="aspect-square bg-gray-100 flex items-center justify-center relative group">
-                            <img
+                            <LazyImage
                                 v-if="media.mime_type?.startsWith('image/')"
                                 :src="media.thumbnail_url || media.url"
-                                :data-original-url="media.url"
                                 :alt="media.alt || media.name"
-                                class="w-full h-full object-cover"
+                                image-class="w-full h-full object-cover"
                                 @error="handleImageError($event)"
                             />
                             <div v-else class="text-gray-400">
@@ -253,12 +252,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-                                        <img
+                                        <LazyImage
                                             v-if="media.mime_type?.startsWith('image/')"
                                             :src="media.thumbnail_url || media.url"
-                                            :data-original-url="media.url"
                                             :alt="media.alt || media.name"
-                                            class="w-full h-full object-cover rounded"
+                                            image-class="w-full h-full object-cover rounded"
                                             @error="handleImageError($event)"
                                         />
                                         <svg v-else class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -382,6 +380,7 @@ import MediaEditModal from '../../../components/media/MediaEditModal.vue';
 import MediaViewModal from '../../../components/media/MediaViewModal.vue';
 import FolderModal from '../../../components/media/FolderModal.vue';
 import MoveToFolderModal from '../../../components/media/MoveToFolderModal.vue';
+import LazyImage from '../../../components/LazyImage.vue';
 
 const viewMode = ref('grid');
 const loading = ref(false);

@@ -27,6 +27,12 @@ const routes = [
         meta: { guest: true },
     },
     {
+        path: '/verify-email',
+        name: 'verify-email',
+        component: () => import('../views/auth/VerifyEmail.vue'),
+        meta: { guest: true },
+    },
+    {
         path: '/admin',
         component: () => import('../layouts/AdminLayout.vue'),
         meta: { requiresAuth: true },

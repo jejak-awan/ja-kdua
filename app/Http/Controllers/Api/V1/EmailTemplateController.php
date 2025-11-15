@@ -22,7 +22,7 @@ class EmailTemplateController extends BaseApiController
 
         $templates = $query->latest()->get();
 
-        return response()->json($templates);
+        return $this->success($templates, 'Email templates retrieved successfully');
     }
 
     public function store(Request $request)
@@ -40,12 +40,12 @@ class EmailTemplateController extends BaseApiController
 
         $template = EmailTemplate::create($validated);
 
-        return response()->json($template, 201);
+        return $this->success($template, 'Email template created successfully', 201);
     }
 
     public function show(EmailTemplate $emailTemplate)
     {
-        return response()->json($emailTemplate);
+        return $this->success($emailTemplate, 'Email template retrieved successfully');
     }
 
     public function update(Request $request, EmailTemplate $emailTemplate)
@@ -63,14 +63,14 @@ class EmailTemplateController extends BaseApiController
 
         $emailTemplate->update($validated);
 
-        return response()->json($emailTemplate);
+        return $this->success($emailTemplate, 'Email template updated successfully');
     }
 
     public function destroy(EmailTemplate $emailTemplate)
     {
         $emailTemplate->delete();
 
-        return response()->json(['message' => 'Email template deleted successfully']);
+        return $this->success(null, 'Email template deleted successfully');
     }
 
     public function preview(Request $request, EmailTemplate $emailTemplate)
@@ -78,7 +78,7 @@ class EmailTemplateController extends BaseApiController
         $data = $request->input('data', []);
         $rendered = $emailTemplate->render($data);
 
-        return response()->json($rendered);
+        return $this->success($rendered, 'Email template preview generated successfully');
     }
 
     public function sendTest(Request $request, EmailTemplate $emailTemplate)
@@ -97,9 +97,9 @@ class EmailTemplateController extends BaseApiController
                     ->subject($rendered['subject']);
             });
 
-            return response()->json(['message' => 'Test email sent successfully']);
+            return $this->success(null, 'Test email sent successfully');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);
+            return $this->error('Failed to send test email: ' . $e->getMessage(), 500, [], 'EMAIL_SEND_ERROR');
         }
     }
 }

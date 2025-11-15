@@ -33,39 +33,37 @@ class FormSubmissionController extends BaseApiController
 
         $submissions = $query->latest()->paginate(50);
 
-        return response()->json($submissions);
+        return $this->paginated($submissions, 'Form submissions retrieved successfully');
     }
 
     public function show(FormSubmission $formSubmission)
     {
-        return response()->json($formSubmission->load(['form.fields', 'user']));
+        return $this->success($formSubmission->load(['form.fields', 'user']), 'Form submission retrieved successfully');
     }
 
     public function markAsRead(FormSubmission $formSubmission)
     {
         $formSubmission->markAsRead();
 
-        return response()->json([
-            'message' => 'Submission marked as read',
+        return $this->success([
             'submission' => $formSubmission,
-        ]);
+        ], 'Submission marked as read');
     }
 
     public function archive(FormSubmission $formSubmission)
     {
         $formSubmission->archive();
 
-        return response()->json([
-            'message' => 'Submission archived',
+        return $this->success([
             'submission' => $formSubmission,
-        ]);
+        ], 'Submission archived');
     }
 
     public function destroy(FormSubmission $formSubmission)
     {
         $formSubmission->delete();
 
-        return response()->json(['message' => 'Submission deleted successfully']);
+        return $this->success(null, 'Submission deleted successfully');
     }
 
     public function export(Request $request, Form $form)
@@ -90,11 +88,11 @@ class FormSubmissionController extends BaseApiController
             $data[] = $row;
         }
 
-        return response()->json([
+        return $this->success([
             'form' => $form->name,
             'total' => $submissions->count(),
             'data' => $data,
-        ]);
+        ], 'Form submissions exported successfully');
     }
 
     public function statistics(Request $request, Form $form = null)
@@ -117,6 +115,6 @@ class FormSubmissionController extends BaseApiController
             'this_month' => (clone $query)->whereMonth('created_at', now()->month)->count(),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Form submission statistics retrieved successfully');
     }
 }

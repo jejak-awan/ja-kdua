@@ -31,7 +31,7 @@ class AnalyticsController extends BaseApiController
             'page_views' => AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])->count(),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Analytics overview retrieved successfully');
     }
 
     public function visits(Request $request)
@@ -46,7 +46,7 @@ class AnalyticsController extends BaseApiController
             ->orderBy('period')
             ->get();
 
-        return response()->json($visits);
+        return $this->success($visits, 'Analytics visits retrieved successfully');
     }
 
     public function topPages(Request $request)
@@ -62,7 +62,7 @@ class AnalyticsController extends BaseApiController
             ->limit($limit)
             ->get();
 
-        return response()->json($topPages);
+        return $this->success($topPages, 'Top pages retrieved successfully');
     }
 
     public function topContent(Request $request)
@@ -85,7 +85,7 @@ class AnalyticsController extends BaseApiController
             ->take($limit)
             ->values();
 
-        return response()->json($topContent);
+        return $this->success($topContent, 'Top content retrieved successfully');
     }
 
     public function devices(Request $request)
@@ -98,7 +98,7 @@ class AnalyticsController extends BaseApiController
             ->groupBy('device_type')
             ->get();
 
-        return response()->json($devices);
+        return $this->success($devices, 'Device analytics retrieved successfully');
     }
 
     public function browsers(Request $request)
@@ -112,7 +112,7 @@ class AnalyticsController extends BaseApiController
             ->orderByDesc('count')
             ->get();
 
-        return response()->json($browsers);
+        return $this->success($browsers, 'Browser analytics retrieved successfully');
     }
 
     public function countries(Request $request)
@@ -127,7 +127,7 @@ class AnalyticsController extends BaseApiController
             ->orderByDesc('count')
             ->get();
 
-        return response()->json($countries);
+        return $this->success($countries, 'Country analytics retrieved successfully');
     }
 
     public function referrers(Request $request)
@@ -145,7 +145,7 @@ class AnalyticsController extends BaseApiController
             ->limit($limit)
             ->get();
 
-        return response()->json($referrers);
+        return $this->success($referrers, 'Referrer analytics retrieved successfully');
     }
 
     public function events(Request $request)
@@ -164,7 +164,7 @@ class AnalyticsController extends BaseApiController
             ->latest('occurred_at')
             ->paginate(50);
 
-        return response()->json($events);
+        return $this->paginated($events, 'Analytics events retrieved successfully');
     }
 
     public function eventStats(Request $request)
@@ -178,7 +178,7 @@ class AnalyticsController extends BaseApiController
             ->orderByDesc('count')
             ->get();
 
-        return response()->json($stats);
+        return $this->success($stats, 'Event statistics retrieved successfully');
     }
 
     public function realTime()
@@ -197,11 +197,11 @@ class AnalyticsController extends BaseApiController
             ->limit(5)
             ->get();
 
-        return response()->json([
+        return $this->success([
             'active_sessions' => $activeSessions,
             'visits_last_hour' => $visitsLastHour,
             'top_pages_now' => $topPagesNow,
-        ]);
+        ], 'Real-time analytics retrieved successfully');
     }
 
     protected function calculateBounceRate($dateFrom, $dateTo)

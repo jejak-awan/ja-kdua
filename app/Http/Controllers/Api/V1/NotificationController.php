@@ -13,7 +13,7 @@ class NotificationController extends BaseApiController
         $user = $request->user();
         
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->unauthorized('Unauthenticated');
         }
 
         $query = $user->notifications();

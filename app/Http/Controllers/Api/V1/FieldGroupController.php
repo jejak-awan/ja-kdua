@@ -22,7 +22,7 @@ class FieldGroupController extends BaseApiController
 
         $groups = $query->orderBy('sort_order')->get();
 
-        return response()->json($groups);
+        return $this->success($groups, 'Field groups retrieved successfully');
     }
 
     public function store(Request $request)
@@ -38,12 +38,12 @@ class FieldGroupController extends BaseApiController
 
         $group = FieldGroup::create($validated);
 
-        return response()->json($group->load('fields'), 201);
+        return $this->success($group->load('fields'), 'Field group created successfully', 201);
     }
 
     public function show(FieldGroup $fieldGroup)
     {
-        return response()->json($fieldGroup->load('fields'));
+        return $this->success($fieldGroup->load('fields'), 'Field group retrieved successfully');
     }
 
     public function update(Request $request, FieldGroup $fieldGroup)
@@ -60,13 +60,13 @@ class FieldGroupController extends BaseApiController
 
         $fieldGroup->update($validated);
 
-        return response()->json($fieldGroup->load('fields'));
+        return $this->success($fieldGroup->load('fields'), 'Field group updated successfully');
     }
 
     public function destroy(FieldGroup $fieldGroup)
     {
         $fieldGroup->delete();
 
-        return response()->json(['message' => 'Field group deleted successfully']);
+        return $this->success(null, 'Field group deleted successfully');
     }
 }

@@ -179,11 +179,6 @@ const fetchSettings = async () => {
         settings.value = settingsData;
         initializeFormData();
     } catch (error) {
-        console.error('Failed to fetch settings:', error);
-        if (error.response) {
-            console.error('Error response:', error.response.data);
-            console.error('Error status:', error.response.status);
-        }
         settings.value = [];
     } finally {
         loading.value = false;
@@ -242,7 +237,7 @@ const handleSubmit = async () => {
                 try {
                     value = JSON.parse(value);
                 } catch (e) {
-                    console.error('Invalid JSON for setting:', setting.key);
+                    // Invalid JSON, keep original value
                 }
             }
             
@@ -261,7 +256,6 @@ const handleSubmit = async () => {
         alert('Settings saved successfully');
         await fetchSettings();
     } catch (error) {
-        console.error('Failed to save settings:', error);
         alert(error.response?.data?.message || 'Failed to save settings');
     } finally {
         saving.value = false;

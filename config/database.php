@@ -144,7 +144,7 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'phpredis'), // Use 'predis' if phpredis extension not available
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),

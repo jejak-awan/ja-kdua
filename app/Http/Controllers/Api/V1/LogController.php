@@ -15,16 +15,16 @@ class LogController extends BaseApiController
         $level = $request->input('level'); // error, warning, info, etc.
 
         if (!File::exists($logFile)) {
-            return response()->json(['logs' => [], 'message' => 'Log file not found']);
+            return $this->success(['logs' => []], 'Log file not found');
         }
 
         $content = File::get($logFile);
         $logEntries = $this->parseLogFile($content, $lines, $level);
 
-        return response()->json([
+        return $this->success([
             'logs' => $logEntries,
             'total' => count($logEntries),
-        ]);
+        ], 'Logs retrieved successfully');
     }
 
     public function clear()
@@ -33,10 +33,10 @@ class LogController extends BaseApiController
 
         if (File::exists($logFile)) {
             File::put($logFile, '');
-            return response()->json(['message' => 'Log file cleared successfully']);
+            return $this->success(null, 'Log file cleared successfully');
         }
 
-        return response()->json(['message' => 'Log file not found'], 404);
+        return $this->notFound('Log file');
     }
 
     public function download()
@@ -47,7 +47,7 @@ class LogController extends BaseApiController
             return response()->download($logFile, 'laravel.log');
         }
 
-        return response()->json(['message' => 'Log file not found'], 404);
+        return $this->notFound('Log file');
     }
 
     protected function parseLogFile($content, $limit = 100, $level = null)

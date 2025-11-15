@@ -27,9 +27,6 @@ export const useAuthStore = defineStore('auth', {
                 this.setAuth(response.data);
                 return { success: true, data: response.data };
             } catch (error) {
-                console.error('Login error:', error);
-                console.error('Error response:', error.response);
-                
                 const errorData = error.response?.data || {};
                 const errors = errorData.errors || {};
                 const status = error.response?.status;

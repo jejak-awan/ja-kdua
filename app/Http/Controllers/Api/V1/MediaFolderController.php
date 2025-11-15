@@ -148,7 +148,7 @@ class MediaFolderController extends BaseApiController
 
         // Prevent setting self as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $mediaFolder->id) {
-            return response()->json(['message' => 'Folder cannot be its own parent'], 422);
+            return $this->validationError(['parent_id' => ['Folder cannot be its own parent']], 'Folder cannot be its own parent');
         }
 
         // Prevent circular reference
@@ -158,7 +158,7 @@ class MediaFolderController extends BaseApiController
                 $checkParent = $parent;
                 while ($checkParent->parent_id) {
                     if ($checkParent->parent_id == $mediaFolder->id) {
-                        return response()->json(['message' => 'Cannot set parent to a child folder'], 422);
+                        return $this->validationError(['parent_id' => ['Cannot set parent to a child folder']], 'Cannot set parent to a child folder');
                     }
                     $checkParent = MediaFolder::find($checkParent->parent_id);
                 }

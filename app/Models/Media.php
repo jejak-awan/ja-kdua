@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\CdnHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
@@ -49,6 +50,11 @@ class Media extends Model
             return null;
         }
         
+        // Use CDN if enabled
+        if (CdnHelper::isEnabled()) {
+            return CdnHelper::mediaUrl($this->path);
+        }
+        
         // For public disk, use relative path to avoid localhost URL issues
         // This ensures URLs work regardless of APP_URL configuration
         if ($this->disk === 'public') {
@@ -71,6 +77,11 @@ class Media extends Model
         $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $extension;
 
         if (Storage::disk($this->disk)->exists($thumbnailPath)) {
+            // Use CDN if enabled
+            if (CdnHelper::isEnabled()) {
+                return CdnHelper::thumbnailUrl($thumbnailPath);
+            }
+            
             // For public disk, use relative path
             if ($this->disk === 'public') {
                 return '/storage/' . ltrim($thumbnailPath, '/');
@@ -79,7 +90,7 @@ class Media extends Model
             return Storage::disk($this->disk)->url($thumbnailPath);
         }
 
-        // If no thumbnail exists, return original URL
+        // If no thumbnail exists, return original URL (with CDN if enabled)
         return $this->url;
     }
 }

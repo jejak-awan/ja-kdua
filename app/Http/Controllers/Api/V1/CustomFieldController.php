@@ -23,7 +23,7 @@ class CustomFieldController extends BaseApiController
 
         $fields = $query->orderBy('sort_order')->get();
 
-        return response()->json($fields);
+        return $this->success($fields, 'Custom fields retrieved successfully');
     }
 
     public function store(Request $request)
@@ -50,18 +50,18 @@ class CustomFieldController extends BaseApiController
                 ->exists();
             
             if ($exists) {
-                return response()->json(['message' => 'Slug already exists in this field group'], 422);
+                return $this->validationError(['slug' => ['Slug already exists in this field group']], 'Slug already exists in this field group');
             }
         }
 
         $field = CustomField::create($validated);
 
-        return response()->json($field->load('fieldGroup'), 201);
+        return $this->success($field->load('fieldGroup'), 'Custom field created successfully', 201);
     }
 
     public function show(CustomField $customField)
     {
-        return response()->json($customField->load('fieldGroup'));
+        return $this->success($customField->load('fieldGroup'), 'Custom field retrieved successfully');
     }
 
     public function update(Request $request, CustomField $customField)
@@ -90,20 +90,20 @@ class CustomFieldController extends BaseApiController
                 ->exists();
             
             if ($exists) {
-                return response()->json(['message' => 'Slug already exists in this field group'], 422);
+                return $this->validationError(['slug' => ['Slug already exists in this field group']], 'Slug already exists in this field group');
             }
         }
 
         $customField->update($validated);
 
-        return response()->json($customField->load('fieldGroup'));
+        return $this->success($customField->load('fieldGroup'), 'Custom field updated successfully');
     }
 
     public function destroy(CustomField $customField)
     {
         $customField->delete();
 
-        return response()->json(['message' => 'Custom field deleted successfully']);
+        return $this->success(null, 'Custom field deleted successfully');
     }
 
     public function getFieldTypes()
@@ -125,6 +125,6 @@ class CustomFieldController extends BaseApiController
             'color' => 'Color Picker',
         ];
 
-        return response()->json($types);
+        return $this->success($types, 'Field types retrieved successfully');
     }
 }

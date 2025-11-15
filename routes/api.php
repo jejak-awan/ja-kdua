@@ -15,6 +15,8 @@ Route::prefix('v1')->group(function () {
     
     // Email Verification
     Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Api\V1\AuthController::class, 'verifyEmail'])->name('verification.verify');
+    Route::post('/verify-email', [App\Http\Controllers\Api\V1\AuthController::class, 'verifyEmailApi'])->middleware('throttle:5,1');
+    Route::post('/resend-verification', [App\Http\Controllers\Api\V1\AuthController::class, 'resendVerificationEmailApi'])->middleware('throttle:3,1');
     Route::post('/email/verification-notification', [App\Http\Controllers\Api\V1\AuthController::class, 'resendVerificationEmail'])->middleware('auth:sanctum');
     
     // Password Reset (with rate limiting)
