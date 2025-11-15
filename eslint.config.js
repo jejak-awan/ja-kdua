@@ -27,6 +27,7 @@ export default [
             'no-console': ['warn', { allow: ['warn', 'error'] }],
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
             'no-undef': 'off',
+            'no-useless-escape': 'off',
         },
     },
     {
