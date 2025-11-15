@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Category;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-class CategoryController extends Controller
+class CategoryController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -16,17 +16,17 @@ class CategoryController extends Controller
 
         // Get tree structure if requested
         if ($request->has('tree') && $request->tree) {
-            return Cache::remember('categories_tree', now()->addHours(24), function () {
-                $categories = Category::whereNull('parent_id')
+            $categories = Cache::remember('categories_tree', now()->addHours(24), function () {
+                return Category::whereNull('parent_id')
                     ->where('is_active', true)
                     ->with(['children' => function ($q) {
                         $q->where('is_active', true)->orderBy('sort_order');
                     }])
                     ->orderBy('sort_order')
                     ->get();
-                
-                return response()->json($categories);
             });
+            
+            return $this->success($categories, 'Categories tree retrieved successfully');
         }
 
         // Get flat list with parent info
@@ -34,7 +34,7 @@ class CategoryController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return response()->json($categories);
+        return $this->success($categories, 'Categories retrieved successfully');
     }
 
     public function store(Request $request)
@@ -53,7 +53,7 @@ class CategoryController extends Controller
         if ($validated['parent_id']) {
             $parent = Category::find($validated['parent_id']);
             if ($parent && $parent->parent_id == $request->input('id')) {
-                return response()->json(['message' => 'Cannot set parent to a child category'], 422);
+                return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
             }
         }
 
@@ -64,12 +64,12 @@ class CategoryController extends Controller
         $cacheService->clearCategoryCaches();
         $cacheService->clearSeoCaches();
 
-        return response()->json($category->load('parent'), 201);
+        return $this->success($category->load('parent'), 'Category created successfully', 201);
     }
 
     public function show(Category $category)
     {
-        return response()->json($category->load(['parent', 'children', 'contents']));
+        return $this->success($category->load(['parent', 'children', 'contents']), 'Category retrieved successfully');
     }
 
     public function update(Request $request, Category $category)
@@ -85,19 +85,19 @@ class CategoryController extends Controller
         ]);
 
         // Prevent setting self as parent
-        if ($validated['parent_id'] == $category->id) {
-            return response()->json(['message' => 'Category cannot be its own parent'], 422);
+        if (isset($validated['parent_id']) && $validated['parent_id'] == $category->id) {
+            return $this->validationError(['parent_id' => ['Category cannot be its own parent']], 'Category cannot be its own parent');
         }
 
         // Prevent circular reference
-        if ($validated['parent_id']) {
+        if (isset($validated['parent_id']) && $validated['parent_id']) {
             $parent = Category::find($validated['parent_id']);
             if ($parent) {
                 // Check if parent is a descendant of this category
                 $checkParent = $parent;
                 while ($checkParent->parent_id) {
                     if ($checkParent->parent_id == $category->id) {
-                        return response()->json(['message' => 'Cannot set parent to a child category'], 422);
+                        return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
                     }
                     $checkParent = Category::find($checkParent->parent_id);
                 }
@@ -106,25 +106,25 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return response()->json($category->load(['parent', 'children']));
+        return $this->success($category->load(['parent', 'children']), 'Category updated successfully');
     }
 
     public function destroy(Category $category)
     {
         // Check if has children
         if ($category->children()->count() > 0) {
-            return response()->json([
-                'message' => 'Cannot delete category with child categories',
+            return $this->validationError([
+                'category' => ['Cannot delete category with child categories'],
                 'children_count' => $category->children()->count(),
-            ], 422);
+            ], 'Cannot delete category with child categories');
         }
 
         // Check if has contents
         if ($category->contents()->count() > 0) {
-            return response()->json([
-                'message' => 'Cannot delete category with associated contents',
+            return $this->validationError([
+                'category' => ['Cannot delete category with associated contents'],
                 'contents_count' => $category->contents()->count(),
-            ], 422);
+            ], 'Cannot delete category with associated contents');
         }
 
         $categoryId = $category->id;
@@ -135,7 +135,7 @@ class CategoryController extends Controller
         $cacheService->clearCategoryCaches($categoryId);
         $cacheService->clearSeoCaches();
 
-        return response()->json(['message' => 'Category deleted successfully']);
+        return $this->success(null, 'Category deleted successfully');
     }
 
     public function move(Request $request, Category $category)
@@ -147,7 +147,7 @@ class CategoryController extends Controller
 
         // Prevent setting self as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $category->id) {
-            return response()->json(['message' => 'Category cannot be its own parent'], 422);
+            return $this->validationError(['parent_id' => ['Category cannot be its own parent']], 'Category cannot be its own parent');
         }
 
         // Prevent circular reference
@@ -157,7 +157,7 @@ class CategoryController extends Controller
                 $checkParent = $parent;
                 while ($checkParent->parent_id) {
                     if ($checkParent->parent_id == $category->id) {
-                        return response()->json(['message' => 'Cannot set parent to a child category'], 422);
+                        return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
                     }
                     $checkParent = Category::find($checkParent->parent_id);
                 }
@@ -166,6 +166,6 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return response()->json($category->load(['parent', 'children']));
+        return $this->success($category->load(['parent', 'children']), 'Category moved successfully');
     }
 }

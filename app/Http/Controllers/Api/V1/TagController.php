@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
-class TagController extends Controller
+class TagController extends BaseApiController
 {
     public function index()
     {
         $tags = Tag::orderBy('name')->get();
 
-        return response()->json($tags);
+        return $this->success($tags, 'Tags retrieved successfully');
     }
 
     public function store(Request $request)
@@ -25,12 +25,12 @@ class TagController extends Controller
 
         $tag = Tag::create($validated);
 
-        return response()->json($tag, 201);
+        return $this->success($tag, 'Tag created successfully', 201);
     }
 
     public function show(Tag $tag)
     {
-        return response()->json($tag->load('contents'));
+        return $this->success($tag->load('contents'), 'Tag retrieved successfully');
     }
 
     public function update(Request $request, Tag $tag)
@@ -43,14 +43,14 @@ class TagController extends Controller
 
         $tag->update($validated);
 
-        return response()->json($tag);
+        return $this->success($tag, 'Tag updated successfully');
     }
 
     public function destroy(Tag $tag)
     {
         $tag->delete();
 
-        return response()->json(['message' => 'Tag deleted successfully']);
+        return $this->success(null, 'Tag deleted successfully');
     }
 
     public function statistics()
@@ -76,6 +76,6 @@ class TagController extends Controller
             })->values(),
         ];
 
-        return response()->json($stats);
+        return $this->success($stats, 'Tag statistics retrieved successfully');
     }
 }

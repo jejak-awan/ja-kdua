@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
-class SettingController extends Controller
+class SettingController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -22,24 +22,21 @@ class SettingController extends Controller
 
         $settings = $query->orderBy('group')->orderBy('key')->get();
 
-        return response()->json([
-            'data' => $settings,
-            'success' => true,
-        ]);
+        return $this->success($settings, 'Settings retrieved successfully');
     }
 
     public function getGroup($group)
     {
         $settings = Setting::getGroup($group);
 
-        return response()->json($settings);
+        return $this->success($settings, 'Settings retrieved successfully');
     }
 
     public function show($key)
     {
         $setting = Setting::where('key', $key)->firstOrFail();
 
-        return response()->json($setting);
+        return $this->success($setting, 'Setting retrieved successfully');
     }
 
     public function store(Request $request)
@@ -55,7 +52,7 @@ class SettingController extends Controller
 
         $setting = Setting::create($validated);
 
-        return response()->json($setting, 201);
+        return $this->success($setting, 'Setting created successfully', 201);
     }
 
     public function update(Request $request, Setting $setting)
@@ -70,7 +67,7 @@ class SettingController extends Controller
 
         $setting->update($validated);
 
-        return response()->json($setting);
+        return $this->success($setting, 'Setting updated successfully');
     }
 
     public function bulkUpdate(Request $request)
@@ -92,16 +89,13 @@ class SettingController extends Controller
             );
         }
 
-        return response()->json([
-            'message' => 'Settings updated successfully',
-            'success' => true,
-        ]);
+        return $this->success(null, 'Settings updated successfully');
     }
 
     public function destroy(Setting $setting)
     {
         $setting->delete();
 
-        return response()->json(['message' => 'Setting deleted successfully']);
+        return $this->success(null, 'Setting deleted successfully');
     }
 }
