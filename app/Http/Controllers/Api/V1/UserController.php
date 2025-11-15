@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
-class UserController extends Controller
+class UserController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -31,17 +31,17 @@ class UserController extends Controller
 
         $users = $query->latest()->paginate(20);
 
-        return response()->json($users);
+        return $this->paginated($users, 'Users retrieved successfully');
     }
 
     public function show(User $user)
     {
-        return response()->json($user->load(['roles', 'permissions']));
+        return $this->success($user->load(['roles', 'permissions']), 'User retrieved successfully');
     }
 
     public function profile(Request $request)
     {
-        return response()->json($request->user()->load(['roles', 'permissions']));
+        return $this->success($request->user()->load(['roles', 'permissions']), 'Profile retrieved successfully');
     }
 
     public function updateProfile(Request $request)
@@ -60,7 +60,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return response()->json($user->load(['roles', 'permissions']));
+        return $this->success($user->load(['roles', 'permissions']), 'Profile updated successfully');
     }
 
     public function uploadAvatar(Request $request)
@@ -79,10 +79,10 @@ class UserController extends Controller
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar' => $path]);
 
-        return response()->json([
+        return $this->success([
             'avatar' => Storage::disk('public')->url($path),
             'user' => $user->load(['roles', 'permissions']),
-        ]);
+        ], 'Avatar uploaded successfully');
     }
 
     public function updatePassword(Request $request)
@@ -95,14 +95,14 @@ class UserController extends Controller
         $user = $request->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['message' => 'Current password is incorrect'], 422);
+            return $this->validationError(['current_password' => ['Current password is incorrect']], 'Current password is incorrect');
         }
 
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        return response()->json(['message' => 'Password updated successfully']);
+        return $this->success(null, 'Password updated successfully');
     }
 
     public function update(Request $request, User $user)
@@ -124,14 +124,14 @@ class UserController extends Controller
             $user->syncRoles($request->roles);
         }
 
-        return response()->json($user->load(['roles', 'permissions']));
+        return $this->success($user->load(['roles', 'permissions']), 'User updated successfully');
     }
 
     public function destroy(User $user)
     {
         // Prevent deleting yourself
         if ($user->id === auth()->id()) {
-            return response()->json(['message' => 'You cannot delete your own account'], 422);
+            return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
         }
 
         // Delete avatar if exists
@@ -141,6 +141,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully']);
+        return $this->success(null, 'User deleted successfully');
     }
 }

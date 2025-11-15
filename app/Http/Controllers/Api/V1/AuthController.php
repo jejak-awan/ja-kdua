@@ -69,10 +69,10 @@ class AuthController extends BaseApiController
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
+        return $this->success([
             'user' => $user->load('roles', 'permissions'),
             'token' => $token,
-        ]);
+        ], 'Login successful');
     }
 
     public function register(Request $request)
@@ -98,11 +98,10 @@ class AuthController extends BaseApiController
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
+        return $this->success([
             'user' => $user->load('roles'),
             'token' => $token,
-            'message' => 'Registration successful. Please verify your email address.',
-        ], 201);
+        ], 'Registration successful. Please verify your email address.', 201);
     }
 
     public function logout(Request $request)
@@ -114,23 +113,23 @@ class AuthController extends BaseApiController
 
         $user->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return $this->success(null, 'Logged out successfully');
     }
 
     public function user(Request $request)
     {
-        return response()->json($request->user()->load('roles', 'permissions'));
+        return $this->success($request->user()->load('roles', 'permissions'), 'User retrieved successfully');
     }
 
     public function resendVerificationEmail(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified'], 422);
+            return $this->validationError(['email' => ['Email already verified']], 'Email already verified');
         }
 
         $request->user()->sendEmailVerificationNotification();
 
-        return response()->json(['message' => 'Verification email sent']);
+        return $this->success(null, 'Verification email sent');
     }
 
     public function verifyEmail(Request $request, $id, $hash)
@@ -138,18 +137,18 @@ class AuthController extends BaseApiController
         $user = User::findOrFail($id);
 
         if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Invalid verification link'], 422);
+            return $this->validationError(['hash' => ['Invalid verification link']], 'Invalid verification link');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified']);
+            return $this->success(null, 'Email already verified');
         }
 
         if ($user->markEmailAsVerified()) {
             event(new \Illuminate\Auth\Events\Verified($user));
         }
 
-        return response()->json(['message' => 'Email verified successfully']);
+        return $this->success(null, 'Email verified successfully');
     }
 
     public function forgotPassword(Request $request)
@@ -159,8 +158,8 @@ class AuthController extends BaseApiController
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            // Don't reveal if user exists
-            return response()->json(['message' => 'If the email exists, a password reset link has been sent']);
+            // Don't reveal if user exists (security best practice)
+            return $this->success(null, 'If the email exists, a password reset link has been sent');
         }
 
         $token = Str::random(64);
@@ -175,7 +174,7 @@ class AuthController extends BaseApiController
 
         $user->notify(new ResetPassword($token));
 
-        return response()->json(['message' => 'If the email exists, a password reset link has been sent']);
+        return $this->success(null, 'If the email exists, a password reset link has been sent');
     }
 
     public function resetPassword(Request $request)
@@ -191,13 +190,13 @@ class AuthController extends BaseApiController
             ->first();
 
         if (!$passwordReset || !Hash::check($request->token, $passwordReset->token)) {
-            return response()->json(['message' => 'Invalid or expired reset token'], 422);
+            return $this->validationError(['token' => ['Invalid or expired reset token']], 'Invalid or expired reset token');
         }
 
         // Check if token is expired (60 minutes)
         if (now()->diffInMinutes($passwordReset->created_at) > 60) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            return response()->json(['message' => 'Reset token has expired'], 422);
+            return $this->validationError(['token' => ['Reset token has expired']], 'Reset token has expired');
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
@@ -208,6 +207,6 @@ class AuthController extends BaseApiController
         // Log activity
         \App\Models\ActivityLog::log('password_reset', null, [], $user, 'Password reset via email');
 
-        return response()->json(['message' => 'Password reset successfully']);
+        return $this->success(null, 'Password reset successfully');
     }
 }
