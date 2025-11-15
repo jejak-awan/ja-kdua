@@ -5,9 +5,11 @@ use Illuminate\Support\Facades\Route;
 
 // API Version 1
 Route::prefix('v1')->group(function () {
-    // Authentication Routes
-    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
-    Route::post('/register', [App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    // Authentication Routes (with rate limiting)
+    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
+        ->middleware('throttle:5,1'); // 5 attempts per minute
+    Route::post('/register', [App\Http\Controllers\Api\V1\AuthController::class, 'register'])
+        ->middleware('throttle:3,1'); // 3 attempts per minute
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('/user', [App\Http\Controllers\Api\V1\AuthController::class, 'user'])->middleware('auth:sanctum');
     
@@ -15,9 +17,11 @@ Route::prefix('v1')->group(function () {
     Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Api\V1\AuthController::class, 'verifyEmail'])->name('verification.verify');
     Route::post('/email/verification-notification', [App\Http\Controllers\Api\V1\AuthController::class, 'resendVerificationEmail'])->middleware('auth:sanctum');
     
-    // Password Reset
-    Route::post('/forgot-password', [App\Http\Controllers\Api\V1\AuthController::class, 'forgotPassword']);
-    Route::post('/reset-password', [App\Http\Controllers\Api\V1\AuthController::class, 'resetPassword']);
+    // Password Reset (with rate limiting)
+    Route::post('/forgot-password', [App\Http\Controllers\Api\V1\AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:3,1'); // 3 attempts per minute
+    Route::post('/reset-password', [App\Http\Controllers\Api\V1\AuthController::class, 'resetPassword'])
+        ->middleware('throttle:3,1'); // 3 attempts per minute
     
     // User Profile Routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -52,8 +56,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/languages', [App\Http\Controllers\Api\V1\LanguageController::class, 'index']);
     });
 
-    // Admin CMS API (requires authentication)
-    Route::prefix('admin/cms')->middleware('auth:sanctum')->group(function () {
+    // Admin CMS API (requires authentication with rate limiting)
+    Route::prefix('admin/cms')->middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         // Contents
         Route::get('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'adminIndex']);
         Route::get('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'adminShow']);
@@ -83,9 +87,11 @@ Route::prefix('v1')->group(function () {
         Route::get('tags/statistics', [App\Http\Controllers\Api\V1\TagController::class, 'statistics'])->middleware('permission:manage tags');
         Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:manage tags');
         
-        // Media
-        Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload']);
-        Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple']);
+        // Media (with stricter rate limiting for uploads)
+        Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload'])
+            ->middleware('throttle:10,1'); // 10 uploads per minute
+        Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple'])
+            ->middleware('throttle:5,1'); // 5 batch uploads per minute
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index']);
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show']);
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:manage media');

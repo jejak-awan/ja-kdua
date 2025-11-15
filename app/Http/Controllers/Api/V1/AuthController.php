@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\User;
 use App\Notifications\ResetPassword;
 use App\Services\SecurityService;
@@ -14,7 +14,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
-class AuthController extends Controller
+class AuthController extends BaseApiController
 {
     public function login(Request $request)
     {
@@ -44,14 +44,16 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if email is verified (optional - can be made required)
-        // Temporarily disabled for testing - uncomment if email verification is required
-        // if (!$user->hasVerifiedEmail()) {
-        //     return response()->json([
-        //         'message' => 'Please verify your email address before logging in.',
-        //         'requires_verification' => true,
-        //     ], 403);
-        // }
+        // Check if email is verified (required for production)
+        if (!$user->hasVerifiedEmail()) {
+            return $this->error(
+                'Please verify your email address before logging in.',
+                403,
+                [],
+                'EMAIL_NOT_VERIFIED',
+                ['requires_verification' => true]
+            );
+        }
 
         // Record successful login
         $securityService->recordSuccessfulLogin($user, $ipAddress);
