@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
-class FileManagerController extends Controller
+class FileManagerController extends BaseApiController
 {
     public function index(Request $request)
     {
@@ -48,14 +48,14 @@ class FileManagerController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error reading directory: ' . $e->getMessage()], 500);
+            return $this->error('Error reading directory: ' . $e->getMessage(), 500, [], 'DIRECTORY_READ_ERROR');
         }
 
-        return response()->json([
+        return $this->success([
             'path' => $path,
             'directories' => $directories,
             'files' => $files,
-        ]);
+        ], 'Directory contents retrieved successfully');
     }
 
     public function upload(Request $request)
@@ -74,10 +74,9 @@ class FileManagerController extends Controller
 
         Storage::disk($disk)->put($filePath, file_get_contents($file));
 
-        return response()->json([
-            'message' => 'File uploaded successfully',
+        return $this->success([
             'path' => $filePath,
-        ], 201);
+        ], 'File uploaded successfully', 201);
     }
 
     public function delete(Request $request)
@@ -92,10 +91,10 @@ class FileManagerController extends Controller
 
         if (Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
-            return response()->json(['message' => 'File deleted successfully']);
+            return $this->success(null, 'File deleted successfully');
         }
 
-        return response()->json(['message' => 'File not found'], 404);
+        return $this->notFound('File');
     }
 
     public function createFolder(Request $request)
@@ -114,9 +113,8 @@ class FileManagerController extends Controller
 
         Storage::disk($disk)->makeDirectory($folderPath);
 
-        return response()->json([
-            'message' => 'Folder created successfully',
+        return $this->success([
             'path' => $folderPath,
-        ], 201);
+        ], 'Folder created successfully', 201);
     }
 }

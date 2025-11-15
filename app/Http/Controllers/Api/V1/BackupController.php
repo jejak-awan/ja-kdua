@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Backup;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
 
-class BackupController extends Controller
+class BackupController extends BaseApiController
 {
     protected $backupService;
 

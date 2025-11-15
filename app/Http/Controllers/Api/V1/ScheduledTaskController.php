@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
-class ScheduledTaskController extends Controller
+class ScheduledTaskController extends BaseApiController
 {
     public function index()
     {
         $tasks = DB::table('scheduled_tasks')->get();
 
-        return response()->json($tasks);
+        return $this->success($tasks, 'Scheduled tasks retrieved successfully');
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class ScheduledTaskController extends Controller
 
         $task = DB::table('scheduled_tasks')->insertGetId($validated);
 
-        return response()->json(DB::table('scheduled_tasks')->where('id', $task)->first(), 201);
+        return $this->success(DB::table('scheduled_tasks')->where('id', $task)->first(), 'Scheduled task created successfully', 201);
     }
 
     public function update(Request $request, $id)
@@ -45,7 +45,7 @@ class ScheduledTaskController extends Controller
 
         DB::table('scheduled_tasks')->where('id', $id)->update($validated);
 
-        return response()->json(DB::table('scheduled_tasks')->where('id', $id)->first());
+        return $this->success(DB::table('scheduled_tasks')->where('id', $id)->first(), 'Scheduled task updated successfully');
     }
 
     public function run($id)
@@ -53,7 +53,7 @@ class ScheduledTaskController extends Controller
         $task = DB::table('scheduled_tasks')->where('id', $id)->first();
 
         if (!$task) {
-            return response()->json(['message' => 'Task not found'], 404);
+            return $this->notFound('Task');
         }
 
         try {
@@ -71,14 +71,16 @@ class ScheduledTaskController extends Controller
                 'output' => $output,
             ]);
 
-            return response()->json(['message' => 'Task executed successfully', 'output' => $output]);
+            return $this->success([
+                'output' => $output,
+            ], 'Task executed successfully');
         } catch (\Exception $e) {
             DB::table('scheduled_tasks')->where('id', $id)->update([
                 'status' => 'failed',
                 'output' => $e->getMessage(),
             ]);
 
-            return response()->json(['message' => 'Task failed', 'error' => $e->getMessage()], 500);
+            return $this->error('Task failed: ' . $e->getMessage(), 500, [], 'TASK_EXECUTION_ERROR');
         }
     }
 
@@ -86,6 +88,6 @@ class ScheduledTaskController extends Controller
     {
         DB::table('scheduled_tasks')->where('id', $id)->delete();
 
-        return response()->json(['message' => 'Task deleted successfully']);
+        return $this->success(null, 'Task deleted successfully');
     }
 }

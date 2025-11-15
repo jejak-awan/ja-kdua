@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Language;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 
-class LanguageController extends Controller
+class LanguageController extends BaseApiController
 {
     public function index()
     {
         $languages = Language::getActive();
 
-        return response()->json($languages);
+        return $this->success($languages, 'Languages retrieved successfully');
     }
 
     public function store(Request $request)
@@ -35,7 +35,7 @@ class LanguageController extends Controller
 
         $language = Language::create($validated);
 
-        return response()->json($language, 201);
+        return $this->success($language, 'Language created successfully', 201);
     }
 
     public function update(Request $request, Language $language)
@@ -57,18 +57,18 @@ class LanguageController extends Controller
 
         $language->update($validated);
 
-        return response()->json($language);
+        return $this->success($language, 'Language updated successfully');
     }
 
     public function destroy(Language $language)
     {
         if ($language->is_default) {
-            return response()->json(['message' => 'Cannot delete default language'], 422);
+            return $this->validationError(['language' => ['Cannot delete default language']], 'Cannot delete default language');
         }
 
         $language->delete();
 
-        return response()->json(['message' => 'Language deleted successfully']);
+        return $this->success(null, 'Language deleted successfully');
     }
 
     public function getTranslations(Request $request, $type, $id)
@@ -77,7 +77,7 @@ class LanguageController extends Controller
         $language = $languageCode ? Language::where('code', $languageCode)->first() : Language::getDefault();
 
         if (!$language) {
-            return response()->json(['message' => 'Language not found'], 404);
+            return $this->notFound('Language');
         }
 
         $translations = Translation::where('translatable_type', $type)
@@ -88,7 +88,7 @@ class LanguageController extends Controller
                 return [$translation->field => $translation->value];
             });
 
-        return response()->json($translations);
+        return $this->success($translations, 'Translations retrieved successfully');
     }
 
     public function setTranslation(Request $request)
@@ -104,6 +104,6 @@ class LanguageController extends Controller
         $model = $validated['type']::findOrFail($validated['id']);
         Translation::setTranslation($model, $validated['field'], $validated['value'], $validated['language']);
 
-        return response()->json(['message' => 'Translation saved successfully']);
+        return $this->success(null, 'Translation saved successfully');
     }
 }
