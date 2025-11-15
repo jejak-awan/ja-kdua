@@ -77,7 +77,7 @@
                         type="text"
                         placeholder="Search webhooks..."
                         class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    >
                 </div>
             </div>
 
@@ -223,8 +223,8 @@ const fetchWebhooks = async () => {
                 failed_calls: webhooks.value.reduce((sum, w) => sum + (w.failed_calls || 0), 0),
             };
         }
-    } catch (error) {
-        console.error('Failed to fetch webhooks:', error);
+        } catch (err) {
+            console.error('Failed to fetch webhooks:', err);
     } finally {
         loading.value = false;
     }
