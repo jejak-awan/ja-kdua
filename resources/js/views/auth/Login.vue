@@ -128,8 +128,21 @@ const handleLogin = async () => {
         if (result.success) {
             message.value = 'Login successful!';
             messageType.value = 'success';
+            
+            // Ensure auth state is properly set
+            // Fetch user data to ensure we have the latest info
+            await authStore.fetchUser();
+            
+            // Check if there's a redirect query parameter
+            const redirect = router.currentRoute.value.query.redirect;
             setTimeout(() => {
-                router.push({ name: 'dashboard' });
+                if (redirect && typeof redirect === 'string') {
+                    // Redirect to the original destination
+                    router.push(redirect);
+                } else {
+                    // Default to dashboard
+                    router.push({ name: 'dashboard' });
+                }
             }, 500);
         } else {
             // Handle validation errors

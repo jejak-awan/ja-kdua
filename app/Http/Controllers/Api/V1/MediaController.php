@@ -216,11 +216,38 @@ class MediaController extends BaseApiController
         // Generate thumbnail filename
         $fileName = pathinfo($media->path, PATHINFO_FILENAME);
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        $thumbnailFileName = $fileName . '_thumb.' . $extension;
+        
+        // For SVG files, convert to PNG for thumbnail
+        $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
+        $thumbnailExtension = $isSvg ? 'png' : $extension;
+        $thumbnailFileName = $fileName . '_thumb.' . $thumbnailExtension;
         $thumbnailPath = 'media/thumbnails/' . $thumbnailFileName;
         $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
 
-        // Use Intervention Image v3 API
+        // Handle SVG files - convert to PNG using Imagick (if available)
+        if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
+            try {
+                $imagick = new \Imagick();
+                $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
+                $imagick->readImage($fullPath);
+                $imagick->setImageFormat('png');
+                
+                // Resize SVG to thumbnail size
+                $imagick->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
+                
+                // Save as PNG
+                $imagick->writeImage($thumbnailFullPath);
+                $imagick->clear();
+                $imagick->destroy();
+                
+                return $thumbnailPath;
+            } catch (\Exception $e) {
+                \Log::warning('SVG thumbnail generation failed with Imagick: ' . $e->getMessage());
+                // Fall through to try Intervention Image
+            }
+        }
+
+        // Use Intervention Image v3 API for raster images
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
             if (extension_loaded('gd')) {
@@ -230,16 +257,29 @@ class MediaController extends BaseApiController
             }
             
             if ($driver) {
-                $manager = new \Intervention\Image\ImageManager($driver);
-                $image = $manager->read($fullPath);
-                
-                // Create thumbnail (crop to fit)
-                $image->cover($width, $height);
-                
-                // Save thumbnail
-                $image->save($thumbnailFullPath, quality: 85);
-                
-                return $thumbnailPath;
+                try {
+                    $manager = new \Intervention\Image\ImageManager($driver);
+                    $image = $manager->read($fullPath);
+                    
+                    // Create thumbnail (crop to fit)
+                    $image->cover($width, $height);
+                    
+                    // For SVG converted to PNG, save as PNG
+                    if ($isSvg) {
+                        $image->toPng()->save($thumbnailFullPath);
+                    } else {
+                        // Save thumbnail with original format
+                        $image->save($thumbnailFullPath, quality: 85);
+                    }
+                    
+                    return $thumbnailPath;
+                } catch (\Exception $e) {
+                    \Log::warning('Thumbnail generation failed with Intervention Image: ' . $e->getMessage());
+                    // If SVG and both methods failed, return null (will use original)
+                    if ($isSvg) {
+                        return null;
+                    }
+                }
             }
         }
         

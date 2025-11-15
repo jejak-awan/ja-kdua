@@ -271,13 +271,20 @@ router.beforeEach((to, from, next) => {
     // Initialize auth for protected routes
     authStore.initAuth();
 
+    // If route requires auth but user is not authenticated
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next({ name: 'login', query: { redirect: to.fullPath } });
-    } else if (to.meta.guest && authStore.isAuthenticated) {
-        next({ name: 'dashboard' });
-    } else {
-        next();
+        return;
     }
+    
+    // If route is for guests but user is authenticated, redirect to dashboard
+    if (to.meta.guest && authStore.isAuthenticated) {
+        next({ name: 'dashboard' });
+        return;
+    }
+    
+    // Allow navigation
+    next();
 });
 
 export default router;

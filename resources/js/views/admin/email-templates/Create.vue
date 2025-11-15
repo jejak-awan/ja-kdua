@@ -125,6 +125,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 
 const router = useRouter();
 const saving = ref(false);
@@ -149,9 +150,10 @@ const variables = ref([
 const handlePreview = async () => {
     try {
         const response = await api.post('/admin/cms/email-templates/preview', form.value);
+        const data = parseSingleResponse(response) || {};
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
-            previewWindow.document.write(response.data.html || response.data);
+            previewWindow.document.write(data.html || '');
         }
     } catch (error) {
         console.error('Failed to preview template:', error);

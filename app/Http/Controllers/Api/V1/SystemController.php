@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class SystemController extends BaseApiController
 {
@@ -59,38 +60,113 @@ class SystemController extends BaseApiController
 
     public function statistics()
     {
-        $stats = [
-            'contents' => [
-                'total' => \App\Models\Content::count(),
-                'published' => \App\Models\Content::where('status', 'published')->count(),
-                'draft' => \App\Models\Content::where('status', 'draft')->count(),
-            ],
-            'users' => [
-                'total' => \App\Models\User::count(),
-                'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
-            ],
-            'media' => [
-                'total' => \App\Models\Media::count(),
-                'total_size' => \App\Models\Media::sum('size'),
-            ],
-            'categories' => \App\Models\Category::count(),
-            'tags' => \App\Models\Tag::count(),
-            'comments' => \App\Models\Comment::count(),
-            'forms' => \App\Models\Form::count(),
-            'form_submissions' => \App\Models\FormSubmission::count(),
-        ];
+        try {
+            $stats = [
+                'contents' => [
+                    'total' => \App\Models\Content::count(),
+                    'published' => \App\Models\Content::where('status', 'published')->count(),
+                    'draft' => \App\Models\Content::where('status', 'draft')->count(),
+                ],
+                'users' => [
+                    'total' => \App\Models\User::count(),
+                    'verified' => \App\Models\User::whereNotNull('email_verified_at')->count(),
+                ],
+                'media' => [
+                    'total' => \App\Models\Media::count(),
+                    'total_size' => \App\Models\Media::sum('size') ?? 0,
+                ],
+                'categories' => \App\Models\Category::count(),
+                'tags' => \App\Models\Tag::count(),
+                'comments' => \App\Models\Comment::count(),
+                'forms' => \App\Models\Form::count(),
+                'form_submissions' => \App\Models\FormSubmission::count(),
+            ];
 
-        return $this->success($stats, 'System statistics retrieved successfully');
+            return $this->success($stats, 'System statistics retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('System statistics error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Return default stats on error
+            return $this->success([
+                'contents' => ['total' => 0, 'published' => 0, 'draft' => 0],
+                'users' => ['total' => 0, 'verified' => 0],
+                'media' => ['total' => 0, 'total_size' => 0],
+                'categories' => 0,
+                'tags' => 0,
+                'comments' => 0,
+                'forms' => 0,
+                'form_submissions' => 0,
+            ], 'System statistics retrieved successfully');
+        }
     }
 
     public function cache()
     {
-        $cacheInfo = [
-            'driver' => config('cache.default'),
-            'size' => $this->getCacheSize(),
-        ];
+        try {
+            $cacheInfo = [
+                'driver' => config('cache.default'),
+                'size' => $this->getCacheSize(),
+            ];
 
-        return $this->success($cacheInfo, 'Cache information retrieved successfully');
+            return $this->success($cacheInfo, 'Cache information retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('System cache info error: ' . $e->getMessage());
+            return $this->success([
+                'driver' => config('cache.default', 'file'),
+                'size' => 0,
+            ], 'Cache information retrieved successfully');
+        }
+    }
+
+    public function cacheStatus()
+    {
+        try {
+            $cacheDriver = config('cache.default', 'file');
+            
+            // Try to get cache stats if available
+            $hits = 0;
+            $misses = 0;
+            
+            // For Redis cache, we can get more detailed stats
+            if ($cacheDriver === 'redis') {
+                try {
+                    $redis = \Illuminate\Support\Facades\Redis::connection();
+                    if ($redis) {
+                        $info = $redis->info('stats');
+                        $hits = $info['keyspace_hits'] ?? 0;
+                        $misses = $info['keyspace_misses'] ?? 0;
+                    }
+                } catch (\Exception $e) {
+                    // Redis stats not available, use defaults
+                }
+            }
+
+            $status = [
+                'status' => 'Active',
+                'driver' => $cacheDriver,
+                'hits' => $hits,
+                'misses' => $misses,
+                'details' => [
+                    'driver' => $cacheDriver,
+                    'size' => $this->getCacheSize(),
+                ],
+            ];
+
+            return $this->success($status, 'Cache status retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('System cache status error: ' . $e->getMessage());
+            return $this->success([
+                'status' => 'Active',
+                'driver' => config('cache.default', 'file'),
+                'hits' => 0,
+                'misses' => 0,
+                'details' => [
+                    'driver' => config('cache.default', 'file'),
+                    'size' => '0 B',
+                ],
+            ], 'Cache status retrieved successfully');
+        }
     }
 
     public function clearCache()

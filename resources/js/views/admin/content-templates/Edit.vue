@@ -124,6 +124,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 
 const route = useRoute();
@@ -146,7 +147,7 @@ const fetchTemplate = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/cms/content-templates/${templateId}`);
-        const template = response.data.data || response.data;
+        const template = parseSingleResponse(response) || {};
         
         form.value = {
             name: template.name || '',

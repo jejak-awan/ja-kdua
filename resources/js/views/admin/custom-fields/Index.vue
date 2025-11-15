@@ -208,6 +208,7 @@ import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
 import FieldGroupModal from '../../../components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '../../../components/custom-fields/FieldModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const fieldGroups = ref([]);
 const fields = ref([]);
@@ -222,22 +223,27 @@ const showEditFieldModal = ref(false);
 const editingField = ref(null);
 
 const filteredFields = computed(() => {
+    if (!Array.isArray(fields.value)) {
+        return [];
+    }
     if (!fieldSearch.value) return fields.value;
     
     const searchLower = fieldSearch.value.toLowerCase();
     return fields.value.filter(field => 
-        field.label.toLowerCase().includes(searchLower) ||
-        field.name.toLowerCase().includes(searchLower) ||
-        field.type.toLowerCase().includes(searchLower)
+        field?.label?.toLowerCase().includes(searchLower) ||
+        field?.name?.toLowerCase().includes(searchLower) ||
+        field?.type?.toLowerCase().includes(searchLower)
     );
 });
 
 const fetchFieldGroups = async () => {
     try {
         const response = await api.get('/admin/cms/field-groups');
-        fieldGroups.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        fieldGroups.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch field groups:', error);
+        fieldGroups.value = [];
     }
 };
 
@@ -245,7 +251,8 @@ const fetchFields = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/custom-fields');
-        fields.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        fields.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch fields:', error);
     } finally {

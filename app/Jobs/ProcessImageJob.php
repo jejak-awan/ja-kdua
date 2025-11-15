@@ -83,9 +83,37 @@ class ProcessImageJob implements ShouldQueue
         // Generate thumbnail filename
         $fileName = pathinfo($media->path, PATHINFO_FILENAME);
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        $thumbnailFileName = $fileName . '_thumb.' . $extension;
+        
+        // For SVG files, convert to PNG for thumbnail
+        $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
+        $thumbnailExtension = $isSvg ? 'png' : $extension;
+        $thumbnailFileName = $fileName . '_thumb.' . $thumbnailExtension;
         $thumbnailPath = 'media/thumbnails/' . $thumbnailFileName;
         $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
+
+        // Handle SVG files - convert to PNG using Imagick (if available)
+        if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
+            try {
+                $imagick = new \Imagick();
+                $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
+                $imagick->readImage($fullPath);
+                $imagick->setImageFormat('png');
+                
+                // Resize SVG to thumbnail size
+                $imagick->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
+                
+                // Save as PNG
+                $imagick->writeImage($thumbnailFullPath);
+                $imagick->clear();
+                $imagick->destroy();
+                
+                Log::info("ProcessImageJob: SVG thumbnail generated for media {$media->id}");
+                return;
+            } catch (\Exception $e) {
+                Log::warning("ProcessImageJob: SVG thumbnail generation failed with Imagick: " . $e->getMessage());
+                // Fall through to try Intervention Image
+            }
+        }
 
         if (class_exists(\Intervention\Image\ImageManager::class)) {
             $driver = null;
@@ -96,12 +124,22 @@ class ProcessImageJob implements ShouldQueue
             }
 
             if ($driver) {
-                $manager = new \Intervention\Image\ImageManager($driver);
-                $image = $manager->read($fullPath);
-                $image->cover($width, $height);
-                $image->save($thumbnailFullPath, quality: $this->quality ?? 85);
+                try {
+                    $manager = new \Intervention\Image\ImageManager($driver);
+                    $image = $manager->read($fullPath);
+                    $image->cover($width, $height);
+                    
+                    // For SVG converted to PNG, save as PNG
+                    if ($isSvg) {
+                        $image->toPng()->save($thumbnailFullPath);
+                    } else {
+                        $image->save($thumbnailFullPath, quality: $this->quality ?? 85);
+                    }
 
-                Log::info("ProcessImageJob: Thumbnail generated for media {$media->id}");
+                    Log::info("ProcessImageJob: Thumbnail generated for media {$media->id}");
+                } catch (\Exception $e) {
+                    Log::warning("ProcessImageJob: Thumbnail generation failed: " . $e->getMessage());
+                }
             }
         }
     }

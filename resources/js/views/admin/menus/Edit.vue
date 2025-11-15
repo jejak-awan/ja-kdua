@@ -96,6 +96,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import MenuItemTree from '../../../components/menus/MenuItemTree.vue';
 import MenuItemModal from '../../../components/menus/MenuItemModal.vue';
 
@@ -123,7 +124,7 @@ const fetchMenu = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/cms/menus/${menuId}`);
-        menu.value = response.data.data || response.data;
+        menu.value = parseSingleResponse(response) || {};
         menuForm.value = {
             name: menu.value.name || '',
             location: menu.value.location || '',
@@ -131,7 +132,8 @@ const fetchMenu = async () => {
         
         // Fetch menu items
         const itemsResponse = await api.get(`/admin/cms/menus/${menuId}/items`);
-        menuItems.value = itemsResponse.data.data || itemsResponse.data || [];
+        const { data } = parseResponse(itemsResponse);
+        menuItems.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch menu:', error);
     } finally {

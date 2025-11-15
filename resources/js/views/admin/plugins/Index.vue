@@ -39,6 +39,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import PluginSettingsModal from '../../../components/plugins/PluginSettingsModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const plugins = ref([]);
 const loading = ref(false);
@@ -49,7 +50,8 @@ const fetchPlugins = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/plugins');
-        plugins.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        plugins.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch plugins:', error);
     } finally {

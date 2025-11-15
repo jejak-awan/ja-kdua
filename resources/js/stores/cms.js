@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { parseResponse, ensureArray } from '../utils/responseParser';
 
 export const useCmsStore = defineStore('cms', {
     state: () => ({
@@ -16,11 +17,13 @@ export const useCmsStore = defineStore('cms', {
             this.loading = true;
             try {
                 const response = await axios.get('/api/v1/cms/contents', { params });
-                this.contents = response.data.data || response.data;
-                return response.data;
+                const { data } = parseResponse(response);
+                this.contents = ensureArray(data);
+                return { data: this.contents };
             } catch (error) {
                 console.error('Error fetching contents:', error);
-                return null;
+                this.contents = [];
+                return { data: [] };
             } finally {
                 this.loading = false;
             }
@@ -43,10 +46,12 @@ export const useCmsStore = defineStore('cms', {
         async fetchCategories() {
             try {
                 const response = await axios.get('/api/v1/cms/categories');
-                this.categories = response.data;
-                return response.data;
+                const { data } = parseResponse(response);
+                this.categories = ensureArray(data);
+                return this.categories;
             } catch (error) {
                 console.error('Error fetching categories:', error);
+                this.categories = [];
                 return [];
             }
         },
@@ -54,10 +59,12 @@ export const useCmsStore = defineStore('cms', {
         async fetchTags() {
             try {
                 const response = await axios.get('/api/v1/cms/tags');
-                this.tags = response.data;
-                return response.data;
+                const { data } = parseResponse(response);
+                this.tags = ensureArray(data);
+                return this.tags;
             } catch (error) {
                 console.error('Error fetching tags:', error);
+                this.tags = [];
                 return [];
             }
         },

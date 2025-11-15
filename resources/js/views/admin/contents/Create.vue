@@ -294,6 +294,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 import MediaPicker from '../../../components/MediaPicker.vue';
 
@@ -321,6 +322,9 @@ const form = ref({
 });
 
 const availableTags = computed(() => {
+    if (!Array.isArray(tags.value) || !Array.isArray(selectedTags.value)) {
+        return [];
+    }
     return tags.value.filter(tag => !selectedTags.value.find(st => st.id === tag.id));
 });
 
@@ -354,22 +358,27 @@ const addTag = (event) => {
 };
 
 const removeTag = (tagId) => {
-    selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
+    if (Array.isArray(selectedTags.value)) {
+        selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
+    }
 };
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/cms/categories');
-        categories.value = response.data.data || response.data || [];
+        const response = await api.get('/admin/cms/categories');
+        const { data } = parseResponse(response);
+        categories.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch categories:', error);
+        categories.value = [];
     }
 };
 
 const fetchTags = async () => {
     try {
-        const response = await api.get('/cms/tags');
-        tags.value = response.data.data || response.data || [];
+        const response = await api.get('/admin/cms/tags');
+        const { data } = parseResponse(response);
+        tags.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch tags:', error);
     }

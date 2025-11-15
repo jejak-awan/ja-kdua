@@ -177,6 +177,7 @@ import api from '../../../services/api';
 import CategoryTreeItem from '../../../components/categories/CategoryTreeItem.vue';
 import CategoryModal from '../../../components/categories/CategoryModal.vue';
 import MoveCategoryModal from '../../../components/categories/MoveCategoryModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const categories = ref([]);
@@ -193,21 +194,31 @@ const allCategories = computed(() => categories.value);
 const rootCategories = computed(() => {
     // For tree view, use tree structure
     if (viewMode.value === 'tree') {
-        return treeCategories.value;
+        if (!Array.isArray(treeCategories.value)) {
+            return [];
+        }
+        return treeCategories.value.filter(cat => cat && !cat.parent_id);
     }
     // For list view, use flat list
-    return categories.value.filter(cat => !cat.parent_id);
+    if (!Array.isArray(categories.value)) {
+        return [];
+    }
+    return categories.value.filter(cat => cat && !cat.parent_id);
 });
 
 const filteredCategories = computed(() => {
+    if (!Array.isArray(categories.value)) {
+        return [];
+    }
     if (!search.value) return categories.value;
     
     const searchLower = search.value.toLowerCase();
-    return categories.value.filter(cat => 
-        cat.name.toLowerCase().includes(searchLower) ||
-        cat.slug.toLowerCase().includes(searchLower) ||
-        (cat.description && cat.description.toLowerCase().includes(searchLower))
-    );
+    return categories.value.filter(cat => {
+        if (!cat) return false;
+        return cat?.name?.toLowerCase().includes(searchLower) ||
+        cat?.slug?.toLowerCase().includes(searchLower) ||
+        (cat?.description && cat.description.toLowerCase().includes(searchLower));
+    });
 });
 
 const fetchCategories = async () => {
@@ -215,29 +226,36 @@ const fetchCategories = async () => {
     try {
         // Fetch tree structure
         const treeResponse = await api.get('/admin/cms/categories?tree=true');
-        const treeData = treeResponse.data;
+        const { data: treeData } = parseResponse(treeResponse);
+        const treeArray = ensureArray(treeData);
         
         // Store tree data for tree view
-        treeCategories.value = treeData;
+        treeCategories.value = treeArray;
         
         // Flatten tree structure for list view
         const flattenTree = (items) => {
+            if (!Array.isArray(items)) {
+                return [];
+            }
             let result = [];
             items.forEach(item => {
+                if (!item) return;
                 const flatItem = { ...item };
                 // Remove children for flat list
                 delete flatItem.children;
                 result.push(flatItem);
-                if (item.children && item.children.length > 0) {
+                if (item.children && Array.isArray(item.children) && item.children.length > 0) {
                     result = result.concat(flattenTree(item.children));
                 }
             });
             return result;
         };
         
-        categories.value = flattenTree(treeData);
+        categories.value = flattenTree(treeArray);
     } catch (error) {
         console.error('Failed to fetch categories:', error);
+        categories.value = [];
+        treeCategories.value = [];
     } finally {
         loading.value = false;
     }
@@ -249,6 +267,9 @@ const editCategory = (category) => {
 };
 
 const deleteCategory = async (category) => {
+    if (!category || !category.name) {
+        return;
+    }
     if (!confirm(`Are you sure you want to delete "${category.name}"?`)) {
         return;
     }

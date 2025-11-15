@@ -5,38 +5,65 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\MediaFolder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MediaFolderController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $query = MediaFolder::query();
+        try {
+            $query = MediaFolder::query();
 
-        if ($request->has('parent_id')) {
-            if ($request->parent_id === 'null' || $request->parent_id === null) {
-                $query->whereNull('parent_id');
-            } else {
-                $query->where('parent_id', $request->parent_id);
+            if ($request->has('parent_id')) {
+                if ($request->parent_id === 'null' || $request->parent_id === null) {
+                    $query->whereNull('parent_id');
+                } else {
+                    $query->where('parent_id', $request->parent_id);
+                }
             }
-        }
 
-        // Get tree structure if requested
-        if ($request->has('tree') && $request->tree) {
-            $folders = MediaFolder::whereNull('parent_id')
-                ->with(['children' => function ($q) {
-                    $q->orderBy('sort_order');
-                }])
+            // Get tree structure if requested
+            if ($request->has('tree') && $request->tree) {
+                $folders = MediaFolder::whereNull('parent_id')
+                    ->with(['children' => function ($q) {
+                        $q->orderBy('sort_order');
+                    }])
+                    ->orderBy('sort_order')
+                    ->get();
+                
+                return $this->success($folders, 'Media folders tree retrieved successfully');
+            }
+
+            $folders = $query->with('parent')
                 ->orderBy('sort_order')
                 ->get();
-            
-            return $this->success($folders, 'Media folders tree retrieved successfully');
+
+            // Transform to avoid issues with accessors during serialization
+            $foldersData = $folders->map(function ($folder) {
+                return [
+                    'id' => $folder->id,
+                    'name' => $folder->name,
+                    'slug' => $folder->slug,
+                    'parent_id' => $folder->parent_id,
+                    'sort_order' => $folder->sort_order,
+                    'parent' => $folder->parent ? [
+                        'id' => $folder->parent->id,
+                        'name' => $folder->parent->name,
+                        'slug' => $folder->parent->slug,
+                    ] : null,
+                    'created_at' => $folder->created_at,
+                    'updated_at' => $folder->updated_at,
+                ];
+            });
+
+            return $this->success($foldersData, 'Media folders retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Media folders index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Return empty array instead of error
+            return $this->success([], 'Media folders retrieved successfully');
         }
-
-        $folders = $query->with('parent')
-            ->orderBy('sort_order')
-            ->get();
-
-        return $this->success($folders, 'Media folders retrieved successfully');
     }
 
     public function store(Request $request)

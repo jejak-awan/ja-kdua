@@ -114,27 +114,34 @@ const typeFilter = ref('');
 const readFilter = ref('');
 
 const unreadCount = computed(() => {
+    if (!Array.isArray(notifications.value)) {
+        return 0;
+    }
     return notifications.value.filter(n => !n.read_at).length;
 });
 
 const filteredNotifications = computed(() => {
+    if (!Array.isArray(notifications.value)) {
+        return [];
+    }
+    
     let filtered = notifications.value;
     
     if (typeFilter.value) {
-        filtered = filtered.filter(n => n.type === typeFilter.value);
+        filtered = filtered.filter(n => n?.type === typeFilter.value);
     }
     
     if (readFilter.value === 'read') {
-        filtered = filtered.filter(n => n.read_at);
+        filtered = filtered.filter(n => n?.read_at);
     } else if (readFilter.value === 'unread') {
-        filtered = filtered.filter(n => !n.read_at);
+        filtered = filtered.filter(n => !n?.read_at);
     }
     
     if (search.value) {
         const searchLower = search.value.toLowerCase();
         filtered = filtered.filter(n => 
-            n.title?.toLowerCase().includes(searchLower) ||
-            n.message?.toLowerCase().includes(searchLower)
+            n?.title?.toLowerCase().includes(searchLower) ||
+            n?.message?.toLowerCase().includes(searchLower)
         );
     }
     
@@ -145,9 +152,19 @@ const fetchNotifications = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/notifications');
-        notifications.value = response.data.data || response.data || [];
+        // Handle different response structures
+        let data = [];
+        if (response.data?.data && Array.isArray(response.data.data)) {
+            data = response.data.data;
+        } else if (Array.isArray(response.data)) {
+            data = response.data;
+        } else if (response.data?.items && Array.isArray(response.data.items)) {
+            data = response.data.items;
+        }
+        notifications.value = data;
     } catch (error) {
         console.error('Failed to fetch notifications:', error);
+        notifications.value = [];
     } finally {
         loading.value = false;
     }

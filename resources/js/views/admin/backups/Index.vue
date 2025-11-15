@@ -151,6 +151,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const backups = ref([]);
 const statistics = ref(null);
@@ -171,12 +172,13 @@ const fetchBackups = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/backups');
-        backups.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        backups.value = ensureArray(data);
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/backups/statistics');
-            statistics.value = statsResponse.data;
+            statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from backups if endpoint doesn't exist
             statistics.value = {

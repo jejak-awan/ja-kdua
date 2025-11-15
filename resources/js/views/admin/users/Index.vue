@@ -88,7 +88,7 @@
                                         class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center"
                                     >
                                         <span class="text-indigo-600 font-medium text-sm">
-                                            {{ user.name.charAt(0).toUpperCase() }}
+                                            {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
                                         </span>
                                     </div>
                                 </div>
@@ -110,13 +110,13 @@
                         <td class="px-6 py-4">
                             <div class="flex flex-wrap gap-1">
                                 <span
-                                    v-for="role in user.roles"
+                                    v-for="role in (user.roles || [])"
                                     :key="role.id"
                                     class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800"
                                 >
                                     {{ role.name }}
                                 </span>
-                                <span v-if="user.roles.length === 0" class="text-xs text-gray-400">
+                                <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-gray-400">
                                     No roles
                                 </span>
                             </div>
@@ -187,6 +187,7 @@
 import { ref, onMounted, watch } from 'vue';
 import api from '../../../services/api';
 import UserModal from '../../../components/users/UserModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const users = ref([]);
@@ -214,14 +215,15 @@ const fetchUsers = async () => {
         }
 
         const response = await api.get('/admin/cms/users', { params });
-        users.value = response.data.data || [];
-        pagination.value = {
-            current_page: response.data.current_page,
-            last_page: response.data.last_page,
-            from: response.data.from,
-            to: response.data.to,
-            total: response.data.total,
-        };
+        const { data, pagination: paginationData } = parseResponse(response);
+        // Ensure each user has roles array
+        users.value = ensureArray(data).map(user => ({
+            ...user,
+            roles: user.roles || [],
+        }));
+        if (paginationData) {
+            pagination.value = paginationData;
+        }
     } catch (error) {
         console.error('Failed to fetch users:', error);
     } finally {
@@ -235,7 +237,8 @@ const fetchRoles = async () => {
         // Note: You may need to create a roles endpoint or use a different approach
         const response = await api.get('/admin/cms/roles').catch(() => null);
         if (response) {
-            roles.value = response.data.data || response.data || [];
+            const { data: rolesData } = parseResponse(response);
+            roles.value = ensureArray(rolesData);
         } else {
             // Fallback: Extract unique roles from users
             const uniqueRoles = new Map();

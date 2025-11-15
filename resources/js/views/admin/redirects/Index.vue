@@ -158,6 +158,7 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
 import RedirectModal from '../../../components/redirects/RedirectModal.vue';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const redirects = ref([]);
 const statistics = ref(null);
@@ -181,12 +182,13 @@ const fetchRedirects = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/redirects');
-        redirects.value = response.data.data || response.data;
+        const { data } = parseResponse(response);
+        redirects.value = ensureArray(data);
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/redirects/statistics');
-            statistics.value = statsResponse.data;
+            statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from redirects if endpoint doesn't exist
             statistics.value = {

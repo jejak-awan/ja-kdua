@@ -54,7 +54,7 @@
                         <div class="flex-shrink-0">
                             <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                                 <span class="text-indigo-600 font-medium text-sm">
-                                    {{ (comment.user?.name || comment.name || 'U').charAt(0).toUpperCase() }}
+                                    {{ ((comment.user?.name || comment.name || 'U')?.charAt(0) || 'U').toUpperCase() }}
                                 </span>
                             </div>
                         </div>
@@ -146,7 +146,7 @@
                             <div class="flex-shrink-0">
                                 <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
                                     <span class="text-gray-600 font-medium text-xs">
-                                        {{ (reply.user?.name || reply.name || 'U').charAt(0).toUpperCase() }}
+                                        {{ ((reply.user?.name || reply.name || 'U')?.charAt(0) || 'U').toUpperCase() }}
                                     </span>
                                 </div>
                             </div>
@@ -225,6 +225,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const comments = ref([]);
@@ -244,14 +245,11 @@ const fetchComments = async () => {
         }
 
         const response = await api.get('/admin/cms/comments', { params });
-        comments.value = response.data.data || [];
-        pagination.value = {
-            current_page: response.data.current_page,
-            last_page: response.data.last_page,
-            from: response.data.from,
-            to: response.data.to,
-            total: response.data.total,
-        };
+        const { data, pagination: paginationData } = parseResponse(response);
+        comments.value = ensureArray(data);
+        if (paginationData) {
+            pagination.value = paginationData;
+        }
     } catch (error) {
         console.error('Failed to fetch comments:', error);
     } finally {

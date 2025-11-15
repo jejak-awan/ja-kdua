@@ -89,11 +89,11 @@ Route::prefix('v1')->group(function () {
         Route::get('tags/statistics', [App\Http\Controllers\Api\V1\TagController::class, 'statistics'])->middleware('permission:manage tags');
         Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:manage tags');
         
-        // Media (with stricter rate limiting for uploads)
+        // Media (with rate limiting for uploads - increased for better UX)
         Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload'])
-            ->middleware('throttle:10,1'); // 10 uploads per minute
+            ->middleware('throttle:30,1'); // 30 uploads per minute (increased from 10)
         Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple'])
-            ->middleware('throttle:5,1'); // 5 batch uploads per minute
+            ->middleware('throttle:10,1'); // 10 batch uploads per minute (increased from 5)
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index']);
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show']);
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:manage media');
@@ -299,6 +299,7 @@ Route::prefix('v1')->group(function () {
         Route::get('system/health', [App\Http\Controllers\Api\V1\SystemController::class, 'health'])->middleware('permission:manage settings');
         Route::get('system/statistics', [App\Http\Controllers\Api\V1\SystemController::class, 'statistics'])->middleware('permission:manage settings');
         Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage settings');
+        Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage settings');
         Route::post('system/cache/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearCache'])->middleware('permission:manage settings');
         
         // Multi-language Support

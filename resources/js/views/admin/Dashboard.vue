@@ -129,16 +129,39 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
+import { parseSingleResponse } from '../../utils/responseParser';
 
 const authStore = useAuthStore();
-const stats = ref({});
+const stats = ref({
+    contents: { total: 0, published: 0 },
+    media: { total: 0 },
+    users: { total: 0 },
+});
 
 onMounted(async () => {
     try {
         const response = await api.get('/admin/cms/system/statistics');
-        stats.value = response.data;
+        const data = parseSingleResponse(response);
+        
+        // SystemController returns: { success: true, data: { contents: {...}, users: {...}, media: {...} } }
+        // parseSingleResponse returns response.data.data, which is the stats object
+        if (data) {
+            stats.value = {
+                contents: {
+                    total: data.contents?.total ?? 0,
+                    published: data.contents?.published ?? 0,
+                },
+                media: {
+                    total: data.media?.total ?? 0,
+                },
+                users: {
+                    total: data.users?.total ?? 0,
+                },
+            };
+        }
     } catch (error) {
         console.error('Failed to fetch statistics:', error);
+        // Keep default values on error
     }
 });
 </script>

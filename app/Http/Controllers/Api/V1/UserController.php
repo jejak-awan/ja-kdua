@@ -13,7 +13,7 @@ class UserController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $query = User::with('roles');
+        $query = User::with(['roles', 'permissions']);
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -30,6 +30,19 @@ class UserController extends BaseApiController
         }
 
         $users = $query->latest()->paginate(20);
+
+        // Ensure roles and permissions are always arrays (not null)
+        $users->getCollection()->transform(function ($user) {
+            // Ensure roles is always a collection (will be serialized as array in JSON)
+            if (!$user->relationLoaded('roles') || $user->roles === null) {
+                $user->setRelation('roles', collect([]));
+            }
+            // Ensure permissions is always a collection (will be serialized as array in JSON)
+            if (!$user->relationLoaded('permissions') || $user->permissions === null) {
+                $user->setRelation('permissions', collect([]));
+            }
+            return $user;
+        });
 
         return $this->paginated($users, 'Users retrieved successfully');
     }

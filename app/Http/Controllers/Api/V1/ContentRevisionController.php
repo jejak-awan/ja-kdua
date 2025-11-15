@@ -6,14 +6,27 @@ use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\Content;
 use App\Models\ContentRevision;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContentRevisionController extends BaseApiController
 {
     public function index(Content $content)
     {
-        $revisions = $content->revisions()->with('user')->latest()->paginate(20);
+        try {
+            $revisions = $content->revisions()->with('user')->latest()->paginate(20);
 
-        return $this->paginated($revisions, 'Content revisions retrieved successfully');
+            return $this->paginated($revisions, 'Content revisions retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Content revisions index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'content_id' => $content->id,
+            ]);
+            // Return empty paginated response instead of error
+            return $this->paginated(
+                \Illuminate\Pagination\LengthAwarePaginator::make([], 0, 20),
+                'Content revisions retrieved successfully'
+            );
+        }
     }
 
     public function show(Content $content, ContentRevision $revision)

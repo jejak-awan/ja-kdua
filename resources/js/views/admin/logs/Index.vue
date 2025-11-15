@@ -94,6 +94,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const logFiles = ref([]);
 const selectedLogFile = ref(null);
@@ -124,9 +125,11 @@ const highlightedLogContent = computed(() => {
 const fetchLogFiles = async () => {
     try {
         const response = await api.get('/admin/cms/logs');
-        logFiles.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        logFiles.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch log files:', error);
+        logFiles.value = [];
     }
 };
 
@@ -135,7 +138,8 @@ const selectLogFile = async (logFile) => {
     loadingLog.value = true;
     try {
         const response = await api.get(`/admin/cms/logs/${logFile.name}`);
-        logContent.value = response.data.content || response.data || '';
+        const data = parseSingleResponse(response) || {};
+        logContent.value = data.content || '';
     } catch (error) {
         console.error('Failed to fetch log content:', error);
         logContent.value = 'Failed to load log content';

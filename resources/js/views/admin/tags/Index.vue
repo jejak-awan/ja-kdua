@@ -153,6 +153,7 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
 import TagModal from '../../../components/tags/TagModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const tags = ref([]);
@@ -177,7 +178,8 @@ const fetchTags = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/tags');
-        tags.value = response.data.data || response.data;
+        const { data } = parseResponse(response);
+        tags.value = ensureArray(data);
         
         // Fetch statistics if available
         try {

@@ -210,6 +210,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const activeTab = ref('sitemap');
 const tabs = [
@@ -234,7 +235,8 @@ const schemaJson = ref(null);
 const fetchRobotsTxt = async () => {
     try {
         const response = await api.get('/admin/cms/seo/robots-txt');
-        robotsContent.value = response.data.content || response.data || '';
+        const data = parseSingleResponse(response) || {};
+        robotsContent.value = data.content || '';
     } catch (error) {
         console.error('Failed to fetch robots.txt:', error);
     }
@@ -274,9 +276,11 @@ const copySitemapUrl = () => {
 const fetchContents = async () => {
     try {
         const response = await api.get('/admin/cms/contents');
-        contents.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        contents.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch contents:', error);
+        contents.value = [];
     }
 };
 
@@ -286,7 +290,7 @@ const runAnalysis = async () => {
     analyzing.value = true;
     try {
         const response = await api.get(`/admin/cms/contents/${selectedContentId.value}/seo-analysis`);
-        analysisResults.value = response.data.data || response.data;
+        analysisResults.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to run SEO analysis:', error);
         alert('Failed to run SEO analysis');
@@ -301,7 +305,7 @@ const generateSchema = async () => {
     generatingSchema.value = true;
     try {
         const response = await api.get(`/admin/cms/contents/${selectedContentForSchema.value}/schema`);
-        const schema = response.data.data || response.data;
+        const schema = parseSingleResponse(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error) {
         console.error('Failed to generate schema:', error);

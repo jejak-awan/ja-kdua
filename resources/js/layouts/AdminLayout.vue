@@ -507,10 +507,16 @@ const getIcon = (name) => {
 };
 
 const unreadNotificationsCount = computed(() => {
+    if (!Array.isArray(notifications.value)) {
+        return 0;
+    }
     return notifications.value.filter(n => !n.read_at).length;
 });
 
 const recentNotifications = computed(() => {
+    if (!Array.isArray(notifications.value)) {
+        return [];
+    }
     return notifications.value.slice(0, 5);
 });
 
@@ -520,9 +526,12 @@ const fetchNotifications = async () => {
     loadingNotifications.value = true;
     try {
         const response = await api.get('/admin/cms/notifications?limit=5');
-        notifications.value = response.data.data || response.data || [];
+        const data = response.data?.data || response.data || [];
+        // Ensure notifications is always an array
+        notifications.value = Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Failed to fetch notifications:', error);
+        notifications.value = [];
     } finally {
         loadingNotifications.value = false;
     }
@@ -583,7 +592,8 @@ const handleSearch = () => {
             const response = await api.get('/admin/cms/search', {
                 params: { q: searchQuery.value, limit: 5 },
             });
-            searchResults.value = response.data.data || response.data || [];
+            const data = response.data?.data || response.data || [];
+            searchResults.value = Array.isArray(data) ? data : [];
             showSearchResults.value = true;
         } catch (error) {
             console.error('Failed to search:', error);
@@ -599,11 +609,15 @@ const handleSearchResultClick = (result) => {
     searchQuery.value = '';
     
     // Navigate based on result type
-    if (result.type === 'content') {
+    if (!result || !result.id) {
+        return;
+    }
+    
+    if (result.type === 'content' && result.id) {
         router.push({ name: 'contents.edit', params: { id: result.id } });
-    } else if (result.type === 'category') {
+    } else if (result.type === 'category' && result.id) {
         router.push({ name: 'categories.edit', params: { id: result.id } });
-    } else if (result.type === 'user') {
+    } else if (result.type === 'user' && result.id) {
         router.push({ name: 'users.edit', params: { id: result.id } });
     } else if (result.url) {
         router.push(result.url);

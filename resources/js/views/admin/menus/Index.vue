@@ -84,6 +84,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import MenuModal from '../../../components/menus/MenuModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const menus = ref([]);
 const loading = ref(false);
@@ -93,7 +94,8 @@ const fetchMenus = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/menus');
-        menus.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        menus.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch menus:', error);
     } finally {

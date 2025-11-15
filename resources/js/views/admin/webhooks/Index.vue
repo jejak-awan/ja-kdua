@@ -183,6 +183,7 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
 import WebhookModal from '../../../components/webhooks/WebhookModal.vue';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const webhooks = ref([]);
 const statistics = ref(null);
@@ -206,12 +207,13 @@ const fetchWebhooks = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/webhooks');
-        webhooks.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        webhooks.value = ensureArray(data);
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/webhooks/statistics');
-            statistics.value = statsResponse.data;
+            statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from webhooks if endpoint doesn't exist
             statistics.value = {

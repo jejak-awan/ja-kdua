@@ -153,7 +153,7 @@
                                 class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                             />
                         </div>
-                        <div class="aspect-square bg-gray-100 flex items-center justify-center relative group">
+                        <div class="aspect-square bg-gray-100 flex items-center justify-center relative group" :data-media-id="media.id">
                             <LazyImage
                                 v-if="media.mime_type?.startsWith('image/')"
                                 :src="media.thumbnail_url || media.url"
@@ -251,7 +251,7 @@
                                     />
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                                    <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center" :data-media-id="media.id">
                                         <LazyImage
                                             v-if="media.mime_type?.startsWith('image/')"
                                             :src="media.thumbnail_url || media.url"
@@ -381,6 +381,7 @@ import MediaViewModal from '../../../components/media/MediaViewModal.vue';
 import FolderModal from '../../../components/media/FolderModal.vue';
 import MoveToFolderModal from '../../../components/media/MoveToFolderModal.vue';
 import LazyImage from '../../../components/LazyImage.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const viewMode = ref('grid');
 const loading = ref(false);
@@ -427,14 +428,11 @@ const fetchMedia = async () => {
         }
 
         const response = await api.get('/admin/cms/media', { params });
-        mediaList.value = response.data.data || [];
-        pagination.value = {
-            current_page: response.data.current_page,
-            last_page: response.data.last_page,
-            from: response.data.from,
-            to: response.data.to,
-            total: response.data.total,
-        };
+        const { data, pagination: paginationData } = parseResponse(response);
+        mediaList.value = ensureArray(data);
+        if (paginationData) {
+            pagination.value = paginationData;
+        }
     } catch (error) {
         console.error('Failed to fetch media:', error);
     } finally {
@@ -445,7 +443,8 @@ const fetchMedia = async () => {
 const fetchFolders = async () => {
     try {
         const response = await api.get('/admin/cms/media-folders');
-        folders.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        folders.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch folders:', error);
     }
@@ -594,7 +593,29 @@ const formatFileSize = (bytes) => {
 const handleImageError = (event) => {
     // If thumbnail fails to load, fallback to original URL
     const img = event.target;
-    if (img.src !== img.dataset.originalUrl) {
+    const currentSrc = img.src || img.getAttribute('src');
+    
+    // Check if this is a thumbnail URL
+    if (currentSrc && currentSrc.includes('_thumb.')) {
+        // Try to get original URL from media object
+        const mediaId = img.closest('[data-media-id]')?.getAttribute('data-media-id');
+        if (mediaId) {
+            const media = mediaList.value.find(m => m.id == mediaId);
+            if (media && media.url && media.url !== currentSrc) {
+                img.src = media.url;
+                return;
+            }
+        }
+        
+        // Fallback: replace thumbnail path with original
+        const originalSrc = currentSrc.replace('_thumb.', '.').replace('/thumbnails/', '/');
+        if (originalSrc !== currentSrc) {
+            img.src = originalSrc;
+            return;
+        }
+    }
+    
+    if (img.src !== img.dataset?.originalUrl) {
         img.src = img.dataset.originalUrl || img.src;
     }
 };

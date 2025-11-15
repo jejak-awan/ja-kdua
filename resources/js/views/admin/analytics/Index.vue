@@ -315,6 +315,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const dateFrom = ref(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
@@ -377,15 +378,22 @@ const fetchAnalytics = async () => {
             api.get('/admin/cms/analytics/realtime'),
         ]);
 
-        overview.value = overviewRes.data;
-        visits.value = visitsRes.data.data || visitsRes.data || [];
-        topPages.value = topPagesRes.data.data || topPagesRes.data || [];
-        topContent.value = topContentRes.data.data || topContentRes.data || [];
-        devices.value = devicesRes.data.data || devicesRes.data || [];
-        browsers.value = browsersRes.data.data || browsersRes.data || [];
-        countries.value = countriesRes.data.data || countriesRes.data || [];
-        referrers.value = referrersRes.data.data || referrersRes.data || [];
-        realtime.value = realtimeRes.data;
+        overview.value = parseSingleResponse(overviewRes) || {};
+        const visitsData = parseResponse(visitsRes);
+        visits.value = ensureArray(visitsData.data);
+        const topPagesData = parseResponse(topPagesRes);
+        topPages.value = ensureArray(topPagesData.data);
+        const topContentData = parseResponse(topContentRes);
+        topContent.value = ensureArray(topContentData.data);
+        const devicesData = parseResponse(devicesRes);
+        devices.value = ensureArray(devicesData.data);
+        const browsersData = parseResponse(browsersRes);
+        browsers.value = ensureArray(browsersData.data);
+        const countriesData = parseResponse(countriesRes);
+        countries.value = ensureArray(countriesData.data);
+        const referrersData = parseResponse(referrersRes);
+        referrers.value = ensureArray(referrersData.data);
+        realtime.value = parseSingleResponse(realtimeRes) || {};
     } catch (error) {
         console.error('Failed to fetch analytics:', error);
     } finally {
@@ -398,7 +406,7 @@ onMounted(() => {
     // Refresh real-time data every 30 seconds
     setInterval(() => {
         api.get('/admin/cms/analytics/realtime').then(res => {
-            realtime.value = res.data;
+            realtime.value = parseSingleResponse(res) || {};
         }).catch(err => {
             console.error('Failed to fetch real-time data:', err);
         });

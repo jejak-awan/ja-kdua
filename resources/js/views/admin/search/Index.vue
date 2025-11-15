@@ -97,6 +97,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const route = useRoute();
 const router = useRouter();
@@ -139,7 +140,8 @@ const performSearch = async () => {
         const response = await api.get('/admin/cms/search', {
             params: { q: query.value },
         });
-        results.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        results.value = ensureArray(data);
         
         // Update URL
         router.replace({ query: { q: query.value } });

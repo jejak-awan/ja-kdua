@@ -80,6 +80,9 @@
                             <option value="deleted">Deleted</option>
                             <option value="login">Login</option>
                             <option value="logout">Logout</option>
+                            <option value="viewed">Viewed</option>
+                            <option value="published">Published</option>
+                            <option value="unpublished">Unpublished</option>
                         </select>
                         <select
                             v-model="userFilter"
@@ -118,13 +121,13 @@
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="{
-                                        'bg-green-100 text-green-800': log.type === 'created',
-                                        'bg-blue-100 text-blue-800': log.type === 'updated',
-                                        'bg-red-100 text-red-800': log.type === 'deleted',
-                                        'bg-purple-100 text-purple-800': log.type === 'login' || log.type === 'logout',
+                                        'bg-green-100 text-green-800': (log.action || log.type) === 'created',
+                                        'bg-blue-100 text-blue-800': (log.action || log.type) === 'updated',
+                                        'bg-red-100 text-red-800': (log.action || log.type) === 'deleted',
+                                        'bg-purple-100 text-purple-800': (log.action || log.type) === 'login' || (log.action || log.type) === 'logout',
                                     }"
                                 >
-                                    {{ log.type }}
+                                    {{ log.action || log.type || 'unknown' }}
                                 </span>
                                 <span class="text-sm font-medium text-gray-900">{{ log.description }}</span>
                             </div>
@@ -160,22 +163,29 @@ const typeFilter = ref('');
 const userFilter = ref('');
 
 const filteredLogs = computed(() => {
+    if (!Array.isArray(logs.value)) {
+        return [];
+    }
+    
     let filtered = logs.value;
     
     if (typeFilter.value) {
-        filtered = filtered.filter(log => log.type === typeFilter.value);
+        // Check both 'type' and 'action' fields
+        filtered = filtered.filter(log => 
+            log?.type === typeFilter.value || log?.action === typeFilter.value
+        );
     }
     
     if (userFilter.value) {
-        filtered = filtered.filter(log => log.user_id === parseInt(userFilter.value));
+        filtered = filtered.filter(log => log?.user_id === parseInt(userFilter.value));
     }
     
     if (search.value) {
         const searchLower = search.value.toLowerCase();
         filtered = filtered.filter(log => 
-            log.description?.toLowerCase().includes(searchLower) ||
-            log.model_type?.toLowerCase().includes(searchLower) ||
-            log.user?.name?.toLowerCase().includes(searchLower)
+            log?.description?.toLowerCase().includes(searchLower) ||
+            log?.model_type?.toLowerCase().includes(searchLower) ||
+            log?.user?.name?.toLowerCase().includes(searchLower)
         );
     }
     
@@ -186,7 +196,16 @@ const fetchLogs = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/activity-logs');
-        logs.value = response.data.data || response.data || [];
+        // Handle paginated response
+        let data = [];
+        if (response.data?.data && Array.isArray(response.data.data)) {
+            data = response.data.data;
+        } else if (Array.isArray(response.data)) {
+            data = response.data;
+        } else if (response.data?.items && Array.isArray(response.data.items)) {
+            data = response.data.items;
+        }
+        logs.value = data;
         
         // Fetch statistics
         try {
@@ -198,12 +217,21 @@ const fetchLogs = async () => {
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
             
-            statistics.value = {
-                total: logs.value.length,
-                today: logs.value.filter(l => new Date(l.created_at) >= today).length,
-                this_week: logs.value.filter(l => new Date(l.created_at) >= weekAgo).length,
-                active_users: new Set(logs.value.map(l => l.user_id).filter(Boolean)).size,
-            };
+            if (Array.isArray(logs.value)) {
+                statistics.value = {
+                    total: logs.value.length,
+                    today: logs.value.filter(l => l?.created_at && new Date(l.created_at) >= today).length,
+                    this_week: logs.value.filter(l => l?.created_at && new Date(l.created_at) >= weekAgo).length,
+                    active_users: new Set(logs.value.map(l => l?.user_id).filter(Boolean)).size,
+                };
+            } else {
+                statistics.value = {
+                    total: 0,
+                    today: 0,
+                    this_week: 0,
+                    active_users: 0,
+                };
+            }
         }
     } catch (error) {
         console.error('Failed to fetch activity logs:', error);
@@ -214,10 +242,12 @@ const fetchLogs = async () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await api.get('/admin/users');
-        users.value = response.data.data || response.data || [];
+        const response = await api.get('/admin/cms/users');
+        const data = response.data?.data || response.data || [];
+        users.value = Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Failed to fetch users:', error);
+        users.value = [];
     }
 };
 

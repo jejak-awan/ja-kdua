@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('content_revisions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('content_id')->constrained('contents')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('title');
+            $table->text('body')->nullable();
+            $table->text('excerpt')->nullable();
+            $table->string('slug');
+            $table->json('meta')->nullable();
+            $table->string('status')->default('draft');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

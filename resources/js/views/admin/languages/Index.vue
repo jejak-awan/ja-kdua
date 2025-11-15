@@ -45,6 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const languages = ref([]);
 const loading = ref(false);
@@ -54,9 +55,11 @@ const fetchLanguages = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/languages');
-        languages.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        languages.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch languages:', error);
+        languages.value = [];
     } finally {
         loading.value = false;
     }

@@ -104,6 +104,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const router = useRouter();
 const templates = ref([]);
@@ -124,9 +125,11 @@ const fetchTemplates = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/content-templates');
-        templates.value = response.data.data || response.data;
+        const { data } = parseResponse(response);
+        templates.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch templates:', error);
+        templates.value = [];
     } finally {
         loading.value = false;
     }
@@ -135,8 +138,10 @@ const fetchTemplates = async () => {
 const createFromTemplate = async (template) => {
     try {
         const response = await api.post(`/admin/cms/content-templates/${template.id}/create-content`);
-        const content = response.data.data || response.data;
-        router.push({ name: 'contents.edit', params: { id: content.id } });
+        const content = parseSingleResponse(response);
+        if (content && content.id) {
+            router.push({ name: 'contents.edit', params: { id: content.id } });
+        }
     } catch (error) {
         console.error('Failed to create content from template:', error);
         alert(error.response?.data?.message || 'Failed to create content from template');

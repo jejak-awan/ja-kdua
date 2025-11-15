@@ -10,7 +10,7 @@ class FieldGroupController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $query = FieldGroup::with('fields');
+        $query = FieldGroup::with('fields')->withCount('fields');
 
         if ($request->has('applies_to')) {
             $query->where('applies_to', $request->applies_to);

@@ -16,6 +16,8 @@ class RolePermissionSeeder extends Seeder
             'edit content',
             'delete content',
             'publish content',
+            'manage content',
+            'manage content templates',
             'manage categories',
             'manage tags',
             'manage media',

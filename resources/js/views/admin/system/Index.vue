@@ -154,6 +154,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 
 const systemInfo = ref({});
 const statistics = ref(null);
@@ -174,12 +175,12 @@ const systemHealth = computed(() => {
 const fetchSystemInfo = async () => {
     try {
         const response = await api.get('/admin/cms/system/info');
-        systemInfo.value = response.data.data || response.data;
+        systemInfo.value = parseSingleResponse(response) || {};
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/system/statistics');
-            statistics.value = statsResponse.data;
+            statistics.value = parseSingleResponse(statsResponse) || {};
         } catch (error) {
             // Set default if endpoint doesn't exist
             statistics.value = {
@@ -193,7 +194,8 @@ const fetchSystemInfo = async () => {
         // Fetch cache status
         try {
             const cacheResponse = await api.get('/admin/cms/system/cache-status');
-            cacheStatus.value = cacheResponse.data.status || 'Active';
+            const cacheData = parseSingleResponse(cacheResponse) || {};
+            cacheStatus.value = cacheData.status || 'Active';
         } catch (error) {
             cacheStatus.value = 'Active';
         }

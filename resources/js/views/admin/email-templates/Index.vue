@@ -107,6 +107,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const templates = ref([]);
 const loading = ref(false);
@@ -126,9 +127,11 @@ const fetchTemplates = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/email-templates');
-        templates.value = response.data.data || response.data;
+        const { data } = parseResponse(response);
+        templates.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch templates:', error);
+        templates.value = [];
     } finally {
         loading.value = false;
     }

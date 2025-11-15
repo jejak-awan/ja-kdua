@@ -36,6 +36,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const route = useRoute();
 const languageCode = route.params.lang || 'en';
@@ -54,9 +55,11 @@ const fetchTranslations = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/cms/translations/${languageCode}`);
-        translations.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        translations.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch translations:', error);
+        translations.value = [];
     } finally {
         loading.value = false;
     }

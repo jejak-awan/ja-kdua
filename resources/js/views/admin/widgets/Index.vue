@@ -44,6 +44,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import WidgetModal from '../../../components/widgets/WidgetModal.vue';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const widgets = ref([]);
 const loading = ref(false);
@@ -55,7 +56,8 @@ const fetchWidgets = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/widgets');
-        widgets.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        widgets.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch widgets:', error);
     } finally {

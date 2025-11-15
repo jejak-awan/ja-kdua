@@ -148,6 +148,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import FormModal from '../../../components/forms/FormModal.vue';
 import Submissions from './Submissions.vue';
 
@@ -183,9 +184,11 @@ const fetchForms = async () => {
     try {
         loading.value = true;
         const response = await api.get('/admin/cms/forms');
-        forms.value = response.data;
+        const { data } = parseResponse(response);
+        forms.value = ensureArray(data);
     } catch (error) {
         console.error('Error fetching forms:', error);
+        forms.value = [];
     } finally {
         loading.value = false;
     }

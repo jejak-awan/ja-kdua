@@ -74,8 +74,13 @@ class Media extends Model
         // Check if thumbnail exists
         $fileName = pathinfo($this->path, PATHINFO_FILENAME);
         $extension = pathinfo($this->path, PATHINFO_EXTENSION);
-        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $extension;
+        
+        // For SVG files, thumbnail is saved as PNG
+        $isSvg = $this->mime_type === 'image/svg+xml' || str_ends_with($this->path, '.svg');
+        $thumbnailExtension = $isSvg ? 'png' : $extension;
+        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $thumbnailExtension;
 
+        // Check if thumbnail file actually exists
         if (Storage::disk($this->disk)->exists($thumbnailPath)) {
             // Use CDN if enabled
             if (CdnHelper::isEnabled()) {

@@ -161,6 +161,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 import FileUploadModal from '../../../components/file-manager/FileUploadModal.vue';
 import CreateFolderModal from '../../../components/file-manager/CreateFolderModal.vue';
 
@@ -200,9 +201,9 @@ const fetchFiles = async () => {
         const response = await api.get('/admin/cms/file-manager', {
             params: { path: currentPath.value },
         });
-        const data = response.data.data || response.data;
-        files.value = data.files || [];
-        folders.value = data.folders || [];
+        const data = parseSingleResponse(response) || {};
+        files.value = Array.isArray(data.files) ? data.files : [];
+        folders.value = Array.isArray(data.folders) ? data.folders : [];
     } catch (error) {
         console.error('Failed to fetch files:', error);
     } finally {

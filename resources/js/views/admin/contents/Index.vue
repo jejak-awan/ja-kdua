@@ -194,19 +194,24 @@ const search = ref('');
 const statusFilter = ref('');
 const selectedContents = ref([]);
 const bulkAction = ref('');
+const pagination = ref(null);
 
 const allSelected = computed(() => {
     return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
 });
 
 const filteredContents = computed(() => {
+    if (!Array.isArray(contents.value)) {
+        return [];
+    }
+    
     let filtered = contents.value;
     
     if (search.value) {
         const searchLower = search.value.toLowerCase();
         filtered = filtered.filter(content => 
-            content.title.toLowerCase().includes(searchLower) ||
-            content.slug.toLowerCase().includes(searchLower)
+            content?.title?.toLowerCase().includes(searchLower) ||
+            content?.slug?.toLowerCase().includes(searchLower)
         );
     }
     
@@ -221,7 +226,25 @@ const fetchContents = async () => {
             params.status = statusFilter.value;
         }
         const response = await api.get('/admin/cms/contents', { params });
-        contents.value = response.data.data || response.data;
+        // Handle paginated response from BaseApiController
+        let data = [];
+        if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+            // Paginated response: { success: true, message: "...", data: { data: [...], pagination: {...} } }
+            data = response.data.data.data;
+            if (response.data.data.pagination) {
+                pagination.value = response.data.data.pagination;
+            }
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+            // Simple array response: { success: true, data: [...] }
+            data = response.data.data;
+        } else if (Array.isArray(response.data)) {
+            // Direct array response
+            data = response.data;
+        } else if (response.data?.items && Array.isArray(response.data.items)) {
+            // Alternative paginated format
+            data = response.data.items;
+        }
+        contents.value = data;
         selectedContents.value = [];
     } catch (error) {
         console.error('Failed to fetch contents:', error);

@@ -131,6 +131,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const loading = ref(false);
 const saving = ref(false);
@@ -158,25 +159,8 @@ const fetchSettings = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/settings');
-        
-        // Handle different response formats
-        let settingsData = [];
-        if (response && response.data) {
-            // If response.data is directly an array
-            if (Array.isArray(response.data)) {
-                settingsData = response.data;
-            }
-            // If response.data has a 'data' property that is an array
-            else if (response.data.data && Array.isArray(response.data.data)) {
-                settingsData = response.data.data;
-            }
-            // If response.data has a 'settings' property
-            else if (response.data.settings && Array.isArray(response.data.settings)) {
-                settingsData = response.data.settings;
-            }
-        }
-        
-        settings.value = settingsData;
+        const { data } = parseResponse(response);
+        settings.value = ensureArray(data);
         initializeFormData();
     } catch (error) {
         settings.value = [];

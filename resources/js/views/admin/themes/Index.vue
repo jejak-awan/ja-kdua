@@ -79,6 +79,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import ThemeSettingsModal from '../../../components/themes/ThemeSettingsModal.vue';
 import CustomCSSModal from '../../../components/themes/CustomCSSModal.vue';
 
@@ -90,9 +91,11 @@ const selectedTheme = ref(null);
 const fetchThemes = async () => {
     try {
         const response = await api.get('/admin/cms/themes');
-        themes.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        themes.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch themes:', error);
+        themes.value = [];
     }
 };
 

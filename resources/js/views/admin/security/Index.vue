@@ -212,6 +212,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const logs = ref([]);
 const statistics = ref(null);
@@ -245,12 +246,13 @@ const fetchLogs = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/security/logs');
-        logs.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        logs.value = ensureArray(data);
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/security/statistics');
-            statistics.value = statsResponse.data;
+            statistics.value = parseSingleResponse(statsResponse) || {};
         } catch (error) {
             // Calculate from logs if endpoint doesn't exist
             statistics.value = {
@@ -296,7 +298,7 @@ const checkIPStatus = async () => {
 
     try {
         const response = await api.get(`/admin/cms/security/check-ip/${ipToCheck.value}`);
-        ipStatus.value = response.data.data || response.data;
+        ipStatus.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to check IP status:', error);
         alert('Failed to check IP status');

@@ -63,6 +63,17 @@ const onLoad = () => {
 
 const onError = (event) => {
     hasError.value = true;
+    // Try to fallback to original URL if thumbnail fails
+    const currentSrc = imageRef.value?.src;
+    if (currentSrc && currentSrc.includes('_thumb.')) {
+        // If thumbnail fails, try original URL
+        const originalSrc = currentSrc.replace('_thumb.', '.').replace('/thumbnails/', '/');
+        if (originalSrc !== currentSrc && imageRef.value) {
+            imageRef.value.src = originalSrc;
+            hasError.value = false; // Reset error to try original
+            return;
+        }
+    }
     emit('error', event);
 };
 
@@ -76,6 +87,16 @@ const loadImage = () => {
 };
 
 onMounted(() => {
+    // For thumbnails, load immediately to avoid lazy loading issues
+    const dataSrc = imageRef.value?.getAttribute('data-src');
+    if (dataSrc && (dataSrc.includes('_thumb.') || dataSrc.includes('/thumbnails/'))) {
+        // Load thumbnail immediately
+        if (imageRef.value) {
+            imageRef.value.src = dataSrc;
+        }
+        return;
+    }
+    
     // Check if IntersectionObserver is supported
     if ('IntersectionObserver' in window) {
         observer = new IntersectionObserver(

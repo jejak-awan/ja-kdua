@@ -126,6 +126,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import TaskModal from '../../../components/scheduled-tasks/TaskModal.vue';
 
 const tasks = ref([]);
@@ -160,9 +161,11 @@ const fetchTasks = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/scheduled-tasks');
-        tasks.value = response.data.data || response.data || [];
+        const { data } = parseResponse(response);
+        tasks.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch tasks:', error);
+        tasks.value = [];
     } finally {
         loading.value = false;
     }

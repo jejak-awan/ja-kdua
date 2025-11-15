@@ -115,22 +115,37 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 
-const cacheStats = ref({});
+const cacheStats = ref({
+    status: 'Active',
+    hits: 0,
+    misses: 0,
+});
 const clearing = ref(false);
 const warming = ref(false);
 
 const fetchCacheStats = async () => {
     try {
-        // Try to get cache stats if endpoint exists
-        // For now, we'll set default values
+        // Try to get cache stats from SystemController
+        const response = await api.get('/admin/cms/system/cache-status');
+        const data = parseSingleResponse(response);
+        if (data) {
+            cacheStats.value = {
+                status: data.status || 'Active',
+                hits: data.hits || 0,
+                misses: data.misses || 0,
+                details: data.details || null,
+            };
+        }
+    } catch (error) {
+        console.error('Failed to fetch cache stats:', error);
+        // Keep default values on error
         cacheStats.value = {
             status: 'Active',
             hits: 0,
             misses: 0,
         };
-    } catch (error) {
-        console.error('Failed to fetch cache stats:', error);
     }
 };
 

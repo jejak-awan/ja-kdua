@@ -330,6 +330,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 import MediaPicker from '../../../components/MediaPicker.vue';
 
@@ -361,6 +362,9 @@ const form = ref({
 });
 
 const availableTags = computed(() => {
+    if (!Array.isArray(tags.value) || !Array.isArray(selectedTags.value)) {
+        return [];
+    }
     return tags.value.filter(tag => !selectedTags.value.find(st => st.id === tag.id));
 });
 
@@ -394,14 +398,16 @@ const addTag = (event) => {
 };
 
 const removeTag = (tagId) => {
-    selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
+    if (Array.isArray(selectedTags.value)) {
+        selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
+    }
 };
 
 const fetchContent = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/cms/contents/${contentId}`);
-        const content = response.data;
+        const content = parseSingleResponse(response) || {};
         
         form.value = {
             title: content.title || '',
@@ -438,7 +444,7 @@ const fetchContent = async () => {
 const lockContent = async () => {
     try {
         const response = await api.post(`/admin/cms/contents/${contentId}/lock`);
-        lockStatus.value = response.data.data || response.data;
+        lockStatus.value = parseSingleResponse(response) || {};
         
         // Refresh lock status every 30 seconds
         if (lockInterval.value) {
@@ -453,7 +459,7 @@ const lockContent = async () => {
 const checkLockStatus = async () => {
     try {
         const response = await api.get(`/admin/cms/contents/${contentId}`);
-        const content = response.data;
+        const content = parseSingleResponse(response) || {};
         if (content.lock_status) {
             lockStatus.value = content.lock_status;
         }
@@ -505,10 +511,12 @@ const formatDateTimeLocal = (dateString) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/cms/categories');
-        categories.value = response.data.data || response.data || [];
+        const response = await api.get('/admin/cms/categories');
+        const data = response.data?.data || response.data || [];
+        categories.value = Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);
+        categories.value = [];
     }
 };
 

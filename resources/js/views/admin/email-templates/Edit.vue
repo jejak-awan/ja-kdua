@@ -136,6 +136,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { parseSingleResponse } from '../../../utils/responseParser';
 
 const route = useRoute();
 const router = useRouter();
@@ -165,7 +166,7 @@ const fetchTemplate = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/admin/cms/email-templates/${templateId}`);
-        const template = response.data.data || response.data;
+        const template = parseSingleResponse(response) || {};
         
         form.value = {
             name: template.name || '',
@@ -185,9 +186,10 @@ const fetchTemplate = async () => {
 const handlePreview = async () => {
     try {
         const response = await api.post(`/admin/cms/email-templates/${templateId}/preview`);
+        const data = parseSingleResponse(response) || {};
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
-            previewWindow.document.write(response.data.html || response.data);
+            previewWindow.document.write(data.html || '');
         }
     } catch (error) {
         console.error('Failed to preview template:', error);
