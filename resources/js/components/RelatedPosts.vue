@@ -23,8 +23,9 @@
           <!-- Featured Image -->
           <div v-if="post.featured_image" class="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-900">
             <img
-              :src="post.featured_image"
+              v-lazy="post.featured_image"
               :alt="post.title"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>

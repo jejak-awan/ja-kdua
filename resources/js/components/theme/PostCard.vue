@@ -2,7 +2,7 @@
   <article class="post-card" @click="navigateToPost">
     <!-- Featured Image -->
     <div v-if="post.featured_image" class="post-image">
-      <img :src="post.featured_image" :alt="post.title" loading="lazy">
+      <img v-lazy="post.featured_image" :alt="post.title" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23f3f4f6'/%3E%3C/svg%3E">
       <div v-if="post.category" class="post-category">
         {{ post.category.name }}
       </div>
@@ -102,6 +102,24 @@ const navigateToPost = () => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+}
+
+.post-image img.lazy-loading {
+  filter: blur(5px);
+  opacity: 0.6;
+}
+
+.post-image img.lazy-loaded {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .post-card:hover .post-image img {
