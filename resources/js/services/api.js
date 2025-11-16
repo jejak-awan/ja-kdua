@@ -78,6 +78,37 @@ api.interceptors.response.use(
                 }
             }
         }
+
+        // Handle 403 Forbidden
+        if (error.response?.status === 403) {
+            const reason = error.response?.data?.message || 'Anda tidak memiliki izin untuk mengakses resource ini';
+            const requiredPermissions = error.response?.data?.required_permissions || [];
+            
+            // Only redirect if not already on error page
+            if (!window.location.pathname.includes('/403')) {
+                import('@/router').then((routerModule) => {
+                    routerModule.default.push({
+                        name: 'forbidden',
+                        state: { reason, requiredPermissions }
+                    });
+                });
+            }
+        }
+
+        // Handle 500 Server Error
+        if (error.response?.status === 500) {
+            const errorDetails = error.response?.data?.message || error.message;
+            
+            // Only redirect if not already on error page
+            if (!window.location.pathname.includes('/500')) {
+                import('@/router').then((routerModule) => {
+                    routerModule.default.push({
+                        name: 'server-error',
+                        state: { errorDetails }
+                    });
+                });
+            }
+        }
         
         return Promise.reject(error);
     }

@@ -250,6 +250,34 @@ const routes = [
             },
         ],
     },
+
+    // Error pages
+    {
+        path: '/403',
+        name: 'forbidden',
+        component: () => import('../views/errors/Forbidden.vue'),
+        meta: { public: true },
+    },
+    {
+        path: '/500',
+        name: 'server-error',
+        component: () => import('../views/errors/ServerError.vue'),
+        meta: { public: true },
+    },
+    {
+        path: '/404',
+        name: 'not-found',
+        component: () => import('../views/errors/NotFound.vue'),
+        meta: { public: true },
+    },
+
+    // Catch-all route (must be last)
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'catch-all',
+        component: () => import('../views/errors/NotFound.vue'),
+        meta: { public: true },
+    },
 ];
 
 const router = createRouter({
@@ -261,7 +289,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
     
-    // Public routes (home, etc.) - skip auth check
+    // Public routes (home, error pages, etc.) - skip auth check
     if (to.meta.public) {
         next();
         return;
@@ -284,6 +312,12 @@ router.beforeEach((to, from, next) => {
     
     // Allow navigation
     next();
+});
+
+// Global error handler
+router.onError((error) => {
+    console.error('Router error:', error);
+    router.push({ name: 'server-error', state: { errorDetails: error.message } });
 });
 
 export default router;
