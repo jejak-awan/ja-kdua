@@ -66,6 +66,15 @@
                     </div>
                 </div>
 
+                <div v-if="timeoutMessage" class="rounded-md bg-amber-50 p-4 mb-4 border border-amber-200">
+                    <div class="flex">
+                        <svg class="h-5 w-5 text-amber-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-sm text-amber-800">{{ timeoutMessage }}</p>
+                    </div>
+                </div>
+
                 <div v-if="message && !errors.email && !errors.password" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'">
                     <p class="text-sm">{{ message }}</p>
                 </div>
@@ -95,11 +104,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const form = reactive({
@@ -112,6 +122,23 @@ const errors = ref({});
 const message = ref('');
 const messageType = ref('');
 const loading = ref(false);
+
+// Check for session timeout
+const timeoutMessage = computed(() => {
+    if (route.query.timeout === '1') {
+        return 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan login kembali untuk melanjutkan.';
+    }
+    return null;
+});
+
+onMounted(() => {
+    // Clear timeout query param after displaying message
+    if (route.query.timeout) {
+        setTimeout(() => {
+            router.replace({ name: 'login', query: { ...route.query, timeout: undefined } });
+        }, 5000);
+    }
+});
 
 const handleLogin = async () => {
     loading.value = true;

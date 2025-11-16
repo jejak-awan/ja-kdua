@@ -1,14 +1,32 @@
 <template>
     <router-view />
+    
+    <!-- Session Timeout Warning Modal -->
+    <SessionTimeoutModal
+        :is-visible="isWarningVisible"
+        :time-remaining="timeRemaining"
+        @extend="extendSession"
+        @logout="manualLogout"
+    />
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useTheme } from './composables/useTheme';
+import { useSessionTimeout } from './composables/useSessionTimeout';
+import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
 
 const authStore = useAuthStore();
 const { loadActiveTheme } = useTheme();
+
+// Session timeout management
+const {
+    isWarningVisible,
+    timeRemaining,
+    extendSession,
+    manualLogout,
+} = useSessionTimeout();
 
 // Initialize dark mode from localStorage or system preference
 const initDarkMode = () => {
