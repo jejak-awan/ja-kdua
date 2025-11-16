@@ -1,314 +1,432 @@
-# JA-CMS User Guide
+# 📖 JA-CMS User Guide
 
-## Table of Contents
+Panduan lengkap untuk content authors dan editors menggunakan JA-CMS.
 
-1. [Getting Started](#getting-started)
-2. [Dashboard](#dashboard)
-3. [Content Management](#content-management)
-4. [Media Management](#media-management)
-5. [User Management](#user-management)
-6. [Settings](#settings)
-7. [Advanced Features](#advanced-features)
+## Daftar Isi
+
+1. [Pendahuluan](#pendahuluan)
+2. [Login & Dashboard](#login--dashboard)
+3. [Membuat Konten](#membuat-konten)
+4. [Mengelola Media](#mengelola-media)
+5. [Kategori & Tags](#kategori--tags)
+6. [Komentar](#komentar)
+7. [Tips & Trik](#tips--trik)
 
 ---
 
-## Getting Started
+## Pendahuluan
 
-### First Login
+JA-CMS adalah Content Management System modern yang memudahkan Anda mengelola konten website. Panduan ini akan membantu Anda memahami fitur-fitur utama dan cara menggunakannya.
 
-1. Navigate to `/login`
-2. Enter your email and password
-3. Click "Sign in"
-4. You'll be redirected to the dashboard
+### Persyaratan
+
+- Akun pengguna dengan role yang sesuai (Author/Editor/Admin)
+- Browser modern (Chrome, Firefox, Safari, Edge)
+- Koneksi internet
+
+---
+
+## Login & Dashboard
+
+### Cara Login
+
+1. Buka halaman login: `https://your-domain.com/login`
+2. Masukkan **Email** dan **Password**
+3. Klik tombol **Login**
+
+![Login Page](https://via.placeholder.com/800x400?text=Login+Page)
 
 ### Dashboard Overview
 
-The dashboard provides:
-- **Statistics:** Content, users, media counts
-- **Recent Activity:** Latest actions and updates
-- **Quick Actions:** Common tasks shortcuts
-- **Notifications:** System and user notifications
+Setelah login, Anda akan melihat Dashboard dengan:
+
+- **Statistik**: Total konten, published posts, media files, users
+- **Quick Actions**: Tombol pintas untuk aksi cepat
+  - Buat Artikel
+  - Buat Halaman
+  - Upload Media
+  - Kelola Kategori
+  - Kelola Tag
+  - Lihat Komentar
+- **Recent Actions**: Histori aksi terakhir Anda
 
 ---
 
-## Content Management
+## Membuat Konten
 
-### Creating Content
+### Membuat Artikel Baru
 
-1. Navigate to **Contents** → **Create**
-2. Fill in the form:
-   - **Title:** Content title
-   - **Slug:** URL-friendly identifier (auto-generated)
-   - **Body:** Content body (rich text editor)
-   - **Excerpt:** Short description
-   - **Category:** Select category
-   - **Tags:** Add tags
-   - **Status:** Draft, Published, or Archived
-   - **Published At:** Schedule publication
-3. Click **Save** or **Publish**
+1. Klik **Quick Actions** → **Buat Artikel**
+   *ATAU*
+   Sidebar → **Konten** → **Buat Baru**
 
-### Editing Content
+2. Isi form konten:
+   - **Judul**: Masukkan judul artikel (wajib)
+   - **Slug**: URL-friendly (otomatis dari judul)
+   - **Konten**: Tulis konten menggunakan Rich Text Editor
+   - **Excerpt**: Ringkasan artikel (optional)
+   - **Featured Image**: Upload gambar utama
+   - **Kategori**: Pilih kategori
+   - **Tags**: Tambahkan tags untuk SEO
 
-1. Go to **Contents** → Select content
-2. Click **Edit**
-3. Make changes
-4. Click **Save**
+3. **Status Konten**:
+   - **Draft**: Simpan sebagai draft (tidak tampil)
+   - **Published**: Publish langsung
+   - **Scheduled**: Jadwalkan publikasi
 
-### Content Features
+4. **SEO Settings** (optional):
+   - Meta Title
+   - Meta Description
+   - Meta Keywords
+   - OG Image (untuk social sharing)
 
-- **Duplicate:** Create a copy of existing content
-- **Preview:** Preview content before publishing
-- **Revisions:** View and restore previous versions
-- **Lock:** Lock content to prevent concurrent editing
-- **Bulk Actions:** Delete, publish, or archive multiple items
+5. Klik **Simpan** atau **Publish**
 
----
+### Rich Text Editor
 
-## Media Management
+Editor mendukung:
 
-### Uploading Media
+- **Format Text**: Bold, Italic, Underline, Strike-through
+- **Heading**: H1, H2, H3, H4, H5, H6
+- **List**: Bullet list, numbered list
+- **Link**: Insert/edit links
+- **Image**: Upload dan embed images
+- **Video**: Embed YouTube/Vimeo videos
+- **Code**: Code blocks dengan syntax highlighting
+- **Table**: Insert dan edit tables
+- **Quote**: Blockquotes
+- **Alignment**: Left, Center, Right, Justify
 
-1. Go to **Media** → **Upload**
-2. Select file(s) or drag and drop
-3. Add metadata (alt text, description)
-4. Select folder (optional)
-5. Click **Upload**
+### Auto-Save
 
-**Supported Formats:**
-- Images: JPG, PNG, GIF, WebP
-- Documents: PDF, DOC, DOCX
-- Max size: 10MB
+Konten otomatis di-save setiap **30 detik** untuk mencegah kehilangan data.
 
-### Organizing Media
+Indikator di kanan atas menunjukkan:
+- ⏱️ "Auto-saving..." - Sedang menyimpan
+- ✅ "Saved at 14:32" - Tersimpan
+- ⚠️ "Not saved" - Belum tersimpan
 
-- **Folders:** Create folders to organize media
-- **Search:** Search by name, filename, or alt text
-- **Filter:** Filter by type, folder, or usage
-- **Bulk Actions:** Delete or move multiple files
+### Content Revisions
 
-### Media Features
+Sistem menyimpan revisi setiap perubahan:
 
-- **Thumbnail Generation:** Automatic for images
-- **Resize:** Resize images to specific dimensions
-- **Usage Tracking:** See where media is used
-- **Lazy Loading:** Images load as you scroll
+1. Buka konten yang sudah ada
+2. Klik tab **Revisions**
+3. Lihat daftar revisi dengan:
+   - Tanggal & waktu
+   - User yang mengubah
+   - Note/keterangan perubahan
+4. Klik **Restore** untuk kembalikan ke revisi tertentu
 
----
+### Duplicate Content
 
-## User Management
-
-### Creating Users
-
-1. Go to **Users** → **Create**
-2. Fill in:
-   - Name
-   - Email
-   - Password
-   - Roles
-3. Click **Create**
-
-### Managing Roles
-
-- **Admin:** Full access
-- **Editor:** Content management
-- **Author:** Create and edit own content
-- **Member:** Basic access
+Untuk duplikasi konten:
+1. Buka konten
+2. Klik **Duplicate** di toolbar
+3. Edit judul dan slug (otomatis ditambah "-copy")
+4. Simpan sebagai konten baru
 
 ---
 
-## Settings
+## Mengelola Media
 
-### General Settings
+### Upload Media
 
-- Site name
-- Site description
-- Site email
-- Timezone
-- Date format
+#### Via Media Library
 
-### Email Settings
+1. Sidebar → **Media**
+2. Klik **Upload** atau drag & drop files
+3. Pilih file (max 10MB per file)
+4. Tunggu proses upload
+5. Media siap digunakan
 
-- SMTP configuration
-- Email templates
-- Notification settings
+#### Via Content Editor
 
-### SEO Settings
+1. Saat menulis konten
+2. Klik icon **Image** di toolbar
+3. Pilih **Upload** atau **Media Library**
+4. Pilih/upload gambar
+5. Atur alignment dan size
 
-- Meta tags
-- Sitemap generation
-- Robots.txt configuration
-- Schema markup
+### Jenis File yang Didukung
 
-### Security Settings
+- **Gambar**: JPG, PNG, GIF, WebP, SVG
+- **Dokumen**: PDF, DOC, DOCX
+- **Video**: MP4, MOV (max 50MB)
 
-- Password requirements
-- Session timeout
-- IP blocking
-- Failed login attempts
+### Organize Media
 
----
+- **Filter**: By type, date uploaded
+- **Search**: Cari berdasarkan nama file
+- **View**: Grid view atau List view
+- **Sort**: Name, Date, Size
 
-## Advanced Features
+### Edit Media Info
 
-### Content Templates
+1. Klik media thumbnail
+2. Edit:
+   - **Alt Text**: Untuk SEO dan accessibility
+   - **Title**: Judul media
+   - **Caption**: Keterangan
+   - **Description**: Deskripsi detail
+3. Klik **Update**
 
-Create reusable content templates:
-1. Go to **Content Templates** → **Create**
-2. Define template structure
-3. Use template when creating content
+### Bulk Operations
 
-### Email Templates
-
-Create custom email templates:
-1. Go to **Email Templates** → **Create**
-2. Design template with variables
-3. Use in notifications
-
-### Forms
-
-Create custom forms:
-1. Go to **Forms** → **Create**
-2. Add fields
-3. Configure settings
-4. Get form submissions
-
-### Menus
-
-Manage navigation menus:
-1. Go to **Menus** → **Create**
-2. Add menu items
-3. Assign to locations
-4. Reorder items
-
-### Widgets
-
-Add widgets to pages:
-1. Go to **Widgets** → **Create**
-2. Configure widget
-3. Assign to location
-4. Customize display
-
-### Backups
-
-Create and manage backups:
-1. Go to **Backups** → **Create**
-2. Select backup type
-3. Download or restore backups
-
-### Activity Logs
-
-View system activity:
-1. Go to **Activity Logs**
-2. Filter by user, action, or date
-3. View details
+Select multiple media:
+1. Checkbox pada media
+2. Pilih action:
+   - **Delete**: Hapus media (bulk)
+   - **Download**: Download sebagai ZIP
+   - **Move to folder**: (jika ada folder system)
 
 ---
 
-## Common Tasks
+## Kategori & Tags
 
-### Publishing Content
+### Membuat Kategori
 
-1. Create or edit content
-2. Set status to "Published"
-3. Set publication date
-4. Click **Publish**
+1. Sidebar → **Kategori** → **Buat Baru**
+2. Isi:
+   - **Nama**: Nama kategori
+   - **Slug**: URL-friendly
+   - **Deskripsi**: Optional
+   - **Parent**: Untuk sub-kategori
+3. Klik **Simpan**
 
-### Scheduling Content
+### Kategori Hierarki
 
-1. Create content
-2. Set status to "Published"
-3. Set future publication date
-4. Content will publish automatically
+Buat struktur kategori:
 
-### Managing Comments
+```
+Blog
+├── Technology
+│   ├── Web Development
+│   └── Mobile Apps
+├── Lifestyle
+└── Business
+```
 
-1. Go to **Comments**
-2. Review pending comments
-3. Approve or reject
-4. Reply to comments
+### Membuat Tags
 
-### Generating Sitemap
+1. Sidebar → **Tags** → **Buat Baru**
+2. Isi Nama dan Slug
+3. Klik **Simpan**
 
-1. Go to **SEO** → **Sitemap**
-2. Click **Generate Sitemap**
-3. Sitemap will be available at `/sitemap.xml`
+### Best Practices
 
-### Creating Redirects
+✅ **DO**:
+- Gunakan kategori untuk topik besar
+- Gunakan tags untuk detail spesifik
+- Max 5-7 tags per artikel
+- Konsisten dalam penamaan
 
-1. Go to **Redirects** → **Create**
-2. Enter source URL
-3. Enter destination URL
-4. Select redirect type (301/302)
-5. Save
+❌ **DON'T**:
+- Jangan buat terlalu banyak kategori (max 10-15)
+- Hindari duplikasi kategori dan tags
+- Jangan gunakan kategori sebagai tags
 
 ---
 
-## Tips & Best Practices
+## Komentar
 
-### Content
+### Moderasi Komentar
 
-- Use descriptive titles
-- Add excerpts for better SEO
-- Use categories and tags
-- Optimize images before upload
-- Preview before publishing
+1. Sidebar → **Komentar**
+2. Lihat daftar komentar:
+   - **Pending**: Menunggu approval
+   - **Approved**: Sudah di-approve
+   - **Spam**: Ditandai spam
+   - **Trash**: Sudah dihapus
 
-### Media
+### Actions
 
-- Use descriptive filenames
-- Add alt text for images
-- Organize with folders
-- Compress large images
-- Use appropriate formats
+- **Approve**: Setujui komentar
+- **Reject**: Tolak (masuk trash)
+- **Mark as Spam**: Tandai sebagai spam
+- **Reply**: Balas komentar langsung
+- **Edit**: Edit isi komentar
+- **Delete**: Hapus permanent
 
-### SEO
+### Bulk Actions
 
-- Write descriptive titles
-- Add meta descriptions
-- Use keywords naturally
-- Optimize images
-- Create quality content
+1. Select multiple comments
+2. Pilih action di dropdown
+3. Klik **Apply**
 
-### Security
+---
 
-- Use strong passwords
-- Enable two-factor authentication
-- Review activity logs regularly
-- Keep software updated
-- Backup regularly
+## Tips & Trik
+
+### 🚀 Productivity Tips
+
+1. **Keyboard Shortcuts**:
+   - `Ctrl/Cmd + S`: Save draft
+   - `Ctrl/Cmd + B`: Bold
+   - `Ctrl/Cmd + I`: Italic
+   - `Ctrl/Cmd + K`: Insert link
+   - `Ctrl/Cmd + Z`: Undo
+   - `Ctrl/Cmd + Y`: Redo
+
+2. **Quick Actions**: Gunakan Quick Actions di dashboard untuk akses cepat
+
+3. **Auto-Save**: Jangan khawatir kehilangan data, auto-save aktif tiap 30 detik
+
+4. **Revisions**: Manfaatkan revisions untuk tracking perubahan
+
+5. **Bulk Edit**: Gunakan bulk operations untuk efisiensi
+
+### ✏️ Writing Tips
+
+1. **SEO Optimization**:
+   - Gunakan heading structure yang benar (H1 → H2 → H3)
+   - Tambahkan alt text pada gambar
+   - Isi meta description (150-160 karakter)
+   - Gunakan internal linking
+   - Optimasi featured image (< 200KB, 1200x630px)
+
+2. **Content Structure**:
+   - Buat intro yang menarik
+   - Gunakan subheading untuk readability
+   - Paragraf pendek (3-4 baris)
+   - Gunakan bullet points dan lists
+   - Tambahkan call-to-action di akhir
+
+3. **Formatting**:
+   - **Bold** untuk emphasis
+   - *Italic* untuk subtle emphasis
+   - `Code` untuk technical terms
+   - > Quotes untuk highlight
+   - Links untuk references
+
+### 🖼️ Media Best Practices
+
+1. **Image Optimization**:
+   - Compress sebelum upload (use TinyPNG)
+   - Optimal size: 1200x800px untuk featured image
+   - Format: WebP (recommended) atau JPG
+   - Max file size: 200KB
+
+2. **File Naming**:
+   - Gunakan descriptive names
+   - Lowercase, dash-separated
+   - Good: `modern-web-design-2024.jpg`
+   - Bad: `IMG_1234.JPG`
+
+3. **Alt Text**:
+   - Deskriptif dan concise
+   - Include keywords (naturally)
+   - Max 125 karakter
+
+### 🔍 SEO Checklist
+
+Sebelum publish, pastikan:
+
+- [ ] Judul menarik dan mengandung keyword
+- [ ] Meta description filled (150-160 chars)
+- [ ] URL slug clean dan descriptive
+- [ ] Featured image ada dan optimized
+- [ ] Alt text pada semua gambar
+- [ ] Minimal 1 internal link
+- [ ] Kategori dan tags sudah dipilih
+- [ ] Content > 500 kata (for blog)
+- [ ] Heading structure correct (H1 → H2 → H3)
+
+### 📱 Mobile Preview
+
+Sebelum publish:
+1. Click **Preview** button
+2. Test di mobile view
+3. Check:
+   - Layout responsive
+   - Images load properly
+   - Text readable
+   - Links clickable
+
+### 🔐 Security Tips
+
+1. **Password**:
+   - Min 8 karakter
+   - Include uppercase, lowercase, number
+   - Change regularly (every 3-6 months)
+
+2. **Session**:
+   - Auto-logout setelah 8 jam inactive
+   - Warning 5 menit sebelum logout
+   - Extend session jika masih bekerja
+
+3. **Login History**:
+   - Check login history di Profile
+   - Report suspicious activity
+   - Enable 2FA jika tersedia
 
 ---
 
 ## Troubleshooting
 
-### Can't Upload Media
+### Content Tidak Tersimpan
 
-- Check file size (max 10MB)
-- Verify file format is supported
-- Check storage permissions
-- Review error messages
+1. Check internet connection
+2. Reload page (auto-save akan restore)
+3. Check browser console for errors
+4. Try different browser
 
-### Content Not Publishing
+### Media Gagal Upload
 
-- Check publication date
-- Verify status is "Published"
-- Check permissions
-- Review activity logs
+1. Check file size (max 10MB)
+2. Check file format (supported types)
+3. Clear browser cache
+4. Try compress image first
 
-### Images Not Loading
+### Rich Text Editor Error
 
-- Check CDN configuration
-- Verify storage link: `php artisan storage:link`
-- Check file permissions
-- Review browser console
+1. Refresh page
+2. Clear browser cache
+3. Disable browser extensions
+4. Try incognito mode
+
+### Slow Performance
+
+1. Clear browser cache
+2. Close unused tabs
+3. Compress images before upload
+4. Use lazy loading (auto-enabled)
 
 ---
 
-## Support
+## Support & Help
 
-For help:
-- Check documentation
-- Review FAQ
-- Contact support: support@jejakawan.com
-- GitHub Issues: https://github.com/jejak-awan/ja-cmspro/issues
+### Kontak
 
+- **Email**: support@ja-cms.com
+- **Documentation**: https://docs.ja-cms.com
+- **Community Forum**: https://forum.ja-cms.com
+- **Video Tutorials**: https://youtube.com/ja-cms
+
+### Useful Resources
+
+- [API Documentation](/docs/api)
+- [Theme Customization](/docs/themes)
+- [Plugin Development](/docs/plugins)
+- [Best Practices](/docs/best-practices)
+
+---
+
+## Changelog
+
+### v2.0.0 (2025-11-16)
+- ✅ Custom error pages (404, 500, 403)
+- ✅ Session timeout warning
+- ✅ Breadcrumbs navigation
+- ✅ Social share buttons
+- ✅ Related posts section
+- ✅ Quick actions widget
+- ✅ Image lazy loading
+- ✅ Auto-save drafts
+- ✅ Content revisions
+
+---
+
+**Happy Writing! 🎉**
+
+*Last updated: November 16, 2025*
