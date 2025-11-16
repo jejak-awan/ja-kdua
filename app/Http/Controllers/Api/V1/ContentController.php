@@ -88,6 +88,56 @@ class ContentController extends BaseApiController
         return $this->success($content, 'Content retrieved successfully');
     }
 
+    public function related($slug)
+    {
+        $cacheKey = 'content_related_'.$slug;
+
+        return Cache::remember($cacheKey, now()->addHours(2), function () use ($slug) {
+            try {
+                $content = Content::where('slug', $slug)->firstOrFail();
+
+                // Get related content by tags first (more specific)
+                $relatedByTags = Content::where('status', 'published')
+                    ->where('id', '!=', $content->id)
+                    ->where(function ($q) {
+                        $q->whereNull('published_at')
+                            ->orWhere('published_at', '<=', Carbon::now());
+                    })
+                    ->whereHas('tags', function ($q) use ($content) {
+                        $q->whereIn('tags.id', $content->tags->pluck('id'));
+                    })
+                    ->with(['author', 'category', 'tags'])
+                    ->latest('published_at')
+                    ->limit(5)
+                    ->get();
+
+                // If not enough, get more by category
+                if ($relatedByTags->count() < 5 && $content->category_id) {
+                    $relatedByCategory = Content::where('status', 'published')
+                        ->where('id', '!=', $content->id)
+                        ->where('category_id', $content->category_id)
+                        ->whereNotIn('id', $relatedByTags->pluck('id'))
+                        ->where(function ($q) {
+                            $q->whereNull('published_at')
+                                ->orWhere('published_at', '<=', Carbon::now());
+                        })
+                        ->with(['author', 'category', 'tags'])
+                        ->latest('published_at')
+                        ->limit(5 - $relatedByTags->count())
+                        ->get();
+
+                    $related = $relatedByTags->concat($relatedByCategory);
+                } else {
+                    $related = $relatedByTags;
+                }
+
+                return $this->success($related, 'Related content retrieved successfully');
+            } catch (\Exception $e) {
+                return $this->success([], 'Related content retrieved successfully');
+            }
+        });
+    }
+
     public function preview(Request $request, Content $content)
     {
         // Allow preview for draft content if user is the author or admin

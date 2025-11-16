@@ -52,6 +52,14 @@
           />
         </div>
       </article>
+      
+      <!-- Related Posts -->
+      <RelatedPosts
+        v-if="post"
+        :slug="post.slug"
+        :limit="6"
+        class="mt-8"
+      />
     </div>
     <div v-else class="container no-post">
       <p>Post not found</p>
@@ -64,6 +72,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/services/api'
 import SocialShare from '@/components/SocialShare.vue'
+import RelatedPosts from '@/components/RelatedPosts.vue'
 
 const route = useRoute()
 const post = ref(null)

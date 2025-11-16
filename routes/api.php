@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('cms')->middleware('throttle:100,1')->group(function () {
         Route::get('/contents', [App\Http\Controllers\Api\V1\ContentController::class, 'index']);
         Route::get('/contents/{slug}', [App\Http\Controllers\Api\V1\ContentController::class, 'show']);
+        Route::get('/contents/{slug}/related', [App\Http\Controllers\Api\V1\ContentController::class, 'related']);
         Route::get('/categories', [App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
         Route::get('/tags', [App\Http\Controllers\Api\V1\TagController::class, 'index']);
         
