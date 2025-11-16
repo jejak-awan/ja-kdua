@@ -19,7 +19,7 @@
                             required
                             class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                             placeholder="Email address"
-                        />
+                        >
                         <p v-if="errors.email" class="mt-1 text-sm text-red-600">
                             {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
                         </p>
@@ -35,7 +35,7 @@
                             required
                             class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                             placeholder="Password"
-                        />
+                        >
                         <p v-if="errors.password" class="mt-1 text-sm text-red-600">
                             {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
                         </p>
@@ -50,7 +50,7 @@
                             type="checkbox"
                             v-model="form.remember"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
+                        >
                         <label for="remember-me" class="ml-2 block text-sm text-gray-900">
                             Remember me
                         </label>

@@ -27,7 +27,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Task name"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -40,7 +40,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="artisan:command or php script.php"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">Laravel artisan command or PHP script</p>
                     </div>
 
@@ -54,7 +54,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="0 * * * *"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">
                             Cron expression (e.g., "0 * * * *" for hourly, "0 0 * * *" for daily)
                         </p>
@@ -69,7 +69,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Task description"
-                        ></textarea>
+                        />
                     </div>
 
                     <div class="flex items-center">
@@ -78,7 +78,7 @@
                             type="checkbox"
                             id="is_active"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
+                        >
                         <label for="is_active" class="ml-2 block text-sm text-gray-900">
                             Active
                         </label>

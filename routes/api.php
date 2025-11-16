@@ -32,30 +32,39 @@ Route::prefix('v1')->group(function () {
         Route::put('/profile/password', [App\Http\Controllers\Api\V1\UserController::class, 'updatePassword']);
     });
 
-    // Public CMS API
-    Route::prefix('cms')->group(function () {
+    // Public CMS API (with rate limiting: 100 requests per minute)
+    Route::prefix('cms')->middleware('throttle:100,1')->group(function () {
         Route::get('/contents', [App\Http\Controllers\Api\V1\ContentController::class, 'index']);
         Route::get('/contents/{slug}', [App\Http\Controllers\Api\V1\ContentController::class, 'show']);
         Route::get('/categories', [App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
         Route::get('/tags', [App\Http\Controllers\Api\V1\TagController::class, 'index']);
+        
+        // Public theme endpoint (no auth required)
+        Route::get('/themes/active', [App\Http\Controllers\Api\V1\ThemeController::class, 'getActive']);
 
         // Comments (public)
         Route::get('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'index']);
         Route::post('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'store']);
 
-        // Forms (public submission)
+        // Forms (public submission - with stricter rate limiting: 10 requests per minute)
         Route::get('/forms/{slug}', function ($slug) {
             $form = \App\Models\Form::where('slug', $slug)->where('is_active', true)->with('fields')->firstOrFail();
 
             return response()->json($form);
-        });
+        })->middleware('throttle:10,1'); // 10 form views per minute
 
-        // Search (public)
-        Route::get('/search', [App\Http\Controllers\Api\V1\SearchController::class, 'search']);
-        Route::get('/search/suggestions', [App\Http\Controllers\Api\V1\SearchController::class, 'suggestions']);
+        // Search (public - with rate limiting: 30 requests per minute)
+        Route::get('/search', [App\Http\Controllers\Api\V1\SearchController::class, 'search'])->middleware('throttle:30,1');
+        Route::get('/search/suggestions', [App\Http\Controllers\Api\V1\SearchController::class, 'suggestions'])->middleware('throttle:30,1');
 
         // Languages (public)
         Route::get('/languages', [App\Http\Controllers\Api\V1\LanguageController::class, 'index']);
+    });
+
+    // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)
+    Route::prefix('analytics')->middleware('throttle:60,1')->group(function () {
+        Route::post('/track', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackEvent']);
+        Route::post('/track/batch', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackBatch']);
     });
 
     // Admin CMS API (requires authentication with rate limiting)
@@ -180,9 +189,21 @@ Route::prefix('v1')->group(function () {
         // Themes
         Route::apiResource('themes', App\Http\Controllers\Api\V1\ThemeController::class)->middleware('permission:manage themes');
         Route::post('themes/{theme}/activate', [App\Http\Controllers\Api\V1\ThemeController::class, 'activate'])->middleware('permission:manage themes');
+        Route::post('themes/{theme}/deactivate', [App\Http\Controllers\Api\V1\ThemeController::class, 'deactivate'])->middleware('permission:manage themes');
         Route::get('themes/active', [App\Http\Controllers\Api\V1\ThemeController::class, 'getActive']);
+        Route::post('themes/scan', [App\Http\Controllers\Api\V1\ThemeController::class, 'scan'])->middleware('permission:manage themes');
+        Route::post('themes/{theme}/validate', [App\Http\Controllers\Api\V1\ThemeController::class, 'validate'])->middleware('permission:manage themes');
+        Route::get('themes/{theme}/assets', [App\Http\Controllers\Api\V1\ThemeController::class, 'getAssets'])->middleware('permission:manage themes');
+        Route::post('themes/{theme}/compile', [App\Http\Controllers\Api\V1\ThemeController::class, 'compileAssets'])->middleware('permission:manage themes');
+        Route::get('themes/{theme}/setting', [App\Http\Controllers\Api\V1\ThemeController::class, 'getSetting'])->middleware('permission:manage themes');
         Route::put('themes/{theme}/settings', [App\Http\Controllers\Api\V1\ThemeController::class, 'updateSettings'])->middleware('permission:manage themes');
         Route::put('themes/{theme}/custom-css', [App\Http\Controllers\Api\V1\ThemeController::class, 'updateCustomCss'])->middleware('permission:manage themes');
+        Route::get('themes/{theme}/export', [App\Http\Controllers\Api\V1\ThemeController::class, 'export'])->middleware('permission:manage themes');
+        Route::post('themes/import', [App\Http\Controllers\Api\V1\ThemeController::class, 'import'])->middleware('permission:manage themes');
+        Route::get('themes/{theme}/partials', [App\Http\Controllers\Api\V1\ThemeController::class, 'getPartials'])->middleware('permission:manage themes');
+        Route::get('themes/{theme}/layouts', [App\Http\Controllers\Api\V1\ThemeController::class, 'getLayouts'])->middleware('permission:manage themes');
+        Route::post('themes/{theme}/partials/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderPartial'])->middleware('permission:manage themes');
+        Route::post('themes/{theme}/layouts/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderLayout'])->middleware('permission:manage themes');
 
         // Menus
         Route::apiResource('menus', App\Http\Controllers\Api\V1\MenuController::class)->middleware('permission:manage menus');
@@ -221,7 +242,8 @@ Route::prefix('v1')->group(function () {
         Route::put('forms/{form}/fields/{formField}', [App\Http\Controllers\Api\V1\FormController::class, 'updateField'])->middleware('permission:manage forms');
         Route::delete('forms/{form}/fields/{formField}', [App\Http\Controllers\Api\V1\FormController::class, 'deleteField'])->middleware('permission:manage forms');
         Route::post('forms/{form}/reorder-fields', [App\Http\Controllers\Api\V1\FormController::class, 'reorderFields'])->middleware('permission:manage forms');
-        Route::post('forms/{form}/submit', [App\Http\Controllers\Api\V1\FormController::class, 'submit']);
+        // Form submission (public - with rate limiting: 10 requests per minute to prevent spam)
+        Route::post('forms/{form}/submit', [App\Http\Controllers\Api\V1\FormController::class, 'submit'])->middleware('throttle:10,1');
 
         // Form Submissions
         Route::get('forms/{form}/submissions', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'index'])->middleware('permission:manage forms');
@@ -304,6 +326,14 @@ Route::prefix('v1')->group(function () {
         Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage settings');
         Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage settings');
         Route::post('system/cache/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearCache'])->middleware('permission:manage settings');
+
+        // Redis Management
+        Route::get('redis/settings', [App\Http\Controllers\Api\V1\RedisController::class, 'index'])->middleware('permission:manage settings');
+        Route::put('redis/settings', [App\Http\Controllers\Api\V1\RedisController::class, 'update'])->middleware('permission:manage settings');
+        Route::get('redis/test-connection', [App\Http\Controllers\Api\V1\RedisController::class, 'testConnection'])->middleware('permission:manage settings');
+        Route::get('redis/info', [App\Http\Controllers\Api\V1\RedisController::class, 'info'])->middleware('permission:manage settings');
+        Route::get('redis/cache-stats', [App\Http\Controllers\Api\V1\RedisController::class, 'cacheStats'])->middleware('permission:manage settings');
+        Route::post('redis/flush-cache', [App\Http\Controllers\Api\V1\RedisController::class, 'flushCache'])->middleware('permission:manage settings');
 
         // Multi-language Support
         Route::apiResource('languages', App\Http\Controllers\Api\V1\LanguageController::class)->middleware('permission:manage settings');

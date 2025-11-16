@@ -30,7 +30,7 @@
                                     :src="form.avatar"
                                     alt="Avatar"
                                     class="h-20 w-20 rounded-full object-cover"
-                                />
+                                >
                             </div>
                             <div v-else class="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center">
                                 <span class="text-indigo-600 font-medium text-xl">
@@ -65,7 +65,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Full name"
-                        />
+                        >
                     </div>
 
                     <!-- Email -->
@@ -79,7 +79,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="user@example.com"
-                        />
+                        >
                     </div>
 
                     <!-- Password (only for new users) -->
@@ -93,7 +93,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Minimum 8 characters"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">Leave empty when editing to keep current password</p>
                     </div>
 
@@ -107,7 +107,7 @@
                             type="tel"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="+1234567890"
-                        />
+                        >
                     </div>
 
                     <!-- Bio -->
@@ -120,7 +120,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="User biography"
-                        ></textarea>
+                        />
                     </div>
 
                     <!-- Website -->
@@ -133,7 +133,7 @@
                             type="url"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="https://example.com"
-                        />
+                        >
                     </div>
 
                     <!-- Location -->
@@ -146,7 +146,7 @@
                             type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="City, Country"
-                        />
+                        >
                     </div>
 
                     <!-- Roles -->
@@ -168,7 +168,7 @@
                                     type="checkbox"
                                     :value="role.id"
                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                />
+                                >
                                 <span class="ml-2 text-sm text-gray-900">{{ role.name }}</span>
                             </label>
                         </div>

@@ -6,7 +6,7 @@
         </div>
         <div class="bg-white shadow rounded-lg p-6">
             <div class="mb-4">
-                <input v-model="search" type="text" placeholder="Search translations..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input v-model="search" type="text" placeholder="Search translations..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>
             <div v-if="loading" class="text-center py-8"><p class="text-gray-500">Loading...</p></div>
             <div v-else-if="filteredTranslations.length === 0" class="text-center py-8"><p class="text-gray-500">No translations found</p></div>

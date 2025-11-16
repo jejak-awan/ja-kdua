@@ -87,7 +87,7 @@
                                 type="text"
                                 placeholder="Search media..."
                                 class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            />
+                            >
                             <select
                                 v-model="mimeFilter"
                                 class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -151,7 +151,7 @@
                                 :checked="isMediaSelected(media.id)"
                                 @click.stop="toggleMediaSelection(media)"
                                 class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
+                            >
                         </div>
                         <div class="aspect-square bg-gray-100 flex items-center justify-center relative group" :data-media-id="media.id">
                             <LazyImage
@@ -218,7 +218,7 @@
                                         :checked="allMediaSelected"
                                         @change="toggleSelectAll"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
+                                    >
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Media
@@ -248,7 +248,7 @@
                                         :value="media.id"
                                         v-model="selectedMedia"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                    />
+                                    >
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center" :data-media-id="media.id">

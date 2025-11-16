@@ -27,7 +27,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="/old-page"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">The URL to redirect from</p>
                     </div>
 
@@ -41,7 +41,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="/new-page"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">The URL to redirect to</p>
                     </div>
 
@@ -67,7 +67,7 @@
                             type="checkbox"
                             id="is_active"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
+                        >
                         <label for="is_active" class="ml-2 block text-sm text-gray-900">
                             Active
                         </label>

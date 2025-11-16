@@ -70,17 +70,21 @@ class AuthController extends BaseApiController
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $securityService = new SecurityService;
         $ipAddress = $request->ip();
 
         // Check if IP is blocked
         if ($securityService->isIpBlocked($ipAddress)) {
-            throw ValidationException::withMessages([
+            return $this->validationError([
                 'email' => ['Your IP address has been temporarily blocked due to too many failed login attempts.'],
             ]);
         }
@@ -91,7 +95,7 @@ class AuthController extends BaseApiController
             // Record failed login
             $securityService->recordFailedLogin($request->email, $ipAddress);
 
-            throw ValidationException::withMessages([
+            return $this->validationError([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
@@ -164,11 +168,15 @@ class AuthController extends BaseApiController
      */
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => ['required', 'confirmed', Password::defaults()],
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -240,10 +248,14 @@ class AuthController extends BaseApiController
 
     public function verifyEmailApi(Request $request)
     {
-        $request->validate([
-            'token' => 'required|string',
-            'email' => 'required|email',
-        ]);
+        try {
+            $request->validate([
+                'token' => 'required|string',
+                'email' => 'required|email',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -271,9 +283,13 @@ class AuthController extends BaseApiController
 
     public function resendVerificationEmailApi(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -293,7 +309,11 @@ class AuthController extends BaseApiController
 
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        try {
+            $request->validate(['email' => 'required|email']);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -319,25 +339,29 @@ class AuthController extends BaseApiController
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => ['required', 'confirmed', Password::defaults()],
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $passwordReset = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
 
         if (! $passwordReset || ! Hash::check($request->token, $passwordReset->token)) {
-            return $this->validationError(['token' => ['Invalid or expired reset token']], 'Invalid or expired reset token');
+            return $this->error('Invalid or expired reset token', 400, [], 'INVALID_TOKEN');
         }
 
         // Check if token is expired (60 minutes)
         if (now()->diffInMinutes($passwordReset->created_at) > 60) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-            return $this->validationError(['token' => ['Reset token has expired']], 'Reset token has expired');
+            return $this->error('Reset token has expired', 400, [], 'TOKEN_EXPIRED');
         }
 
         $user = User::where('email', $request->email)->firstOrFail();

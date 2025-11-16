@@ -22,7 +22,7 @@
                     type="text"
                     placeholder="Search users..."
                     class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                >
                 <select
                     v-model="roleFilter"
                     class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -82,7 +82,7 @@
                                         :src="user.avatar"
                                         :alt="user.name"
                                         class="h-10 w-10 rounded-full object-cover"
-                                    />
+                                    >
                                     <div
                                         v-else
                                         class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center"

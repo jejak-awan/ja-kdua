@@ -1,129 +1,89 @@
 # Deployment Guide
 
-## Overview
+## Pre-Deployment Checklist
 
-This guide covers deployment of JA-CMS to production servers.
+- [ ] Backup database
+- [ ] Backup files (storage, uploads)
+- [ ] Verify `.env` is configured for production
+- [ ] Ensure Redis is running (if used)
+- [ ] Ensure queue workers are configured
+- [ ] Test on staging environment first
 
----
+## Production Environment Setup
 
-## Prerequisites
+### 1. Environment Configuration
 
-- Production server with SSH access
-- PHP 8.2+ installed
-- Composer installed
-- Node.js 18+ and npm installed
-- MySQL/SQLite database
-- Redis (optional, for caching and queues)
-- Supervisor or Systemd (for queue workers)
-- Web server (Nginx/Apache)
+Update `.env` file:
 
----
-
-## Manual Deployment
-
-### 1. Server Setup
-
-```bash
-# Clone repository
-git clone https://github.com/jejak-awan/ja-cmspro.git /var/www/ja-cms
-cd /var/www/ja-cms
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install PHP dependencies
-composer install --no-dev --optimize-autoloader
-
-# Install JavaScript dependencies
-npm install
-```
-
-### 3. Environment Configuration
-
-```bash
-# Copy environment file
-cp .env.example .env
-
-# Edit .env with production settings
-nano .env
-```
-
-**Required Environment Variables:**
 ```env
-APP_NAME="JA-CMS"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://yourdomain.com
+APP_URL=https://your-domain.com
 
+# Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=ja_cms
-DB_USERNAME=your_db_user
-DB_PASSWORD=your_db_password
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 
-CACHE_STORE=redis
+# Cache & Queue
+CACHE_DRIVER=redis
 QUEUE_CONNECTION=redis
+SESSION_DRIVER=redis
 
-CDN_ENABLED=true
-CDN_URL=https://cdn.yourdomain.com
+# Redis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
 ```
 
-### 4. Generate Application Key
+### 2. Automated Deployment
+
+Use the provided deployment script:
 
 ```bash
-php artisan key:generate
+./deploy.sh
 ```
 
-### 5. Database Setup
+Or manually run:
 
 ```bash
+# Pull latest code
+git pull origin main
+
+# Install dependencies
+composer install --no-dev --optimize-autoloader
+npm ci
+
 # Run migrations
 php artisan migrate --force
 
-# Seed database (optional)
-php artisan db:seed
-```
-
-### 6. Build Assets
-
-```bash
-npm run build
-```
-
-### 7. Create Storage Link
-
-```bash
-php artisan storage:link
-```
-
-### 8. Optimize Application
-
-```bash
+# Optimize
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan optimize
-```
 
-### 9. Set Permissions
+# Build assets
+npm run build
 
-```bash
-chmod -R 775 storage bootstrap/cache
+# Set permissions
+chmod -R 755 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 ```
 
-### 10. Setup Queue Worker
+### 3. Queue Workers Setup
 
-**Using Supervisor:**
+#### Using Supervisor
 
 Create `/etc/supervisor/conf.d/laravel-worker.conf`:
 
 ```ini
 [program:laravel-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/ja-cms/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/ja-cms/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -143,7 +103,7 @@ sudo supervisorctl update
 sudo supervisorctl start laravel-worker:*
 ```
 
-**Using Systemd:**
+#### Using Systemd
 
 Create `/etc/systemd/system/laravel-worker.service`:
 
@@ -156,7 +116,7 @@ After=network.target
 User=www-data
 Group=www-data
 Restart=always
-ExecStart=/usr/bin/php /var/www/ja-cms/artisan queue:work --sleep=3 --tries=3
+ExecStart=/usr/bin/php /var/www/ja-cms/artisan queue:work redis --sleep=3 --tries=3
 
 [Install]
 WantedBy=multi-user.target
@@ -170,273 +130,144 @@ sudo systemctl enable laravel-worker
 sudo systemctl start laravel-worker
 ```
 
----
-
-## Automated Deployment (GitHub Actions)
-
-### Setup GitHub Secrets
-
-Go to your GitHub repository → Settings → Secrets and variables → Actions, and add:
-
-1. **SSH_PRIVATE_KEY** - Your SSH private key for server access
-2. **SSH_USER** - SSH username (e.g., `root`, `deploy`)
-3. **SSH_HOST** - Server IP or domain (e.g., `192.168.1.1`, `server.example.com`)
-
-### Generate SSH Key
+### 4. Redis Setup
 
 ```bash
-# On your local machine
-ssh-keygen -t ed25519 -C "github-actions" -f ~/.ssh/github_actions
+# Install Redis
+sudo apt-get install redis-server
 
-# Copy public key to server
-ssh-copy-id -i ~/.ssh/github_actions.pub user@server
+# Start Redis
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
 
-# Copy private key content
-cat ~/.ssh/github_actions
-# Add this to GitHub Secrets as SSH_PRIVATE_KEY
+# Test Redis
+redis-cli ping
 ```
 
-### Deployment Workflow
-
-The deployment workflow (`.github/workflows/deploy.yml`) will automatically:
-1. Trigger on push to `main` branch or version tags
-2. Setup SSH connection
-3. Pull latest code
-4. Install dependencies
-5. Build assets
-6. Run migrations
-7. Cache configuration
-8. Restart queue workers
-
----
-
-## Web Server Configuration
-
-### Nginx Configuration
-
-```nginx
-server {
-    listen 80;
-    listen [::]:80;
-    server_name yourdomain.com www.yourdomain.com;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name yourdomain.com www.yourdomain.com;
-
-    root /var/www/ja-cms/public;
-    index index.php;
-
-    ssl_certificate /path/to/certificate.crt;
-    ssl_certificate_key /path/to/private.key;
-
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-
-    # Increase upload size
-    client_max_body_size 10M;
-}
-```
-
-### Apache Configuration
-
-```apache
-<VirtualHost *:80>
-    ServerName yourdomain.com
-    ServerAlias www.yourdomain.com
-    DocumentRoot /var/www/ja-cms/public
-
-    <Directory /var/www/ja-cms/public>
-        AllowOverride All
-        Require all granted
-    </Directory>
-
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
-```
-
----
-
-## Post-Deployment Checklist
-
-- [ ] Environment variables configured
-- [ ] Database migrated
-- [ ] Storage link created
-- [ ] Permissions set correctly
-- [ ] Queue worker running
-- [ ] Cache cleared and optimized
-- [ ] SSL certificate installed
-- [ ] CDN configured (if using)
-- [ ] Backup system configured
-- [ ] Monitoring setup
-- [ ] Error logging configured
-
----
-
-## Troubleshooting
-
-### Queue Not Processing
+### 5. SSL/HTTPS Setup (Let's Encrypt)
 
 ```bash
-# Check queue worker status
-sudo supervisorctl status laravel-worker:*
+# Install Certbot
+sudo apt-get install certbot python3-certbot-nginx
 
-# Restart queue worker
-sudo supervisorctl restart laravel-worker:*
+# Get certificate
+sudo certbot --nginx -d your-domain.com
 
-# Check logs
-tail -f storage/logs/worker.log
+# Auto-renewal (already configured in certbot)
+sudo certbot renew --dry-run
 ```
 
-### Permission Issues
+### 6. CDN Configuration
+
+Update `config/cdn.php` with your CDN settings:
+
+```php
+return [
+    'enabled' => env('CDN_ENABLED', true),
+    'url' => env('CDN_URL', 'https://cdn.your-domain.com'),
+    // ... other settings
+];
+```
+
+### 7. Backup Schedule
+
+Add to crontab (`crontab -e`):
 
 ```bash
-# Fix storage permissions
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
+# Daily database backup at 2 AM
+0 2 * * * /usr/bin/mysqldump -u username -p'password' database_name > /backups/db_$(date +\%Y\%m\%d).sql
+
+# Weekly file backup
+0 3 * * 0 tar -czf /backups/files_$(date +\%Y\%m\%d).tar.gz /var/www/ja-cms/storage/app/public
 ```
 
-### Cache Issues
+## Post-Deployment
 
-```bash
-# Clear all caches
-php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+1. **Verify Application**
+   - Check homepage loads
+   - Test login functionality
+   - Verify API endpoints
+   - Check admin panel
 
-### Database Connection Issues
-
-```bash
-# Test database connection
-php artisan tinker
->>> DB::connection()->getPdo();
-```
-
----
-
-## Backup Strategy
-
-### Automated Backups
-
-Use the built-in backup system:
-
-```bash
-# Create backup via command
-php artisan backup:create
-
-# Or use the admin interface
-# Go to Backups → Create Backup
-```
-
-### Manual Backup
-
-```bash
-# Database backup
-mysqldump -u user -p database_name > backup.sql
-
-# Files backup
-tar -czf files_backup.tar.gz storage/app/public
-```
-
----
-
-## Monitoring
-
-### Application Logs
-
-```bash
-# View Laravel logs
-tail -f storage/logs/laravel.log
-
-# View queue logs
-tail -f storage/logs/worker.log
-```
-
-### System Monitoring
-
-- Monitor server resources (CPU, Memory, Disk)
-- Monitor queue worker processes
-- Monitor database connections
-- Monitor cache hit rates
-- Monitor API response times
-
----
-
-## Security Best Practices
-
-1. **Keep dependencies updated:**
+2. **Monitor Logs**
    ```bash
-   composer update
-   npm update
+   tail -f storage/logs/laravel.log
    ```
 
-2. **Use strong passwords** for database and admin accounts
+3. **Check Queue Workers**
+   ```bash
+   supervisorctl status
+   # or
+   systemctl status laravel-worker
+   ```
 
-3. **Enable HTTPS** with valid SSL certificate
+4. **Verify Cache**
+   ```bash
+   php artisan cache:clear
+   php artisan config:cache
+   ```
 
-4. **Configure firewall** to restrict access
-
-5. **Regular backups** of database and files
-
-6. **Monitor security logs** in admin dashboard
-
-7. **Keep PHP and server software updated**
-
-8. **Use environment variables** for sensitive data
-
----
+5. **Test Rate Limiting**
+   - Verify 429 responses when limits exceeded
+   - Check rate limit headers
 
 ## Rollback Procedure
 
 If deployment fails:
 
 ```bash
-# Revert to previous commit
-git reset --hard HEAD~1
+# Restore from backup
+mysql -u username -p database_name < /backups/db_backup.sql
 
-# Restore database backup
-mysql -u user -p database_name < backup.sql
+# Restore files
+tar -xzf /backups/files_backup.tar.gz -C /
 
-# Clear caches
-php artisan optimize:clear
-
-# Restart services
-sudo supervisorctl restart laravel-worker:*
+# Revert code
+git checkout <previous-commit-hash>
+./deploy.sh
 ```
 
----
+## Troubleshooting
 
-## References
+### Queue Not Processing
+```bash
+# Check queue workers
+supervisorctl status
+# Restart if needed
+supervisorctl restart laravel-worker:*
+```
 
-- [Laravel Deployment](https://laravel.com/docs/deployment)
-- [Nginx Configuration](https://nginx.org/en/docs/)
-- [Supervisor Documentation](http://supervisord.org/)
-- [GitHub Actions](https://docs.github.com/en/actions)
+### Cache Issues
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+# Then rebuild
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
 
+### Permission Issues
+```bash
+chmod -R 755 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+```
+
+### Database Connection Issues
+- Verify `.env` database credentials
+- Check MySQL is running: `sudo systemctl status mysql`
+- Test connection: `php artisan tinker` then `DB::connection()->getPdo();`
+
+## Security Checklist
+
+- [ ] `APP_DEBUG=false` in production
+- [ ] Strong database passwords
+- [ ] SSL/HTTPS enabled
+- [ ] Rate limiting configured
+- [ ] File permissions set correctly
+- [ ] `.env` file not publicly accessible
+- [ ] Regular security updates
+- [ ] Firewall configured
+- [ ] Backup strategy in place

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 
 class Webhook extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'url',
@@ -43,10 +46,27 @@ class Webhook extends Model
                 ->withHeaders($this->headers ?? [])
                 ->{strtolower($this->method)}($this->url, $payload);
 
-            $this->increment('success_count');
-            $this->update(['last_triggered_at' => now()]);
+            if ($response->successful()) {
+                $this->increment('success_count');
+                $this->update(['last_triggered_at' => now()]);
 
-            return $response->successful();
+                return true;
+            } else {
+                $this->increment('failure_count');
+
+                // Retry if not exceeded max retries
+                if ($this->retry_count < $this->max_retries) {
+                    $this->increment('retry_count');
+                    // Could implement retry queue here
+                }
+
+                \Log::error('Webhook failed with status: '.$response->status(), [
+                    'webhook_id' => $this->id,
+                    'url' => $this->url,
+                ]);
+
+                return false;
+            }
         } catch (\Exception $e) {
             $this->increment('failure_count');
 

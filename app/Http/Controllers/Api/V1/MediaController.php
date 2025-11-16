@@ -52,11 +52,20 @@ class MediaController extends BaseApiController
 
     public function upload(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|max:10240', // 10MB max
-            'folder_id' => 'nullable|exists:media_folders,id',
-            'optimize' => 'boolean',
-        ]);
+        // Check permission
+        if (! $request->user()->hasRole('admin') && ! $request->user()->can('upload media')) {
+            return $this->forbidden('You do not have permission to upload media');
+        }
+
+        try {
+            $request->validate([
+                'file' => 'required|file|max:10240', // 10MB max
+                'folder_id' => 'nullable|exists:media_folders,id',
+                'optimize' => 'boolean',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $file = $request->file('file');
         $path = $file->store('media', 'public');
@@ -134,11 +143,15 @@ class MediaController extends BaseApiController
 
     public function update(Request $request, Media $media)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'alt' => 'nullable|string',
-            'description' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'alt' => 'nullable|string',
+                'description' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $media->update($validated);
 
@@ -391,7 +404,7 @@ class MediaController extends BaseApiController
 
         return $this->success([
             'media_id' => $media->id,
-            'total_usage' => $usages->count(),
+            'usage_count' => $usages->count(),
             'usages' => $usageData,
         ], 'Media usage retrieved successfully');
     }
@@ -400,7 +413,7 @@ class MediaController extends BaseApiController
     {
         // Only for images
         if (! str_starts_with($media->mime_type, 'image/')) {
-            return $this->validationError(['media' => ['Thumbnail can only be generated for images']], 'Thumbnail can only be generated for images');
+            return $this->error('Thumbnail can only be generated for images', 400, ['media' => ['Thumbnail can only be generated for images']], 'INVALID_MEDIA_TYPE');
         }
 
         try {
@@ -438,11 +451,15 @@ class MediaController extends BaseApiController
             return $this->validationError(['media' => ['Resize can only be performed on images']], 'Resize can only be performed on images');
         }
 
-        $validated = $request->validate([
-            'width' => 'required|integer|min:1|max:5000',
-            'height' => 'nullable|integer|min:1|max:5000',
-            'quality' => 'nullable|integer|min:1|max:100',
-        ]);
+        try {
+            $validated = $request->validate([
+                'width' => 'required|integer|min:1|max:5000',
+                'height' => 'nullable|integer|min:1|max:5000',
+                'quality' => 'nullable|integer|min:1|max:100',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         try {
             $fullPath = Storage::disk($media->disk)->path($media->path);

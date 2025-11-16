@@ -10,13 +10,13 @@
                     v-model="dateFrom"
                     type="date"
                     class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                >
                 <span class="text-gray-500">to</span>
                 <input
                     v-model="dateTo"
                     type="date"
                     class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                >
                 <button
                     @click="fetchAnalytics"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -126,7 +126,7 @@
                                         <div
                                             class="bg-indigo-600 h-6 rounded"
                                             :style="{ width: (visit.visits / maxVisits * 100) + '%' }"
-                                        ></div>
+                                        />
                                         <span class="absolute inset-0 flex items-center justify-center text-xs text-white font-medium">
                                             {{ visit.visits }}
                                         </span>
@@ -177,7 +177,7 @@
                                     <div
                                         class="bg-indigo-600 h-2 rounded-full"
                                         :style="{ width: (device.count / maxDeviceCount * 100) + '%' }"
-                                    ></div>
+                                    />
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ device.count }}</span>
                             </div>
@@ -203,7 +203,7 @@
                                     <div
                                         class="bg-green-600 h-2 rounded-full"
                                         :style="{ width: (browser.count / maxBrowserCount * 100) + '%' }"
-                                    ></div>
+                                    />
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ browser.count }}</span>
                             </div>
@@ -255,7 +255,7 @@
                                     <div
                                         class="bg-blue-600 h-2 rounded-full"
                                         :style="{ width: (country.count / maxCountryCount * 100) + '%' }"
-                                    ></div>
+                                    />
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ country.count }}</span>
                             </div>

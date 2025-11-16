@@ -27,7 +27,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Field group name"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -39,7 +39,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Field group description"
-                        ></textarea>
+                        />
                     </div>
 
                     <div>

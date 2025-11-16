@@ -27,7 +27,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Webhook name"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -40,7 +40,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="https://example.com/webhook"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -58,7 +58,7 @@
                                     :value="event"
                                     v-model="form.events"
                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                />
+                                >
                                 <span class="ml-2 text-sm text-gray-900">{{ event }}</span>
                             </label>
                         </div>
@@ -73,7 +73,7 @@
                             type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="Optional secret key for signing"
-                        />
+                        >
                     </div>
 
                     <div class="flex items-center">
@@ -82,7 +82,7 @@
                             type="checkbox"
                             id="is_active"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
+                        >
                         <label for="is_active" class="ml-2 block text-sm text-gray-900">
                             Active
                         </label>

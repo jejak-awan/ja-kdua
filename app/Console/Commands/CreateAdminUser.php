@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role;
 
 class CreateAdminUser extends Command
 {
-    protected $signature = 'user:create-admin {--email=admin@example.com} {--password=admin123} {--name=Admin}';
+    protected $signature = 'user:create-admin {--email=admin@jejakawan.com} {--password=admin123} {--name=Admin}';
 
     protected $description = 'Create an admin user';
 
@@ -31,6 +31,7 @@ class CreateAdminUser extends Command
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
+            'email_verified_at' => now(),
         ]);
 
         // Assign admin role

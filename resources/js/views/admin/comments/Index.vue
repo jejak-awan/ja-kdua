@@ -16,7 +16,7 @@
                     type="text"
                     placeholder="Search comments..."
                     class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                >
                 <select
                     v-model="statusFilter"
                     class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"

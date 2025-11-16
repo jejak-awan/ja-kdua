@@ -26,16 +26,20 @@ class WebhookController extends BaseApiController
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'url' => 'required|url',
-            'event' => 'required|string',
-            'method' => 'nullable|in:POST,PUT,PATCH',
-            'headers' => 'nullable|array',
-            'payload_template' => 'nullable|array',
-            'timeout' => 'integer|min:1|max:300',
-            'max_retries' => 'integer|min:0|max:10',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'url' => 'required|url',
+                'event' => 'required|string',
+                'method' => 'nullable|in:POST,PUT,PATCH',
+                'headers' => 'nullable|array',
+                'payload_template' => 'nullable|array',
+                'timeout' => 'integer|min:1|max:300',
+                'max_retries' => 'integer|min:0|max:10',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $webhook = Webhook::create($validated);
 
@@ -49,17 +53,21 @@ class WebhookController extends BaseApiController
 
     public function update(Request $request, Webhook $webhook)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'url' => 'sometimes|required|url',
-            'event' => 'sometimes|required|string',
-            'method' => 'nullable|in:POST,PUT,PATCH',
-            'headers' => 'nullable|array',
-            'payload_template' => 'nullable|array',
-            'is_active' => 'boolean',
-            'timeout' => 'integer|min:1|max:300',
-            'max_retries' => 'integer|min:0|max:10',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'url' => 'sometimes|required|url',
+                'event' => 'sometimes|required|string',
+                'method' => 'nullable|in:POST,PUT,PATCH',
+                'headers' => 'nullable|array',
+                'payload_template' => 'nullable|array',
+                'is_active' => 'boolean',
+                'timeout' => 'integer|min:1|max:300',
+                'max_retries' => 'integer|min:0|max:10',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $webhook->update($validated);
 

@@ -24,19 +24,47 @@ class ContentController extends BaseApiController
                         ->orWhere('published_at', '<=', Carbon::now());
                 });
 
+            // Filter by type
+            if ($request->has('type')) {
+                $query->where('type', $request->type);
+            }
+
+            // Filter by is_featured
+            if ($request->has('is_featured')) {
+                $query->where('is_featured', filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN));
+            }
+
+            // Filter by category
             if ($request->has('category')) {
                 $query->whereHas('category', function ($q) use ($request) {
                     $q->where('slug', $request->category);
                 });
             }
 
+            // Filter by tag
             if ($request->has('tag')) {
                 $query->whereHas('tags', function ($q) use ($request) {
                     $q->where('slug', $request->tag);
                 });
             }
 
-            $contents = $query->latest('published_at')->paginate(12);
+            // Sorting
+            $sortBy = $request->get('sort', '-published_at');
+            if (str_starts_with($sortBy, '-')) {
+                $query->orderBy(substr($sortBy, 1), 'desc');
+            } else {
+                $query->orderBy($sortBy, 'asc');
+            }
+
+            // Pagination or limit
+            $limit = $request->get('limit');
+            if ($limit) {
+                $contents = $query->limit($limit)->get();
+                return $this->success($contents, 'Contents retrieved successfully');
+            }
+
+            $perPage = $request->get('per_page', 12);
+            $contents = $query->paginate($perPage);
 
             return $this->paginated($contents, 'Contents retrieved successfully');
         });
@@ -92,24 +120,28 @@ class ContentController extends BaseApiController
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|unique:contents,slug',
-            'excerpt' => 'nullable|string',
-            'body' => 'required|string',
-            'featured_image' => 'nullable|string',
-            'status' => 'required|in:draft,published,archived',
-            'type' => 'required|in:post,page,custom',
-            'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
-            'published_at' => 'nullable|date',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:500',
-            'meta_keywords' => 'nullable|string|max:255',
-            'og_image' => 'nullable|string',
-            'create_revision' => 'boolean',
-        ]);
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'slug' => 'required|string|unique:contents,slug',
+                'excerpt' => 'nullable|string',
+                'body' => 'required|string',
+                'featured_image' => 'nullable|string',
+                'status' => 'required|in:draft,published,archived',
+                'type' => 'required|in:post,page,custom',
+                'category_id' => 'nullable|exists:categories,id',
+                'tags' => 'nullable|array',
+                'tags.*' => 'exists:tags,id',
+                'published_at' => 'nullable|date',
+                'meta_title' => 'nullable|string|max:255',
+                'meta_description' => 'nullable|string|max:500',
+                'meta_keywords' => 'nullable|string|max:255',
+                'og_image' => 'nullable|string',
+                'create_revision' => 'boolean',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $validated['author_id'] = $request->user()->id;
 
@@ -207,25 +239,29 @@ class ContentController extends BaseApiController
             );
         }
 
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:contents,slug,'.$content->id,
-            'excerpt' => 'nullable|string',
-            'body' => 'sometimes|required|string',
-            'featured_image' => 'nullable|string',
-            'status' => 'sometimes|required|in:draft,published,archived',
-            'type' => 'sometimes|required|in:post,page,custom',
-            'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
-            'published_at' => 'nullable|date',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:500',
-            'meta_keywords' => 'nullable|string|max:255',
-            'og_image' => 'nullable|string',
-            'create_revision' => 'boolean',
-            'revision_note' => 'nullable|string|max:500',
-        ]);
+        try {
+            $validated = $request->validate([
+                'title' => 'sometimes|required|string|max:255',
+                'slug' => 'sometimes|required|string|unique:contents,slug,'.$content->id,
+                'excerpt' => 'nullable|string',
+                'body' => 'sometimes|required|string',
+                'featured_image' => 'nullable|string',
+                'status' => 'sometimes|required|in:draft,published,archived',
+                'type' => 'sometimes|required|in:post,page,custom',
+                'category_id' => 'nullable|exists:categories,id',
+                'tags' => 'nullable|array',
+                'tags.*' => 'exists:tags,id',
+                'published_at' => 'nullable|date',
+                'meta_title' => 'nullable|string|max:255',
+                'meta_description' => 'nullable|string|max:500',
+                'meta_keywords' => 'nullable|string|max:255',
+                'og_image' => 'nullable|string',
+                'create_revision' => 'boolean',
+                'revision_note' => 'nullable|string|max:500',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         // Handle published_at scheduling
         if ($request->has('published_at')) {
@@ -352,12 +388,16 @@ class ContentController extends BaseApiController
 
     public function bulkAction(Request $request)
     {
-        $validated = $request->validate([
-            'action' => 'required|in:publish,draft,archive,delete,change_category',
-            'content_ids' => 'required|array',
-            'content_ids.*' => 'exists:contents,id',
-            'category_id' => 'required_if:action,change_category|exists:categories,id',
-        ]);
+        try {
+            $validated = $request->validate([
+                'action' => 'required|in:publish,draft,archive,delete,change_category',
+                'content_ids' => 'required|array',
+                'content_ids.*' => 'exists:contents,id',
+                'category_id' => 'required_if:action,change_category|exists:categories,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $contents = Content::whereIn('id', $validated['content_ids'])->get();
 

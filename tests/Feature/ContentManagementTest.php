@@ -179,7 +179,7 @@ class ContentManagementTest extends TestCase
 
         $response = $this->postJson("/api/v1/admin/cms/contents/{$content->id}/duplicate");
 
-        TestHelpers::assertApiSuccess($response);
+        TestHelpers::assertApiSuccess($response, 201);
 
         $this->assertDatabaseHas('contents', [
             'title' => $content->title.' (Copy)',
@@ -198,7 +198,7 @@ class ContentManagementTest extends TestCase
 
         $response = $this->postJson('/api/v1/admin/cms/contents/bulk-action', [
             'action' => 'delete',
-            'ids' => $contents->pluck('id')->toArray(),
+            'content_ids' => $contents->pluck('id')->toArray(),
         ]);
 
         TestHelpers::assertApiSuccess($response);

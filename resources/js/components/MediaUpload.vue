@@ -7,7 +7,7 @@
                 @change="handleFileSelect"
                 accept="image/*"
                 class="hidden"
-            />
+            >
             <button
                 @click="$refs.fileInput.click()"
                 class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
@@ -18,7 +18,7 @@
         </div>
 
         <div v-else class="relative">
-            <img :src="preview" alt="Preview" class="w-full h-64 object-cover rounded-lg" />
+            <img :src="preview" alt="Preview" class="w-full h-64 object-cover rounded-lg">
             <div class="mt-4 flex space-x-2">
                 <button
                     @click="uploadFile"

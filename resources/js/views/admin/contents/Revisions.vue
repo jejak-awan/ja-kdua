@@ -124,7 +124,7 @@
                                 <div
                                     class="text-sm text-gray-900 prose max-w-none"
                                     v-html="viewingRevision.data?.content || '-'"
-                                ></div>
+                                />
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>

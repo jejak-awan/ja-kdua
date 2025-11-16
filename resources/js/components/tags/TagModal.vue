@@ -31,7 +31,7 @@
                             @input="generateSlug"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Tag name"
-                        />
+                        >
                     </div>
 
                     <!-- Slug -->
@@ -45,7 +45,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="tag-slug"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">URL-friendly version</p>
                     </div>
 
@@ -59,7 +59,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Tag description"
-                        ></textarea>
+                        />
                     </div>
                 </form>
 

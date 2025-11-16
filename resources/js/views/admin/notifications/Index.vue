@@ -21,7 +21,7 @@
                         type="text"
                         placeholder="Search notifications..."
                         class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    >
                     <select
                         v-model="typeFilter"
                         class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -64,7 +64,7 @@
                                 <span
                                     v-if="!notification.read_at"
                                     class="h-2 w-2 bg-blue-600 rounded-full"
-                                ></span>
+                                />
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="{

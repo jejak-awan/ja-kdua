@@ -6,6 +6,7 @@ use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
 use App\Models\AnalyticsVisit;
 use App\Models\Content;
+use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -224,6 +225,57 @@ class AnalyticsController extends BaseApiController
             ->get();
 
         return $this->success($stats, 'Event statistics retrieved successfully');
+    }
+
+    /**
+     * Track a custom event
+     */
+    public function trackEvent(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'event_type' => 'required|string|max:50',
+                'event_name' => 'required|string|max:255',
+                'event_data' => 'nullable|array',
+                'content_id' => 'nullable|integer|exists:contents,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        $event = AnalyticsService::trackEvent(
+            $validated['event_type'],
+            $validated['event_name'],
+            $validated['event_data'] ?? [],
+            $validated['content_id'] ?? null
+        );
+
+        return $this->success($event, 'Event tracked successfully', 201);
+    }
+
+    /**
+     * Track multiple events in batch
+     */
+    public function trackBatch(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'events' => 'required|array|min:1|max:100',
+                'events.*.type' => 'required|string|max:50',
+                'events.*.name' => 'required|string|max:255',
+                'events.*.data' => 'nullable|array',
+                'events.*.content_id' => 'nullable|integer|exists:contents,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        $tracked = AnalyticsService::trackBatch($validated['events']);
+
+        return $this->success([
+            'tracked_count' => count($tracked),
+            'events' => $tracked,
+        ], 'Events tracked successfully', 201);
     }
 
     public function realTime()

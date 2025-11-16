@@ -24,7 +24,8 @@ return new class extends Migration
 
                 $table->index(['searchable_type', 'searchable_id']);
                 $table->index('type');
-                $table->index(['title', 'content']); // Regular index for search
+                // Index removed - use fulltext search instead for long text fields
+            $table->fullText(['title', 'content']); // Regular index for search
             });
         }
     }

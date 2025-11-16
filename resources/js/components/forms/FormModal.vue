@@ -28,7 +28,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Contact Form"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -41,7 +41,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="contact-form"
-                        />
+                        >
                     </div>
                 </div>
 
@@ -54,7 +54,7 @@
                         rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Form description..."
-                    ></textarea>
+                    />
                 </div>
 
                 <!-- Success Message & Redirect -->
@@ -68,7 +68,7 @@
                             type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Thank you for your submission!"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -80,7 +80,7 @@
                             type="url"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="https://example.com/thank-you"
-                        />
+                        >
                     </div>
                 </div>
 
@@ -91,7 +91,7 @@
                         type="checkbox"
                         id="is_active"
                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
+                    >
                     <label for="is_active" class="ml-2 block text-sm text-gray-900">
                         Form is active
                     </label>

@@ -25,6 +25,7 @@
         "@heroicons/vue": "^2.2.0",
         "@tinymce/tinymce-vue": "^6.3.0",
         "@vitejs/plugin-vue": "^6.0.1",
+        "@vueuse/head": "^2.0.0",
         "pinia": "^2.3.1",
         "quill": "^2.0.3",
         "vue": "^3.5.24",

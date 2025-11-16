@@ -17,15 +17,19 @@ class LanguageController extends BaseApiController
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|string|max:10|unique:languages,code',
-            'name' => 'required|string|max:255',
-            'native_name' => 'nullable|string|max:255',
-            'flag' => 'nullable|string',
-            'is_default' => 'boolean',
-            'is_active' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
+        try {
+            $validated = $request->validate([
+                'code' => 'required|string|max:10|unique:languages,code',
+                'name' => 'required|string|max:255',
+                'native_name' => 'nullable|string|max:255',
+                'flag' => 'nullable|string',
+                'is_default' => 'boolean',
+                'is_active' => 'boolean',
+                'sort_order' => 'integer',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         // If setting as default, unset other defaults
         if ($validated['is_default'] ?? false) {
@@ -39,15 +43,19 @@ class LanguageController extends BaseApiController
 
     public function update(Request $request, Language $language)
     {
-        $validated = $request->validate([
-            'code' => 'sometimes|required|string|max:10|unique:languages,code,'.$language->id,
-            'name' => 'sometimes|required|string|max:255',
-            'native_name' => 'nullable|string|max:255',
-            'flag' => 'nullable|string',
-            'is_default' => 'boolean',
-            'is_active' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
+        try {
+            $validated = $request->validate([
+                'code' => 'sometimes|required|string|max:10|unique:languages,code,'.$language->id,
+                'name' => 'sometimes|required|string|max:255',
+                'native_name' => 'nullable|string|max:255',
+                'flag' => 'nullable|string',
+                'is_default' => 'boolean',
+                'is_active' => 'boolean',
+                'sort_order' => 'integer',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         // If setting as default, unset other defaults
         if (isset($validated['is_default']) && $validated['is_default']) {
@@ -92,13 +100,17 @@ class LanguageController extends BaseApiController
 
     public function setTranslation(Request $request)
     {
-        $validated = $request->validate([
-            'type' => 'required|string',
-            'id' => 'required|integer',
-            'field' => 'required|string',
-            'value' => 'required|string',
-            'language' => 'required|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'type' => 'required|string',
+                'id' => 'required|integer',
+                'field' => 'required|string',
+                'value' => 'required|string',
+                'language' => 'required|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $model = $validated['type']::findOrFail($validated['id']);
         Translation::setTranslation($model, $validated['field'], $validated['value'], $validated['language']);

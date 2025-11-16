@@ -1,6 +1,6 @@
 <template>
     <div class="rich-text-editor">
-        <div ref="editor" class="editor-container"></div>
+        <div ref="editor" class="editor-container" />
     </div>
 </template>
 

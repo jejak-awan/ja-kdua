@@ -11,7 +11,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register ThemeHooksService as singleton
+        $this->app->singleton(\App\Services\ThemeHooksService::class);
+        
+        // Register ThemeCacheService as singleton
+        $this->app->singleton(\App\Services\ThemeCacheService::class);
+        
+
     }
 
     /**

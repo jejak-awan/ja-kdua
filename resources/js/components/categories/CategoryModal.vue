@@ -31,7 +31,7 @@
                             @input="generateSlug"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Category name"
-                        />
+                        >
                     </div>
 
                     <!-- Slug -->
@@ -45,7 +45,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="category-slug"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">URL-friendly version</p>
                     </div>
 
@@ -59,7 +59,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Category description"
-                        ></textarea>
+                        />
                     </div>
 
                     <!-- Parent Category -->
@@ -92,7 +92,7 @@
                                 :src="form.image"
                                 alt="Category image"
                                 class="w-32 h-32 object-cover rounded-lg"
-                            />
+                            >
                             <button
                                 type="button"
                                 @click="form.image = null"
@@ -119,7 +119,7 @@
                             min="0"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="0"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">Lower numbers appear first</p>
                     </div>
 
@@ -130,7 +130,7 @@
                             type="checkbox"
                             id="is_active"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
+                        >
                         <label for="is_active" class="ml-2 block text-sm text-gray-900">
                             Active
                         </label>

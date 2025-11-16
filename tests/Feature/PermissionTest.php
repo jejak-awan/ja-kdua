@@ -55,7 +55,7 @@ class PermissionTest extends TestCase
 
         $response->assertStatus(403);
         $response->assertJson([
-            'success' => false,
+            'message' => 'Unauthorized',
         ]);
     }
 

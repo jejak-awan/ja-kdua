@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\HandleRedirects::class,
+            // LoadTheme middleware removed - Vue SPA handles theme loading via API
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
 
         // Register permission middleware alias

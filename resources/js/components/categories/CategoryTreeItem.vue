@@ -18,7 +18,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
-                    <div v-else class="w-5"></div>
+                    <div v-else class="w-5" />
                 </div>
                 <div
                     v-if="category.image"
@@ -28,7 +28,7 @@
                         :src="category.image"
                         :alt="category.name"
                         class="h-10 w-10 rounded-full object-cover"
-                    />
+                    >
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center">

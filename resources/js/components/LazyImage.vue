@@ -12,7 +12,7 @@
         @load="onLoad"
         @error="onError"
         ref="imageRef"
-    />
+    >
 </template>
 
 <script setup>

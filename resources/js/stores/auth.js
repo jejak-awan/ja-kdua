@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '../services/api';
+import api, { getCsrfCookie } from '../services/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -23,6 +23,9 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async login(credentials) {
             try {
+                // Ensure CSRF cookie is fresh before login
+                await getCsrfCookie();
+                
                 const response = await api.post('/login', credentials);
                 // Handle different response structures
                 const responseData = response.data?.data || response.data;
@@ -73,6 +76,9 @@ export const useAuthStore = defineStore('auth', {
 
         async register(userData) {
             try {
+                // Ensure CSRF cookie is fresh before register
+                await getCsrfCookie();
+                
                 const response = await api.post('/register', userData);
                 this.setAuth(response.data);
                 return { success: true, data: response.data };

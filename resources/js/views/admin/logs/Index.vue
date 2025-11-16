@@ -62,7 +62,7 @@
                                 type="text"
                                 placeholder="Search in log..."
                                 class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            />
+                            >
                             <button
                                 @click="refreshLog"
                                 class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
@@ -82,7 +82,7 @@
                             <p class="text-gray-500">Loading log file...</p>
                         </div>
                         <div v-else class="bg-gray-900 rounded-lg p-4 overflow-x-auto max-h-[600px] overflow-y-auto">
-                            <pre class="text-xs font-mono text-green-400" v-html="highlightedLogContent"></pre>
+                            <pre class="text-xs font-mono text-green-400" v-html="highlightedLogContent" />
                         </div>
                     </div>
                 </div>

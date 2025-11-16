@@ -13,7 +13,7 @@
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Label <span class="text-red-500">*</span></label>
-                        <input v-model="form.label" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                        <input v-model="form.label" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
@@ -26,7 +26,7 @@
                     </div>
                     <div v-if="form.type === 'link'">
                         <label class="block text-sm font-medium text-gray-700 mb-1">URL <span class="text-red-500">*</span></label>
-                        <input v-model="form.url" type="url" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                        <input v-model="form.url" type="url" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div v-else-if="form.type === 'page'">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Page</label>
@@ -48,10 +48,10 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">CSS Classes</label>
-                        <input v-model="form.css_classes" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                        <input v-model="form.css_classes" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div class="flex items-center">
-                        <input v-model="form.open_in_new_tab" type="checkbox" id="new_tab" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                        <input v-model="form.open_in_new_tab" type="checkbox" id="new_tab" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                         <label for="new_tab" class="ml-2 block text-sm text-gray-900">Open in new tab</label>
                     </div>
                 </form>

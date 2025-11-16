@@ -69,7 +69,7 @@
                             type="text"
                             placeholder="Search activities..."
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                         <select
                             v-model="typeFilter"
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"

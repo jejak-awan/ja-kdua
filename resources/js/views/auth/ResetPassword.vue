@@ -17,7 +17,7 @@
                             type="email"
                             required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
+                        >
                     </div>
                     <div>
                         <label for="token" class="block text-sm font-medium text-gray-700">Reset Token</label>
@@ -28,7 +28,7 @@
                             type="text"
                             required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
+                        >
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
@@ -39,7 +39,7 @@
                             type="password"
                             required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
+                        >
                         <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password[0] }}</p>
                     </div>
                     <div>
@@ -51,7 +51,7 @@
                             type="password"
                             required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
+                        >
                     </div>
                 </div>
 

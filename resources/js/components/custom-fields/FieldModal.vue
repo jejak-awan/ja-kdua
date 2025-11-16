@@ -28,7 +28,7 @@
                             @input="generateName"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Field label"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -41,7 +41,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="field_name"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">Field identifier (snake_case)</p>
                     </div>
 
@@ -100,7 +100,7 @@
                             type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Default value"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -112,7 +112,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                             placeholder="option1,option2,option3"
-                        ></textarea>
+                        />
                         <p class="mt-1 text-xs text-gray-500">Comma-separated values</p>
                     </div>
 
@@ -125,7 +125,7 @@
                             rows="2"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Field instructions for users"
-                        ></textarea>
+                        />
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -135,7 +135,7 @@
                                 type="checkbox"
                                 id="is_required"
                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
+                            >
                             <label for="is_required" class="ml-2 block text-sm text-gray-900">
                                 Required
                             </label>
@@ -146,7 +146,7 @@
                                 type="checkbox"
                                 id="is_searchable"
                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
+                            >
                             <label for="is_searchable" class="ml-2 block text-sm text-gray-900">
                                 Searchable
                             </label>

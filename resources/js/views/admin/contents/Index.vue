@@ -33,7 +33,7 @@
                             type="text"
                             placeholder="Search contents..."
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                         <select
                             v-model="statusFilter"
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -80,7 +80,7 @@
                                 :checked="allSelected"
                                 @change="toggleSelectAll"
                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
+                            >
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Title
@@ -107,7 +107,7 @@
                                 :value="content.id"
                                 v-model="selectedContents"
                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
+                            >
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ content.title }}</div>

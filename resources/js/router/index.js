@@ -1,7 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import frontendRoutes from './frontend';
 
 const routes = [
+    // Frontend routes (public)
+    ...frontendRoutes,
+    
+    // Auth routes
     {
         path: '/login',
         name: 'login',
@@ -163,6 +168,12 @@ const routes = [
                 component: () => import('../views/admin/system/Index.vue'),
             },
             {
+                path: 'redis',
+                name: 'redis',
+                component: () => import('../views/admin/system/Redis.vue'),
+                meta: { title: 'Redis Management' },
+            },
+            {
                 path: 'activity-logs',
                 name: 'activity-logs',
                 component: () => import('../views/admin/activity-logs/Index.vue'),
@@ -238,18 +249,6 @@ const routes = [
                 component: () => import('../views/admin/translations/Index.vue'),
             },
         ],
-    },
-    {
-        path: '/content/:slug',
-        name: 'content.show',
-        component: () => import('../views/ContentShow.vue'),
-        meta: { public: true },
-    },
-    {
-        path: '/',
-        name: 'home',
-        component: () => import('../views/Home.vue'),
-        meta: { public: true },
     },
 ];
 

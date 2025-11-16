@@ -64,7 +64,7 @@
                             @input="generateSlug"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Enter content title"
-                        />
+                        >
                     </div>
 
                     <!-- Slug -->
@@ -78,7 +78,7 @@
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="content-slug"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">URL-friendly version of the title</p>
                     </div>
 
@@ -180,7 +180,7 @@
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Brief description of the content"
-                        ></textarea>
+                        />
                     </div>
 
                     <!-- Body / Rich Text Editor -->
@@ -203,7 +203,7 @@
                             v-model="form.published_at"
                             type="datetime-local"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">Leave empty to publish immediately</p>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                             :src="form.featured_image"
                             alt="Featured Image"
                             class="w-full h-64 object-cover rounded-lg"
-                        />
+                        >
                         <button
                             type="button"
                             @click="form.featured_image = null"
@@ -249,7 +249,7 @@
                             maxlength="255"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="SEO title (defaults to content title)"
-                        />
+                        >
                         <p class="mt-1 text-xs text-gray-500">{{ form.meta_title?.length || 0 }}/255 characters</p>
                     </div>
 
@@ -263,7 +263,7 @@
                             maxlength="500"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="SEO description (defaults to excerpt)"
-                        ></textarea>
+                        />
                         <p class="mt-1 text-xs text-gray-500">{{ form.meta_description?.length || 0 }}/500 characters</p>
                     </div>
 
@@ -276,7 +276,7 @@
                             type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="keyword1, keyword2, keyword3"
-                        />
+                        >
                     </div>
 
                     <div>
@@ -288,7 +288,7 @@
                                 :src="form.og_image"
                                 alt="OG Image"
                                 class="w-full h-48 object-cover rounded-lg"
-                            />
+                            >
                             <button
                                 type="button"
                                 @click="form.og_image = null"

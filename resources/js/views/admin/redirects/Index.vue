@@ -64,7 +64,7 @@
                         type="text"
                         placeholder="Search redirects..."
                         class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    >
                 </div>
             </div>
 

@@ -74,7 +74,7 @@
                             type="text"
                             placeholder="192.168.1.1"
                             class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                         <button
                             @click="blockIP"
                             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
@@ -93,7 +93,7 @@
                             type="text"
                             placeholder="192.168.1.1"
                             class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                         <button
                             @click="checkIPStatus"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -131,7 +131,7 @@
                             type="text"
                             placeholder="Search logs..."
                             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                        >
                     </div>
                 </div>
             </div>

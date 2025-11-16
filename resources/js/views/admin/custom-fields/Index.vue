@@ -118,7 +118,7 @@
                         type="text"
                         placeholder="Search fields..."
                         class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    >
                 </div>
                 <div v-if="loading" class="text-center py-8">
                     <p class="text-gray-500">Loading...</p>

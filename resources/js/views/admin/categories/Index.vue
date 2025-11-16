@@ -22,7 +22,7 @@
                     type="text"
                     placeholder="Search categories..."
                     class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
+                >
                 <select
                     v-model="viewMode"
                     class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -97,7 +97,7 @@
                                         :src="category.image"
                                         :alt="category.name"
                                         class="h-10 w-10 rounded-full object-cover"
-                                    />
+                                    >
                                 </div>
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">{{ category.name }}</div>

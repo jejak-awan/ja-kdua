@@ -19,7 +19,7 @@
                 <div class="p-6">
                     <!-- Image Preview -->
                     <div v-if="media.mime_type?.startsWith('image/')" class="mb-6">
-                        <img :src="media.url" :alt="media.alt || media.name" class="w-full h-auto rounded-lg" />
+                        <img :src="media.url" :alt="media.alt || media.name" class="w-full h-auto rounded-lg">
                     </div>
 
                     <!-- Media Info -->
@@ -61,7 +61,7 @@
                                     :value="media.url"
                                     readonly
                                     class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
-                                />
+                                >
                                 <button
                                     @click="copyUrl"
                                     class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"

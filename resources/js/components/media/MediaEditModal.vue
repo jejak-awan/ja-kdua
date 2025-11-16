@@ -24,7 +24,7 @@
                     <form v-else @submit.prevent="handleSubmit" class="space-y-4">
                         <!-- Preview -->
                         <div v-if="form.url && form.mime_type?.startsWith('image/')" class="mb-4">
-                            <img :src="form.url" :alt="form.alt" class="w-full h-64 object-contain bg-gray-100 rounded-lg" />
+                            <img :src="form.url" :alt="form.alt" class="w-full h-64 object-contain bg-gray-100 rounded-lg">
                         </div>
 
                         <!-- Name -->
@@ -37,7 +37,7 @@
                                 type="text"
                                 required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            />
+                            >
                         </div>
 
                         <!-- Alt Text -->
@@ -50,7 +50,7 @@
                                 type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder="Alternative text for accessibility"
-                            />
+                            >
                         </div>
 
                         <!-- Description -->
@@ -62,7 +62,7 @@
                                 v-model="form.description"
                                 rows="3"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            ></textarea>
+                            />
                         </div>
 
                         <!-- Folder -->
