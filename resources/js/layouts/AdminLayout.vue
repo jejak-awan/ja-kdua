@@ -20,6 +20,9 @@
 
             <!-- Page Content -->
             <main class="p-6">
+                <!-- Breadcrumbs -->
+                <Breadcrumbs class="admin-breadcrumbs" />
+                
                 <router-view />
             </main>
         </div>
@@ -32,6 +35,7 @@ import { useAuthStore } from '../stores/auth';
 import { useSidebar } from '../composables/useSidebar';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
 import AdminNavbar from '../components/layouts/AdminNavbar.vue';
+import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

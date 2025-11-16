@@ -3,6 +3,9 @@
     <!-- Theme Header -->
     <ThemeHeader />
     
+    <!-- Breadcrumbs -->
+    <Breadcrumbs v-if="!isHomePage" />
+    
     <!-- Main Content -->
     <main class="main-content">
       <router-view v-slot="{ Component }">
@@ -18,15 +21,19 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@vueuse/head'
 import { useTheme } from '@/composables/useTheme'
 import ThemeHeader from '@/components/theme/ThemeHeader.vue'
 import ThemeFooter from '@/components/theme/ThemeFooter.vue'
+import Breadcrumbs from '@/components/Breadcrumbs.vue'
 
 const route = useRoute()
 const { activeTheme, loadActiveTheme } = useTheme()
+
+// Hide breadcrumbs on homepage
+const isHomePage = computed(() => route.path === '/')
 
 // Load active theme on mount
 onMounted(async () => {
