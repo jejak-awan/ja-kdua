@@ -32,6 +32,25 @@
         
         <!-- Content -->
         <div class="post-body" v-html="post.content"></div>
+        
+        <!-- Tags -->
+        <div v-if="post.tags && post.tags.length > 0" class="post-tags">
+          <span class="tags-label">Tags:</span>
+          <span v-for="tag in post.tags" :key="tag.id" class="tag">
+            {{ tag.name }}
+          </span>
+        </div>
+        
+        <!-- Social Share -->
+        <div class="post-share-section">
+          <SocialShare
+            :url="postUrl"
+            :title="post.title"
+            :description="post.excerpt || post.meta_description"
+            :hashtags="postHashtags"
+            @shared="trackShare"
+          />
+        </div>
       </article>
     </div>
     <div v-else class="container no-post">
@@ -41,13 +60,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/services/api'
+import SocialShare from '@/components/SocialShare.vue'
 
 const route = useRoute()
 const post = ref(null)
 const loading = ref(true)
+
+// Computed properties for social share
+const postUrl = computed(() => window.location.href)
+const postHashtags = computed(() => {
+  if (post.value?.tags) {
+    return post.value.tags.map(tag => tag.name.replace(/\s+/g, ''))
+  }
+  return []
+})
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -55,6 +84,22 @@ const formatDate = (date) => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+const trackShare = async (data) => {
+  // Track share event (optional analytics)
+  console.log('Shared on:', data.platform, data.url)
+  
+  // You can send this to your analytics endpoint
+  try {
+    await api.post('/analytics/share', {
+      content_id: post.value?.id,
+      platform: data.platform,
+      url: data.url,
+    })
+  } catch (error) {
+    console.error('Failed to track share:', error)
+  }
 }
 
 onMounted(async () => {
@@ -168,6 +213,43 @@ onMounted(async () => {
   margin: 1.5rem 0;
 }
 
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.tags-label {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.tag:hover {
+  background-color: #e5e7eb;
+}
+
+.post-share-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
 @media (max-width: 768px) {
   .post-content {
     padding: 1.5rem;
@@ -175,6 +257,10 @@ onMounted(async () => {
   
   .post-title {
     font-size: 1.875rem;
+  }
+  
+  .post-tags {
+    gap: 0.5rem;
   }
 }
 </style>
