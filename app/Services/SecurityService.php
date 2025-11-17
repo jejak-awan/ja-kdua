@@ -18,15 +18,28 @@ class SecurityService
             'email' => $email,
         ]);
 
-        // Track failed attempts
-        $key = "failed_login_attempts_{$ipAddress}";
-        $attempts = Cache::get($key, 0) + 1;
-        Cache::put($key, $attempts, now()->addMinutes($this->lockoutDuration));
+        // Track failed attempts by IP
+        $ipKey = "failed_login_attempts_{$ipAddress}";
+        $ipAttempts = Cache::get($ipKey, 0) + 1;
+        Cache::put($ipKey, $ipAttempts, now()->addMinutes($this->lockoutDuration));
+
+        // Track failed attempts by email (for account lockout)
+        $emailKey = "failed_login_attempts_email_{$email}";
+        $emailAttempts = Cache::get($emailKey, 0) + 1;
+        Cache::put($emailKey, $emailAttempts, now()->addMinutes($this->lockoutDuration));
 
         // Block IP if too many attempts
-        if ($attempts >= $this->maxFailedAttempts) {
-            $this->blockIp($ipAddress, "Too many failed login attempts ({$attempts})");
-            SecurityLog::log('login_blocked', null, $ipAddress, "IP blocked due to {$attempts} failed login attempts");
+        if ($ipAttempts >= $this->maxFailedAttempts) {
+            $this->blockIp($ipAddress, "Too many failed login attempts ({$ipAttempts})");
+            SecurityLog::log('login_blocked', null, $ipAddress, "IP blocked due to {$ipAttempts} failed login attempts");
+        }
+
+        // Lock account if too many attempts
+        if ($emailAttempts >= $this->maxFailedAttempts) {
+            $this->lockAccount($email, "Too many failed login attempts ({$emailAttempts})");
+            SecurityLog::log('account_locked', null, $ipAddress, "Account locked due to {$emailAttempts} failed login attempts", [
+                'email' => $email,
+            ]);
         }
     }
 
@@ -34,9 +47,16 @@ class SecurityService
     {
         SecurityLog::log('login_success', $user, $ipAddress, "Successful login for user: {$user->email}");
 
-        // Clear failed attempts
-        $key = "failed_login_attempts_{$ipAddress}";
-        Cache::forget($key);
+        // Clear failed attempts for IP
+        $ipKey = "failed_login_attempts_{$ipAddress}";
+        Cache::forget($ipKey);
+
+        // Clear failed attempts for email
+        $emailKey = "failed_login_attempts_email_{$user->email}";
+        Cache::forget($emailKey);
+
+        // Unlock account if locked
+        $this->unlockAccount($user->email);
     }
 
     public function isIpBlocked($ipAddress)
@@ -66,6 +86,44 @@ class SecurityService
     public function clearFailedAttempts($ipAddress)
     {
         Cache::forget("failed_login_attempts_{$ipAddress}");
+    }
+
+    public function isAccountLocked($email)
+    {
+        return Cache::has("account_locked_{$email}");
+    }
+
+    public function lockAccount($email, $reason = null)
+    {
+        Cache::put("account_locked_{$email}", true, now()->addMinutes($this->lockoutDuration));
+    }
+
+    public function unlockAccount($email)
+    {
+        Cache::forget("account_locked_{$email}");
+        Cache::forget("failed_login_attempts_email_{$email}");
+    }
+
+    public function getAccountLockoutTime($email)
+    {
+        $lockoutKey = "account_locked_{$email}";
+        if (!Cache::has($lockoutKey)) {
+            return null;
+        }
+
+        // Get remaining time from cache TTL
+        // Note: This is approximate, as Cache doesn't expose TTL directly
+        return now()->addMinutes($this->lockoutDuration);
+    }
+
+    public function getLockoutDuration()
+    {
+        return $this->lockoutDuration;
+    }
+
+    public function getMaxFailedAttempts()
+    {
+        return $this->maxFailedAttempts;
     }
 
     public function clearAllBlockedIPs()

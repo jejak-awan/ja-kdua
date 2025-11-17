@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -102,7 +103,7 @@ class UserController extends BaseApiController
     {
         $request->validate([
             'current_password' => 'required',
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
         ]);
 
         $user = $request->user();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
 use App\Notifications\ResetPassword;
+use App\Rules\StrongPassword;
 use App\Services\SecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,8 +86,18 @@ class AuthController extends BaseApiController
         // Check if IP is blocked
         if ($securityService->isIpBlocked($ipAddress)) {
             return $this->validationError([
-                'email' => ['Your IP address has been temporarily blocked due to too many failed login attempts.'],
+                'email' => ['Your IP address has been temporarily blocked due to too many failed login attempts. Please try again later.'],
             ]);
+        }
+
+        // Check if account is locked
+        if ($securityService->isAccountLocked($request->email)) {
+            $lockoutTime = $securityService->getAccountLockoutTime($request->email);
+            $remainingMinutes = $lockoutTime ? max(1, now()->diffInMinutes($lockoutTime)) : $securityService->getLockoutDuration();
+            
+            return $this->validationError([
+                'email' => ["Account temporarily locked due to too many failed login attempts. Please try again in {$remainingMinutes} minutes."],
+            ], 'Account locked', 423);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -172,7 +183,7 @@ class AuthController extends BaseApiController
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => ['required', 'confirmed', Password::defaults()],
+                'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e->errors());
@@ -343,7 +354,7 @@ class AuthController extends BaseApiController
             $request->validate([
                 'token' => 'required',
                 'email' => 'required|email',
-                'password' => ['required', 'confirmed', Password::defaults()],
+                'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e->errors());
