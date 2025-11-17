@@ -47,6 +47,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'index']);
         Route::post('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'store']);
 
+        // Newsletter (public subscription)
+        Route::post('/newsletter/subscribe', [App\Http\Controllers\Api\V1\NewsletterController::class, 'subscribe'])->middleware('throttle:10,1');
+        Route::post('/newsletter/unsubscribe', [App\Http\Controllers\Api\V1\NewsletterController::class, 'unsubscribe'])->middleware('throttle:10,1');
+
         // Forms (public submission - with stricter rate limiting: 10 requests per minute)
         Route::get('/forms/{slug}', function ($slug) {
             $form = \App\Models\Form::where('slug', $slug)->where('is_active', true)->with('fields')->firstOrFail();

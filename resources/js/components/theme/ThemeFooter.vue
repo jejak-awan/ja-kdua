@@ -36,15 +36,17 @@
           </ul>
         </div>
         
-        <!-- Follow Us -->
+        <!-- Newsletter -->
         <div class="footer-column">
-          <h3 class="footer-heading">Follow Us</h3>
-          <ul class="footer-links">
-            <li><a href="#" target="_blank">Facebook</a></li>
-            <li><a href="#" target="_blank">Twitter</a></li>
-            <li><a href="#" target="_blank">Instagram</a></li>
-            <li><a href="#" target="_blank">LinkedIn</a></li>
-          </ul>
+          <h3 class="footer-heading">Newsletter</h3>
+          <NewsletterWidget
+            variant="compact"
+            title=""
+            description=""
+            button-text="Subscribe"
+            :show-icon="false"
+            :show-privacy="false"
+          />
         </div>
       </div>
       
@@ -65,6 +67,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from '@/composables/useTheme'
 import api from '@/services/api'
+import NewsletterWidget from '@/components/NewsletterWidget.vue'
 
 const { themeSettings } = useTheme()
 const categories = ref([])

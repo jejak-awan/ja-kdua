@@ -69,6 +69,18 @@
       </div>
     </section>
     
+    <!-- Newsletter Section -->
+    <section class="newsletter-section section-gray">
+      <div class="container">
+        <NewsletterWidget
+          variant="default"
+          title="Berlangganan Newsletter"
+          description="Dapatkan update terbaru, tips, dan artikel menarik langsung ke email Anda"
+          button-text="Berlangganan"
+        />
+      </div>
+    </section>
+    
     <!-- CTA Section -->
     <section class="cta-section">
       <div class="container">
@@ -91,6 +103,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
+import NewsletterWidget from '@/components/NewsletterWidget.vue'
 
 const authStore = useAuthStore()
 const { themeSettings } = useTheme()
