@@ -23,6 +23,10 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
+                <AutoSaveIndicator
+                    :status="autoSaveStatus"
+                    :last-saved="lastSaved"
+                />
                 <button
                     @click="handlePreview"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -333,6 +337,8 @@ import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 import MediaPicker from '../../../components/MediaPicker.vue';
+import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
+import { useAutoSave } from '../../../composables/useAutoSave';
 
 const route = useRoute();
 const router = useRouter();
@@ -359,6 +365,27 @@ const form = ref({
     meta_description: '',
     meta_keywords: '',
     og_image: null,
+});
+
+// Create a computed form that includes tags for auto-save
+const formWithTags = computed(() => ({
+    ...form.value,
+    tags: selectedTags.value.map(t => t.id),
+}));
+
+// Auto-save setup
+const autoSaveEnabled = ref(false);
+const {
+    isSaving: autoSaving,
+    lastSaved,
+    saveStatus: autoSaveStatus,
+    hasChanges,
+    startAutoSave,
+} = useAutoSave(formWithTags, contentId, {
+    interval: 30000, // 30 seconds
+    get enabled() {
+        return autoSaveEnabled.value;
+    },
 });
 
 const availableTags = computed(() => {
@@ -429,6 +456,10 @@ const fetchContent = async () => {
         if (content.tags && Array.isArray(content.tags)) {
             selectedTags.value = content.tags;
         }
+        
+        // Enable auto-save after content is loaded
+        autoSaveEnabled.value = true;
+        startAutoSave();
         
         // Lock content on edit
         await lockContent();

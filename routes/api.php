@@ -78,7 +78,9 @@ Route::prefix('v1')->group(function () {
         Route::get('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'adminIndex']);
         Route::get('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'adminShow']);
         Route::post('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'store'])->middleware('permission:create content');
+        Route::post('contents/autosave', [App\Http\Controllers\Api\V1\ContentController::class, 'autosave'])->middleware('permission:create content');
         Route::put('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'update'])->middleware('permission:edit content');
+        Route::patch('contents/{content}/autosave', [App\Http\Controllers\Api\V1\ContentController::class, 'autosave'])->middleware('permission:edit content');
         Route::delete('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'destroy'])->middleware('permission:delete content');
         Route::post('contents/{content}/duplicate', [App\Http\Controllers\Api\V1\ContentController::class, 'duplicate'])->middleware('permission:create content');
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');

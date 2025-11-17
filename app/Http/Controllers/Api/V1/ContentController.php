@@ -381,6 +381,94 @@ class ContentController extends BaseApiController
         return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content updated successfully');
     }
 
+    /**
+     * Auto-save draft (lightweight save without revisions, webhooks, or search indexing)
+     */
+    public function autosave(Request $request, Content $content = null)
+    {
+        try {
+            $validated = $request->validate([
+                'title' => 'sometimes|string|max:255',
+                'slug' => 'sometimes|string',
+                'excerpt' => 'nullable|string',
+                'body' => 'nullable|string',
+                'featured_image' => 'nullable|string',
+                'type' => 'sometimes|in:post,page,custom',
+                'category_id' => 'nullable|exists:categories,id',
+                'tags' => 'nullable|array',
+                'tags.*' => 'exists:tags,id',
+                'meta_title' => 'nullable|string|max:255',
+                'meta_description' => 'nullable|string|max:500',
+                'meta_keywords' => 'nullable|string|max:255',
+                'og_image' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        // Force status to draft for auto-save
+        $validated['status'] = 'draft';
+
+        if ($content) {
+            // Update existing content
+            // Check if content is locked by another user
+            if ($content->locked_by && $content->locked_by !== $request->user()->id) {
+                return $this->error('Content is currently being edited by another user', 423);
+            }
+
+            // Validate slug uniqueness if changed
+            if (isset($validated['slug']) && $validated['slug'] !== $content->slug) {
+                $exists = Content::where('slug', $validated['slug'])
+                    ->where('id', '!=', $content->id)
+                    ->exists();
+                if ($exists) {
+                    unset($validated['slug']); // Don't update slug if conflict
+                }
+            }
+
+            $content->update($validated);
+
+            if ($request->has('tags')) {
+                $content->tags()->sync($request->tags);
+            }
+
+            return $this->success([
+                'id' => $content->id,
+                'saved_at' => $content->updated_at,
+            ], 'Draft auto-saved successfully');
+        } else {
+            // Create new draft
+            if (!isset($validated['title']) || empty($validated['title'])) {
+                return $this->error('Title is required for auto-save', 422);
+            }
+
+            // Generate slug if not provided
+            if (!isset($validated['slug']) || empty($validated['slug'])) {
+                $validated['slug'] = \Illuminate\Support\Str::slug($validated['title']);
+            }
+
+            // Ensure slug is unique
+            $baseSlug = $validated['slug'];
+            $counter = 1;
+            while (Content::where('slug', $validated['slug'])->exists()) {
+                $validated['slug'] = $baseSlug.'-'.$counter;
+                $counter++;
+            }
+
+            $validated['author_id'] = $request->user()->id;
+            $content = Content::create($validated);
+
+            if ($request->has('tags')) {
+                $content->tags()->sync($request->tags);
+            }
+
+            return $this->success([
+                'id' => $content->id,
+                'saved_at' => $content->created_at,
+            ], 'Draft auto-saved successfully', 201);
+        }
+    }
+
     protected function saveCustomFields(Content $content, array $customFields)
     {
         foreach ($customFields as $fieldSlug => $value) {

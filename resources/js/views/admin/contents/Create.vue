@@ -1,7 +1,14 @@
 <template>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Create New Content</h1>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Create New Content</h1>
+                <AutoSaveIndicator
+                    :status="autoSaveStatus"
+                    :last-saved="lastSaved"
+                    class="mt-2"
+                />
+            </div>
             <router-link
                 :to="{ name: 'contents' }"
                 class="text-gray-600 hover:text-gray-900"
@@ -297,6 +304,8 @@ import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 import MediaPicker from '../../../components/MediaPicker.vue';
+import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
+import { useAutoSave } from '../../../composables/useAutoSave';
 
 const router = useRouter();
 
@@ -304,6 +313,7 @@ const loading = ref(false);
 const categories = ref([]);
 const tags = ref([]);
 const selectedTags = ref([]);
+const contentId = ref(null);
 
 const form = ref({
     title: '',
@@ -319,6 +329,29 @@ const form = ref({
     meta_description: '',
     meta_keywords: '',
     og_image: null,
+});
+
+// Create a computed form that includes tags for auto-save
+const formWithTags = computed(() => ({
+    ...form.value,
+    tags: selectedTags.value.map(t => t.id),
+}));
+
+// Auto-save setup
+const {
+    isSaving: autoSaving,
+    lastSaved,
+    saveStatus: autoSaveStatus,
+    hasChanges,
+} = useAutoSave(formWithTags, contentId, {
+    interval: 30000, // 30 seconds
+    enabled: true,
+    onSave: (response) => {
+        // Update contentId if new content was created
+        if (response?.data?.id && !contentId.value) {
+            contentId.value = response.data.id;
+        }
+    },
 });
 
 const availableTags = computed(() => {
@@ -392,7 +425,15 @@ const handleSubmit = async () => {
             tags: selectedTags.value.map(t => t.id),
         };
 
-        const response = await api.post('/admin/cms/contents', payload);
+        // If content was auto-saved, use update endpoint
+        const endpoint = contentId.value
+            ? `/admin/cms/contents/${contentId.value}`
+            : '/admin/cms/contents';
+        const method = contentId.value ? 'put' : 'post';
+
+        const response = await method === 'put'
+            ? await api.put(endpoint, payload)
+            : await api.post(endpoint, payload);
         
         router.push({ name: 'contents' });
     } catch (error) {
