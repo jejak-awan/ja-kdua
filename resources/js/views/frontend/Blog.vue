@@ -7,7 +7,13 @@
       </div>
       
       <!-- Posts Grid -->
-      <div v-if="loading" class="loading">Loading...</div>
+      <div v-if="loading" class="posts-grid">
+        <SkeletonLoader 
+          v-for="i in 9" 
+          :key="i" 
+          type="post-card"
+        />
+      </div>
       <div v-else-if="posts.length > 0" class="posts-grid">
         <PostCard 
           v-for="post in posts" 
@@ -46,6 +52,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 
 const route = useRoute()
 const router = useRouter()
