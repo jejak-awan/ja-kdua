@@ -9,6 +9,7 @@ export const navigationGroups = {
         { name: 'tags', to: '/admin/tags', label: 'Tags' },
     ],
     users: [
+        { name: 'profile', to: '/admin/profile', label: 'My Profile' },
         { name: 'users', to: '/admin/users', label: 'Users' },
         { name: 'comments', to: '/admin/comments', label: 'Comments' },
         { name: 'forms', to: '/admin/forms', label: 'Forms' },

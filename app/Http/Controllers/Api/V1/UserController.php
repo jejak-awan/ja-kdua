@@ -58,6 +58,22 @@ class UserController extends BaseApiController
         return $this->success($request->user()->load(['roles', 'permissions']), 'Profile retrieved successfully');
     }
 
+    public function loginHistory(Request $request)
+    {
+        $user = $request->user();
+        
+        $limit = $request->get('limit', 20);
+        $offset = $request->get('offset', 0);
+        
+        $history = \App\Models\LoginHistory::where('user_id', $user->id)
+            ->orderBy('login_at', 'desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        return $this->success($history, 'Login history retrieved successfully');
+    }
+
     public function updateProfile(Request $request)
     {
         $user = $request->user();

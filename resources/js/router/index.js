@@ -88,6 +88,11 @@ const routes = [
                 component: () => import('../views/admin/settings/Index.vue'),
             },
             {
+                path: 'profile',
+                name: 'profile',
+                component: () => import('../views/admin/Profile.vue'),
+            },
+            {
                 path: 'analytics',
                 name: 'analytics',
                 component: () => import('../views/admin/analytics/Index.vue'),

@@ -106,6 +106,18 @@ class AuthController extends BaseApiController
             // Record failed login
             $securityService->recordFailedLogin($request->email, $ipAddress);
 
+            // Record failed login history if user exists
+            if ($user) {
+                \App\Models\LoginHistory::create([
+                    'user_id' => $user->id,
+                    'ip_address' => $ipAddress,
+                    'user_agent' => $request->userAgent(),
+                    'login_at' => now(),
+                    'status' => 'failed',
+                    'failure_reason' => 'Invalid password',
+                ]);
+            }
+
             return $this->validationError([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -129,6 +141,15 @@ class AuthController extends BaseApiController
         $user->update([
             'last_login_at' => now(),
             'last_login_ip' => $ipAddress,
+        ]);
+
+        // Record login history
+        \App\Models\LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $ipAddress,
+            'user_agent' => $request->userAgent(),
+            'login_at' => now(),
+            'status' => 'success',
         ]);
 
         // Log activity

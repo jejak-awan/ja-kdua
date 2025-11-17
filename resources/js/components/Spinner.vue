@@ -29,7 +29,7 @@
       <div></div>
     </div>
     
-    <div v-if="text" class="spinner-text mt-2 text-sm text-gray-600 dark:text-gray-400">
+    <div v-if="text" class="spinner-text">
       {{ text }}
     </div>
   </div>
@@ -65,32 +65,48 @@ const props = defineProps({
 
 <style scoped>
 .spinner-container {
-  @apply flex flex-col items-center justify-center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .spinner-container.inline {
-  @apply inline-flex;
+  display: inline-flex;
 }
 
 /* Circular Spinner */
 .spinner-circular {
-  @apply animate-spin;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner-circular.sm {
-  @apply w-4 h-4;
+  width: 1rem;
+  height: 1rem;
 }
 
 .spinner-circular.md {
-  @apply w-8 h-8;
+  width: 2rem;
+  height: 2rem;
 }
 
 .spinner-circular.lg {
-  @apply w-12 h-12;
+  width: 3rem;
+  height: 3rem;
 }
 
 .spinner-circular.xl {
-  @apply w-16 h-16;
+  width: 4rem;
+  height: 4rem;
 }
 
 .spinner-path {
@@ -102,15 +118,23 @@ const props = defineProps({
 }
 
 .spinner-path.primary {
-  @apply text-blue-600 dark:text-blue-400;
+  color: rgb(37 99 235);
+}
+
+:global(.dark) .spinner-path.primary {
+  color: rgb(96 165 250);
 }
 
 .spinner-path.white {
-  @apply text-white;
+  color: white;
 }
 
 .spinner-path.gray {
-  @apply text-gray-600 dark:text-gray-400;
+  color: rgb(75 85 99);
+}
+
+:global(.dark) .spinner-path.gray {
+  color: rgb(156 163 175);
 }
 
 @keyframes spinner-dash {
@@ -130,24 +154,43 @@ const props = defineProps({
 
 /* Dots Spinner */
 .spinner-dots {
-  @apply flex gap-1;
+  display: flex;
+  gap: 0.25rem;
 }
 
 .spinner-dots.sm span {
-  @apply w-1 h-1;
+  width: 0.25rem;
+  height: 0.25rem;
 }
 
 .spinner-dots.md span {
-  @apply w-2 h-2;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .spinner-dots.lg span {
-  @apply w-3 h-3;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .spinner-dots span {
-  @apply bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse;
+  background-color: rgb(37 99 235);
+  border-radius: 9999px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   animation-delay: calc(var(--i) * 0.2s);
+}
+
+:global(.dark) .spinner-dots span {
+  background-color: rgb(96 165 250);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .spinner-dots span:nth-child(1) {
@@ -164,24 +207,32 @@ const props = defineProps({
 
 /* Bars Spinner */
 .spinner-bars {
-  @apply flex gap-1 items-end;
+  display: flex;
+  gap: 0.25rem;
+  align-items: flex-end;
 }
 
 .spinner-bars.sm div {
-  @apply w-1;
+  width: 0.25rem;
 }
 
 .spinner-bars.md div {
-  @apply w-1.5;
+  width: 0.375rem;
 }
 
 .spinner-bars.lg div {
-  @apply w-2;
+  width: 0.5rem;
 }
 
 .spinner-bars div {
-  @apply bg-blue-600 dark:bg-blue-400 rounded-t;
+  background-color: rgb(37 99 235);
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
   animation: spinner-bars 1.2s ease-in-out infinite;
+}
+
+:global(.dark) .spinner-bars div {
+  background-color: rgb(96 165 250);
 }
 
 .spinner-bars div:nth-child(1) {
@@ -211,6 +262,17 @@ const props = defineProps({
   20% {
     transform: scaleY(1);
   }
+}
+
+.spinner-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgb(75 85 99);
+}
+
+:global(.dark) .spinner-text {
+  color: rgb(156 163 175);
 }
 </style>
 

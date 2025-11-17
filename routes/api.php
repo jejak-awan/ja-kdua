@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/profile', [App\Http\Controllers\Api\V1\UserController::class, 'updateProfile']);
         Route::post('/profile/avatar', [App\Http\Controllers\Api\V1\UserController::class, 'uploadAvatar']);
         Route::put('/profile/password', [App\Http\Controllers\Api\V1\UserController::class, 'updatePassword']);
+        Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
     });
 
     // Public CMS API (with rate limiting: 100 requests per minute)
