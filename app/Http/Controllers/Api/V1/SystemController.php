@@ -196,6 +196,144 @@ class SystemController extends BaseApiController
         return '0 B';
     }
 
+    public function systemHealth()
+    {
+        try {
+            $health = [
+                'cpu' => $this->getCpuUsage(),
+                'memory' => $this->getMemoryUsage(),
+                'disk' => $this->getDiskUsage(),
+                'database' => $this->checkDatabase(),
+                'redis' => $this->checkRedis(),
+                'overall' => 'healthy',
+            ];
+
+            // Determine overall status
+            $critical = false;
+            $warning = false;
+
+            if ($health['cpu']['percent'] > 90 || $health['memory']['percent'] > 90 || $health['disk']['percent'] > 90) {
+                $critical = true;
+            } elseif ($health['cpu']['percent'] > 75 || $health['memory']['percent'] > 75 || $health['disk']['percent'] > 75) {
+                $warning = true;
+            }
+
+            if ($health['database']['status'] !== 'ok' || $health['redis']['status'] !== 'ok') {
+                $critical = true;
+            }
+
+            $health['overall'] = $critical ? 'critical' : ($warning ? 'warning' : 'healthy');
+
+            return $this->success($health, 'System health retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('System health error: '.$e->getMessage());
+
+            return $this->success([
+                'cpu' => ['percent' => 0, 'status' => 'unknown'],
+                'memory' => ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'],
+                'disk' => ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'],
+                'database' => ['status' => 'unknown', 'message' => 'Unable to check'],
+                'redis' => ['status' => 'unknown', 'message' => 'Unable to check'],
+                'overall' => 'unknown',
+            ], 'System health retrieved successfully');
+        }
+    }
+
+    protected function getCpuUsage()
+    {
+        try {
+            // Get CPU usage from /proc/loadavg (Linux)
+            if (file_exists('/proc/loadavg')) {
+                $load = sys_getloadavg();
+                $cpuPercent = min(100, ($load[0] * 100) / 4); // Rough estimate
+                
+                return [
+                    'percent' => round($cpuPercent, 2),
+                    'load' => $load[0],
+                    'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
+                ];
+            }
+        } catch (\Exception $e) {
+            // Fallback
+        }
+
+        return ['percent' => 0, 'load' => 0, 'status' => 'unknown'];
+    }
+
+    protected function getMemoryUsage()
+    {
+        try {
+            $memInfo = @file_get_contents('/proc/meminfo');
+            if ($memInfo) {
+                preg_match('/MemTotal:\s+(\d+)\s+kB/', $memInfo, $total);
+                preg_match('/MemAvailable:\s+(\d+)\s+kB/', $memInfo, $available);
+                
+                if (isset($total[1]) && isset($available[1])) {
+                    $totalMem = (int) $total[1] * 1024;
+                    $availableMem = (int) $available[1] * 1024;
+                    $usedMem = $totalMem - $availableMem;
+                    $percent = ($usedMem / $totalMem) * 100;
+
+                    return [
+                        'percent' => round($percent, 2),
+                        'used' => $this->formatBytes($usedMem),
+                        'total' => $this->formatBytes($totalMem),
+                        'available' => $this->formatBytes($availableMem),
+                        'status' => $percent > 90 ? 'critical' : ($percent > 75 ? 'warning' : 'ok'),
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            // Fallback
+        }
+
+        return ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'];
+    }
+
+    protected function getDiskUsage()
+    {
+        try {
+            $path = base_path();
+            $total = disk_total_space($path);
+            $free = disk_free_space($path);
+            $used = $total - $free;
+            $percent = ($used / $total) * 100;
+
+            return [
+                'percent' => round($percent, 2),
+                'used' => $this->formatBytes($used),
+                'total' => $this->formatBytes($total),
+                'free' => $this->formatBytes($free),
+                'status' => $percent > 90 ? 'critical' : ($percent > 75 ? 'warning' : 'ok'),
+            ];
+        } catch (\Exception $e) {
+            return ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'];
+        }
+    }
+
+    protected function checkDatabase()
+    {
+        try {
+            DB::connection()->getPdo();
+            return ['status' => 'ok', 'message' => 'Connected'];
+        } catch (\Exception $e) {
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    protected function checkRedis()
+    {
+        try {
+            if (config('cache.default') === 'redis') {
+                \Illuminate\Support\Facades\Redis::connection()->ping();
+                return ['status' => 'ok', 'message' => 'Connected'];
+            }
+            return ['status' => 'disabled', 'message' => 'Redis not configured'];
+        } catch (\Exception $e) {
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
     protected function formatBytes($bytes, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];

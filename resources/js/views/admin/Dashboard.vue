@@ -82,6 +82,9 @@
 
         <!-- Quick Actions Widget -->
         <QuickActions :show-recent="true" class="mb-6" />
+
+        <!-- System Health Widget -->
+        <SystemHealthWidget class="mb-6" />
     </div>
 </template>
 
@@ -91,6 +94,7 @@ import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
 import { parseSingleResponse } from '../../utils/responseParser';
 import QuickActions from '@/components/admin/QuickActions.vue';
+import SystemHealthWidget from '@/components/admin/SystemHealthWidget.vue';
 
 const authStore = useAuthStore();
 const stats = ref({

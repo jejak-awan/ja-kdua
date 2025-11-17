@@ -323,6 +323,7 @@ Route::prefix('v1')->group(function () {
         // System Information
         Route::get('system/info', [App\Http\Controllers\Api\V1\SystemController::class, 'info'])->middleware('permission:manage settings');
         Route::get('system/health', [App\Http\Controllers\Api\V1\SystemController::class, 'health'])->middleware('permission:manage settings');
+        Route::get('system/health/detailed', [App\Http\Controllers\Api\V1\SystemController::class, 'systemHealth'])->middleware('permission:manage settings');
         Route::get('system/statistics', [App\Http\Controllers\Api\V1\SystemController::class, 'statistics'])->middleware('permission:manage settings');
         Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage settings');
         Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage settings');
