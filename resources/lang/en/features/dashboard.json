@@ -1,0 +1,62 @@
+{
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}!",
+    "stats": {
+        "totalContents": "Total Contents",
+        "published": "published",
+        "mediaFiles": "Media Files",
+        "totalUsers": "Total Users",
+        "pendingContent": "Pending Content",
+        "requiresReview": "Requires review"
+    },
+    "traffic": {
+        "title": "Traffic Overview",
+        "last7Days": "Last 7 Days",
+        "noData": "No traffic data available",
+        "visits": "Visits"
+    },
+    "widgets": {
+        "quickActions": {
+            "title": "Quick Actions",
+            "createPost": "Create Post",
+            "createPage": "Create Page",
+            "uploadMedia": "Upload Media",
+            "createCategory": "Create Category",
+            "createTag": "Create Tag",
+            "manageUsers": "Manage Users",
+            "viewComments": "View Comments",
+            "settings": "Settings",
+            "recentActions": "Recent Actions"
+        },
+        "systemHealth": {
+            "title": "System Health",
+            "overallStatus": "Overall Status",
+            "cpu": "CPU",
+            "memory": "Memory",
+            "disk": "Disk",
+            "database": "Database",
+            "redis": "Redis",
+            "lastUpdated": "Last updated: {time}",
+            "status": {
+                "healthy": "Healthy",
+                "warning": "Warning",
+                "critical": "Critical",
+                "unknown": "Unknown",
+                "ok": "OK",
+                "error": "Error",
+                "disabled": "Disabled"
+            }
+        },
+        "recentActivity": {
+            "title": "Recent Activity",
+            "live": "Live",
+            "loading": "Loading activities...",
+            "empty": "No recent activity found",
+            "viewAll": "View All Activity",
+            "time": {
+                "justNow": "Just now",
+                "ago": "{time} ago"
+            }
+        }
+    }
+}

@@ -1,0 +1,110 @@
+{
+    "title": "Pustaka Media",
+    "upload": "Unggah Media",
+    "search": "Cari media...",
+    "folders": "Folder",
+    "newFolder": "Folder Baru",
+    "allMedia": "Semua Media",
+    "filter": {
+        "allTypes": "Semua Tipe",
+        "images": "Gambar",
+        "videos": "Video",
+        "documents": "Dokumen",
+        "allStatus": "Semua Media",
+        "used": "Digunakan",
+        "unused": "Tidak Digunakan"
+    },
+    "actions": {
+        "bulk": "Tindakan Massal",
+        "delete": "Hapus",
+        "move": "Pindah ke Folder",
+        "updateAlt": "Perbarui Teks Alt",
+        "downloadZip": "Unduh sebagai ZIP",
+        "view": "Lihat",
+        "edit": "Ubah",
+        "select": "Pilih",
+        "uploadNew": "Unggah Baru",
+        "cancel": "Batal",
+        "close": "Tutup",
+        "save": "Simpan Perubahan"
+    },
+    "loading": "Memuat media...",
+    "empty": "Tidak ada media ditemukan",
+    "table": {
+        "media": "Media",
+        "name": "Nama",
+        "type": "Tipe",
+        "size": "Ukuran",
+        "folder": "Folder",
+        "actions": "Aksi"
+    },
+    "selected": "{count} dipilih",
+    "messages": {
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus {count} file media?",
+        "deleteSingleConfirm": "Apakah Anda yakin ingin menghapus \"{name}\"?",
+        "deleteSuccess": "Berhasil menghapus {count} file media",
+        "deleteFailed": "Gagal menghapus media",
+        "moveSuccess": "Berhasil memindahkan {count} file media",
+        "moveFailed": "Gagal memindahkan media",
+        "updateAltSuccess": "Teks alt berhasil diperbarui",
+        "updateAltFailed": "Gagal memperbarui teks alt",
+        "downloadSuccess": "Berhasil mengunduh {count} file media sebagai ZIP",
+        "downloadFailed": "Gagal mengunduh media",
+        "uploadSuccess": "File berhasil diunggah",
+        "uploadFailed": "Gagal mengunggah file",
+        "updateSuccess": "Media berhasil diperbarui",
+        "updateFailed": "Gagal memperbarui media",
+        "createFolderSuccess": "Folder berhasil dibuat",
+        "createFolderFailed": "Gagal membuat folder",
+        "fileTooLarge": "File {name} terlalu besar. Ukuran maksimum adalah 10MB."
+    },
+    "modals": {
+        "updateAlt": {
+            "title": "Perbarui Teks Alt",
+            "description": "Perbarui teks alt untuk {count} file media yang dipilih",
+            "label": "Teks Alt",
+            "placeholder": "Masukkan teks alt...",
+            "cancel": "Batal",
+            "update": "Perbarui",
+            "updating": "Memperbarui..."
+        },
+        "bulk": {
+            "processing": "Memproses...",
+            "wait": "Mohon tunggu"
+        },
+        "upload": {
+            "title": "Unggah Media",
+            "clickToUpload": "Klik untuk mengunggah",
+            "dragAndDrop": "atau seret dan lepas",
+            "formats": "PNG, JPG, GIF, PDF, MP4 hingga 10MB",
+            "selectedFiles": "File Terpilih:",
+            "uploading": "Mengunggah...",
+            "uploadAction": "Unggah {count} File"
+        },
+        "edit": {
+            "title": "Edit Media",
+            "name": "Nama",
+            "altText": "Teks Alt",
+            "altPlaceholder": "Teks alternatif untuk aksesibilitas",
+            "description": "Deskripsi",
+            "folder": "Folder",
+            "noFolder": "Tidak Ada Folder",
+            "type": "Tipe",
+            "size": "Ukuran",
+            "saving": "Menyimpan..."
+        },
+        "folder": {
+            "title": "Buat Folder",
+            "name": "Nama Folder",
+            "placeholder": "Masukkan nama folder",
+            "parent": "Folder Induk",
+            "noParent": "Tidak Ada Induk",
+            "creating": "Membuat...",
+            "create": "Buat Folder"
+        },
+        "picker": {
+            "title": "Pilih Media",
+            "select": "Pilih"
+        }
+    }
+}

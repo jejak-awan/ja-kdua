@@ -1,60 +1,82 @@
 <template>
-    <div class="border border-gray-200 rounded-lg p-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2 flex-1">
-                <svg class="w-5 h-5 text-gray-400 cursor-move" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                </svg>
-                <span class="text-sm font-medium text-gray-900">{{ item.label }}</span>
-                <span class="text-xs text-gray-500">({{ item.type }})</span>
+    <draggable
+        :list="items"
+        group="menu"
+        item-key="id"
+        class="space-y-2 min-h-[10px] pb-2"
+        handle=".drag-handle"
+        ghost-class="ghost"
+        @change="$emit('change', items)"
+    >
+        <template #item="{ element }">
+            <div class="border border-border rounded-lg bg-card relative">
+                <!-- Item Content -->
+                <div class="flex items-center justify-between p-3 bg-card rounded-lg hover:bg-muted">
+                    <div class="flex items-center space-x-3 flex-1">
+                        <div class="drag-handle cursor-move text-gray-400 hover:text-muted-foreground p-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-foreground">{{ element.title || element.label }}</span>
+                            <span class="ml-2 text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full capitalize">
+                                {{ element.type }}
+                            </span>
+                            <span v-if="!element.is_active" class="ml-2 text-xs text-red-500 bg-red-500/20 px-2 py-0.5 rounded-full">
+                                Inactive
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button
+                            @click="$emit('edit', element)"
+                            class="text-indigo-600 hover:text-indigo-900 text-sm px-2 py-1"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            @click="$emit('delete', element)"
+                            class="text-red-600 hover:text-red-900 text-sm px-2 py-1"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Nested Children -->
+                <div class="pl-8 pr-2">
+                    <MenuItemTree
+                        :items="element.children"
+                        @edit="$emit('edit', $event)"
+                        @delete="$emit('delete', $event)"
+                        @change="$emit('change', $event)"
+                    />
+                </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <button
-                    @click="$emit('edit', item)"
-                    class="text-indigo-600 hover:text-indigo-900 text-sm"
-                >
-                    Edit
-                </button>
-                <button
-                    @click="$emit('delete', item)"
-                    class="text-red-600 hover:text-red-900 text-sm"
-                >
-                    Delete
-                </button>
-            </div>
-        </div>
-        <div v-if="children.length > 0" class="mt-2 ml-6 space-y-2">
-            <MenuItemTree
-                v-for="child in children"
-                :key="child.id"
-                :item="child"
-                :items="items"
-                @edit="$emit('edit', $event)"
-                @delete="$emit('delete', $event)"
-                @move="$emit('move', $event)"
-            />
-        </div>
-    </div>
+        </template>
+    </draggable>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { defineProps, defineEmits } from 'vue';
+import draggable from 'vuedraggable';
 
 const props = defineProps({
-    item: {
-        type: Object,
-        required: true,
-    },
     items: {
         type: Array,
         required: true,
     },
 });
 
-defineEmits(['edit', 'delete', 'move']);
-
-const children = computed(() => {
-    return props.items.filter(i => i.parent_id === props.item.id);
-});
+defineEmits(['edit', 'delete', 'change']);
 </script>
+
+<style scoped>
+.ghost {
+    opacity: 0.5;
+    background: #f3f4f6;
+    border: 1px dashed #9ca3af;
+}
+</style>
 

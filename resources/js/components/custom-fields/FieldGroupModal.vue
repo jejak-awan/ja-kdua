@@ -1,14 +1,14 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">
-                        {{ fieldGroup ? 'Edit Field Group' : 'Create Field Group' }}
+                        {{ fieldGroup ? t('features.developer.custom_fields.groups.modal.title_edit') : t('features.developer.custom_fields.groups.modal.title_create') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,42 +18,42 @@
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Name <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.developer.custom_fields.groups.modal.name_label') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Field group name"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.developer.custom_fields.groups.modal.name_placeholder')"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Description
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.developer.custom_fields.groups.modal.description_label') }}
                         </label>
                         <textarea
                             v-model="form.description"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Field group description"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.developer.custom_fields.groups.modal.description_placeholder')"
                         />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Attach To
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.developer.custom_fields.groups.modal.attach_label') }}
                         </label>
                         <select
                             v-model="form.attachable_type"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option :value="null">None</option>
-                            <option value="App\\Models\\Content">Content</option>
-                            <option value="App\\Models\\Category">Category</option>
-                            <option value="App\\Models\\Media">Media</option>
+                            <option :value="null">{{ t('features.developer.custom_fields.groups.modal.attach_options.none') }}</option>
+                            <option value="App\\Models\\Content">{{ t('features.developer.custom_fields.groups.modal.attach_options.content') }}</option>
+                            <option value="App\\Models\\Category">{{ t('features.developer.custom_fields.groups.modal.attach_options.category') }}</option>
+                            <option value="App\\Models\\Media">{{ t('features.developer.custom_fields.groups.modal.attach_options.media') }}</option>
                         </select>
                     </div>
                 </form>
@@ -61,16 +61,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ t('features.developer.custom_fields.groups.modal.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (fieldGroup ? 'Update' : 'Create') }}
+                        {{ saving ? t('features.developer.custom_fields.groups.modal.saving') : (fieldGroup ? t('features.developer.custom_fields.groups.modal.update') : t('features.developer.custom_fields.groups.modal.create')) }}
                     </button>
                 </div>
             </div>
@@ -80,7 +80,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     fieldGroup: {
@@ -120,7 +123,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save field group:', error);
-        alert(error.response?.data?.message || 'Failed to save field group');
+        alert(error.response?.data?.message || t('features.developer.custom_fields.groups.messages.save_failed'));
     } finally {
         saving.value = false;
     }

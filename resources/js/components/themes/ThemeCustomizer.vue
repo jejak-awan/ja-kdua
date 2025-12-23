@@ -2,13 +2,13 @@
     <div class="theme-customizer">
         <div class="flex h-screen">
             <!-- Settings Panel -->
-            <div class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
-                <div class="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+            <div class="w-80 bg-card border-r border-border overflow-y-auto">
+                <div class="sticky top-0 bg-card border-b border-border p-4 z-10">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold">Customize Theme</h3>
                         <button
                             @click="$emit('close')"
-                            class="text-gray-400 hover:text-gray-600"
+                            class="text-gray-400 hover:text-muted-foreground"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -22,9 +22,9 @@
                     <div
                         v-for="section in settingsSections"
                         :key="section.id"
-                        class="space-y-4 border-b border-gray-200 pb-6 last:border-b-0"
+                        class="space-y-4 border-b border-border pb-6 last:border-b-0"
                     >
-                        <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        <h4 class="text-sm font-semibold text-foreground uppercase tracking-wider">
                             {{ section.label }}
                         </h4>
 
@@ -34,7 +34,7 @@
                                 :key="setting.key"
                                 class="space-y-2"
                             >
-                                <label class="block text-sm font-medium text-gray-700">
+                                <label class="block text-sm font-medium text-foreground">
                                     {{ setting.label }}
                                     <span v-if="setting.required" class="text-red-500">*</span>
                                 </label>
@@ -44,7 +44,7 @@
                                     <input
                                         v-model="formValues[setting.key]"
                                         type="color"
-                                        class="h-10 w-20 border border-gray-300 rounded cursor-pointer"
+                                        class="h-10 w-20 border border-input rounded cursor-pointer"
                                         @input="updateSetting(setting.key, $event.target.value)"
                                     >
                                     <input
@@ -52,11 +52,11 @@
                                         type="text"
                                         pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
                                         placeholder="#000000"
-                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                                        class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-mono"
                                         @input="updateSetting(setting.key, $event.target.value)"
                                     >
                                     <div
-                                        class="h-10 w-10 rounded border border-gray-300"
+                                        class="h-10 w-10 rounded border border-input"
                                         :style="{ backgroundColor: formValues[setting.key] || setting.default || '#000000' }"
                                     ></div>
                                 </div>
@@ -67,7 +67,7 @@
                                     v-model="formValues[setting.key]"
                                     :type="setting.type"
                                     :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
                                     @input="updateSetting(setting.key, $event.target.value)"
                                 >
 
@@ -80,7 +80,7 @@
                                     :max="setting.max"
                                     :step="setting.step || 1"
                                     :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
                                     @input="updateSetting(setting.key, parseFloat($event.target.value))"
                                 >
 
@@ -90,7 +90,7 @@
                                     v-model="formValues[setting.key]"
                                     :rows="setting.rows || 3"
                                     :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
                                     @input="updateSetting(setting.key, $event.target.value)"
                                 />
 
@@ -98,7 +98,7 @@
                                 <select
                                     v-else-if="setting.type === 'select'"
                                     v-model="formValues[setting.key]"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
                                     @change="updateSetting(setting.key, $event.target.value)"
                                 >
                                     <option value="">{{ setting.placeholder || 'Select...' }}</option>
@@ -122,10 +122,10 @@
                                             v-model="formValues[setting.key]"
                                             type="radio"
                                             :value="option.value"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input"
                                             @change="updateSetting(setting.key, option.value)"
                                         >
-                                        <span class="ml-2 text-sm text-gray-700">{{ option.label }}</span>
+                                        <span class="ml-2 text-sm text-foreground">{{ option.label }}</span>
                                     </label>
                                 </div>
 
@@ -134,19 +134,19 @@
                                     <input
                                         v-model="formValues[setting.key]"
                                         type="checkbox"
-                                        class="h-4 w-4 mt-1 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        class="h-4 w-4 mt-1 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                                         @change="updateSetting(setting.key, $event.target.checked)"
                                     >
                                     <div class="ml-3">
-                                        <span class="text-sm text-gray-700">{{ setting.description || setting.label }}</span>
+                                        <span class="text-sm text-foreground">{{ setting.description || setting.label }}</span>
                                     </div>
                                 </div>
 
                                 <!-- Range/Slider -->
                                 <div v-else-if="setting.type === 'range'" class="space-y-2">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm text-gray-600">{{ formValues[setting.key] || setting.default || setting.min || 0 }}</span>
-                                        <span class="text-sm text-gray-600">{{ setting.max || 100 }}</span>
+                                        <span class="text-sm text-muted-foreground">{{ formValues[setting.key] || setting.default || setting.min || 0 }}</span>
+                                        <span class="text-sm text-muted-foreground">{{ setting.max || 100 }}</span>
                                     </div>
                                     <input
                                         v-model.number="formValues[setting.key]"
@@ -154,13 +154,13 @@
                                         :min="setting.min || 0"
                                         :max="setting.max || 100"
                                         :step="setting.step || 1"
-                                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
                                         @input="updateSetting(setting.key, parseFloat($event.target.value))"
                                     >
                                 </div>
 
                                 <!-- Description -->
-                                <p v-if="setting.description && setting.type !== 'checkbox'" class="text-xs text-gray-500">
+                                <p v-if="setting.description && setting.type !== 'checkbox'" class="text-xs text-muted-foreground">
                                     {{ setting.description }}
                                 </p>
                             </div>
@@ -170,7 +170,7 @@
                     <!-- Custom CSS -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                            <h4 class="text-sm font-semibold text-foreground uppercase tracking-wider">
                                 Custom CSS
                             </h4>
                             <button
@@ -184,7 +184,7 @@
                             v-if="showCustomCss"
                             v-model="customCss"
                             rows="6"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-mono"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-mono"
                             placeholder="/* Custom CSS */"
                             @input="updateCustomCss"
                         />
@@ -192,7 +192,7 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 space-y-2">
+                <div class="sticky bottom-0 bg-card border-t border-border p-4 space-y-2">
                     <button
                         @click="saveSettings"
                         :disabled="saving"
@@ -202,7 +202,7 @@
                     </button>
                     <button
                         @click="resetSettings"
-                        class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                        class="w-full px-4 py-2 border border-input text-foreground rounded-md hover:bg-muted"
                     >
                         Reset to Defaults
                     </button>
@@ -210,7 +210,7 @@
             </div>
 
             <!-- Preview Panel -->
-            <div class="flex-1 bg-gray-100">
+            <div class="flex-1 bg-secondary">
                 <ThemePreview
                     :theme="previewTheme"
                     :preview-url="previewUrl"

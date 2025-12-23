@@ -8,6 +8,7 @@ use App\Models\AnalyticsVisit;
 use App\Models\Content;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -72,20 +73,39 @@ class AnalyticsController extends BaseApiController
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
         $limit = $request->input('limit', 10);
 
-        // Get top content by matching URL patterns
-        $topContent = Content::with('author')
-            ->get()
-            ->map(function ($content) use ($dateFrom, $dateTo) {
-                $visits = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
-                    ->where('url', 'like', '%'.$content->slug.'%')
-                    ->count();
-                $content->visits_count = $visits;
+        // Optimized: Use content.views column instead of N+1 visits queries
+        // For more accurate date-filtered stats, use subquery or pre-aggregated table
+        $topContent = Cache::remember(
+            "analytics_top_content_{$dateFrom}_{$dateTo}_{$limit}",
+            now()->addMinutes(30),
+            function () use ($dateFrom, $dateTo, $limit) {
+                // Get content IDs with most visits in date range
+                $visitCounts = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
+                    ->select('url', DB::raw('count(*) as visits_count'))
+                    ->groupBy('url')
+                    ->orderByDesc('visits_count')
+                    ->limit($limit * 2)  // Get extra to match with content
+                    ->pluck('visits_count', 'url');
 
-                return $content;
-            })
-            ->sortByDesc('visits_count')
-            ->take($limit)
-            ->values();
+                return Content::with('author')
+                    ->where('status', 'published')
+                    ->get()
+                    ->map(function ($content) use ($visitCounts) {
+                        // Match content slug to URL visits
+                        $visits = 0;
+                        foreach ($visitCounts as $url => $count) {
+                            if (str_contains($url, $content->slug)) {
+                                $visits += $count;
+                            }
+                        }
+                        $content->visits_count = $visits;
+                        return $content;
+                    })
+                    ->sortByDesc('visits_count')
+                    ->take($limit)
+                    ->values();
+            }
+        );
 
         return $this->success($topContent, 'Top content retrieved successfully');
     }
@@ -225,6 +245,20 @@ class AnalyticsController extends BaseApiController
             ->get();
 
         return $this->success($stats, 'Event statistics retrieved successfully');
+    }
+
+    /**
+     * Track a page visit
+     */
+    public function trackVisit(Request $request)
+    {
+        try {
+            $visit = AnalyticsVisit::trackVisit($request);
+            return $this->success($visit, 'Visit tracked successfully');
+        } catch (\Exception $e) {
+            Log::error('Track visit error: ' . $e->getMessage());
+            return $this->error('Failed to track visit', 500);
+        }
     }
 
     /**

@@ -2,8 +2,8 @@
   <div class="blog-page">
     <div class="container">
       <div class="blog-header">
-        <h1 class="page-title">Blog</h1>
-        <p class="page-subtitle">Latest articles and updates from our team</p>
+        <h1 class="page-title">{{ t('features.frontend.blog.title') }}</h1>
+        <p class="page-subtitle">{{ t('features.frontend.blog.subtitle') }}</p>
       </div>
       
       <!-- Posts Grid -->
@@ -22,7 +22,7 @@
         />
       </div>
       <div v-else class="no-posts">
-        <p>No posts available yet.</p>
+        <p>{{ t('features.frontend.blog.empty') }}</p>
       </div>
       
       <!-- Pagination -->
@@ -32,15 +32,15 @@
           :disabled="currentPage === 1"
           class="btn btn-outline"
         >
-          Previous
+          {{ t('features.frontend.blog.pagination.previous') }}
         </button>
-        <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+        <span class="page-info">{{ t('features.frontend.blog.pagination.info', { current: currentPage, total: totalPages }) }}</span>
         <button 
           @click="goToPage(currentPage + 1)" 
           :disabled="currentPage === totalPages"
           class="btn btn-outline"
         >
-          Next
+          {{ t('features.frontend.blog.pagination.next') }}
         </button>
       </div>
     </div>
@@ -50,10 +50,12 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 

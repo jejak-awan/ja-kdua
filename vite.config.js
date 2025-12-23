@@ -15,7 +15,26 @@ export default defineConfig({
     resolve: {
         alias: {
             'vue': 'vue/dist/vue.esm-bundler.js',
+            '@': '/resources/js',
         },
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Vue core libraries
+                    'vendor-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n'],
+                    // Chart and Calendar libraries
+                    'vendor-ui': ['chart.js', 'vue-chartjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],
+                    // Utility libraries
+                    'vendor-utils': ['axios', 'lodash'],
+                },
+            },
+        },
+        chunkSizeWarningLimit: 600,
+    },
+    optimizeDeps: {
+        include: ['cropperjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],
     },
     server: {
         host: '0.0.0.0',

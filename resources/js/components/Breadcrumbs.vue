@@ -1,29 +1,33 @@
 <template>
   <nav 
     v-if="breadcrumbs.length > 0" 
-    class="py-3 px-4 mb-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700" 
+    :class="compact ? 'flex items-center' : 'py-3 px-4 mb-4 bg-card dark:bg-gray-800 border-b border-border'"
     aria-label="Breadcrumb"
   >
-    <ol class="flex items-center flex-wrap space-x-2 text-sm">
+    <ol :class="compact ? 'flex items-center space-x-1 text-xs' : 'flex items-center flex-wrap space-x-2 text-sm'">
       <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center">
         <!-- Home Icon for first item -->
         <router-link
           v-if="index === 0"
           :to="crumb.path"
-          class="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          :class="compact 
+            ? 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors' 
+            : 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors'"
           :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined"
         >
-          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <svg :class="compact ? 'h-3.5 w-3.5' : 'h-4 w-4'" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
-          <span v-if="crumb.label" class="ml-1">{{ crumb.label }}</span>
+          <span v-if="crumb.label && !compact" class="ml-1">{{ crumb.label }}</span>
         </router-link>
 
         <!-- Regular breadcrumb items -->
         <template v-else>
           <!-- Separator -->
           <svg
-            class="flex-shrink-0 h-4 w-4 text-gray-400 dark:text-gray-600 mx-2"
+            :class="compact 
+              ? 'flex-shrink-0 h-3 w-3 text-gray-400 dark:text-muted-foreground mx-1' 
+              : 'flex-shrink-0 h-4 w-4 text-gray-400 dark:text-muted-foreground mx-2'"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -38,13 +42,17 @@
           <router-link
             v-if="index < breadcrumbs.length - 1"
             :to="crumb.path"
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors truncate max-w-[200px] sm:max-w-[120px]"
+            :class="compact 
+              ? 'text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors truncate max-w-[100px]' 
+              : 'text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors truncate max-w-[200px] sm:max-w-[120px]'"
           >
             {{ crumb.label }}
           </router-link>
           <span
             v-else
-            class="text-gray-900 dark:text-white font-medium truncate max-w-[200px] sm:max-w-[120px]"
+            :class="compact 
+              ? 'text-foreground font-medium truncate max-w-[150px]' 
+              : 'text-foreground font-medium truncate max-w-[200px] sm:max-w-[120px]'"
             aria-current="page"
           >
             {{ crumb.label }}
@@ -59,6 +67,13 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useBreadcrumbs } from '@/composables/useBreadcrumbs';
+
+const props = defineProps({
+  compact: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const route = useRoute();
 const { getBreadcrumbs } = useBreadcrumbs();

@@ -59,8 +59,8 @@ class NewsletterController extends BaseApiController
                 'user_agent' => $request->userAgent(),
             ]);
 
-            // TODO: Send welcome email
-            // Mail::to($email)->send(new NewsletterWelcome($subscriber));
+            // Send welcome email
+            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\NewsletterWelcome($subscriber));
 
             return $this->success([
                 'subscriber' => $subscriber,
@@ -103,6 +103,98 @@ class NewsletterController extends BaseApiController
             Log::error('Newsletter unsubscribe error: '.$e->getMessage());
 
             return $this->error('Terjadi kesalahan saat berhenti berlangganan', 500);
+        }
+    }
+    /**
+     * Admin: Get paginated subscribers
+     */
+    public function index(Request $request)
+    {
+        try {
+            $query = NewsletterSubscriber::query();
+
+            // Search by email or name
+            if ($request->has('q')) {
+                $search = $request->q;
+                $query->where(function ($q) use ($search) {
+                    $q->where('email', 'like', "%{$search}%")
+                      ->orWhere('name', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by status
+            if ($request->has('status') && in_array($request->status, ['subscribed', 'unsubscribed'])) {
+                $query->where('status', $request->status);
+            }
+
+            $perPage = $request->get('per_page', 10);
+            $subscribers = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+            return $this->success($subscribers);
+        } catch (\Exception $e) {
+            Log::error('Newsletter admin index error: ' . $e->getMessage());
+            return $this->error('Failed to fetch subscribers', 500);
+        }
+    }
+
+    /**
+     * Admin: Delete subscriber
+     */
+    public function destroy($id)
+    {
+        try {
+            $subscriber = NewsletterSubscriber::findOrFail($id);
+            $subscriber->delete();
+
+            return $this->success(null, 'Subscriber deleted successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to delete subscriber', 500);
+        }
+    }
+
+    /**
+     * Admin: Export subscribers (returns raw CSV data)
+     */
+    public function export(Request $request)
+    {
+        try {
+            $query = NewsletterSubscriber::query();
+
+            if ($request->has('status') && in_array($request->status, ['subscribed', 'unsubscribed'])) {
+                $query->where('status', $request->status);
+            }
+
+            $subscribers = $query->orderBy('created_at', 'desc')->get();
+
+            $headers = [
+                'Content-type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename=subscribers.csv',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            $callback = function () use ($subscribers) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, ['ID', 'Email', 'Name', 'Status', 'Joined At', 'Source']);
+
+                foreach ($subscribers as $subscriber) {
+                    fputcsv($file, [
+                        $subscriber->id,
+                        $subscriber->email,
+                        $subscriber->name,
+                        $subscriber->status,
+                        $subscriber->created_at,
+                        $subscriber->source,
+                    ]);
+                }
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (\Exception $e) {
+             Log::error('Newsletter export error: ' . $e->getMessage());
+             return $this->error('Failed to export subscribers', 500);
         }
     }
 }

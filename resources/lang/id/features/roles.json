@@ -1,0 +1,38 @@
+{
+    "title": "Peran & Izin",
+    "subtitle": "Kelola peran pengguna dan izin akses mereka",
+    "create": "Buat Peran",
+    "edit": "Edit Peran",
+    "permissions": "Izin",
+    "list": {
+        "loading": "Memuat peran...",
+        "empty": "Tidak ada peran ditemukan",
+        "permissionsCount": "{count} izin",
+        "usersCount": "Pengguna: {count}",
+        "more": "+{count} lagi"
+    },
+    "form": {
+        "name": "Nama Peran",
+        "namePlaceholder": "Masukkan nama peran",
+        "selectAll": "Pilih Semua",
+        "deselectAll": "Batalkan Semua",
+        "cancel": "Batal",
+        "save": "Simpan",
+        "saving": "Menyimpan..."
+    },
+    "actions": {
+        "edit": "Edit",
+        "duplicate": "Duplikasi",
+        "delete": "Hapus"
+    },
+    "messages": {
+        "enterName": "Mohon masukkan nama peran",
+        "saveSuccess": "Peran berhasil disimpan",
+        "saveFailed": "Gagal menyimpan peran",
+        "deleteConfirm": "Hapus peran \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+        "deleteSuccess": "Peran berhasil dihapus",
+        "deleteFailed": "Gagal menghapus peran",
+        "duplicateFailed": "Gagal menduplikasi peran",
+        "fetchFailed": "Gagal memuat peran"
+    }
+}

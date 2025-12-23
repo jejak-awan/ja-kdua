@@ -1,0 +1,31 @@
+{
+    "title": "Activity Logs",
+    "stats": {
+        "total": "Total Activities",
+        "today": "Today",
+        "activeUsers": "Active Users",
+        "thisWeek": "This Week"
+    },
+    "filters": {
+        "search": "Search activities...",
+        "allTypes": "All Types",
+        "allUsers": "All Users",
+        "types": {
+            "created": "Created",
+            "updated": "Updated",
+            "deleted": "Deleted",
+            "login": "Login",
+            "logout": "Logout",
+            "viewed": "Viewed",
+            "published": "Published",
+            "unpublished": "Unpublished"
+        }
+    },
+    "messages": {
+        "loading": "Loading...",
+        "empty": "No activity logs found",
+        "viewDetails": "View Details",
+        "system": "System",
+        "unknown": "Unknown"
+    }
+}

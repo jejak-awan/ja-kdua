@@ -1,0 +1,61 @@
+{
+    "title": "Pengguna",
+    "createNew": "Buat Pengguna Baru",
+    "search": "Cari pengguna berdasarkan nama, email atau telepon...",
+    "allRoles": "Semua Peran",
+    "loading": "Memuat pengguna...",
+    "empty": "Tidak ada pengguna ditemukan.",
+    "table": {
+        "user": "Pengguna",
+        "email": "Email",
+        "roles": "Peran",
+        "lastLogin": "Login Terakhir",
+        "actions": "Aksi"
+    },
+    "status": {
+        "verified": "Terverifikasi",
+        "unverified": "Belum Terverifikasi",
+        "noRoles": "Tidak ada peran yang ditetapkan",
+        "never": "Belum pernah"
+    },
+    "actions": {
+        "edit": "Ubah",
+        "delete": "Hapus"
+    },
+    "messages": {
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus pengguna \"{name}\"?",
+        "deleteFailed": "Gagal menghapus pengguna",
+        "saveSuccess": "Pengguna berhasil disimpan",
+        "saveFailed": "Gagal menyimpan pengguna",
+        "roleRequired": "Harap pilih setidaknya satu peran",
+        "passwordRequired": "Kata sandi wajib diisi untuk pengguna baru"
+    },
+    "modals": {
+        "user": {
+            "titleEdit": "Ubah Pengguna",
+            "titleCreate": "Buat Pengguna",
+            "avatar": "Avatar",
+            "selectAvatar": "Pilih Avatar",
+            "removeAvatar": "Hapus Avatar",
+            "name": "Nama",
+            "namePlaceholder": "Nama lengkap",
+            "email": "Email",
+            "emailPlaceholder": "user@teladan.com",
+            "password": "Kata Sandi",
+            "passwordPlaceholder": "Minimal 8 karakter",
+            "passwordHint": "Biarkan kosong saat mengubah untuk tetap menggunakan kata sandi saat ini",
+            "phone": "Telepon",
+            "phonePlaceholder": "+6281234567890",
+            "bio": "Bio",
+            "bioPlaceholder": "Biografi pengguna",
+            "website": "Situs Web",
+            "websitePlaceholder": "https://contoh.com",
+            "location": "Lokasi",
+            "locationPlaceholder": "Kota, Negara",
+            "roles": "Peran",
+            "loadingRoles": "Memuat peran...",
+            "noRoles": "Tidak ada peran tersedia",
+            "saving": "Menyimpan..."
+        }
+    }
+}

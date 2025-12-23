@@ -1,6 +1,6 @@
 <template>
-  <div :class="compact ? '' : 'p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700'">
-    <h3 v-if="!compact" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+  <div :class="compact ? '' : 'p-4 bg-muted dark:bg-gray-800 rounded-lg border border-border'">
+    <h3 v-if="!compact" class="text-sm font-semibold text-foreground mb-3">
       {{ title }}
     </h3>
     
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Share count (optional) -->
-    <div v-if="showCount && shareCount > 0" class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+    <div v-if="showCount && shareCount > 0" class="mt-3 text-sm text-muted-foreground dark:text-gray-400">
       {{ shareCount }} kali dibagikan
     </div>
   </div>

@@ -1,0 +1,65 @@
+{
+    "title": "Menu",
+    "actions": {
+        "create": "Menu Baru",
+        "createItem": "Tambah Item",
+        "edit": "Edit",
+        "delete": "Hapus",
+        "save": "Simpan Menu",
+        "saved": "Menu berhasil disimpan",
+        "cancel": "Batal",
+        "createAction": "Buat",
+        "creating": "Membuat...",
+        "update": "Perbarui",
+        "saving": "Menyimpan..."
+    },
+    "headers": {
+        "name": "Nama",
+        "location": "Lokasi",
+        "items": "Item",
+        "actions": "Aksi"
+    },
+    "messages": {
+        "loading": "Memuat...",
+        "empty": "Tidak ada menu ditemukan",
+        "emptyItems": "Tidak ada item menu. Klik \"Tambah Item\" untuk memulai.",
+        "deleteConfirm": "Anda yakin ingin menghapus menu \"{name}\"?",
+        "deleteItemConfirm": "Anda yakin ingin menghapus \"{title}\"?",
+        "deleteFailed": "Gagal menghapus menu",
+        "deleteItemFailed": "Gagal menghapus item menu",
+        "saveFailed": "Gagal menyimpan menu",
+        "createFailed": "Gagal membuat menu",
+        "saveItemFailed": "Gagal menyimpan item menu"
+    },
+    "form": {
+        "name": "Nama",
+        "label": "Label",
+        "type": "Tipe",
+        "url": "URL",
+        "location": "Lokasi",
+        "page": "Halaman",
+        "category": "Kategori",
+        "content": "Konten",
+        "cssClasses": "Kelas CSS",
+        "openInNewTab": "Buka di tab baru",
+        "settings": "Pengaturan Menu",
+        "items": "Item Menu",
+        "createTitle": "Buat Menu",
+        "editTitle": "Edit Menu",
+        "createItemTitle": "Tambah Item Menu",
+        "editItemTitle": "Edit Item Menu",
+        "placeholders": {
+            "name": "Nama menu",
+            "location": "header, footer, dll.",
+            "selectPage": "Pilih halaman...",
+            "selectCategory": "Pilih kategori...",
+            "selectContent": "Pilih konten..."
+        },
+        "types": {
+            "link": "Tautan",
+            "page": "Halaman",
+            "category": "Kategori",
+            "content": "Konten"
+        }
+    }
+}

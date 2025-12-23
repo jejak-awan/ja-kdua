@@ -57,6 +57,12 @@ const frontendRoutes = [
           title: 'Search',
         }
       },
+      // Dynamic content route (must be last in children)
+      {
+        path: ':slug',
+        name: 'page',
+        component: () => import('@/views/frontend/Post.vue'),
+      },
     ]
   },
 ]

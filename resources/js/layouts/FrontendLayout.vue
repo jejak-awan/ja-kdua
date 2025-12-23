@@ -24,11 +24,13 @@
 import { onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@vueuse/head'
+import { useI18n } from 'vue-i18n'
 import { useTheme } from '@/composables/useTheme'
 import ThemeHeader from '@/components/theme/ThemeHeader.vue'
 import ThemeFooter from '@/components/theme/ThemeFooter.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const { activeTheme, loadActiveTheme } = useTheme()
 
@@ -43,11 +45,11 @@ onMounted(async () => {
 // Update page title and meta tags on route change
 watch(() => route.meta, (meta) => {
   useHead({
-    title: meta.title ? `${meta.title} - ${activeTheme.value?.name || 'JA-CMS'}` : activeTheme.value?.name || 'JA-CMS',
+    title: meta.title ? `${meta.title} - ${activeTheme.value?.name || t('features.frontend.home.title')}` : activeTheme.value?.name || t('features.frontend.home.title'),
     meta: [
-      { name: 'description', content: meta.description || activeTheme.value?.description || 'Modern Content Management System' },
-      { property: 'og:title', content: meta.title || activeTheme.value?.name || 'JA-CMS' },
-      { property: 'og:description', content: meta.description || activeTheme.value?.description || 'Modern Content Management System' },
+      { name: 'description', content: meta.description || activeTheme.value?.description || t('features.frontend.home.subtitle') },
+      { property: 'og:title', content: meta.title || activeTheme.value?.name || t('features.frontend.home.title') },
+      { property: 'og:description', content: meta.description || activeTheme.value?.description || t('features.frontend.home.subtitle') },
     ]
   })
 }, { immediate: true })

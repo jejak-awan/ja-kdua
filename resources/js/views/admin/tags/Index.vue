@@ -2,7 +2,7 @@
     <div>
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Tags</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.tags.title') }}</h1>
             <button
                 @click="showCreateModal = true"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -10,25 +10,25 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Tag
+                {{ $t('features.tags.createNew') }}
             </button>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white shadow rounded-lg p-4 mb-4">
+        <div class="bg-card shadow rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
                     type="text"
-                    placeholder="Search tags..."
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    :placeholder="$t('features.tags.search')"
+                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
             </div>
         </div>
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,12 +36,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Tags</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_tags || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.total') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total_tags || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,12 +49,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Used Tags</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.used_tags || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.used') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.used_tags || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,61 +62,61 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Usage</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_usage || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.tags.stats.usage') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total_usage || 0 }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Tags List -->
-        <div v-if="loading" class="bg-white shadow rounded-lg p-12 text-center">
-            <p class="text-gray-500">Loading tags...</p>
+        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+            <p class="text-muted-foreground">{{ $t('features.tags.loading') }}</p>
         </div>
 
-        <div v-else-if="filteredTags.length === 0" class="bg-white shadow rounded-lg p-12 text-center">
+        <div v-else-if="filteredTags.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
-            <p class="mt-4 text-gray-500">No tags found</p>
+            <p class="mt-4 text-muted-foreground">{{ $t('features.tags.empty') }}</p>
         </div>
 
-        <div v-else class="bg-white shadow rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.tags.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Slug
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.tags.table.slug') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.tags.table.description') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Usage
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.tags.table.usage') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.tags.table.actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="tag in filteredTags" :key="tag.id" class="hover:bg-gray-50">
+                <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="tag in filteredTags" :key="tag.id" class="hover:bg-muted">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ tag.name }}</div>
+                            <div class="text-sm font-medium text-foreground">{{ tag.name }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ tag.slug }}</div>
+                            <div class="text-sm text-foreground">{{ tag.slug }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm text-gray-500 truncate max-w-xs">
+                            <div class="text-sm text-muted-foreground truncate max-w-xs">
                                 {{ tag.description || '-' }}
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ tag.contents_count || 0 }} contents</div>
+                            <div class="text-sm text-foreground">{{ tag.contents_count || 0 }} contents</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
@@ -124,13 +124,13 @@
                                     @click="editTag(tag)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    Edit
+                                    {{ $t('features.tags.actions.edit') }}
                                 </button>
                                 <button
                                     @click="deleteTag(tag)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    Delete
+                                    {{ $t('features.tags.actions.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -151,10 +151,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import TagModal from '../../../components/tags/TagModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
+const { t } = useI18n();
 const loading = ref(false);
 const tags = ref([]);
 const statistics = ref(null);
@@ -206,7 +208,7 @@ const editTag = (tag) => {
 };
 
 const deleteTag = async (tag) => {
-    if (!confirm(`Are you sure you want to delete "${tag.name}"? This action cannot be undone.`)) {
+    if (!confirm(t('features.tags.messages.deleteConfirm', { name: tag.name }))) {
         return;
     }
 
@@ -215,7 +217,7 @@ const deleteTag = async (tag) => {
         await fetchTags();
     } catch (error) {
         console.error('Failed to delete tag:', error);
-        const message = error.response?.data?.message || 'Failed to delete tag';
+        const message = error.response?.data?.message || t('features.tags.messages.deleteError');
         alert(message);
     }
 };

@@ -1,0 +1,99 @@
+{
+    "home": {
+        "title": "JA-CMS",
+        "subtitle": "Sistem Manajemen Konten Modern",
+        "actions": {
+            "explore": "Jelajahi Konten",
+            "getStarted": "Mulai Sekarang",
+            "startReading": "Mulai Membaca",
+            "contactUs": "Hubungi Kami",
+            "viewAll": "Lihat Semua Postingan"
+        },
+        "stats": {
+            "content": "Konten Terbit",
+            "visitors": "Total Pengunjung",
+            "categories": "Kategori"
+        },
+        "sections": {
+            "featured": "Konten Unggulan",
+            "recent": "Postingan Terbaru",
+            "cta": {
+                "title": "Siap untuk Memulai?",
+                "text": "Bergabunglah dengan ribuan pengguna yang mempercayai JA-CMS untuk kebutuhan manajemen konten mereka"
+            }
+        }
+    },
+    "blog": {
+        "title": "Blog",
+        "subtitle": "Artikel dan pembaruan terbaru dari tim kami",
+        "empty": "Belum ada postingan yang tersedia.",
+        "pagination": {
+            "previous": "Sebelumnya",
+            "next": "Berikutnya",
+            "info": "Halaman {current} dari {total}"
+        },
+        "readMore": "Baca Selengkapnya"
+    },
+    "contact": {
+        "title": "Hubungi Kami",
+        "subtitle": "Hubungi kami melalui formulir di bawah ini",
+        "placeholder": "Ini adalah halaman placeholder. Konten akan segera hadir."
+    },
+    "newsletter": {
+        "title": "Berlangganan Newsletter",
+        "description": "Dapatkan update terbaru, tips, dan artikel menarik langsung ke email Anda",
+        "placeholder": "Masukkan email Anda",
+        "button": "Berlangganan",
+        "processing": "Memproses...",
+        "success": "Terima kasih! Email Anda berhasil didaftarkan.",
+        "privacy": "Dengan berlangganan, Anda menyetujui",
+        "privacyLink": "Kebijakan Privasi"
+    },
+    "search": {
+        "title": "Hasil Pencarian",
+        "query": "Mencari:",
+        "loading": "Mencari...",
+        "empty": "Tidak ada hasil untuk \"{query}\""
+    },
+    "post": {
+        "loading": "Memuat...",
+        "notFound": "Postingan tidak ditemukan",
+        "views": "tayangan",
+        "tags": "Tag:"
+    },
+    "nav": {
+        "home": "Beranda",
+        "blog": "Blog",
+        "about": "Tentang",
+        "contact": "Kontak",
+        "login": "Masuk",
+        "register": "Daftar",
+        "dashboard": "Dashboard",
+        "logout": "Keluar"
+    },
+    "about": {
+        "title": "Tentang Kami",
+        "welcome": "Selamat datang di JA-CMS - Sistem Manajemen Konten Modern",
+        "placeholder": "Ini adalah halaman placeholder. Konten akan segera hadir."
+    },
+    "footer": {
+        "headings": {
+            "about": "Tentang",
+            "resources": "Sumber Daya",
+            "categories": "Kategori",
+            "newsletter": "Newsletter"
+        },
+        "about": {
+            "default": "Sistem manajemen konten modern, bersih, dan kuat yang dibangun untuk web."
+        },
+        "resources": {
+            "blog": "Blog",
+            "documentation": "Dokumentasi",
+            "support": "Dukungan",
+            "faq": "FAQ"
+        },
+        "copyright": "© {year} JA-CMS. Hak cipta dilindungi undang-undang.",
+        "powered": "Ditenagai oleh",
+        "system": "Sistem Manajemen Konten Modern"
+    }
+}

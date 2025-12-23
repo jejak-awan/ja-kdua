@@ -1,10 +1,10 @@
 <template>
     <div class="comment-form">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Leave a Comment</h3>
+        <h3 class="text-lg font-semibold text-foreground mb-4">Leave a Comment</h3>
         <form @submit.prevent="handleSubmit" class="space-y-4">
             <div v-if="!authStore.isAuthenticated" class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <label for="name" class="block text-sm font-medium text-foreground">Name</label>
                     <input
                         id="name"
                         v-model="form.name"
@@ -14,7 +14,7 @@
                     >
                 </div>
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <label for="email" class="block text-sm font-medium text-foreground">Email</label>
                     <input
                         id="email"
                         v-model="form.email"
@@ -26,7 +26,7 @@
             </div>
 
             <div>
-                <label for="body" class="block text-sm font-medium text-gray-700">Comment</label>
+                <label for="body" class="block text-sm font-medium text-foreground">Comment</label>
                 <textarea
                     id="body"
                     v-model="form.body"

@@ -1,12 +1,12 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Activity Logs</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.activityLogs.title') }}</h1>
         </div>
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,12 +14,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Activities</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.total || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.activityLogs.stats.total') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,12 +27,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Today</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.today || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.activityLogs.stats.today') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.today || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,12 +40,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Active Users</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.active_users || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.activityLogs.stats.activeUsers') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.active_users || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,42 +53,42 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">This Week</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.this_week || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.activityLogs.stats.thisWeek') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.this_week || 0 }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-card shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <input
                             v-model="search"
                             type="text"
-                            placeholder="Search activities..."
-                            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.activityLogs.filters.search')"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                         <select
                             v-model="typeFilter"
-                            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option value="">All Types</option>
-                            <option value="created">Created</option>
-                            <option value="updated">Updated</option>
-                            <option value="deleted">Deleted</option>
-                            <option value="login">Login</option>
-                            <option value="logout">Logout</option>
-                            <option value="viewed">Viewed</option>
-                            <option value="published">Published</option>
-                            <option value="unpublished">Unpublished</option>
+                            <option value="">{{ t('features.activityLogs.filters.allTypes') }}</option>
+                            <option value="created">{{ t('features.activityLogs.filters.types.created') }}</option>
+                            <option value="updated">{{ t('features.activityLogs.filters.types.updated') }}</option>
+                            <option value="deleted">{{ t('features.activityLogs.filters.types.deleted') }}</option>
+                            <option value="login">{{ t('features.activityLogs.filters.types.login') }}</option>
+                            <option value="logout">{{ t('features.activityLogs.filters.types.logout') }}</option>
+                            <option value="viewed">{{ t('features.activityLogs.filters.types.viewed') }}</option>
+                            <option value="published">{{ t('features.activityLogs.filters.types.published') }}</option>
+                            <option value="unpublished">{{ t('features.activityLogs.filters.types.unpublished') }}</option>
                         </select>
                         <select
                             v-model="userFilter"
-                            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option value="">All Users</option>
+                            <option value="">{{ t('features.activityLogs.filters.allUsers') }}</option>
                             <option
                                 v-for="user in users"
                                 :key="user.id"
@@ -102,18 +102,18 @@
             </div>
 
             <div v-if="loading" class="p-6 text-center">
-                <p class="text-gray-500">Loading...</p>
+                <p class="text-muted-foreground">{{ t('features.activityLogs.messages.loading') }}</p>
             </div>
 
             <div v-else-if="filteredLogs.length === 0" class="p-6 text-center">
-                <p class="text-gray-500">No activity logs found</p>
+                <p class="text-muted-foreground">{{ t('features.activityLogs.messages.empty') }}</p>
             </div>
 
-            <div v-else class="divide-y divide-gray-200">
+            <div v-else class="divide-y divide-border">
                 <div
                     v-for="log in filteredLogs"
                     :key="log.id"
-                    class="px-6 py-4 hover:bg-gray-50"
+                    class="px-6 py-4 hover:bg-muted"
                 >
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
@@ -121,25 +121,25 @@
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="{
-                                        'bg-green-100 text-green-800': (log.action || log.type) === 'created',
-                                        'bg-blue-100 text-blue-800': (log.action || log.type) === 'updated',
-                                        'bg-red-100 text-red-800': (log.action || log.type) === 'deleted',
+                                        'bg-green-500/20 text-green-400': (log.action || log.type) === 'created',
+                                        'bg-blue-500/20 text-blue-400': (log.action || log.type) === 'updated',
+                                        'bg-red-500/20 text-red-400': (log.action || log.type) === 'deleted',
                                         'bg-purple-100 text-purple-800': (log.action || log.type) === 'login' || (log.action || log.type) === 'logout',
                                     }"
                                 >
-                                    {{ log.action || log.type || 'unknown' }}
+                                    {{ t(`features.activityLogs.filters.types.${log.action || log.type}`) || (log.action || log.type || t('features.activityLogs.messages.unknown')) }}
                                 </span>
-                                <span class="text-sm font-medium text-gray-900">{{ log.description }}</span>
+                                <span class="text-sm font-medium text-foreground">{{ log.description }}</span>
                             </div>
-                            <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                                <span>{{ log.user?.name || 'System' }}</span>
+                            <div class="mt-1 flex items-center space-x-4 text-sm text-muted-foreground">
+                                <span>{{ log.user?.name || t('features.activityLogs.messages.system') }}</span>
                                 <span>{{ log.model_type || '' }}</span>
                                 <span>{{ formatDate(log.created_at) }}</span>
                             </div>
                             <div v-if="log.properties" class="mt-2 text-xs text-gray-400">
                                 <details>
-                                    <summary class="cursor-pointer hover:text-gray-600">View Details</summary>
-                                    <pre class="mt-2 p-2 bg-gray-50 rounded text-xs overflow-x-auto">{{ JSON.stringify(log.properties, null, 2) }}</pre>
+                                    <summary class="cursor-pointer hover:text-muted-foreground">{{ t('features.activityLogs.messages.viewDetails') }}</summary>
+                                    <pre class="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">{{ JSON.stringify(log.properties, null, 2) }}</pre>
                                 </details>
                             </div>
                         </div>
@@ -152,7 +152,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+
+const { t } = useI18n();
 
 const logs = ref([]);
 const users = ref([]);

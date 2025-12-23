@@ -10,25 +10,28 @@
         
         <!-- Navigation -->
         <nav class="header-nav" :class="{ 'active': isMobileMenuOpen }">
-          <router-link to="/" class="nav-link" exact-active-class="active">Home</router-link>
-          <router-link to="/blog" class="nav-link" active-class="active">Blog</router-link>
-          <router-link to="/about" class="nav-link" active-class="active">About</router-link>
-          <router-link to="/contact" class="nav-link" active-class="active">Contact</router-link>
+          <router-link to="/" class="nav-link" exact-active-class="active">{{ t('features.frontend.nav.home') }}</router-link>
+          <router-link to="/blog" class="nav-link" active-class="active">{{ t('features.frontend.nav.blog') }}</router-link>
+          <router-link to="/about" class="nav-link" active-class="active">{{ t('features.frontend.nav.about') }}</router-link>
+          <router-link to="/contact" class="nav-link" active-class="active">{{ t('features.frontend.nav.contact') }}</router-link>
         </nav>
         
         <!-- Actions -->
         <div class="header-actions">
+          <!-- Language Switcher -->
+          <LanguageSwitcher />
+          
           <button @click="toggleSearch" class="btn-icon" aria-label="Search">
             <i class="bi bi-search"></i>
           </button>
           
           <template v-if="isAuthenticated">
-            <router-link to="/admin" class="btn btn-secondary btn-sm">Dashboard</router-link>
-            <button @click="handleLogout" class="btn btn-outline btn-sm">Logout</button>
+            <router-link to="/admin" class="btn btn-secondary btn-sm">{{ t('features.frontend.nav.dashboard') }}</router-link>
+            <button @click="handleLogout" class="btn btn-outline btn-sm">{{ t('features.frontend.nav.logout') }}</button>
           </template>
           <template v-else>
-            <router-link to="/login" class="btn btn-outline btn-sm">Login</router-link>
-            <router-link to="/register" class="btn btn-primary btn-sm">Register</router-link>
+            <router-link to="/login" class="btn btn-outline btn-sm">{{ t('features.frontend.nav.login') }}</router-link>
+            <router-link to="/register" class="btn btn-primary btn-sm">{{ t('features.frontend.nav.register') }}</router-link>
           </template>
         </div>
         
@@ -47,11 +50,11 @@
             ref="searchInput"
             v-model="searchQuery"
             type="text"
-            placeholder="Search..."
+            :placeholder="t('common.actions.search') + '...'"
             class="search-input"
             @keyup.enter="handleSearch"
           >
-          <button @click="handleSearch" class="btn btn-primary">Search</button>
+          <button @click="handleSearch" class="btn btn-primary">{{ t('common.actions.search') }}</button>
         </div>
       </div>
     </Teleport>
@@ -63,9 +66,12 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
+import { useI18n } from 'vue-i18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 const { activeTheme, themeSettings } = useTheme()
 
 const isScrolled = ref(false)

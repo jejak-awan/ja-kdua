@@ -1,13 +1,12 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
-                <!-- Header -->
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Edit Media</h3>
+                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.edit.title') }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,63 +17,63 @@
                 <!-- Content -->
                 <div class="p-6">
                     <div v-if="loading" class="text-center py-8">
-                        <p class="text-gray-500">Loading...</p>
+                        <p class="text-muted-foreground">{{ $t('features.media.loading') }}</p>
                     </div>
 
                     <form v-else @submit.prevent="handleSubmit" class="space-y-4">
                         <!-- Preview -->
                         <div v-if="form.url && form.mime_type?.startsWith('image/')" class="mb-4">
-                            <img :src="form.url" :alt="form.alt" class="w-full h-64 object-contain bg-gray-100 rounded-lg">
+                            <img :src="form.url" :alt="form.alt" class="w-full h-64 object-contain bg-secondary rounded-lg">
                         </div>
 
                         <!-- Name -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Name
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.edit.name') }}
                             </label>
                             <input
                                 v-model="form.name"
                                 type="text"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                         </div>
 
                         <!-- Alt Text -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Alt Text
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.edit.altText') }}
                             </label>
                             <input
                                 v-model="form.alt"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Alternative text for accessibility"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                :placeholder="$t('features.media.modals.edit.altPlaceholder')"
                             >
                         </div>
 
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Description
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.edit.description') }}
                             </label>
                             <textarea
                                 v-model="form.description"
                                 rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
 
                         <!-- Folder -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Folder
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.edit.folder') }}
                             </label>
                             <select
                                 v-model="form.folder_id"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                                <option :value="null">No Folder</option>
+                                <option :value="null">{{ $t('features.media.modals.edit.noFolder') }}</option>
                                 <option
                                     v-for="folder in folders"
                                     :key="folder.id"
@@ -88,12 +87,12 @@
                         <!-- Media Info -->
                         <div class="grid grid-cols-2 gap-4 pt-4 border-t">
                             <div>
-                                <p class="text-xs text-gray-500">Type</p>
-                                <p class="text-sm text-gray-900">{{ form.mime_type }}</p>
+                                <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.type') }}</p>
+                                <p class="text-sm text-foreground">{{ form.mime_type }}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Size</p>
-                                <p class="text-sm text-gray-900">{{ formatFileSize(form.size) }}</p>
+                                <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.size') }}</p>
+                                <p class="text-sm text-foreground">{{ formatFileSize(form.size) }}</p>
                             </div>
                         </div>
                     </form>
@@ -103,16 +102,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('features.media.actions.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : 'Save Changes' }}
+                        {{ saving ? $t('features.media.modals.edit.saving') : $t('features.media.actions.save') }}
                     </button>
                 </div>
             </div>
@@ -122,7 +121,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     media: {
@@ -191,7 +193,7 @@ const handleSubmit = async () => {
         emit('updated');
     } catch (error) {
         console.error('Failed to update media:', error);
-        alert('Failed to update media');
+        alert(t('features.media.messages.updateFailed'));
     } finally {
         saving.value = false;
     }

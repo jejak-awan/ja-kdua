@@ -1,13 +1,13 @@
 <template>
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="close">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">
+                <h2 class="text-2xl font-bold text-foreground">
                     {{ field ? 'Edit Field' : 'Add New Field' }}
                 </h2>
                 <button
                     @click="close"
-                    class="text-gray-400 hover:text-gray-600"
+                    class="text-gray-400 hover:text-muted-foreground"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,14 +18,14 @@
             <form @submit.prevent="saveField" class="space-y-4">
                 <!-- Field Type -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Field Type <span class="text-red-500">*</span>
                     </label>
                     <select
                         v-model="fieldData.type"
                         required
                         @change="handleTypeChange"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="text">Text</option>
                         <option value="email">Email</option>
@@ -43,7 +43,7 @@
 
                 <!-- Field Name -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Field Name <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -51,55 +51,55 @@
                         type="text"
                         required
                         pattern="[a-z0-9_]+"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="field_name"
                     >
-                    <p class="mt-1 text-xs text-gray-500">Only lowercase letters, numbers, and underscores</p>
+                    <p class="mt-1 text-xs text-muted-foreground">Only lowercase letters, numbers, and underscores</p>
                 </div>
 
                 <!-- Field Label -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Field Label <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="fieldData.label"
                         type="text"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Field Label"
                     >
                 </div>
 
                 <!-- Placeholder -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Placeholder
                     </label>
                     <input
                         v-model="fieldData.placeholder"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Enter placeholder text..."
                     >
                 </div>
 
                 <!-- Help Text -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Help Text
                     </label>
                     <textarea
                         v-model="fieldData.help_text"
                         rows="2"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Help text to display below the field..."
                     />
                 </div>
 
                 <!-- Options (for select, radio, checkbox) -->
                 <div v-if="needsOptions">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         Options <span class="text-red-500">*</span>
                     </label>
                     <div class="space-y-2">
@@ -111,13 +111,13 @@
                             <input
                                 v-model="fieldData.options[index]"
                                 type="text"
-                                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 :placeholder="`Option ${index + 1}`"
                             >
                             <button
                                 type="button"
                                 @click="removeOption(index)"
-                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-500/20 rounded transition-colors"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -127,7 +127,7 @@
                         <button
                             type="button"
                             @click="addOption"
-                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            class="inline-flex items-center px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted"
                         >
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -143,19 +143,19 @@
                         v-model="fieldData.is_required"
                         type="checkbox"
                         id="is_required"
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                     >
-                    <label for="is_required" class="ml-2 block text-sm text-gray-900">
+                    <label for="is_required" class="ml-2 block text-sm text-foreground">
                         Field is required
                     </label>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                <div class="flex justify-end space-x-3 pt-4 border-t border-border">
                     <button
                         type="button"
                         @click="close"
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted"
                     >
                         Cancel
                     </button>

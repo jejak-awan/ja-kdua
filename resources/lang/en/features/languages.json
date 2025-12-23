@@ -1,0 +1,57 @@
+{
+    "title": "Languages",
+    "subtitle": "Manage application languages",
+    "add": "Add Language",
+    "importPack": "Import Pack",
+    "list": {
+        "title": "Registered Languages",
+        "description": "Languages registered in the system",
+        "empty": "No languages found",
+        "default": "Default",
+        "headers": {
+            "name": "Name",
+            "code": "Code",
+            "default": "Default",
+            "actions": "Actions"
+        }
+    },
+    "uiLanguages": {
+        "title": "UI Translations",
+        "description": "Languages available for the user interface. Changes take effect immediately.",
+        "active": "Active",
+        "browserDetected": "Browser Language",
+        "hasUiTranslations": "UI Support",
+        "available": "Available",
+        "notAvailable": "Not Available",
+        "translationKeys": "Translation Keys",
+        "keys": "keys"
+    },
+    "actions": {
+        "setDefault": "Set Default",
+        "delete": "Delete",
+        "export": "Export",
+        "confirmDelete": "Delete language \"{name}\"?"
+    },
+    "import": {
+        "title": "Import Language Pack",
+        "description": "Upload a ZIP file containing language translation files.",
+        "file": "Select ZIP File",
+        "button": "Import"
+    },
+    "create": {
+        "title": "Add New Language",
+        "code": "Language Code",
+        "name": "Language Name",
+        "fromTemplate": "Create translations from template (English)"
+    },
+    "messages": {
+        "setDefaultFailed": "Failed to set default language",
+        "deleteFailed": "Failed to delete language",
+        "fetchFailed": "Failed to fetch languages",
+        "createSuccess": "Language created successfully",
+        "createFailed": "Failed to create language",
+        "exportFailed": "Failed to export language pack",
+        "importSuccess": "Language pack imported successfully",
+        "importFailed": "Failed to import language pack"
+    }
+}

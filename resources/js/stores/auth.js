@@ -44,6 +44,44 @@ export const useAuthStore = defineStore('auth', {
                 const errorData = error.response?.data || {};
                 const errors = errorData.errors || {};
                 const status = error.response?.status;
+                const headers = error.response?.headers || {};
+                
+                // Handle rate limiting (429)
+                if (status === 429) {
+                    // Try to get retry-after from various sources
+                    let retryAfter = 60; // Default 60 seconds
+                    
+                    // Try from response body first
+                    if (errorData.retry_after) {
+                        retryAfter = parseInt(errorData.retry_after, 10);
+                    }
+                    // Try from headers (axios lowercases header names)
+                    else if (headers['retry-after']) {
+                        retryAfter = parseInt(headers['retry-after'], 10);
+                    }
+                    // Try capitalized version
+                    else if (headers['Retry-After']) {
+                        retryAfter = parseInt(headers['Retry-After'], 10);
+                    }
+                    // Try from error response headers directly
+                    else if (error.response?.headers?.['retry-after']) {
+                        retryAfter = parseInt(error.response.headers['retry-after'], 10);
+                    }
+                    else if (error.response?.headers?.['Retry-After']) {
+                        retryAfter = parseInt(error.response.headers['Retry-After'], 10);
+                    }
+                    
+                    const retryAfterSeconds = retryAfter;
+                    const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
+                    
+                    return {
+                        success: false,
+                        message: `Too many login attempts. Please try again in ${retryAfterMinutes} minute${retryAfterMinutes > 1 ? 's' : ''}.`,
+                        errors: {},
+                        rateLimited: true,
+                        retryAfter: retryAfterSeconds,
+                    };
+                }
                 
                 // Handle different error statuses
                 if (status === 403) {

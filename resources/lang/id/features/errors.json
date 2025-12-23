@@ -1,0 +1,37 @@
+{
+    "404": {
+        "title": "Halaman Tidak Ditemukan",
+        "message": "Maaf, halaman yang Anda cari tidak dapat ditemukan.",
+        "description": "URL mungkin salah ketik atau halaman telah dipindahkan.",
+        "back": "Kembali",
+        "home": "Halaman Utama",
+        "popular": "Halaman Populer:",
+        "searchPlaceholder": "Cari konten..."
+    },
+    "500": {
+        "title": "Kesalahan Server",
+        "message": "Maaf, terjadi kesalahan pada server kami.",
+        "description": "Tim kami telah diberitahu dan sedang menangani masalah ini.",
+        "showDetails": "Tampilkan Detail Error",
+        "hideDetails": "Sembunyikan Detail Error",
+        "retry": "Coba Lagi",
+        "retrying": "Mencoba Ulang...",
+        "report": "Laporkan Masalah Ini",
+        "checkStatus": "Cek status server:",
+        "api": "API",
+        "database": "Database",
+        "cache": "Cache"
+    },
+    "403": {
+        "title": "Akses Ditolak",
+        "message": "Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.",
+        "description": "Silakan hubungi administrator jika Anda yakin ini adalah kesalahan.",
+        "reason": "Alasan:",
+        "loggedInAs": "Login sebagai:",
+        "login": "Login",
+        "relogin": "Logout & Login Ulang",
+        "support": "Butuh bantuan? Hubungi administrator:",
+        "contactForm": "Formulir Kontak",
+        "requiredPermissions": "Izin yang Diperlukan:"
+    }
+}

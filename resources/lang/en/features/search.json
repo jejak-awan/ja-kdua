@@ -1,0 +1,17 @@
+{
+    "title": "Search Results",
+    "resultsFor": "Results for:",
+    "placeholder": "Search...",
+    "filterBy": "Filter by type:",
+    "searching": "Searching...",
+    "empty": "No results found",
+    "initial": "Enter a search query to get started",
+    "types": {
+        "content": "Content",
+        "category": "Category",
+        "user": "User",
+        "media": "Media",
+        "page": "Page",
+        "tag": "Tag"
+    }
+}

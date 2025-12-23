@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Tag;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TagController extends BaseApiController
 {
     public function index()
     {
-        $tags = Tag::orderBy('name')->get();
+        $tags = Cache::remember('tags_all', now()->addHours(6), function () {
+            return Tag::orderBy('name')->get();
+        });
 
         return $this->success($tags, 'Tags retrieved successfully');
     }
@@ -24,6 +28,8 @@ class TagController extends BaseApiController
 
         $tag = Tag::create($validated);
 
+        $this->clearTagCaches();
+
         return $this->success($tag, 'Tag created successfully', 201);
     }
 
@@ -36,11 +42,13 @@ class TagController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:tags,slug,'.$tag->id,
+            'slug' => 'sometimes|required|string|unique:tags,slug,' . $tag->id,
             'description' => 'nullable|string',
         ]);
 
         $tag->update($validated);
+
+        $this->clearTagCaches();
 
         return $this->success($tag, 'Tag updated successfully');
     }
@@ -49,32 +57,36 @@ class TagController extends BaseApiController
     {
         $tag->delete();
 
+        $this->clearTagCaches();
+
         return $this->success(null, 'Tag deleted successfully');
     }
 
     public function statistics()
     {
-        $tags = Tag::withCount('contents')->get();
+        $stats = Cache::remember('tags_statistics', now()->addHours(1), function () {
+            $tags = Tag::withCount('contents')->get();
 
-        $stats = [
-            'total_tags' => $tags->count(),
-            'used_tags' => $tags->filter(function ($tag) {
-                return $tag->contents_count > 0;
-            })->count(),
-            'unused_tags' => $tags->filter(function ($tag) {
-                return $tag->contents_count === 0;
-            })->count(),
-            'total_usage' => $tags->sum('contents_count'),
-            'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(function ($tag) {
-                return [
+            return [
+                'total_tags' => $tags->count(),
+                'used_tags' => $tags->filter(fn($tag) => $tag->contents_count > 0)->count(),
+                'unused_tags' => $tags->filter(fn($tag) => $tag->contents_count === 0)->count(),
+                'total_usage' => $tags->sum('contents_count'),
+                'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(fn($tag) => [
                     'id' => $tag->id,
                     'name' => $tag->name,
                     'slug' => $tag->slug,
                     'usage_count' => $tag->contents_count,
-                ];
-            })->values(),
-        ];
+                ])->values(),
+            ];
+        });
 
         return $this->success($stats, 'Tag statistics retrieved successfully');
+    }
+
+    protected function clearTagCaches(): void
+    {
+        Cache::forget('tags_all');
+        Cache::forget('tags_statistics');
     }
 }

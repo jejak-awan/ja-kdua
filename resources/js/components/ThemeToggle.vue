@@ -2,7 +2,7 @@
   <button
     @click="toggleTheme"
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    class="p-2 rounded-lg hover:bg-accent dark:hover:bg-gray-800 transition-colors"
     type="button"
   >
     <svg
@@ -23,7 +23,7 @@
     <svg
       v-else
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-gray-700 dark:text-gray-300"
+      class="h-5 w-5 text-foreground"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

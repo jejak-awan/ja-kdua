@@ -1,10 +1,10 @@
 <template>
   <div class="search-page">
     <div class="container">
-      <h1 class="page-title">Search Results</h1>
-      <p class="search-query">Searching for: <strong>{{ searchQuery }}</strong></p>
+      <h1 class="page-title">{{ t('features.frontend.search.title') }}</h1>
+      <p class="search-query">{{ t('features.frontend.search.query') }} <strong>{{ searchQuery }}</strong></p>
       
-      <div v-if="loading" class="loading">Searching...</div>
+      <div v-if="loading" class="loading">{{ t('features.frontend.search.loading') }}</div>
       <div v-else-if="results.length > 0" class="posts-grid">
         <PostCard 
           v-for="post in results" 
@@ -13,7 +13,7 @@
         />
       </div>
       <div v-else class="no-results">
-        <p>No results found for "{{ searchQuery }}"</p>
+        <p>{{ t('features.frontend.search.empty', { query: searchQuery }) }}</p>
       </div>
     </div>
   </div>
@@ -22,8 +22,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const searchQuery = ref('')

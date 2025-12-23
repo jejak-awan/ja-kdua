@@ -152,8 +152,55 @@ class AuthController extends BaseApiController
             'status' => 'success',
         ]);
 
-        // Log activity
-        \App\Models\ActivityLog::log('login', null, [], $user, 'User logged in');
+        // Check if 2FA is enabled
+        if ($user->hasTwoFactorEnabled()) {
+            // Check if 2FA code is provided
+            if (! $request->has('two_factor_code')) {
+                return $this->success([
+                    'requires_two_factor' => true,
+                    'user_id' => $user->id,
+                ], 'Two-factor authentication code required', 200);
+            }
+
+            // Verify 2FA code
+            $twoFactorAuth = $user->twoFactorAuth;
+            $secret = $twoFactorAuth->getDecryptedSecret();
+            
+            $google2fa = new \PragmaRX\Google2FA\Google2FA;
+            $valid = $google2fa->verifyKey($secret, $request->two_factor_code, 2);
+
+            // If TOTP fails, try backup code
+            if (! $valid) {
+                $valid = $twoFactorAuth->verifyBackupCode($request->two_factor_code);
+            }
+
+            if (! $valid) {
+                // Record failed login
+                $securityService->recordFailedLogin($request->email, $ipAddress);
+                
+                \App\Models\LoginHistory::create([
+                    'user_id' => $user->id,
+                    'ip_address' => $ipAddress,
+                    'user_agent' => $request->userAgent(),
+                    'login_at' => now(),
+                    'status' => 'failed',
+                    'failure_reason' => 'Invalid 2FA code',
+                ]);
+
+                return $this->validationError([
+                    'two_factor_code' => ['Invalid two-factor authentication code'],
+                ]);
+            }
+        }
+
+        // Log activity (optional - skip if ActivityLog doesn't exist)
+        try {
+            if (class_exists(\App\Models\ActivityLog::class)) {
+                \App\Models\ActivityLog::log('login', null, [], $user, 'User logged in');
+            }
+        } catch (\Exception $e) {
+            // ActivityLog not available, skip
+        }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 

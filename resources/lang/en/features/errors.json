@@ -1,0 +1,37 @@
+{
+    "404": {
+        "title": "Page Not Found",
+        "message": "Sorry, the page you are looking for could not be found.",
+        "description": "The URL might be misspelled or the page has been moved.",
+        "back": "Go Back",
+        "home": "Home Page",
+        "popular": "Popular Pages",
+        "searchPlaceholder": "Search content..."
+    },
+    "500": {
+        "title": "Server Error",
+        "message": "Sorry, an error occurred on our server.",
+        "description": "Our team has been notified and is working on the issue.",
+        "showDetails": "Show Error Details",
+        "hideDetails": "Hide Error Details",
+        "retry": "Try Again",
+        "retrying": "Retrying...",
+        "report": "Report This Issue",
+        "checkStatus": "Check server status:",
+        "api": "API",
+        "database": "Database",
+        "cache": "Cache"
+    },
+    "403": {
+        "title": "Access Denied",
+        "message": "Sorry, you do not have permission to access this page.",
+        "description": "Please contact the administrator if you believe this is a mistake.",
+        "reason": "Reason:",
+        "loggedInAs": "Logged in as:",
+        "login": "Login",
+        "relogin": "Logout & Relogin",
+        "support": "Need help? Contact administrator:",
+        "contactForm": "Contact Form",
+        "requiredPermissions": "Required Permissions:"
+    }
+}

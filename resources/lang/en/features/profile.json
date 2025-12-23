@@ -1,0 +1,31 @@
+{
+    "title": "My Profile",
+    "subtitle": "Manage your account information and security",
+    "tabs": {
+        "profile": "Profile Information",
+        "password": "Change Password",
+        "twoFactor": "Two-Factor Authentication",
+        "history": "Login History"
+    },
+    "form": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "location": "Location",
+        "bio": "Bio",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordHelp": "Must be at least 8 characters with uppercase, lowercase, and number",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "changePassword": "Change Password",
+        "changing": "Changing..."
+    },
+    "messages": {
+        "updateSuccess": "Profile updated successfully",
+        "updateFailed": "Failed to update profile",
+        "passwordSuccess": "Password changed successfully",
+        "passwordFailed": "Failed to change password"
+    }
+}

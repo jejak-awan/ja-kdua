@@ -1,0 +1,33 @@
+{
+    "title": "Analytics",
+    "subtitle": "Track and analyze your website performance",
+    "to": "to",
+    "apply": "Apply",
+    "loading": "Loading analytics...",
+    "noData": "No data available",
+    "overview": {
+        "totalVisits": "Total Visits",
+        "uniqueVisitors": "Unique Visitors",
+        "totalSessions": "Total Sessions",
+        "bounceRate": "Bounce Rate"
+    },
+    "charts": {
+        "visitsOverTime": "Visits Over Time",
+        "visits": "Visits",
+        "topPages": "Top Pages",
+        "devices": "Devices",
+        "browsers": "Browsers",
+        "topContent": "Top Content",
+        "topCountries": "Top Countries",
+        "topReferrers": "Top Referrers",
+        "realtime": "Real-time Activity"
+    },
+    "realtime": {
+        "activeSessions": "Active Sessions",
+        "visitsLastHour": "Visits (Last Hour)",
+        "activePages": "Active Pages"
+    },
+    "labels": {
+        "visits": "visits"
+    }
+}

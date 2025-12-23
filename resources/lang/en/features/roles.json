@@ -1,0 +1,38 @@
+{
+    "title": "Roles & Permissions",
+    "subtitle": "Manage user roles and their permissions",
+    "create": "Create Role",
+    "edit": "Edit Role",
+    "permissions": "Permissions",
+    "list": {
+        "loading": "Loading roles...",
+        "empty": "No roles found",
+        "permissionsCount": "{count} permissions",
+        "usersCount": "Users: {count}",
+        "more": "+{count} more"
+    },
+    "form": {
+        "name": "Role Name",
+        "namePlaceholder": "Enter role name",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving..."
+    },
+    "actions": {
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "delete": "Delete"
+    },
+    "messages": {
+        "enterName": "Please enter a role name",
+        "saveSuccess": "Role saved successfully",
+        "saveFailed": "Failed to save role",
+        "deleteConfirm": "Delete role \"{name}\"? This cannot be undone.",
+        "deleteSuccess": "Role deleted successfully",
+        "deleteFailed": "Failed to delete role",
+        "duplicateFailed": "Failed to duplicate role",
+        "fetchFailed": "Failed to fetch roles"
+    }
+}

@@ -1,14 +1,14 @@
 <template>
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 bg-gray-900 dark:bg-gray-950 text-white transform transition-all duration-300 ease-in-out',
+            'fixed inset-y-0 left-0 z-50 bg-card text-card-foreground border-r border-border transform transition-all duration-300 ease-in-out shadow-lg',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             sidebarMinimized ? 'w-20' : 'w-64'
         ]"
     >
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800">
+            <div class="flex items-center justify-between h-16 px-4 border-b border-border">
                 <div v-if="!sidebarMinimized" class="flex items-center">
                     <h1 class="text-xl font-bold">JA CMS</h1>
                 </div>
@@ -18,8 +18,8 @@
                 <div class="flex items-center gap-2">
                     <button
                         @click="$emit('toggle-minimize')"
-                        class="hidden lg:flex p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-colors"
-                        :title="sidebarMinimized ? 'Expand sidebar' : 'Minimize sidebar'"
+                        class="hidden lg:flex p-2 text-muted-foreground hover:text-accent-foreground hover:bg-accent rounded transition-colors"
+                        :title="sidebarMinimized ? t('common.navigation.sidebar.expand') : t('common.navigation.sidebar.minimize')"
                     >
                         <svg v-if="!sidebarMinimized" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -30,7 +30,7 @@
                     </button>
                     <button
                         @click="$emit('close')"
-                        class="lg:hidden text-gray-400 hover:text-white"
+                        class="lg:hidden text-muted-foreground hover:text-accent-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -48,20 +48,20 @@
                         class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                         :class="[
                             $route.name === 'dashboard'
-                                ? 'bg-gray-800 text-white'
-                                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                ? 'bg-accent text-foreground'
+                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                         ]"
-                        :title="sidebarMinimized ? 'Dashboard' : ''"
+                        :title="sidebarMinimized ? t('common.navigation.menu.dashboard') : ''"
                     >
                         <component :is="getIcon('dashboard')" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                        <span v-if="!sidebarMinimized" class="truncate">Dashboard</span>
+                        <span v-if="!sidebarMinimized" class="truncate">{{ t('common.navigation.menu.dashboard') }}</span>
                     </router-link>
                 </div>
 
-                <!-- Content Management -->
+                <!-- Content -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Content
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.content') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
@@ -71,21 +71,69 @@
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                             :class="[
                                 $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             ]"
-                            :title="sidebarMinimized ? item.label : ''"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
                         >
                             <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
                         </router-link>
                     </div>
                 </div>
 
-                <!-- User Management -->
+                <!-- Media -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Users
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.media') }}
+                    </h3>
+                    <div class="space-y-1">
+                        <router-link
+                            v-for="item in navigationGroups.media"
+                            :key="item.name"
+                            :to="item.to"
+                            class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
+                            :class="[
+                                $route.name === item.name
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            ]"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
+                        >
+                            <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
+                        </router-link>
+                    </div>
+                </div>
+
+                <!-- Engagement -->
+                <div>
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.engagement') }}
+                    </h3>
+                    <div class="space-y-1">
+                        <router-link
+                            v-for="item in navigationGroups.engagement"
+                            :key="item.name"
+                            :to="item.to"
+                            class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
+                            :class="[
+                                $route.name === item.name
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            ]"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
+                        >
+                            <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
+                        </router-link>
+                    </div>
+                </div>
+
+                <!-- Users & Access -->
+                <div>
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.usersAccess') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
@@ -95,21 +143,45 @@
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                             :class="[
                                 $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             ]"
-                            :title="sidebarMinimized ? item.label : ''"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
                         >
                             <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
+                        </router-link>
+                    </div>
+                </div>
+
+                <!-- Appearance -->
+                <div>
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.appearance') }}
+                    </h3>
+                    <div class="space-y-1">
+                        <router-link
+                            v-for="item in navigationGroups.appearance"
+                            :key="item.name"
+                            :to="item.to"
+                            class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
+                            :class="[
+                                $route.name === item.name
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            ]"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
+                        >
+                            <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
                         </router-link>
                     </div>
                 </div>
 
                 <!-- Analytics & SEO -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Analytics & SEO
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.analyticsSeo') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
@@ -119,21 +191,21 @@
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                             :class="[
                                 $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             ]"
-                            :title="sidebarMinimized ? item.label : ''"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
                         >
                             <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
                         </router-link>
                     </div>
                 </div>
 
                 <!-- System -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        System
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.system') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
@@ -143,114 +215,53 @@
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                             :class="[
                                 $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             ]"
-                            :title="sidebarMinimized ? item.label : ''"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
                         >
                             <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
                         </router-link>
                     </div>
                 </div>
 
-                <!-- Logs & Monitoring -->
+                <!-- Developer -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Monitoring
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        {{ t('common.navigation.sections.developer') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.monitoring"
+                            v-for="item in navigationGroups.developer"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
                             :class="[
                                 $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             ]"
-                            :title="sidebarMinimized ? item.label : ''"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
                         >
                             <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
-                        </router-link>
-                    </div>
-                </div>
-
-                <!-- Advanced -->
-                <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Advanced
-                    </h3>
-                    <div class="space-y-1">
-                        <router-link
-                            v-for="item in navigationGroups.advanced"
-                            :key="item.name"
-                            :to="item.to"
-                            class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
-                            :class="[
-                                $route.name === item.name
-                                    ? 'bg-gray-800 text-white'
-                                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            ]"
-                            :title="sidebarMinimized ? item.label : ''"
-                        >
-                            <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
-                            <span v-if="!sidebarMinimized" class="truncate">{{ item.label }}</span>
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
                         </router-link>
                     </div>
                 </div>
             </nav>
-
-            <!-- User Info -->
-            <div class="p-3 border-t border-gray-800">
-                <div v-if="!sidebarMinimized" class="flex items-center mb-3">
-                    <div class="flex-shrink-0">
-                        <img
-                            :src="user?.avatar || '/default-avatar.png'"
-                            :alt="user?.name"
-                            class="w-10 h-10 rounded-full"
-                        >
-                    </div>
-                    <div class="ml-3 flex-1 min-w-0">
-                        <p class="text-sm font-medium text-white truncate">
-                            {{ user?.name }}
-                        </p>
-                        <p class="text-xs text-gray-400 truncate">
-                            {{ user?.email }}
-                        </p>
-                    </div>
-                </div>
-                <div v-else class="flex items-center justify-center mb-3">
-                    <img
-                        :src="user?.avatar || '/default-avatar.png'"
-                        :alt="user?.name"
-                        class="w-10 h-10 rounded-full"
-                        :title="user?.name"
-                    >
-                </div>
-                <button
-                    @click="$emit('logout')"
-                    class="w-full px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex items-center justify-center"
-                    :title="sidebarMinimized ? 'Logout' : ''"
-                >
-                    <svg v-if="sidebarMinimized" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span v-else>Logout</span>
-                </button>
-            </div>
         </div>
     </aside>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { navigationGroups } from '../../utils/navigation';
 import { getIcon } from '../../utils/icons';
 
-defineProps({
+const props = defineProps({
     sidebarMinimized: {
         type: Boolean,
         default: false,
@@ -267,6 +278,33 @@ defineProps({
 
 defineEmits(['toggle-minimize', 'close', 'logout']);
 
+const { t, te } = useI18n();
 const $route = useRoute();
+const avatarError = ref(false);
+
+const getNavigationLabel = (item) => {
+    const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    const key = `common.navigation.menu.${camelName}`;
+    return te(key) ? t(key) : item.label;
+};
+
+const userAvatar = computed(() => {
+    if (!props.user?.avatar) return null;
+    if (typeof props.user.avatar === 'string') {
+        return props.user.avatar.startsWith('http') ? props.user.avatar : `/storage/${props.user.avatar}`;
+    }
+    if (props.user.avatar?.url) {
+        return props.user.avatar.url.startsWith('http') ? props.user.avatar.url : `/storage/${props.user.avatar.url}`;
+    }
+    if (props.user.avatar?.path) {
+        return props.user.avatar.path.startsWith('http') ? props.user.avatar.path : `/storage/${props.user.avatar.path}`;
+    }
+    return null;
+});
+
+const userInitial = computed(() => {
+    if (!props.user?.name) return 'U';
+    return props.user.name.charAt(0).toUpperCase();
+});
 </script>
 

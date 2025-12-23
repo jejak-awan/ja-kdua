@@ -25,11 +25,6 @@ class Language extends Model
         'sort_order' => 'integer',
     ];
 
-    public function translations()
-    {
-        return $this->hasMany(Translation::class);
-    }
-
     public static function getDefault()
     {
         return static::where('is_default', true)->where('is_active', true)->first();

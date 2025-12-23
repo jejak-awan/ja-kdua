@@ -1,8 +1,8 @@
 <template>
   <div class="redis-management">
     <div class="page-header">
-      <h1 class="page-title">Redis Management</h1>
-      <p class="page-description">Manage Redis server configuration and monitor cache performance</p>
+      <h1 class="page-title">{{ $t('features.redis.title') }}</h1>
+      <p class="page-description">{{ $t('features.redis.description') }}</p>
     </div>
 
     <!-- Tabs -->
@@ -13,7 +13,7 @@
         :class="['tab', { active: activeTab === tab.id }]"
         @click="activeTab = tab.id"
       >
-        {{ tab.label }}
+        {{ $t(`features.redis.tabs.${tab.id}`) }}
       </button>
     </div>
 
@@ -23,10 +23,10 @@
       <div v-if="activeTab === 'settings'" class="settings-tab">
         <div class="card">
           <div class="card-header">
-            <h3>Connection Settings</h3>
+            <h3>{{ $t('features.redis.settings.connection') }}</h3>
             <button @click="testConnection" :disabled="testing" class="btn btn-primary">
-              <span v-if="!testing">Test Connection</span>
-              <span v-else>Testing...</span>
+              <span v-if="!testing">{{ $t('features.redis.settings.test') }}</span>
+              <span v-else>{{ $t('features.redis.settings.testing') }}</span>
             </button>
           </div>
 
@@ -58,16 +58,16 @@
                   v-model="settingsForm[setting.key]"
                   class="form-control"
                 >
-                  <option value="true">Enabled</option>
-                  <option value="false">Disabled</option>
+                  <option value="true">{{ $t('features.redis.settings.enabled') }}</option>
+                  <option value="false">{{ $t('features.redis.settings.disabled') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="form-actions">
               <button type="submit" :disabled="saving" class="btn btn-success">
-                <span v-if="!saving">Save Settings</span>
-                <span v-else>Saving...</span>
+                <span v-if="!saving">{{ $t('features.redis.settings.save') }}</span>
+                <span v-else>{{ $t('features.redis.settings.saving') }}</span>
               </button>
             </div>
           </form>
@@ -80,7 +80,7 @@
           <div class="stat-card">
             <div class="stat-icon">🚀</div>
             <div class="stat-content">
-              <div class="stat-label">Redis Version</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.version') }}</div>
               <div class="stat-value">{{ stats.version || 'N/A' }}</div>
             </div>
           </div>
@@ -88,7 +88,7 @@
           <div class="stat-card">
             <div class="stat-icon">💾</div>
             <div class="stat-content">
-              <div class="stat-label">Memory Used</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.memory') }}</div>
               <div class="stat-value">{{ stats.used_memory || 'N/A' }}</div>
             </div>
           </div>
@@ -96,7 +96,7 @@
           <div class="stat-card">
             <div class="stat-icon">🔑</div>
             <div class="stat-content">
-              <div class="stat-label">Total Keys</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.keys') }}</div>
               <div class="stat-value">{{ stats.total_keys || 0 }}</div>
             </div>
           </div>
@@ -104,7 +104,7 @@
           <div class="stat-card">
             <div class="stat-icon">⏱️</div>
             <div class="stat-content">
-              <div class="stat-label">Uptime</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.uptime') }}</div>
               <div class="stat-value">{{ stats.uptime_days || 'N/A' }}</div>
             </div>
           </div>
@@ -112,7 +112,7 @@
           <div class="stat-card">
             <div class="stat-icon">👥</div>
             <div class="stat-content">
-              <div class="stat-label">Connected Clients</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.clients') }}</div>
               <div class="stat-value">{{ stats.connected_clients || 0 }}</div>
             </div>
           </div>
@@ -120,7 +120,7 @@
           <div class="stat-card">
             <div class="stat-icon">🎯</div>
             <div class="stat-content">
-              <div class="stat-label">Hit Rate</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.hitRate') }}</div>
               <div class="stat-value">{{ stats.hit_rate || '0%' }}</div>
             </div>
           </div>
@@ -128,7 +128,7 @@
           <div class="stat-card">
             <div class="stat-icon">📊</div>
             <div class="stat-content">
-              <div class="stat-label">Operations/Sec</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.ops') }}</div>
               <div class="stat-value">{{ stats.operations_per_sec || 0 }}</div>
             </div>
           </div>
@@ -136,7 +136,7 @@
           <div class="stat-card">
             <div class="stat-icon">💥</div>
             <div class="stat-content">
-              <div class="stat-label">Total Commands</div>
+              <div class="stat-label">{{ $t('features.redis.statistics.grid.commands') }}</div>
               <div class="stat-value">{{ formatNumber(stats.total_commands) || 0 }}</div>
             </div>
           </div>
@@ -144,20 +144,20 @@
 
         <div class="card mt-4">
           <div class="card-header">
-            <h3>Cache Hit/Miss Statistics</h3>
+            <h3>{{ $t('features.redis.statistics.hitMiss.title') }}</h3>
           </div>
           <div class="card-body">
             <div class="hit-miss-stats">
               <div class="stat-row">
-                <span class="label">Cache Hits:</span>
+                <span class="label">{{ $t('features.redis.statistics.hitMiss.hits') }}:</span>
                 <span class="value success">{{ formatNumber(stats.hits) || 0 }}</span>
               </div>
               <div class="stat-row">
-                <span class="label">Cache Misses:</span>
+                <span class="label">{{ $t('features.redis.statistics.hitMiss.misses') }}:</span>
                 <span class="value danger">{{ formatNumber(stats.misses) || 0 }}</span>
               </div>
               <div class="stat-row">
-                <span class="label">Hit Rate:</span>
+                <span class="label">{{ $t('features.redis.statistics.hitMiss.hitRate') }}:</span>
                 <span class="value primary">{{ stats.hit_rate || '0%' }}</span>
               </div>
             </div>
@@ -166,10 +166,10 @@
 
         <div class="refresh-info">
           <button @click="loadStats" :disabled="loadingStats" class="btn btn-sm btn-outline">
-            <span v-if="!loadingStats">Refresh Stats</span>
-            <span v-else>Loading...</span>
+            <span v-if="!loadingStats">{{ $t('features.redis.statistics.refresh') }}</span>
+            <span v-else>{{ $t('features.redis.messages.loading') }}</span>
           </button>
-          <span class="text-muted">Auto-refresh every 30 seconds</span>
+          <span class="text-muted">{{ $t('features.redis.statistics.autoRefresh') }}</span>
         </div>
       </div>
 
@@ -177,84 +177,84 @@
       <div v-if="activeTab === 'cache'" class="cache-tab">
         <div class="card">
           <div class="card-header">
-            <h3>Cache Management</h3>
+            <h3>{{ $t('features.redis.cache.title') }}</h3>
           </div>
 
           <div class="cache-actions">
             <div class="cache-action-card">
               <div class="icon">🧹</div>
-              <h4>Clear All Cache</h4>
-              <p>Clear all cached data including config, routes, and views</p>
+              <h4>{{ $t('features.redis.cache.actions.all.title') }}</h4>
+              <p>{{ $t('features.redis.cache.actions.all.desc') }}</p>
               <button @click="flushCache('all')" :disabled="flushing" class="btn btn-danger">
-                Clear All
+                {{ $t('features.redis.cache.actions.all.button') }}
               </button>
             </div>
 
             <div class="cache-action-card">
               <div class="icon">💾</div>
-              <h4>Application Cache</h4>
-              <p>Clear application cache only</p>
+              <h4>{{ $t('features.redis.cache.actions.cache.title') }}</h4>
+              <p>{{ $t('features.redis.cache.actions.cache.desc') }}</p>
               <button @click="flushCache('cache')" :disabled="flushing" class="btn btn-warning">
-                Clear Cache
+                {{ $t('features.redis.cache.actions.cache.button') }}
               </button>
             </div>
 
             <div class="cache-action-card">
               <div class="icon">⚙️</div>
-              <h4>Configuration Cache</h4>
-              <p>Clear configuration cache</p>
+              <h4>{{ $t('features.redis.cache.actions.config.title') }}</h4>
+              <p>{{ $t('features.redis.cache.actions.config.desc') }}</p>
               <button @click="flushCache('config')" :disabled="flushing" class="btn btn-warning">
-                Clear Config
+                {{ $t('features.redis.cache.actions.config.button') }}
               </button>
             </div>
 
             <div class="cache-action-card">
               <div class="icon">🛣️</div>
-              <h4>Route Cache</h4>
-              <p>Clear route cache</p>
+              <h4>{{ $t('features.redis.cache.actions.route.title') }}</h4>
+              <p>{{ $t('features.redis.cache.actions.route.desc') }}</p>
               <button @click="flushCache('route')" :disabled="flushing" class="btn btn-warning">
-                Clear Routes
+                {{ $t('features.redis.cache.actions.route.button') }}
               </button>
             </div>
 
             <div class="cache-action-card">
               <div class="icon">👁️</div>
-              <h4>View Cache</h4>
-              <p>Clear compiled view templates</p>
+              <h4>{{ $t('features.redis.cache.actions.view.title') }}</h4>
+              <p>{{ $t('features.redis.cache.actions.view.desc') }}</p>
               <button @click="flushCache('view')" :disabled="flushing" class="btn btn-warning">
-                Clear Views
+                {{ $t('features.redis.cache.actions.view.button') }}
               </button>
             </div>
           </div>
 
           <div v-if="cacheStats" class="card mt-4">
             <div class="card-header">
-              <h3>Cache Statistics</h3>
+              <h3>{{ $t('features.redis.cache.stats.title') }}</h3>
             </div>
             <div class="card-body">
               <div class="cache-stats-grid">
                 <div class="stat">
-                  <span class="label">Total Keys:</span>
+                  <span class="label">{{ $t('features.redis.cache.stats.keys') }}:</span>
                   <span class="value">{{ cacheStats.total_keys || 0 }}</span>
                 </div>
                 <div class="stat">
-                  <span class="label">Cache Size:</span>
+                  <span class="label">{{ $t('features.redis.cache.stats.size') }}:</span>
                   <span class="value">{{ cacheStats.cache_size || 'N/A' }}</span>
                 </div>
                 <div class="stat">
-                  <span class="label">Expired Keys:</span>
+                  <span class="label">{{ $t('features.redis.cache.stats.expired') }}:</span>
                   <span class="value">{{ cacheStats.expired_keys || 0 }}</span>
                 </div>
               </div>
 
               <div v-if="cacheStats.top_keys && cacheStats.top_keys.length" class="top-keys mt-4">
-                <h4>Top Keys by Size</h4>
+                <h4>{{ $t('features.redis.cache.stats.topKeys') }}</h4>
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Key</th>
-                      <th>Size</th>
-                      <th>TTL</th>
+                      <th>{{ $t('features.redis.cache.stats.table.key') }}</th>
+                      <th>{{ $t('features.redis.cache.stats.table.size') }}</th>
+                      <th>{{ $t('features.redis.cache.stats.table.ttl') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -276,8 +276,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 
+const { t } = useI18n()
 const activeTab = ref('statistics')
 const tabs = [
   { id: 'statistics', label: 'Statistics' },
@@ -345,7 +347,7 @@ const saveSettings = async () => {
 
     connectionStatus.value = {
       type: 'success',
-      message: 'Settings saved successfully!'
+      message: t('features.redis.messages.saveSuccess')
     }
 
     setTimeout(() => {
@@ -354,7 +356,7 @@ const saveSettings = async () => {
   } catch (error) {
     connectionStatus.value = {
       type: 'error',
-      message: error.response?.data?.message || 'Failed to save settings'
+      message: error.response?.data?.message || t('features.redis.messages.saveFailed')
     }
   } finally {
     saving.value = false
@@ -369,12 +371,12 @@ const testConnection = async () => {
     const response = await api.get('/admin/cms/redis/test-connection')
     connectionStatus.value = {
       type: 'success',
-      message: `✅ ${response.data.data.message} (${response.data.data.response_time})`
+      message: `✅ ${response.data.data.message || t('features.redis.messages.testSuccess')} (${response.data.data.response_time})`
     }
   } catch (error) {
     connectionStatus.value = {
       type: 'error',
-      message: `❌ ${error.response?.data?.message || 'Connection failed'}`
+      message: `❌ ${error.response?.data?.message || t('features.redis.messages.testFailed')}`
     }
   } finally {
     testing.value = false
@@ -403,17 +405,17 @@ const loadCacheStats = async () => {
 }
 
 const flushCache = async (type) => {
-  if (!confirm(`Are you sure you want to clear ${type} cache?`)) {
+  if (!confirm(t('features.redis.messages.flushConfirm', { type }))) {
     return
   }
 
   flushing.value = true
   try {
     await api.post('/admin/cms/redis/flush-cache', { type })
-    alert(`${type} cache cleared successfully!`)
+    alert(t('features.redis.messages.flushSuccess', { type }))
     loadCacheStats()
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to flush cache')
+    alert(error.response?.data?.message || t('features.redis.messages.flushFailed'))
   } finally {
     flushing.value = false
   }
@@ -470,12 +472,12 @@ onUnmounted(() => {
 .page-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: hsl(var(--foreground));
   margin-bottom: 0.5rem;
 }
 
 .page-description {
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   font-size: 1rem;
 }
 
@@ -483,7 +485,7 @@ onUnmounted(() => {
 .tabs {
   display: flex;
   gap: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid hsl(var(--border));
   margin-bottom: 2rem;
 }
 
@@ -492,7 +494,7 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -510,7 +512,7 @@ onUnmounted(() => {
 
 /* Card */
 .card {
-  background: white;
+  background: hsl(var(--card));
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -518,7 +520,7 @@ onUnmounted(() => {
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid hsl(var(--border));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -527,7 +529,7 @@ onUnmounted(() => {
 .card-header h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: hsl(var(--foreground));
   margin: 0;
 }
 
@@ -566,10 +568,10 @@ onUnmounted(() => {
 .settings-group h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #374151;
+  color: hsl(var(--foreground));
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .form-group {
@@ -579,14 +581,14 @@ onUnmounted(() => {
 .form-group label {
   display: block;
   font-weight: 500;
-  color: #374151;
+  color: hsl(var(--foreground));
   margin-bottom: 0.5rem;
 }
 
 .form-group .description {
   display: block;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   font-weight: 400;
   margin-top: 0.25rem;
 }
@@ -594,7 +596,7 @@ onUnmounted(() => {
 .form-control {
   width: 100%;
   padding: 0.625rem 0.875rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid hsl(var(--border));
   border-radius: 0.375rem;
   font-size: 0.875rem;
   transition: border-color 0.2s;
@@ -611,7 +613,7 @@ onUnmounted(() => {
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid hsl(var(--border));
 }
 
 /* Buttons */
@@ -669,13 +671,13 @@ onUnmounted(() => {
 }
 
 .btn-outline {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #f9fafb;
+  background: hsl(var(--muted));
 }
 
 .btn-sm {
@@ -692,7 +694,7 @@ onUnmounted(() => {
 }
 
 .stat-card {
-  background: white;
+  background: hsl(var(--card));
   border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -711,14 +713,14 @@ onUnmounted(() => {
 
 .stat-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 0.25rem;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: hsl(var(--foreground));
 }
 
 .hit-miss-stats {
@@ -732,13 +734,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: #f9fafb;
+  background: hsl(var(--muted));
   border-radius: 0.375rem;
 }
 
 .stat-row .label {
   font-weight: 500;
-  color: #374151;
+  color: hsl(var(--foreground));
 }
 
 .stat-row .value {
@@ -763,11 +765,11 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid hsl(var(--border));
 }
 
 .text-muted {
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   font-size: 0.875rem;
 }
 
@@ -780,11 +782,11 @@ onUnmounted(() => {
 }
 
 .cache-action-card {
-  background: #f9fafb;
+  background: hsl(var(--muted));
   border-radius: 0.5rem;
   padding: 1.5rem;
   text-align: center;
-  border: 2px solid #e5e7eb;
+  border: 2px solid hsl(var(--border));
   transition: all 0.2s;
 }
 
@@ -801,12 +803,12 @@ onUnmounted(() => {
 .cache-action-card h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: hsl(var(--foreground));
   margin-bottom: 0.5rem;
 }
 
 .cache-action-card p {
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -821,13 +823,13 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 0.75rem;
-  background: #f9fafb;
+  background: hsl(var(--muted));
   border-radius: 0.375rem;
 }
 
 .cache-stats-grid .label {
   font-weight: 500;
-  color: #374151;
+  color: hsl(var(--foreground));
 }
 
 .cache-stats-grid .value {
@@ -845,13 +847,13 @@ onUnmounted(() => {
 .table td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .table th {
   font-weight: 600;
-  color: #374151;
-  background: #f9fafb;
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
 }
 
 .table code {
@@ -869,7 +871,7 @@ onUnmounted(() => {
 .top-keys h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: hsl(var(--foreground));
   margin-bottom: 1rem;
 }
 </style>

@@ -1,0 +1,65 @@
+{
+    "title": "Kategori",
+    "createNew": "Kategori Baru",
+    "search": "Cari kategori...",
+    "viewMode": {
+        "tree": "Tampilan Pohon",
+        "list": "Tampilan Daftar"
+    },
+    "loading": "Memuat kategori...",
+    "empty": "Tidak ada kategori ditemukan",
+    "table": {
+        "name": "Nama",
+        "slug": "Slug",
+        "parent": "Induk",
+        "contents": "Konten",
+        "status": "Status",
+        "actions": "Aksi"
+    },
+    "actions": {
+        "move": "Pindah",
+        "edit": "Edit",
+        "delete": "Hapus"
+    },
+    "status": {
+        "active": "Aktif",
+        "inactive": "Tidak Aktif"
+    },
+    "form": {
+        "createTitle": "Buat Kategori",
+        "editTitle": "Edit Kategori",
+        "name": "Nama",
+        "namePlaceholder": "Nama kategori",
+        "slug": "Slug",
+        "slugPlaceholder": "slug-kategori",
+        "slugHelp": "Versi ramah URL",
+        "description": "Deskripsi",
+        "descriptionPlaceholder": "Deskripsi kategori",
+        "parent": "Kategori Induk",
+        "noParent": "Tanpa Induk (Kategori Root)",
+        "image": "Gambar",
+        "removeImage": "Hapus Gambar",
+        "selectImage": "Pilih Gambar",
+        "sortOrder": "Urutan",
+        "sortOrderHelp": "Angka lebih kecil muncul lebih dulu",
+        "active": "Aktif",
+        "cancel": "Batal",
+        "create": "Buat",
+        "update": "Perbarui",
+        "saving": "Menyimpan...",
+        "saveError": "Gagal menyimpan kategori"
+    },
+    "move": {
+        "title": "Pindahkan Kategori",
+        "description": "Pindahkan \"{name}\" ke:",
+        "newParent": "Kategori Induk Baru",
+        "cancel": "Batal",
+        "submit": "Pindahkan Kategori",
+        "moving": "Memindahkan...",
+        "error": "Gagal memindahkan kategori"
+    },
+    "messages": {
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus \"{name}\" dan semua subkategorinya?",
+        "deleteError": "Gagal menghapus kategori"
+    }
+}

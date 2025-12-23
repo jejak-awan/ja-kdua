@@ -2,8 +2,8 @@
     <div>
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Edit Menu</h1>
-                <p v-if="menu" class="text-sm text-gray-500 mt-1">{{ menu.name }}</p>
+                <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.form.editTitle') }}</h1>
+                <p v-if="menu" class="text-sm text-muted-foreground mt-1">{{ menu.name }}</p>
             </div>
             <button
                 @click="addMenuItem"
@@ -12,31 +12,28 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Item
+                {{ t('features.menus.actions.createItem') }}
             </button>
         </div>
 
         <div v-if="loading" class="text-center py-12">
-            <p class="text-gray-500">Loading...</p>
+            <p class="text-muted-foreground">{{ t('features.menus.messages.loading') }}</p>
         </div>
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Menu Items Tree -->
             <div class="lg:col-span-2">
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Menu Items</h2>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.items') }}</h2>
                     <div v-if="menuItems.length === 0" class="text-center py-8">
-                        <p class="text-gray-500">No menu items. Click "Add Item" to get started.</p>
+                        <p class="text-muted-foreground">{{ t('features.menus.messages.emptyItems') }}</p>
                     </div>
-                    <div v-else class="space-y-2">
+                    <div v-else>
                         <MenuItemTree
-                            v-for="item in rootItems"
-                            :key="item.id"
-                            :item="item"
-                            :items="menuItems"
+                            :items="nestedItems"
                             @edit="editMenuItem"
                             @delete="deleteMenuItem"
-                            @move="handleMoveItem"
+                            @change="handleTreeChange"
                         />
                     </div>
                 </div>
@@ -44,29 +41,29 @@
 
             <!-- Menu Settings -->
             <div class="lg:col-span-1">
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Menu Settings</h2>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.settings') }}</h2>
                     <form @submit.prevent="saveMenu" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Name <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ t('features.menus.form.name') }} <span class="text-red-500">*</span>
                             </label>
                             <input
                                 v-model="menuForm.name"
                                 type="text"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Location
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ t('features.menus.form.location') }}
                             </label>
                             <input
                                 v-model="menuForm.location"
                                 type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="header, footer, etc."
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                :placeholder="t('features.menus.form.placeholders.location')"
                             >
                         </div>
                         <button
@@ -74,7 +71,7 @@
                             :disabled="saving"
                             class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                         >
-                            {{ saving ? 'Saving...' : 'Save Menu' }}
+                            {{ saving ? t('features.menus.actions.saving') : t('features.menus.actions.save') }}
                         </button>
                     </form>
                 </div>
@@ -95,7 +92,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+
+const { t } = useI18n();
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import MenuItemTree from '../../../components/menus/MenuItemTree.vue';
 import MenuItemModal from '../../../components/menus/MenuItemModal.vue';
@@ -105,19 +105,15 @@ const router = useRouter();
 const menuId = route.params.id;
 
 const menu = ref(null);
-const menuItems = ref([]);
 const loading = ref(false);
 const saving = ref(false);
 const showItemModal = ref(false);
 const editingItem = ref(null);
+const nestedItems = ref([]);
 
 const menuForm = ref({
     name: '',
     location: '',
-});
-
-const rootItems = computed(() => {
-    return menuItems.value.filter(item => !item.parent_id);
 });
 
 const fetchMenu = async () => {
@@ -130,10 +126,11 @@ const fetchMenu = async () => {
             location: menu.value.location || '',
         };
         
-        // Fetch menu items
+        // Fetch menu items and build tree
         const itemsResponse = await api.get(`/admin/cms/menus/${menuId}/items`);
         const { data } = parseResponse(itemsResponse);
-        menuItems.value = ensureArray(data);
+        const flatItems = ensureArray(data);
+        nestedItems.value = buildTree(flatItems);
     } catch (error) {
         console.error('Failed to fetch menu:', error);
     } finally {
@@ -141,14 +138,46 @@ const fetchMenu = async () => {
     }
 };
 
+const buildTree = (items, parentId = null) => {
+    return items
+        .filter(item => item.parent_id === parentId)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(item => ({
+            ...item,
+            children: buildTree(items, item.id)
+        }));
+};
+
+const flattenTree = (items, parentId = null) => {
+    let result = [];
+    items.forEach((item, index) => {
+        result.push({
+            id: item.id,
+            parent_id: parentId,
+            sort_order: index
+        });
+        if (item.children && item.children.length > 0) {
+            result = result.concat(flattenTree(item.children, item.id));
+        }
+    });
+    return result;
+};
+
 const saveMenu = async () => {
     saving.value = true;
     try {
+        // Save menu details
         await api.put(`/admin/cms/menus/${menuId}`, menuForm.value);
-        alert('Menu saved successfully');
+        
+        // Save menu items order
+        const reordered = flattenTree(nestedItems.value);
+        await api.post(`/admin/cms/menus/${menuId}/reorder`, { items: reordered });
+        
+        alert(t('features.menus.actions.saved'));
+        await fetchMenu();
     } catch (error) {
         console.error('Failed to save menu:', error);
-        alert('Failed to save menu');
+        alert(t('features.menus.messages.saveFailed'));
     } finally {
         saving.value = false;
     }
@@ -165,34 +194,42 @@ const editMenuItem = (item) => {
 };
 
 const deleteMenuItem = async (item) => {
-    if (!confirm(`Are you sure you want to delete "${item.label}"?`)) {
+    if (!confirm(t('features.menus.messages.deleteItemConfirm', { title: item.title || item.label }))) {
         return;
     }
 
     try {
         await api.delete(`/admin/cms/menu-items/${item.id}`);
-        await fetchMenu();
+        // Remove from local tree to avoid full reload flicker
+        removeItemFromTree(nestedItems.value, item.id);
     } catch (error) {
         console.error('Failed to delete menu item:', error);
-        alert('Failed to delete menu item');
+        alert(t('features.menus.messages.deleteItemFailed'));
     }
 };
 
-const handleMoveItem = async (itemId, newParentId, newOrder) => {
-    try {
-        await api.put(`/admin/cms/menu-items/${itemId}/move`, {
-            parent_id: newParentId,
-            order: newOrder,
-        });
-        await fetchMenu();
-    } catch (error) {
-        console.error('Failed to move menu item:', error);
+const removeItemFromTree = (items, id) => {
+    const index = items.findIndex(i => i.id === id);
+    if (index > -1) {
+        items.splice(index, 1);
+        return true;
     }
+    for (const item of items) {
+        if (item.children && removeItemFromTree(item.children, id)) {
+            return true;
+        }
+    }
+    return false;
 };
 
 const handleItemSaved = () => {
     fetchMenu();
     showItemModal.value = false;
+};
+
+// Handle changes from MenuItemTree (drag-drop)
+const handleTreeChange = (newItems) => {
+    nestedItems.value = newItems;
 };
 
 onMounted(() => {

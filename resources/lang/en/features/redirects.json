@@ -1,0 +1,54 @@
+{
+    "title": "Redirects",
+    "new": "New Redirect",
+    "loading": "Loading...",
+    "empty": "No redirects found",
+    "search": "Search redirects...",
+    "statistics": {
+        "total": "Total Redirects",
+        "active": "Active Redirects",
+        "hits": "Total Hits"
+    },
+    "table": {
+        "from": "From URL",
+        "to": "To URL",
+        "code": "Status Code",
+        "hits": "Hits",
+        "status": "Status",
+        "actions": "Actions"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete redirect from \"{from}\"?",
+        "deleteFailed": "Failed to delete redirect",
+        "saveFailed": "Failed to save redirect"
+    },
+    "modals": {
+        "redirect": {
+            "titleEdit": "Edit Redirect",
+            "titleCreate": "Create Redirect",
+            "from": "From URL",
+            "fromPlaceholder": "/old-path",
+            "fromHint": "The source URL path (e.g., /old-page)",
+            "to": "To URL",
+            "toPlaceholder": "/new-path",
+            "toHint": "The destination URL path or full URL",
+            "code": "Status Code",
+            "codes": {
+                "p301": "301 - Permanent Redirect",
+                "t302": "302 - Temporary Redirect",
+                "t307": "307 - Temporary Redirect (Preserve Method)",
+                "p308": "308 - Permanent Redirect (Preserve Method)"
+            },
+            "active": "Active",
+            "saving": "Saving..."
+        }
+    }
+}

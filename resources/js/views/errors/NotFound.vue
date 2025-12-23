@@ -10,20 +10,20 @@
 
       <!-- Error Message -->
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Halaman Tidak Ditemukan
+        <h2 class="text-3xl font-bold text-foreground mb-4">
+          {{ t('features.errors.404.title') }}
         </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">
-          Maaf, halaman yang Anda cari tidak dapat ditemukan.
+        <p class="text-lg text-muted-foreground dark:text-gray-400 mb-2">
+          {{ t('features.errors.404.message') }}
         </p>
-        <p class="text-sm text-gray-500 dark:text-gray-500">
-          URL mungkin salah ketik atau halaman telah dipindahkan.
+        <p class="text-sm text-muted-foreground dark:text-muted-foreground">
+          {{ t('features.errors.404.description') }}
         </p>
       </div>
 
       <!-- Illustration -->
       <div class="mb-8 flex justify-center">
-        <svg class="w-64 h-64 text-gray-300 dark:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-64 h-64 text-gray-300 dark:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
@@ -37,16 +37,16 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali
+          {{ t('features.errors.404.back') }}
         </button>
         <router-link
           to="/"
-          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-800 hover:bg-muted dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          Halaman Utama
+          {{ t('features.errors.404.home') }}
         </router-link>
       </div>
 
@@ -56,8 +56,8 @@
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari konten..."
-            class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            :placeholder="t('features.errors.404.searchPlaceholder')"
+            class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card dark:bg-gray-800 text-foreground placeholder-gray-500 dark:placeholder-gray-400"
             @keyup.enter="search"
           />
           <button
@@ -73,15 +73,15 @@
 
       <!-- Popular Links -->
       <div class="text-left max-w-md mx-auto">
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-          Halaman Populer:
+        <h3 class="text-sm font-semibold text-foreground mb-3">
+          {{ t('features.errors.404.popular') }}
         </h3>
         <div class="space-y-2">
           <router-link
             v-for="link in popularLinks"
             :key="link.path"
             :to="link.path"
-            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            class="block px-4 py-2 text-sm text-foreground hover:bg-accent dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -92,7 +92,7 @@
       </div>
 
       <!-- Error Code for Reference -->
-      <div class="mt-8 text-xs text-gray-400 dark:text-gray-600">
+      <div class="mt-8 text-xs text-gray-400 dark:text-muted-foreground">
         Error Code: 404 | {{ new Date().toISOString() }}
       </div>
     </div>
@@ -100,18 +100,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // Added computed for i18n reactivity if needed, though simple setup is fine
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
+const { t } = useI18n();
 const searchQuery = ref('');
 
-const popularLinks = ref([
-  { path: '/', label: 'Beranda' },
-  { path: '/blog', label: 'Blog' },
-  { path: '/about', label: 'Tentang Kami' },
-  { path: '/contact', label: 'Kontak' },
+const popularLinks = computed(() => [
+  { path: '/', label: t('common.navigation.breadcrumbs.home') },
+  { path: '/blog', label: t('features.frontend.nav.blog') || 'Blog' }, // Assuming these exist, otherwise fallback
+  { path: '/about', label: t('features.frontend.nav.about') || 'About Us' },
+  { path: '/contact', label: t('features.frontend.nav.contact') || 'Contact' },
 ]);
+
+// Note: I assumed features.frontend.nav keys exist from previous steps. 
+// If not, I'll check.
+// Checking my history: step 2056 created frontend.json with "nav": { "home":..., "blog":..., "about":..., "contact":... }
+// So this is correct.
 
 const goBack = () => {
   if (window.history.length > 1) {

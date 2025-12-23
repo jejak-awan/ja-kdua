@@ -7,15 +7,15 @@
         </svg>
       </div>
       
-      <h3 v-if="title" class="newsletter-title">{{ title }}</h3>
-      <p v-if="description" class="newsletter-description">{{ description }}</p>
+      <h3 v-if="title || t('features.frontend.newsletter.title')" class="newsletter-title">{{ title || t('features.frontend.newsletter.title') }}</h3>
+      <p v-if="description || t('features.frontend.newsletter.description')" class="newsletter-description">{{ description || t('features.frontend.newsletter.description') }}</p>
       
       <form @submit.prevent="handleSubscribe" class="newsletter-form">
         <div class="form-group">
           <input
             v-model="email"
             type="email"
-            placeholder="Masukkan email Anda"
+            :placeholder="t('features.frontend.newsletter.placeholder')"
             required
             :disabled="loading || success"
             class="newsletter-input"
@@ -32,7 +32,7 @@
               </svg>
             </span>
             <span v-else-if="success">✓</span>
-            <span v-else>{{ buttonText }}</span>
+            <span v-else>{{ buttonText || t('features.frontend.newsletter.button') }}</span>
           </button>
         </div>
         
@@ -41,13 +41,13 @@
         </div>
         
         <div v-if="success" class="success-message">
-          {{ successMessage }}
+          {{ successMessage || t('features.frontend.newsletter.success') }}
         </div>
       </form>
       
       <p v-if="showPrivacy" class="newsletter-privacy">
-        Dengan berlangganan, Anda menyetujui
-        <a href="/privacy" class="privacy-link">Kebijakan Privasi</a> kami.
+        {{ t('features.frontend.newsletter.privacy') }}
+        <a href="/privacy" class="privacy-link">{{ t('features.frontend.newsletter.privacyLink') }}</a>.
       </p>
     </div>
   </div>
@@ -55,7 +55,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
   variant: {
@@ -65,15 +68,15 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: 'Berlangganan Newsletter',
+    default: undefined,
   },
   description: {
     type: String,
-    default: 'Dapatkan update terbaru langsung ke email Anda',
+    default: undefined,
   },
   buttonText: {
     type: String,
-    default: 'Berlangganan',
+    default: undefined,
   },
   showIcon: {
     type: Boolean,
@@ -85,7 +88,7 @@ const props = defineProps({
   },
   successMessage: {
     type: String,
-    default: 'Terima kasih! Email Anda berhasil didaftarkan.',
+    default: undefined,
   },
 });
 
@@ -116,7 +119,7 @@ const handleSubscribe = async () => {
       }, 5000);
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.';
+    error.value = err.response?.data?.message || t('common.messages.error.generic');
   } finally {
     loading.value = false;
   }

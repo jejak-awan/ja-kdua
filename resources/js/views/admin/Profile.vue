@@ -1,12 +1,12 @@
 <template>
     <div class="p-6">
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Manage your account information and security</p>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.profile.title') }}</h1>
+            <p class="text-muted-foreground mt-1">{{ $t('features.profile.subtitle') }}</p>
         </div>
 
         <!-- Tabs -->
-        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="mb-6 border-b border-border">
             <nav class="flex space-x-8">
                 <button
                     v-for="tab in tabs"
@@ -16,21 +16,21 @@
                         'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
                         activeTab === tab.key
                             ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                     ]"
                 >
-                    {{ tab.label }}
+                    {{ $t('features.profile.tabs.' + tab.key) }}
                 </button>
             </nav>
         </div>
 
         <!-- Profile Info Tab -->
-        <div v-if="activeTab === 'profile'" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div v-if="activeTab === 'profile'" class="bg-card rounded-lg shadow p-6">
             <form @submit.prevent="updateProfile" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Name
+                        <label class="block text-sm font-medium text-foreground mb-2">
+                            {{ $t('features.profile.form.name') }}
                         </label>
                         <input
                             v-model="profileForm.name"
@@ -40,8 +40,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Email
+                        <label class="block text-sm font-medium text-foreground mb-2">
+                            {{ $t('features.profile.form.email') }}
                         </label>
                         <input
                             v-model="profileForm.email"
@@ -51,8 +51,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Phone
+                        <label class="block text-sm font-medium text-foreground mb-2">
+                            {{ $t('features.profile.form.phone') }}
                         </label>
                         <input
                             v-model="profileForm.phone"
@@ -62,8 +62,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Location
+                        <label class="block text-sm font-medium text-foreground mb-2">
+                            {{ $t('features.profile.form.location') }}
                         </label>
                         <input
                             v-model="profileForm.location"
@@ -74,8 +74,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Bio
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        {{ $t('features.profile.form.bio') }}
                     </label>
                     <textarea
                         v-model="profileForm.bio"
@@ -86,22 +86,21 @@
 
                 <div class="flex justify-end">
                     <button
-                        type="submit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : 'Save Changes' }}
+                        {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
                     </button>
                 </div>
             </form>
         </div>
 
         <!-- Password Tab -->
-        <div v-if="activeTab === 'password'" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div v-if="activeTab === 'password'" class="bg-card rounded-lg shadow p-6">
             <form @submit.prevent="updatePassword" class="space-y-6 max-w-md">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Current Password
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        {{ $t('features.profile.form.currentPassword') }}
                     </label>
                     <input
                         v-model="passwordForm.current_password"
@@ -111,22 +110,22 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        New Password
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        {{ $t('features.profile.form.newPassword') }}
                     </label>
                     <input
                         v-model="passwordForm.password"
                         type="password"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                     />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Must be at least 8 characters with uppercase, lowercase, and number
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        {{ $t('features.profile.form.passwordHelp') }}
                     </p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Confirm New Password
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        {{ $t('features.profile.form.confirmPassword') }}
                     </label>
                     <input
                         v-model="passwordForm.password_confirmation"
@@ -137,14 +136,17 @@
 
                 <div class="flex justify-end">
                     <button
-                        type="submit"
-                        :disabled="changingPassword"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ changingPassword ? 'Changing...' : 'Change Password' }}
+                        {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- Two-Factor Authentication Tab -->
+        <div v-if="activeTab === 'two-factor'">
+            <TwoFactorSettings />
         </div>
 
         <!-- Login History Tab -->
@@ -155,13 +157,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import LoginHistory from '../../components/admin/LoginHistory.vue';
+import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
+
+const { t } = useI18n();
 
 const tabs = [
     { key: 'profile', label: 'Profile Information' },
     { key: 'password', label: 'Change Password' },
+    { key: 'two-factor', label: 'Two-Factor Authentication' },
     { key: 'history', label: 'Login History' },
 ];
 
@@ -207,10 +214,10 @@ const updateProfile = async () => {
     saving.value = true;
     try {
         await api.put('/profile', profileForm.value);
-        alert('Profile updated successfully');
+        alert(t('features.profile.messages.updateSuccess'));
         await fetchProfile();
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to update profile');
+        alert(error.response?.data?.message || t('features.profile.messages.updateFailed'));
     } finally {
         saving.value = false;
     }
@@ -220,14 +227,14 @@ const updatePassword = async () => {
     changingPassword.value = true;
     try {
         await api.put('/profile/password', passwordForm.value);
-        alert('Password changed successfully');
+        alert(t('features.profile.messages.passwordSuccess'));
         passwordForm.value = {
             current_password: '',
             password: '',
             password_confirmation: '',
         };
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to change password');
+        alert(error.response?.data?.message || t('features.profile.messages.passwordFailed'));
     } finally {
         changingPassword.value = false;
     }

@@ -1,12 +1,12 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div class="bg-card rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">Custom CSS: {{ theme?.name }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,7 +18,7 @@
                     <textarea
                         v-model="css"
                         rows="20"
-                        class="w-full h-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                        class="w-full h-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                         placeholder="/* Enter your custom CSS here */"
                     />
                 </div>
@@ -26,7 +26,7 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         Cancel
                     </button>

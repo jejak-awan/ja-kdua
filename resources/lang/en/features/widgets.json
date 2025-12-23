@@ -1,0 +1,34 @@
+{
+    "title": "Widgets",
+    "new": "New Widget",
+    "loading": "Loading...",
+    "empty": "No widgets found",
+    "table": {
+        "name": "Name",
+        "type": "Type",
+        "position": "Position",
+        "actions": "Actions"
+    },
+    "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "messages": {
+        "deleteConfirm": "Delete widget \"{name}\"?",
+        "deleteFailed": "Failed to delete widget",
+        "saveFailed": "Failed to save widget"
+    },
+    "modals": {
+        "widget": {
+            "titleEdit": "Edit Widget",
+            "titleCreate": "Create Widget",
+            "name": "Name",
+            "type": "Type",
+            "position": "Position",
+            "positionPlaceholder": "sidebar, footer, etc.",
+            "content": "Content",
+            "active": "Active",
+            "saving": "Saving..."
+        }
+    }
+}

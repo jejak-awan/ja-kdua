@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen bg-background text-foreground">
         <!-- Sidebar -->
         <AdminSidebar
             :sidebar-minimized="sidebarMinimized"
@@ -20,9 +20,6 @@
 
             <!-- Page Content -->
             <main class="p-6">
-                <!-- Breadcrumbs -->
-                <Breadcrumbs class="admin-breadcrumbs" />
-                
                 <router-view />
             </main>
         </div>
@@ -35,7 +32,6 @@ import { useAuthStore } from '../stores/auth';
 import { useSidebar } from '../composables/useSidebar';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
 import AdminNavbar from '../components/layouts/AdminNavbar.vue';
-import Breadcrumbs from '@/components/Breadcrumbs.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

@@ -1,0 +1,435 @@
+{
+    "info": {
+        "name": "JA-CMS API",
+        "description": "API collection for JA-CMS Content Management System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+                        },
+                        "url": "{{base_url}}/login"
+                    }
+                },
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}"
+                        },
+                        "url": "{{base_url}}/register"
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/logout"
+                    }
+                },
+                {
+                    "name": "Current User",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/user"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Content",
+            "item": [
+                {
+                    "name": "List Contents",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/contents?status=published&per_page=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "contents"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "published"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "post"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Content",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/contents/1"
+                    }
+                },
+                {
+                    "name": "Get Content by Slug",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/contents/slug/hello-world"
+                    }
+                },
+                {
+                    "name": "Create Content",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"New Post\",\n  \"slug\": \"new-post\",\n  \"content\": \"<p>Content here</p>\",\n  \"excerpt\": \"Short description\",\n  \"type\": \"post\",\n  \"status\": \"draft\",\n  \"category_id\": 1\n}"
+                        },
+                        "url": "{{base_url}}/contents"
+                    }
+                },
+                {
+                    "name": "Update Content",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated Title\",\n  \"status\": \"published\"\n}"
+                        },
+                        "url": "{{base_url}}/contents/1"
+                    }
+                },
+                {
+                    "name": "Delete Content",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/contents/1"
+                    }
+                },
+                {
+                    "name": "Related Content",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/contents/hello-world/related"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Categories",
+            "item": [
+                {
+                    "name": "List Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/categories"
+                    }
+                },
+                {
+                    "name": "Categories Tree",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/categories?tree=1"
+                    }
+                },
+                {
+                    "name": "Create Category",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Category\",\n  \"slug\": \"new-category\",\n  \"description\": \"Category description\"\n}"
+                        },
+                        "url": "{{base_url}}/categories"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tags",
+            "item": [
+                {
+                    "name": "List Tags",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/tags"
+                    }
+                },
+                {
+                    "name": "Tag Statistics",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/tags/statistics"
+                    }
+                },
+                {
+                    "name": "Create Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Tag\",\n  \"slug\": \"new-tag\"\n}"
+                        },
+                        "url": "{{base_url}}/tags"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Media",
+            "item": [
+                {
+                    "name": "List Media",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/media"
+                    }
+                },
+                {
+                    "name": "Upload Media",
+                    "request": {
+                        "method": "POST",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": ""
+                                },
+                                {
+                                    "key": "optimize",
+                                    "value": "true",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": "{{base_url}}/media/upload"
+                    }
+                },
+                {
+                    "name": "Get Media Usage",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/media/1/usage"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "System",
+            "item": [
+                {
+                    "name": "System Info",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/system/info"
+                    }
+                },
+                {
+                    "name": "System Health",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/system/health"
+                    }
+                },
+                {
+                    "name": "System Statistics",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/system/statistics"
+                    }
+                },
+                {
+                    "name": "Cache Status",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/system/cache/status"
+                    }
+                },
+                {
+                    "name": "Clear Cache",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/system/cache/clear"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Analytics",
+            "item": [
+                {
+                    "name": "Overview",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/analytics/overview?date_from=2025-01-01&date_to=2025-12-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "analytics",
+                                "overview"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date_from",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2025-12-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Top Pages",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/analytics/top-pages"
+                    }
+                },
+                {
+                    "name": "Real-time",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/analytics/real-time"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Themes",
+            "item": [
+                {
+                    "name": "List Themes",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/themes"
+                    }
+                },
+                {
+                    "name": "Active Theme",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/themes/active"
+                    }
+                },
+                {
+                    "name": "Activate Theme",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/themes/1/activate"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/users"
+                    }
+                },
+                {
+                    "name": "Get User",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/users/1"
+                    }
+                }
+            ]
+        }
+    ]
+}

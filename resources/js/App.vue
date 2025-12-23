@@ -15,10 +15,12 @@ import { onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
+import { useLanguage } from './composables/useLanguage';
 import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
 
 const authStore = useAuthStore();
 const { loadActiveTheme } = useTheme();
+const { initializeLanguage } = useLanguage();
 
 // Session timeout management
 const {
@@ -43,6 +45,11 @@ const initDarkMode = () => {
 onMounted(async () => {
     initDarkMode();
     authStore.initAuth();
+    
+    // Initialize language (non-blocking)
+    initializeLanguage().catch(err => {
+        console.warn('Language initialization failed:', err);
+    });
     
     // Load active theme for frontend (non-blocking, don't wait)
     // Theme loading failure shouldn't prevent app from loading

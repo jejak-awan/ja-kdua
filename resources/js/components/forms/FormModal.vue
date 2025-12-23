@@ -1,13 +1,13 @@
 <template>
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="close">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">
-                    {{ form ? 'Edit Form' : 'Create New Form' }}
+                <h2 class="text-2xl font-bold text-foreground">
+                    {{ form ? t('features.forms.modal.editTitle') : t('features.forms.modal.createTitle') }}
                 </h2>
                 <button
                     @click="close"
-                    class="text-gray-400 hover:text-gray-600"
+                    class="text-gray-400 hover:text-muted-foreground"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -19,67 +19,67 @@
                 <!-- Basic Information -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Form Name <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.forms.modal.formName') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="formData.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Contact Form"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.forms.modal.placeholders.name')"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Slug <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.forms.modal.slug') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="formData.slug"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="contact-form"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.forms.modal.placeholders.slug')"
                         >
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                    <label class="block text-sm font-medium text-foreground mb-1">
+                        {{ t('features.forms.modal.description') }}
                     </label>
                     <textarea
                         v-model="formData.description"
                         rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Form description..."
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="t('features.forms.modal.placeholders.description')"
                     />
                 </div>
 
                 <!-- Success Message & Redirect -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Success Message
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.forms.modal.successMessage') }}
                         </label>
                         <input
                             v-model="formData.success_message"
                             type="text"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Thank you for your submission!"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.forms.modal.placeholders.successMessage')"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Redirect URL
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.forms.modal.redirectUrl') }}
                         </label>
                         <input
                             v-model="formData.redirect_url"
                             type="url"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="https://example.com/thank-you"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.forms.modal.placeholders.redirectUrl')"
                         >
                     </div>
                 </div>
@@ -90,17 +90,17 @@
                         v-model="formData.is_active"
                         type="checkbox"
                         id="is_active"
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                     >
-                    <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                        Form is active
+                    <label for="is_active" class="ml-2 block text-sm text-foreground">
+                        {{ t('features.forms.modal.isActive') }}
                     </label>
                 </div>
 
                 <!-- Fields Builder -->
-                <div class="border-t border-gray-200 pt-6">
+                <div class="border-t border-border pt-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Form Fields</h3>
+                        <h3 class="text-lg font-semibold text-foreground">{{ t('features.forms.modal.formFields') }}</h3>
                         <button
                             type="button"
                             @click="showFieldModal = true; editingField = null"
@@ -109,7 +109,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Add Field
+                            {{ t('features.forms.actions.addField') }}
                         </button>
                     </div>
 
@@ -123,20 +123,20 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <div class="flex justify-end space-x-3 pt-6 border-t border-border">
                     <button
                         type="button"
                         @click="close"
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted"
                     >
-                        Cancel
+                        {{ t('features.forms.actions.cancel') }}
                     </button>
                     <button
                         type="submit"
                         :disabled="saving"
                         class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (form ? 'Update Form' : 'Create Form') }}
+                        {{ saving ? t('common.messages.loading.saving') : (form ? t('features.forms.actions.update') : t('features.forms.actions.createForm')) }}
                     </button>
                 </div>
             </form>
@@ -154,9 +154,12 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import FieldBuilder from './FieldBuilder.vue';
 import FieldModal from './FieldModal.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     form: {
@@ -246,7 +249,7 @@ const saveForm = async () => {
         emit('saved', formResponse.data);
     } catch (error) {
         console.error('Error saving form:', error);
-        alert('Failed to save form. Please check the console for details.');
+        alert(t('features.forms.messages.saveFailed'));
     } finally {
         saving.value = false;
     }

@@ -1,0 +1,51 @@
+{
+    "list": {
+        "title": "Comments",
+        "subtitle": "Manage and moderate comments",
+        "empty": "No comments found"
+    },
+    "stats": {
+        "total": "Total",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "spam": "Spam"
+    },
+    "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "spam": "Spam"
+    },
+    "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "markSpam": "Mark as Spam",
+        "reply": "Reply",
+        "approveAll": "Approve All",
+        "rejectAll": "Reject All"
+    },
+    "filter": {
+        "allStatus": "All Status",
+        "searchPlaceholder": "Search comments..."
+    },
+    "detail": {
+        "author": "Author",
+        "email": "Email",
+        "postedOn": "Posted on",
+        "repliesCount": "{count} reply | {count} replies",
+        "replyTo": "Reply to"
+    },
+    "messages": {
+        "bulkDeleteConfirm": "Delete {count} comments? This cannot be undone.",
+        "bulkApproveConfirm": "Approve {count} comments?",
+        "bulkRejectConfirm": "Reject {count} comments?",
+        "bulkSpamConfirm": "Mark {count} comments as spam?",
+        "bulkFailed": "Failed to perform bulk action",
+        "approveFailed": "Failed to approve comment",
+        "rejectFailed": "Failed to reject comment",
+        "spamFailed": "Failed to mark comment as spam",
+        "deleteConfirm": "Are you sure you want to delete this comment?",
+        "deleteFailed": "Failed to delete comment"
+    }
+}

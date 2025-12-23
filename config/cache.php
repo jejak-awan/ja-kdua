@@ -94,8 +94,17 @@ return [
         'failover' => [
             'driver' => 'failover',
             'stores' => [
-                'database',
-                'array',
+                'redis',
+                'file',
+            ],
+        ],
+
+        // Redis with automatic file fallback - recommended for production
+        'redis_failover' => [
+            'driver' => 'failover',
+            'stores' => [
+                'redis',
+                'file',
             ],
         ],
 

@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Redirects</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.redirects.title') }}</h1>
             <button
                 @click="showCreateModal = true"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -9,13 +9,13 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Redirect
+                {{ $t('features.redirects.new') }}
             </button>
         </div>
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,12 +23,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Redirects</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.total || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.total') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,91 +36,91 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Active Redirects</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.active || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.active') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.active || 0 }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Hits</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_hits || 0 }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.hits') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total_hits || 0 }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-card shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Search redirects..."
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="$t('features.redirects.search')"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                 </div>
             </div>
 
             <div v-if="loading" class="p-6 text-center">
-                <p class="text-gray-500">Loading...</p>
+                <p class="text-muted-foreground">{{ $t('features.redirects.loading') }}</p>
             </div>
 
             <div v-else-if="filteredRedirects.length === 0" class="p-6 text-center">
-                <p class="text-gray-500">No redirects found</p>
+                <p class="text-muted-foreground">{{ $t('features.redirects.empty') }}</p>
             </div>
 
-            <table v-else class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table v-else class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            From URL
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.from') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            To URL
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.to') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status Code
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.code') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Hits
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.hits') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.status') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.redirects.table.actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="redirect in filteredRedirects" :key="redirect.id" class="hover:bg-gray-50">
+                <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="redirect in filteredRedirects" :key="redirect.id" class="hover:bg-muted">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ redirect.from_url }}</div>
+                            <div class="text-sm font-medium text-foreground">{{ redirect.from_url }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ redirect.to_url }}</div>
+                            <div class="text-sm text-foreground">{{ redirect.to_url }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/20 text-blue-400">
                                 {{ redirect.status_code || 301 }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {{ redirect.hits || 0 }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                :class="redirect.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                :class="redirect.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
                             >
-                                {{ redirect.is_active ? 'Active' : 'Inactive' }}
+                                {{ redirect.is_active ? $t('features.redirects.status.active') : $t('features.redirects.status.inactive') }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -129,13 +129,13 @@
                                     @click="editRedirect(redirect)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    Edit
+                                    {{ $t('features.redirects.actions.edit') }}
                                 </button>
                                 <button
                                     @click="deleteRedirect(redirect)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    Delete
+                                    {{ $t('features.redirects.actions.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -156,10 +156,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import RedirectModal from '../../../components/redirects/RedirectModal.vue';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
+const { t } = useI18n();
 const redirects = ref([]);
 const statistics = ref(null);
 const loading = ref(false);
@@ -210,7 +212,7 @@ const editRedirect = (redirect) => {
 };
 
 const deleteRedirect = async (redirect) => {
-    if (!confirm(`Are you sure you want to delete redirect from "${redirect.from_url}"?`)) {
+    if (!confirm(t('features.redirects.messages.deleteConfirm', { from: redirect.from_url }))) {
         return;
     }
 
@@ -219,7 +221,7 @@ const deleteRedirect = async (redirect) => {
         await fetchRedirects();
     } catch (error) {
         console.error('Failed to delete redirect:', error);
-        alert('Failed to delete redirect');
+        alert(t('features.redirects.messages.deleteFailed'));
     }
 };
 

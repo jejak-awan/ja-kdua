@@ -1,0 +1,62 @@
+{
+    "title": "Dasbor",
+    "welcome": "Selamat datang kembali, {name}!",
+    "stats": {
+        "totalContents": "Total Konten",
+        "published": "diterbitkan",
+        "mediaFiles": "File Media",
+        "totalUsers": "Total Pengguna",
+        "pendingContent": "Konten Tertunda",
+        "requiresReview": "Butuh tinjauan"
+    },
+    "traffic": {
+        "title": "Ringkasan Trafik",
+        "last7Days": "7 Hari Terakhir",
+        "noData": "Tidak ada data trafik",
+        "visits": "Kunjungan"
+    },
+    "widgets": {
+        "quickActions": {
+            "title": "Aksi Cepat",
+            "createPost": "Buat Artikel",
+            "createPage": "Buat Halaman",
+            "uploadMedia": "Unggah Media",
+            "createCategory": "Buat Kategori",
+            "createTag": "Buat Tag",
+            "manageUsers": "Kelola Pengguna",
+            "viewComments": "Lihat Komentar",
+            "settings": "Pengaturan",
+            "recentActions": "Aksi Terakhir"
+        },
+        "systemHealth": {
+            "title": "Kesehatan Sistem",
+            "overallStatus": "Status Keseluruhan",
+            "cpu": "CPU",
+            "memory": "Memori",
+            "disk": "Disk",
+            "database": "Database",
+            "redis": "Redis",
+            "lastUpdated": "Terakhir diperbarui: {time}",
+            "status": {
+                "healthy": "Sehat",
+                "warning": "Peringatan",
+                "critical": "Kritis",
+                "unknown": "Tidak Diketahui",
+                "ok": "OK",
+                "error": "Error",
+                "disabled": "Nonaktif"
+            }
+        },
+        "recentActivity": {
+            "title": "Aktivitas Terkini",
+            "live": "Langsung",
+            "loading": "Memuat aktivitas...",
+            "empty": "Tidak ada aktivitas terkini",
+            "viewAll": "Lihat Semua Aktivitas",
+            "time": {
+                "justNow": "Baru saja",
+                "ago": "{time} yang lalu"
+            }
+        }
+    }
+}

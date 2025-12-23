@@ -1,0 +1,110 @@
+{
+    "title": "Media Library",
+    "upload": "Upload Media",
+    "search": "Search media...",
+    "folders": "Folders",
+    "newFolder": "New Folder",
+    "allMedia": "All Media",
+    "filter": {
+        "allTypes": "All Types",
+        "images": "Images",
+        "videos": "Videos",
+        "documents": "Documents",
+        "allStatus": "All Media",
+        "used": "Used",
+        "unused": "Unused"
+    },
+    "actions": {
+        "bulk": "Bulk Actions",
+        "delete": "Delete",
+        "move": "Move to Folder",
+        "updateAlt": "Update Alt Text",
+        "downloadZip": "Download as ZIP",
+        "view": "View",
+        "edit": "Edit",
+        "select": "Select",
+        "uploadNew": "Upload New",
+        "cancel": "Cancel",
+        "close": "Close",
+        "save": "Save Changes"
+    },
+    "loading": "Loading media...",
+    "empty": "No media found",
+    "table": {
+        "media": "Media",
+        "name": "Name",
+        "type": "Type",
+        "size": "Size",
+        "folder": "Folder",
+        "actions": "Actions"
+    },
+    "selected": "{count} selected",
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete {count} media file(s)?",
+        "deleteSingleConfirm": "Are you sure you want to delete \"{name}\"?",
+        "deleteSuccess": "Successfully deleted {count} media file(s)",
+        "deleteFailed": "Failed to delete media",
+        "moveSuccess": "Successfully moved {count} media file(s)",
+        "moveFailed": "Failed to move media",
+        "updateAltSuccess": "Alt text updated successfully",
+        "updateAltFailed": "Failed to update alt text",
+        "downloadSuccess": "Successfully downloaded {count} media file(s) as ZIP",
+        "downloadFailed": "Failed to download media",
+        "uploadSuccess": "Files uploaded successfully",
+        "uploadFailed": "Failed to upload files",
+        "updateSuccess": "Media updated successfully",
+        "updateFailed": "Failed to update media",
+        "createFolderSuccess": "Folder created successfully",
+        "createFolderFailed": "Failed to create folder",
+        "fileTooLarge": "File {name} is too large. Maximum size is 10MB."
+    },
+    "modals": {
+        "updateAlt": {
+            "title": "Update Alt Text",
+            "description": "Update alt text for {count} selected media file(s)",
+            "label": "Alt Text",
+            "placeholder": "Enter alt text...",
+            "cancel": "Cancel",
+            "update": "Update",
+            "updating": "Updating..."
+        },
+        "bulk": {
+            "processing": "Processing...",
+            "wait": "Please wait"
+        },
+        "upload": {
+            "title": "Upload Media",
+            "clickToUpload": "Click to upload",
+            "dragAndDrop": "or drag and drop",
+            "formats": "PNG, JPG, GIF, PDF, MP4 up to 10MB",
+            "selectedFiles": "Selected Files:",
+            "uploading": "Uploading...",
+            "uploadAction": "Upload {count} File|Upload {count} Files"
+        },
+        "edit": {
+            "title": "Edit Media",
+            "name": "Name",
+            "altText": "Alt Text",
+            "altPlaceholder": "Alternative text for accessibility",
+            "description": "Description",
+            "folder": "Folder",
+            "noFolder": "No Folder",
+            "type": "Type",
+            "size": "Size",
+            "saving": "Saving..."
+        },
+        "folder": {
+            "title": "Create Folder",
+            "name": "Folder Name",
+            "placeholder": "Enter folder name",
+            "parent": "Parent Folder",
+            "noParent": "No Parent",
+            "creating": "Creating...",
+            "create": "Create Folder"
+        },
+        "picker": {
+            "title": "Select Media",
+            "select": "Select"
+        }
+    }
+}

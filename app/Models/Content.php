@@ -18,6 +18,7 @@ class Content extends Model
         'excerpt',
         'body',
         'featured_image',
+        'is_featured',
         'status',
         'type',
         'author_id',

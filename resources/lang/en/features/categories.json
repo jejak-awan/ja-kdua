@@ -1,0 +1,65 @@
+{
+    "title": "Categories",
+    "createNew": "New Category",
+    "search": "Search categories...",
+    "viewMode": {
+        "tree": "Tree View",
+        "list": "List View"
+    },
+    "loading": "Loading categories...",
+    "empty": "No categories found",
+    "table": {
+        "name": "Name",
+        "slug": "Slug",
+        "parent": "Parent",
+        "contents": "Contents",
+        "status": "Status",
+        "actions": "Actions"
+    },
+    "actions": {
+        "move": "Move",
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "form": {
+        "createTitle": "Create Category",
+        "editTitle": "Edit Category",
+        "name": "Name",
+        "namePlaceholder": "Category name",
+        "slug": "Slug",
+        "slugPlaceholder": "category-slug",
+        "slugHelp": "URL-friendly version",
+        "description": "Description",
+        "descriptionPlaceholder": "Category description",
+        "parent": "Parent Category",
+        "noParent": "No Parent (Root Category)",
+        "image": "Image",
+        "removeImage": "Remove Image",
+        "selectImage": "Select Image",
+        "sortOrder": "Sort Order",
+        "sortOrderHelp": "Lower numbers appear first",
+        "active": "Active",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update",
+        "saving": "Saving...",
+        "saveError": "Failed to save category"
+    },
+    "move": {
+        "title": "Move Category",
+        "description": "Move \"{name}\" to:",
+        "newParent": "New Parent Category",
+        "cancel": "Cancel",
+        "submit": "Move Category",
+        "moving": "Moving...",
+        "error": "Failed to move category"
+    },
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete \"{name}\" and all its subcategories?",
+        "deleteError": "Failed to delete category"
+    }
+}

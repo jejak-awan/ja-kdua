@@ -1,17 +1,17 @@
 <template>
     <div>
-        <div v-if="fields.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+        <div v-if="fields.length === 0" class="text-center py-8 border-2 border-dashed border-input rounded-lg">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            <p class="mt-2 text-sm text-gray-500">No fields yet. Click "Add Field" to get started.</p>
+            <p class="mt-2 text-sm text-muted-foreground">No fields yet. Click "Add Field" to get started.</p>
         </div>
 
         <div v-else class="space-y-3">
             <div
                 v-for="(field, index) in fields"
                 :key="field.id || index"
-                class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-colors"
+                class="bg-muted border border-border rounded-lg p-4 hover:border-indigo-300 transition-colors"
             >
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
@@ -19,21 +19,21 @@
                             <span class="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded">
                                 {{ field.type }}
                             </span>
-                            <span class="font-semibold text-gray-900">{{ field.label || field.name }}</span>
-                            <span v-if="field.is_required" class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                            <span class="font-semibold text-foreground">{{ field.label || field.name }}</span>
+                            <span v-if="field.is_required" class="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded">
                                 Required
                             </span>
                         </div>
-                        <p v-if="field.help_text" class="text-sm text-gray-600 mb-1">{{ field.help_text }}</p>
-                        <p v-if="field.placeholder" class="text-xs text-gray-500">Placeholder: {{ field.placeholder }}</p>
+                        <p v-if="field.help_text" class="text-sm text-muted-foreground mb-1">{{ field.help_text }}</p>
+                        <p v-if="field.placeholder" class="text-xs text-muted-foreground">Placeholder: {{ field.placeholder }}</p>
                         <div v-if="field.options && field.options.length > 0" class="mt-2">
-                            <p class="text-xs text-gray-500">Options: {{ field.options.join(', ') }}</p>
+                            <p class="text-xs text-muted-foreground">Options: {{ field.options.join(', ') }}</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 ml-4">
                         <button
                             @click="$emit('update-field', field)"
-                            class="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                            class="p-2 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/20 rounded transition-colors"
                             title="Edit field"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@
                         <button
                             @click="moveField(index, 'up')"
                             :disabled="index === 0"
-                            class="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="p-2 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Move up"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
                         <button
                             @click="moveField(index, 'down')"
                             :disabled="index === fields.length - 1"
-                            class="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="p-2 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Move down"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                         </button>
                         <button
                             @click="$emit('delete-field', field.id)"
-                            class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                            class="p-2 text-red-600 hover:text-red-800 hover:bg-red-500/20 rounded transition-colors"
                             title="Delete field"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

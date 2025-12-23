@@ -1,14 +1,14 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">
-                        {{ redirect ? 'Edit Redirect' : 'Create Redirect' }}
+                        {{ redirect ? $t('features.redirects.modals.redirect.titleEdit') : $t('features.redirects.modals.redirect.titleCreate') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,46 +18,46 @@
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            From URL <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.redirects.modals.redirect.from') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.from_url"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="/old-page"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.redirects.modals.redirect.fromPlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">The URL to redirect from</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.fromHint') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            To URL <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.redirects.modals.redirect.to') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.to_url"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="/new-page"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.redirects.modals.redirect.toPlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">The URL to redirect to</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.toHint') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Status Code <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.redirects.modals.redirect.code') }} <span class="text-red-500">*</span>
                         </label>
                         <select
                             v-model.number="form.status_code"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option :value="301">301 - Permanent Redirect</option>
-                            <option :value="302">302 - Temporary Redirect</option>
-                            <option :value="307">307 - Temporary Redirect (Preserve Method)</option>
-                            <option :value="308">308 - Permanent Redirect (Preserve Method)</option>
+                            <option :value="301">{{ $t('features.redirects.modals.redirect.codes.p301') }}</option>
+                            <option :value="302">{{ $t('features.redirects.modals.redirect.codes.t302') }}</option>
+                            <option :value="307">{{ $t('features.redirects.modals.redirect.codes.t307') }}</option>
+                            <option :value="308">{{ $t('features.redirects.modals.redirect.codes.p308') }}</option>
                         </select>
                     </div>
 
@@ -66,10 +66,10 @@
                             v-model="form.is_active"
                             type="checkbox"
                             id="is_active"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                         >
-                        <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                            Active
+                        <label for="is_active" class="ml-2 block text-sm text-foreground">
+                            {{ $t('features.redirects.modals.redirect.active') }}
                         </label>
                     </div>
                 </form>
@@ -77,16 +77,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('common.actions.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (redirect ? 'Update' : 'Create') }}
+                        {{ saving ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
                     </button>
                 </div>
             </div>
@@ -96,6 +96,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 
 const props = defineProps({
@@ -106,7 +107,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'saved']);
-
+const { t } = useI18n();
 const saving = ref(false);
 
 const form = ref({
@@ -138,7 +139,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save redirect:', error);
-        alert(error.response?.data?.message || 'Failed to save redirect');
+        alert(error.response?.data?.message || t('features.redirects.messages.saveFailed'));
     } finally {
         saving.value = false;
     }

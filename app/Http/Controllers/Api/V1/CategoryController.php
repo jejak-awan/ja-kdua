@@ -11,8 +11,6 @@ class CategoryController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $query = Category::where('is_active', true);
-
         // Get tree structure if requested
         if ($request->has('tree') && $request->tree) {
             $categories = Cache::remember('categories_tree', now()->addHours(24), function () {
@@ -28,10 +26,13 @@ class CategoryController extends BaseApiController
             return $this->success($categories, 'Categories tree retrieved successfully');
         }
 
-        // Get flat list with parent info
-        $categories = $query->with('parent')
-            ->orderBy('sort_order')
-            ->get();
+        // Get flat list with parent info (cached)
+        $categories = Cache::remember('categories_flat', now()->addHours(6), function () {
+            return Category::where('is_active', true)
+                ->with('parent')
+                ->orderBy('sort_order')
+                ->get();
+        });
 
         return $this->success($categories, 'Categories retrieved successfully');
     }
@@ -105,6 +106,10 @@ class CategoryController extends BaseApiController
 
         $category->update($validated);
 
+        // Clear caches
+        $cacheService = new CacheService();
+        $cacheService->clearCategoryCaches();
+
         return $this->success($category->load(['parent', 'children']), 'Category updated successfully');
     }
 
@@ -164,6 +169,10 @@ class CategoryController extends BaseApiController
         }
 
         $category->update($validated);
+
+        // Clear caches
+        $cacheService = new CacheService();
+        $cacheService->clearCategoryCaches();
 
         return $this->success($category->load(['parent', 'children']), 'Category moved successfully');
     }

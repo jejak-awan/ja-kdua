@@ -1,0 +1,29 @@
+{
+    "title": "Notifikasi",
+    "actions": {
+        "markAllRead": "Tandai Semua Dibaca",
+        "markRead": "Tandai Dibaca",
+        "delete": "Hapus"
+    },
+    "filters": {
+        "search": "Cari notifikasi...",
+        "allTypes": "Semua Tipe",
+        "type": {
+            "info": "Info",
+            "success": "Sukses",
+            "warning": "Peringatan",
+            "error": "Error"
+        },
+        "readStatus": {
+            "all": "Semua",
+            "unread": "Belum Dibaca",
+            "read": "Dibaca"
+        }
+    },
+    "messages": {
+        "loading": "Memuat...",
+        "empty": "Tidak ada notifikasi ditemukan",
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus notifikasi ini?",
+        "deleteFailed": "Gagal menghapus notifikasi"
+    }
+}

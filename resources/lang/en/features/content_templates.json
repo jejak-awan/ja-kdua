@@ -1,0 +1,50 @@
+{
+    "title": "Content Templates",
+    "create": "New Template",
+    "search": "Search templates...",
+    "loading": "Loading...",
+    "empty": "No templates found",
+    "table": {
+        "name": "Name",
+        "type": "Type",
+        "description": "Description",
+        "updated": "Updated",
+        "actions": "Actions"
+    },
+    "form": {
+        "createTitle": "Create Content Template",
+        "editTitle": "Edit Content Template",
+        "back": "Back to Templates",
+        "details": "Template Details",
+        "content": "Template Content",
+        "name": "Name",
+        "namePlaceholder": "Template name",
+        "description": "Description",
+        "descriptionPlaceholder": "Template description",
+        "type": "Type",
+        "titleLabel": "Title",
+        "titlePlaceholder": "Content title template",
+        "body": "Body",
+        "bodyPlaceholder": "Enter content body...",
+        "excerpt": "Excerpt",
+        "excerptPlaceholder": "Content excerpt",
+        "save": "Create Template",
+        "saving": "Creating...",
+        "update": "Update Template",
+        "updating": "Updating...",
+        "cancel": "Cancel"
+    },
+    "actions": {
+        "createContent": "Create Content",
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+        "createError": "Failed to create content from template",
+        "deleteError": "Failed to delete template",
+        "saveError": "Failed to create template",
+        "updateError": "Failed to update template",
+        "loadError": "Failed to load template"
+    }
+}

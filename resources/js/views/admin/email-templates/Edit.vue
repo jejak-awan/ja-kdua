@@ -1,57 +1,57 @@
 <template>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Edit Email Template</h1>
+            <h1 class="text-2xl font-bold text-foreground">Edit Email Template</h1>
             <router-link
                 :to="{ name: 'email-templates' }"
-                class="text-gray-600 hover:text-gray-900"
+                class="text-muted-foreground hover:text-foreground"
             >
                 ← Back to Templates
             </router-link>
         </div>
 
         <div v-if="loading && !form.name" class="text-center py-8">
-            <p class="text-gray-500">Loading template...</p>
+            <p class="text-muted-foreground">Loading template...</p>
         </div>
 
         <form v-else @submit.prevent="handleSubmit" class="space-y-6">
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Template Details</h2>
+            <div class="bg-card shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Template Details</h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Name <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Template name"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Subject <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.subject"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Email subject"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Type
                         </label>
                         <select
                             v-model="form.type"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="custom">Custom</option>
                             <option value="notification">Notification</option>
@@ -61,53 +61,53 @@
                 </div>
             </div>
 
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Template Content</h2>
+                    <h2 class="text-lg font-semibold text-foreground">Template Content</h2>
                     <div class="flex items-center space-x-2">
                         <button
                             type="button"
                             @click="showVariables = !showVariables"
-                            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
                         >
                             {{ showVariables ? 'Hide' : 'Show' }} Variables
                         </button>
                         <button
                             type="button"
                             @click="handlePreview"
-                            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
                         >
                             Preview
                         </button>
                         <button
                             type="button"
                             @click="handleSendTest"
-                            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
                         >
                             Send Test
                         </button>
                     </div>
                 </div>
 
-                <div v-if="showVariables" class="mb-4 p-4 bg-gray-50 rounded-lg">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">Available Variables:</h3>
+                <div v-if="showVariables" class="mb-4 p-4 bg-muted rounded-lg">
+                    <h3 class="text-sm font-medium text-foreground mb-2">Available Variables:</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div v-for="variable in variables" :key="variable" class="flex items-center">
-                            <code class="px-2 py-1 bg-white rounded">{{ variable }}</code>
+                            <code class="px-2 py-1 bg-card rounded">{{ variable }}</code>
                         </div>
                     </div>
-                    <p class="mt-2 text-xs text-gray-500">Use <code>{{ '{' }}{{ '{' }} variable_name {{ '}' }}{{ '}' }}</code> in your template</p>
+                    <p class="mt-2 text-xs text-muted-foreground">Use <code>{{ '{' }}{{ '{' }} variable_name {{ '}' }}{{ '}' }}</code> in your template</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-medium text-foreground mb-1">
                         HTML Content <span class="text-red-500">*</span>
                     </label>
                     <textarea
                         v-model="form.body"
                         rows="20"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
                         placeholder="Enter HTML template content..."
                     />
                 </div>
@@ -116,7 +116,7 @@
             <div class="flex justify-end space-x-3">
                 <router-link
                     :to="{ name: 'email-templates' }"
-                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                 >
                     Cancel
                 </router-link>

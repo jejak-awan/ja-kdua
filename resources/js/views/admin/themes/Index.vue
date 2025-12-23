@@ -2,26 +2,26 @@
     <div>
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Themes Management</h1>
-                <p class="text-sm text-gray-500 mt-1">Manage and customize your themes</p>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.themes.title') }}</h1>
+                <p class="text-sm text-muted-foreground mt-1">{{ $t('features.themes.subtitle') }}</p>
             </div>
             <div class="flex items-center gap-3">
                 <select
                     v-model="selectedType"
                     @change="fetchThemes"
-                    class="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
                 >
-                    <option value="">All Types</option>
-                    <option value="frontend">Frontend</option>
-                    <option value="admin">Admin</option>
-                    <option value="email">Email</option>
+                    <option value="">{{ $t('features.themes.types.all') }}</option>
+                    <option value="frontend">{{ $t('features.themes.types.frontend') }}</option>
+                    <option value="admin">{{ $t('features.themes.types.admin') }}</option>
+                    <option value="email">{{ $t('features.themes.types.email') }}</option>
                 </select>
                 <button
                     @click="scanThemes"
                     :disabled="scanning"
-                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md disabled:opacity-50"
+                    class="px-4 py-2 bg-secondary hover:bg-accent text-foreground text-sm font-medium rounded-md disabled:opacity-50"
                 >
-                    {{ scanning ? 'Scanning...' : 'Scan Themes' }}
+                    {{ scanning ? $t('features.themes.scanning') : $t('features.themes.scan') }}
                 </button>
             </div>
         </div>
@@ -30,14 +30,14 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No themes found</h3>
-            <p class="mt-1 text-sm text-gray-500">Get started by creating a new theme.</p>
+            <h3 class="mt-2 text-sm font-medium text-foreground">{{ $t('features.themes.list.empty') }}</h3>
+            <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.themes.list.emptySubtitle') }}</p>
             <div class="mt-6">
                 <button
                     @click="scanThemes"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
-                    Scan for Themes
+                    {{ $t('features.themes.scan') }}
                 </button>
             </div>
         </div>
@@ -46,11 +46,11 @@
             <div
                 v-for="theme in themes"
                 :key="theme.id"
-                class="bg-white shadow rounded-lg overflow-hidden transition-shadow hover:shadow-lg"
+                class="bg-card shadow rounded-lg overflow-hidden transition-shadow hover:shadow-lg"
                 :class="{ 'ring-2 ring-indigo-500': theme.is_active }"
             >
                 <!-- Preview Image -->
-                <div class="h-48 bg-gray-200 relative group">
+                <div class="h-48 bg-muted relative group">
                     <img
                         v-if="theme.preview_image"
                         :src="theme.preview_image"
@@ -69,15 +69,15 @@
                             v-if="theme.is_active"
                             class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-white shadow-sm"
                         >
-                            Active
+                            {{ $t('features.themes.status.active') }}
                         </span>
                         <span
                             v-else-if="theme.status && theme.status !== 'active'"
                             class="px-2 py-1 text-xs font-semibold rounded-full shadow-sm"
                             :class="{
-                                'bg-red-100 text-red-800': theme.status === 'broken',
-                                'bg-gray-100 text-gray-800': theme.status === 'inactive',
-                                'bg-yellow-100 text-yellow-800': theme.status === 'pending',
+                                'bg-red-500/20 text-red-400': theme.status === 'broken',
+                                'bg-secondary text-gray-800': theme.status === 'inactive',
+                                'bg-yellow-500/20 text-yellow-400': theme.status === 'pending',
                             }"
                         >
                             {{ theme.status }}
@@ -88,16 +88,16 @@
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                         <button
                             @click="openPreview(theme)"
-                            class="px-3 py-2 bg-white text-gray-900 rounded-md text-sm font-medium hover:bg-gray-100"
+                            class="px-3 py-2 bg-card text-foreground rounded-md text-sm font-medium hover:bg-accent"
                         >
-                            Preview
+                            {{ $t('features.themes.actions.preview') }}
                         </button>
                         <button
                             v-if="theme.is_active"
                             @click="openCustomizer(theme)"
                             class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
                         >
-                            Customize
+                            {{ $t('features.themes.actions.customize') }}
                         </button>
                     </div>
                 </div>
@@ -106,25 +106,25 @@
                 <div class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900">{{ theme.name }}</h3>
+                            <h3 class="text-lg font-semibold text-foreground">{{ theme.name }}</h3>
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="text-sm text-gray-500">v{{ theme.version || '1.0.0' }}</span>
-                                <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                                <span class="text-sm text-muted-foreground">{{ $t('features.themes.list.version', { version: theme.version || '1.0.0' }) }}</span>
+                                <span class="text-xs px-2 py-0.5 bg-secondary text-muted-foreground rounded">
                                     {{ theme.type || 'frontend' }}
                                 </span>
                                 <span v-if="theme.parent_theme" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded">
-                                    Child
+                                    {{ $t('features.themes.list.child') }}
                                 </span>
                             </div>
                         </div>
                     </div>
                     
-                    <p v-if="theme.description" class="text-sm text-gray-600 mt-2 line-clamp-2">
+                    <p v-if="theme.description" class="text-sm text-muted-foreground mt-2 line-clamp-2">
                         {{ theme.description }}
                     </p>
 
-                    <div v-if="theme.author" class="mt-2 text-xs text-gray-500">
-                        by {{ theme.author }}
+                    <div v-if="theme.author" class="mt-2 text-xs text-muted-foreground">
+                        {{ $t('features.themes.list.by', { author: theme.author }) }}
                     </div>
 
                     <!-- Actions -->
@@ -138,7 +138,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                             </svg>
-                            Customize
+                            {{ $t('features.themes.actions.customize') }}
                         </button>
                         <button
                             v-else
@@ -148,13 +148,13 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            Activate
+                            {{ $t('features.themes.actions.activate') }}
                         </button>
                         
                         <!-- Secondary Action Buttons -->
                         <button
                             @click="openPreview(theme)"
-                            class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50"
+                            class="px-4 py-2 border border-input text-foreground text-sm font-medium rounded-md hover:bg-muted"
                             title="Preview theme"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +164,7 @@
                         </button>
                         <button
                             @click="openSettings(theme)"
-                            class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50"
+                            class="px-4 py-2 border border-input text-foreground text-sm font-medium rounded-md hover:bg-muted"
                             title="Settings"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,7 +174,7 @@
                         </button>
                         <button
                             @click="validateTheme(theme)"
-                            class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50"
+                            class="px-4 py-2 border border-input text-foreground text-sm font-medium rounded-md hover:bg-muted"
                             title="Validate theme"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,12 +192,12 @@
             class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
             @click.self="showPreviewModal = false"
         >
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
+            <div class="bg-card rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
                 <div class="flex items-center justify-between p-4 border-b">
-                    <h3 class="text-lg font-semibold">Theme Preview: {{ selectedTheme?.name }}</h3>
+                    <h3 class="text-lg font-semibold">{{ $t('features.themes.modals.previewTitle', { name: selectedTheme?.name }) }}</h3>
                     <button
                         @click="showPreviewModal = false"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -255,6 +255,9 @@ import ThemeSettingsModal from '../../../components/themes/ThemeSettingsModal.vu
 import CustomCSSModal from '../../../components/themes/CustomCSSModal.vue';
 import ThemePreview from '../../../components/themes/ThemePreview.vue';
 import ThemeCustomizer from '../../../components/themes/ThemeCustomizer.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const themes = ref([]);
 const selectedType = ref('');
@@ -283,27 +286,27 @@ const scanThemes = async () => {
         const response = await api.post('/admin/cms/themes/scan');
         await fetchThemes();
         const count = response.data?.data?.count || 0;
-        alert(`Scan completed! Found ${count} theme(s).`);
+        alert(t('features.themes.messages.scanSuccess', { count }));
     } catch (error) {
         console.error('Failed to scan themes:', error);
-        alert('Failed to scan themes');
+        alert(t('features.themes.messages.scanFailed'));
     } finally {
         scanning.value = false;
     }
 };
 
 const activateTheme = async (theme) => {
-    if (!confirm(`Are you sure you want to activate theme "${theme.name}"?`)) {
+    if (!confirm(t('features.themes.messages.activateConfirm', { name: theme.name }))) {
         return;
     }
 
     try {
         await api.post(`/admin/cms/themes/${theme.id}/activate`);
         await fetchThemes();
-        alert('Theme activated successfully');
+        alert(t('features.themes.messages.activateSuccess'));
     } catch (error) {
         console.error('Failed to activate theme:', error);
-        alert(error.response?.data?.message || 'Failed to activate theme');
+        alert(error.response?.data?.message || t('features.themes.messages.activateFailed'));
     }
 };
 
@@ -313,15 +316,15 @@ const validateTheme = async (theme) => {
         const data = response.data?.data || response.data;
         
         if (data.valid) {
-            alert('Theme is valid!');
+            alert(t('features.themes.messages.validateSuccess'));
         } else {
-            alert('Theme validation failed:\n' + data.errors.join('\n'));
+            alert(t('features.themes.messages.validateFailed') + '\n' + data.errors.join('\n'));
         }
         
         await fetchThemes();
     } catch (error) {
         console.error('Failed to validate theme:', error);
-        alert('Failed to validate theme');
+        alert(t('features.themes.messages.validateError'));
     }
 };
 

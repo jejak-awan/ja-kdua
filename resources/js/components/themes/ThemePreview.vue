@@ -5,7 +5,7 @@
             <div class="flex items-center gap-2">
                 <select
                     v-model="selectedDevice"
-                    class="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                    class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm"
                 >
                     <option value="desktop">Desktop</option>
                     <option value="tablet">Tablet</option>
@@ -13,7 +13,7 @@
                 </select>
                 <button
                     @click="refreshPreview"
-                    class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
+                    class="px-3 py-1 bg-secondary hover:bg-muted rounded-md text-sm"
                     title="Refresh preview"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,7 +22,7 @@
                 </button>
                 <button
                     @click="$emit('close')"
-                    class="px-3 py-1 text-gray-500 hover:text-gray-700"
+                    class="px-3 py-1 text-muted-foreground hover:text-foreground"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -31,8 +31,8 @@
             </div>
         </div>
 
-        <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-100" :class="deviceClasses">
-            <div class="bg-white" :style="iframeStyle">
+        <div class="border border-input rounded-lg overflow-hidden bg-secondary" :class="deviceClasses">
+            <div class="bg-card" :style="iframeStyle">
                 <iframe
                     ref="previewFrame"
                     :src="previewUrl"
@@ -43,10 +43,10 @@
             </div>
         </div>
 
-        <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+        <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-card bg-opacity-75">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                <p class="mt-2 text-sm text-gray-600">Loading preview...</p>
+                <p class="mt-2 text-sm text-muted-foreground">Loading preview...</p>
             </div>
         </div>
     </div>

@@ -1,0 +1,16 @@
+{
+    "required": "{field} is required",
+    "email": "Invalid email format",
+    "min": "{field} must be at least {min} characters",
+    "max": "{field} must not exceed {max} characters",
+    "confirmed": "Passwords do not match",
+    "unique": "{field} already exists",
+    "invalid": "Invalid {field}",
+    "numeric": "{field} must be a number",
+    "url": "Invalid URL format",
+    "date": "Invalid date format",
+    "image": "File must be an image",
+    "mimes": "File type not allowed",
+    "maxSize": "File size must not exceed {size}",
+    "alphaNum": "{field} may only contain letters and numbers"
+}

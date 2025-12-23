@@ -31,7 +31,7 @@
       
       <!-- Read More -->
       <router-link :to="`/blog/${post.slug}`" class="read-more">
-        Read More <i class="bi bi-arrow-right"></i>
+        {{ t('features.frontend.blog.readMore') }} <i class="bi bi-arrow-right"></i>
       </router-link>
     </div>
   </article>
@@ -40,7 +40,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { t, locale } = useI18n()
 const props = defineProps({
   post: {
     type: Object,
@@ -61,7 +63,7 @@ const excerpt = computed(() => {
 })
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString(locale.value, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'

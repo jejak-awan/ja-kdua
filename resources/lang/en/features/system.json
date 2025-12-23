@@ -1,0 +1,177 @@
+{
+    "info": {
+        "title": "System Information",
+        "health": {
+            "title": "System Health",
+            "healthy": "Healthy",
+            "warning": "Warning",
+            "critical": "Critical"
+        },
+        "cache": {
+            "title": "Cache Status",
+            "active": "Active",
+            "clear": "Clear Cache",
+            "clearing": "Clearing...",
+            "success": "Cache cleared successfully",
+            "failed": "Failed to clear cache"
+        },
+        "uptime": "Uptime",
+        "sections": {
+            "application": "Application",
+            "server": "Server",
+            "phpVersion": "PHP Version",
+            "laravelVersion": "Laravel Version",
+            "environment": "Environment",
+            "debugMode": "Debug Mode",
+            "serverSoftware": "Server Software",
+            "memoryUsage": "Memory Usage",
+            "diskUsage": "Disk Usage",
+            "database": "Database",
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+        },
+        "statistics": {
+            "title": "System Statistics",
+            "contents": "Total Contents",
+            "users": "Total Users",
+            "media": "Total Media",
+            "visits": "Total Visits"
+        }
+    },
+    "backups": {
+        "title": "Backups",
+        "create": "Create Backup",
+        "creating": "Creating...",
+        "stats": {
+            "total": "Total Backups",
+            "size": "Total Size",
+            "last": "Last Backup",
+            "auto": "Auto Backup",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "never": "Never"
+        },
+        "schedule": {
+            "title": "Backup Schedule",
+            "configure": "Configure",
+            "status": "Status",
+            "frequency": "Frequency",
+            "time": "Time",
+            "retention": "Retention",
+            "days": "days",
+            "modal": {
+                "title": "Backup Schedule Settings",
+                "enable": "Enable automatic backups",
+                "max": "Max Backups",
+                "cancel": "Cancel",
+                "save": "Save",
+                "saving": "Saving..."
+            },
+            "frequencies": {
+                "daily": "Daily",
+                "weekly": "Weekly",
+                "monthly": "Monthly"
+            }
+        },
+        "table": {
+            "name": "Name",
+            "size": "Size",
+            "created": "Created",
+            "actions": "Actions",
+            "download": "Download",
+            "restore": "Restore",
+            "delete": "Delete"
+        },
+        "search": "Search backups...",
+        "empty": "No backups found",
+        "loading": "Loading...",
+        "messages": {
+            "created": "Backup created successfully",
+            "failed_create": "Failed to create backup",
+            "restored": "Backup restored successfully. Please refresh the page.",
+            "failed_restore": "Failed to restore backup",
+            "failed_download": "Failed to download backup",
+            "saved": "Schedule saved successfully",
+            "failed_save": "Failed to save schedule"
+        },
+        "confirm": {
+            "restore": "Are you sure you want to restore backup \"{name}\"? This will replace all current data.",
+            "restore_warning": "This action cannot be undone. Are you absolutely sure?",
+            "delete": "Are you sure you want to delete backup \"{name}\"?"
+        }
+    },
+    "logs": {
+        "title": "Log Viewer",
+        "clear": "Clear Logs",
+        "clearing": "Clearing...",
+        "files": "Log Files",
+        "select": "Select a log file",
+        "search": "Search in log...",
+        "refresh": "Refresh",
+        "empty": "Select a log file to view",
+        "loading": "Loading log file...",
+        "failed_load": "Failed to load log content",
+        "messages": {
+            "cleared": "Logs cleared successfully",
+            "failed_clear": "Failed to clear logs",
+            "failed_download": "Failed to download log file"
+        },
+        "confirm": {
+            "clear": "Are you sure you want to clear all logs? This action cannot be undone."
+        }
+    },
+    "scheduled_tasks": {
+        "title": "Scheduled Tasks",
+        "create": "New Task",
+        "search": "Search tasks...",
+        "filters": {
+            "all": "All Status",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "empty": "No scheduled tasks found",
+        "loading": "Loading...",
+        "table": {
+            "name": "Name",
+            "command": "Command",
+            "schedule": "Schedule",
+            "last_run": "Last Run",
+            "status": "Status",
+            "actions": "Actions",
+            "run": "Run Now",
+            "edit": "Edit",
+            "delete": "Delete",
+            "never": "Never"
+        },
+        "messages": {
+            "executed": "Task executed successfully",
+            "failed_execute": "Failed to run task",
+            "saved": "Task saved successfully",
+            "failed_save": "Failed to save task"
+        },
+        "confirm": {
+            "run": "Are you sure you want to run task \"{name}\" now?",
+            "delete": "Are you sure you want to delete task \"{name}\"?"
+        },
+        "modal": {
+            "title_create": "Create New Task",
+            "title_edit": "Edit Task",
+            "name_label": "Task Name",
+            "command_label": "Command (e.g., emails:send)",
+            "schedule_label": "Schedule Expression (Cron)",
+            "description_label": "Description",
+            "active_label": "Active",
+            "name_placeholder": "Task name",
+            "command_placeholder": "artisan:command or php script.php",
+            "command_help": "Laravel artisan command or PHP script",
+            "schedule_placeholder": "0 * * * *",
+            "schedule_help": "Cron expression (e.g., \"0 * * * *\" for hourly, \"0 0 * * *\" for daily)",
+            "description_placeholder": "Task description",
+            "update": "Update",
+            "create_action": "Create",
+            "cancel": "Cancel",
+            "save": "Save Task",
+            "saving": "Saving..."
+        }
+    }
+}

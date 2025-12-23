@@ -1,17 +1,17 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage your CMS settings and configuration</p>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.settings.title') }}</h1>
+            <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.settings.description') }}</p>
         </div>
 
-        <div v-if="loading" class="bg-white shadow rounded-lg p-12 text-center">
-            <p class="text-gray-500">Loading settings...</p>
+        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+            <p class="text-muted-foreground">{{ $t('features.settings.loading') }}</p>
         </div>
 
-        <div v-else class="bg-white shadow rounded-lg">
+        <div v-else class="bg-card shadow rounded-lg">
             <!-- Tabs -->
-            <div class="border-b border-gray-200">
+            <div class="border-b border-border">
                 <nav class="flex -mb-px overflow-x-auto">
                     <button
                         v-for="tab in tabs"
@@ -21,10 +21,10 @@
                             'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                             activeTab === tab.id
                                 ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-input'
                         ]"
                     >
-                        {{ tab.label }}
+                        {{ $t('features.settings.tabs.' + tab.id) }}
                     </button>
                 </nav>
             </div>
@@ -33,19 +33,19 @@
             <div class="p-6">
                 <form @submit.prevent="handleSubmit" class="space-y-6">
                     <div v-if="currentSettings.length === 0" class="text-center py-8">
-                        <p class="text-gray-500">No settings found for this group</p>
+                        <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
                     </div>
 
                     <div v-else class="space-y-6">
                         <div
                             v-for="setting in currentSettings"
                             :key="setting.id"
-                            class="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0"
+                            class="border-b border-border pb-6 last:border-b-0 last:pb-0"
                         >
-                            <label class="block text-sm font-medium text-gray-900 mb-1">
-                                {{ setting.key }}
-                                <span v-if="setting.description" class="text-xs font-normal text-gray-500 ml-2">
-                                    - {{ setting.description }}
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.settings.labels.' + setting.key) }}
+                                <span v-if="setting.description" class="text-xs font-normal text-muted-foreground ml-2">
+                                    - {{ $t('features.settings.descriptions.' + setting.key) }}
                                 </span>
                             </label>
 
@@ -54,7 +54,7 @@
                                 v-if="setting.type === 'string'"
                                 v-model="formData[setting.key]"
                                 type="text"
-                                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
 
                             <!-- Number Input -->
@@ -62,7 +62,7 @@
                                 v-else-if="setting.type === 'integer'"
                                 v-model.number="formData[setting.key]"
                                 type="number"
-                                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
 
                             <!-- Boolean Checkbox -->
@@ -71,10 +71,10 @@
                                     <input
                                         v-model="formData[setting.key]"
                                         type="checkbox"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                                     >
-                                    <span class="ml-2 text-sm text-gray-700">
-                                        {{ formData[setting.key] ? 'Enabled' : 'Disabled' }}
+                                    <span class="ml-2 text-sm text-foreground">
+                                        {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
                                     </span>
                                 </label>
                             </div>
@@ -84,7 +84,7 @@
                                 v-else-if="setting.type === 'text'"
                                 v-model="formData[setting.key]"
                                 rows="4"
-                                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             />
 
                             <!-- JSON Editor -->
@@ -92,16 +92,177 @@
                                 <textarea
                                     v-model="formData[setting.key]"
                                     rows="6"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                                    placeholder="{&quot;key&quot;: &quot;value&quot;}"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                                    :placeholder="$t('features.settings.jsonPlaceholder')"
                                 />
-                                <p class="mt-1 text-xs text-gray-500">Enter valid JSON format</p>
+                                <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.settings.jsonPlaceholder') }}</p>
                             </div>
 
                             <!-- Current Value Display -->
                             <p v-if="setting.value" class="mt-1 text-xs text-gray-400">
-                                Current: {{ formatValue(setting.value, setting.type) }}
+                                {{ $t('features.settings.current') }}: {{ formatValue(setting.value, setting.type) }}
                             </p>
+                        </div>
+                    </div>
+
+                    <!-- Email Test Section (only for email tab) -->
+                    <div v-if="activeTab === 'email'" class="mt-8 pt-8 border-t border-border">
+                        <h3 class="text-lg font-medium text-foreground mb-4">{{ $t('features.settings.emailTest.title') }}</h3>
+                        
+                        <!-- Config Validation -->
+                        <div class="mb-6 p-4 bg-muted rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-foreground">{{ $t('features.settings.emailTest.configStatus') }}</h4>
+                                <button
+                                    type="button"
+                                    @click="validateEmailConfig"
+                                    :disabled="validatingConfig"
+                                    class="px-3 py-1 text-sm bg-card border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                                >
+                                    {{ validatingConfig ? $t('features.settings.emailTest.validating') : $t('features.settings.emailTest.validate') }}
+                                </button>
+                            </div>
+                            <div v-if="configValidation" class="mt-2">
+                                <div v-if="configValidation.valid" class="text-sm text-green-600">
+                                    ✓ {{ $t('features.settings.emailTest.valid') }}
+                                </div>
+                                <div v-else class="text-sm text-red-600">
+                                    ✗ {{ $t('features.settings.emailTest.invalid') }}
+                                </div>
+                                <div v-if="configValidation.errors && configValidation.errors.length > 0" class="mt-2">
+                                    <p class="text-xs font-medium text-red-600 mb-1">{{ $t('features.settings.emailTest.errors') }}</p>
+                                    <ul class="text-xs text-red-600 list-disc list-inside">
+                                        <li v-for="error in configValidation.errors" :key="error">{{ error }}</li>
+                                    </ul>
+                                </div>
+                                <div v-if="configValidation.warnings && configValidation.warnings.length > 0" class="mt-2">
+                                    <p class="text-xs font-medium text-yellow-600 mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
+                                    <ul class="text-xs text-yellow-600 list-disc list-inside">
+                                        <li v-for="warning in configValidation.warnings" :key="warning">{{ warning }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SMTP Connection Test -->
+                        <div class="mb-6 p-4 bg-muted rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-foreground">{{ $t('features.settings.emailTest.smtpTest') }}</h4>
+                                <button
+                                    type="button"
+                                    @click="testSmtpConnection"
+                                    :disabled="testingConnection"
+                                    class="px-3 py-1 text-sm bg-card border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                                >
+                                    {{ testingConnection ? $t('features.settings.emailTest.testing') : $t('features.settings.emailTest.testConnection') }}
+                                </button>
+                            </div>
+                            <div v-if="connectionResult" class="mt-2">
+                                <div v-if="connectionResult.connected" class="text-sm text-green-600">
+                                    ✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}
+                                </div>
+                                <div v-else class="text-sm text-red-600">
+                                    ✗ {{ $t('features.settings.emailTest.failed') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send Test Email -->
+                        <div class="mb-6 p-4 bg-muted rounded-lg">
+                            <h4 class="text-sm font-medium text-foreground mb-3">{{ $t('features.settings.emailTest.sendTest') }}</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.recipient') }}</label>
+                                    <input
+                                        v-model="testEmail.to"
+                                        type="email"
+                                        :placeholder="$t('features.settings.emailTest.recipientPlaceholder')"
+                                        class="w-full px-3 py-2 text-sm border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.subject') }}</label>
+                                    <input
+                                        v-model="testEmail.subject"
+                                        type="text"
+                                        :placeholder="$t('features.settings.emailTest.subjectPlaceholder')"
+                                        class="w-full px-3 py-2 text-sm border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-foreground mb-1">{{ $t('features.settings.emailTest.message') }}</label>
+                                    <textarea
+                                        v-model="testEmail.message"
+                                        rows="3"
+                                        :placeholder="$t('features.settings.emailTest.messagePlaceholder')"
+                                        class="w-full px-3 py-2 text-sm border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="sendTestEmail"
+                                    :disabled="sendingTestEmail || !testEmail.to"
+                                    class="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                >
+                                    {{ sendingTestEmail ? $t('features.settings.emailTest.sending') : $t('features.settings.emailTest.sendTest') }}
+                                </button>
+                                <div v-if="testEmailResult" class="mt-2 text-sm" :class="testEmailResult.success ? 'text-green-600' : 'text-red-600'">
+                                    {{ testEmailResult.message }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Queue Status -->
+                        <div class="mb-6 p-4 bg-muted rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-foreground">{{ $t('features.settings.emailTest.queueStatus') }}</h4>
+                                <button
+                                    type="button"
+                                    @click="getQueueStatus"
+                                    :disabled="loadingQueueStatus"
+                                    class="px-3 py-1 text-sm bg-card border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                                >
+                                    {{ loadingQueueStatus ? $t('features.settings.loading') : $t('features.settings.emailTest.refresh') }}
+                                </button>
+                            </div>
+                            <div v-if="queueStatus" class="mt-2 text-sm text-muted-foreground">
+                                <p>{{ $t('features.settings.emailTest.driver') }}: <span class="font-medium">{{ queueStatus.driver }}</span></p>
+                                <p>{{ $t('features.settings.emailTest.pending') }}: <span class="font-medium">{{ queueStatus.pending_jobs }}</span></p>
+                                <p>{{ $t('features.settings.emailTest.failedJobs') }}: <span class="font-medium">{{ queueStatus.failed_jobs }}</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Email Logs -->
+                        <div class="p-4 bg-muted rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-foreground">{{ $t('features.settings.emailTest.recentLogs') }}</h4>
+                                <button
+                                    type="button"
+                                    @click="getRecentLogs"
+                                    :disabled="loadingLogs"
+                                    class="px-3 py-1 text-sm bg-card border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                                >
+                                    {{ loadingLogs ? $t('features.settings.loading') : $t('features.settings.emailTest.refresh') }}
+                                </button>
+                            </div>
+                            <div v-if="emailLogs && emailLogs.length > 0" class="mt-2 space-y-2">
+                                <div
+                                    v-for="log in emailLogs"
+                                    :key="log.sent_at"
+                                    class="p-2 bg-card rounded border border-border text-xs"
+                                >
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium text-foreground">{{ log.to }}</p>
+                                            <p class="text-muted-foreground">{{ log.subject }}</p>
+                                        </div>
+                                        <span class="text-gray-400">{{ formatDate(log.sent_at) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else-if="emailLogs && emailLogs.length === 0" class="mt-2 text-sm text-muted-foreground">
+                                {{ $t('features.settings.emailTest.noLogs') }}
+                            </div>
                         </div>
                     </div>
 
@@ -110,16 +271,16 @@
                         <button
                             type="button"
                             @click="resetForm"
-                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                         >
-                            Reset
+                            {{ $t('features.settings.reset') }}
                         </button>
                         <button
                             type="submit"
                             :disabled="saving"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                         >
-                            {{ saving ? 'Saving...' : 'Save Settings' }}
+                            {{ saving ? $t('features.settings.saving') : $t('features.settings.save') }}
                         </button>
                     </div>
                 </form>
@@ -130,14 +291,33 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
+const { t } = useI18n();
 const loading = ref(false);
 const saving = ref(false);
 const activeTab = ref('general');
 const settings = ref([]);
 const formData = ref({});
+
+// Email testing state
+const validatingConfig = ref(false);
+const configValidation = ref(null);
+const testingConnection = ref(false);
+const connectionResult = ref(null);
+const sendingTestEmail = ref(false);
+const testEmailResult = ref(null);
+const testEmail = ref({
+    to: '',
+    subject: '',
+    message: '',
+});
+const loadingQueueStatus = ref(false);
+const queueStatus = ref(null);
+const loadingLogs = ref(false);
+const emailLogs = ref([]);
 
 const tabs = [
     { id: 'general', label: 'General' },
@@ -202,7 +382,7 @@ const resetForm = () => {
 
 const formatValue = (value, type) => {
     if (type === 'boolean') {
-        return value ? 'Yes' : 'No';
+        return value ? t('common.labels.yes') : t('common.labels.no');
     } else if (type === 'json') {
         return typeof value === 'string' ? value : JSON.stringify(value);
     }
@@ -237,21 +417,153 @@ const handleSubmit = async () => {
             settings: settingsToUpdate,
         });
         
-        alert('Settings saved successfully');
+        alert(t('features.settings.saved'));
         await fetchSettings();
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to save settings');
+        alert(error.response?.data?.message || t('features.settings.failed'));
     } finally {
         saving.value = false;
     }
 };
 
-watch(activeTab, () => {
+// Email testing functions
+const validateEmailConfig = async () => {
+    validatingConfig.value = true;
+    configValidation.value = null;
+    try {
+        const response = await api.get('/admin/cms/email-test/validate-config');
+        const { data } = parseResponse(response);
+        configValidation.value = data;
+    } catch (error) {
+        configValidation.value = {
+            valid: false,
+            errors: [error.response?.data?.message || t('features.settings.emailTest.failed')],
+            warnings: [],
+        };
+    } finally {
+        validatingConfig.value = false;
+    }
+};
+
+const testSmtpConnection = async () => {
+    testingConnection.value = true;
+    connectionResult.value = null;
+    try {
+        const response = await api.post('/admin/cms/email-test/test-connection');
+        const { data } = parseResponse(response);
+        connectionResult.value = data;
+    } catch (error) {
+        connectionResult.value = {
+            connected: false,
+            host: 'unknown',
+            port: 'unknown',
+            error: error.response?.data?.message || t('features.settings.emailTest.failed'),
+        };
+    } finally {
+        testingConnection.value = false;
+    }
+};
+
+const sendTestEmail = async () => {
+    if (!testEmail.value.to) {
+        testEmailResult.value = {
+            success: false,
+            message: t('features.settings.emailTest.recipientRequired'),
+        };
+        return;
+    }
+
+    sendingTestEmail.value = true;
+    testEmailResult.value = null;
+    try {
+        const response = await api.post('/admin/cms/email-test/send-test', {
+            to: testEmail.value.to,
+            subject: testEmail.value.subject || undefined,
+            message: testEmail.value.message || undefined,
+        });
+        const { data, message } = parseResponse(response);
+        testEmailResult.value = {
+            success: true,
+            message: message || t('features.settings.emailTest.sentSuccess'),
+        };
+        // Clear form
+        testEmail.value.subject = '';
+        testEmail.value.message = '';
+        // Refresh logs
+        await getRecentLogs();
+    } catch (error) {
+        testEmailResult.value = {
+            success: false,
+            message: error.response?.data?.message || t('features.settings.emailTest.sendFailed'),
+        };
+    } finally {
+        sendingTestEmail.value = false;
+    }
+};
+
+const getQueueStatus = async () => {
+    loadingQueueStatus.value = true;
+    try {
+        const response = await api.get('/admin/cms/email-test/queue-status');
+        const { data } = parseResponse(response);
+        queueStatus.value = data;
+    } catch (error) {
+        queueStatus.value = {
+            driver: 'unknown',
+            connection: 'unknown',
+            pending_jobs: 'error',
+            failed_jobs: 'error',
+        };
+    } finally {
+        loadingQueueStatus.value = false;
+    }
+};
+
+const getRecentLogs = async () => {
+    loadingLogs.value = true;
+    try {
+        const response = await api.get('/admin/cms/email-test/recent-logs?limit=10');
+        const { data } = parseResponse(response);
+        emailLogs.value = data.logs || [];
+    } catch (error) {
+        emailLogs.value = [];
+    } finally {
+        loadingLogs.value = false;
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return dateString;
+    }
+};
+
+watch(activeTab, (newTab) => {
     // Reset form when switching tabs
     initializeFormData();
+    // Load email test data when switching to email tab
+    if (newTab === 'email') {
+        getQueueStatus();
+        getRecentLogs();
+    }
 });
 
 onMounted(() => {
     fetchSettings();
+    // Load email test data if email tab is active
+    if (activeTab.value === 'email') {
+        getQueueStatus();
+        getRecentLogs();
+    }
 });
 </script>

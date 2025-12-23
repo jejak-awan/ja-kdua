@@ -1,0 +1,132 @@
+{
+    "title": "Manajemen Keamanan",
+    "tabs": {
+        "overview": "Ringkasan",
+        "blocklist": "Daftar Blokir",
+        "whitelist": "Daftar Putih"
+    },
+    "statistics": {
+        "events": "Event Keamanan",
+        "blockedIps": "IP Terblokir",
+        "failedLogins": "Login Gagal",
+        "last24h": "24 Jam Terakhir"
+    },
+    "ipManagement": {
+        "title": "Manajemen IP",
+        "block": {
+            "label": "Blokir Alamat IP",
+            "placeholder": "192.168.1.1",
+            "button": "Blokir"
+        },
+        "check": {
+            "label": "Cek Status IP",
+            "placeholder": "192.168.1.1",
+            "button": "Cek"
+        },
+        "status": {
+            "label": "Status IP",
+            "blocked": "Terblokir",
+            "allowed": "Diizinkan"
+        },
+        "unblock": {
+            "label": "Buka Blokir IP / Hapus Rate Limit",
+            "placeholder": "192.168.1.1",
+            "button": "Buka Blokir"
+        }
+    },
+    "blocklist": {
+        "title": "Daftar Blokir IP",
+        "description": "Alamat IP yang terblokir tidak dapat mengakses sistem",
+        "empty": "Tidak ada alamat IP yang terblokir",
+        "addIp": "Tambah IP ke Daftar Blokir",
+        "reason": "Alasan (opsional)",
+        "table": {
+            "ip": "Alamat IP",
+            "reason": "Alasan",
+            "createdBy": "Dibuat Oleh",
+            "date": "Tanggal",
+            "actions": "Aksi"
+        },
+        "actions": {
+            "remove": "Hapus",
+            "moveToWhitelist": "Pindah ke Daftar Putih"
+        }
+    },
+    "whitelist": {
+        "title": "Daftar Putih IP",
+        "description": "Alamat IP di daftar putih tidak akan pernah diblokir",
+        "empty": "Tidak ada alamat IP di daftar putih",
+        "addIp": "Tambah IP ke Daftar Putih",
+        "reason": "Alasan (opsional)",
+        "table": {
+            "ip": "Alamat IP",
+            "reason": "Alasan",
+            "createdBy": "Dibuat Oleh",
+            "date": "Tanggal",
+            "actions": "Aksi"
+        },
+        "actions": {
+            "remove": "Hapus"
+        }
+    },
+    "bulkActions": {
+        "selected": "{count} dipilih",
+        "blockSelected": "Blokir Terpilih",
+        "unblockSelected": "Buka Blokir Terpilih",
+        "whitelistSelected": "Tambah ke Daftar Putih",
+        "removeSelected": "Hapus Terpilih"
+    },
+    "logs": {
+        "title": "Log Keamanan",
+        "all": "Semua Event",
+        "failedLogin": "Login Gagal",
+        "blockedIp": "IP Terblokir",
+        "suspiciousActivity": "Aktivitas Mencurigakan",
+        "search": "Cari log...",
+        "loading": "Memuat...",
+        "empty": "Tidak ada log keamanan ditemukan",
+        "table": {
+            "event": "Event",
+            "ip": "Alamat IP",
+            "user": "Pengguna",
+            "details": "Detail",
+            "date": "Tanggal",
+            "actions": "Aksi"
+        },
+        "actions": {
+            "blockIp": "Blokir IP"
+        },
+        "eventTypes": {
+            "login_failed": "Login Gagal",
+            "login_success": "Login Berhasil",
+            "ip_blocked": "IP Diblokir",
+            "ip_unblocked": "IP Dibuka Blokir",
+            "suspicious_activity": "Aktivitas Mencurigakan",
+            "ip_whitelisted": "IP Masuk Daftar Putih",
+            "ip_whitelist_removed": "Dihapus dari Daftar Putih",
+            "account_locked": "Akun Dikunci",
+            "login_blocked": "Login Diblokir"
+        }
+    },
+    "messages": {
+        "enterIp": "Silakan masukkan alamat IP",
+        "blockSuccess": "Alamat IP berhasil diblokir",
+        "blockFailed": "Gagal memblokir alamat IP",
+        "checkFailed": "Gagal mengecek status IP",
+        "confirmBlock": "Apakah Anda yakin ingin memblokir alamat IP {ip}?",
+        "unblockSuccess": "Alamat IP berhasil dibuka blokirnya dan rate limit dihapus",
+        "unblockFailed": "Gagal membuka blokir alamat IP",
+        "confirmUnblock": "Apakah Anda yakin ingin membuka blokir alamat IP {ip} dan menghapus rate limit-nya?",
+        "whitelistSuccess": "Alamat IP berhasil ditambahkan ke daftar putih",
+        "whitelistFailed": "Gagal menambahkan alamat IP ke daftar putih",
+        "confirmWhitelist": "Tambahkan alamat IP {ip} ke daftar putih?",
+        "removeWhitelistSuccess": "Alamat IP dihapus dari daftar putih",
+        "removeWhitelistFailed": "Gagal menghapus alamat IP dari daftar putih",
+        "confirmRemoveWhitelist": "Hapus alamat IP {ip} dari daftar putih?",
+        "bulkBlockSuccess": "{blocked} alamat IP diblokir, {skipped} dilewati",
+        "bulkUnblockSuccess": "{count} alamat IP dibuka blokirnya",
+        "bulkWhitelistSuccess": "{count} alamat IP ditambahkan ke daftar putih",
+        "bulkRemoveSuccess": "{count} alamat IP dihapus",
+        "cannotBlockWhitelisted": "Tidak dapat memblokir alamat IP yang ada di daftar putih"
+    }
+}

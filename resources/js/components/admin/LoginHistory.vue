@@ -1,8 +1,8 @@
 <template>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Login History</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Recent login attempts and sessions</p>
+    <div class="bg-card rounded-lg shadow">
+        <div class="p-6 border-b border-border">
+            <h2 class="text-lg font-semibold text-foreground">Login History</h2>
+            <p class="text-sm text-muted-foreground dark:text-gray-400 mt-1">Recent login attempts and sessions</p>
         </div>
 
         <div class="p-6">
@@ -11,14 +11,14 @@
             </div>
 
             <div v-else-if="history.length === 0" class="text-center py-8">
-                <p class="text-gray-500 dark:text-gray-400">No login history found</p>
+                <p class="text-muted-foreground dark:text-gray-400">No login history found</p>
             </div>
 
             <div v-else class="space-y-4">
                 <div
                     v-for="entry in history"
                     :key="entry.id"
-                    class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted dark:hover:bg-gray-700/50 transition-colors"
                 >
                     <div class="flex items-center space-x-4 flex-1">
                         <!-- Status Icon -->
@@ -77,23 +77,23 @@
                                 </p>
                                 <span
                                     v-if="entry.failure_reason"
-                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                    class="text-xs text-muted-foreground dark:text-gray-400"
                                 >
                                     ({{ entry.failure_reason }})
                                 </span>
                             </div>
                             <div class="mt-1 space-y-1">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <p class="text-sm text-muted-foreground dark:text-gray-400">
                                     <span class="font-medium">IP:</span> {{ entry.ip_address }}
                                 </p>
                                 <p
                                     v-if="entry.user_agent"
-                                    class="text-xs text-gray-500 dark:text-gray-500 truncate"
+                                    class="text-xs text-muted-foreground dark:text-muted-foreground truncate"
                                     :title="entry.user_agent"
                                 >
                                     {{ parseUserAgent(entry.user_agent) }}
                                 </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-500">
+                                <p class="text-xs text-muted-foreground dark:text-muted-foreground">
                                     {{ formatDate(entry.login_at) }}
                                 </p>
                             </div>

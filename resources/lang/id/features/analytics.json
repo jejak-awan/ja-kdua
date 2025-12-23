@@ -1,0 +1,33 @@
+{
+    "title": "Analitik",
+    "subtitle": "Pantau dan analisis performa situs web Anda",
+    "to": "sampai",
+    "apply": "Terapkan",
+    "loading": "Memuat analitik...",
+    "noData": "Data tidak tersedia",
+    "overview": {
+        "totalVisits": "Total Kunjungan",
+        "uniqueVisitors": "Pengunjung Unik",
+        "totalSessions": "Total Sesi",
+        "bounceRate": "Rasio Pantulan"
+    },
+    "charts": {
+        "visitsOverTime": "Kunjungan dari Waktu ke Waktu",
+        "visits": "Kunjungan",
+        "topPages": "Halaman Teratas",
+        "devices": "Perangkat",
+        "browsers": "Browser",
+        "topContent": "Konten Teratas",
+        "topCountries": "Negara Teratas",
+        "topReferrers": "Perujuk Teratas",
+        "realtime": "Aktivitas Real-time"
+    },
+    "realtime": {
+        "activeSessions": "Sesi Aktif",
+        "visitsLastHour": "Kunjungan (Jam Terakhir)",
+        "activePages": "Halaman Aktif"
+    },
+    "labels": {
+        "visits": "kunjungan"
+    }
+}

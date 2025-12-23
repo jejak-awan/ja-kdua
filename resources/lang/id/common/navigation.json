@@ -1,0 +1,56 @@
+{
+    "menu": {
+        "dashboard": "Dasbor",
+        "content": "Konten",
+        "contents": "Konten",
+        "categories": "Kategori",
+        "tags": "Tag",
+        "media": "Media",
+        "mediaLibrary": "Pustaka Media",
+        "fileManager": "Manajer File",
+        "comments": "Komentar",
+        "forms": "Formulir",
+        "newsletter": "Buletin",
+        "users": "Pengguna",
+        "roles": "Peran & Izin",
+        "activityLogs": "Log Aktivitas",
+        "themes": "Tema",
+        "menus": "Menu",
+        "widgets": "Widget",
+        "languages": "Bahasa",
+        "analytics": "Analitik",
+        "seoTools": "Alat SEO",
+        "redirects": "Pengalihan",
+        "settings": "Pengaturan",
+        "backups": "Cadangan",
+        "security": "Keamanan",
+        "redis": "Cache Redis",
+        "systemInfo": "Info Sistem",
+        "scheduledTasks": "Tugas Terjadwal",
+        "webhooks": "Webhooks",
+        "plugins": "Plugin",
+        "customFields": "Bidang Kustom",
+        "seo": "Alat SEO",
+        "system": "Info Sistem",
+        "logout": "Keluar"
+    },
+    "sections": {
+        "content": "KONTEN",
+        "media": "MEDIA",
+        "engagement": "KETERLIBATAN",
+        "usersAccess": "PENGGUNA & AKSES",
+        "appearance": "TAMPILAN",
+        "analyticsSeo": "ANALITIK & SEO",
+        "system": "SISTEM",
+        "developer": "PENGEMBANG"
+    },
+    "breadcrumbs": {
+        "home": "Beranda",
+        "dashboard": "Dasbor"
+    },
+    "sidebar": {
+        "expand": "Perluas sidebar",
+        "minimize": "Minimalkan sidebar",
+        "toggle": "Beralih sidebar"
+    }
+}

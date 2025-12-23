@@ -1,14 +1,14 @@
 <template>
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-10 mx-auto p-5 border w-full max-w-6xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="close">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-6xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Form Submissions</h2>
-                    <p class="text-sm text-gray-500 mt-1">{{ form.name }}</p>
+                    <h2 class="text-2xl font-bold text-foreground">{{ t('features.forms.submissions.title') }}</h2>
+                    <p class="text-sm text-muted-foreground mt-1">{{ form.name }}</p>
                 </div>
                 <button
                     @click="close"
-                    class="text-gray-400 hover:text-gray-600"
+                    class="text-gray-400 hover:text-muted-foreground"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,76 +18,76 @@
 
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-blue-50 rounded-lg p-4">
+                <div class="bg-blue-500/20 rounded-lg p-4">
                     <div class="text-2xl font-bold text-blue-900">{{ statistics.total || 0 }}</div>
-                    <div class="text-sm text-blue-700">Total</div>
+                    <div class="text-sm text-blue-700">{{ t('features.forms.stats.total') }}</div>
                 </div>
-                <div class="bg-green-50 rounded-lg p-4">
+                <div class="bg-green-500/20 rounded-lg p-4">
                     <div class="text-2xl font-bold text-green-900">{{ statistics.new || 0 }}</div>
-                    <div class="text-sm text-green-700">New</div>
+                    <div class="text-sm text-green-700">{{ t('features.forms.stats.new') }}</div>
                 </div>
-                <div class="bg-yellow-50 rounded-lg p-4">
+                <div class="bg-yellow-500/20 rounded-lg p-4">
                     <div class="text-2xl font-bold text-yellow-900">{{ statistics.read || 0 }}</div>
-                    <div class="text-sm text-yellow-700">Read</div>
+                    <div class="text-sm text-yellow-700">{{ t('features.forms.stats.read') }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-gray-900">{{ statistics.archived || 0 }}</div>
-                    <div class="text-sm text-gray-700">Archived</div>
+                <div class="bg-muted rounded-lg p-4">
+                    <div class="text-2xl font-bold text-foreground">{{ statistics.archived || 0 }}</div>
+                    <div class="text-sm text-foreground">{{ t('features.forms.stats.archived') }}</div>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+            <div class="bg-muted rounded-lg p-4 mb-4">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Search submissions..."
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="t('features.forms.submissions.search')"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                     <select
                         v-model="statusFilter"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                        <option value="">All Status</option>
-                        <option value="new">New</option>
-                        <option value="read">Read</option>
-                        <option value="archived">Archived</option>
+                        <option value="">{{ t('features.forms.filters.status') }}</option>
+                        <option value="new">{{ t('features.forms.stats.new') }}</option>
+                        <option value="read">{{ t('features.forms.stats.read') }}</option>
+                        <option value="archived">{{ t('features.forms.stats.archived') }}</option>
                     </select>
                     <input
                         v-model="dateFrom"
                         type="date"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                     <input
                         v-model="dateTo"
                         type="date"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                 </div>
                 <div class="mt-4 flex justify-end">
                     <button
                         @click="exportSubmissions"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted"
                     >
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Export
+                        {{ t('features.forms.actions.export') }}
                     </button>
                 </div>
             </div>
 
             <!-- Submissions List -->
             <div v-if="loading" class="text-center py-12">
-                <p class="text-gray-500">Loading submissions...</p>
+                <p class="text-muted-foreground">{{ t('features.forms.messages.loading') }}</p>
             </div>
 
             <div v-else-if="submissions.length === 0" class="text-center py-12">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <p class="mt-4 text-gray-500">No submissions found</p>
+                <p class="mt-4 text-muted-foreground">{{ t('features.forms.submissions.empty') }}</p>
             </div>
 
             <div v-else class="space-y-3">
@@ -95,8 +95,8 @@
                     v-for="submission in submissions"
                     :key="submission.id"
                     :class="[
-                        'bg-white border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer',
-                        submission.status === 'new' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                        'bg-card border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer',
+                        submission.status === 'new' ? 'border-blue-300 bg-blue-50' : 'border-border'
                     ]"
                     @click="viewSubmission(submission)"
                 >
@@ -106,32 +106,32 @@
                                 <span
                                     :class="[
                                         'px-2 py-1 text-xs font-medium rounded-full',
-                                        submission.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                                        submission.status === 'read' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-gray-100 text-gray-800'
+                                        submission.status === 'new' ? 'bg-blue-500/20 text-blue-400' :
+                                        submission.status === 'read' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-secondary text-secondary-foreground'
                                     ]"
                                 >
-                                    {{ submission.status }}
+                                    {{ submission.status === 'new' ? t('features.forms.stats.new') : submission.status === 'read' ? t('features.forms.stats.read') : t('features.forms.stats.archived') }}
                                 </span>
-                                <span class="text-sm text-gray-500">
+                                <span class="text-sm text-muted-foreground">
                                     {{ formatDate(submission.created_at) }}
                                 </span>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                                 <div v-for="(value, key) in submission.data" :key="key" class="truncate">
-                                    <span class="font-medium text-gray-700">{{ key }}:</span>
-                                    <span class="text-gray-600 ml-1">{{ formatValue(value) }}</span>
+                                    <span class="font-medium text-foreground">{{ key }}:</span>
+                                    <span class="text-muted-foreground ml-1">{{ formatValue(value) }}</span>
                                 </div>
                             </div>
-                            <div v-if="submission.user" class="mt-2 text-xs text-gray-500">
-                                Submitted by: {{ submission.user.name || submission.user.email }}
+                            <div v-if="submission.user" class="mt-2 text-xs text-muted-foreground">
+                                {{ t('features.forms.submissions.submittedBy') }} {{ submission.user.name || submission.user.email }}
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 ml-4">
                             <button
                                 v-if="submission.status === 'new'"
                                 @click.stop="markAsRead(submission)"
-                                class="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded transition-colors"
+                                class="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-500/20 rounded transition-colors"
                                 title="Mark as read"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
                             </button>
                             <button
                                 @click.stop="deleteSubmission(submission)"
-                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-500/20 rounded transition-colors"
                                 title="Delete"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,19 +158,19 @@
                     <button
                         @click="loadPage(pagination.current_page - 1)"
                         :disabled="!pagination.prev_page_url"
-                        class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Previous
+                        {{ t('common.actions.prev') }}
                     </button>
-                    <span class="px-3 py-2 text-sm text-gray-700">
+                    <span class="px-3 py-2 text-sm text-foreground">
                         Page {{ pagination.current_page }} of {{ pagination.last_page }}
                     </span>
                     <button
                         @click="loadPage(pagination.current_page + 1)"
                         :disabled="!pagination.next_page_url"
-                        class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Next
+                        {{ t('common.actions.next') }}
                     </button>
                 </div>
             </div>
@@ -178,15 +178,15 @@
             <!-- Submission Detail Modal -->
             <div
                 v-if="selectedSubmission"
-                class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+                class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50"
                 @click.self="selectedSubmission = null"
             >
-                <div class="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900">Submission Details</h3>
+                        <h3 class="text-xl font-bold text-foreground">{{ t('features.forms.submissions.detailTitle') }}</h3>
                         <button
                             @click="selectedSubmission = null"
-                            class="text-gray-400 hover:text-gray-600"
+                            class="text-gray-400 hover:text-muted-foreground"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -197,29 +197,29 @@
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <span class="font-medium text-gray-700">Status:</span>
+                                <span class="font-medium text-foreground">{{ t('features.forms.submissions.status') }}:</span>
                                 <span class="ml-2">{{ selectedSubmission.status }}</span>
                             </div>
                             <div>
-                                <span class="font-medium text-gray-700">Submitted:</span>
+                                <span class="font-medium text-foreground">{{ t('features.forms.submissions.submitted') }}:</span>
                                 <span class="ml-2">{{ formatDate(selectedSubmission.created_at) }}</span>
                             </div>
                             <div>
-                                <span class="font-medium text-gray-700">IP Address:</span>
+                                <span class="font-medium text-foreground">{{ t('features.forms.submissions.ipAddress') }}:</span>
                                 <span class="ml-2">{{ selectedSubmission.ip_address }}</span>
                             </div>
                             <div v-if="selectedSubmission.user">
-                                <span class="font-medium text-gray-700">User:</span>
+                                <span class="font-medium text-foreground">{{ t('features.forms.submissions.user') }}:</span>
                                 <span class="ml-2">{{ selectedSubmission.user.name || selectedSubmission.user.email }}</span>
                             </div>
                         </div>
 
-                        <div class="border-t border-gray-200 pt-4">
-                            <h4 class="font-semibold text-gray-900 mb-3">Form Data</h4>
+                        <div class="border-t border-border pt-4">
+                            <h4 class="font-semibold text-foreground mb-3">{{ t('features.forms.submissions.formData') }}</h4>
                             <dl class="space-y-3">
                                 <div v-for="(value, key) in selectedSubmission.data" :key="key" class="border-b border-gray-100 pb-2">
-                                    <dt class="text-sm font-medium text-gray-700">{{ key }}</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ formatValue(value) }}</dd>
+                                    <dt class="text-sm font-medium text-foreground">{{ key }}</dt>
+                                    <dd class="mt-1 text-sm text-foreground">{{ formatValue(value) }}</dd>
                                 </div>
                             </dl>
                         </div>
@@ -232,7 +232,10 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     form: {
@@ -313,7 +316,7 @@ const markAsRead = async (submission, refresh = true) => {
 };
 
 const deleteSubmission = async (submission) => {
-    if (!confirm('Are you sure you want to delete this submission?')) {
+    if (!confirm(t('features.forms.messages.submissionDeleteConfirm'))) {
         return;
     }
 
@@ -329,27 +332,24 @@ const deleteSubmission = async (submission) => {
 
 const exportSubmissions = async () => {
     try {
-        const response = await api.get(`/admin/cms/forms/${props.form.id}/submissions/export`);
-        const data = response.data.data;
-        
-        // Convert to CSV
-        const headers = Object.keys(data[0] || {});
-        const csv = [
-            headers.join(','),
-            ...data.map(row => headers.map(header => {
-                const value = row[header] || '';
-                return `"${String(value).replace(/"/g, '""')}"`;
-            }).join(','))
-        ].join('\n');
+        // Build query params for filtering
+        const params = new URLSearchParams({
+            format: 'csv',
+            ...(dateFrom.value && { date_from: dateFrom.value }),
+            ...(dateTo.value && { date_to: dateTo.value })
+        });
 
-        // Download
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${props.form.slug}-submissions-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        // Use window.open for direct file download
+        const baseUrl = import.meta.env.VITE_API_URL || '';
+        const exportUrl = `${baseUrl}/api/v1/admin/cms/forms/${props.form.id}/submissions/export?${params.toString()}`;
+        
+        // Create a link and trigger download
+        const link = document.createElement('a');
+        link.href = exportUrl;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     } catch (error) {
         console.error('Error exporting submissions:', error);
         alert('Failed to export submissions');

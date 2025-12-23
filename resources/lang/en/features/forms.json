@@ -1,0 +1,72 @@
+{
+    "title": "Forms Builder",
+    "actions": {
+        "create": "New Form",
+        "createFirst": "Create Your First Form",
+        "submissions": "Submissions",
+        "export": "Export",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "update": "Update Form",
+        "createForm": "Create Form",
+        "addField": "Add Field"
+    },
+    "filters": {
+        "search": "Search forms...",
+        "status": "All Status",
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "stats": {
+        "fields": "{count} Fields",
+        "submissions": "{count} Submissions",
+        "total": "Total",
+        "new": "New",
+        "read": "Read",
+        "archived": "Archived"
+    },
+    "submissions": {
+        "title": "Form Submissions",
+        "search": "Search submissions...",
+        "detailTitle": "Submission Details",
+        "submittedBy": "Submitted by:",
+        "formData": "Form Data",
+        "ipAddress": "IP Address",
+        "status": "Status",
+        "user": "User",
+        "submitted": "Submitted",
+        "empty": "No submissions found"
+    },
+    "modal": {
+        "createTitle": "Create New Form",
+        "editTitle": "Edit Form",
+        "formName": "Form Name",
+        "slug": "Slug",
+        "description": "Description",
+        "successMessage": "Success Message",
+        "redirectUrl": "Redirect URL",
+        "isActive": "Form is active",
+        "formFields": "Form Fields",
+        "placeholders": {
+            "name": "Contact Form",
+            "slug": "contact-form",
+            "description": "Form description...",
+            "successMessage": "Thank you for your submission!",
+            "redirectUrl": "https://example.com/thank-you"
+        }
+    },
+    "messages": {
+        "loading": "Loading forms...",
+        "empty": "No forms found",
+        "saved": "Form saved successfully",
+        "deleted": "Form deleted successfully",
+        "statusUpdated": "Form status updated",
+        "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+        "submissionDeleted": "Submission deleted successfully",
+        "submissionDeleteConfirm": "Are you sure you want to delete this submission?",
+        "exportFailed": "Failed to export submissions",
+        "saveFailed": "Failed to save form"
+    }
+}

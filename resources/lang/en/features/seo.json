@@ -1,0 +1,47 @@
+{
+    "title": "SEO Tools",
+    "tabs": {
+        "sitemap": "Sitemap",
+        "robots": "Robots.txt",
+        "analysis": "SEO Analysis",
+        "schema": "Schema Generation"
+    },
+    "sitemap": {
+        "title": "Sitemap Management",
+        "urlLabel": "Sitemap URL",
+        "copyUrl": "Copy URL",
+        "generate": "Generate Sitemap",
+        "generating": "Generating...",
+        "generated": "Sitemap generated successfully",
+        "copySuccess": "Sitemap URL copied to clipboard!"
+    },
+    "robots": {
+        "title": "Robots.txt Editor",
+        "contentLabel": "Robots.txt Content",
+        "placeholder": "User-agent: *\nDisallow: /admin\nAllow: /",
+        "save": "Save Robots.txt",
+        "saving": "Saving...",
+        "saved": "Robots.txt saved successfully",
+        "reload": "Reload"
+    },
+    "analysis": {
+        "title": "SEO Analysis",
+        "selectContent": "Select Content to Analyze",
+        "placeholder": "Select content...",
+        "run": "Run Analysis",
+        "analyzing": "Analyzing...",
+        "results": "Analysis Results",
+        "score": "Score: {score}/100",
+        "failed": "Failed to run SEO analysis"
+    },
+    "schema": {
+        "title": "Schema Markup Generator",
+        "selectContent": "Select Content",
+        "generate": "Generate Schema",
+        "generating": "Generating...",
+        "jsonTitle": "Generated Schema JSON",
+        "copy": "Copy to Clipboard",
+        "copySuccess": "Schema JSON copied to clipboard!",
+        "failed": "Failed to generate schema"
+    }
+}

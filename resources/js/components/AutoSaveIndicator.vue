@@ -47,10 +47,10 @@
 
       <!-- Status Text -->
       <span class="text-sm font-medium">
-        <span v-if="status === 'saving'">Auto-saving...</span>
-        <span v-else-if="status === 'saved'">Saved at {{ lastSavedTime }}</span>
-        <span v-else-if="status === 'error'">Save failed</span>
-        <span v-else>Not saved</span>
+        <span v-if="status === 'saving'">{{ $t('features.autosave.saving') }}</span>
+        <span v-else-if="status === 'saved'">{{ $t('features.autosave.savedAt', { time: lastSavedTime }) }}</span>
+        <span v-else-if="status === 'error'">{{ $t('features.autosave.failed') }}</span>
+        <span v-else>{{ $t('features.autosave.notSaved') }}</span>
       </span>
     </div>
   </div>
@@ -58,6 +58,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   status: {
@@ -88,9 +91,9 @@ const lastSavedTime = computed(() => {
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
 
-  if (seconds < 10) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
-  if (minutes < 60) return `${minutes}m ago`;
+  if (seconds < 10) return t('features.autosave.justNow');
+  if (seconds < 60) return t('features.autosave.agoSeconds', { seconds });
+  if (minutes < 60) return t('features.autosave.agoMinutes', { minutes });
 
   return props.lastSaved.toLocaleTimeString('en-US', {
     hour: '2-digit',

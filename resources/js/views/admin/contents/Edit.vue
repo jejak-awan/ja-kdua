@@ -2,23 +2,23 @@
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Edit Content</h1>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.content.form.editTitle') }}</h1>
                 <div v-if="lockStatus" class="mt-2 flex items-center space-x-2">
                     <span
                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                        :class="lockStatus.is_locked ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'"
+                        :class="lockStatus.is_locked ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'"
                     >
-                        {{ lockStatus.is_locked ? 'Locked' : 'Unlocked' }}
+                        {{ lockStatus.is_locked ? $t('features.content.form.locked') : $t('features.content.form.unlocked') }}
                     </span>
-                    <span v-if="lockStatus.is_locked && lockStatus.locked_by" class="text-xs text-gray-500">
-                        by {{ lockStatus.locked_by.name }}
+                    <span v-if="lockStatus.is_locked && lockStatus.locked_by" class="text-xs text-muted-foreground">
+                        {{ $t('features.content.form.lockedBy', { name: lockStatus.locked_by.name }) }}
                     </span>
                     <button
                         v-if="lockStatus.is_locked && lockStatus.can_unlock"
                         @click="handleUnlock"
                         class="text-xs text-indigo-600 hover:text-indigo-900"
                     >
-                        Unlock
+                        {{ $t('features.content.form.unlock') }}
                     </button>
                 </div>
             </div>
@@ -29,36 +29,36 @@
                 />
                 <button
                     @click="handlePreview"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    Preview
+                    {{ $t('features.content.form.preview') }}
                 </button>
                 <router-link
                     :to="{ name: 'contents' }"
-                    class="text-gray-600 hover:text-gray-900"
+                    class="text-muted-foreground hover:text-foreground"
                 >
-                    ← Back to Contents
+                    ← {{ $t('features.content.form.back') }}
                 </router-link>
             </div>
         </div>
 
         <div v-if="loading && !form.title" class="text-center py-8">
-            <p class="text-gray-500">Loading content...</p>
+            <p class="text-muted-foreground">{{ $t('features.content.form.loading') }}</p>
         </div>
 
         <form v-else @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Main Content Section -->
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Content Details</h2>
+            <div class="bg-card shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.content.form.details') }}</h2>
                 
                 <div class="space-y-4">
                     <!-- Title -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Title <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -66,36 +66,36 @@
                             type="text"
                             required
                             @input="generateSlug"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Enter content title"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.titlePlaceholder')"
                         >
                     </div>
 
                     <!-- Slug -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Slug <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.slug"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="content-slug"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.slugPlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">URL-friendly version of the title</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.content.form.urlFriendlyHelp') }}</p>
                     </div>
 
                     <!-- Type & Status -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Type <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.content.form.type') }} <span class="text-red-500">*</span>
                             </label>
                             <select
                                 v-model="form.type"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                                 <option value="post">Post</option>
                                 <option value="page">Page</option>
@@ -103,31 +103,31 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Status <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.content.form.status') }} <span class="text-red-500">*</span>
                             </label>
                             <select
                                 v-model="form.status"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                                <option value="archived">Archived</option>
+                                <option value="draft">{{ $t('features.content.status.draft') }}</option>
+                                <option value="published">{{ $t('features.content.status.published') }}</option>
+                                <option value="archived">{{ $t('features.content.status.archived') }}</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Category -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Category
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.content.form.category') }}
                         </label>
                         <select
                             v-model="form.category_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option :value="null">No Category</option>
+                            <option :value="null">{{ $t('features.content.form.selectCategory') }}</option>
                             <option
                                 v-for="category in categories"
                                 :key="category.id"
@@ -140,8 +140,8 @@
 
                     <!-- Tags -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Tags
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.content.form.tags') }}
                         </label>
                         <div class="flex flex-wrap gap-2 mb-2">
                             <span
@@ -161,9 +161,9 @@
                         </div>
                         <select
                             @change="addTag"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option value="">Select a tag...</option>
+                            <option value="">{{ $t('features.content.form.selectTag') }}</option>
                             <option
                                 v-for="tag in availableTags"
                                 :key="tag.id"
@@ -176,21 +176,21 @@
 
                     <!-- Excerpt -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Excerpt
                         </label>
                         <textarea
                             v-model="form.excerpt"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Brief description of the content"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.excerptPlaceholder')"
                         />
                     </div>
 
                     <!-- Body / Rich Text Editor -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Content <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.content.form.body') }} <span class="text-red-500">*</span>
                         </label>
                         <RichTextEditor
                             v-model="form.body"
@@ -200,22 +200,22 @@
 
                     <!-- Published At -->
                     <div v-if="form.status === 'published'">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Published At
                         </label>
                         <input
                             v-model="form.published_at"
                             type="datetime-local"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                        <p class="mt-1 text-xs text-gray-500">Leave empty to publish immediately</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.content.form.publishImmediatelyHelp') }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Featured Image Section -->
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Featured Image</h2>
+            <div class="bg-card shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.content.form.featuredImage') }}</h2>
                 <div class="space-y-4">
                     <div v-if="form.featured_image" class="relative">
                         <img
@@ -228,63 +228,63 @@
                             @click="form.featured_image = null"
                             class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
                         >
-                            Remove
+                            {{ $t('features.content.form.remove') }}
                         </button>
                     </div>
                     <MediaPicker
                         v-else
                         @selected="(media) => form.featured_image = media.url"
-                        label="Select Featured Image"
+                        :label="$t('features.content.form.selectImage')"
                     />
                 </div>
             </div>
 
             <!-- SEO Section -->
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">SEO Settings</h2>
+            <div class="bg-card shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.content.form.seoSettings') }}</h2>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Meta Title
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.content.form.metaTitle') }}
                         </label>
                         <input
                             v-model="form.meta_title"
                             type="text"
                             maxlength="255"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="SEO title (defaults to content title)"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.seoTitlePlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">{{ form.meta_title?.length || 0 }}/255 characters</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ form.meta_title?.length || 0 }}/255 characters</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Meta Description
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.content.form.metaDescription') }}
                         </label>
                         <textarea
                             v-model="form.meta_description"
                             rows="3"
                             maxlength="500"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="SEO description (defaults to excerpt)"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.seoDescPlaceholder')"
                         />
-                        <p class="mt-1 text-xs text-gray-500">{{ form.meta_description?.length || 0 }}/500 characters</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ form.meta_description?.length || 0 }}/500 characters</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Meta Keywords
                         </label>
                         <input
                             v-model="form.meta_keywords"
                             type="text"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="keyword1, keyword2, keyword3"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.content.form.keywordsPlaceholder')"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-foreground mb-1">
                             Open Graph Image
                         </label>
                         <div v-if="form.og_image" class="relative mb-2">
@@ -298,13 +298,13 @@
                                 @click="form.og_image = null"
                                 class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
                             >
-                                Remove
+                                {{ $t('features.content.form.remove') }}
                             </button>
                         </div>
                         <MediaPicker
                             v-else
                             @selected="(media) => form.og_image = media.url"
-                            label="Select OG Image"
+                            :label="$t('features.content.form.selectOgImage')"
                         />
                     </div>
                 </div>
@@ -314,30 +314,41 @@
             <div class="flex justify-end space-x-4">
                 <router-link
                     :to="{ name: 'contents' }"
-                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                 >
-                    Cancel
+                    {{ $t('features.content.form.cancel') }}
                 </router-link>
                 <button
                     type="submit"
                     :disabled="loading"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                 >
-                    {{ loading ? 'Updating...' : 'Update Content' }}
+                    {{ loading ? $t('features.content.form.updating') : $t('features.content.form.update') }}
                 </button>
             </div>
         </form>
+
+        <!-- Preview Modal -->
+        <ContentPreviewModal
+            :show="showPreviewModal"
+            :content="previewContent"
+            :can-publish="form.status !== 'published'"
+            @close="showPreviewModal = false"
+            @publish="handlePublishFromPreview"
+        />
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
+import ContentPreviewModal from '../../../components/admin/ContentPreviewModal.vue';
 import { useAutoSave } from '../../../composables/useAutoSave';
 
 const route = useRoute();
@@ -465,7 +476,7 @@ const fetchContent = async () => {
         await lockContent();
     } catch (error) {
         console.error('Failed to fetch content:', error);
-        alert('Failed to load content');
+        alert(t('features.content.messages.loadFailed'));
         router.push({ name: 'contents' });
     } finally {
         loading.value = false;
@@ -508,25 +519,32 @@ const handleUnlock = async () => {
         }
     } catch (error) {
         console.error('Failed to unlock content:', error);
-        alert(error.response?.data?.message || 'Failed to unlock content');
+        alert(error.response?.data?.message || t('features.content.messages.unlockFailed'));
     }
 };
 
-const handlePreview = async () => {
-    try {
-        const response = await api.get(`/admin/cms/contents/${contentId}/preview`);
-        const previewUrl = response.data.url || response.data.preview_url;
-        if (previewUrl) {
-            window.open(previewUrl, '_blank');
-        } else {
-            // Fallback: open content URL if preview URL not available
-            window.open(`/${form.value.slug}`, '_blank');
-        }
-    } catch (error) {
-        console.error('Failed to get preview URL:', error);
-        // Fallback: open content URL
-        window.open(`/${form.value.slug}`, '_blank');
-    }
+const showPreviewModal = ref(false);
+
+const handlePreview = () => {
+    showPreviewModal.value = true;
+};
+
+const previewContent = computed(() => {
+    const category = categories.value.find(c => c.id === form.value.category_id);
+    return {
+        title: form.value.title,
+        body: form.value.body,
+        excerpt: form.value.excerpt,
+        featured_image: form.value.featured_image,
+        author: { name: 'Current User' }, // You can get from auth store
+        category: category ? { name: category.name } : null,
+        published_at: form.value.published_at || new Date().toISOString(),
+    };
+});
+
+const handlePublishFromPreview = async () => {
+    form.value.status = 'published';
+    await handleSubmit();
 };
 
 const formatDateTimeLocal = (dateString) => {
@@ -579,7 +597,7 @@ const handleSubmit = async () => {
         router.push({ name: 'contents' });
     } catch (error) {
         console.error('Failed to update content:', error);
-        alert(error.response?.data?.message || 'Failed to update content');
+        alert(error.response?.data?.message || t('features.content.messages.updateFailed'));
     } finally {
         loading.value = false;
     }

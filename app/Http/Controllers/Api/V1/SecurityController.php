@@ -57,6 +57,16 @@ class SecurityController extends BaseApiController
         return $this->success($stats, 'Security statistics retrieved successfully');
     }
 
+    // =====================
+    // Blocklist Management
+    // =====================
+    
+    public function getBlocklist()
+    {
+        $blocklist = $this->securityService->getBlocklist();
+        return $this->success($blocklist, 'Blocklist retrieved successfully');
+    }
+
     public function blockIp(Request $request)
     {
         $request->validate([
@@ -64,7 +74,11 @@ class SecurityController extends BaseApiController
             'reason' => 'nullable|string',
         ]);
 
-        $this->securityService->blockIp($request->ip_address, $request->reason);
+        $result = $this->securityService->blockIp($request->ip_address, $request->reason);
+        
+        if (!$result) {
+            return $this->error('Cannot block whitelisted IP address', 400);
+        }
 
         return $this->success(null, 'IP address blocked successfully');
     }
@@ -79,6 +93,111 @@ class SecurityController extends BaseApiController
 
         return $this->success(null, 'IP address unblocked successfully');
     }
+    
+    public function bulkBlock(Request $request)
+    {
+        $request->validate([
+            'ip_addresses' => 'required|array',
+            'ip_addresses.*' => 'required|ip',
+            'reason' => 'nullable|string',
+        ]);
+        
+        $blocked = 0;
+        $skipped = 0;
+        
+        foreach ($request->ip_addresses as $ip) {
+            if ($this->securityService->blockIp($ip, $request->reason)) {
+                $blocked++;
+            } else {
+                $skipped++;
+            }
+        }
+        
+        return $this->success([
+            'blocked' => $blocked,
+            'skipped' => $skipped,
+        ], "{$blocked} IP addresses blocked, {$skipped} skipped (whitelisted)");
+    }
+    
+    public function bulkUnblock(Request $request)
+    {
+        $request->validate([
+            'ip_addresses' => 'required|array',
+            'ip_addresses.*' => 'required|ip',
+        ]);
+        
+        foreach ($request->ip_addresses as $ip) {
+            $this->securityService->unblockIp($ip);
+        }
+        
+        return $this->success(null, count($request->ip_addresses) . ' IP addresses unblocked');
+    }
+
+    // =====================
+    // Whitelist Management
+    // =====================
+    
+    public function getWhitelist()
+    {
+        $whitelist = $this->securityService->getWhitelist();
+        return $this->success($whitelist, 'Whitelist retrieved successfully');
+    }
+    
+    public function addToWhitelist(Request $request)
+    {
+        $request->validate([
+            'ip_address' => 'required|ip',
+            'reason' => 'nullable|string',
+        ]);
+
+        $this->securityService->addToWhitelist($request->ip_address, $request->reason);
+
+        return $this->success(null, 'IP address added to whitelist');
+    }
+    
+    public function removeFromWhitelist(Request $request)
+    {
+        $request->validate([
+            'ip_address' => 'required|ip',
+        ]);
+
+        $this->securityService->removeFromWhitelist($request->ip_address);
+
+        return $this->success(null, 'IP address removed from whitelist');
+    }
+    
+    public function bulkWhitelist(Request $request)
+    {
+        $request->validate([
+            'ip_addresses' => 'required|array',
+            'ip_addresses.*' => 'required|ip',
+            'reason' => 'nullable|string',
+        ]);
+        
+        foreach ($request->ip_addresses as $ip) {
+            $this->securityService->addToWhitelist($ip, $request->reason);
+        }
+        
+        return $this->success(null, count($request->ip_addresses) . ' IP addresses added to whitelist');
+    }
+    
+    public function bulkRemoveWhitelist(Request $request)
+    {
+        $request->validate([
+            'ip_addresses' => 'required|array',
+            'ip_addresses.*' => 'required|ip',
+        ]);
+        
+        foreach ($request->ip_addresses as $ip) {
+            $this->securityService->removeFromWhitelist($ip);
+        }
+        
+        return $this->success(null, count($request->ip_addresses) . ' IP addresses removed from whitelist');
+    }
+
+    // =====================
+    // IP Check & Clear
+    // =====================
 
     public function checkIp(Request $request)
     {

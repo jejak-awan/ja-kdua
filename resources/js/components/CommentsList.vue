@@ -1,13 +1,13 @@
 <template>
     <div class="comments-list">
-        <h3 class="text-xl font-bold text-gray-900 mb-4">Comments ({{ comments.length }})</h3>
+        <h3 class="text-xl font-bold text-foreground mb-4">Comments ({{ comments.length }})</h3>
 
         <div v-if="loading" class="text-center py-8">
-            <p class="text-gray-500">Loading comments...</p>
+            <p class="text-muted-foreground">Loading comments...</p>
         </div>
 
         <div v-else-if="comments.length === 0" class="text-center py-8">
-            <p class="text-gray-500">No comments yet. Be the first to comment!</p>
+            <p class="text-muted-foreground">No comments yet. Be the first to comment!</p>
         </div>
 
         <div v-else class="space-y-6">
@@ -19,31 +19,31 @@
                 <div class="flex items-start space-x-4">
                     <div class="flex-1">
                         <div class="flex items-center space-x-2 mb-2">
-                            <span class="font-semibold text-gray-900">
+                            <span class="font-semibold text-foreground">
                                 {{ comment.user?.name || comment.name }}
                             </span>
-                            <span class="text-sm text-gray-500">
+                            <span class="text-sm text-muted-foreground">
                                 {{ formatDate(comment.created_at) }}
                             </span>
                         </div>
-                        <p class="text-gray-700">{{ comment.body }}</p>
+                        <p class="text-foreground">{{ comment.body }}</p>
                         
                         <!-- Replies -->
                         <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 ml-8 space-y-4">
                             <div
                                 v-for="reply in comment.replies"
                                 :key="reply.id"
-                                class="border-l-2 border-gray-200 pl-4"
+                                class="border-l-2 border-border pl-4"
                             >
                                 <div class="flex items-center space-x-2 mb-2">
-                                    <span class="font-semibold text-gray-900">
+                                    <span class="font-semibold text-foreground">
                                         {{ reply.user?.name || reply.name }}
                                     </span>
-                                    <span class="text-sm text-gray-500">
+                                    <span class="text-sm text-muted-foreground">
                                         {{ formatDate(reply.created_at) }}
                                     </span>
                                 </div>
-                                <p class="text-gray-700">{{ reply.body }}</p>
+                                <p class="text-foreground">{{ reply.body }}</p>
                             </div>
                         </div>
                     </div>

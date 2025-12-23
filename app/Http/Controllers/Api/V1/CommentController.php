@@ -58,9 +58,37 @@ class CommentController extends BaseApiController
             $query->where('status', $request->status);
         }
 
+        if ($request->has('content_id')) {
+            $query->where('content_id', $request->content_id);
+        }
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('body', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
         $comments = $query->latest()->paginate(20);
 
         return $this->paginated($comments, 'Comments retrieved successfully');
+    }
+
+    public function statistics()
+    {
+        $stats = [
+            'total' => Comment::count(),
+            'pending' => Comment::where('status', 'pending')->count(),
+            'approved' => Comment::where('status', 'approved')->count(),
+            'rejected' => Comment::where('status', 'rejected')->count(),
+            'spam' => Comment::where('status', 'spam')->count(),
+            'today' => Comment::whereDate('created_at', today())->count(),
+            'this_week' => Comment::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        ];
+
+        return $this->success($stats, 'Comment statistics retrieved successfully');
     }
 
     public function approve(Comment $comment)
@@ -77,6 +105,51 @@ class CommentController extends BaseApiController
         return $this->success($comment->load(['content', 'user']), 'Comment rejected successfully');
     }
 
+    public function markAsSpam(Comment $comment)
+    {
+        $comment->update(['status' => 'spam']);
+
+        return $this->success($comment->load(['content', 'user']), 'Comment marked as spam');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:comments,id',
+            'action' => 'required|in:approve,reject,spam,delete',
+        ]);
+
+        $count = count($validated['ids']);
+
+        switch ($validated['action']) {
+            case 'approve':
+                Comment::whereIn('id', $validated['ids'])->update(['status' => 'approved']);
+                $message = "{$count} comments approved";
+                break;
+
+            case 'reject':
+                Comment::whereIn('id', $validated['ids'])->update(['status' => 'rejected']);
+                $message = "{$count} comments rejected";
+                break;
+
+            case 'spam':
+                Comment::whereIn('id', $validated['ids'])->update(['status' => 'spam']);
+                $message = "{$count} comments marked as spam";
+                break;
+
+            case 'delete':
+                Comment::whereIn('id', $validated['ids'])->delete();
+                $message = "{$count} comments deleted";
+                break;
+
+            default:
+                return $this->error('Invalid action', 400);
+        }
+
+        return $this->success(['affected' => $count], $message);
+    }
+
     public function destroy(Comment $comment)
     {
         $comment->delete();
@@ -84,3 +157,4 @@ class CommentController extends BaseApiController
         return $this->success(null, 'Comment deleted successfully');
     }
 }
+

@@ -14,7 +14,7 @@
             >
                 Choose File
             </button>
-            <p class="mt-2 text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+            <p class="mt-2 text-sm text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
         </div>
 
         <div v-else class="relative">
@@ -34,7 +34,7 @@
                     Cancel
                 </button>
             </div>
-            <div v-if="uploadedMedia" class="mt-4 p-4 bg-green-50 rounded-lg">
+            <div v-if="uploadedMedia" class="mt-4 p-4 bg-green-500/20 rounded-lg">
                 <p class="text-sm text-green-800">Uploaded successfully!</p>
                 <p class="text-xs text-green-600 mt-1">{{ uploadedMedia.url }}</p>
             </div>

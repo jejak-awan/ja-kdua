@@ -2,7 +2,7 @@
     <div>
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Categories</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.categories.title') }}</h1>
             <button
                 @click="showCreateModal = true"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -10,44 +10,44 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Category
+                {{ $t('features.categories.createNew') }}
             </button>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white shadow rounded-lg p-4 mb-4">
+        <div class="bg-card shadow rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
                     type="text"
-                    placeholder="Search categories..."
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    :placeholder="$t('features.categories.search')"
+                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
                 <select
                     v-model="viewMode"
-                    class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                    <option value="tree">Tree View</option>
-                    <option value="list">List View</option>
+                    <option value="tree">{{ $t('features.categories.viewMode.tree') }}</option>
+                    <option value="list">{{ $t('features.categories.viewMode.list') }}</option>
                 </select>
             </div>
         </div>
 
         <!-- Categories List -->
-        <div v-if="loading" class="bg-white shadow rounded-lg p-12 text-center">
-            <p class="text-gray-500">Loading categories...</p>
+        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+            <p class="text-muted-foreground">{{ $t('features.categories.loading') }}</p>
         </div>
 
-        <div v-else-if="filteredCategories.length === 0" class="bg-white shadow rounded-lg p-12 text-center">
+        <div v-else-if="filteredCategories.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
-            <p class="mt-4 text-gray-500">No categories found</p>
+            <p class="mt-4 text-muted-foreground">{{ $t('features.categories.empty') }}</p>
         </div>
 
         <!-- Tree View -->
-        <div v-else-if="viewMode === 'tree'" class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="divide-y divide-gray-200">
+        <div v-else-if="viewMode === 'tree'" class="bg-card shadow rounded-lg overflow-hidden">
+            <div class="divide-y divide-border">
                 <CategoryTreeItem
                     v-for="category in rootCategories"
                     :key="category.id"
@@ -61,32 +61,32 @@
         </div>
 
         <!-- List View -->
-        <div v-else class="bg-white shadow rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Slug
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.slug') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Parent
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.parent') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Contents
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.contents') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.status') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.categories.table.actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="category in filteredCategories" :key="category.id" class="hover:bg-gray-50">
+                <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="category in filteredCategories" :key="category.id" class="hover:bg-muted">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div
@@ -100,28 +100,28 @@
                                     >
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ category.name }}</div>
-                                    <div v-if="category.description" class="text-sm text-gray-500 truncate max-w-xs">
+                                    <div class="text-sm font-medium text-foreground">{{ category.name }}</div>
+                                    <div v-if="category.description" class="text-sm text-muted-foreground truncate max-w-xs">
                                         {{ category.description }}
                                     </div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ category.slug }}</div>
+                            <div class="text-sm text-foreground">{{ category.slug }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ category.parent?.name || '-' }}</div>
+                            <div class="text-sm text-foreground">{{ category.parent?.name || '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ category.contents_count || 0 }}</div>
+                            <div class="text-sm text-foreground">{{ category.contents_count || 0 }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                :class="category.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                :class="category.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
                             >
-                                {{ category.is_active ? 'Active' : 'Inactive' }}
+                                {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -129,21 +129,21 @@
                                 <button
                                     @click="showMoveModal(category)"
                                     class="text-blue-600 hover:text-blue-900"
-                                    title="Move"
+                                    :title="$t('features.categories.actions.move')"
                                 >
-                                    Move
+                                    {{ $t('features.categories.actions.move') }}
                                 </button>
                                 <button
                                     @click="editCategory(category)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    Edit
+                                    {{ $t('features.categories.actions.edit') }}
                                 </button>
                                 <button
                                     @click="deleteCategory(category)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    Delete
+                                    {{ $t('features.categories.actions.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -173,12 +173,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import CategoryTreeItem from '../../../components/categories/CategoryTreeItem.vue';
 import CategoryModal from '../../../components/categories/CategoryModal.vue';
 import MoveCategoryModal from '../../../components/categories/MoveCategoryModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
+const { t } = useI18n();
 const loading = ref(false);
 const categories = ref([]);
 const treeCategories = ref([]);

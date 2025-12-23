@@ -1,16 +1,19 @@
 <template>
   <div class="contact-page">
     <div class="container">
-      <h1 class="page-title">Contact Us</h1>
+      <h1 class="page-title">{{ t('features.frontend.contact.title') }}</h1>
       <div class="content">
-        <p>Get in touch with us</p>
-        <p>This is a placeholder page. Content coming soon.</p>
+        <p>{{ t('features.frontend.contact.subtitle') }}</p>
+        <p>{{ t('features.frontend.contact.placeholder') }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 </script>
 
 <style scoped>

@@ -65,4 +65,28 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\Notification::class);
     }
+
+    /**
+     * Get the two factor authentication record.
+     */
+    public function twoFactorAuth()
+    {
+        return $this->hasOne(\App\Models\TwoFactorAuth::class);
+    }
+
+    /**
+     * Check if 2FA is enabled for this user.
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->twoFactorAuth && $this->twoFactorAuth->enabled;
+    }
+
+    /**
+     * Check if 2FA is required for this user (admin users).
+     */
+    public function requiresTwoFactor(): bool
+    {
+        return $this->hasRole('admin') || $this->hasRole('super-admin');
+    }
 }

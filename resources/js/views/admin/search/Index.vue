@@ -1,9 +1,9 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Search Results</h1>
-            <p v-if="query" class="text-sm text-gray-500 mt-1">
-                Results for: <span class="font-medium">{{ query }}</span>
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.search.title') }}</h1>
+            <p v-if="query" class="text-sm text-muted-foreground mt-1">
+                {{ t('features.search.resultsFor') }} <span class="font-medium">{{ query }}</span>
             </p>
         </div>
 
@@ -13,8 +13,8 @@
                     v-model="searchQuery"
                     @keyup.enter="performSearch"
                     type="text"
-                    placeholder="Search..."
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    :placeholder="t('features.search.placeholder')"
+                    class="w-full pl-10 pr-4 py-3 border border-input rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
                 <svg class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -24,7 +24,7 @@
 
         <!-- Filters -->
         <div class="mb-4 flex items-center space-x-2">
-            <span class="text-sm text-gray-700">Filter by type:</span>
+            <span class="text-sm text-foreground">{{ t('features.search.filterBy') }}</span>
             <button
                 v-for="type in availableTypes"
                 :key="type"
@@ -33,22 +33,22 @@
                     'px-3 py-1 text-sm rounded-md transition-colors',
                     typeFilters.includes(type)
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-secondary text-foreground hover:bg-accent'
                 ]"
             >
-                {{ type }}
+                {{ t(`features.search.types.${type}`) }}
             </button>
         </div>
 
         <div v-if="loading" class="text-center py-12">
-            <p class="text-gray-500">Searching...</p>
+            <p class="text-muted-foreground">{{ t('features.search.searching') }}</p>
         </div>
 
         <div v-else-if="results.length === 0 && query" class="text-center py-12">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p class="mt-4 text-gray-500">No results found</p>
+            <p class="mt-4 text-muted-foreground">{{ t('features.search.empty') }}</p>
         </div>
 
         <div v-else-if="results.length > 0" class="space-y-4">
@@ -56,20 +56,20 @@
             <div
                 v-for="type in groupedResults"
                 :key="type"
-                class="bg-white shadow rounded-lg p-6"
+                class="bg-card shadow rounded-lg p-6"
             >
-                <h2 class="text-lg font-semibold text-gray-900 mb-4 capitalize">{{ type }}</h2>
+                <h2 class="text-lg font-semibold text-foreground mb-4 capitalize">{{ t(`features.search.types.${type}`) }}</h2>
                 <div class="space-y-3">
                     <div
                         v-for="result in groupedResults[type]"
                         :key="`${result.type}-${result.id}`"
                         @click="handleResultClick(result)"
-                        class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer transition-colors"
                     >
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
-                                <h3 class="text-sm font-medium text-gray-900">{{ result.title }}</h3>
-                                <p v-if="result.description" class="text-sm text-gray-500 mt-1">{{ result.description }}</p>
+                                <h3 class="text-sm font-medium text-foreground">{{ result.title }}</h3>
+                                <p v-if="result.description" class="text-sm text-muted-foreground mt-1">{{ result.description }}</p>
                                 <div class="mt-2 flex items-center space-x-4 text-xs text-gray-400">
                                     <span v-if="result.created_at">{{ formatDate(result.created_at) }}</span>
                                     <span v-if="result.author">{{ result.author }}</span>
@@ -88,7 +88,7 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p class="mt-4 text-gray-500">Enter a search query to get started</p>
+            <p class="mt-4 text-muted-foreground">{{ t('features.search.initial') }}</p>
         </div>
     </div>
 </template>
@@ -96,7 +96,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+
+const { t } = useI18n();
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const route = useRoute();

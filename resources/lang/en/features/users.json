@@ -1,0 +1,61 @@
+{
+    "title": "Users",
+    "createNew": "Create New User",
+    "search": "Search user by name, email or phone...",
+    "allRoles": "All Roles",
+    "loading": "Loading users...",
+    "empty": "No users found.",
+    "table": {
+        "user": "User",
+        "email": "Email",
+        "roles": "Roles",
+        "lastLogin": "Last Login",
+        "actions": "Actions"
+    },
+    "status": {
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "noRoles": "No roles assigned",
+        "never": "Never"
+    },
+    "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete user \"{name}\"?",
+        "deleteFailed": "Failed to delete user",
+        "saveSuccess": "User saved successfully",
+        "saveFailed": "Failed to save user",
+        "roleRequired": "Please select at least one role",
+        "passwordRequired": "Password is required for new users"
+    },
+    "modals": {
+        "user": {
+            "titleEdit": "Edit User",
+            "titleCreate": "Create User",
+            "avatar": "Avatar",
+            "selectAvatar": "Select Avatar",
+            "removeAvatar": "Remove Avatar",
+            "name": "Name",
+            "namePlaceholder": "Full name",
+            "email": "Email",
+            "emailPlaceholder": "user@example.com",
+            "password": "Password",
+            "passwordPlaceholder": "Minimum 8 characters",
+            "passwordHint": "Leave empty when editing to keep current password",
+            "phone": "Phone",
+            "phonePlaceholder": "+1234567890",
+            "bio": "Bio",
+            "bioPlaceholder": "User biography",
+            "website": "Website",
+            "websitePlaceholder": "https://example.com",
+            "location": "Location",
+            "locationPlaceholder": "City, Country",
+            "roles": "Roles",
+            "loadingRoles": "Loading roles...",
+            "noRoles": "No roles available",
+            "saving": "Saving..."
+        }
+    }
+}

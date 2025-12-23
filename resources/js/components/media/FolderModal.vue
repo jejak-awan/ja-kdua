@@ -1,13 +1,12 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-                <!-- Header -->
+            <div class="bg-card rounded-lg shadow-xl max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Create Folder</h3>
+                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.folder.title') }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -19,27 +18,27 @@
                 <div class="p-6">
                     <form @submit.prevent="handleSubmit" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Folder Name <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.folder.name') }} <span class="text-red-500">*</span>
                             </label>
                             <input
                                 v-model="form.name"
                                 type="text"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Enter folder name"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                :placeholder="$t('features.media.modals.folder.placeholder')"
                             >
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Parent Folder
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.media.modals.folder.parent') }}
                             </label>
                             <select
                                 v-model="form.parent_id"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                                <option :value="null">No Parent</option>
+                                <option :value="null">{{ $t('features.media.modals.folder.noParent') }}</option>
                                 <option
                                     v-for="folder in folders"
                                     :key="folder.id"
@@ -56,16 +55,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('features.media.actions.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Creating...' : 'Create Folder' }}
+                        {{ saving ? $t('features.media.modals.folder.creating') : $t('features.media.modals.folder.create') }}
                     </button>
                 </div>
             </div>
@@ -75,7 +74,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const emit = defineEmits(['close', 'created']);
 
@@ -106,7 +108,7 @@ const handleSubmit = async () => {
         form.value = { name: '', parent_id: null };
     } catch (error) {
         console.error('Failed to create folder:', error);
-        alert('Failed to create folder');
+        alert(t('features.media.messages.createFolderFailed'));
     } finally {
         saving.value = false;
     }

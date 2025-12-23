@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Media;
 use App\Services\CacheService;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class MediaController extends BaseApiController
 {
+    protected MediaService $mediaService;
+
+    public function __construct()
+    {
+        $this->mediaService = new MediaService();
+    }
+
     public function index(Request $request)
     {
         $query = Media::with(['folder', 'usages']);
@@ -34,7 +42,6 @@ class MediaController extends BaseApiController
             });
         }
 
-        // Filter by usage (used/unused)
         if ($request->has('usage')) {
             if ($request->usage === 'used') {
                 $query->has('usages');
@@ -43,7 +50,6 @@ class MediaController extends BaseApiController
             }
         }
 
-        // View type (affects pagination)
         $perPage = $request->input('view', 'grid') === 'list' ? 50 : 24;
         $media = $query->latest()->paginate($perPage);
 
@@ -52,14 +58,13 @@ class MediaController extends BaseApiController
 
     public function upload(Request $request)
     {
-        // Check permission
-        if (! $request->user()->hasRole('admin') && ! $request->user()->can('upload media')) {
+        if (!$request->user()->hasRole('admin') && !$request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
         try {
             $request->validate([
-                'file' => 'required|file|max:10240', // 10MB max
+                'file' => 'required|file|max:10240',
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
             ]);
@@ -67,68 +72,11 @@ class MediaController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        $file = $request->file('file');
-        $path = $file->store('media', 'public');
-        $fullPath = Storage::disk('public')->path($path);
-
-        // Optimize image if requested and it's an image
-        if ($request->input('optimize', true) && str_starts_with($file->getMimeType(), 'image/')) {
-            try {
-                // Use Intervention Image v3 API
-                if (class_exists(\Intervention\Image\ImageManager::class)) {
-                    // Try GD driver first, fallback to Imagick if available
-                    $driver = null;
-                    if (extension_loaded('gd')) {
-                        $driver = new \Intervention\Image\Drivers\Gd\Driver;
-                    } elseif (extension_loaded('imagick')) {
-                        $driver = new \Intervention\Image\Drivers\Imagick\Driver;
-                    }
-
-                    if ($driver) {
-                        $manager = new \Intervention\Image\ImageManager($driver);
-                        $image = $manager->read($fullPath);
-
-                        // Resize if too large (max 1920px width)
-                        if ($image->width() > 1920) {
-                            $image->scale(width: 1920);
-                        }
-
-                        // Save with quality optimization
-                        $image->save($fullPath, quality: 85);
-                    }
-                }
-            } catch (\Exception $e) {
-                // If optimization fails, continue with original
-                \Log::warning('Image optimization failed: '.$e->getMessage());
-            }
-        }
-
-        $fileSize = filesize($fullPath);
-
-        $media = Media::create([
-            'name' => $file->getClientOriginalName(),
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'disk' => 'public',
-            'path' => $path,
-            'size' => $fileSize,
-            'alt' => $request->input('alt'),
-            'description' => $request->input('description'),
-            'folder_id' => $request->input('folder_id'),
-        ]);
-
-        // Auto-generate thumbnail for images
-        if (str_starts_with($media->mime_type, 'image/')) {
-            try {
-                $this->generateThumbnailForMedia($media);
-            } catch (\Exception $e) {
-                \Log::warning('Auto-thumbnail generation failed: '.$e->getMessage());
-            }
-        }
-
-        // Clear media cache
-        $cacheService = new CacheService;
-        $cacheService->clearMediaCaches();
+        $media = $this->mediaService->upload(
+            $request->file('file'),
+            $request->input('folder_id'),
+            $request->input('optimize', true)
+        );
 
         return $this->success([
             'media' => $media->fresh()->load(['folder', 'usages']),
@@ -155,19 +103,17 @@ class MediaController extends BaseApiController
 
         $media->update($validated);
 
-        // Clear cache
-        $cacheService = new CacheService;
+        $cacheService = new CacheService();
         $cacheService->clearMediaCaches();
 
         return $this->success($media->load(['folder', 'usages']), 'Media updated successfully');
     }
 
-    public function destroy(Media $media)
+    public function destroy(Request $request, Media $media)
     {
-        // Check if media is in use
         $usageCount = $media->usages()->count();
 
-        if ($usageCount > 0 && ! $request->input('force', false)) {
+        if ($usageCount > 0 && !$request->input('force', false)) {
             return $this->validationError([
                 'media' => ['Media is currently in use. Use force=true to delete anyway.'],
                 'usage_count' => $usageCount,
@@ -175,20 +121,7 @@ class MediaController extends BaseApiController
             ], 'Media is currently in use. Use force=true to delete anyway.');
         }
 
-        // Delete all thumbnails/variants if exist
-        $this->deleteMediaVariants($media);
-
-        // Delete file from storage
-        Storage::disk($media->disk)->delete($media->path);
-
-        // Delete usage records
-        $media->usages()->delete();
-
-        $media->delete();
-
-        // Clear cache
-        $cacheService = new CacheService;
-        $cacheService->clearMediaCaches();
+        $this->mediaService->delete($media);
 
         return $this->success(null, 'Media deleted successfully');
     }
@@ -299,149 +232,72 @@ class MediaController extends BaseApiController
 
     public function bulkAction(Request $request)
     {
-        // Accept both 'ids' and 'media_ids' for compatibility
         $ids = $request->input('ids', $request->input('media_ids', []));
         $action = $request->input('action');
 
-        // Normalize action: 'move' -> 'move_folder'
         if ($action === 'move') {
             $action = 'move_folder';
-            // Update request to use normalized action for validation
-            $request->merge(['action' => $action]);
         }
 
-        // Validate IDs separately first
-        if (empty($ids) || ! is_array($ids)) {
+        if (empty($ids) || !is_array($ids)) {
             return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
-        // Validate that all IDs exist
         $existingIds = Media::whereIn('id', $ids)->pluck('id')->toArray();
-        $missingIds = array_diff($ids, $existingIds);
-
-        if (! empty($missingIds)) {
+        if (count($existingIds) !== count($ids)) {
             return $this->validationError(['ids' => ['Some media IDs do not exist.']], 'The selected action is invalid.');
         }
 
-        // Now validate action and folder_id
-        $folderId = $request->input('folder_id', null);
-
-        // Convert string "null" to actual null
+        $folderId = $request->input('folder_id');
         if ($folderId === 'null') {
             $folderId = null;
         }
 
-        // Validate action
-        $validated = $request->validate([
-            'action' => 'required|in:delete,move_folder',
-        ]);
+        $affected = $this->mediaService->bulkAction(
+            $action,
+            $ids,
+            $folderId,
+            $request->input('alt_text')
+        );
 
-        // Validate folder_id only if it's not null
-        if ($folderId !== null) {
-            $request->validate([
-                'folder_id' => 'exists:media_folders,id',
-            ]);
-        }
-
-        $validated['folder_id'] = $folderId;
-
-        $media = Media::whereIn('id', $ids)->get();
-
-        foreach ($media as $item) {
-            switch ($validated['action']) {
-                case 'delete':
-                    $this->deleteMediaVariants($item);
-                    Storage::disk($item->disk)->delete($item->path);
-                    $item->delete();
-                    break;
-                case 'move_folder':
-                    $item->update(['folder_id' => $validated['folder_id']]);
-                    break;
-            }
-        }
-
-        return $this->success([
-            'affected' => $media->count(),
-        ], 'Bulk action completed successfully');
+        return $this->success(['affected' => $affected], 'Bulk action completed successfully');
     }
 
     public function usage(Media $media)
     {
-        $usages = $media->usages()->get();
-
-        $usageData = $usages->map(function ($usage) {
-            $model = null;
-            try {
-                // Try to load the model
-                $modelClass = $usage->model_type;
-                if (class_exists($modelClass)) {
-                    $model = $modelClass::find($usage->model_id);
-                }
-            } catch (\Exception $e) {
-                // Model might be deleted or class doesn't exist
-                \Log::warning('Failed to load model for usage: '.$e->getMessage());
-            }
-
-            return [
-                'id' => $usage->id,
-                'model_type' => $usage->model_type,
-                'model_id' => $usage->model_id,
-                'field_name' => $usage->field_name,
-                'model' => $model ? [
-                    'id' => $model->id,
-                    'title' => $model->title ?? $model->name ?? 'N/A',
-                    'slug' => $model->slug ?? null,
-                    'type' => class_basename($usage->model_type),
-                ] : [
-                    'id' => $usage->model_id,
-                    'title' => 'Deleted or not found',
-                    'slug' => null,
-                    'type' => class_basename($usage->model_type),
-                ],
-                'created_at' => $usage->created_at,
-            ];
-        });
+        $usageInfo = $this->mediaService->getUsageInfo($media);
 
         return $this->success([
             'media_id' => $media->id,
-            'usage_count' => $usages->count(),
-            'usages' => $usageData,
+            'usage_count' => count($usageInfo),
+            'usages' => $usageInfo,
         ], 'Media usage retrieved successfully');
     }
 
     public function generateThumbnail(Request $request, Media $media)
     {
-        // Only for images
-        if (! str_starts_with($media->mime_type, 'image/')) {
-            return $this->error('Thumbnail can only be generated for images', 400, ['media' => ['Thumbnail can only be generated for images']], 'INVALID_MEDIA_TYPE');
+        if (!str_starts_with($media->mime_type, 'image/')) {
+            return $this->error('Thumbnail can only be generated for images', 400, [], 'INVALID_MEDIA_TYPE');
         }
 
-        try {
-            // Get thumbnail dimensions from request or use defaults
-            $width = $request->input('width', 300);
-            $height = $request->input('height', 300);
+        $width = $request->input('width', 300);
+        $height = $request->input('height', 300);
 
-            $thumbnailPath = $this->generateThumbnailForMedia($media, $width, $height);
+        $thumbnailPath = $this->mediaService->generateThumbnail($media, $width, $height);
 
-            if ($thumbnailPath) {
-                // Use relative path for public disk to avoid localhost URL issues
-                $thumbnailUrl = $media->disk === 'public'
-                    ? '/storage/'.ltrim($thumbnailPath, '/')
-                    : Storage::disk($media->disk)->url($thumbnailPath);
+        if ($thumbnailPath) {
+            $thumbnailUrl = $media->disk === 'public'
+                ? '/storage/' . ltrim($thumbnailPath, '/')
+                : Storage::disk($media->disk)->url($thumbnailPath);
 
-                return $this->success([
-                    'thumbnail_url' => $thumbnailUrl,
-                    'thumbnail_path' => $thumbnailPath,
-                    'media' => $media->fresh()->load(['folder', 'usages']),
-                ], 'Thumbnail generated successfully');
-            }
-
-            return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
-        } catch (\Exception $e) {
-            \Log::error('Thumbnail generation failed: '.$e->getMessage());
-
-            return $this->error('Failed to generate thumbnail: '.$e->getMessage(), 500, [], 'THUMBNAIL_GENERATION_ERROR');
+            return $this->success([
+                'thumbnail_url' => $thumbnailUrl,
+                'thumbnail_path' => $thumbnailPath,
+                'media' => $media->fresh()->load(['folder', 'usages']),
+            ], 'Thumbnail generated successfully');
         }
+
+        return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
     }
 
     public function resize(Request $request, Media $media)
@@ -511,4 +367,160 @@ class MediaController extends BaseApiController
             return $this->error('Failed to resize image: '.$e->getMessage(), 500, [], 'IMAGE_RESIZE_ERROR');
         }
     }
+
+    /**
+     * Download multiple media files as ZIP
+     */
+    public function downloadZip(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:media,id',
+        ]);
+
+        $ids = $request->input('ids');
+        $media = Media::whereIn('id', $ids)->get();
+
+        if ($media->isEmpty()) {
+            return $this->error('No media files found', 404, [], 'NO_MEDIA_FOUND');
+        }
+
+        // Create temporary ZIP file
+        $zipFileName = 'media-'.now()->format('Y-m-d-His').'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
+
+        // Ensure temp directory exists
+        $tempDir = storage_path('app/temp');
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $zip = new \ZipArchive;
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return $this->error('Failed to create ZIP file', 500, [], 'ZIP_CREATION_FAILED');
+        }
+
+        foreach ($media as $item) {
+            $filePath = Storage::disk($item->disk)->path($item->path);
+            if (file_exists($filePath)) {
+                $zip->addFile($filePath, $item->file_name ?: $item->name);
+            }
+        }
+
+        $zip->close();
+
+        // Return file download
+        return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+    }
+
+    public function edit(Request $request, Media $media)
+    {
+        // Only for images
+        if (! str_starts_with($media->mime_type, 'image/')) {
+            return $this->validationError(['media' => ['Image editing can only be performed on images']], 'Image editing can only be performed on images');
+        }
+
+        try {
+            $validated = $request->validate([
+                'image' => 'required|image|max:10240', // 10MB max
+                'save_as_new' => 'nullable|boolean',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        try {
+            $saveAsNew = $request->boolean('save_as_new', false);
+            $imageFile = $request->file('image');
+
+            // Use Intervention Image v3 API
+            if (class_exists(\Intervention\Image\ImageManager::class)) {
+                $driver = null;
+                if (extension_loaded('gd')) {
+                    $driver = new \Intervention\Image\Drivers\Gd\Driver;
+                } elseif (extension_loaded('imagick')) {
+                    $driver = new \Intervention\Image\Drivers\Imagick\Driver;
+                }
+
+                if ($driver) {
+                    $manager = new \Intervention\Image\ImageManager($driver);
+                    $image = $manager->read($imageFile->getRealPath());
+
+                    if ($saveAsNew) {
+                        // Save as new version
+                        $originalPath = $media->path;
+                        $pathInfo = pathinfo($originalPath);
+                        $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
+                        $newPath = $pathInfo['dirname'].'/'.$newFileName;
+
+                        // Save to same disk
+                        $fullPath = Storage::disk($media->disk)->path($newPath);
+                        $directory = dirname($fullPath);
+                        if (! is_dir($directory)) {
+                            mkdir($directory, 0755, true);
+                        }
+
+                        $image->save($fullPath);
+
+                        // Create new media record
+                        $newMedia = Media::create([
+                            'name' => $pathInfo['filename'].'_edited',
+                            'file_name' => $newFileName,
+                            'path' => $newPath,
+                            'mime_type' => $media->mime_type,
+                            'size' => filesize($fullPath),
+                            'disk' => $media->disk,
+                            'folder_id' => $media->folder_id,
+                            'alt' => $media->alt,
+                            'description' => $media->description,
+                            'user_id' => auth()->id(),
+                        ]);
+
+                        // Generate thumbnail if needed
+                        if (config('media.generate_thumbnails', true)) {
+                            try {
+                                $thumbnailPath = $this->generateThumbnailForMedia($newMedia);
+                                $newMedia->update(['thumbnail_path' => $thumbnailPath]);
+                            } catch (\Exception $e) {
+                                \Log::warning('Thumbnail generation failed for edited image: '.$e->getMessage());
+                            }
+                        }
+
+                        return $this->success($newMedia->load(['folder', 'usages']), 'Image saved as new version successfully');
+                    } else {
+                        // Overwrite existing
+                        $fullPath = Storage::disk($media->disk)->path($media->path);
+                        $image->save($fullPath);
+
+                        // Update file size
+                        $media->update([
+                            'size' => filesize($fullPath),
+                        ]);
+
+                        // Regenerate thumbnail
+                        if (config('media.generate_thumbnails', true) && $media->thumbnail_path) {
+                            try {
+                                $thumbnailPath = $this->generateThumbnailForMedia($media);
+                                $media->update(['thumbnail_path' => $thumbnailPath]);
+                            } catch (\Exception $e) {
+                                \Log::warning('Thumbnail regeneration failed: '.$e->getMessage());
+                            }
+                        }
+
+                        // Invalidate cache
+                        CacheService::invalidateByPattern("media:{$media->id}:*");
+
+                        return $this->success($media->fresh()->load(['folder', 'usages']), 'Image updated successfully');
+                    }
+                }
+            }
+
+            return $this->error('Image processing library not available', 500, [], 'IMAGE_PROCESSING_UNAVAILABLE');
+        } catch (\Exception $e) {
+            \Log::error('Image editing failed: '.$e->getMessage());
+
+            return $this->error('Failed to edit image: '.$e->getMessage(), 500, [], 'IMAGE_EDIT_ERROR');
+        }
+    }
+
 }

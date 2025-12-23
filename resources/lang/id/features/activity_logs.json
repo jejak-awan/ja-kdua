@@ -1,0 +1,31 @@
+{
+    "title": "Log Aktivitas",
+    "stats": {
+        "total": "Total Aktivitas",
+        "today": "Hari Ini",
+        "activeUsers": "Pengguna Aktif",
+        "thisWeek": "Minggu Ini"
+    },
+    "filters": {
+        "search": "Cari aktivitas...",
+        "allTypes": "Semua Tipe",
+        "allUsers": "Semua Pengguna",
+        "types": {
+            "created": "Dibuat",
+            "updated": "Diperbarui",
+            "deleted": "Dihapus",
+            "login": "Masuk",
+            "logout": "Keluar",
+            "viewed": "Dilihat",
+            "published": "Diterbitkan",
+            "unpublished": "Tidak Diterbitkan"
+        }
+    },
+    "messages": {
+        "loading": "Memuat...",
+        "empty": "Tidak ada log aktivitas ditemukan",
+        "viewDetails": "Lihat Detail",
+        "system": "Sistem",
+        "unknown": "Tidak Diketahui"
+    }
+}

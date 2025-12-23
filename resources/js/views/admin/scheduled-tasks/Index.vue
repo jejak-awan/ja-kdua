@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Scheduled Tasks</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.scheduled_tasks.title') }}</h1>
             <button
                 @click="showCreateModal = true"
                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -9,81 +9,81 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Task
+                {{ t('features.system.scheduled_tasks.create') }}
             </button>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-card shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Search tasks..."
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="t('features.system.scheduled_tasks.search')"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                     <select
                         v-model="statusFilter"
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="">{{ t('features.system.scheduled_tasks.filters.all') }}</option>
+                        <option value="active">{{ t('features.system.scheduled_tasks.filters.active') }}</option>
+                        <option value="inactive">{{ t('features.system.scheduled_tasks.filters.inactive') }}</option>
                     </select>
                 </div>
             </div>
 
             <div v-if="loading" class="p-6 text-center">
-                <p class="text-gray-500">Loading...</p>
+                <p class="text-muted-foreground">{{ t('features.system.scheduled_tasks.loading') }}</p>
             </div>
 
             <div v-else-if="filteredTasks.length === 0" class="p-6 text-center">
-                <p class="text-gray-500">No scheduled tasks found</p>
+                <p class="text-muted-foreground">{{ t('features.system.scheduled_tasks.empty') }}</p>
             </div>
 
-            <table v-else class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table v-else class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Command
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.command') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Schedule
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.schedule') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Last Run
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.last_run') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.status') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ t('features.system.scheduled_tasks.table.actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="task in filteredTasks" :key="task.id" class="hover:bg-gray-50">
+                <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="task in filteredTasks" :key="task.id" class="hover:bg-muted">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ task.name }}</div>
+                            <div class="text-sm font-medium text-foreground">{{ task.name }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900 font-mono">{{ task.command }}</div>
+                            <div class="text-sm text-foreground font-mono">{{ task.command }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ task.schedule || '-' }}</div>
+                            <div class="text-sm text-foreground">{{ task.schedule || '-' }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {{ formatDate(task.last_run_at) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                :class="task.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                :class="task.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
                             >
-                                {{ task.is_active ? 'Active' : 'Inactive' }}
+                                {{ task.is_active ? t('features.system.scheduled_tasks.filters.active') : t('features.system.scheduled_tasks.filters.inactive') }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -92,19 +92,19 @@
                                     @click="runTask(task)"
                                     class="text-green-600 hover:text-green-900"
                                 >
-                                    Run Now
+                                    {{ t('features.system.scheduled_tasks.table.run') }}
                                 </button>
                                 <button
                                     @click="editTask(task)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    Edit
+                                    {{ t('features.system.scheduled_tasks.table.edit') }}
                                 </button>
                                 <button
                                     @click="deleteTask(task)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    Delete
+                                    {{ t('features.system.scheduled_tasks.table.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -125,9 +125,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import TaskModal from '../../../components/scheduled-tasks/TaskModal.vue';
+
+const { t } = useI18n();
 
 const tasks = ref([]);
 const loading = ref(false);
@@ -177,22 +180,22 @@ const editTask = (task) => {
 };
 
 const runTask = async (task) => {
-    if (!confirm(`Are you sure you want to run task "${task.name}" now?`)) {
+    if (!confirm(t('features.system.scheduled_tasks.confirm.run', { name: task.name }))) {
         return;
     }
 
     try {
         await api.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
-        alert('Task executed successfully');
+        alert(t('features.system.scheduled_tasks.messages.executed'));
         await fetchTasks();
     } catch (error) {
         console.error('Failed to run task:', error);
-        alert(error.response?.data?.message || 'Failed to run task');
+        alert(error.response?.data?.message || t('features.system.scheduled_tasks.messages.failed_execute'));
     }
 };
 
 const deleteTask = async (task) => {
-    if (!confirm(`Are you sure you want to delete task "${task.name}"?`)) {
+    if (!confirm(t('features.system.scheduled_tasks.confirm.delete', { name: task.name }))) {
         return;
     }
 
@@ -217,7 +220,7 @@ const handleTaskSaved = () => {
 };
 
 const formatDate = (date) => {
-    if (!date) return 'Never';
+    if (!date) return t('features.system.scheduled_tasks.table.never');
     return new Date(date).toLocaleString();
 };
 

@@ -1,11 +1,11 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Cache Management</h1>
+            <h1 class="text-2xl font-bold text-foreground">Cache Management</h1>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,14 +13,14 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Cache Status</p>
-                        <p class="text-2xl font-semibold text-gray-900">
+                        <p class="text-sm font-medium text-muted-foreground">Cache Status</p>
+                        <p class="text-2xl font-semibold text-foreground">
                             {{ cacheStats.status || 'Active' }}
                         </p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,14 +28,14 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Cache Hits</p>
-                        <p class="text-2xl font-semibold text-gray-900">
+                        <p class="text-sm font-medium text-muted-foreground">Cache Hits</p>
+                        <p class="text-2xl font-semibold text-foreground">
                             {{ cacheStats.hits || 0 }}
                         </p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,8 +43,8 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Cache Misses</p>
-                        <p class="text-2xl font-semibold text-gray-900">
+                        <p class="text-sm font-medium text-muted-foreground">Cache Misses</p>
+                        <p class="text-2xl font-semibold text-foreground">
                             {{ cacheStats.misses || 0 }}
                         </p>
                     </div>
@@ -52,8 +52,8 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Cache Actions</h2>
+        <div class="bg-card shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">Cache Actions</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                     @click="clearAllCache"
@@ -82,26 +82,26 @@
             </div>
         </div>
 
-        <div v-if="cacheStats.details" class="mt-6 bg-white shadow rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Cache Statistics</h2>
+        <div v-if="cacheStats.details" class="mt-6 bg-card shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">Cache Statistics</h2>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-border">
+                    <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                 Key
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                 Value
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-card divide-y divide-border">
                         <tr v-for="(value, key) in cacheStats.details" :key="key">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                                 {{ key }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                 {{ value }}
                             </td>
                         </tr>

@@ -1,0 +1,132 @@
+{
+    "title": "Security Management",
+    "tabs": {
+        "overview": "Overview",
+        "blocklist": "Blocklist",
+        "whitelist": "Whitelist"
+    },
+    "statistics": {
+        "events": "Security Events",
+        "blockedIps": "Blocked IPs",
+        "failedLogins": "Failed Logins",
+        "last24h": "Last 24h"
+    },
+    "ipManagement": {
+        "title": "IP Management",
+        "block": {
+            "label": "Block IP Address",
+            "placeholder": "192.168.1.1",
+            "button": "Block"
+        },
+        "check": {
+            "label": "Check IP Status",
+            "placeholder": "192.168.1.1",
+            "button": "Check"
+        },
+        "status": {
+            "label": "IP Status",
+            "blocked": "Blocked",
+            "allowed": "Allowed"
+        },
+        "unblock": {
+            "label": "Unblock IP / Clear Rate Limit",
+            "placeholder": "192.168.1.1",
+            "button": "Unblock"
+        }
+    },
+    "blocklist": {
+        "title": "IP Blocklist",
+        "description": "Blocked IP addresses cannot access the system",
+        "empty": "No blocked IP addresses",
+        "addIp": "Add IP to Blocklist",
+        "reason": "Reason (optional)",
+        "table": {
+            "ip": "IP Address",
+            "reason": "Reason",
+            "createdBy": "Created By",
+            "date": "Date",
+            "actions": "Actions"
+        },
+        "actions": {
+            "remove": "Remove",
+            "moveToWhitelist": "Move to Whitelist"
+        }
+    },
+    "whitelist": {
+        "title": "IP Whitelist",
+        "description": "Whitelisted IP addresses are never blocked",
+        "empty": "No whitelisted IP addresses",
+        "addIp": "Add IP to Whitelist",
+        "reason": "Reason (optional)",
+        "table": {
+            "ip": "IP Address",
+            "reason": "Reason",
+            "createdBy": "Created By",
+            "date": "Date",
+            "actions": "Actions"
+        },
+        "actions": {
+            "remove": "Remove"
+        }
+    },
+    "bulkActions": {
+        "selected": "{count} selected",
+        "blockSelected": "Block Selected",
+        "unblockSelected": "Unblock Selected",
+        "whitelistSelected": "Add to Whitelist",
+        "removeSelected": "Remove Selected"
+    },
+    "logs": {
+        "title": "Security Logs",
+        "all": "All Events",
+        "failedLogin": "Failed Login",
+        "blockedIp": "Blocked IP",
+        "suspiciousActivity": "Suspicious Activity",
+        "search": "Search logs...",
+        "loading": "Loading...",
+        "empty": "No security logs found",
+        "table": {
+            "event": "Event",
+            "ip": "IP Address",
+            "user": "User",
+            "details": "Details",
+            "date": "Date",
+            "actions": "Actions"
+        },
+        "actions": {
+            "blockIp": "Block IP"
+        },
+        "eventTypes": {
+            "login_failed": "Login Failed",
+            "login_success": "Login Success",
+            "ip_blocked": "IP Blocked",
+            "ip_unblocked": "IP Unblocked",
+            "suspicious_activity": "Suspicious Activity",
+            "ip_whitelisted": "IP Whitelisted",
+            "ip_whitelist_removed": "Removed from Whitelist",
+            "account_locked": "Account Locked",
+            "login_blocked": "Login Blocked"
+        }
+    },
+    "messages": {
+        "enterIp": "Please enter an IP address",
+        "blockSuccess": "IP address blocked successfully",
+        "blockFailed": "Failed to block IP address",
+        "checkFailed": "Failed to check IP status",
+        "confirmBlock": "Are you sure you want to block IP address {ip}?",
+        "unblockSuccess": "IP address unblocked and rate limit cleared successfully",
+        "unblockFailed": "Failed to unblock IP address",
+        "confirmUnblock": "Are you sure you want to unblock IP address {ip} and clear its rate limit?",
+        "whitelistSuccess": "IP address added to whitelist successfully",
+        "whitelistFailed": "Failed to add IP address to whitelist",
+        "confirmWhitelist": "Add IP address {ip} to whitelist?",
+        "removeWhitelistSuccess": "IP address removed from whitelist",
+        "removeWhitelistFailed": "Failed to remove IP address from whitelist",
+        "confirmRemoveWhitelist": "Remove IP address {ip} from whitelist?",
+        "bulkBlockSuccess": "{blocked} IP addresses blocked, {skipped} skipped",
+        "bulkUnblockSuccess": "{count} IP addresses unblocked",
+        "bulkWhitelistSuccess": "{count} IP addresses added to whitelist",
+        "bulkRemoveSuccess": "{count} IP addresses removed",
+        "cannotBlockWhitelisted": "Cannot block whitelisted IP address"
+    }
+}

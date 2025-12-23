@@ -1,61 +1,61 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.notifications.title') }}</h1>
             <div class="flex items-center space-x-2">
                 <button
                     v-if="unreadCount > 0"
                     @click="markAllAsRead"
-                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm"
+                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted text-sm"
                 >
-                    Mark All as Read
+                    {{ $t('features.notifications.actions.markAllRead') }}
                 </button>
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-card shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Search notifications..."
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="$t('features.notifications.filters.search')"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                     <select
                         v-model="typeFilter"
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                        <option value="">All Types</option>
-                        <option value="info">Info</option>
-                        <option value="success">Success</option>
-                        <option value="warning">Warning</option>
-                        <option value="error">Error</option>
+                        <option value="">{{ $t('features.notifications.filters.allTypes') }}</option>
+                        <option value="info">{{ $t('features.notifications.filters.type.info') }}</option>
+                        <option value="success">{{ $t('features.notifications.filters.type.success') }}</option>
+                        <option value="warning">{{ $t('features.notifications.filters.type.warning') }}</option>
+                        <option value="error">{{ $t('features.notifications.filters.type.error') }}</option>
                     </select>
                     <select
                         v-model="readFilter"
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                        <option value="">All</option>
-                        <option value="unread">Unread</option>
-                        <option value="read">Read</option>
+                        <option value="">{{ $t('features.notifications.filters.readStatus.all') }}</option>
+                        <option value="unread">{{ $t('features.notifications.filters.readStatus.unread') }}</option>
+                        <option value="read">{{ $t('features.notifications.filters.readStatus.read') }}</option>
                     </select>
                 </div>
             </div>
 
             <div v-if="loading" class="p-6 text-center">
-                <p class="text-gray-500">Loading...</p>
+                <p class="text-muted-foreground">{{ $t('features.notifications.messages.loading') }}</p>
             </div>
 
             <div v-else-if="filteredNotifications.length === 0" class="p-6 text-center">
-                <p class="text-gray-500">No notifications found</p>
+                <p class="text-muted-foreground">{{ $t('features.notifications.messages.empty') }}</p>
             </div>
 
-            <div v-else class="divide-y divide-gray-200">
+            <div v-else class="divide-y divide-border">
                 <div
                     v-for="notification in filteredNotifications"
                     :key="notification.id"
-                    class="px-6 py-4 hover:bg-gray-50"
+                    class="px-6 py-4 hover:bg-muted"
                     :class="{ 'bg-blue-50': !notification.read_at }"
                 >
                     <div class="flex items-start justify-between">
@@ -68,17 +68,17 @@
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="{
-                                        'bg-blue-100 text-blue-800': notification.type === 'info',
-                                        'bg-green-100 text-green-800': notification.type === 'success',
-                                        'bg-yellow-100 text-yellow-800': notification.type === 'warning',
-                                        'bg-red-100 text-red-800': notification.type === 'error',
+                                        'bg-blue-500/20 text-blue-400': notification.type === 'info',
+                                        'bg-green-500/20 text-green-400': notification.type === 'success',
+                                        'bg-yellow-500/20 text-yellow-400': notification.type === 'warning',
+                                        'bg-red-500/20 text-red-400': notification.type === 'error',
                                     }"
                                 >
-                                    {{ notification.type }}
+                                    {{ $t(`features.notifications.filters.type.${notification.type}`) }}
                                 </span>
-                                <h3 class="text-sm font-medium text-gray-900">{{ notification.title }}</h3>
+                                <h3 class="text-sm font-medium text-foreground">{{ notification.title }}</h3>
                             </div>
-                            <p class="mt-1 text-sm text-gray-600">{{ notification.message }}</p>
+                            <p class="mt-1 text-sm text-muted-foreground">{{ notification.message }}</p>
                             <p class="mt-1 text-xs text-gray-400">{{ formatDate(notification.created_at) }}</p>
                         </div>
                         <div class="flex items-center space-x-2 ml-4">
@@ -87,13 +87,13 @@
                                 @click="markAsRead(notification)"
                                 class="text-sm text-indigo-600 hover:text-indigo-900"
                             >
-                                Mark as Read
+                                {{ $t('features.notifications.actions.markRead') }}
                             </button>
                             <button
                                 @click="deleteNotification(notification)"
                                 class="text-sm text-red-600 hover:text-red-900"
                             >
-                                Delete
+                                {{ $t('features.notifications.actions.delete') }}
                             </button>
                         </div>
                     </div>
@@ -105,7 +105,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+
+const { t } = useI18n();
 
 const notifications = ref([]);
 const loading = ref(false);
@@ -189,7 +192,7 @@ const markAllAsRead = async () => {
 };
 
 const deleteNotification = async (notification) => {
-    if (!confirm('Are you sure you want to delete this notification?')) {
+    if (!confirm(t('features.notifications.messages.deleteConfirm'))) {
         return;
     }
 
@@ -198,7 +201,7 @@ const deleteNotification = async (notification) => {
         await fetchNotifications();
     } catch (error) {
         console.error('Failed to delete notification:', error);
-        alert('Failed to delete notification');
+        alert(t('features.notifications.messages.deleteFailed'));
     }
 };
 

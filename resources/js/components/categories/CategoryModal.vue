@@ -1,15 +1,15 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">
-                        {{ category ? 'Edit Category' : 'Create Category' }}
+                        {{ category ? t('features.categories.form.editTitle') : t('features.categories.form.createTitle') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -21,57 +21,57 @@
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Name <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.name') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
                             @input="generateSlug"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Category name"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.categories.form.namePlaceholder')"
                         >
                     </div>
 
                     <!-- Slug -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Slug <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.slug') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.slug"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="category-slug"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.categories.form.slugPlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">URL-friendly version</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ t('features.categories.form.slugHelp') }}</p>
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Description
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.description') }}
                         </label>
                         <textarea
                             v-model="form.description"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Category description"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.categories.form.descriptionPlaceholder')"
                         />
                     </div>
 
                     <!-- Parent Category -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Parent Category
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.parent') }}
                         </label>
                         <select
                             v-model="form.parent_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option :value="null">No Parent (Root Category)</option>
+                            <option :value="null">{{ t('features.categories.form.noParent') }}</option>
                             <option
                                 v-for="cat in availableParents"
                                 :key="cat.id"
@@ -84,8 +84,8 @@
 
                     <!-- Image -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Image
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.image') }}
                         </label>
                         <div v-if="form.image" class="mb-2">
                             <img
@@ -98,29 +98,29 @@
                                 @click="form.image = null"
                                 class="mt-2 text-sm text-red-600 hover:text-red-800"
                             >
-                                Remove Image
+                                {{ t('features.categories.form.removeImage') }}
                             </button>
                         </div>
                         <MediaPicker
                             v-else
                             @selected="(media) => form.image = media.url"
-                            label="Select Image"
+                            :label="t('features.categories.form.selectImage')"
                         />
                     </div>
 
                     <!-- Sort Order -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Sort Order
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.form.sortOrder') }}
                         </label>
                         <input
                             v-model.number="form.sort_order"
                             type="number"
                             min="0"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="0"
                         >
-                        <p class="mt-1 text-xs text-gray-500">Lower numbers appear first</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ t('features.categories.form.sortOrderHelp') }}</p>
                     </div>
 
                     <!-- Active Status -->
@@ -129,10 +129,10 @@
                             v-model="form.is_active"
                             type="checkbox"
                             id="is_active"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                         >
-                        <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                            Active
+                        <label for="is_active" class="ml-2 block text-sm text-foreground">
+                            {{ t('features.categories.form.active') }}
                         </label>
                     </div>
                 </form>
@@ -141,16 +141,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ t('features.categories.form.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (category ? 'Update' : 'Create') }}
+                        {{ saving ? t('features.categories.form.saving') : (category ? t('features.categories.form.update') : t('features.categories.form.create')) }}
                     </button>
                 </div>
             </div>
@@ -160,8 +160,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import MediaPicker from '../MediaPicker.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     category: {
@@ -264,7 +267,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save category:', error);
-        alert(error.response?.data?.message || 'Failed to save category');
+        alert(error.response?.data?.message || t('features.categories.form.saveError'));
     } finally {
         saving.value = false;
     }

@@ -1,0 +1,178 @@
+{
+    "plugins": {
+        "title": "Plugins",
+        "empty": "No plugins found",
+        "loading": "Loading...",
+        "table": {
+            "name": "Name",
+            "version": "Version",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "actions": {
+            "activate": "Activate",
+            "deactivate": "Deactivate",
+            "settings": "Settings",
+            "close": "Close"
+        },
+        "messages": {
+            "failed_activate": "Failed to activate plugin",
+            "failed_deactivate": "Failed to deactivate plugin"
+        },
+        "modal": {
+            "settings_title": "Settings: {name}",
+            "settings_placeholder": "Plugin settings will be loaded here",
+            "close": "Close"
+        }
+    },
+    "webhooks": {
+        "title": "Webhooks",
+        "create": "New Webhook",
+        "search": "Search webhooks...",
+        "empty": "No webhooks found",
+        "loading": "Loading...",
+        "stats": {
+            "total": "Total Webhooks",
+            "active": "Active",
+            "total_calls": "Total Calls",
+            "failed_calls": "Failed Calls"
+        },
+        "table": {
+            "name": "Name",
+            "url": "URL",
+            "events": "Events",
+            "calls": "Calls",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "actions": {
+            "test": "Test",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "messages": {
+            "test_success": "Webhook test sent successfully",
+            "test_failed": "Failed to test webhook",
+            "delete_failed": "Failed to delete webhook",
+            "save_failed": "Failed to save webhook"
+        },
+        "confirm": {
+            "delete": "Are you sure you want to delete webhook \"{name}\"?"
+        },
+        "modal": {
+            "title_create": "Create Webhook",
+            "title_edit": "Edit Webhook",
+            "name_label": "Name",
+            "name_placeholder": "Webhook name",
+            "url_label": "URL",
+            "url_placeholder": "https://example.com/webhook",
+            "events_label": "Events",
+            "secret_label": "Secret Key",
+            "secret_placeholder": "Optional secret key for signing",
+            "active_label": "Active",
+            "cancel": "Cancel",
+            "create": "Create",
+            "update": "Update",
+            "saving": "Saving..."
+        }
+    },
+    "custom_fields": {
+        "title": "Custom Fields",
+        "create_group": "New Field Group",
+        "create_field": "New Field",
+        "tabs": {
+            "groups": "Field Groups",
+            "fields": "Custom Fields"
+        },
+        "groups": {
+            "empty": "No field groups found",
+            "table": {
+                "name": "Name",
+                "fields": "Fields",
+                "attached_to": "Attached To",
+                "actions": "Actions"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "confirm": {
+                "delete": "Are you sure you want to delete field group \"{name}\"?"
+            },
+            "messages": {
+                "delete_failed": "Failed to delete field group",
+                "save_failed": "Failed to save field group"
+            },
+            "modal": {
+                "title_create": "Create Field Group",
+                "title_edit": "Edit Field Group",
+                "name_label": "Name",
+                "name_placeholder": "Field group name",
+                "description_label": "Description",
+                "description_placeholder": "Field group description",
+                "attach_label": "Attach To",
+                "attach_options": {
+                    "none": "None",
+                    "content": "Content",
+                    "category": "Category",
+                    "media": "Media"
+                },
+                "cancel": "Cancel",
+                "create": "Create",
+                "update": "Update",
+                "saving": "Saving..."
+            }
+        },
+        "fields": {
+            "search": "Search fields...",
+            "empty": "No custom fields found",
+            "table": {
+                "label": "Label",
+                "name": "Name",
+                "type": "Type",
+                "group": "Group",
+                "actions": "Actions"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "confirm": {
+                "delete": "Are you sure you want to delete field \"{label}\"?"
+            },
+            "messages": {
+                "delete_failed": "Failed to delete field",
+                "save_failed": "Failed to save field"
+            },
+            "modal": {
+                "title_create": "Create Custom Field",
+                "title_edit": "Edit Custom Field",
+                "label_label": "Label",
+                "label_placeholder": "Field label",
+                "name_label": "Name",
+                "name_placeholder": "field_name",
+                "name_help": "Field identifier (snake_case)",
+                "type_label": "Type",
+                "group_label": "Field Group",
+                "group_none": "No Group",
+                "default_label": "Default Value",
+                "default_placeholder": "Default value",
+                "options_label": "Options (for select, radio, checkbox)",
+                "options_placeholder": "option1,option2,option3",
+                "options_help": "Comma-separated values",
+                "instructions_label": "Instructions",
+                "instructions_placeholder": "Field instructions for users",
+                "required_label": "Required",
+                "searchable_label": "Searchable",
+                "cancel": "Cancel",
+                "create": "Create",
+                "update": "Update",
+                "saving": "Saving..."
+            }
+        }
+    }
+}

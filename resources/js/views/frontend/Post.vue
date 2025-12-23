@@ -1,6 +1,6 @@
 <template>
   <div class="post-page">
-    <div v-if="loading" class="container loading">Loading...</div>
+    <div v-if="loading" class="container loading">{{ t('features.frontend.post.loading') }}</div>
     <div v-else-if="post" class="container">
       <!-- Post Header -->
       <article class="post-content">
@@ -22,7 +22,7 @@
             </span>
             <span v-if="post.views" class="meta-item">
               <i class="bi bi-eye"></i>
-              {{ post.views }} views
+              {{ post.views }} {{ t('features.frontend.post.views') }}
             </span>
           </div>
         </div>
@@ -35,7 +35,7 @@
         
         <!-- Tags -->
         <div v-if="post.tags && post.tags.length > 0" class="post-tags">
-          <span class="tags-label">Tags:</span>
+          <span class="tags-label">{{ t('features.frontend.post.tags') }}</span>
           <span v-for="tag in post.tags" :key="tag.id" class="tag">
             {{ tag.name }}
           </span>
@@ -62,7 +62,7 @@
       />
     </div>
     <div v-else class="container no-post">
-      <p>Post not found</p>
+      <p>{{ t('features.frontend.post.notFound') }}</p>
     </div>
   </div>
 </template>
@@ -70,9 +70,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import SocialShare from '@/components/SocialShare.vue'
 import RelatedPosts from '@/components/RelatedPosts.vue'
+
+const { t, locale } = useI18n()
 
 const route = useRoute()
 const post = ref(null)
@@ -88,7 +91,7 @@ const postHashtags = computed(() => {
 })
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString(locale.value, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

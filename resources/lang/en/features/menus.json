@@ -1,0 +1,65 @@
+{
+    "title": "Menus",
+    "actions": {
+        "create": "New Menu",
+        "createItem": "Add Item",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save Menu",
+        "saved": "Menu saved successfully",
+        "cancel": "Cancel",
+        "createAction": "Create",
+        "creating": "Creating...",
+        "update": "Update",
+        "saving": "Saving..."
+    },
+    "headers": {
+        "name": "Name",
+        "location": "Location",
+        "items": "Items",
+        "actions": "Actions"
+    },
+    "messages": {
+        "loading": "Loading...",
+        "empty": "No menus found",
+        "emptyItems": "No menu items. Click \"Add Item\" to get started.",
+        "deleteConfirm": "Are you sure you want to delete menu \"{name}\"?",
+        "deleteItemConfirm": "Are you sure you want to delete \"{title}\"?",
+        "deleteFailed": "Failed to delete menu",
+        "deleteItemFailed": "Failed to delete menu item",
+        "saveFailed": "Failed to save menu",
+        "createFailed": "Failed to create menu",
+        "saveItemFailed": "Failed to save menu item"
+    },
+    "form": {
+        "name": "Name",
+        "label": "Label",
+        "type": "Type",
+        "url": "URL",
+        "location": "Location",
+        "page": "Page",
+        "category": "Category",
+        "content": "Content",
+        "cssClasses": "CSS Classes",
+        "openInNewTab": "Open in new tab",
+        "settings": "Menu Settings",
+        "items": "Menu Items",
+        "createTitle": "Create Menu",
+        "editTitle": "Edit Menu",
+        "createItemTitle": "Add Menu Item",
+        "editItemTitle": "Edit Menu Item",
+        "placeholders": {
+            "name": "Menu name",
+            "location": "header, footer, etc.",
+            "selectPage": "Select page...",
+            "selectCategory": "Select category...",
+            "selectContent": "Select content..."
+        },
+        "types": {
+            "link": "Link",
+            "page": "Page",
+            "category": "Category",
+            "content": "Content"
+        }
+    }
+}

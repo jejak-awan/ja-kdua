@@ -1,15 +1,15 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-md w-full">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">
-                        Move Category
+                        {{ t('features.categories.move.title') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -20,17 +20,17 @@
                 <!-- Content -->
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
-                        <p class="text-sm text-gray-600 mb-4">
-                            Move <strong>{{ category.name }}</strong> to:
+                        <p class="text-sm text-muted-foreground mb-4">
+                            {{ t('features.categories.move.description', { name: category.name }) }}
                         </p>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            New Parent Category
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.categories.move.newParent') }}
                         </label>
                         <select
                             v-model="selectedParentId"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option :value="null">No Parent (Root Category)</option>
+                            <option :value="null">{{ t('features.categories.form.noParent') }}</option>
                             <option
                                 v-for="cat in availableParents"
                                 :key="cat.id"
@@ -46,16 +46,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ t('features.categories.move.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Moving...' : 'Move Category' }}
+                        {{ saving ? t('features.categories.move.moving') : t('features.categories.move.submit') }}
                     </button>
                 </div>
             </div>
@@ -65,7 +65,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     category: {
@@ -122,7 +125,7 @@ const handleSubmit = async () => {
         emit('moved');
     } catch (error) {
         console.error('Failed to move category:', error);
-        alert(error.response?.data?.message || 'Failed to move category');
+        alert(error.response?.data?.message || t('features.categories.move.error'));
     } finally {
         saving.value = false;
     }

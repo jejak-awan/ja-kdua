@@ -1,14 +1,14 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Log Viewer</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.logs.title') }}</h1>
             <div class="flex items-center space-x-2">
                 <button
                     @click="clearLogs"
                     :disabled="clearing"
-                    class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 disabled:opacity-50"
+                    class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20 disabled:opacity-50"
                 >
-                    {{ clearing ? 'Clearing...' : 'Clear Logs' }}
+                    {{ clearing ? t('features.system.logs.clearing') : t('features.system.logs.clear') }}
                 </button>
             </div>
         </div>
@@ -16,24 +16,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Log Files List -->
             <div class="lg:col-span-1">
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Log Files</h2>
+                <div class="bg-card shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-border">
+                        <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.logs.files') }}</h2>
                     </div>
-                    <div class="divide-y divide-gray-200">
+                    <div class="divide-y divide-border">
                         <button
                             v-for="logFile in logFiles"
                             :key="logFile.name"
                             @click="selectLogFile(logFile)"
                             :class="[
-                                'w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors',
-                                selectedLogFile?.name === logFile.name ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''
+                                'w-full px-6 py-4 text-left hover:bg-muted transition-colors',
+                                selectedLogFile?.name === logFile.name ? 'bg-indigo-500/20 border-l-4 border-indigo-600' : ''
                             ]"
                         >
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">{{ logFile.name }}</p>
-                                    <p class="text-xs text-gray-500 mt-1">{{ formatFileSize(logFile.size) }}</p>
+                                    <p class="text-sm font-medium text-foreground">{{ logFile.name }}</p>
+                                    <p class="text-xs text-muted-foreground mt-1">{{ formatFileSize(logFile.size) }}</p>
                                 </div>
                                 <button
                                     @click.stop="downloadLog(logFile)"
@@ -51,23 +51,23 @@
 
             <!-- Log Viewer -->
             <div class="lg:col-span-2">
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">
-                            {{ selectedLogFile ? selectedLogFile.name : 'Select a log file' }}
+                <div class="bg-card shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-foreground">
+                            {{ selectedLogFile ? selectedLogFile.name : t('features.system.logs.select') }}
                         </h2>
                         <div v-if="selectedLogFile" class="flex items-center space-x-2">
                             <input
                                 v-model="logSearch"
                                 type="text"
-                                placeholder="Search in log..."
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                :placeholder="t('features.system.logs.search')"
+                                class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                             <button
                                 @click="refreshLog"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                                class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
                             >
-                                Refresh
+                                {{ t('features.system.logs.refresh') }}
                             </button>
                         </div>
                     </div>
@@ -76,10 +76,10 @@
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <p class="mt-4 text-gray-500">Select a log file to view</p>
+                            <p class="mt-4 text-muted-foreground">{{ t('features.system.logs.empty') }}</p>
                         </div>
                         <div v-else-if="loadingLog" class="text-center py-12">
-                            <p class="text-gray-500">Loading log file...</p>
+                            <p class="text-muted-foreground">{{ t('features.system.logs.loading') }}</p>
                         </div>
                         <div v-else class="bg-gray-900 rounded-lg p-4 overflow-x-auto max-h-[600px] overflow-y-auto">
                             <pre class="text-xs font-mono text-green-400" v-html="highlightedLogContent" />
@@ -93,9 +93,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
+const { t } = useI18n();
 const logFiles = ref([]);
 const selectedLogFile = ref(null);
 const logContent = ref('');
@@ -142,7 +144,7 @@ const selectLogFile = async (logFile) => {
         logContent.value = data.content || '';
     } catch (error) {
         console.error('Failed to fetch log content:', error);
-        logContent.value = 'Failed to load log content';
+        logContent.value = t('features.system.logs.failed_load');
     } finally {
         loadingLog.value = false;
     }
@@ -168,24 +170,24 @@ const downloadLog = async (logFile) => {
         link.remove();
     } catch (error) {
         console.error('Failed to download log:', error);
-        alert('Failed to download log file');
+        alert(t('features.system.logs.messages.failed_download'));
     }
 };
 
 const clearLogs = async () => {
-    if (!confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
+    if (!confirm(t('features.system.logs.confirm.clear'))) {
         return;
     }
 
     clearing.value = true;
     try {
         await api.post('/admin/cms/logs/clear');
-        alert('Logs cleared successfully');
+        alert(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         await fetchLogFiles();
     } catch (error) {
         console.error('Failed to clear logs:', error);
-        alert('Failed to clear logs');
+        alert(t('features.system.logs.messages.failed_clear'));
     } finally {
         clearing.value = false;
     }

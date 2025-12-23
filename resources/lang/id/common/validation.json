@@ -1,0 +1,16 @@
+{
+    "required": "{field} wajib diisi",
+    "email": "Format email tidak valid",
+    "min": "{field} minimal {min} karakter",
+    "max": "{field} maksimal {max} karakter",
+    "confirmed": "Kata sandi tidak cocok",
+    "unique": "{field} sudah ada",
+    "invalid": "{field} tidak valid",
+    "numeric": "{field} harus berupa angka",
+    "url": "Format URL tidak valid",
+    "date": "Format tanggal tidak valid",
+    "image": "File harus berupa gambar",
+    "mimes": "Tipe file tidak diizinkan",
+    "maxSize": "Ukuran file maksimal {size}",
+    "alphaNum": "{field} hanya boleh berisi huruf dan angka"
+}

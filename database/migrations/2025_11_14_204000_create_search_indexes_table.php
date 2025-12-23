@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -24,8 +25,11 @@ return new class extends Migration
 
                 $table->index(['searchable_type', 'searchable_id']);
                 $table->index('type');
-                // Index removed - use fulltext search instead for long text fields
-            $table->fullText(['title', 'content']); // Regular index for search
+                
+                // Add fulltext index only for MySQL/MariaDB (SQLite doesn't support it)
+                if (DB::getDriverName() === 'mysql') {
+                    $table->fullText(['title', 'content']);
+                }
             });
         }
     }

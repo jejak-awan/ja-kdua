@@ -1,17 +1,17 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">System Information</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.info.title') }}</h1>
         </div>
 
         <!-- System Health -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500">System Health</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.info.health.title') }}</p>
                         <p class="text-2xl font-semibold mt-1" :class="systemHealth === 'healthy' ? 'text-green-600' : systemHealth === 'warning' ? 'text-yellow-600' : 'text-red-600'">
-                            {{ systemHealth === 'healthy' ? 'Healthy' : systemHealth === 'warning' ? 'Warning' : 'Critical' }}
+                            {{ systemHealth === 'healthy' ? t('features.system.info.health.healthy') : systemHealth === 'warning' ? t('features.system.info.health.warning') : t('features.system.info.health.critical') }}
                         </p>
                     </div>
                     <div>
@@ -40,7 +40,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,12 +48,12 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Cache Status</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ cacheStatus || 'Active' }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.info.cache.title') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ cacheStatus || t('features.system.info.cache.active') }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,65 +61,65 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Uptime</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ formatUptime(systemInfo.uptime) }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.info.uptime') }}</p>
+                        <p class="text-2xl font-semibold text-foreground">{{ formatUptime(systemInfo.uptime) }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- System Info -->
-        <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="bg-card shadow rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">System Information</h2>
+                <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.info.title') }}</h2>
                 <button
                     @click="clearCache"
                     :disabled="clearingCache"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
                 >
-                    {{ clearingCache ? 'Clearing...' : 'Clear Cache' }}
+                    {{ clearingCache ? t('features.system.info.cache.clearing') : t('features.system.info.cache.clear') }}
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-3">Application</h3>
+                    <h3 class="text-sm font-medium text-foreground mb-3">{{ t('features.system.info.sections.application') }}</h3>
                     <dl class="space-y-2">
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">PHP Version</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.php_version || '-' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.phpVersion') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.php_version || '-' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Laravel Version</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.laravel_version || '-' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.laravelVersion') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.laravel_version || '-' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Environment</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.environment || '-' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.environment') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.environment || '-' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Debug Mode</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.debug_mode ? 'Enabled' : 'Disabled' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.debugMode') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.debug_mode ? t('features.system.info.sections.enabled') : t('features.system.info.sections.disabled') }}</dd>
                         </div>
                     </dl>
                 </div>
                 <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-3">Server</h3>
+                    <h3 class="text-sm font-medium text-foreground mb-3">{{ t('features.system.info.sections.server') }}</h3>
                     <dl class="space-y-2">
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Server Software</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.server_software || '-' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.serverSoftware') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.server_software || '-' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Memory Usage</dt>
-                            <dd class="text-sm text-gray-900">{{ formatMemory(systemInfo.memory_usage) }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.memoryUsage') }}</dt>
+                            <dd class="text-sm text-foreground">{{ formatMemory(systemInfo.memory_usage) }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Disk Usage</dt>
-                            <dd class="text-sm text-gray-900">{{ formatDiskUsage(systemInfo.disk_usage) }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.diskUsage') }}</dt>
+                            <dd class="text-sm text-foreground">{{ formatDiskUsage(systemInfo.disk_usage) }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm text-gray-500">Database</dt>
-                            <dd class="text-sm text-gray-900">{{ systemInfo.database || '-' }}</dd>
+                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.database') }}</dt>
+                            <dd class="text-sm text-foreground">{{ systemInfo.database || '-' }}</dd>
                         </div>
                     </dl>
                 </div>
@@ -127,24 +127,24 @@
         </div>
 
         <!-- Statistics -->
-        <div v-if="statistics" class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">System Statistics</h2>
+        <div v-if="statistics" class="bg-card shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.statistics.title') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_contents || 0 }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total Contents</p>
+                <div class="text-center p-4 bg-muted rounded-lg">
+                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_contents || 0 }}</p>
+                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.contents') }}</p>
                 </div>
-                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_users || 0 }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total Users</p>
+                <div class="text-center p-4 bg-muted rounded-lg">
+                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_users || 0 }}</p>
+                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.users') }}</p>
                 </div>
-                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_media || 0 }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total Media</p>
+                <div class="text-center p-4 bg-muted rounded-lg">
+                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_media || 0 }}</p>
+                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.media') }}</p>
                 </div>
-                <div class="text-center p-4 bg-gray-50 rounded-lg">
-                    <p class="text-2xl font-semibold text-gray-900">{{ statistics.total_visits || 0 }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total Visits</p>
+                <div class="text-center p-4 bg-muted rounded-lg">
+                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_visits || 0 }}</p>
+                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.visits') }}</p>
                 </div>
             </div>
         </div>
@@ -153,8 +153,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
+
+const { t } = useI18n();
 
 const systemInfo = ref({});
 const statistics = ref(null);
@@ -208,11 +211,11 @@ const clearCache = async () => {
     clearingCache.value = true;
     try {
         await api.post('/admin/cms/cache/clear');
-        alert('Cache cleared successfully');
+        alert(t('features.system.info.cache.success'));
         await fetchSystemInfo();
     } catch (error) {
         console.error('Failed to clear cache:', error);
-        alert('Failed to clear cache');
+        alert(t('features.system.info.cache.failed'));
     } finally {
         clearingCache.value = false;
     }

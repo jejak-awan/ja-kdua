@@ -1,0 +1,9 @@
+{
+    "saving": "Auto-saving...",
+    "savedAt": "Saved at {time}",
+    "failed": "Save failed",
+    "notSaved": "Not saved",
+    "justNow": "just now",
+    "agoSeconds": "{seconds}s ago",
+    "agoMinutes": "{minutes}m ago"
+}

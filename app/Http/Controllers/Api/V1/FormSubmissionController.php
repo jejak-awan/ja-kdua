@@ -67,29 +67,87 @@ class FormSubmissionController extends BaseApiController
 
     public function export(Request $request, Form $form)
     {
-        $submissions = $form->submissions()
+        $query = $form->submissions()
             ->where('status', '!=', 'archived')
-            ->latest()
-            ->get();
+            ->latest();
 
+        // Date range filter
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $submissions = $query->get();
+
+        // Build export data
         $data = [];
+        $headers = ['ID', 'Submitted At', 'IP Address', 'Status'];
+        
+        // Collect all possible field keys from submissions
+        $fieldKeys = [];
+        foreach ($submissions as $submission) {
+            if (is_array($submission->data)) {
+                $fieldKeys = array_merge($fieldKeys, array_keys($submission->data));
+            }
+        }
+        $fieldKeys = array_unique($fieldKeys);
+        $headers = array_merge($headers, $fieldKeys);
+
         foreach ($submissions as $submission) {
             $row = [
                 'ID' => $submission->id,
                 'Submitted At' => $submission->created_at->format('Y-m-d H:i:s'),
                 'IP Address' => $submission->ip_address,
+                'Status' => $submission->status,
             ];
 
-            foreach ($submission->data as $key => $value) {
+            // Add all field values
+            foreach ($fieldKeys as $key) {
+                $value = $submission->data[$key] ?? '';
                 $row[$key] = is_array($value) ? implode(', ', $value) : $value;
             }
 
             $data[] = $row;
         }
 
+        // Return as CSV if requested
+        if ($request->input('format') === 'csv') {
+            $filename = str_replace(' ', '_', $form->name) . '_submissions_' . now()->format('Y-m-d') . '.csv';
+            
+            $callback = function() use ($headers, $data) {
+                $handle = fopen('php://output', 'w');
+                
+                // BOM for Excel UTF-8
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                
+                // Write headers
+                fputcsv($handle, $headers);
+                
+                // Write data rows
+                foreach ($data as $row) {
+                    $orderedRow = [];
+                    foreach ($headers as $header) {
+                        $orderedRow[] = $row[$header] ?? '';
+                    }
+                    fputcsv($handle, $orderedRow);
+                }
+                
+                fclose($handle);
+            };
+
+            return response()->stream($callback, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }
+
+        // Default: return JSON
         return $this->success([
             'form' => $form->name,
             'total' => $submissions->count(),
+            'headers' => $headers,
             'data' => $data,
         ], 'Form submissions exported successfully');
     }

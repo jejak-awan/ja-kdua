@@ -4,15 +4,15 @@
     <section class="hero">
       <div class="container">
         <div class="hero-content">
-          <h1 class="hero-title">{{ settings.site_title || 'JA-CMS' }}</h1>
-          <p class="hero-subtitle">{{ settings.site_tagline || 'Modern Content Management System' }}</p>
+          <h1 class="hero-title">{{ settings.site_title || t('features.frontend.home.title') }}</h1>
+          <p class="hero-subtitle">{{ settings.site_tagline || t('features.frontend.home.subtitle') }}</p>
           
           <div class="hero-actions">
             <router-link to="/blog" class="btn btn-primary btn-lg">
-              Explore Content
+              {{ t('features.frontend.home.actions.explore') }}
             </router-link>
             <router-link v-if="!isAuthenticated" to="/register" class="btn btn-outline btn-lg">
-              Get Started
+              {{ t('features.frontend.home.actions.getStarted') }}
             </router-link>
           </div>
           
@@ -20,15 +20,15 @@
           <div class="hero-stats">
             <div class="stat-item">
               <div class="stat-value">{{ stats.contents }}</div>
-              <div class="stat-label">Published Content</div>
+              <div class="stat-label">{{ t('features.frontend.home.stats.content') }}</div>
             </div>
             <div class="stat-item">
               <div class="stat-value">{{ stats.visitors }}</div>
-              <div class="stat-label">Total Visitors</div>
+              <div class="stat-label">{{ t('features.frontend.home.stats.visitors') }}</div>
             </div>
             <div class="stat-item">
               <div class="stat-value">{{ stats.categories }}</div>
-              <div class="stat-label">Categories</div>
+              <div class="stat-label">{{ t('features.frontend.home.stats.categories') }}</div>
             </div>
           </div>
         </div>
@@ -38,7 +38,7 @@
     <!-- Featured Content -->
     <section v-if="featuredPosts.length > 0" class="section">
       <div class="container">
-        <h2 class="section-title">Featured Content</h2>
+        <h2 class="section-title">{{ t('features.frontend.home.sections.featured') }}</h2>
         <div class="posts-grid">
           <PostCard 
             v-for="post in featuredPosts" 
@@ -52,7 +52,7 @@
     <!-- Recent Posts -->
     <section v-if="recentPosts.length > 0" class="section section-gray">
       <div class="container">
-        <h2 class="section-title">Recent Posts</h2>
+        <h2 class="section-title">{{ t('features.frontend.home.sections.recent') }}</h2>
         <div class="posts-grid">
           <PostCard 
             v-for="post in recentPosts" 
@@ -63,7 +63,7 @@
         
         <div class="section-actions">
           <router-link to="/blog" class="btn btn-primary">
-            View All Posts
+            {{ t('features.frontend.home.actions.viewAll') }}
           </router-link>
         </div>
       </div>
@@ -74,9 +74,9 @@
       <div class="container">
         <NewsletterWidget
           variant="default"
-          title="Berlangganan Newsletter"
-          description="Dapatkan update terbaru, tips, dan artikel menarik langsung ke email Anda"
-          button-text="Berlangganan"
+          :title="t('features.frontend.newsletter.title')"
+          :description="t('features.frontend.newsletter.description')"
+          :button-text="t('features.frontend.newsletter.button')"
         />
       </div>
     </section>
@@ -85,11 +85,11 @@
     <section class="cta-section">
       <div class="container">
         <div class="cta-content">
-          <h2 class="cta-title">Ready to Get Started?</h2>
-          <p class="cta-text">Join thousands of users who trust JA-CMS for their content management needs</p>
+          <h2 class="cta-title">{{ t('features.frontend.home.sections.cta.title') }}</h2>
+          <p class="cta-text">{{ t('features.frontend.home.sections.cta.text') }}</p>
           <div class="cta-actions">
-            <router-link to="/register" class="btn btn-primary btn-lg">Start Reading</router-link>
-            <router-link to="/contact" class="btn btn-outline-white btn-lg">Contact Us</router-link>
+            <router-link to="/register" class="btn btn-primary btn-lg">{{ t('features.frontend.home.actions.startReading') }}</router-link>
+            <router-link to="/contact" class="btn btn-outline-white btn-lg">{{ t('features.frontend.home.actions.contactUs') }}</router-link>
           </div>
         </div>
       </div>
@@ -101,11 +101,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
 import NewsletterWidget from '@/components/NewsletterWidget.vue'
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 const { themeSettings } = useTheme()
 
 const featuredPosts = ref([])

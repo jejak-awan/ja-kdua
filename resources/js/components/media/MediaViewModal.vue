@@ -1,13 +1,13 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-4xl w-full">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ media.name }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -25,42 +25,42 @@
                     <!-- Media Info -->
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Details</h4>
+                            <h4 class="text-sm font-medium text-foreground mb-3">Details</h4>
                             <dl class="space-y-2">
                                 <div>
-                                    <dt class="text-xs text-gray-500">Name</dt>
-                                    <dd class="text-sm text-gray-900">{{ media.name }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Name</dt>
+                                    <dd class="text-sm text-foreground">{{ media.name }}</dd>
                                 </div>
                                 <div v-if="media.alt">
-                                    <dt class="text-xs text-gray-500">Alt Text</dt>
-                                    <dd class="text-sm text-gray-900">{{ media.alt }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Alt Text</dt>
+                                    <dd class="text-sm text-foreground">{{ media.alt }}</dd>
                                 </div>
                                 <div v-if="media.description">
-                                    <dt class="text-xs text-gray-500">Description</dt>
-                                    <dd class="text-sm text-gray-900">{{ media.description }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Description</dt>
+                                    <dd class="text-sm text-foreground">{{ media.description }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-gray-500">Type</dt>
-                                    <dd class="text-sm text-gray-900">{{ media.mime_type }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Type</dt>
+                                    <dd class="text-sm text-foreground">{{ media.mime_type }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-gray-500">Size</dt>
-                                    <dd class="text-sm text-gray-900">{{ formatFileSize(media.size) }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Size</dt>
+                                    <dd class="text-sm text-foreground">{{ formatFileSize(media.size) }}</dd>
                                 </div>
                                 <div v-if="media.folder">
-                                    <dt class="text-xs text-gray-500">Folder</dt>
-                                    <dd class="text-sm text-gray-900">{{ media.folder.name }}</dd>
+                                    <dt class="text-xs text-muted-foreground">Folder</dt>
+                                    <dd class="text-sm text-foreground">{{ media.folder.name }}</dd>
                                 </div>
                             </dl>
                         </div>
 
                         <div>
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">URL</h4>
+                            <h4 class="text-sm font-medium text-foreground mb-3">URL</h4>
                             <div class="flex items-center space-x-2">
                                 <input
                                     :value="media.url"
                                     readonly
-                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                                    class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md bg-muted text-sm"
                                 >
                                 <button
                                     @click="copyUrl"
@@ -74,8 +74,14 @@
 
                     <!-- Actions for Images -->
                     <div v-if="media.mime_type?.startsWith('image/')" class="mt-6 pt-6 border-t">
-                        <h4 class="text-sm font-medium text-gray-700 mb-3">Actions</h4>
-                        <div class="flex space-x-2">
+                        <h4 class="text-sm font-medium text-foreground mb-3">Actions</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                @click="showImageEditor = true"
+                                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm"
+                            >
+                                Edit Image
+                            </button>
                             <button
                                 @click="generateThumbnail"
                                 :disabled="generatingThumbnail"
@@ -94,24 +100,24 @@
 
                     <!-- Usage Detail -->
                     <div class="mt-6 pt-6 border-t">
-                        <h4 class="text-sm font-medium text-gray-700 mb-3">Usage</h4>
-                        <div v-if="loadingUsage" class="text-sm text-gray-500">
+                        <h4 class="text-sm font-medium text-foreground mb-3">Usage</h4>
+                        <div v-if="loadingUsage" class="text-sm text-muted-foreground">
                             Loading usage information...
                         </div>
                         <div v-else-if="usageDetail && usageDetail.length > 0" class="space-y-2">
                             <div
                                 v-for="usage in usageDetail"
                                 :key="usage.id"
-                                class="text-sm text-gray-600 p-2 bg-gray-50 rounded"
+                                class="text-sm text-muted-foreground p-2 bg-muted rounded"
                             >
                                 <div class="font-medium">{{ usage.type }}</div>
-                                <div v-if="usage.title" class="text-xs text-gray-500">{{ usage.title }}</div>
+                                <div v-if="usage.title" class="text-xs text-muted-foreground">{{ usage.title }}</div>
                                 <div v-if="usage.url" class="text-xs text-indigo-600 mt-1">
                                     <a :href="usage.url" target="_blank" class="hover:underline">{{ usage.url }}</a>
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="text-sm text-gray-500">
+                        <div v-else class="text-sm text-muted-foreground">
                             This media is not used anywhere.
                         </div>
                     </div>
@@ -121,7 +127,7 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         Close
                     </button>
@@ -136,6 +142,14 @@
             @resized="handleResized"
             :media="media"
         />
+
+        <!-- Image Editor Modal -->
+        <ImageEditor
+            v-if="showImageEditor"
+            @close="showImageEditor = false"
+            @updated="handleImageEdited"
+            :media="media"
+        />
     </div>
 </template>
 
@@ -143,6 +157,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../../services/api';
 import ResizeMediaModal from './ResizeMediaModal.vue';
+import ImageEditor from './ImageEditor.vue';
 
 const props = defineProps({
     media: {
@@ -157,6 +172,7 @@ const loadingUsage = ref(false);
 const usageDetail = ref([]);
 const generatingThumbnail = ref(false);
 const showResizeModal = ref(false);
+const showImageEditor = ref(false);
 
 const fetchUsageDetail = async () => {
     loadingUsage.value = true;
@@ -188,6 +204,11 @@ const generateThumbnail = async () => {
 const handleResized = () => {
     emit('updated');
     showResizeModal.value = false;
+};
+
+const handleImageEdited = () => {
+    emit('updated');
+    showImageEditor.value = false;
 };
 
 const copyUrl = () => {

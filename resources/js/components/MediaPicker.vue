@@ -3,9 +3,9 @@
         <button
             type="button"
             @click="showModal = true"
-            class="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+            class="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-colors"
         >
-            {{ label || 'Select Media' }}
+            {{ label || $t('features.media.modals.picker.select') }}
         </button>
 
         <!-- Media Picker Modal -->
@@ -15,13 +15,12 @@
             @click.self="showModal = false"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                    <!-- Header -->
+                <div class="bg-card rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
                     <div class="flex items-center justify-between p-4 border-b">
-                        <h3 class="text-lg font-semibold">Select Media</h3>
+                        <h3 class="text-lg font-semibold">{{ $t('features.media.modals.picker.title') }}</h3>
                         <button
                             @click="showModal = false"
-                            class="text-gray-400 hover:text-gray-600"
+                            class="text-gray-400 hover:text-muted-foreground"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -32,10 +31,10 @@
                     <!-- Content -->
                     <div class="flex-1 overflow-y-auto p-4">
                         <div v-if="loading" class="text-center py-8">
-                            <p class="text-gray-500">Loading media...</p>
+                            <p class="text-muted-foreground">{{ $t('features.media.loading') }}</p>
                         </div>
                         <div v-else-if="mediaList.length === 0" class="text-center py-8">
-                            <p class="text-gray-500">No media found</p>
+                            <p class="text-muted-foreground">{{ $t('features.media.empty') }}</p>
                         </div>
                         <div v-else class="grid grid-cols-4 gap-4">
                             <div
@@ -45,7 +44,7 @@
                                 class="cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:border-indigo-500"
                                 :class="selectedMedia?.id === media.id ? 'border-indigo-500' : 'border-gray-200'"
                             >
-                                <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                <div class="aspect-square bg-secondary flex items-center justify-center">
                                     <img
                                         v-if="media.type === 'image'"
                                         :src="media.url"
@@ -58,8 +57,8 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <div class="p-2 bg-white">
-                                    <p class="text-xs text-gray-600 truncate">{{ media.name }}</p>
+                                <div class="p-2 bg-card">
+                                    <p class="text-xs text-muted-foreground truncate">{{ media.name }}</p>
                                 </div>
                             </div>
                         </div>
@@ -71,21 +70,21 @@
                             @click="showUpload = true"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                         >
-                            Upload New
+                            {{ $t('features.media.actions.uploadNew') }}
                         </button>
                         <div class="flex space-x-2">
                             <button
                                 @click="showModal = false"
-                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-foreground hover:bg-muted"
                             >
-                                Cancel
+                                {{ $t('features.media.actions.cancel') }}
                             </button>
                             <button
                                 @click="confirmSelection"
                                 :disabled="!selectedMedia"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                             >
-                                Select
+                                {{ $t('features.media.actions.select') }}
                             </button>
                         </div>
                     </div>
@@ -100,14 +99,14 @@
             @click.self="showUpload = false"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                    <h3 class="text-lg font-semibold mb-4">Upload Media</h3>
+                <div class="bg-card rounded-lg shadow-xl max-w-md w-full p-6">
+                    <h3 class="text-lg font-semibold mb-4">{{ $t('features.media.modals.upload.title') }}</h3>
                     <MediaUpload @uploaded="handleMediaUploaded" />
                     <button
                         @click="showUpload = false"
-                        class="mt-4 w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="mt-4 w-full px-4 py-2 border border-gray-300 rounded-md text-foreground hover:bg-muted"
                     >
-                        Close
+                        {{ $t('features.media.actions.close') }}
                     </button>
                 </div>
             </div>

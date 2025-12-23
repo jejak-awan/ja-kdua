@@ -1,107 +1,98 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Custom Fields</h1>
-            <div class="flex items-center space-x-2">
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.developer.custom_fields.title') }}</h1>
+            <div class="space-x-2">
                 <button
-                    @click="showFieldGroupModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                    @click="showCreateGroupModal = true"
+                    class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md hover:bg-muted"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    New Field Group
+                    {{ t('features.developer.custom_fields.create_group') }}
                 </button>
                 <button
-                    @click="showFieldModal = true"
+                    @click="showCreateFieldModal = true"
                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    New Field
+                    {{ t('features.developer.custom_fields.create_field') }}
                 </button>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="border-b border-gray-200">
-                <nav class="flex -mb-px">
+        <div class="bg-card shadow rounded-lg">
+            <div class="border-b border-border">
+                <nav class="-mb-px flex px-6" aria-label="Tabs">
                     <button
-                        @click="activeTab = 'groups'"
+                        v-for="tab in tabs"
+                        :key="tab.name"
+                        @click="currentTab = tab.name"
                         :class="[
-                            'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
-                            activeTab === 'groups'
+                            currentTab === tab.name
                                 ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300',
+                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm mr-8'
                         ]"
                     >
-                        Field Groups
-                    </button>
-                    <button
-                        @click="activeTab = 'fields'"
-                        :class="[
-                            'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
-                            activeTab === 'fields'
-                                ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        ]"
-                    >
-                        Custom Fields
+                        {{ tab.label }}
                     </button>
                 </nav>
             </div>
 
             <!-- Field Groups Tab -->
-            <div v-if="activeTab === 'groups'" class="p-6">
-                <div v-if="loading" class="text-center py-8">
-                    <p class="text-gray-500">Loading...</p>
+            <div v-if="currentTab === 'groups'" class="p-6">
+                <div v-if="loadingGroups" class="text-center">
+                    <p class="text-muted-foreground">{{ t('features.developer.webhooks.loading') }}</p>
                 </div>
-                <div v-else-if="fieldGroups.length === 0" class="text-center py-8">
-                    <p class="text-gray-500">No field groups found</p>
+                <div v-else-if="fieldGroups.length === 0" class="text-center">
+                    <p class="text-muted-foreground">{{ t('features.developer.custom_fields.groups.empty') }}</p>
                 </div>
-                <table v-else class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table v-else class="min-w-full divide-y divide-border">
+                    <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.groups.table.name') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Fields
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.groups.table.fields') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Attached To
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.groups.table.attached_to') }}
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
+                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.groups.table.actions') }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="group in fieldGroups" :key="group.id" class="hover:bg-gray-50">
+                    <tbody class="bg-card divide-y divide-border">
+                        <tr v-for="group in fieldGroups" :key="group.id" class="hover:bg-muted">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ group.name }}</div>
+                                <div class="text-sm font-medium text-foreground">{{ group.name }}</div>
+                                <div class="text-sm text-muted-foreground">{{ group.description }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                 {{ group.fields_count || 0 }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ group.attachable_type || '-' }}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                {{ group.attachable_type ? group.attachable_type.split('\\').pop() : '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">
                                     <button
-                                        @click="editFieldGroup(group)"
+                                        @click="editGroup(group)"
                                         class="text-indigo-600 hover:text-indigo-900"
                                     >
-                                        Edit
+                                        {{ t('features.developer.custom_fields.groups.actions.edit') }}
                                     </button>
                                     <button
-                                        @click="deleteFieldGroup(group)"
+                                        @click="deleteGroup(group)"
                                         class="text-red-600 hover:text-red-900"
                                     >
-                                        Delete
+                                        {{ t('features.developer.custom_fields.groups.actions.delete') }}
                                     </button>
                                 </div>
                             </td>
@@ -111,55 +102,55 @@
             </div>
 
             <!-- Custom Fields Tab -->
-            <div v-if="activeTab === 'fields'" class="p-6">
+            <div v-else class="p-6">
+                <!-- Filters -->
                 <div class="mb-4">
                     <input
                         v-model="fieldSearch"
                         type="text"
-                        placeholder="Search fields..."
-                        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="t('features.developer.custom_fields.fields.search')"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-64"
                     >
                 </div>
-                <div v-if="loading" class="text-center py-8">
-                    <p class="text-gray-500">Loading...</p>
+
+                <div v-if="loadingFields" class="text-center">
+                    <p class="text-muted-foreground">{{ t('features.developer.webhooks.loading') }}</p>
                 </div>
-                <div v-else-if="filteredFields.length === 0" class="text-center py-8">
-                    <p class="text-gray-500">No custom fields found</p>
+                <div v-else-if="filteredFields.length === 0" class="text-center">
+                    <p class="text-muted-foreground">{{ t('features.developer.custom_fields.fields.empty') }}</p>
                 </div>
-                <table v-else class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table v-else class="min-w-full divide-y divide-border">
+                    <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Label
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.fields.table.label') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.fields.table.name') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.fields.table.type') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Group
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.fields.table.group') }}
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
+                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                {{ t('features.developer.custom_fields.fields.table.actions') }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="field in filteredFields" :key="field.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ field.label }}</div>
+                    <tbody class="bg-card divide-y divide-border">
+                        <tr v-for="field in filteredFields" :key="field.id" class="hover:bg-muted">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                                {{ field.label }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 font-mono">{{ field.name }}</div>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-muted-foreground">
+                                {{ field.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ field.type }}
-                                </span>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
+                                {{ field.type }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                 {{ field.field_group?.name || '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -168,13 +159,13 @@
                                         @click="editField(field)"
                                         class="text-indigo-600 hover:text-indigo-900"
                                     >
-                                        Edit
+                                        {{ t('features.developer.custom_fields.fields.actions.edit') }}
                                     </button>
                                     <button
                                         @click="deleteField(field)"
                                         class="text-red-600 hover:text-red-900"
                                     >
-                                        Delete
+                                        {{ t('features.developer.custom_fields.fields.actions.delete') }}
                                     </button>
                                 </div>
                             </td>
@@ -184,17 +175,16 @@
             </div>
         </div>
 
-        <!-- Field Group Modal -->
+        <!-- Modals -->
         <FieldGroupModal
-            v-if="showFieldGroupModal || showEditFieldGroupModal"
-            @close="closeFieldGroupModal"
-            @saved="handleFieldGroupSaved"
-            :field-group="editingFieldGroup"
+            v-if="showCreateGroupModal || showEditGroupModal"
+            @close="closeGroupModal"
+            @saved="handleGroupSaved"
+            :field-group="editingGroup"
         />
 
-        <!-- Field Modal -->
         <FieldModal
-            v-if="showFieldModal || showEditFieldModal"
+            v-if="showCreateFieldModal || showEditFieldModal"
             @close="closeFieldModal"
             @saved="handleFieldSaved"
             :field="editingField"
@@ -205,68 +195,78 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import FieldGroupModal from '../../../components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '../../../components/custom-fields/FieldModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
+const { t } = useI18n();
+
+const currentTab = ref('groups');
+const tabs = computed(() => [
+    { name: 'groups', label: t('features.developer.custom_fields.tabs.groups') },
+    { name: 'fields', label: t('features.developer.custom_fields.tabs.fields') },
+]);
+
 const fieldGroups = ref([]);
-const fields = ref([]);
-const loading = ref(false);
-const activeTab = ref('groups');
+const customFields = ref([]);
+const loadingGroups = ref(false);
+const loadingFields = ref(false);
 const fieldSearch = ref('');
-const showFieldGroupModal = ref(false);
-const showEditFieldGroupModal = ref(false);
-const editingFieldGroup = ref(null);
-const showFieldModal = ref(false);
+
+// Modals state
+const showCreateGroupModal = ref(false);
+const showEditGroupModal = ref(false);
+const editingGroup = ref(null);
+const showCreateFieldModal = ref(false);
 const showEditFieldModal = ref(false);
 const editingField = ref(null);
 
 const filteredFields = computed(() => {
-    if (!Array.isArray(fields.value)) {
-        return [];
-    }
-    if (!fieldSearch.value) return fields.value;
+    if (!fieldSearch.value) return customFields.value;
     
     const searchLower = fieldSearch.value.toLowerCase();
-    return fields.value.filter(field => 
-        field?.label?.toLowerCase().includes(searchLower) ||
-        field?.name?.toLowerCase().includes(searchLower) ||
-        field?.type?.toLowerCase().includes(searchLower)
+    return customFields.value.filter(field => 
+        field.label.toLowerCase().includes(searchLower) ||
+        field.name.toLowerCase().includes(searchLower)
     );
 });
 
 const fetchFieldGroups = async () => {
+    loadingGroups.value = true;
     try {
         const response = await api.get('/admin/cms/field-groups');
         const { data } = parseResponse(response);
         fieldGroups.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch field groups:', error);
-        fieldGroups.value = [];
+    } finally {
+        loadingGroups.value = false;
     }
 };
 
-const fetchFields = async () => {
-    loading.value = true;
+const fetchCustomFields = async () => {
+    loadingFields.value = true;
     try {
         const response = await api.get('/admin/cms/custom-fields');
         const { data } = parseResponse(response);
-        fields.value = ensureArray(data);
+        customFields.value = ensureArray(data);
     } catch (error) {
-        console.error('Failed to fetch fields:', error);
+        console.error('Failed to fetch custom fields:', error);
     } finally {
-        loading.value = false;
+        loadingFields.value = false;
     }
 };
 
-const editFieldGroup = (group) => {
-    editingFieldGroup.value = group;
-    showEditFieldGroupModal.value = true;
+// Group Actions
+const editGroup = (group) => {
+    editingGroup.value = group;
+    showEditGroupModal.value = true;
 };
 
-const deleteFieldGroup = async (group) => {
-    if (!confirm(`Are you sure you want to delete field group "${group.name}"?`)) {
+const deleteGroup = async (group) => {
+    if (!confirm(t('features.developer.custom_fields.groups.confirm.delete', { name: group.name }))) {
         return;
     }
 
@@ -275,48 +275,49 @@ const deleteFieldGroup = async (group) => {
         await fetchFieldGroups();
     } catch (error) {
         console.error('Failed to delete field group:', error);
-        alert('Failed to delete field group');
+        alert(t('features.developer.custom_fields.groups.messages.delete_failed'));
     }
 };
 
+const closeGroupModal = () => {
+    showCreateGroupModal.value = false;
+    showEditGroupModal.value = false;
+    editingGroup.value = null;
+};
+
+const handleGroupSaved = () => {
+    fetchFieldGroups();
+    closeGroupModal();
+};
+
+// Field Actions
 const editField = (field) => {
     editingField.value = field;
     showEditFieldModal.value = true;
 };
 
 const deleteField = async (field) => {
-    if (!confirm(`Are you sure you want to delete field "${field.label}"?`)) {
+    if (!confirm(t('features.developer.custom_fields.fields.confirm.delete', { label: field.label }))) {
         return;
     }
 
     try {
         await api.delete(`/admin/cms/custom-fields/${field.id}`);
-        await fetchFields();
+        await fetchCustomFields();
     } catch (error) {
-        console.error('Failed to delete field:', error);
-        alert('Failed to delete field');
+        console.error('Failed to delete custom field:', error);
+        alert(t('features.developer.custom_fields.fields.messages.delete_failed'));
     }
 };
 
-const closeFieldGroupModal = () => {
-    showFieldGroupModal.value = false;
-    showEditFieldGroupModal.value = false;
-    editingFieldGroup.value = null;
-};
-
-const handleFieldGroupSaved = () => {
-    fetchFieldGroups();
-    closeFieldGroupModal();
-};
-
 const closeFieldModal = () => {
-    showFieldModal.value = false;
+    showCreateFieldModal.value = false;
     showEditFieldModal.value = false;
     editingField.value = null;
 };
 
 const handleFieldSaved = () => {
-    fetchFields();
+    fetchCustomFields();
     closeFieldModal();
 };
 

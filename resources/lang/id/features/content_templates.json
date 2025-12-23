@@ -1,0 +1,50 @@
+{
+    "title": "Templat Konten",
+    "create": "Templat Baru",
+    "search": "Cari templat...",
+    "loading": "Memuat...",
+    "empty": "Tidak ada templat ditemukan",
+    "table": {
+        "name": "Nama",
+        "type": "Tipe",
+        "description": "Deskripsi",
+        "updated": "Diperbarui",
+        "actions": "Aksi"
+    },
+    "form": {
+        "createTitle": "Buat Templat Konten",
+        "editTitle": "Edit Templat Konten",
+        "back": "Kembali ke Templat",
+        "details": "Detail Templat",
+        "content": "Isi Templat",
+        "name": "Nama",
+        "namePlaceholder": "Nama templat",
+        "description": "Deskripsi",
+        "descriptionPlaceholder": "Deskripsi templat",
+        "type": "Tipe",
+        "titleLabel": "Judul",
+        "titlePlaceholder": "Templat judul konten",
+        "body": "Isi",
+        "bodyPlaceholder": "Masukkan isi konten...",
+        "excerpt": "Kutipan",
+        "excerptPlaceholder": "Kutipan konten",
+        "save": "Buat Templat",
+        "saving": "Membuat...",
+        "update": "Perbarui Templat",
+        "updating": "Memperbarui...",
+        "cancel": "Batal"
+    },
+    "actions": {
+        "createContent": "Buat Konten",
+        "edit": "Edit",
+        "delete": "Hapus"
+    },
+    "messages": {
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus \"{name}\"?",
+        "createError": "Gagal membuat konten dari templat",
+        "deleteError": "Gagal menghapus templat",
+        "saveError": "Gagal membuat templat",
+        "updateError": "Gagal memperbarui templat",
+        "loadError": "Gagal memuat templat"
+    }
+}

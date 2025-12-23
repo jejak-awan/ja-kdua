@@ -1,14 +1,14 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">
-                        {{ task ? 'Edit Scheduled Task' : 'Create Scheduled Task' }}
+                        {{ task ? t('features.system.scheduled_tasks.modal.title_edit') : t('features.system.scheduled_tasks.modal.title_create') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,57 +18,57 @@
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Name <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.system.scheduled_tasks.modal.name_label') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Task name"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.system.scheduled_tasks.modal.name_placeholder')"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Command <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.system.scheduled_tasks.modal.command_label') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.command"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                            placeholder="artisan:command or php script.php"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                            :placeholder="t('features.system.scheduled_tasks.modal.command_placeholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">Laravel artisan command or PHP script</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ t('features.system.scheduled_tasks.modal.command_help') }}</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Schedule (Cron Expression) <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.system.scheduled_tasks.modal.schedule_label') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.schedule"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                            placeholder="0 * * * *"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+                            :placeholder="t('features.system.scheduled_tasks.modal.schedule_placeholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">
-                            Cron expression (e.g., "0 * * * *" for hourly, "0 0 * * *" for daily)
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            {{ t('features.system.scheduled_tasks.modal.schedule_help') }}
                         </p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Description
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ t('features.system.scheduled_tasks.modal.description_label') }}
                         </label>
                         <textarea
                             v-model="form.description"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Task description"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="t('features.system.scheduled_tasks.modal.description_placeholder')"
                         />
                     </div>
 
@@ -77,10 +77,10 @@
                             v-model="form.is_active"
                             type="checkbox"
                             id="is_active"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                         >
-                        <label for="is_active" class="ml-2 block text-sm text-gray-900">
-                            Active
+                        <label for="is_active" class="ml-2 block text-sm text-foreground">
+                            {{ t('features.system.scheduled_tasks.modal.active_label') }}
                         </label>
                     </div>
                 </form>
@@ -88,16 +88,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ t('features.system.scheduled_tasks.modal.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (task ? 'Update' : 'Create') }}
+                        {{ saving ? t('features.system.scheduled_tasks.modal.saving') : (task ? t('features.system.scheduled_tasks.modal.update') : t('features.system.scheduled_tasks.modal.create_action')) }}
                     </button>
                 </div>
             </div>
@@ -107,7 +107,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     task: {
@@ -151,7 +154,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save task:', error);
-        alert(error.response?.data?.message || 'Failed to save task');
+        alert(error.response?.data?.message || t('features.system.scheduled_tasks.messages.failed_save'));
     } finally {
         saving.value = false;
     }

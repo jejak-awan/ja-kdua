@@ -4,9 +4,12 @@ use Illuminate\Support\Facades\Route;
 
 // API Version 1
 Route::prefix('v1')->group(function () {
+    // Public endpoint to clear rate limit (no auth required for emergency)
+    Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
+    
     // Authentication Routes (with rate limiting)
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
-        ->middleware('throttle:5,1'); // 5 attempts per minute
+        ->middleware('throttle:10,1'); // 10 attempts per minute (increased for better UX)
     Route::post('/register', [App\Http\Controllers\Api\V1\AuthController::class, 'register'])
         ->middleware('throttle:3,1'); // 3 attempts per minute
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -31,7 +34,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/profile/avatar', [App\Http\Controllers\Api\V1\UserController::class, 'uploadAvatar']);
         Route::put('/profile/password', [App\Http\Controllers\Api\V1\UserController::class, 'updatePassword']);
         Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
+
+        // Two-Factor Authentication Routes
+        Route::prefix('two-factor')->group(function () {
+            Route::get('/status', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'status']);
+            Route::post('/generate', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'generate']);
+            Route::post('/verify', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'verify']);
+            Route::post('/disable', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'disable']);
+            Route::post('/regenerate-backup-codes', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'regenerateBackupCodes']);
+        });
     });
+
+    // Two-Factor Authentication Verification (for login, no auth required)
+    Route::post('/two-factor/verify-code', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'verifyCode'])->middleware('throttle:5,1');
 
     // Public CMS API (with rate limiting: 100 requests per minute)
     Route::prefix('cms')->middleware('throttle:100,1')->group(function () {
@@ -69,12 +84,14 @@ Route::prefix('v1')->group(function () {
 
     // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)
     Route::prefix('analytics')->middleware('throttle:60,1')->group(function () {
+        Route::post('/track-visit', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackVisit']);
         Route::post('/track', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackEvent']);
         Route::post('/track/batch', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackBatch']);
     });
 
-    // Admin CMS API (requires authentication with rate limiting)
-    Route::prefix('admin/cms')->middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    // Admin CMS API (requires authentication with rate limiting: 300 requests per minute)
+    // Increased from 60 to 300 to allow dashboard concurrent requests (7-10 on initial load)
+    Route::prefix('admin/cms')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
         // Contents
         Route::get('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'adminIndex']);
         Route::get('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'adminShow']);
@@ -85,6 +102,11 @@ Route::prefix('v1')->group(function () {
         Route::delete('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'destroy'])->middleware('permission:delete content');
         Route::post('contents/{content}/duplicate', [App\Http\Controllers\Api\V1\ContentController::class, 'duplicate'])->middleware('permission:create content');
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');
+
+        // Newsletter
+        Route::get('newsletter/subscribers', [App\Http\Controllers\Api\V1\NewsletterController::class, 'index'])->middleware('permission:manage users');
+        Route::delete('newsletter/subscribers/{id}', [App\Http\Controllers\Api\V1\NewsletterController::class, 'destroy'])->middleware('permission:manage users');
+        Route::get('newsletter/export', [App\Http\Controllers\Api\V1\NewsletterController::class, 'export'])->middleware('permission:manage users');
 
         // Content Revisions
         Route::get('contents/{content}/revisions', [App\Http\Controllers\Api\V1\ContentRevisionController::class, 'index']);
@@ -116,8 +138,10 @@ Route::prefix('v1')->group(function () {
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:manage media');
         Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy'])->middleware('permission:manage media');
         Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:manage media');
+        Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:manage media');
         Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:manage media');
         Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:manage media');
+        Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit'])->middleware('permission:manage media');
         Route::get('media/{media}/usage', [App\Http\Controllers\Api\V1\MediaController::class, 'usage'])->middleware('permission:manage media');
 
         // Media Folders
@@ -126,8 +150,11 @@ Route::prefix('v1')->group(function () {
 
         // Comments (admin)
         Route::get('comments', [App\Http\Controllers\Api\V1\CommentController::class, 'adminIndex']);
+        Route::get('comments/statistics', [App\Http\Controllers\Api\V1\CommentController::class, 'statistics']);
+        Route::post('comments/bulk', [App\Http\Controllers\Api\V1\CommentController::class, 'bulkAction'])->middleware('permission:manage comments');
         Route::put('comments/{comment}/approve', [App\Http\Controllers\Api\V1\CommentController::class, 'approve'])->middleware('permission:manage comments');
         Route::put('comments/{comment}/reject', [App\Http\Controllers\Api\V1\CommentController::class, 'reject'])->middleware('permission:manage comments');
+        Route::put('comments/{comment}/spam', [App\Http\Controllers\Api\V1\CommentController::class, 'markAsSpam'])->middleware('permission:manage comments');
         Route::delete('comments/{comment}', [App\Http\Controllers\Api\V1\CommentController::class, 'destroy'])->middleware('permission:manage comments');
 
         // Users Management
@@ -135,6 +162,13 @@ Route::prefix('v1')->group(function () {
 
         // Roles (for user management)
         Route::get('roles', [App\Http\Controllers\Api\V1\RoleController::class, 'index'])->middleware('permission:manage users');
+        Route::get('roles/permissions', [App\Http\Controllers\Api\V1\RoleController::class, 'permissions'])->middleware('permission:manage users');
+        Route::post('roles', [App\Http\Controllers\Api\V1\RoleController::class, 'store'])->middleware('permission:manage users');
+        Route::get('roles/{role}', [App\Http\Controllers\Api\V1\RoleController::class, 'show'])->middleware('permission:manage users');
+        Route::put('roles/{role}', [App\Http\Controllers\Api\V1\RoleController::class, 'update'])->middleware('permission:manage users');
+        Route::delete('roles/{role}', [App\Http\Controllers\Api\V1\RoleController::class, 'destroy'])->middleware('permission:manage users');
+        Route::post('roles/{role}/permissions', [App\Http\Controllers\Api\V1\RoleController::class, 'syncPermissions'])->middleware('permission:manage users');
+        Route::post('roles/{role}/duplicate', [App\Http\Controllers\Api\V1\RoleController::class, 'duplicate'])->middleware('permission:manage users');
 
         // Activity Logs
         Route::get('activity-logs', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'index'])->middleware('permission:manage users');
@@ -181,6 +215,8 @@ Route::prefix('v1')->group(function () {
         // Statistics route must be defined before apiResource to avoid route conflict
         Route::get('backups/statistics', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage settings');
         Route::get('backups/stats', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage settings');
+        Route::match(['GET', 'POST'], 'backups/schedule', [App\Http\Controllers\Api\V1\BackupController::class, 'schedule'])->middleware('permission:manage settings');
+        Route::post('backups/cleanup', [App\Http\Controllers\Api\V1\BackupController::class, 'cleanup'])->middleware('permission:manage settings');
         Route::apiResource('backups', App\Http\Controllers\Api\V1\BackupController::class)->middleware('permission:manage settings');
         Route::post('backups/{backup}/restore', [App\Http\Controllers\Api\V1\BackupController::class, 'restore'])->middleware('permission:manage settings');
         Route::get('backups/{backup}/download', [App\Http\Controllers\Api\V1\BackupController::class, 'download'])->middleware('permission:manage settings');
@@ -189,8 +225,22 @@ Route::prefix('v1')->group(function () {
         Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
         Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');
+        
+        // IP Blocklist
+        Route::get('security/blocklist', [App\Http\Controllers\Api\V1\SecurityController::class, 'getBlocklist'])->middleware('permission:manage settings');
         Route::post('security/block-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'blockIp'])->middleware('permission:manage settings');
         Route::post('security/unblock-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'unblockIp'])->middleware('permission:manage settings');
+        Route::post('security/bulk-block', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkBlock'])->middleware('permission:manage settings');
+        Route::post('security/bulk-unblock', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkUnblock'])->middleware('permission:manage settings');
+        
+        // IP Whitelist
+        Route::get('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'getWhitelist'])->middleware('permission:manage settings');
+        Route::post('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'addToWhitelist'])->middleware('permission:manage settings');
+        Route::delete('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'removeFromWhitelist'])->middleware('permission:manage settings');
+        Route::post('security/bulk-whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkWhitelist'])->middleware('permission:manage settings');
+        Route::post('security/bulk-remove-whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkRemoveWhitelist'])->middleware('permission:manage settings');
+        
+        // IP Check & Clear
         Route::get('security/check-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'checkIp'])->middleware('permission:manage settings');
         Route::post('security/clear-failed-attempts', [App\Http\Controllers\Api\V1\SecurityController::class, 'clearFailedAttempts'])->middleware('permission:manage settings');
 
@@ -275,7 +325,9 @@ Route::prefix('v1')->group(function () {
             Route::get('referrers', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'referrers']);
             Route::get('events', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'events']);
             Route::get('event-stats', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'eventStats']);
-            Route::get('realtime', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'realTime']);
+            // Realtime endpoint needs higher rate limit for polling
+            Route::get('realtime', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'realTime'])
+                ->middleware('throttle:120,1'); // 120 requests per minute for real-time polling
         });
 
         // Search
@@ -297,6 +349,15 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('email-templates', App\Http\Controllers\Api\V1\EmailTemplateController::class)->middleware('permission:manage settings');
         Route::post('email-templates/{emailTemplate}/preview', [App\Http\Controllers\Api\V1\EmailTemplateController::class, 'preview'])->middleware('permission:manage settings');
         Route::post('email-templates/{emailTemplate}/send-test', [App\Http\Controllers\Api\V1\EmailTemplateController::class, 'sendTest'])->middleware('permission:manage settings');
+
+        // Email Testing & Verification
+        Route::prefix('email-test')->middleware('permission:manage settings')->group(function () {
+            Route::post('test-connection', [App\Http\Controllers\Api\V1\EmailTestController::class, 'testConnection']);
+            Route::post('send-test', [App\Http\Controllers\Api\V1\EmailTestController::class, 'sendTest']);
+            Route::get('queue-status', [App\Http\Controllers\Api\V1\EmailTestController::class, 'getQueueStatus']);
+            Route::get('recent-logs', [App\Http\Controllers\Api\V1\EmailTestController::class, 'getRecentLogs']);
+            Route::get('validate-config', [App\Http\Controllers\Api\V1\EmailTestController::class, 'validateConfig']);
+        });
 
         // Notifications
         Route::get('notifications', [App\Http\Controllers\Api\V1\NotificationController::class, 'index']);
@@ -335,6 +396,10 @@ Route::prefix('v1')->group(function () {
         Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage settings');
         Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage settings');
         Route::post('system/cache/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearCache'])->middleware('permission:manage settings');
+        Route::post('system/cache/warm', [App\Http\Controllers\Api\V1\SystemController::class, 'warmCache'])->middleware('permission:manage settings');
+        Route::get('system/cache/warming-stats', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheWarmingStats'])->middleware('permission:manage settings');
+        Route::get('system/query-performance', [App\Http\Controllers\Api\V1\SystemController::class, 'queryPerformance'])->middleware('permission:manage settings');
+        Route::post('system/rate-limit/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit'])->middleware('permission:manage settings');
 
         // Redis Management
         Route::get('redis/settings', [App\Http\Controllers\Api\V1\RedisController::class, 'index'])->middleware('permission:manage settings');
@@ -345,9 +410,12 @@ Route::prefix('v1')->group(function () {
         Route::post('redis/flush-cache', [App\Http\Controllers\Api\V1\RedisController::class, 'flushCache'])->middleware('permission:manage settings');
 
         // Multi-language Support
+        // These routes must be defined BEFORE apiResource to avoid route conflicts
+        Route::get('languages/ui-stats', [App\Http\Controllers\Api\V1\LanguageController::class, 'uiStats'])->middleware('permission:manage settings');
+        Route::get('languages/{language}/export-pack', [App\Http\Controllers\Api\V1\LanguageController::class, 'exportPack'])->middleware('permission:manage settings');
+        Route::post('languages/import-pack', [App\Http\Controllers\Api\V1\LanguageController::class, 'importPack'])->middleware('permission:manage settings');
+        Route::post('languages/{language}/set-default', [App\Http\Controllers\Api\V1\LanguageController::class, 'setDefault'])->middleware('permission:manage settings');
         Route::apiResource('languages', App\Http\Controllers\Api\V1\LanguageController::class)->middleware('permission:manage settings');
-        Route::get('translations/{type}/{id}', [App\Http\Controllers\Api\V1\LanguageController::class, 'getTranslations'])->middleware('permission:manage content');
-        Route::post('translations', [App\Http\Controllers\Api\V1\LanguageController::class, 'setTranslation'])->middleware('permission:manage content');
     });
 });
 

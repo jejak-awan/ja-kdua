@@ -1,0 +1,90 @@
+{
+    "title": "Manajemen Redis",
+    "description": "Kelola konfigurasi server Redis dan monitor performa cache",
+    "tabs": {
+        "statistics": "Statistik",
+        "settings": "Pengaturan",
+        "cache": "Manajemen Cache"
+    },
+    "settings": {
+        "connection": "Pengaturan Koneksi",
+        "test": "Uji Koneksi",
+        "testing": "Menguji...",
+        "save": "Simpan Pengaturan",
+        "saving": "Menyimpan...",
+        "enabled": "Diaktifkan",
+        "disabled": "Dinonaktifkan"
+    },
+    "statistics": {
+        "grid": {
+            "version": "Versi Redis",
+            "memory": "Memori Digunakan",
+            "keys": "Total Key",
+            "uptime": "Uptime",
+            "clients": "Klien Terhubung",
+            "hitRate": "Hit Rate",
+            "ops": "Operasi/Detik",
+            "commands": "Total Perintah"
+        },
+        "hitMiss": {
+            "title": "Statistik Cache Hit/Miss",
+            "hits": "Cache Hit",
+            "misses": "Cache Miss",
+            "hitRate": "Hit Rate"
+        },
+        "refresh": "Segarkan Statistik",
+        "autoRefresh": "Segarkan otomatis setiap 30 detik"
+    },
+    "cache": {
+        "title": "Manajemen Cache",
+        "actions": {
+            "all": {
+                "title": "Bersihkan Semua Cache",
+                "desc": "Bersihkan semua data cache termasuk config, route, dan view",
+                "button": "Bersihkan Semua"
+            },
+            "cache": {
+                "title": "Cache Aplikasi",
+                "desc": "Bersihkan cache aplikasi saja",
+                "button": "Bersihkan Cache"
+            },
+            "config": {
+                "title": "Cache Konfigurasi",
+                "desc": "Bersihkan cache konfigurasi",
+                "button": "Bersihkan Config"
+            },
+            "route": {
+                "title": "Cache Route",
+                "desc": "Bersihkan cache route",
+                "button": "Bersihkan Route"
+            },
+            "view": {
+                "title": "Cache View",
+                "desc": "Bersihkan template view yang dikompilasi",
+                "button": "Bersihkan View"
+            }
+        },
+        "stats": {
+            "title": "Statistik Cache",
+            "keys": "Total Key",
+            "size": "Ukuran Cache",
+            "expired": "Key Kedaluwarsa",
+            "topKeys": "Key Teratas berdasarkan Ukuran",
+            "table": {
+                "key": "Key",
+                "size": "Ukuran",
+                "ttl": "TTL"
+            }
+        }
+    },
+    "messages": {
+        "saveSuccess": "Pengaturan berhasil disimpan!",
+        "saveFailed": "Gagal menyimpan pengaturan",
+        "testSuccess": "Koneksi berhasil",
+        "testFailed": "Koneksi gagal",
+        "flushConfirm": "Apakah Anda yakin ingin membersihkan cache {type}?",
+        "flushSuccess": "Cache {type} berhasil dibersihkan!",
+        "flushFailed": "Gagal membersihkan cache",
+        "loading": "Memuat..."
+    }
+}

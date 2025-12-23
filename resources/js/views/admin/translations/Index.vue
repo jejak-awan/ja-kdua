@@ -1,27 +1,27 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Translations</h1>
-            <p class="text-sm text-gray-500 mt-1">Language: {{ languageCode }}</p>
+            <h1 class="text-2xl font-bold text-foreground">Translations</h1>
+            <p class="text-sm text-muted-foreground mt-1">Language: {{ languageCode }}</p>
         </div>
-        <div class="bg-white shadow rounded-lg p-6">
+        <div class="bg-card shadow rounded-lg p-6">
             <div class="mb-4">
-                <input v-model="search" type="text" placeholder="Search translations..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <input v-model="search" type="text" placeholder="Search translations..." class="w-full px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>
-            <div v-if="loading" class="text-center py-8"><p class="text-gray-500">Loading...</p></div>
-            <div v-else-if="filteredTranslations.length === 0" class="text-center py-8"><p class="text-gray-500">No translations found</p></div>
-            <table v-else class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <div v-if="loading" class="text-center py-8"><p class="text-muted-foreground">Loading...</p></div>
+            <div v-else-if="filteredTranslations.length === 0" class="text-center py-8"><p class="text-muted-foreground">No translations found</p></div>
+            <table v-else class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Key</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Translation</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Key</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Translation</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="translation in filteredTranslations" :key="translation.id" class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ translation.key }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ translation.value || '-' }}</td>
+                <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="translation in filteredTranslations" :key="translation.id" class="hover:bg-muted">
+                        <td class="px-6 py-4 text-sm font-medium text-foreground">{{ translation.key }}</td>
+                        <td class="px-6 py-4 text-sm text-muted-foreground">{{ translation.value || '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button @click="editTranslation(translation)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
                         </td>

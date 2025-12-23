@@ -1,0 +1,72 @@
+{
+    "title": "Pembuat Formulir",
+    "actions": {
+        "create": "Formulir Baru",
+        "createFirst": "Buat Formulir Pertama Anda",
+        "submissions": "Submisi",
+        "export": "Ekspor",
+        "edit": "Edit",
+        "delete": "Hapus",
+        "cancel": "Batal",
+        "save": "Simpan",
+        "update": "Perbarui Formulir",
+        "createForm": "Buat Formulir",
+        "addField": "Tambah Bidang"
+    },
+    "filters": {
+        "search": "Cari formulir...",
+        "status": "Semua Status",
+        "active": "Aktif",
+        "inactive": "Tidak Aktif"
+    },
+    "stats": {
+        "fields": "{count} Bidang",
+        "submissions": "{count} Submisi",
+        "total": "Total",
+        "new": "Baru",
+        "read": "Dibaca",
+        "archived": "Diarsipkan"
+    },
+    "submissions": {
+        "title": "Submisi Formulir",
+        "search": "Cari submisi...",
+        "detailTitle": "Detail Submisi",
+        "submittedBy": "Diserahkan oleh:",
+        "formData": "Data Formulir",
+        "ipAddress": "Alamat IP",
+        "status": "Status",
+        "user": "Pengguna",
+        "submitted": "Diserahkan",
+        "empty": "Tidak ada submisi ditemukan"
+    },
+    "modal": {
+        "createTitle": "Buat Formulir Baru",
+        "editTitle": "Edit Formulir",
+        "formName": "Nama Formulir",
+        "slug": "Slug",
+        "description": "Deskripsi",
+        "successMessage": "Pesan Sukses",
+        "redirectUrl": "URL Pengalihan",
+        "isActive": "Formulir aktif",
+        "formFields": "Bidang Formulir",
+        "placeholders": {
+            "name": "Formulir Kontak",
+            "slug": "formulir-kontak",
+            "description": "Deskripsi formulir...",
+            "successMessage": "Terima kasih atas kiriman Anda!",
+            "redirectUrl": "https://example.com/terima-kasih"
+        }
+    },
+    "messages": {
+        "loading": "Memuat formulir...",
+        "empty": "Tidak ada formulir ditemukan",
+        "saved": "Formulir berhasil disimpan",
+        "deleted": "Formulir berhasil dihapus",
+        "statusUpdated": "Status formulir diperbarui",
+        "deleteConfirm": "Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+        "submissionDeleted": "Submisi berhasil dihapus",
+        "submissionDeleteConfirm": "Anda yakin ingin menghapus submisi ini?",
+        "exportFailed": "Gagal mengekspor submisi",
+        "saveFailed": "Gagal menyimpan formulir"
+    }
+}

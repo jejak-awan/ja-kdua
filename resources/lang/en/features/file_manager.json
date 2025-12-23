@@ -1,0 +1,51 @@
+{
+    "title": "File Manager",
+    "actions": {
+        "newFolder": "New Folder",
+        "uploadFiles": "Upload Files",
+        "delete": "Delete",
+        "remove": "Remove",
+        "cancel": "Cancel",
+        "create": "Create",
+        "upload": "Upload",
+        "uploading": "Uploading...",
+        "creating": "Creating...",
+        "close": "Close"
+    },
+    "nav": {
+        "root": "Root"
+    },
+    "labels": {
+        "folders": "Folders",
+        "files": "Files & Folders",
+        "selectedFiles": "Selected Files:",
+        "multipleSupported": "Multiple files supported",
+        "folderName": "Folder Name",
+        "clickToUpload": "Click to upload",
+        "dragAndDrop": "or drag and drop"
+    },
+    "placeholders": {
+        "newDetails": "New details",
+        "folderName": "New folder name"
+    },
+    "messages": {
+        "loading": "Loading...",
+        "noFiles": "No files found",
+        "deleteFolderConfirm": "Delete folder \"{name}\"?",
+        "deleteFileConfirm": "Delete file \"{name}\"?",
+        "deleteFolderFailed": "Failed to delete folder",
+        "deleteFileFailed": "Failed to delete file",
+        "uploadFailed": "Failed to upload files",
+        "createFolderFailed": "Failed to create folder",
+        "uploadedSuccess": "Files uploaded successfully",
+        "folderCreatedSuccess": "Folder created successfully"
+    },
+    "modals": {
+        "upload": {
+            "title": "Upload Files"
+        },
+        "createFolder": {
+            "title": "Create Folder"
+        }
+    }
+}

@@ -1,13 +1,12 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
-                <!-- Header -->
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Upload Media</h3>
+                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.upload.title') }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -24,7 +23,7 @@
                         @dragenter.prevent
                         :class="[
                             'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
-                            isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'
+                            isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-input'
                         ]"
                     >
                         <input
@@ -37,25 +36,25 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <p class="mt-4 text-sm text-gray-600">
+                        <p class="mt-4 text-sm text-muted-foreground">
                             <button
                                 @click="$refs.fileInput.click()"
                                 class="text-indigo-600 hover:text-indigo-700 font-medium"
                             >
-                                Click to upload
+                                {{ $t('features.media.modals.upload.clickToUpload') }}
                             </button>
-                            or drag and drop
+                            {{ $t('features.media.modals.upload.dragAndDrop') }}
                         </p>
-                        <p class="mt-2 text-xs text-gray-500">PNG, JPG, GIF, PDF, MP4 up to 10MB</p>
+                        <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.media.modals.upload.formats') }}</p>
                     </div>
 
                     <!-- Selected Files -->
                     <div v-if="selectedFiles.length > 0" class="mt-6 space-y-2">
-                        <h4 class="text-sm font-medium text-gray-700">Selected Files:</h4>
-                        <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-foreground">{{ $t('features.media.modals.upload.selectedFiles') }}</h4>
+                        <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-muted rounded-lg">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-900">{{ file.name }}</p>
-                                <p class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</p>
+                                <p class="text-sm font-medium text-foreground">{{ file.name }}</p>
+                                <p class="text-xs text-muted-foreground">{{ formatFileSize(file.size) }}</p>
                             </div>
                             <button
                                 @click="removeFile(index)"
@@ -71,10 +70,10 @@
                     <!-- Upload Progress -->
                     <div v-if="uploading" class="mt-6">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm text-gray-700">Uploading...</span>
-                            <span class="text-sm text-gray-500">{{ uploadProgress }}%</span>
+                            <span class="text-sm text-foreground">{{ $t('features.media.modals.upload.uploading') }}</span>
+                            <span class="text-sm text-muted-foreground">{{ uploadProgress }}%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="w-full bg-muted rounded-full h-2">
                             <div
                                 class="bg-indigo-600 h-2 rounded-full transition-all"
                                 :style="{ width: uploadProgress + '%' }"
@@ -87,16 +86,16 @@
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('features.media.actions.cancel') }}
                     </button>
                     <button
                         @click="handleUpload"
                         :disabled="selectedFiles.length === 0 || uploading"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ uploading ? 'Uploading...' : `Upload ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}` }}
+                        {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.uploadAction', { count: selectedFiles.length }) }}
                     </button>
                 </div>
             </div>
@@ -106,7 +105,10 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+
+const { t } = useI18n();
 
 const props = defineProps({
     folderId: {
@@ -137,7 +139,7 @@ const handleDrop = (event) => {
 const addFiles = (files) => {
     files.forEach(file => {
         if (file.size > 10 * 1024 * 1024) {
-            alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+            alert(t('features.media.messages.fileTooLarge', { name: file.name }));
             return;
         }
         if (!selectedFiles.value.find(f => f.name === file.name && f.size === file.size)) {
@@ -182,7 +184,7 @@ const handleUpload = async () => {
         uploadProgress.value = 0;
     } catch (error) {
         console.error('Upload error:', error);
-        alert('Failed to upload files');
+        alert(t('features.media.messages.uploadFailed'));
     } finally {
         uploading.value = false;
     }

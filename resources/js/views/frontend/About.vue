@@ -1,16 +1,19 @@
 <template>
   <div class="about-page">
     <div class="container">
-      <h1 class="page-title">About Us</h1>
+      <h1 class="page-title">{{ t('features.frontend.about.title') }}</h1>
       <div class="content">
-        <p>Welcome to JA-CMS - Modern Content Management System</p>
-        <p>This is a placeholder page. Content coming soon.</p>
+        <p>{{ t('features.frontend.about.welcome') }}</p>
+        <p>{{ t('features.frontend.about.placeholder') }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 </script>
 
 <style scoped>

@@ -1,0 +1,34 @@
+{
+    "title": "Widget",
+    "new": "Widget Baru",
+    "loading": "Memuat...",
+    "empty": "Tidak ada widget ditemukan",
+    "table": {
+        "name": "Nama",
+        "type": "Tipe",
+        "position": "Posisi",
+        "actions": "Aksi"
+    },
+    "actions": {
+        "edit": "Ubah",
+        "delete": "Hapus"
+    },
+    "messages": {
+        "deleteConfirm": "Hapus widget \"{name}\"?",
+        "deleteFailed": "Gagal menghapus widget",
+        "saveFailed": "Gagal menyimpan widget"
+    },
+    "modals": {
+        "widget": {
+            "titleEdit": "Ubah Widget",
+            "titleCreate": "Buat Widget",
+            "name": "Nama",
+            "type": "Tipe",
+            "position": "Posisi",
+            "positionPlaceholder": "sidebar, footer, dll.",
+            "content": "Konten",
+            "active": "Aktif",
+            "saving": "Menyimpan..."
+        }
+    }
+}

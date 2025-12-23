@@ -1,0 +1,56 @@
+{
+    "menu": {
+        "dashboard": "Dashboard",
+        "content": "Content",
+        "contents": "Contents",
+        "categories": "Categories",
+        "tags": "Tags",
+        "media": "Media",
+        "mediaLibrary": "Media Library",
+        "fileManager": "File Manager",
+        "comments": "Comments",
+        "forms": "Forms",
+        "newsletter": "Newsletter",
+        "users": "Users",
+        "roles": "Roles & Permissions",
+        "activityLogs": "Activity Logs",
+        "themes": "Themes",
+        "menus": "Menus",
+        "widgets": "Widgets",
+        "languages": "Languages",
+        "analytics": "Analytics",
+        "seoTools": "SEO Tools",
+        "redirects": "Redirects",
+        "settings": "Settings",
+        "backups": "Backups",
+        "security": "Security",
+        "redis": "Redis Cache",
+        "systemInfo": "System Info",
+        "scheduledTasks": "Scheduled Tasks",
+        "webhooks": "Webhooks",
+        "plugins": "Plugins",
+        "customFields": "Custom Fields",
+        "seo": "SEO Tools",
+        "system": "System Info",
+        "logout": "Logout"
+    },
+    "sections": {
+        "content": "CONTENT",
+        "media": "MEDIA",
+        "engagement": "ENGAGEMENT",
+        "usersAccess": "USERS & ACCESS",
+        "appearance": "APPEARANCE",
+        "analyticsSeo": "ANALYTICS & SEO",
+        "system": "SYSTEM",
+        "developer": "DEVELOPER"
+    },
+    "breadcrumbs": {
+        "home": "Home",
+        "dashboard": "Dashboard"
+    },
+    "sidebar": {
+        "expand": "Expand sidebar",
+        "minimize": "Minimize sidebar",
+        "toggle": "Toggle sidebar"
+    }
+}

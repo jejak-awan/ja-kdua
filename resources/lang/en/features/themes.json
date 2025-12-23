@@ -1,0 +1,45 @@
+{
+    "title": "Themes Management",
+    "subtitle": "Manage and customize your themes",
+    "scan": "Scan Themes",
+    "scanning": "Scanning...",
+    "types": {
+        "all": "All Types",
+        "frontend": "Frontend",
+        "admin": "Admin",
+        "email": "Email"
+    },
+    "status": {
+        "active": "Active",
+        "broken": "Broken",
+        "inactive": "Inactive",
+        "pending": "Pending"
+    },
+    "list": {
+        "empty": "No themes found",
+        "emptySubtitle": "Get started by creating a new theme.",
+        "version": "v{version}",
+        "child": "Child",
+        "by": "by {author}"
+    },
+    "actions": {
+        "preview": "Preview",
+        "customize": "Customize",
+        "activate": "Activate",
+        "settings": "Settings",
+        "validate": "Validate"
+    },
+    "modals": {
+        "previewTitle": "Theme Preview: {name}"
+    },
+    "messages": {
+        "scanSuccess": "Scan completed! Found {count} theme(s).",
+        "scanFailed": "Failed to scan themes",
+        "activateConfirm": "Are you sure you want to activate theme \"{name}\"?",
+        "activateSuccess": "Theme activated successfully",
+        "activateFailed": "Failed to activate theme",
+        "validateSuccess": "Theme is valid!",
+        "validateFailed": "Theme validation failed:",
+        "validateError": "Failed to validate theme"
+    }
+}

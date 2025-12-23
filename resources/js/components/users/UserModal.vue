@@ -1,15 +1,15 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
+                <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-card z-10">
                     <h3 class="text-lg font-semibold">
-                        {{ user ? 'Edit User' : 'Create User' }}
+                        {{ user ? $t('features.users.modals.user.titleEdit') : $t('features.users.modals.user.titleCreate') }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-gray-600"
+                        class="text-gray-400 hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -21,14 +21,14 @@
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
                     <!-- Avatar -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Avatar
+                        <label class="block text-sm font-medium text-foreground mb-2">
+                            {{ $t('features.users.modals.user.avatar') }}
                         </label>
                         <div class="flex items-center space-x-4">
                             <div v-if="form.avatar" class="flex-shrink-0">
                                 <img
                                     :src="form.avatar"
-                                    alt="Avatar"
+                                    :alt="$t('features.users.modals.user.avatar')"
                                     class="h-20 w-20 rounded-full object-cover"
                                 >
                             </div>
@@ -40,7 +40,7 @@
                             <div>
                                 <MediaPicker
                                     @selected="(media) => form.avatar = media.url"
-                                    label="Select Avatar"
+                                    :label="$t('features.users.modals.user.selectAvatar')"
                                 />
                                 <button
                                     v-if="form.avatar"
@@ -48,7 +48,7 @@
                                     @click="form.avatar = null"
                                     class="mt-2 text-sm text-red-600 hover:text-red-800"
                                 >
-                                    Remove Avatar
+                                    {{ $t('features.users.modals.user.removeAvatar') }}
                                 </button>
                             </div>
                         </div>
@@ -56,106 +56,106 @@
 
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Name <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.name') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Full name"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.namePlaceholder')"
                         >
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Email <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.email') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.email"
                             type="email"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="user@example.com"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.emailPlaceholder')"
                         >
                     </div>
 
                     <!-- Password (only for new users) -->
                     <div v-if="!user">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Password <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.password') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.password"
                             type="password"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Minimum 8 characters"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.passwordPlaceholder')"
                         >
-                        <p class="mt-1 text-xs text-gray-500">Leave empty when editing to keep current password</p>
+                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.users.modals.user.passwordHint') }}</p>
                     </div>
 
                     <!-- Phone -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Phone
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.phone') }}
                         </label>
                         <input
                             v-model="form.phone"
                             type="tel"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="+1234567890"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.phonePlaceholder')"
                         >
                     </div>
 
                     <!-- Bio -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Bio
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.bio') }}
                         </label>
                         <textarea
                             v-model="form.bio"
                             rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="User biography"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.bioPlaceholder')"
                         />
                     </div>
 
                     <!-- Website -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Website
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.website') }}
                         </label>
                         <input
                             v-model="form.website"
                             type="url"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="https://example.com"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.websitePlaceholder')"
                         >
                     </div>
 
                     <!-- Location -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Location
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.location') }}
                         </label>
                         <input
                             v-model="form.location"
                             type="text"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="City, Country"
+                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.users.modals.user.locationPlaceholder')"
                         >
                     </div>
 
                     <!-- Roles -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Roles <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-foreground mb-1">
+                            {{ $t('features.users.modals.user.roles') }} <span class="text-red-500">*</span>
                         </label>
-                        <div v-if="loading" class="text-sm text-gray-500">
-                            Loading roles...
+                        <div v-if="loading" class="text-sm text-muted-foreground">
+                            {{ $t('features.users.modals.user.loadingRoles') }}
                         </div>
                         <div v-else-if="availableRoles.length > 0" class="space-y-2 max-h-60 overflow-y-auto">
                             <label
@@ -167,31 +167,31 @@
                                     v-model="form.roles"
                                     type="checkbox"
                                     :value="role.id"
-                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                                 >
-                                <span class="ml-2 text-sm text-gray-900">{{ role.name }}</span>
+                                <span class="ml-2 text-sm text-foreground">{{ role.name }}</span>
                             </label>
                         </div>
-                        <p v-if="availableRoles.length === 0 && !loading" class="text-xs text-gray-500 mt-2">
-                            No roles available
+                        <p v-if="availableRoles.length === 0 && !loading" class="text-xs text-muted-foreground mt-2">
+                            {{ $t('features.users.modals.user.noRoles') }}
                         </p>
                     </div>
                 </form>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t sticky bottom-0 bg-white">
+                <div class="flex items-center justify-end space-x-3 p-6 border-t sticky bottom-0 bg-card">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ saving ? 'Saving...' : (user ? 'Update' : 'Create') }}
+                        {{ saving ? $t('features.users.modals.user.saving') : (user ? $t('common.update') : $t('common.create')) }}
                     </button>
                 </div>
             </div>
@@ -201,6 +201,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import MediaPicker from '../MediaPicker.vue';
 
@@ -213,6 +214,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
+const { t } = useI18n();
 const saving = ref(false);
 const loading = ref(false);
 const availableRoles = ref([]);
@@ -269,7 +271,7 @@ const loadUser = () => {
 
 const handleSubmit = async () => {
     if (form.value.roles.length === 0) {
-        alert('Please select at least one role');
+        alert(t('features.users.messages.roleRequired'));
         return;
     }
 
@@ -288,7 +290,7 @@ const handleSubmit = async () => {
             await api.put(`/admin/cms/users/${props.user.id}`, payload);
         } else {
             if (!payload.password) {
-                alert('Password is required for new users');
+                alert(t('features.users.messages.passwordRequired'));
                 saving.value = false;
                 return;
             }
@@ -298,7 +300,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save user:', error);
-        alert(error.response?.data?.message || 'Failed to save user');
+        alert(error.response?.data?.message || t('features.users.messages.saveFailed'));
     } finally {
         saving.value = false;
     }

@@ -20,14 +20,14 @@
 
       <!-- Error Message -->
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Server Error
+        <h2 class="text-3xl font-bold text-foreground mb-4">
+          {{ t('features.errors.500.title') }}
         </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">
-          Maaf, terjadi kesalahan pada server kami.
+        <p class="text-lg text-muted-foreground dark:text-gray-400 mb-2">
+          {{ t('features.errors.500.message') }}
         </p>
-        <p class="text-sm text-gray-500 dark:text-gray-500">
-          Tim kami telah diberitahu dan sedang menangani masalah ini.
+        <p class="text-sm text-muted-foreground dark:text-muted-foreground">
+          {{ t('features.errors.500.description') }}
         </p>
       </div>
 
@@ -35,9 +35,9 @@
       <div v-if="errorDetails" class="mb-8 max-w-lg mx-auto">
         <button
           @click="showDetails = !showDetails"
-          class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center justify-center mx-auto"
+          class="text-sm text-muted-foreground dark:text-gray-400 hover:text-foreground dark:hover:text-white transition-colors flex items-center justify-center mx-auto"
         >
-          <span>{{ showDetails ? 'Sembunyikan' : 'Tampilkan' }} Detail Error</span>
+          <span>{{ showDetails ? t('features.errors.500.hideDetails') : t('features.errors.500.showDetails') }}</span>
           <svg
             class="w-4 h-4 ml-1 transform transition-transform"
             :class="{ 'rotate-180': showDetails }"
@@ -50,8 +50,8 @@
         </button>
         
         <transition name="slide-fade">
-          <div v-if="showDetails" class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-left">
-            <pre class="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto">{{ errorDetails }}</pre>
+          <div v-if="showDetails" class="mt-4 p-4 bg-red-500/20 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-left">
+            <pre class="text-xs text-foreground overflow-x-auto">{{ errorDetails }}</pre>
           </div>
         </transition>
       </div>
@@ -72,17 +72,17 @@
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          {{ retrying ? 'Mencoba Ulang...' : 'Coba Lagi' }}
+          {{ retrying ? t('features.errors.500.retrying') : t('features.errors.500.retry') }}
         </button>
         
         <router-link
           to="/"
-          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-800 hover:bg-muted dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          Halaman Utama
+          {{ t('features.errors.404.home') }}
         </router-link>
       </div>
 
@@ -90,36 +90,36 @@
       <div class="mb-8">
         <button
           @click="reportIssue"
-          class="text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          class="text-sm text-muted-foreground dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
         >
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          Laporkan Masalah Ini
+          {{ t('features.errors.500.report') }}
         </button>
       </div>
 
       <!-- Status Check -->
-      <div class="text-sm text-gray-500 dark:text-gray-600">
-        <p class="mb-2">Cek status server:</p>
+      <div class="text-sm text-muted-foreground dark:text-muted-foreground">
+        <p class="mb-2">{{ t('features.errors.500.checkStatus') }}</p>
         <div class="flex items-center justify-center gap-2">
           <div class="flex items-center gap-1">
             <div class="w-2 h-2 rounded-full" :class="serverStatus.api ? 'bg-green-500' : 'bg-red-500'"></div>
-            <span>API</span>
+            <span>{{ t('features.errors.500.api') }}</span>
           </div>
           <div class="flex items-center gap-1">
             <div class="w-2 h-2 rounded-full" :class="serverStatus.database ? 'bg-green-500' : 'bg-red-500'"></div>
-            <span>Database</span>
+            <span>{{ t('features.errors.500.database') }}</span>
           </div>
           <div class="flex items-center gap-1">
             <div class="w-2 h-2 rounded-full" :class="serverStatus.cache ? 'bg-green-500' : 'bg-red-500'"></div>
-            <span>Cache</span>
+            <span>{{ t('features.errors.500.cache') }}</span>
           </div>
         </div>
       </div>
 
       <!-- Error Code for Reference -->
-      <div class="mt-8 text-xs text-gray-400 dark:text-gray-600">
+      <div class="mt-8 text-xs text-gray-400 dark:text-muted-foreground">
         Error Code: 500 | {{ errorId }} | {{ new Date().toISOString() }}
       </div>
     </div>
@@ -129,8 +129,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
+const { t } = useI18n();
 const showDetails = ref(false);
 const retrying = ref(false);
 const errorId = ref(generateErrorId());

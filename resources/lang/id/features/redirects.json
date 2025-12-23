@@ -1,0 +1,54 @@
+{
+    "title": "Pengalihan",
+    "new": "Pengalihan Baru",
+    "loading": "Memuat...",
+    "empty": "Tidak ada pengalihan ditemukan",
+    "search": "Cari pengalihan...",
+    "statistics": {
+        "total": "Total Pengalihan",
+        "active": "Pengalihan Aktif",
+        "hits": "Total Klik"
+    },
+    "table": {
+        "from": "URL Asal",
+        "to": "URL Tujuan",
+        "code": "Kode Status",
+        "hits": "Klik",
+        "status": "Status",
+        "actions": "Aksi"
+    },
+    "status": {
+        "active": "Aktif",
+        "inactive": "Tidak Aktif"
+    },
+    "actions": {
+        "edit": "Ubah",
+        "delete": "Hapus"
+    },
+    "messages": {
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus pengalihan dari \"{from}\"?",
+        "deleteFailed": "Gagal menghapus pengalihan",
+        "saveFailed": "Gagal menyimpan pengalihan"
+    },
+    "modals": {
+        "redirect": {
+            "titleEdit": "Ubah Pengalihan",
+            "titleCreate": "Buat Pengalihan",
+            "from": "URL Asal",
+            "fromPlaceholder": "/jalur-lama",
+            "fromHint": "Jalur URL sumber (misal, /halaman-lama)",
+            "to": "URL Tujuan",
+            "toPlaceholder": "/jalur-baru",
+            "toHint": "Jalur URL tujuan atau URL lengkap",
+            "code": "Kode Status",
+            "codes": {
+                "p301": "301 - Pengalihan Permanen",
+                "t302": "302 - Pengalihan Sementara",
+                "t307": "307 - Pengalihan Sementara (Pertahankan Metode)",
+                "p308": "308 - Pengalihan Permanen (Pertahankan Metode)"
+            },
+            "active": "Aktif",
+            "saving": "Menyimpan..."
+        }
+    }
+}

@@ -51,6 +51,14 @@ class RolePermissionSeeder extends Seeder
             'manage comments',
         ]);
 
+        // Author role - can create and edit own content
+        $authorRole = Role::firstOrCreate(['name' => 'author', 'guard_name' => 'web']);
+        $authorRole->givePermissionTo([
+            'create content',
+            'edit content',
+            'manage media',
+        ]);
+
         $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
         // Members have no special permissions by default
     }

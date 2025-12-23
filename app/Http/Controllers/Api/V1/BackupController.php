@@ -105,4 +105,37 @@ class BackupController extends BaseApiController
 
         return $this->success($stats, 'Backup statistics retrieved successfully');
     }
+
+    public function schedule(Request $request)
+    {
+        if ($request->isMethod('GET')) {
+            $schedule = $this->backupService->getScheduleSettings();
+            return $this->success($schedule, 'Backup schedule retrieved successfully');
+        }
+
+        // POST - update schedule
+        $validated = $request->validate([
+            'backup_schedule_enabled' => 'sometimes|boolean',
+            'backup_schedule_frequency' => 'sometimes|in:daily,weekly,monthly',
+            'backup_schedule_time' => 'sometimes|date_format:H:i',
+            'backup_retention_days' => 'sometimes|integer|min:1|max:365',
+            'backup_max_count' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $schedule = $this->backupService->updateScheduleSettings($validated);
+
+        return $this->success($schedule, 'Backup schedule updated successfully');
+    }
+
+    public function cleanup(Request $request)
+    {
+        $retentionDays = $request->input('retention_days', 30);
+        $maxBackups = $request->input('max_backups', 10);
+
+        $deleted = $this->backupService->cleanupOldBackups($retentionDays, $maxBackups);
+
+        return $this->success([
+            'deleted' => $deleted,
+        ], "{$deleted} old backups cleaned up");
+    }
 }

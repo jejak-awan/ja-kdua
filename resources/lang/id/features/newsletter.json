@@ -1,0 +1,30 @@
+{
+    "title": "Pelanggan Buletin",
+    "subtitle": "Kelola pelanggan buletin Anda",
+    "actions": {
+        "export": "Ekspor CSV",
+        "delete": "Hapus"
+    },
+    "filters": {
+        "allStatus": "Semua Status",
+        "subscribed": "Berlangganan",
+        "unsubscribed": "Berhenti Langganan",
+        "search": "Cari email atau nama..."
+    },
+    "table": {
+        "subscriber": "Pelanggan",
+        "status": "Status",
+        "joinedAt": "Bergabung Pada",
+        "source": "Sumber",
+        "actions": "Aksi"
+    },
+    "messages": {
+        "loading": "Memuat pelanggan...",
+        "empty": "Tidak ada pelanggan ditemukan",
+        "deleteConfirm": "Apakah Anda yakin ingin menghapus {email}?",
+        "deleteSuccess": "Pelanggan berhasil dihapus",
+        "deleteFailed": "Gagal menghapus pelanggan",
+        "exportFailed": "Gagal mengekspor pelanggan",
+        "noName": "Tanpa Nama"
+    }
+}

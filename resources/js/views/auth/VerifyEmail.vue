@@ -1,26 +1,26 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center bg-muted py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Verify Your Email
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-foreground">
+                    {{ t('features.auth.verifyEmail.title') }}
                 </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.
+                <p class="mt-2 text-center text-sm text-muted-foreground">
+                    {{ t('features.auth.verifyEmail.description') }}
                 </p>
             </div>
 
-            <div v-if="message" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'">
+            <div v-if="message" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-500/20 text-red-800' : 'bg-green-500/20 text-green-800'">
                 <p class="text-sm">{{ message }}</p>
             </div>
 
-            <div class="bg-white shadow rounded-lg p-6">
+            <div class="bg-card shadow rounded-lg p-6">
                 <div class="text-center mb-6">
                     <svg class="mx-auto h-12 w-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <p class="mt-4 text-sm text-gray-600">
-                        Didn't receive the email? Check your spam folder or click the button below to resend.
+                    <p class="mt-4 text-sm text-muted-foreground">
+                        {{ t('features.auth.verifyEmail.resendPrompt') }}
                     </p>
                 </div>
 
@@ -30,9 +30,9 @@
                         :disabled="loading || resendCooldown > 0"
                         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span v-if="loading">Sending...</span>
-                        <span v-else-if="resendCooldown > 0">Resend in {{ resendCooldown }}s</span>
-                        <span v-else>Resend Verification Email</span>
+                        <span v-if="loading">{{ t('features.auth.verifyEmail.sending') }}</span>
+                        <span v-else-if="resendCooldown > 0">{{ t('features.auth.verifyEmail.cooldown', { seconds: resendCooldown }) }}</span>
+                        <span v-else>{{ t('features.auth.verifyEmail.resendButton') }}</span>
                     </button>
 
                     <div class="text-center">
@@ -40,18 +40,18 @@
                             :to="{ name: 'login' }"
                             class="text-sm text-indigo-600 hover:text-indigo-500"
                         >
-                            Back to login
+                            {{ t('features.auth.forgotPassword.backToLogin') }}
                         </router-link>
                     </div>
                 </div>
             </div>
 
-            <div v-if="verified" class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+            <div v-if="verified" class="bg-green-500/20 border border-green-200 rounded-lg p-6 text-center">
                 <svg class="mx-auto h-12 w-12 text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-green-800 font-medium">Email verified successfully!</p>
-                <p class="text-sm text-green-600 mt-2">Redirecting to login...</p>
+                <p class="text-green-800 font-medium">{{ t('features.auth.verifyEmail.success') }}</p>
+                <p class="text-sm text-green-600 mt-2">{{ t('features.auth.verifyEmail.redirecting') }}</p>
             </div>
         </div>
     </div>
@@ -60,8 +60,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
@@ -98,18 +100,18 @@ const handleVerify = async (token, email) => {
 
         if (response.data.success) {
             verified.value = true;
-            message.value = 'Email verified successfully!';
+            message.value = t('features.auth.verifyEmail.success');
             messageType.value = 'success';
             
             setTimeout(() => {
                 router.push({ name: 'login' });
             }, 2000);
         } else {
-            message.value = response.data.message || 'Verification failed.';
+            message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
     } catch (error) {
-        message.value = error.response?.data?.message || 'Verification failed. Please try again.';
+        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
         messageType.value = 'error';
     } finally {
         loading.value = false;
@@ -128,7 +130,7 @@ const handleResend = async () => {
         });
 
         if (response.data.success) {
-            message.value = 'Verification email sent! Please check your inbox.';
+            message.value = t('features.auth.verifyEmail.resendSuccess');
             messageType.value = 'success';
             
             // Start cooldown timer (60 seconds)
@@ -141,11 +143,11 @@ const handleResend = async () => {
                 }
             }, 1000);
         } else {
-            message.value = response.data.message || 'Failed to send verification email.';
+            message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
     } catch (error) {
-        message.value = error.response?.data?.message || 'Failed to send verification email. Please try again.';
+        message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
         messageType.value = 'error';
     } finally {
         loading.value = false;

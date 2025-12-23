@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import api from '../services/api';
 import frontendRoutes from './frontend';
 
 const routes = [
     // Frontend routes (public)
     ...frontendRoutes,
-    
+
     // Auth routes
     {
         path: '/login',
@@ -53,6 +54,11 @@ const routes = [
                 component: () => import('../views/admin/contents/Index.vue'),
             },
             {
+                path: 'contents/calendar',
+                name: 'contents.calendar',
+                component: () => import('../views/admin/contents/Calendar.vue'),
+            },
+            {
                 path: 'contents/create',
                 name: 'contents.create',
                 component: () => import('../views/admin/contents/Create.vue'),
@@ -83,9 +89,19 @@ const routes = [
                 component: () => import('../views/admin/users/Index.vue'),
             },
             {
+                path: 'roles',
+                name: 'roles',
+                component: () => import('../views/admin/roles/Index.vue'),
+            },
+            {
                 path: 'settings',
                 name: 'settings',
                 component: () => import('../views/admin/settings/Index.vue'),
+            },
+            {
+                path: 'newsletter',
+                name: 'newsletter',
+                component: () => import('../views/admin/newsletter/Index.vue'),
             },
             {
                 path: 'profile',
@@ -293,13 +309,13 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
-    
+
     // Public routes (home, error pages, etc.) - skip auth check
     if (to.meta.public) {
         next();
         return;
     }
-    
+
     // Initialize auth for protected routes
     authStore.initAuth();
 
@@ -308,13 +324,13 @@ router.beforeEach((to, from, next) => {
         next({ name: 'login', query: { redirect: to.fullPath } });
         return;
     }
-    
+
     // If route is for guests but user is authenticated, redirect to dashboard
     if (to.meta.guest && authStore.isAuthenticated) {
         next({ name: 'dashboard' });
         return;
     }
-    
+
     // Allow navigation
     next();
 });
@@ -323,6 +339,24 @@ router.beforeEach((to, from, next) => {
 router.onError((error) => {
     console.error('Router error:', error);
     router.push({ name: 'server-error', state: { errorDetails: error.message } });
+});
+
+// Analytics tracking
+router.afterEach((to) => {
+    // Skip tracking for admin routes
+    if (to.path.startsWith('/admin')) {
+        return;
+    }
+
+    // Track visit using static import
+    api.post('/analytics/track-visit', {
+        url: window.location.href,
+        path: to.path,
+        title: to.meta.title || document.title
+    }).catch(err => {
+        // Silently fail for analytics errors
+        console.debug('Analytics tracking failed:', err);
+    });
 });
 
 export default router;

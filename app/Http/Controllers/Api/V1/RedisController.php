@@ -66,7 +66,18 @@ class RedisController extends BaseApiController
     {
         try {
             $start = microtime(true);
-            $pong = Redis::connection()->ping();
+            $redis = Redis::connection();
+            
+            // Check if Redis requires authentication
+            try {
+                $pong = $redis->ping();
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'NOAUTH') || str_contains($e->getMessage(), 'Authentication required')) {
+                    return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+                }
+                throw $e;
+            }
+            
             $duration = round((microtime(true) - $start) * 1000, 2);
 
             if ($pong) {
@@ -79,7 +90,11 @@ class RedisController extends BaseApiController
 
             return $this->error('Redis connection failed', 500);
         } catch (\Exception $e) {
-            return $this->error('Redis connection error: ' . $e->getMessage(), 500);
+            $message = $e->getMessage();
+            if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
+                return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+            }
+            return $this->error('Redis connection error: ' . $message, 500);
         }
     }
 
@@ -90,6 +105,17 @@ class RedisController extends BaseApiController
     {
         try {
             $redis = Redis::connection();
+            
+            // Check if Redis requires authentication
+            try {
+                $redis->ping();
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'NOAUTH') || str_contains($e->getMessage(), 'Authentication required')) {
+                    return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+                }
+                throw $e;
+            }
+            
             $info = $redis->info();
 
             // Get some key metrics (Redis returns flat array)
@@ -108,7 +134,11 @@ class RedisController extends BaseApiController
 
             return $this->success($stats, 'Redis info retrieved successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to retrieve Redis info: ' . $e->getMessage(), 500);
+            $message = $e->getMessage();
+            if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
+                return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+            }
+            return $this->error('Failed to retrieve Redis info: ' . $message, 500);
         }
     }
 
@@ -156,6 +186,17 @@ class RedisController extends BaseApiController
     {
         try {
             $redis = Redis::connection();
+            
+            // Check if Redis requires authentication
+            try {
+                $redis->ping();
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'NOAUTH') || str_contains($e->getMessage(), 'Authentication required')) {
+                    return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+                }
+                throw $e;
+            }
+            
             $keys = $redis->keys('*');
 
             $stats = [
@@ -167,7 +208,11 @@ class RedisController extends BaseApiController
 
             return $this->success($stats, 'Cache statistics retrieved successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to retrieve cache stats: ' . $e->getMessage(), 500);
+            $message = $e->getMessage();
+            if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
+                return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
+            }
+            return $this->error('Failed to retrieve cache stats: ' . $message, 500);
         }
     }
 

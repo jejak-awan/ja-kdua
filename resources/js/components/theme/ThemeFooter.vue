@@ -4,8 +4,8 @@
       <div class="footer-content">
         <!-- About Section -->
         <div class="footer-column">
-          <h3 class="footer-heading">About</h3>
-          <p class="footer-text">{{ settings.footer_about || 'Modern, clean, and powerful content management system built for the web.' }}</p>
+          <h3 class="footer-heading">{{ t('features.frontend.footer.headings.about') }}</h3>
+          <p class="footer-text">{{ settings.footer_about || t('features.frontend.footer.about.default') }}</p>
           
           <!-- Social Links -->
           <div v-if="settings.social_links" class="social-links">
@@ -17,18 +17,18 @@
         
         <!-- Resources -->
         <div class="footer-column">
-          <h3 class="footer-heading">Resources</h3>
+          <h3 class="footer-heading">{{ t('features.frontend.footer.headings.resources') }}</h3>
           <ul class="footer-links">
-            <li><router-link to="/blog">Blog</router-link></li>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">Support</a></li>
-            <li><a href="#">FAQ</a></li>
+            <li><router-link to="/blog">{{ t('features.frontend.footer.resources.blog') }}</router-link></li>
+            <li><a href="#">{{ t('features.frontend.footer.resources.documentation') }}</a></li>
+            <li><a href="#">{{ t('features.frontend.footer.resources.support') }}</a></li>
+            <li><a href="#">{{ t('features.frontend.footer.resources.faq') }}</a></li>
           </ul>
         </div>
         
         <!-- Categories -->
         <div class="footer-column">
-          <h3 class="footer-heading">Categories</h3>
+          <h3 class="footer-heading">{{ t('features.frontend.footer.headings.categories') }}</h3>
           <ul class="footer-links">
             <li v-for="category in categories" :key="category.id">
               <router-link :to="`/blog?category=${category.slug}`">{{ category.name }}</router-link>
@@ -38,12 +38,12 @@
         
         <!-- Newsletter -->
         <div class="footer-column">
-          <h3 class="footer-heading">Newsletter</h3>
+          <h3 class="footer-heading">{{ t('features.frontend.footer.headings.newsletter') }}</h3>
           <NewsletterWidget
             variant="compact"
             title=""
             description=""
-            button-text="Subscribe"
+            :button-text="t('features.frontend.newsletter.button')"
             :show-icon="false"
             :show-privacy="false"
           />
@@ -53,10 +53,10 @@
       <!-- Footer Bottom -->
       <div class="footer-bottom">
         <p class="footer-copyright">
-          {{ settings.footer_text || `© ${new Date().getFullYear()} JA-CMS. All rights reserved.` }}
+          {{ settings.footer_text || t('features.frontend.footer.copyright', { year: new Date().getFullYear() }) }}
         </p>
         <p class="footer-powered">
-          Powered by <strong>JA-CMS</strong> - Modern Content Management System
+          {{ t('features.frontend.footer.powered') }} <strong>JA-CMS</strong> - {{ t('features.frontend.footer.system') }}
         </p>
       </div>
     </div>
@@ -66,9 +66,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from '@/composables/useTheme'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import NewsletterWidget from '@/components/NewsletterWidget.vue'
 
+const { t } = useI18n()
 const { themeSettings } = useTheme()
 const categories = ref([])
 

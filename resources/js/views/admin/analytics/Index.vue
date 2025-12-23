@@ -2,39 +2,39 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
-                <p class="mt-1 text-sm text-gray-500">Track and analyze your website performance</p>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.analytics.title') }}</h1>
+                <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.analytics.subtitle') }}</p>
             </div>
             <div class="flex items-center space-x-3">
                 <input
                     v-model="dateFrom"
                     type="date"
-                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                <span class="text-gray-500">to</span>
+                <span class="text-muted-foreground">{{ $t('features.analytics.to') }}</span>
                 <input
                     v-model="dateTo"
                     type="date"
-                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
                 <button
                     @click="fetchAnalytics"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
-                    Apply
+                    {{ $t('features.analytics.apply') }}
                 </button>
             </div>
         </div>
 
         <!-- Overview Stats -->
         <div v-if="loading" class="text-center py-12">
-            <p class="text-gray-500">Loading analytics...</p>
+            <p class="text-muted-foreground">{{ $t('features.analytics.loading') }}</p>
         </div>
 
         <div v-else>
             <!-- Overview Cards -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden shadow rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -45,15 +45,15 @@
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Visits</dt>
-                                    <dd class="text-lg font-semibold text-gray-900">{{ overview.total_visits || 0 }}</dd>
+                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.totalVisits') }}</dt>
+                                    <dd class="text-lg font-semibold text-foreground">{{ overview.total_visits || 0 }}</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden shadow rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -63,15 +63,15 @@
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Unique Visitors</dt>
-                                    <dd class="text-lg font-semibold text-gray-900">{{ overview.unique_visitors || 0 }}</dd>
+                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.uniqueVisitors') }}</dt>
+                                    <dd class="text-lg font-semibold text-foreground">{{ overview.unique_visitors || 0 }}</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden shadow rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -81,15 +81,15 @@
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Sessions</dt>
-                                    <dd class="text-lg font-semibold text-gray-900">{{ overview.total_sessions || 0 }}</dd>
+                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.totalSessions') }}</dt>
+                                    <dd class="text-lg font-semibold text-foreground">{{ overview.total_sessions || 0 }}</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden shadow rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -99,8 +99,8 @@
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Bounce Rate</dt>
-                                    <dd class="text-lg font-semibold text-gray-900">{{ overview.bounce_rate || 0 }}%</dd>
+                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.bounceRate') }}</dt>
+                                    <dd class="text-lg font-semibold text-foreground">{{ overview.bounce_rate || 0 }}%</dd>
                                 </dl>
                             </div>
                         </div>
@@ -110,36 +110,23 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Visits Chart -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Visits Over Time</h2>
-                    <div class="h-64 flex items-center justify-center">
-                        <div class="text-center">
-                            <p class="text-sm text-gray-500 mb-2">Simple bar chart (install chart library for better visualization)</p>
-                            <div class="space-y-2">
-                                <div
-                                    v-for="(visit, index) in visits.slice(0, 10)"
-                                    :key="index"
-                                    class="flex items-center"
-                                >
-                                    <span class="text-xs text-gray-600 w-24">{{ visit.period }}</span>
-                                    <div class="flex-1 bg-gray-200 rounded h-6 relative">
-                                        <div
-                                            class="bg-indigo-600 h-6 rounded"
-                                            :style="{ width: (visit.visits / maxVisits * 100) + '%' }"
-                                        />
-                                        <span class="absolute inset-0 flex items-center justify-center text-xs text-white font-medium">
-                                            {{ visit.visits }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.visitsOverTime') }}</h2>
+                    <div class="h-64">
+                         <LineChart
+                            v-if="visits.length > 0"
+                            :data="visits"
+                            :label="$t('features.analytics.charts.visits')"
+                        />
+                        <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+                            {{ $t('features.analytics.noData') }}
                         </div>
                     </div>
                 </div>
 
                 <!-- Top Pages -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Top Pages</h2>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topPages') }}</h2>
                     <div class="space-y-3">
                         <div
                             v-for="(page, index) in topPages"
@@ -147,15 +134,15 @@
                             class="flex items-center justify-between"
                         >
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ page.url }}</p>
+                                <p class="text-sm font-medium text-foreground truncate">{{ page.url }}</p>
                             </div>
                             <div class="ml-4 flex items-center">
-                                <span class="text-sm text-gray-900 font-medium">{{ page.visits }}</span>
-                                <span class="ml-2 text-xs text-gray-500">visits</span>
+                                <span class="text-sm text-foreground font-medium">{{ page.visits }}</span>
+                                <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
                             </div>
                         </div>
-                        <p v-if="topPages.length === 0" class="text-sm text-gray-500 text-center py-4">
-                            No data available
+                        <p v-if="topPages.length === 0" class="text-sm text-muted-foreground text-center py-4">
+                            {{ $t('features.analytics.noData') }}
                         </p>
                     </div>
                 </div>
@@ -163,62 +150,42 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Devices -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Devices</h2>
-                    <div class="space-y-3">
-                        <div
-                            v-for="device in devices"
-                            :key="device.device_type"
-                            class="flex items-center justify-between"
-                        >
-                            <span class="text-sm text-gray-900 capitalize">{{ device.device_type || 'Unknown' }}</span>
-                            <div class="flex items-center">
-                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                    <div
-                                        class="bg-indigo-600 h-2 rounded-full"
-                                        :style="{ width: (device.count / maxDeviceCount * 100) + '%' }"
-                                    />
-                                </div>
-                                <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ device.count }}</span>
-                            </div>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.devices') }}</h2>
+                    <div class="h-64">
+                        <DoughnutChart
+                            v-if="devices.length > 0"
+                            :data="devices"
+                            label-key="device_type"
+                            value-key="count"
+                        />
+                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+                            {{ $t('features.analytics.noData') }}
                         </div>
-                        <p v-if="devices.length === 0" class="text-sm text-gray-500 text-center py-4">
-                            No data available
-                        </p>
                     </div>
                 </div>
 
                 <!-- Browsers -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Browsers</h2>
-                    <div class="space-y-3">
-                        <div
-                            v-for="browser in browsers"
-                            :key="browser.browser"
-                            class="flex items-center justify-between"
-                        >
-                            <span class="text-sm text-gray-900">{{ browser.browser || 'Unknown' }}</span>
-                            <div class="flex items-center">
-                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                    <div
-                                        class="bg-green-600 h-2 rounded-full"
-                                        :style="{ width: (browser.count / maxBrowserCount * 100) + '%' }"
-                                    />
-                                </div>
-                                <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ browser.count }}</span>
-                            </div>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.browsers') }}</h2>
+                    <div class="h-64">
+                         <DoughnutChart
+                            v-if="browsers.length > 0"
+                            :data="browsers"
+                            label-key="browser"
+                            value-key="count"
+                        />
+                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+                            {{ $t('features.analytics.noData') }}
                         </div>
-                        <p v-if="browsers.length === 0" class="text-sm text-gray-500 text-center py-4">
-                            No data available
-                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Top Content -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Top Content</h2>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topContent') }}</h2>
                     <div class="space-y-3">
                         <div
                             v-for="content in topContent"
@@ -226,50 +193,41 @@
                             class="flex items-center justify-between"
                         >
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ content.title }}</p>
-                                <p class="text-xs text-gray-500">{{ content.author?.name }}</p>
+                                <p class="text-sm font-medium text-foreground truncate">{{ content.title }}</p>
+                                <p class="text-xs text-muted-foreground">{{ content.author?.name }}</p>
                             </div>
                             <div class="ml-4 flex items-center">
-                                <span class="text-sm text-gray-900 font-medium">{{ content.visits_count || 0 }}</span>
-                                <span class="ml-2 text-xs text-gray-500">visits</span>
+                                <span class="text-sm text-foreground font-medium">{{ content.visits_count || 0 }}</span>
+                                <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
                             </div>
                         </div>
-                        <p v-if="topContent.length === 0" class="text-sm text-gray-500 text-center py-4">
-                            No data available
+                        <p v-if="topContent.length === 0" class="text-sm text-muted-foreground text-center py-4">
+                            {{ $t('features.analytics.noData') }}
                         </p>
                     </div>
                 </div>
 
                 <!-- Countries -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Top Countries</h2>
-                    <div class="space-y-3">
-                        <div
-                            v-for="country in countries"
-                            :key="country.country"
-                            class="flex items-center justify-between"
-                        >
-                            <span class="text-sm text-gray-900">{{ country.country || 'Unknown' }}</span>
-                            <div class="flex items-center">
-                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                    <div
-                                        class="bg-blue-600 h-2 rounded-full"
-                                        :style="{ width: (country.count / maxCountryCount * 100) + '%' }"
-                                    />
-                                </div>
-                                <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ country.count }}</span>
-                            </div>
+                <div class="bg-card shadow rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topCountries') }}</h2>
+                    <div class="h-64">
+                         <BarChart
+                            v-if="countries.length > 0"
+                            :data="countries"
+                            label-key="country"
+                            value-key="count"
+                            :horizontal="true"
+                        />
+                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
+                            {{ $t('features.analytics.noData') }}
                         </div>
-                        <p v-if="countries.length === 0" class="text-sm text-gray-500 text-center py-4">
-                            No data available
-                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- Referrers -->
-            <div class="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Top Referrers</h2>
+            <div class="bg-card shadow rounded-lg p-6 mb-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h2>
                 <div class="space-y-3">
                     <div
                         v-for="referrer in referrers"
@@ -277,34 +235,34 @@
                         class="flex items-center justify-between"
                     >
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ referrer.referer }}</p>
+                            <p class="text-sm font-medium text-foreground truncate">{{ referrer.referer }}</p>
                         </div>
                         <div class="ml-4 flex items-center">
-                            <span class="text-sm text-gray-900 font-medium">{{ referrer.count }}</span>
-                            <span class="ml-2 text-xs text-gray-500">visits</span>
+                            <span class="text-sm text-foreground font-medium">{{ referrer.count }}</span>
+                            <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
                         </div>
                     </div>
-                    <p v-if="referrers.length === 0" class="text-sm text-gray-500 text-center py-4">
-                        No data available
+                    <p v-if="referrers.length === 0" class="text-sm text-muted-foreground text-center py-4">
+                        {{ $t('features.analytics.noData') }}
                     </p>
                 </div>
             </div>
 
             <!-- Real-time Stats -->
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Real-time Activity</h2>
+            <div class="bg-card shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.realtime') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="text-center p-4 bg-indigo-50 rounded-lg">
+                    <div class="text-center p-4 bg-indigo-500/10 rounded-lg">
                         <p class="text-2xl font-bold text-indigo-600">{{ realtime.active_sessions || 0 }}</p>
-                        <p class="text-sm text-gray-600 mt-1">Active Sessions</p>
+                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.activeSessions') }}</p>
                     </div>
-                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-center p-4 bg-green-500/10 rounded-lg">
                         <p class="text-2xl font-bold text-green-600">{{ realtime.visits_last_hour || 0 }}</p>
-                        <p class="text-sm text-gray-600 mt-1">Visits (Last Hour)</p>
+                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.visitsLastHour') }}</p>
                     </div>
-                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-center p-4 bg-blue-500/10 rounded-lg">
                         <p class="text-2xl font-bold text-blue-600">{{ realtime.top_pages_now?.length || 0 }}</p>
-                        <p class="text-sm text-gray-600 mt-1">Active Pages</p>
+                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.activePages') }}</p>
                     </div>
                 </div>
             </div>
@@ -314,9 +272,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
+import LineChart from '../../../components/charts/LineChart.vue';
+import DoughnutChart from '../../../components/charts/DoughnutChart.vue';
+import BarChart from '../../../components/charts/BarChart.vue';
 
+const { t } = useI18n();
 const loading = ref(false);
 const dateFrom = ref(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 const dateTo = ref(new Date().toISOString().split('T')[0]);

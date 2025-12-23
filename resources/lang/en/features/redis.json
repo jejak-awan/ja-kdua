@@ -1,0 +1,90 @@
+{
+    "title": "Redis Management",
+    "description": "Manage Redis server configuration and monitor cache performance",
+    "tabs": {
+        "statistics": "Statistics",
+        "settings": "Settings",
+        "cache": "Cache Management"
+    },
+    "settings": {
+        "connection": "Connection Settings",
+        "test": "Test Connection",
+        "testing": "Testing...",
+        "save": "Save Settings",
+        "saving": "Saving...",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+    },
+    "statistics": {
+        "grid": {
+            "version": "Redis Version",
+            "memory": "Memory Used",
+            "keys": "Total Keys",
+            "uptime": "Uptime",
+            "clients": "Connected Clients",
+            "hitRate": "Hit Rate",
+            "ops": "Operations/Sec",
+            "commands": "Total Commands"
+        },
+        "hitMiss": {
+            "title": "Cache Hit/Miss Statistics",
+            "hits": "Cache Hits",
+            "misses": "Cache Misses",
+            "hitRate": "Hit Rate"
+        },
+        "refresh": "Refresh Stats",
+        "autoRefresh": "Auto-refresh every 30 seconds"
+    },
+    "cache": {
+        "title": "Cache Management",
+        "actions": {
+            "all": {
+                "title": "Clear All Cache",
+                "desc": "Clear all cached data including config, routes, and views",
+                "button": "Clear All"
+            },
+            "cache": {
+                "title": "Application Cache",
+                "desc": "Clear application cache only",
+                "button": "Clear Cache"
+            },
+            "config": {
+                "title": "Configuration Cache",
+                "desc": "Clear configuration cache",
+                "button": "Clear Config"
+            },
+            "route": {
+                "title": "Route Cache",
+                "desc": "Clear route cache",
+                "button": "Clear Routes"
+            },
+            "view": {
+                "title": "View Cache",
+                "desc": "Clear compiled view templates",
+                "button": "Clear Views"
+            }
+        },
+        "stats": {
+            "title": "Cache Statistics",
+            "keys": "Total Keys",
+            "size": "Cache Size",
+            "expired": "Expired Keys",
+            "topKeys": "Top Keys by Size",
+            "table": {
+                "key": "Key",
+                "size": "Size",
+                "ttl": "TTL"
+            }
+        }
+    },
+    "messages": {
+        "saveSuccess": "Settings saved successfully!",
+        "saveFailed": "Failed to save settings",
+        "testSuccess": "Connection successful",
+        "testFailed": "Connection failed",
+        "flushConfirm": "Are you sure you want to clear {type} cache?",
+        "flushSuccess": "{type} cache cleared successfully!",
+        "flushFailed": "Failed to flush cache",
+        "loading": "Loading..."
+    }
+}

@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">Contents</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.content.list.title') }}</h1>
             <div class="flex items-center space-x-2">
                 <router-link
                     :to="{ name: 'content-templates' }"
-                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md shadow-sm text-foreground bg-card hover:bg-muted"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
                     </svg>
-                    Templates
+                    {{ $t('features.content.list.templates') }}
                 </router-link>
                 <router-link
                     :to="{ name: 'contents.create' }"
@@ -19,44 +19,44 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    New Content
+                    {{ $t('features.content.list.createNew') }}
                 </router-link>
             </div>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-card shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <input
                             v-model="search"
                             type="text"
-                            placeholder="Search contents..."
-                            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('features.comments.filter.searchPlaceholder')"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                         <select
                             v-model="statusFilter"
-                            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                            <option value="">All Status</option>
-                            <option value="published">Published</option>
-                            <option value="draft">Draft</option>
-                            <option value="archived">Archived</option>
+                            <option value="">{{ $t('features.comments.filter.allStatus') }}</option>
+                            <option value="published">{{ $t('features.content.status.published') }}</option>
+                            <option value="draft">{{ $t('features.content.status.draft') }}</option>
+                            <option value="archived">{{ $t('features.content.status.archived') }}</option>
                         </select>
                     </div>
                     <div v-if="selectedContents.length > 0" class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-700">{{ selectedContents.length }} selected</span>
+                        <span class="text-sm text-foreground">{{ $t('features.content.list.selected', { count: selectedContents.length }) }}</span>
                         <div class="relative">
                             <select
                                 v-model="bulkAction"
                                 @change="handleBulkAction"
-                                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                                <option value="">Bulk Actions</option>
-                                <option value="publish">Publish</option>
-                                <option value="draft">Draft</option>
-                                <option value="archive">Archive</option>
-                                <option value="delete">Delete</option>
+                                <option value="">{{ $t('features.content.list.bulkActions') }}</option>
+                                <option value="publish">{{ $t('features.content.actions.publishNow') }}</option>
+                                <option value="draft">{{ $t('features.content.actions.saveDraft') }}</option>
+                                <option value="archive">{{ $t('features.content.status.archived') }}</option>
+                                <option value="delete">{{ $t('features.languages.actions.delete') }}</option>
                             </select>
                         </div>
                     </div>
@@ -64,71 +64,88 @@
             </div>
 
             <div v-if="loading" class="p-6 text-center">
-                <p class="text-gray-500">Loading...</p>
+                <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
             </div>
 
             <div v-else-if="contents.length === 0" class="p-6 text-center">
-                <p class="text-gray-500">No contents found</p>
+                <p class="text-muted-foreground">{{ $t('features.content.list.empty') }}</p>
             </div>
 
-            <table v-else class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table v-else class="min-w-full divide-y divide-border">
+                <thead class="bg-muted">
                     <tr>
                         <th class="px-6 py-3 text-left">
                             <input
                                 type="checkbox"
                                 :checked="allSelected"
                                 @change="toggleSelectAll"
-                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                             >
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Title
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.content.form.title') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Author
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.comments.detail.author') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('common.labels.status') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.content.form.featured') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.content.form.publishDate') }}
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {{ $t('features.languages.list.headers.actions') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-card divide-y divide-border">
                     <tr v-for="content in filteredContents" :key="content.id">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <input
                                 type="checkbox"
                                 :value="content.id"
                                 v-model="selectedContents"
-                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                             >
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ content.title }}</div>
-                            <div class="text-sm text-gray-500">{{ content.slug }}</div>
+                            <div class="text-sm font-medium text-foreground">{{ content.title }}</div>
+                            <div class="text-sm text-muted-foreground">{{ content.slug }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ content.author?.name }}</div>
+                            <div class="text-sm text-foreground">{{ content.author?.name }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                 :class="{
-                                    'bg-green-100 text-green-800': content.status === 'published',
-                                    'bg-yellow-100 text-yellow-800': content.status === 'draft',
-                                    'bg-gray-100 text-gray-800': content.status === 'archived',
+                                    'bg-green-500/20 text-green-400': content.status === 'published',
+                                    'bg-yellow-500/20 text-yellow-400': content.status === 'draft',
+                                    'bg-secondary text-secondary-foreground': content.status === 'archived',
                                 }"
                             >
                                 {{ content.status }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button
+                                @click="toggleFeatured(content)"
+                                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                :class="content.is_featured ? 'bg-indigo-600' : 'bg-gray-200'"
+                            >
+                                <span class="sr-only">Use setting</span>
+                                <span
+                                    aria-hidden="true"
+                                    class="pointer-events-none inline-block h-5 w-5 rounded-full bg-card shadow transform ring-0 transition ease-in-out duration-200"
+                                    :class="content.is_featured ? 'translate-x-5' : 'translate-x-0'"
+                                ></span>
+                            </button>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             {{ formatDate(content.created_at) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -145,7 +162,7 @@
                                 </button>
                                 <button
                                     @click="handleDuplicate(content)"
-                                    class="text-gray-600 hover:text-gray-900"
+                                    class="text-muted-foreground hover:text-foreground"
                                     title="Duplicate"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,13 +182,13 @@
                                     :to="{ name: 'contents.edit', params: { id: content.id } }"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    Edit
+                                    {{ $t('common.actions.edit') }}
                                 </router-link>
                                 <button
                                     @click="handleDelete(content)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    Delete
+                                    {{ $t('features.languages.actions.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -185,8 +202,10 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 
+const { t } = useI18n();
 const router = useRouter();
 const contents = ref([]);
 const loading = ref(false);
@@ -261,6 +280,21 @@ const toggleSelectAll = () => {
     }
 };
 
+const toggleFeatured = async (content) => {
+    const originalState = content.is_featured;
+    // Optimistic update
+    content.is_featured = !originalState;
+    
+    try {
+        await api.post(`/admin/cms/contents/${content.id}/toggle-featured`);
+    } catch (error) {
+        console.error('Failed to toggle featured status:', error);
+        // Revert on failure
+        content.is_featured = originalState;
+        alert('Failed to update featured status');
+    }
+};
+
 const handleDuplicate = async (content) => {
     if (!confirm(`Are you sure you want to duplicate "${content.title}"?`)) {
         return;
@@ -279,7 +313,10 @@ const handleDuplicate = async (content) => {
 const handlePreview = async (content) => {
     try {
         const response = await api.get(`/admin/cms/contents/${content.id}/preview`);
-        const previewUrl = response.data.url || response.data.preview_url;
+        // Handle data wrapped in "data" key from BaseApiController
+        const data = response.data?.data || response.data;
+        const previewUrl = data?.url || data?.preview_url;
+        
         if (previewUrl) {
             window.open(previewUrl, '_blank');
         } else {

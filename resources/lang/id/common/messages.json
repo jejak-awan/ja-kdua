@@ -1,0 +1,46 @@
+{
+    "success": {
+        "created": "{item} berhasil dibuat",
+        "updated": "{item} berhasil diperbarui",
+        "deleted": "{item} berhasil dihapus",
+        "saved": "Perubahan berhasil disimpan",
+        "uploaded": "File berhasil diunggah",
+        "imported": "Data berhasil diimpor",
+        "exported": "Data berhasil diekspor",
+        "activated": "{item} berhasil diaktifkan",
+        "deactivated": "{item} berhasil dinonaktifkan"
+    },
+    "error": {
+        "generic": "Terjadi kesalahan",
+        "notFound": "{item} tidak ditemukan",
+        "unauthorized": "Anda tidak memiliki izin untuk melakukan tindakan ini",
+        "network": "Kesalahan jaringan. Silakan coba lagi",
+        "server": "Kesalahan server. Silakan coba lagi nanti",
+        "validation": "Silakan periksa formulir untuk kesalahan",
+        "uploadFailed": "Gagal mengunggah file",
+        "deleteFailed": "Gagal menghapus {item}"
+    },
+    "confirm": {
+        "delete": "Apakah Anda yakin ingin menghapus {item} ini?",
+        "deleteMultiple": "Apakah Anda yakin ingin menghapus {count} item?",
+        "unsaved": "Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?",
+        "action": "Apakah Anda yakin ingin {action} {item} ini?"
+    },
+    "loading": {
+        "default": "Memuat...",
+        "saving": "Menyimpan...",
+        "deleting": "Menghapus...",
+        "uploading": "Mengunggah...",
+        "processing": "Memproses...",
+        "searching": "Mencari..."
+    },
+    "empty": {
+        "default": "Tidak ada data",
+        "search": "Tidak ada hasil untuk \"{query}\"",
+        "filter": "Tidak ada item yang cocok dengan filter"
+    },
+    "time": {
+        "justNow": "Baru saja",
+        "ago": "{time} yang lalu"
+    }
+}

@@ -1,15 +1,15 @@
 <template>
-  <div v-if="related && related.length > 0" class="related-posts py-8 border-t border-gray-200 dark:border-gray-700">
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+  <div v-if="related && related.length > 0" class="related-posts py-8 border-t border-border">
+    <h2 class="text-2xl font-bold text-foreground mb-6">
       {{ title }}
     </h2>
     
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Loading skeleton -->
       <div v-for="i in 3" :key="i" class="animate-pulse">
-        <div class="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg mb-3"></div>
-        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        <div class="bg-muted dark:bg-gray-700 h-48 rounded-lg mb-3"></div>
+        <div class="h-4 bg-muted dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-muted dark:bg-gray-700 rounded w-1/2"></div>
       </div>
     </div>
     
@@ -17,11 +17,11 @@
       <article
         v-for="post in related"
         :key="post.id"
-        class="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-700"
+        class="group bg-card dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-border"
       >
         <router-link :to="getPostUrl(post.slug)" class="block">
           <!-- Featured Image -->
-          <div v-if="post.featured_image" class="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-900">
+          <div v-if="post.featured_image" class="relative h-48 overflow-hidden bg-secondary dark:bg-gray-900">
             <img
               v-lazy="post.featured_image"
               :alt="post.title"
@@ -30,7 +30,7 @@
             />
           </div>
           <div v-else class="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-            <svg class="w-12 h-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 text-gray-400 dark:text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -39,23 +39,23 @@
           <div class="p-4">
             <!-- Category -->
             <div v-if="post.category" class="mb-2">
-              <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-500/20 text-blue-400 dark:bg-blue-900 dark:text-blue-200">
                 {{ post.category.name }}
               </span>
             </div>
             
             <!-- Title -->
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <h3 class="text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {{ post.title }}
             </h3>
             
             <!-- Excerpt -->
-            <p v-if="post.excerpt" class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+            <p v-if="post.excerpt" class="text-sm text-muted-foreground dark:text-gray-400 mb-3 line-clamp-2">
               {{ post.excerpt }}
             </p>
             
             <!-- Meta -->
-            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
+            <div class="flex items-center justify-between text-xs text-muted-foreground dark:text-muted-foreground">
               <span v-if="post.author" class="flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
@@ -74,7 +74,7 @@
       </article>
     </div>
     
-    <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <div v-else class="text-center py-8 text-muted-foreground dark:text-gray-400">
       Tidak ada artikel terkait
     </div>
   </div>

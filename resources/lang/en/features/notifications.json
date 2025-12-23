@@ -1,0 +1,29 @@
+{
+    "title": "Notifications",
+    "actions": {
+        "markAllRead": "Mark All as Read",
+        "markRead": "Mark as Read",
+        "delete": "Delete"
+    },
+    "filters": {
+        "search": "Search notifications...",
+        "allTypes": "All Types",
+        "type": {
+            "info": "Info",
+            "success": "Success",
+            "warning": "Warning",
+            "error": "Error"
+        },
+        "readStatus": {
+            "all": "All",
+            "unread": "Unread",
+            "read": "Read"
+        }
+    },
+    "messages": {
+        "loading": "Loading...",
+        "empty": "No notifications found",
+        "deleteConfirm": "Are you sure you want to delete this notification?",
+        "deleteFailed": "Failed to delete notification"
+    }
+}

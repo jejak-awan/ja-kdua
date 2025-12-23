@@ -1,0 +1,99 @@
+{
+    "home": {
+        "title": "JA-CMS",
+        "subtitle": "Modern Content Management System",
+        "actions": {
+            "explore": "Explore Content",
+            "getStarted": "Get Started",
+            "startReading": "Start Reading",
+            "contactUs": "Contact Us",
+            "viewAll": "View All Posts"
+        },
+        "stats": {
+            "content": "Published Content",
+            "visitors": "Total Visitors",
+            "categories": "Categories"
+        },
+        "sections": {
+            "featured": "Featured Content",
+            "recent": "Recent Posts",
+            "cta": {
+                "title": "Ready to Get Started?",
+                "text": "Join thousands of users who trust JA-CMS for their content management needs"
+            }
+        }
+    },
+    "blog": {
+        "title": "Blog",
+        "subtitle": "Latest articles and updates from our team",
+        "empty": "No posts available yet.",
+        "pagination": {
+            "previous": "Previous",
+            "next": "Next",
+            "info": "Page {current} of {total}"
+        },
+        "readMore": "Read More"
+    },
+    "contact": {
+        "title": "Contact Us",
+        "subtitle": "Get in touch with us",
+        "placeholder": "This is a placeholder page. Content coming soon."
+    },
+    "newsletter": {
+        "title": "Subscribe to Newsletter",
+        "description": "Get the latest updates, tips, and articles directly to your inbox",
+        "placeholder": "Enter your email",
+        "button": "Subscribe",
+        "processing": "Subscribing...",
+        "success": "Thanks! Your email has been registered.",
+        "privacy": "By subscribing, you agree to our",
+        "privacyLink": "Privacy Policy"
+    },
+    "search": {
+        "title": "Search Results",
+        "query": "Searching for:",
+        "loading": "Searching...",
+        "empty": "No results found for \"{query}\""
+    },
+    "post": {
+        "loading": "Loading...",
+        "notFound": "Post not found",
+        "views": "views",
+        "tags": "Tags:"
+    },
+    "nav": {
+        "home": "Home",
+        "blog": "Blog",
+        "about": "About",
+        "contact": "Contact",
+        "login": "Login",
+        "register": "Register",
+        "dashboard": "Dashboard",
+        "logout": "Logout"
+    },
+    "about": {
+        "title": "About Us",
+        "welcome": "Welcome to JA-CMS - Modern Content Management System",
+        "placeholder": "This is a placeholder page. Content coming soon."
+    },
+    "footer": {
+        "headings": {
+            "about": "About",
+            "resources": "Resources",
+            "categories": "Categories",
+            "newsletter": "Newsletter"
+        },
+        "about": {
+            "default": "Modern, clean, and powerful content management system built for the web."
+        },
+        "resources": {
+            "blog": "Blog",
+            "documentation": "Documentation",
+            "support": "Support",
+            "faq": "FAQ"
+        },
+        "copyright": "© {year} JA-CMS. All rights reserved.",
+        "powered": "Powered by",
+        "system": "Modern Content Management System"
+    }
+}

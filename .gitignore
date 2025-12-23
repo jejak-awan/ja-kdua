@@ -110,3 +110,7 @@ _ide_helper_models.php
 
 # Internal documentation (development only)
 /docs/dev/
+
+# Task Management
+/docs/task/
+/docs/99-arsip/

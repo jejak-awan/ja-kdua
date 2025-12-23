@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust proxies for correct client IP detection
+        $middleware->prepend(\App\Http\Middleware\TrustProxies::class);
+        
         // Enable Sanctum stateful API for SPA
         $middleware->statefulApi();
 
@@ -27,5 +30,28 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle rate limiting exceptions - add retry_after to response body
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                // Get retry-after from exception headers
+                $headers = $e->getHeaders();
+                $retryAfter = $headers['Retry-After'] ?? $headers['retry-after'] ?? 60;
+                
+                // Ensure it's an integer
+                $retryAfter = (int) $retryAfter;
+                
+                // Calculate minutes for user-friendly message
+                $minutes = ceil($retryAfter / 60);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Too many attempts. Please try again in {$minutes} minute" . ($minutes > 1 ? 's' : '') . ".",
+                    'retry_after' => $retryAfter,
+                ], 429)->withHeaders([
+                    'Retry-After' => $retryAfter,
+                    'X-RateLimit-Limit' => 5,
+                    'X-RateLimit-Remaining' => 0,
+                ]);
+            }
+        });
     })->create();

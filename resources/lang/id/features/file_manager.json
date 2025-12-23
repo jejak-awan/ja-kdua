@@ -1,0 +1,51 @@
+{
+    "title": "Manajer Berkas",
+    "actions": {
+        "newFolder": "Folder Baru",
+        "uploadFiles": "Unggah Berkas",
+        "delete": "Hapus",
+        "remove": "Hapus",
+        "cancel": "Batal",
+        "create": "Buat",
+        "upload": "Unggah",
+        "uploading": "Mengunggah...",
+        "creating": "Membuat...",
+        "close": "Tutup"
+    },
+    "nav": {
+        "root": "Root"
+    },
+    "labels": {
+        "folders": "Folder",
+        "files": "Berkas & Folder",
+        "selectedFiles": "Berkas Terpilih:",
+        "multipleSupported": "Mendukung banyak berkas",
+        "folderName": "Nama Folder",
+        "clickToUpload": "Klik untuk mengunggah",
+        "dragAndDrop": "atau seret dan lepas"
+    },
+    "placeholders": {
+        "newDetails": "Rincian baru",
+        "folderName": "Nama folder baru"
+    },
+    "messages": {
+        "loading": "Memuat...",
+        "noFiles": "Tidak ada berkas ditemukan",
+        "deleteFolderConfirm": "Hapus folder \"{name}\"?",
+        "deleteFileConfirm": "Hapus berkas \"{name}\"?",
+        "deleteFolderFailed": "Gagal menghapus folder",
+        "deleteFileFailed": "Gagal menghapus berkas",
+        "uploadFailed": "Gagal mengunggah berkas",
+        "createFolderFailed": "Gagal membuat folder",
+        "uploadedSuccess": "Berkas berhasil diunggah",
+        "folderCreatedSuccess": "Folder berhasil dibuat"
+    },
+    "modals": {
+        "upload": {
+            "title": "Unggah Berkas"
+        },
+        "createFolder": {
+            "title": "Buat Folder"
+        }
+    }
+}

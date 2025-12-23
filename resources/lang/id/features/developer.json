@@ -1,0 +1,178 @@
+{
+    "plugins": {
+        "title": "Plugin",
+        "empty": "Tidak ada plugin ditemukan",
+        "loading": "Memuat...",
+        "table": {
+            "name": "Nama",
+            "version": "Versi",
+            "status": "Status",
+            "actions": "Tindakan"
+        },
+        "status": {
+            "active": "Aktif",
+            "inactive": "Tidak Aktif"
+        },
+        "actions": {
+            "activate": "Aktifkan",
+            "deactivate": "Nonaktifkan",
+            "settings": "Pengaturan",
+            "close": "Tutup"
+        },
+        "messages": {
+            "failed_activate": "Gagal mengaktifkan plugin",
+            "failed_deactivate": "Gagal menonaktifkan plugin"
+        },
+        "modal": {
+            "settings_title": "Pengaturan: {name}",
+            "settings_placeholder": "Pengaturan plugin akan dimuat di sini",
+            "close": "Tutup"
+        }
+    },
+    "webhooks": {
+        "title": "Webhook",
+        "create": "Webhook Baru",
+        "search": "Cari webhook...",
+        "empty": "Tidak ada webhook ditemukan",
+        "loading": "Memuat...",
+        "stats": {
+            "total": "Total Webhook",
+            "active": "Aktif",
+            "total_calls": "Total Panggilan",
+            "failed_calls": "Panggilan Gagal"
+        },
+        "table": {
+            "name": "Nama",
+            "url": "URL",
+            "events": "Kejadian",
+            "calls": "Panggilan",
+            "status": "Status",
+            "actions": "Tindakan"
+        },
+        "actions": {
+            "test": "Tes",
+            "edit": "Edit",
+            "delete": "Hapus"
+        },
+        "messages": {
+            "test_success": "Tes webhook berhasil dikirim",
+            "test_failed": "Gagal mengetes webhook",
+            "delete_failed": "Gagal menghapus webhook",
+            "save_failed": "Gagal menyimpan webhook"
+        },
+        "confirm": {
+            "delete": "Apakah Anda yakin ingin menghapus webhook \"{name}\"?"
+        },
+        "modal": {
+            "title_create": "Buat Webhook",
+            "title_edit": "Edit Webhook",
+            "name_label": "Nama",
+            "name_placeholder": "Nama webhook",
+            "url_label": "URL",
+            "url_placeholder": "https://contoh.com/webhook",
+            "events_label": "Kejadian",
+            "secret_label": "Kunci Rahasia",
+            "secret_placeholder": "Kunci rahasia opsional untuk penandatanganan",
+            "active_label": "Aktif",
+            "cancel": "Batal",
+            "create": "Buat",
+            "update": "Perbarui",
+            "saving": "Menyimpan..."
+        }
+    },
+    "custom_fields": {
+        "title": "Bidang Kustom",
+        "create_group": "Grup Bidang Baru",
+        "create_field": "Bidang Baru",
+        "tabs": {
+            "groups": "Grup Bidang",
+            "fields": "Bidang Kustom"
+        },
+        "groups": {
+            "empty": "Tidak ada grup bidang ditemukan",
+            "table": {
+                "name": "Nama",
+                "fields": "Bidang",
+                "attached_to": "Terlampir Pada",
+                "actions": "Tindakan"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Hapus"
+            },
+            "confirm": {
+                "delete": "Apakah Anda yakin ingin menghapus grup bidang \"{name}\"?"
+            },
+            "messages": {
+                "delete_failed": "Gagal menghapus grup bidang",
+                "save_failed": "Gagal menyimpan grup bidang"
+            },
+            "modal": {
+                "title_create": "Buat Grup Bidang",
+                "title_edit": "Edit Grup Bidang",
+                "name_label": "Nama",
+                "name_placeholder": "Nama grup bidang",
+                "description_label": "Deskripsi",
+                "description_placeholder": "Deskripsi grup bidang",
+                "attach_label": "Lampirkan Ke",
+                "attach_options": {
+                    "none": "Tidak Ada",
+                    "content": "Konten",
+                    "category": "Kategori",
+                    "media": "Media"
+                },
+                "cancel": "Batal",
+                "create": "Buat",
+                "update": "Perbarui",
+                "saving": "Menyimpan..."
+            }
+        },
+        "fields": {
+            "search": "Cari bidang...",
+            "empty": "Tidak ada bidang kustom ditemukan",
+            "table": {
+                "label": "Label",
+                "name": "Nama",
+                "type": "Tipe",
+                "group": "Grup",
+                "actions": "Tindakan"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Hapus"
+            },
+            "confirm": {
+                "delete": "Apakah Anda yakin ingin menghapus bidang \"{label}\"?"
+            },
+            "messages": {
+                "delete_failed": "Gagal menghapus bidang",
+                "save_failed": "Gagal menyimpan bidang"
+            },
+            "modal": {
+                "title_create": "Buat Bidang Kustom",
+                "title_edit": "Edit Bidang Kustom",
+                "label_label": "Label",
+                "label_placeholder": "Label bidang",
+                "name_label": "Nama",
+                "name_placeholder": "nama_bidang",
+                "name_help": "Pengenal bidang (snake_case)",
+                "type_label": "Tipe",
+                "group_label": "Grup Bidang",
+                "group_none": "Tidak Ada Grup",
+                "default_label": "Nilai Default",
+                "default_placeholder": "Nilai default",
+                "options_label": "Opsi (untuk pilihan, radio, centang)",
+                "options_placeholder": "opsi1,opsi2,opsi3",
+                "options_help": "Nilai dipisahkan koma",
+                "instructions_label": "Instruksi",
+                "instructions_placeholder": "Instruksi bidang untuk pengguna",
+                "required_label": "Wajib",
+                "searchable_label": "Dapat Dicari",
+                "cancel": "Batal",
+                "create": "Buat",
+                "update": "Perbarui",
+                "saving": "Menyimpan..."
+            }
+        }
+    }
+}

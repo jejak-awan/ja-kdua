@@ -1,0 +1,43 @@
+{
+    "title": "Tags",
+    "createNew": "New Tag",
+    "search": "Search tags...",
+    "stats": {
+        "total": "Total Tags",
+        "used": "Used Tags",
+        "usage": "Total Usage"
+    },
+    "loading": "Loading tags...",
+    "empty": "No tags found",
+    "table": {
+        "name": "Name",
+        "slug": "Slug",
+        "description": "Description",
+        "usage": "Usage",
+        "actions": "Actions"
+    },
+    "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "form": {
+        "createTitle": "Create Tag",
+        "editTitle": "Edit Tag",
+        "name": "Name",
+        "namePlaceholder": "Tag name",
+        "slug": "Slug",
+        "slugPlaceholder": "tag-slug",
+        "slugHelp": "URL-friendly version",
+        "description": "Description",
+        "descriptionPlaceholder": "Tag description",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update",
+        "saving": "Saving...",
+        "saveError": "Failed to save tag"
+    },
+    "messages": {
+        "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+        "deleteError": "Failed to delete tag"
+    }
+}
