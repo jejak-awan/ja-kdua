@@ -161,7 +161,7 @@ class FormController extends BaseApiController
         $submission = $form->submissions()->create([
             'user_id' => $request->user()?->id,
             'data' => $validated,
-            'ip_address' => $request->ip(),
+            'ip_address' => \App\Helpers\IpHelper::getClientIp($request),
             'user_agent' => $request->userAgent(),
         ]);
 

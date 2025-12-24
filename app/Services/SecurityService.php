@@ -414,28 +414,13 @@ class SecurityService
 
     /**
      * Check if an IP is protected (should never be blocked).
+     * Only protects localhost - private IPs can still be blocked for security.
      */
     public function isProtectedIp(string $ip): bool
     {
-        // Localhost IPs
+        // Only protect localhost IPs (development/testing)
         $localhostIps = ['127.0.0.1', '::1', 'localhost'];
-        if (in_array($ip, $localhostIps)) {
-            return true;
-        }
-
-        // Private IP ranges
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $isPrivate = filter_var(
-                $ip,
-                FILTER_VALIDATE_IP,
-                FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-            ) === false;
-
-            if ($isPrivate) {
-                return true;
-            }
-        }
-
-        return false;
+        
+        return in_array($ip, $localhostIps);
     }
 }

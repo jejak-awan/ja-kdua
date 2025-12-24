@@ -105,7 +105,12 @@
             "ip_whitelisted": "IP Whitelisted",
             "ip_whitelist_removed": "Removed from Whitelist",
             "account_locked": "Account Locked",
-            "login_blocked": "Login Blocked"
+            "login_blocked": "Login Blocked",
+            "ip_blocked_permanent": "IP Blocked Permanently",
+            "ip_blocked_temp": "IP Blocked Temporarily",
+            "session_invalidated": "Session Invalidated",
+            "session_limit_reached": "Session Limit Reached",
+            "force_logout": "Force Logout"
         }
     },
     "messages": {

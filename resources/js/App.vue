@@ -8,19 +8,27 @@
         @extend="extendSession"
         @logout="manualLogout"
     />
+    
+    <!-- Global Toast Notifications -->
+    <Toast ref="toastRef" />
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
 import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
+import Toast from './components/ui/toast.vue';
+import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
 const { loadActiveTheme } = useTheme();
 const { initializeLanguage } = useLanguage();
+
+// Toast reference
+const toastRef = ref(null);
 
 // Session timeout management
 const {
@@ -46,6 +54,14 @@ onMounted(async () => {
     initDarkMode();
     authStore.initAuth();
     
+    // Initialize toast instance for global access
+    if (toastRef.value) {
+        setToastInstance({
+            addToast: toastRef.value.addToast,
+            removeToast: toastRef.value.removeToast,
+        });
+    }
+    
     // Initialize language (non-blocking)
     initializeLanguage().catch(err => {
         console.warn('Language initialization failed:', err);
@@ -62,4 +78,3 @@ onMounted(async () => {
     }
 });
 </script>
-

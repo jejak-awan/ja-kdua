@@ -105,7 +105,12 @@
             "ip_whitelisted": "IP Masuk Daftar Putih",
             "ip_whitelist_removed": "Dihapus dari Daftar Putih",
             "account_locked": "Akun Dikunci",
-            "login_blocked": "Login Diblokir"
+            "login_blocked": "Login Diblokir",
+            "ip_blocked_permanent": "IP Diblokir Permanen",
+            "ip_blocked_temp": "IP Diblokir Sementara",
+            "session_invalidated": "Sesi Diinvalidasi",
+            "session_limit_reached": "Batas Sesi Tercapai",
+            "force_logout": "Logout Paksa"
         }
     },
     "messages": {

@@ -27,7 +27,14 @@
         "passwordRequired": "Kata sandi wajib diisi untuk pengguna baru",
         "fetchFailed": "Gagal memuat data pengguna",
         "updateFailed": "Gagal memperbarui pengguna",
-        "createFailed": "Gagal membuat pengguna"
+        "createFailed": "Gagal membuat pengguna",
+        "forceLogoutConfirm": "Apakah Anda yakin ingin melogout paksa pengguna \"{name}\" dari semua perangkat?",
+        "forceLogoutSuccess": "Berhasil Logout Paksa",
+        "forceLogoutSessions": "Pengguna berhasil dilogout dari {count} perangkat",
+        "forceLogoutFailed": "Gagal melogout paksa pengguna"
+    },
+    "actions": {
+        "forceLogout": "Logout Paksa"
     },
     "modals": {
         "user": {

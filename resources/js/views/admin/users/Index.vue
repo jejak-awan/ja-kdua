@@ -132,6 +132,13 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
                                 <button
+                                    @click="forceLogoutUser(user)"
+                                    class="text-orange-600 hover:text-orange-900"
+                                    :title="$t('features.users.actions.forceLogout')"
+                                >
+                                    {{ $t('features.users.actions.forceLogout') }}
+                                </button>
+                                <button
                                     @click="editUser(user)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
@@ -183,6 +190,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import toast from '../../../services/toast';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -271,6 +279,26 @@ const deleteUser = async (user) => {
         console.error('Failed to delete user:', error);
         const message = error.response?.data?.message || t('features.users.messages.deleteFailed');
         alert(message);
+    }
+};
+
+const forceLogoutUser = async (user) => {
+    if (!confirm(t('features.users.messages.forceLogoutConfirm', { name: user.name }))) {
+        return;
+    }
+
+    try {
+        const response = await api.post(`/admin/cms/users/${user.id}/force-logout`);
+        const { data } = parseResponse(response);
+        
+        toast.success(
+            t('features.users.messages.forceLogoutSuccess'),
+            t('features.users.messages.forceLogoutSessions', { count: data.revoked_sessions || 0 })
+        );
+    } catch (error) {
+        console.error('Failed to force logout user:', error);
+        const message = error.response?.data?.message || t('features.users.messages.forceLogoutFailed');
+        toast.error(t('features.users.messages.forceLogoutFailed'), message);
     }
 };
 

@@ -27,7 +27,14 @@
         "passwordRequired": "Password is required for new users",
         "fetchFailed": "Failed to fetch user data",
         "updateFailed": "Failed to update user",
-        "createFailed": "Failed to create user"
+        "createFailed": "Failed to create user",
+        "forceLogoutConfirm": "Are you sure you want to force logout user \"{name}\" from all devices?",
+        "forceLogoutSuccess": "Force Logout Successful",
+        "forceLogoutSessions": "User logged out from {count} device(s)",
+        "forceLogoutFailed": "Failed to force logout user"
+    },
+    "actions": {
+        "forceLogout": "Force Logout"
     },
     "modals": {
         "user": {

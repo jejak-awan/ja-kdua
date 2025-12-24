@@ -341,6 +341,18 @@ const routes = [
         component: () => import('../views/errors/NotFound.vue'),
         meta: { public: true },
     },
+    {
+        path: '/419',
+        name: 'session-expired',
+        component: () => import('../views/errors/SessionExpired.vue'),
+        meta: { public: true },
+    },
+    {
+        path: '/429',
+        name: 'too-many-requests',
+        component: () => import('../views/errors/RateLimit.vue'),
+        meta: { public: true },
+    },
 
     // Catch-all route (must be last)
     {

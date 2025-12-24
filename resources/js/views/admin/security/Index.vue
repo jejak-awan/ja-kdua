@@ -798,6 +798,8 @@ const getEventClass = (eventType) => {
         'ip_whitelist_removed': 'bg-amber-500/20 text-amber-500 border border-amber-500/30',
         'account_locked': 'bg-purple-500/20 text-purple-500 border border-purple-500/30',
         'login_blocked': 'bg-red-500/20 text-red-500 border border-red-500/30',
+        'ip_blocked_permanent': 'bg-red-500/20 text-red-500 border border-red-500/30',
+        'ip_blocked_temp': 'bg-red-500/20 text-red-500 border border-red-500/30',
     };
     return classes[eventType] || 'bg-muted/50 text-muted-foreground border border-border';
 };

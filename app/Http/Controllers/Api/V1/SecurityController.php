@@ -75,7 +75,9 @@ class SecurityController extends BaseApiController
             'permanent' => 'sometimes|boolean',
         ]);
 
-        if ($request->input('permanent', false)) {
+        // Default to permanent blocking so IP appears in blocklist tab
+        // Use permanent=false to only block temporarily (cache only)
+        if ($request->input('permanent', true)) {
             $result = $this->securityService->blockIpPermanently($request->ip_address, $request->reason);
         } else {
             $seconds = $this->securityService->blockIpTemporarily($request->ip_address, $request->reason);
@@ -207,7 +209,7 @@ class SecurityController extends BaseApiController
 
     public function checkIp(Request $request)
     {
-        $ipAddress = $request->input('ip_address', $request->ip());
+        $ipAddress = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
         $blockInfo = $this->securityService->getBlockInfo($ipAddress);
 
         return $this->success([
@@ -221,7 +223,7 @@ class SecurityController extends BaseApiController
 
     public function clearFailedAttempts(Request $request)
     {
-        $ipAddress = $request->input('ip_address', $request->ip());
+        $ipAddress = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
         
         // Clear all security cache for IP
         $this->securityService->clearSecurityCache($ipAddress);

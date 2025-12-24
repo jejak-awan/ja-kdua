@@ -230,6 +230,20 @@ class SettingsSeeder extends Seeder
                 'group' => 'security',
                 'description' => 'Session lifetime in minutes',
             ],
+            [
+                'key' => 'single_session_enabled',
+                'value' => '0',
+                'type' => 'boolean',
+                'group' => 'security',
+                'description' => 'Restrict users to single concurrent login session',
+            ],
+            [
+                'key' => 'max_concurrent_sessions',
+                'value' => '0',
+                'type' => 'integer',
+                'group' => 'security',
+                'description' => 'Maximum concurrent sessions per user (0 = unlimited)',
+            ],
 
             // Performance Settings
             [

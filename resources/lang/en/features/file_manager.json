@@ -47,5 +47,65 @@
         "createFolder": {
             "title": "Create Folder"
         }
+    },
+    "search": {
+        "placeholder": "Search files and folders...",
+        "noResults": "No files or folders match your search"
+    },
+    "filter": {
+        "all": "All Files",
+        "images": "Images",
+        "documents": "Documents",
+        "videos": "Videos",
+        "audio": "Audio",
+        "archives": "Archives"
+    },
+    "sort": {
+        "label": "Sort by",
+        "name": "Name",
+        "size": "Size",
+        "date": "Date Modified",
+        "asc": "Ascending",
+        "desc": "Descending"
+    },
+    "bulk": {
+        "selected": "{count} item selected | {count} items selected",
+        "selectAll": "Select All",
+        "clearSelection": "Clear Selection",
+        "deleteSelected": "Delete Selected",
+        "downloadSelected": "Download Selected",
+        "confirmDelete": "Are you sure you want to delete {count} item? | Are you sure you want to delete {count} items?"
+    },
+    "pagination": {
+        "showing": "Showing {from} to {to} of {total} items",
+        "perPage": "Items per page",
+        "previous": "Previous",
+        "next": "Next"
+    },
+    "help": {
+        "title": "File Manager Guide",
+        "toggle": "Show/Hide Help",
+        "sections": {
+            "navigation": {
+                "title": "Navigation",
+                "content": "Click on folders to browse their contents. Use the breadcrumb trail above to navigate back to parent folders. Click 'Root' in the sidebar to return to the main directory."
+            },
+            "upload": {
+                "title": "Uploading Files",
+                "content": "Click the 'Upload Files' button to select files from your computer. You can upload multiple files at once. Files will be uploaded to the current folder you're viewing."
+            },
+            "actions": {
+                "title": "File Actions",
+                "content": "Right-click on any file or folder to see available actions. For images, clicking will show a full-screen preview. Other files will open in a new tab."
+            },
+            "bulk": {
+                "title": "Bulk Operations",
+                "content": "Use checkboxes to select multiple files or folders. When items are selected, a toolbar with bulk actions (like delete) will appear at the top. Use 'Select All' to select everything in the current folder."
+            },
+            "search": {
+                "title": "Search & Filter",
+                "content": "Use the search box to find files by name. Use the filter dropdown to show only specific file types (images, documents, etc.). You can also sort files by name, size, or date."
+            }
+        }
     }
 }

@@ -27,6 +27,88 @@
                         <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
                     </div>
 
+                    <!-- Grouped Security Settings -->
+                    <div v-else-if="activeTab === 'security'" class="space-y-8">
+                        <div
+                            v-for="group in securitySettingsGrouped"
+                            :key="group.id"
+                            class="bg-muted/20 rounded-xl border border-border p-5"
+                        >
+                            <!-- Group Header -->
+                            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-border">
+                                <div class="p-2 rounded-lg bg-primary/10">
+                                    <component :is="group.icon" class="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-semibold text-foreground">{{ group.title }}</h3>
+                                    <p class="text-xs text-muted-foreground">{{ group.description }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Group Settings Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div
+                                    v-for="setting in group.settings"
+                                    :key="setting.id"
+                                    class="p-4 bg-card rounded-lg border border-border"
+                                >
+                                    <label class="block text-sm font-medium text-foreground mb-1">
+                                        {{ $t('features.settings.labels.' + setting.key) }}
+                                    </label>
+                                    <p v-if="setting.description" class="text-xs text-muted-foreground mb-2">
+                                        {{ $t('features.settings.descriptions.' + setting.key) }}
+                                    </p>
+
+                                    <!-- Security Dropdown -->
+                                    <select
+                                        v-if="setting.type === 'integer' && isSecurityDropdown(setting.key)"
+                                        v-model.number="formData[setting.key]"
+                                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                    >
+                                        <option
+                                            v-for="option in getSecurityOptions(setting.key)"
+                                            :key="option.value"
+                                            :value="option.value"
+                                        >
+                                            {{ option.label }}
+                                        </option>
+                                    </select>
+
+                                    <!-- Number Input -->
+                                    <input
+                                        v-else-if="setting.type === 'integer'"
+                                        v-model.number="formData[setting.key]"
+                                        type="number"
+                                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                    >
+
+                                    <!-- Boolean Toggle -->
+                                    <div v-else-if="setting.type === 'boolean'" class="mt-1">
+                                        <label class="flex items-center cursor-pointer">
+                                            <div class="relative">
+                                                <input
+                                                    v-model="formData[setting.key]"
+                                                    type="checkbox"
+                                                    class="sr-only peer"
+                                                >
+                                                <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
+                                            </div>
+                                            <span class="ml-3 text-sm text-foreground">
+                                                {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Current Value -->
+                                    <p v-if="setting.value !== undefined && setting.value !== null" class="mt-2 text-xs text-muted-foreground">
+                                        {{ $t('features.settings.current') }}: {{ formatValue(setting.value, setting.type) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Default Layout for Other Tabs -->
                     <div v-else class="space-y-6">
                         <div
                             v-for="setting in currentSettings"
@@ -35,10 +117,10 @@
                         >
                             <label class="block text-sm font-medium text-foreground mb-1">
                                 {{ $t('features.settings.labels.' + setting.key) }}
-                                <span v-if="setting.description" class="text-xs font-normal text-muted-foreground ml-2">
-                                    - {{ $t('features.settings.descriptions.' + setting.key) }}
-                                </span>
                             </label>
+                            <p v-if="setting.description" class="text-xs text-muted-foreground mb-2">
+                                {{ $t('features.settings.descriptions.' + setting.key) }}
+                            </p>
 
                             <!-- String Input -->
                             <input
@@ -90,7 +172,7 @@
                             </div>
 
                             <!-- Current Value Display -->
-                            <p v-if="setting.value" class="mt-1 text-xs text-muted-foreground">
+                            <p v-if="setting.value !== undefined && setting.value !== null" class="mt-1 text-xs text-muted-foreground">
                                 {{ $t('features.settings.current') }}: {{ formatValue(setting.value, setting.type) }}
                             </p>
                         </div>
@@ -330,6 +412,59 @@ const currentSettings = computed(() => {
     return settings.value.filter(s => s && s.group === activeTab.value);
 });
 
+// SVG Icon Components
+const ShieldCheckIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>`
+};
+
+const ClockIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+};
+
+const LockIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>`
+};
+
+// Security settings grouped by category
+const securitySettingsGrouped = computed(() => {
+    const securitySettings = settings.value.filter(s => s && s.group === 'security');
+    
+    const groups = [
+        {
+            id: 'authentication',
+            title: 'Autentikasi & Password',
+            description: 'Pengaturan keamanan untuk autentikasi pengguna',
+            icon: ShieldCheckIcon,
+            keys: ['password_min_length', 'enable_2fa', 'require_email_verification', 'enable_registration'],
+            settings: [],
+        },
+        {
+            id: 'session',
+            title: 'Manajemen Sesi',
+            description: 'Kontrol durasi dan batasan sesi login',
+            icon: ClockIcon,
+            keys: ['session_lifetime', 'single_session_enabled', 'max_concurrent_sessions'],
+            settings: [],
+        },
+        {
+            id: 'access',
+            title: 'Pembatasan Akses',
+            description: 'Pengaturan untuk membatasi akses yang mencurigakan',
+            icon: LockIcon,
+            keys: ['login_attempts_limit', 'block_duration_minutes'],
+            settings: [],
+        },
+    ];
+    
+    // Distribute settings to groups
+    groups.forEach(group => {
+        group.settings = securitySettings.filter(s => group.keys.includes(s.key));
+    });
+    
+    // Filter out empty groups
+    return groups.filter(group => group.settings.length > 0);
+});
+
 const fetchSettings = async () => {
     loading.value = true;
     try {
@@ -382,6 +517,54 @@ const formatValue = (value, type) => {
         return typeof value === 'string' ? value : JSON.stringify(value);
     }
     return value;
+};
+
+// Security dropdown configuration with recommended options
+const securityDropdownConfig = {
+    password_min_length: [
+        { value: 6, label: '6 - Minimum' },
+        { value: 8, label: '8 - Standar (Direkomendasikan)' },
+        { value: 10, label: '10 - Kuat' },
+        { value: 12, label: '12 - Sangat Kuat' },
+        { value: 16, label: '16 - Maksimum' },
+    ],
+    login_attempts_limit: [
+        { value: 3, label: '3 - Ketat' },
+        { value: 5, label: '5 - Standar (Direkomendasikan)' },
+        { value: 10, label: '10 - Longgar' },
+        { value: 15, label: '15 - Sangat Longgar' },
+    ],
+    block_duration_minutes: [
+        { value: 5, label: '5 menit - Singkat' },
+        { value: 15, label: '15 menit - Sedang' },
+        { value: 30, label: '30 menit - Standar (Direkomendasikan)' },
+        { value: 60, label: '1 jam - Ketat' },
+        { value: 1440, label: '24 jam - Sangat Ketat' },
+    ],
+    session_lifetime: [
+        { value: 30, label: '30 menit - Ketat' },
+        { value: 60, label: '1 jam - Sedang' },
+        { value: 120, label: '2 jam - Standar (Direkomendasikan)' },
+        { value: 480, label: '8 jam - Satu Hari Kerja' },
+        { value: 1440, label: '24 jam - Satu Hari Penuh' },
+        { value: 10080, label: '7 hari - Satu Minggu' },
+    ],
+    max_concurrent_sessions: [
+        { value: 0, label: '0 - Tidak Terbatas' },
+        { value: 1, label: '1 - Satu Perangkat' },
+        { value: 2, label: '2 - Desktop + Mobile' },
+        { value: 3, label: '3 - Standar (Direkomendasikan)' },
+        { value: 5, label: '5 - Fleksibel' },
+        { value: 10, label: '10 - Sangat Fleksibel' },
+    ],
+};
+
+const isSecurityDropdown = (key) => {
+    return Object.keys(securityDropdownConfig).includes(key);
+};
+
+const getSecurityOptions = (key) => {
+    return securityDropdownConfig[key] || [];
 };
 
 const handleSubmit = async () => {

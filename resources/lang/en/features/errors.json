@@ -33,5 +33,18 @@
         "support": "Need help? Contact administrator:",
         "contactForm": "Contact Form",
         "requiredPermissions": "Required Permissions:"
+    },
+    "419": {
+        "title": "Page Expired",
+        "message": "Your session has expired due to inactivity.",
+        "description": "Please refresh the page or log in again to continue.",
+        "refresh": "Refresh Page",
+        "login": "Login Again"
+    },
+    "429": {
+        "title": "Too Many Requests",
+        "message": "You have made too many requests in a short period.",
+        "description": "Please check back in a moment or contact administrator if you believe this is a mistake.",
+        "retryAfter": "Please try again in {seconds} seconds."
     }
 }

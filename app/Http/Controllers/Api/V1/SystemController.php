@@ -137,7 +137,7 @@ class SystemController extends BaseApiController
     public function clearRateLimit(Request $request)
     {
         try {
-            $ip = $request->input('ip', $request->ip());
+            $ip = $request->input('ip', \App\Helpers\IpHelper::getClientIp($request));
             $email = $request->input('email');
 
             $cleared = [];

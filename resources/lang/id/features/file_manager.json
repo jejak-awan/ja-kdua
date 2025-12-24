@@ -47,5 +47,65 @@
         "createFolder": {
             "title": "Buat Folder"
         }
+    },
+    "search": {
+        "placeholder": "Cari berkas dan folder...",
+        "noResults": "Tidak ada berkas atau folder yang cocok dengan pencarian Anda"
+    },
+    "filter": {
+        "all": "Semua Berkas",
+        "images": "Gambar",
+        "documents": "Dokumen",
+        "videos": "Video",
+        "audio": "Audio",
+        "archives": "Arsip"
+    },
+    "sort": {
+        "label": "Urutkan berdasarkan",
+        "name": "Nama",
+        "size": "Ukuran",
+        "date": "Tanggal Diubah",
+        "asc": "Naik",
+        "desc": "Turun"
+    },
+    "bulk": {
+        "selected": "{count} item dipilih | {count} item dipilih",
+        "selectAll": "Pilih Semua",
+        "clearSelection": "Hapus Pilihan",
+        "deleteSelected": "Hapus yang Dipilih",
+        "downloadSelected": "Unduh yang Dipilih",
+        "confirmDelete": "Apakah Anda yakin ingin menghapus {count} item? | Apakah Anda yakin ingin menghapus {count} item?"
+    },
+    "pagination": {
+        "showing": "Menampilkan {from} sampai {to} dari {total} item",
+        "perPage": "Item per halaman",
+        "previous": "Sebelumnya",
+        "next": "Berikutnya"
+    },
+    "help": {
+        "title": "Panduan Manajer Berkas",
+        "toggle": "Tampilkan/Sembunyikan Bantuan",
+        "sections": {
+            "navigation": {
+                "title": "Navigasi",
+                "content": "Klik pada folder untuk melihat isinya. Gunakan breadcrumb di atas untuk kembali ke folder induk. Klik 'Root' di sidebar untuk kembali ke direktori utama."
+            },
+            "upload": {
+                "title": "Mengunggah Berkas",
+                "content": "Klik tombol 'Unggah Berkas' untuk memilih berkas dari komputer Anda. Anda dapat mengunggah banyak berkas sekaligus. Berkas akan diunggah ke folder yang sedang Anda lihat."
+            },
+            "actions": {
+                "title": "Aksi Berkas",
+                "content": "Klik kanan pada berkas atau folder untuk melihat aksi yang tersedia. Untuk gambar, mengklik akan menampilkan pratinjau layar penuh. Berkas lain akan dibuka di tab baru."
+            },
+            "bulk": {
+                "title": "Operasi Massal",
+                "content": "Gunakan checkbox untuk memilih banyak berkas atau folder. Ketika item dipilih, toolbar dengan aksi massal (seperti hapus) akan muncul di atas. Gunakan 'Pilih Semua' untuk memilih semua item di folder saat ini."
+            },
+            "search": {
+                "title": "Cari & Filter",
+                "content": "Gunakan kotak pencarian untuk menemukan berkas berdasarkan nama. Gunakan dropdown filter untuk menampilkan hanya jenis berkas tertentu (gambar, dokumen, dll). Anda juga dapat mengurutkan berkas berdasarkan nama, ukuran, atau tanggal."
+            }
+        }
     }
 }

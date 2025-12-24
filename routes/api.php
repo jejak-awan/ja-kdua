@@ -8,7 +8,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
     
     // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
-    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
+        ->middleware('throttle:60,1'); // Increase Laravel throttle to avoid conflict with SecurityService
     Route::post('/register', [App\Http\Controllers\Api\V1\AuthController::class, 'register'])
         ->middleware('throttle:3,1'); // 3 attempts per minute
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -161,6 +162,7 @@ Route::prefix('v1')->group(function () {
 
         // Users Management
         Route::apiResource('users', App\Http\Controllers\Api\V1\UserController::class)->middleware('permission:manage users');
+        Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
 
         // Roles (for user management)
         Route::get('roles', [App\Http\Controllers\Api\V1\RoleController::class, 'index'])->middleware('permission:manage users');
@@ -384,6 +386,7 @@ Route::prefix('v1')->group(function () {
         Route::post('file-manager/upload', [App\Http\Controllers\Api\V1\FileManagerController::class, 'upload'])->middleware('permission:manage media');
         Route::delete('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage media');
         Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage media');
+        Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage media');
 
         // Log Viewer
         Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');

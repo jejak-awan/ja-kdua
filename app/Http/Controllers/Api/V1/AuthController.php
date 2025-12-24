@@ -81,7 +81,8 @@ class AuthController extends BaseApiController
         }
 
         $securityService = new SecurityService;
-        $ipAddress = $request->ip();
+        // Use IpHelper to get real client IP (handles proxies/CDN properly)
+        $ipAddress = \App\Helpers\IpHelper::getClientIp($request);
 
         // Check if IP is blocked (auto-expires via cache TTL)
         if ($securityService->isIpBlocked($ipAddress)) {
@@ -225,6 +226,43 @@ class AuthController extends BaseApiController
             }
         } catch (\Exception $e) {
             // ActivityLog not available, skip
+        }
+
+        // Handle concurrent login control
+        $singleSession = \App\Models\Setting::get('single_session_enabled', false);
+        $maxSessions = \App\Models\Setting::get('max_concurrent_sessions', 0);
+
+        if ($singleSession) {
+            // Revoke all previous tokens for this user (single session mode)
+            $revokedCount = $user->tokens()->count();
+            if ($revokedCount > 0) {
+                $user->tokens()->delete();
+                
+                // Log the session invalidation
+                \App\Models\SecurityLog::log(
+                    'session_invalidated',
+                    $user,
+                    $ipAddress,
+                    "Previous {$revokedCount} session(s) invalidated due to new login (single session mode)"
+                );
+            }
+        } elseif ($maxSessions > 0) {
+            // Limit concurrent sessions
+            $activeTokens = $user->tokens()->orderBy('created_at', 'asc')->get();
+            
+            if ($activeTokens->count() >= $maxSessions) {
+                // Remove oldest tokens to make room for new one
+                $tokensToRemove = $activeTokens->count() - $maxSessions + 1;
+                $oldestTokenIds = $activeTokens->take($tokensToRemove)->pluck('id');
+                $user->tokens()->whereIn('id', $oldestTokenIds)->delete();
+                
+                \App\Models\SecurityLog::log(
+                    'session_limit_reached',
+                    $user,
+                    $ipAddress,
+                    "Oldest {$tokensToRemove} session(s) removed due to max session limit ({$maxSessions})"
+                );
+            }
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;

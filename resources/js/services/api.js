@@ -54,6 +54,7 @@ api.interceptors.response.use(
         // Handle 401 Unauthorized
         if (error.response?.status === 401) {
             const url = error.config?.url || '';
+            const responseData = error.response?.data || {};
 
             // Don't redirect for public endpoints
             const publicEndpoints = [
@@ -72,9 +73,32 @@ api.interceptors.response.use(
                 // Only redirect to login for protected endpoints
                 // Check if we're already on login page to avoid redirect loop
                 if (window.location.pathname !== '/login') {
+                    // Check if this is a session invalidation (concurrent login)
+                    const isSessionInvalidated = responseData.session_expired ||
+                        responseData.message?.includes('session') ||
+                        responseData.message?.includes('expired');
+
+                    // Show toast notification before redirect
+                    if (window.__toastInstance?.addToast) {
+                        const message = isSessionInvalidated
+                            ? (responseData.message || 'Sesi Anda telah berakhir. Silakan login kembali.')
+                            : 'Sesi berakhir. Silakan login kembali.';
+
+                        window.__toastInstance.addToast({
+                            title: 'Sesi Berakhir',
+                            description: message,
+                            variant: 'warning',
+                            duration: 4000,
+                        });
+                    }
+
                     localStorage.removeItem('auth_token');
                     localStorage.removeItem('user');
-                    window.location.href = '/login';
+
+                    // Delay redirect to allow toast to be seen
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
                 }
             }
         }

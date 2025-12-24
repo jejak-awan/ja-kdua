@@ -33,5 +33,18 @@
         "support": "Butuh bantuan? Hubungi administrator:",
         "contactForm": "Formulir Kontak",
         "requiredPermissions": "Izin yang Diperlukan:"
+    },
+    "419": {
+        "title": "Halaman Kedaluwarsa",
+        "message": "Sesi Anda telah berakhir karena tidak ada aktivitas.",
+        "description": "Silakan muat ulang halaman atau login kembali untuk melanjutkan.",
+        "refresh": "Muat Ulang",
+        "login": "Login Kembali"
+    },
+    "429": {
+        "title": "Terlalu Banyak Permintaan",
+        "message": "Anda telah melakukan terlalu banyak permintaan dalam waktu singkat.",
+        "description": "Silakan coba lagi beberapa saat lagi atau hubungi administrator.",
+        "retryAfter": "Silakan coba lagi dalam {seconds} detik."
     }
 }

@@ -39,7 +39,7 @@ class NewsletterController extends BaseApiController
                     'unsubscribed_at' => null,
                     'name' => $name ?? $existing->name,
                     'source' => $request->header('referer') ?? 'unknown',
-                    'ip_address' => $request->ip(),
+                    'ip_address' => \App\Helpers\IpHelper::getClientIp($request),
                     'user_agent' => $request->userAgent(),
                 ]);
 
@@ -55,7 +55,7 @@ class NewsletterController extends BaseApiController
                 'status' => 'subscribed',
                 'subscribed_at' => now(),
                 'source' => $request->header('referer') ?? 'unknown',
-                'ip_address' => $request->ip(),
+                'ip_address' => \App\Helpers\IpHelper::getClientIp($request),
                 'user_agent' => $request->userAgent(),
             ]);
 

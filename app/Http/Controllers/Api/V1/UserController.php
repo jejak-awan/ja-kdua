@@ -211,4 +211,40 @@ class UserController extends BaseApiController
 
         return $this->success(null, 'User deleted successfully');
     }
+
+    /**
+     * Force logout a user from all devices by revoking all their tokens.
+     * Admin-only action for security management.
+     */
+    public function forceLogout(User $user)
+    {
+        // Prevent force logging out yourself
+        if ($user->id === auth()->id()) {
+            return $this->validationError(
+                ['user' => ['You cannot force logout your own account']],
+                'You cannot force logout your own account'
+            );
+        }
+
+        // Count and revoke all tokens
+        $tokenCount = $user->tokens()->count();
+        $user->tokens()->delete();
+
+        // Log this security action
+        \App\Models\SecurityLog::log(
+            'force_logout',
+            $user,
+            request()->ip(),
+            "Admin force logged out user from {$tokenCount} device(s)",
+            [
+                'admin_id' => auth()->id(),
+                'admin_name' => auth()->user()->name,
+                'revoked_sessions' => $tokenCount,
+            ]
+        );
+
+        return $this->success([
+            'revoked_sessions' => $tokenCount,
+        ], "User logged out from {$tokenCount} device(s) successfully");
+    }
 }
