@@ -10,6 +10,10 @@
         "search": "Cari aktivitas...",
         "allTypes": "Semua Tipe",
         "allUsers": "Semua Pengguna",
+        "dateFrom": "Dari",
+        "dateTo": "Sampai",
+        "perPage": "Per halaman",
+        "clear": "Hapus",
         "types": {
             "created": "Dibuat",
             "updated": "Diperbarui",
@@ -20,6 +24,11 @@
             "published": "Diterbitkan",
             "unpublished": "Tidak Diterbitkan"
         }
+    },
+    "export": {
+        "button": "Ekspor CSV",
+        "exporting": "Mengekspor...",
+        "failed": "Gagal mengekspor log aktivitas"
     },
     "messages": {
         "loading": "Memuat...",

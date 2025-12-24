@@ -10,6 +10,10 @@
         "search": "Search activities...",
         "allTypes": "All Types",
         "allUsers": "All Users",
+        "dateFrom": "From",
+        "dateTo": "To",
+        "perPage": "Per page",
+        "clear": "Clear",
         "types": {
             "created": "Created",
             "updated": "Updated",
@@ -20,6 +24,11 @@
             "published": "Published",
             "unpublished": "Unpublished"
         }
+    },
+    "export": {
+        "button": "Export CSV",
+        "exporting": "Exporting...",
+        "failed": "Failed to export activity logs"
     },
     "messages": {
         "loading": "Loading...",
