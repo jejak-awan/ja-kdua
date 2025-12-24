@@ -255,6 +255,11 @@ const routes = [
                 component: () => import('../views/admin/login-history/Index.vue'),
             },
             {
+                path: 'logs-dashboard',
+                name: 'logs-dashboard',
+                component: () => import('../views/admin/logs-dashboard/Index.vue'),
+            },
+            {
                 path: 'notifications',
                 name: 'notifications',
                 component: () => import('../views/admin/notifications/Index.vue'),

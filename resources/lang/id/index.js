@@ -31,6 +31,7 @@ import forms from './features/forms.json';
 import menus from './features/menus.json';
 import activityLogs from './features/activity_logs.json';
 import loginHistory from './features/login_history.json';
+import logsDashboard from './features/logs_dashboard.json';
 import search from './features/search.json';
 import frontend from './features/frontend.json';
 import errors from './features/errors.json';
@@ -74,6 +75,7 @@ export default {
         menus,
         activityLogs,
         login_history: loginHistory,
+        logs_dashboard: logsDashboard,
         search,
         frontend,
         errors,
