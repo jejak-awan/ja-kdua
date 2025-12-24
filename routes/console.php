@@ -20,3 +20,9 @@ Schedule::command('cache:warm')
     ->dailyAt('02:00')
     ->description('Daily cache warming at 2 AM')
     ->withoutOverlapping();
+
+// Schedule log cleanup - run daily at 3 AM
+Schedule::command('logs:cleanup')
+    ->dailyAt('03:00')
+    ->description('Clean up old activity, security, and login logs')
+    ->withoutOverlapping();

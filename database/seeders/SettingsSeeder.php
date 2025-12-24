@@ -244,6 +244,13 @@ class SettingsSeeder extends Seeder
                 'group' => 'security',
                 'description' => 'Maximum concurrent sessions per user (0 = unlimited)',
             ],
+            [
+                'key' => 'log_retention_days',
+                'value' => '90',
+                'type' => 'integer',
+                'group' => 'security',
+                'description' => 'Days to retain activity and security logs (0 = keep forever)',
+            ],
 
             // Performance Settings
             [

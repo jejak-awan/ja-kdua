@@ -557,6 +557,14 @@ const securityDropdownConfig = {
         { value: 5, label: '5 - Fleksibel' },
         { value: 10, label: '10 - Sangat Fleksibel' },
     ],
+    log_retention_days: [
+        { value: 0, label: '0 - Simpan Selamanya' },
+        { value: 30, label: '30 hari - 1 Bulan' },
+        { value: 60, label: '60 hari - 2 Bulan' },
+        { value: 90, label: '90 hari - 3 Bulan (Direkomendasikan)' },
+        { value: 180, label: '180 hari - 6 Bulan' },
+        { value: 365, label: '365 hari - 1 Tahun' },
+    ],
 };
 
 const isSecurityDropdown = (key) => {
