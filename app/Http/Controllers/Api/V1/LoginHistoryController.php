@@ -136,8 +136,6 @@ class LoginHistoryController extends BaseApiController
             Log::error('Login history export error: '.$e->getMessage());
             return $this->error('Failed to export login history', 500);
         }
-            return $this->error('Failed to export login history', 500);
-        }
     }
 
     public function clear(Request $request)
