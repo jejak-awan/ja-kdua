@@ -9,20 +9,58 @@
                 <input
                     v-model="dateFrom"
                     type="date"
-                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 >
                 <span class="text-muted-foreground">{{ $t('features.analytics.to') }}</span>
                 <input
                     v-model="dateTo"
                     type="date"
-                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 >
-                <button
-                    @click="fetchAnalytics"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
-                >
+                <Button @click="fetchAnalytics">
                     {{ $t('features.analytics.apply') }}
-                </button>
+                </Button>
+                
+                <!-- Export Dropdown -->
+                <div class="relative" ref="exportDropdownRef">
+                    <Button 
+                        variant="outline" 
+                        @click="toggleExportMenu"
+                        :disabled="exporting"
+                    >
+                        <svg v-if="!exporting" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <svg v-else class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ exporting ? $t('features.analytics.export.exporting') : $t('features.analytics.export.button') }}
+                    </Button>
+                    <div 
+                        v-if="showExportMenu" 
+                        class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-50"
+                    >
+                        <button 
+                            @click="exportData('visits')" 
+                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground first:rounded-t-md"
+                        >
+                            {{ $t('features.analytics.export.visits') }}
+                        </button>
+                        <button 
+                            @click="exportData('events')" 
+                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
+                            {{ $t('features.analytics.export.events') }}
+                        </button>
+                        <button 
+                            @click="exportData('sessions')" 
+                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground last:rounded-b-md"
+                        >
+                            {{ $t('features.analytics.export.sessions') }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -271,16 +309,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
 import LineChart from '../../../components/charts/LineChart.vue';
 import DoughnutChart from '../../../components/charts/DoughnutChart.vue';
 import BarChart from '../../../components/charts/BarChart.vue';
+import Button from '../../../components/ui/button.vue';
 
 const { t } = useI18n();
 const loading = ref(false);
+const exporting = ref(false);
+const showExportMenu = ref(false);
+const exportDropdownRef = ref(null);
 const dateFrom = ref(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 const dateTo = ref(new Date().toISOString().split('T')[0]);
 
@@ -374,6 +416,55 @@ onMounted(() => {
             console.error('Failed to fetch real-time data:', err);
         });
     }, 30000);
+    
+    // Click outside handler for export dropdown
+    document.addEventListener('click', handleClickOutside);
 });
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
+// Export functionality
+const toggleExportMenu = () => {
+    showExportMenu.value = !showExportMenu.value;
+};
+
+const handleClickOutside = (event) => {
+    if (exportDropdownRef.value && !exportDropdownRef.value.contains(event.target)) {
+        showExportMenu.value = false;
+    }
+};
+
+const exportData = async (type) => {
+    showExportMenu.value = false;
+    exporting.value = true;
+    
+    try {
+        const response = await api.get('/admin/cms/analytics/export', {
+            params: {
+                date_from: dateFrom.value,
+                date_to: dateTo.value,
+                type: type
+            },
+            responseType: 'blob'
+        });
+        
+        // Create download link
+        const blob = new Blob([response.data], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `analytics-${type}-${dateFrom.value}-to-${dateTo.value}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Failed to export analytics:', error);
+    } finally {
+        exporting.value = false;
+    }
+};
 </script>
 

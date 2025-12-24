@@ -21,11 +21,6 @@ class AnalyticsVisit extends Model
         'url',
         'method',
         'status_code',
-        'device_type',
-        'browser',
-        'os',
-        'country',
-        'city',
         'duration',
         'visited_at',
     ];
@@ -41,6 +36,14 @@ class AnalyticsVisit extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the session for this visit
+     */
+    public function session(): BelongsTo
+    {
+        return $this->belongsTo(AnalyticsSession::class, 'session_id', 'session_id');
+    }
+
     public function content()
     {
         // Try to find content by URL slug
@@ -49,83 +52,60 @@ class AnalyticsVisit extends Model
         return \App\Models\Content::where('slug', $slug)->first();
     }
 
+    /**
+     * Accessor to get device_type from session
+     */
+    public function getDeviceTypeAttribute()
+    {
+        return $this->session?->device_type;
+    }
+
+    /**
+     * Accessor to get browser from session
+     */
+    public function getBrowserAttribute()
+    {
+        return $this->session?->browser;
+    }
+
+    /**
+     * Accessor to get os from session
+     */
+    public function getOsAttribute()
+    {
+        return $this->session?->os;
+    }
+
+    /**
+     * Accessor to get country from session
+     */
+    public function getCountryAttribute()
+    {
+        return $this->session?->country;
+    }
+
+    /**
+     * Accessor to get city from session
+     */
+    public function getCityAttribute()
+    {
+        return $this->session?->city;
+    }
+
     public static function trackVisit($request, $sessionId = null)
     {
         $sessionId = $sessionId ?? session()->getId();
-
-        // Parse user agent
-        $userAgent = $request->userAgent();
-        $deviceInfo = self::parseUserAgent($userAgent);
-
-        // Get location (simplified - in production use GeoIP service)
-        $location = self::getLocation($request->ip());
 
         return self::create([
             'session_id' => $sessionId,
             'user_id' => auth()->id(),
             'ip_address' => $request->ip(),
-            'user_agent' => $userAgent,
+            'user_agent' => $request->userAgent(),
             'referer' => $request->header('referer'),
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'status_code' => 200,
-            'device_type' => $deviceInfo['device_type'],
-            'browser' => $deviceInfo['browser'],
-            'os' => $deviceInfo['os'],
-            'country' => $location['country'],
-            'city' => $location['city'],
             'visited_at' => now(),
         ]);
-    }
-
-    protected static function parseUserAgent($userAgent)
-    {
-        $deviceType = 'desktop';
-        $browser = 'unknown';
-        $os = 'unknown';
-
-        // Simple detection (in production use a library like jenssegers/agent)
-        if (preg_match('/mobile|android|iphone|ipad/i', $userAgent)) {
-            $deviceType = 'mobile';
-        } elseif (preg_match('/tablet|ipad/i', $userAgent)) {
-            $deviceType = 'tablet';
-        }
-
-        if (preg_match('/chrome/i', $userAgent)) {
-            $browser = 'chrome';
-        } elseif (preg_match('/firefox/i', $userAgent)) {
-            $browser = 'firefox';
-        } elseif (preg_match('/safari/i', $userAgent)) {
-            $browser = 'safari';
-        } elseif (preg_match('/edge/i', $userAgent)) {
-            $browser = 'edge';
-        }
-
-        if (preg_match('/windows/i', $userAgent)) {
-            $os = 'windows';
-        } elseif (preg_match('/mac|os x/i', $userAgent)) {
-            $os = 'macos';
-        } elseif (preg_match('/linux/i', $userAgent)) {
-            $os = 'linux';
-        } elseif (preg_match('/android/i', $userAgent)) {
-            $os = 'android';
-        } elseif (preg_match('/ios|iphone|ipad/i', $userAgent)) {
-            $os = 'ios';
-        }
-
-        return [
-            'device_type' => $deviceType,
-            'browser' => $browser,
-            'os' => $os,
-        ];
-    }
-
-    protected static function getLocation($ipAddress)
-    {
-        // Simplified - in production use GeoIP service like MaxMind or ipapi.co
-        return [
-            'country' => null,
-            'city' => null,
-        ];
     }
 }

@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleRedirects::class,
             // LoadTheme middleware removed - Vue SPA handles theme loading via API
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\TrackAnalytics::class, // Track page visits for analytics
         ]);
 
         // Register permission middleware alias

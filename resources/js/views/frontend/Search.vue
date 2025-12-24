@@ -25,8 +25,10 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
+import { useAnalytics } from '@/composables/useAnalytics'
 
 const { t } = useI18n()
+const { trackSearch } = useAnalytics()
 
 const route = useRoute()
 const searchQuery = ref('')
@@ -42,6 +44,9 @@ const search = async () => {
       params: { q: searchQuery.value }
     })
     results.value = response.data.data || []
+    
+    // Track search analytics
+    trackSearch(searchQuery.value, results.value.length)
   } catch (error) {
     console.error('Search failed:', error)
   } finally {

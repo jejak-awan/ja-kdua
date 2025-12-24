@@ -29,5 +29,12 @@
     },
     "labels": {
         "visits": "kunjungan"
+    },
+    "export": {
+        "button": "Ekspor",
+        "visits": "Ekspor Kunjungan",
+        "events": "Ekspor Event",
+        "sessions": "Ekspor Sesi",
+        "exporting": "Mengekspor..."
     }
 }

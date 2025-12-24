@@ -116,12 +116,13 @@ class AnalyticsController extends BaseApiController
             $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-            if (! Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_sessions')) {
                 return $this->success([], 'No analytics data available');
             }
 
-            $devices = AnalyticsVisit::whereDate('visited_at', '>=', $dateFrom)
-                ->whereDate('visited_at', '<=', $dateTo)
+            // Query from sessions table (normalized)
+            $devices = AnalyticsSession::whereDate('started_at', '>=', $dateFrom)
+                ->whereDate('started_at', '<=', $dateTo)
                 ->select('device_type', DB::raw('count(*) as count'))
                 ->groupBy('device_type')
                 ->get();
@@ -140,12 +141,13 @@ class AnalyticsController extends BaseApiController
             $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-            if (! Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_sessions')) {
                 return $this->success([], 'No analytics data available');
             }
 
-            $browsers = AnalyticsVisit::whereDate('visited_at', '>=', $dateFrom)
-                ->whereDate('visited_at', '<=', $dateTo)
+            // Query from sessions table (normalized)
+            $browsers = AnalyticsSession::whereDate('started_at', '>=', $dateFrom)
+                ->whereDate('started_at', '<=', $dateTo)
                 ->select('browser', DB::raw('count(*) as count'))
                 ->groupBy('browser')
                 ->orderByDesc('count')
@@ -166,18 +168,13 @@ class AnalyticsController extends BaseApiController
             $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
             // Check if table exists
-            if (! Schema::hasTable('analytics_visits')) {
+            if (! Schema::hasTable('analytics_sessions')) {
                 return $this->success([], 'No analytics data available');
             }
 
-            // Check if country column exists
-            if (! Schema::hasColumn('analytics_visits', 'country')) {
-                return $this->success([], 'Country data not available');
-            }
-
-            // Use whereDate for better compatibility with SQLite and MySQL
-            $countries = AnalyticsVisit::whereDate('visited_at', '>=', $dateFrom)
-                ->whereDate('visited_at', '<=', $dateTo)
+            // Query from sessions table (normalized)
+            $countries = AnalyticsSession::whereDate('started_at', '>=', $dateFrom)
+                ->whereDate('started_at', '<=', $dateTo)
                 ->whereNotNull('country')
                 ->where('country', '!=', '')
                 ->select('country', DB::raw('count(*) as count'))
@@ -359,8 +356,14 @@ class AnalyticsController extends BaseApiController
 
     protected function calculateBounceRate($dateFrom, $dateTo)
     {
-        $singlePageSessions = AnalyticsSession::whereBetween('started_at', [$dateFrom, $dateTo])
-            ->where('page_views', 1)
+        // A bounce is either:
+        // 1. Single page view session, OR
+        // 2. Session with duration < 10 seconds
+        $bounceSessions = AnalyticsSession::whereBetween('started_at', [$dateFrom, $dateTo])
+            ->where(function ($query) {
+                $query->where('page_views', 1)
+                    ->orWhere('duration', '<', 10);
+            })
             ->count();
 
         $totalSessions = AnalyticsSession::whereBetween('started_at', [$dateFrom, $dateTo])->count();
@@ -369,7 +372,7 @@ class AnalyticsController extends BaseApiController
             return 0;
         }
 
-        return round(($singlePageSessions / $totalSessions) * 100, 2);
+        return round(($bounceSessions / $totalSessions) * 100, 2);
     }
 
     protected function getGroupByQuery($groupBy)
@@ -402,5 +405,127 @@ class AnalyticsController extends BaseApiController
             default:
                 return 'DATE(visited_at)';
         }
+    }
+
+    /**
+     * Export analytics data to CSV
+     */
+    public function export(Request $request)
+    {
+        try {
+            $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
+            $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+            $type = $request->input('type', 'visits'); // visits, events, sessions
+
+            $filename = "analytics-{$type}-{$dateFrom}-to-{$dateTo}.csv";
+
+            switch ($type) {
+                case 'events':
+                    $data = $this->exportEvents($dateFrom, $dateTo);
+                    break;
+                case 'sessions':
+                    $data = $this->exportSessions($dateFrom, $dateTo);
+                    break;
+                default:
+                    $data = $this->exportVisits($dateFrom, $dateTo);
+            }
+
+            return response($data, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Analytics export error: ' . $e->getMessage());
+            return $this->error('Failed to export analytics data', 500);
+        }
+    }
+
+    protected function exportVisits($dateFrom, $dateTo): string
+    {
+        $visits = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
+            ->orderBy('visited_at', 'desc')
+            ->limit(10000)
+            ->get();
+
+        $csv = "ID,Session ID,URL,Referer,IP Address,Device Type,Browser,OS,Country,City,Visited At\n";
+
+        foreach ($visits as $visit) {
+            $csv .= sprintf(
+                "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+                $visit->id,
+                $visit->session_id ?? '',
+                str_replace('"', '""', $visit->url ?? ''),
+                str_replace('"', '""', $visit->referer ?? ''),
+                $visit->ip_address ?? '',
+                $visit->device_type ?? '',
+                $visit->browser ?? '',
+                $visit->os ?? '',
+                $visit->country ?? '',
+                $visit->city ?? '',
+                $visit->visited_at?->format('Y-m-d H:i:s') ?? ''
+            );
+        }
+
+        return $csv;
+    }
+
+    protected function exportEvents($dateFrom, $dateTo): string
+    {
+        $events = AnalyticsEvent::whereBetween('occurred_at', [$dateFrom, $dateTo])
+            ->with('user')
+            ->orderBy('occurred_at', 'desc')
+            ->limit(10000)
+            ->get();
+
+        $csv = "ID,Session ID,User,Event Type,Event Name,URL,Content ID,IP Address,Occurred At\n";
+
+        foreach ($events as $event) {
+            $csv .= sprintf(
+                "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s,\"%s\",\"%s\"\n",
+                $event->id,
+                $event->session_id ?? '',
+                $event->user?->name ?? 'Guest',
+                $event->event_type ?? '',
+                str_replace('"', '""', $event->event_name ?? ''),
+                str_replace('"', '""', $event->url ?? ''),
+                $event->content_id ?? '',
+                $event->ip_address ?? '',
+                $event->occurred_at?->format('Y-m-d H:i:s') ?? ''
+            );
+        }
+
+        return $csv;
+    }
+
+    protected function exportSessions($dateFrom, $dateTo): string
+    {
+        $sessions = AnalyticsSession::whereBetween('started_at', [$dateFrom, $dateTo])
+            ->with('user')
+            ->orderBy('started_at', 'desc')
+            ->limit(10000)
+            ->get();
+
+        $csv = "ID,Session ID,User,IP Address,Device Type,Browser,OS,Country,City,Page Views,Duration (sec),Started At,Ended At\n";
+
+        foreach ($sessions as $session) {
+            $csv .= sprintf(
+                "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\"\n",
+                $session->id,
+                $session->session_id ?? '',
+                $session->user?->name ?? 'Guest',
+                $session->ip_address ?? '',
+                $session->device_type ?? '',
+                $session->browser ?? '',
+                $session->os ?? '',
+                $session->country ?? '',
+                $session->city ?? '',
+                $session->page_views ?? 0,
+                $session->duration ?? 0,
+                $session->started_at?->format('Y-m-d H:i:s') ?? '',
+                $session->ended_at?->format('Y-m-d H:i:s') ?? ''
+            );
+        }
+
+        return $csv;
     }
 }

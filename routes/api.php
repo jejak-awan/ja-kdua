@@ -342,6 +342,8 @@ Route::prefix('v1')->group(function () {
             // Realtime endpoint needs higher rate limit for polling
             Route::get('realtime', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'realTime'])
                 ->middleware('throttle:120,1'); // 120 requests per minute for real-time polling
+            // Export analytics data to CSV
+            Route::get('export', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'export']);
         });
 
         // Search

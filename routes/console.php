@@ -26,3 +26,9 @@ Schedule::command('logs:cleanup')
     ->dailyAt('03:00')
     ->description('Clean up old activity, security, and login logs')
     ->withoutOverlapping();
+
+// Schedule analytics cleanup - run weekly on Sunday at 3:30 AM
+Schedule::command('analytics:cleanup --days=90')
+    ->weeklyOn(0, '03:30')
+    ->description('Clean up analytics data older than 90 days')
+    ->withoutOverlapping();

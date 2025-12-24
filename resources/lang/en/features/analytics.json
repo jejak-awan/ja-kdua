@@ -29,5 +29,12 @@
     },
     "labels": {
         "visits": "visits"
+    },
+    "export": {
+        "button": "Export",
+        "visits": "Export Visits",
+        "events": "Export Events",
+        "sessions": "Export Sessions",
+        "exporting": "Exporting..."
     }
 }
