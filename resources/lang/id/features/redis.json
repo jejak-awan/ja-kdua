@@ -38,6 +38,12 @@
     "cache": {
         "title": "Manajemen Cache",
         "actions": {
+            "warm": {
+                "title": "Warm Cache",
+                "desc": "Regenerasi file cache yang dioptimalkan",
+                "button": "Warm Cache",
+                "warming": "Memproses..."
+            },
             "all": {
                 "title": "Bersihkan Semua Cache",
                 "desc": "Bersihkan semua data cache termasuk config, route, dan view",
@@ -85,6 +91,9 @@
         "flushConfirm": "Apakah Anda yakin ingin membersihkan cache {type}?",
         "flushSuccess": "Cache {type} berhasil dibersihkan!",
         "flushFailed": "Gagal membersihkan cache",
+        "warmConfirm": "Apakah Anda yakin ingin melakukan warm cache? Ini akan meregenerasi cache config, route, dan view.",
+        "warmSuccess": "Cache berhasil di-warm!",
+        "warmFailed": "Gagal melakukan warm cache",
         "loading": "Memuat..."
     }
 }

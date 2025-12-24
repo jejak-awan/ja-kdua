@@ -270,6 +270,12 @@ const routes = [
                 component: () => import('../views/admin/system/ScheduledTasks.vue'),
             },
             {
+                path: 'command-runner',
+                name: 'command-runner',
+                component: () => import('../views/admin/system/CommandRunner.vue'),
+                meta: { requiresSuperAdmin: true },
+            },
+            {
                 path: 'logs',
                 name: 'logs',
                 component: () => import('../views/admin/logs/Index.vue'),

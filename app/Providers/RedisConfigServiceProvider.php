@@ -82,13 +82,8 @@ class RedisConfigServiceProvider extends ServiceProvider
                 continue;
             }
 
-            // Handle redis_enabled specially
+            // Handle redis_enabled specially - DEPRECATED: Controlled by global cache_driver
             if ($key === 'redis_enabled') {
-                $enabled = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-                if ($enabled) {
-                    // Use redis_failover for graceful fallback
-                    config(['cache.default' => 'redis_failover']);
-                }
                 continue;
             }
 

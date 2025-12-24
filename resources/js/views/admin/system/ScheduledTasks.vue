@@ -1,16 +1,19 @@
 <template>
-  <div class="scheduled-tasks">
-    <div class="page-header">
-      <h1 class="page-title">{{ $t('features.scheduled_tasks.title') }}</h1>
-      <p class="page-description">{{ $t('features.scheduled_tasks.description') }}</p>
-      <Button @click="openCreateDialog" class="ml-auto">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">{{ $t('features.scheduled_tasks.title') }}</h1>
+        <p class="text-muted-foreground mt-1">{{ $t('features.scheduled_tasks.description') }}</p>
+      </div>
+      <Button @click="openCreateDialog">
         <Plus class="w-4 h-4 mr-2" />
         {{ $t('features.scheduled_tasks.create') }}
       </Button>
     </div>
 
     <!-- Tasks Table -->
-    <div class="card">
+    <div class="bg-card border border-border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -26,7 +29,7 @@
         <TableBody>
           <TableRow v-if="loading">
             <TableCell colspan="7" class="text-center py-8">
-              <Loader2 class="w-6 h-6 animate-spin mx-auto" />
+              <Loader2 class="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
             </TableCell>
           </TableRow>
           <TableRow v-else-if="tasks.length === 0">
@@ -35,13 +38,13 @@
             </TableCell>
           </TableRow>
           <template v-else>
-            <TableRow v-for="task in tasks" :key="task.id">
+            <TableRow v-for="task in tasks" :key="task.id" class="hover:bg-muted/50">
               <TableCell class="font-medium">{{ task.name }}</TableCell>
               <TableCell>
-                <code class="text-xs bg-muted px-2 py-1 rounded">{{ task.command }}</code>
+                <code class="text-xs bg-muted px-2 py-1 rounded border border-border">{{ task.command }}</code>
               </TableCell>
               <TableCell>
-                <code class="text-xs">{{ task.schedule }}</code>
+                <code class="text-xs font-mono">{{ task.schedule }}</code>
               </TableCell>
               <TableCell>
                 <span v-if="task.last_run_at" class="text-sm">
@@ -58,40 +61,50 @@
                 </Badge>
               </TableCell>
               <TableCell>
-                <Switch 
-                  :checked="task.is_active" 
-                  @update:checked="toggleActive(task)"
-                />
+                <Button 
+                  size="sm" 
+                  :variant="task.is_active ? 'default' : 'outline'"
+                  @click="toggleActive(task)"
+                  class="w-20"
+                >
+                  {{ task.is_active ? 'Active' : 'Inactive' }}
+                </Button>
               </TableCell>
               <TableCell class="text-right">
                 <div class="flex justify-end gap-2">
                   <Button 
-                    size="sm" 
-                    variant="outline"
+                    size="icon" 
+                    variant="ghost"
                     @click="runTask(task)"
                     :disabled="running === task.id"
+                    :title="$t('common.actions.run')"
                   >
-                    <Play class="w-4 h-4" />
+                    <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
+                    <Play v-else class="w-4 h-4" />
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="outline"
+                    size="icon" 
+                    variant="ghost"
                     @click="viewOutput(task)"
                     v-if="task.output"
+                    :title="$t('features.scheduled_tasks.output.title')"
                   >
                     <FileText class="w-4 h-4" />
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="outline"
+                    size="icon" 
+                    variant="ghost"
                     @click="editTask(task)"
+                    :title="$t('common.actions.edit')"
                   >
                     <Pencil class="w-4 h-4" />
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="destructive"
+                    size="icon" 
+                    variant="ghost"
+                    class="text-destructive hover:text-destructive"
                     @click="deleteTask(task)"
+                    :title="$t('common.actions.delete')"
                   >
                     <Trash2 class="w-4 h-4" />
                   </Button>
@@ -112,13 +125,13 @@
           </DialogTitle>
         </DialogHeader>
         
-        <form @submit.prevent="saveTask" class="space-y-4">
-          <div>
+        <form @submit.prevent="saveTask" class="space-y-4 py-4">
+          <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.name') }}</Label>
             <Input v-model="form.name" required />
           </div>
 
-          <div>
+          <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.command') }}</Label>
             <Select v-model="form.command" required>
               <SelectTrigger>
@@ -136,7 +149,7 @@
             </Select>
           </div>
 
-          <div>
+          <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.schedule') }}</Label>
             <div class="flex gap-2">
               <Select v-model="cronPreset" @update:model-value="applyCronPreset">
@@ -157,27 +170,27 @@
                 required
               />
             </div>
-            <p class="text-xs text-muted-foreground mt-1">
+            <p class="text-xs text-muted-foreground">
               {{ $t('features.scheduled_tasks.form.cron_help') }}
             </p>
           </div>
 
-          <div>
+          <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.description') }}</Label>
             <Textarea v-model="form.description" rows="3" />
           </div>
 
           <div class="flex items-center gap-2">
-            <Switch v-model="form.is_active" />
-            <Label>{{ $t('features.scheduled_tasks.form.active') }}</Label>
+            <input type="checkbox" v-model="form.is_active" id="is_active" class="h-4 w-4 rounded border-input" />
+            <Label for="is_active" class="cursor-pointer">{{ $t('features.scheduled_tasks.form.active') }}</Label>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" @click="dialogOpen = false">
-              {{ $t('common.cancel') }}
+              {{ $t('common.actions.cancel') }}
             </Button>
             <Button type="submit" :disabled="saving">
-              {{ saving ? $t('common.saving') : $t('common.save') }}
+              {{ saving ? $t('common.actions.save') + '...' : $t('common.actions.save') }}
             </Button>
           </DialogFooter>
         </form>
@@ -190,7 +203,7 @@
         <DialogHeader>
           <DialogTitle>{{ $t('features.scheduled_tasks.output.title') }}</DialogTitle>
         </DialogHeader>
-        <div class="bg-black text-green-400 p-4 rounded font-mono text-sm overflow-auto max-h-96">
+        <div class="bg-black text-green-400 p-4 rounded-md font-mono text-sm overflow-auto max-h-[500px] border border-border">
           <pre>{{ selectedTaskOutput }}</pre>
         </div>
       </DialogContent>
@@ -201,13 +214,31 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import apiService from '@/services/apiService';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-  Button, Input, Label, Textarea, Badge, Switch,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem
-} from '@/components/ui';
+import api from '@/services/api';
+
+// UI Components - individual imports
+import Table from '@/components/ui/table.vue';
+import TableBody from '@/components/ui/table-body.vue';
+import TableCell from '@/components/ui/table-cell.vue';
+import TableHead from '@/components/ui/table-head.vue';
+import TableHeader from '@/components/ui/table-header.vue';
+import TableRow from '@/components/ui/table-row.vue';
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
+import Button from '@/components/ui/button.vue';
+import Input from '@/components/ui/input.vue';
+import Label from '@/components/ui/label.vue';
+import Textarea from '@/components/ui/textarea.vue';
+import Badge from '@/components/ui/badge.vue';
+import Select from '@/components/ui/select.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+
 import { Plus, Play, Pencil, Trash2, FileText, Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -228,8 +259,8 @@ const form = ref({
   command: '',
   schedule: '',
   description: '',
-  is_active: true}
-);
+  is_active: true
+});
 
 const cronPresets = {
   hourly: '0 * * * *',
@@ -243,19 +274,15 @@ onMounted(async () => {
     fetchTasks(),
     fetchAllowedCommands()
   ]);
-);
+});
 
 async function fetchTasks() {
   try {
     loading.value = true;
-    const response = await apiService.get('/admin/cms/scheduled-tasks');
+    const response = await api.get('/admin/cms/scheduled-tasks');
     tasks.value = response.data.data;
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.message
-    );
+    console.error('Failed to fetch tasks:', error.message);
   } finally {
     loading.value = false;
   }
@@ -263,7 +290,7 @@ async function fetchTasks() {
 
 async function fetchAllowedCommands() {
   try {
-    const response = await apiService.get('/admin/cms/scheduled-tasks/meta/allowed-commands');
+    const response = await api.get('/admin/cms/scheduled-tasks/meta/allowed-commands');
     allowedCommands.value = response.data.data.commands;
   } catch (error) {
     console.error('Failed to fetch allowed commands:', error);
@@ -277,7 +304,7 @@ function openCreateDialog() {
     command: '',
     schedule: '',
     description: '',
-    is_active: true}
+    is_active: true
   };
   cronPreset.value = '';
   dialogOpen.value = true;
@@ -304,27 +331,17 @@ async function saveTask() {
     saving.value = true;
     
     if (editingTask.value) {
-      await apiService.put(`/admin/cms/scheduled-tasks/${editingTask.value.id}`, form.value);
-      console.log('Success:', 
-        title: t('common.success'),
-        description: t('features.scheduled_tasks.messages.updated')
-      );
+      await api.put(`/admin/cms/scheduled-tasks/${editingTask.value.id}`, form.value);
+      console.log('Task updated successfully');
     } else {
-      await apiService.post('/admin/cms/scheduled-tasks', form.value);
-      console.log('Success:', 
-        title: t('common.success'),
-        description: t('features.scheduled_tasks.messages.created')
-      );
+      await api.post('/admin/cms/scheduled-tasks', form.value);
+      console.log('Task created successfully');
     }
     
     dialogOpen.value = false;
     await fetchTasks();
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.response?.data?.message || error.message
-    );
+    console.error('Failed to save task:', error.response?.data?.message || error.message);
   } finally {
     saving.value = false;
   }
@@ -337,12 +354,9 @@ async function runTask(task) {
 
   try {
     running.value = task.id;
-    const response = await apiService.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
+    const response = await api.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
     
-    console.log('Success:', 
-      title: t('common.success'),
-      description: t('features.scheduled_tasks.messages.executed')
-    );
+    console.log('Task executed successfully');
 
     // Show output
     selectedTaskOutput.value = response.data.data.output;
@@ -350,11 +364,7 @@ async function runTask(task) {
     
     await fetchTasks();
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.response?.data?.message || error.message
-    );
+    console.error('Failed to run task:', error.response?.data?.message || error.message);
   } finally {
     running.value = null;
   }
@@ -362,22 +372,14 @@ async function runTask(task) {
 
 async function toggleActive(task) {
   try {
-    await apiService.put(`/admin/cms/scheduled-tasks/${task.id}`, {
+    await api.put(`/admin/cms/scheduled-tasks/${task.id}`, {
       is_active: !task.is_active
-    );
+    });
     
     await fetchTasks();
-    
-    console.log('Success:', 
-      title: t('common.success'),
-      description: t('features.scheduled_tasks.messages.toggled')
-    );
+    console.log('Task toggled successfully');
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.message
-    );
+    console.error('Failed to toggle task:', error.message);
   }
 }
 
@@ -392,20 +394,11 @@ async function deleteTask(task) {
   }
 
   try {
-    await apiService.delete(`/admin/cms/scheduled-tasks/${task.id}`);
-    
-    console.log('Success:', 
-      title: t('common.success'),
-      description: t('features.scheduled_tasks.messages.deleted')
-    );
-    
+    await api.delete(`/admin/cms/scheduled-tasks/${task.id}`);
+    console.log('Task deleted successfully');
     await fetchTasks();
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.message
-    );
+    console.error('Failed to delete task:', error.message);
   }
 }
 
@@ -424,32 +417,4 @@ function formatDate(dateString) {
 }
 </script>
 
-<style scoped>
-.scheduled-tasks {
-  padding: 2rem;
-}
 
-.page-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-description {
-  color: var(--muted-foreground);
-  margin: 0.5rem 0 0 0;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-</style>

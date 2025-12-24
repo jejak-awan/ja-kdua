@@ -14,251 +14,336 @@
       </TabsList>
 
       <!-- Settings Tab -->
-      <TabsContent value="settings" class="settings-tab">
-        <div class="card">
-          <div class="card-header">
-            <h3>{{ $t('features.redis.settings.connection') }}</h3>
-            <button @click="testConnection" :disabled="testing" class="btn btn-primary">
+      <TabsContent value="settings" class="settings-tab space-y-6">
+        <!-- Global Driver Warning -->
+        <div v-if="cacheDriver !== 'redis'" class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-yellow-800 flex items-start gap-3">
+             <div class="text-xl">⚠️</div>
+             <div>
+                <h4 class="font-bold text-sm uppercase tracking-wider mb-1">Redis Disabled</h4>
+                <p class="text-sm">
+                   Redis is currently disabled in system settings. To enable it, go to 
+                   <router-link to="/admin/settings?tab=performance" class="underline font-semibold hover:text-yellow-900">Settings &gt; Performance</router-link>
+                   and select "Redis" as the Cache Driver.
+                </p>
+             </div>
+        </div>
+
+        <!-- Connection Test Card -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-foreground">{{ $t('features.redis.settings.connection') }}</h3>
+            <button 
+              type="button"
+              @click="testConnection" 
+              :disabled="testing" 
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+            >
               <span v-if="!testing">{{ $t('features.redis.settings.test') }}</span>
               <span v-else>{{ $t('features.redis.settings.testing') }}</span>
             </button>
           </div>
-
-          <div v-if="connectionStatus" :class="['alert', connectionStatus.type]">
+          
+          <div v-if="connectionStatus" class="rounded-lg p-3 text-sm" :class="connectionStatus.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'">
             {{ connectionStatus.message }}
           </div>
+        </div>
 
-          <form @submit.prevent="saveSettings" class="settings-form">
-            <div v-for="group in groupedSettings" :key="group.name" class="settings-group">
-              <h4>{{ group.name }}</h4>
+        <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis'" class="space-y-6">
+            <!-- Opacity overlay for disabled state -->
+            <div :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis'}" class="space-y-6">
               
-              <div v-for="setting in group.items" :key="setting.key" class="form-group">
-                <label :for="setting.key">
-                  {{ formatLabel(setting.key) }}
-                  <span v-if="setting.description" class="description">{{ setting.description }}</span>
-                </label>
+              <div v-for="group in groupedSettings" :key="group.name" class="bg-card border border-border rounded-lg p-6">
+                <!-- Group Header -->
+                <h3 class="text-base font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  {{ group.name }}
+                </h3>
+              
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div v-for="setting in group.items" :key="setting.key" class="space-y-2">
+                    <Label :for="setting.key" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {{ formatLabel(setting.key) }}
+                      <span v-if="setting.description" class="block text-xs text-muted-foreground font-normal mt-1">{{ setting.description }}</span>
+                    </Label>
 
-                <input
-                  v-if="setting.type === 'string' || setting.type === 'integer'"
-                  :id="setting.key"
-                  :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
-                  v-model="settingsForm[setting.key]"
-                  class="form-control"
-                />
+                    <Input
+                      v-if="setting.type === 'string' || setting.type === 'integer'"
+                      :id="setting.key"
+                      :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
+                      v-model="settingsForm[setting.key]"
+                      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
 
-                <select
-                  v-else-if="setting.type === 'boolean'"
-                  :id="setting.key"
-                  v-model="settingsForm[setting.key]"
-                  class="form-control"
-                >
-                  <option value="true">{{ $t('features.redis.settings.enabled') }}</option>
-                  <option value="false">{{ $t('features.redis.settings.disabled') }}</option>
-                </select>
-              </div>
+                    <Select
+                      v-else-if="setting.type === 'boolean'"
+                      :model-value="String(settingsForm[setting.key])"
+                      @update:model-value="(val) => settingsForm[setting.key] = val"
+                    >
+                      <SelectTrigger class="w-full">
+                        <SelectValue :placeholder="$t('features.redis.settings.select')" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">{{ $t('features.redis.settings.enabled') }}</SelectItem>
+                        <SelectItem value="false">{{ $t('features.redis.settings.disabled') }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
             </div>
+          </div>
 
-            <div class="form-actions">
-              <button type="submit" :disabled="saving" class="btn btn-success">
+          <!-- Footer Actions -->
+          <div class="flex justify-end space-x-4 pt-6 border-t border-border mt-8">
+              <button
+                  type="button"
+                  @click="loadSettings"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              >
+                  {{ $t('features.redis.settings.cancel') || 'Reset' }}
+              </button>
+              <button 
+                type="submit" 
+                :disabled="saving" 
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
                 <span v-if="!saving">{{ $t('features.redis.settings.save') }}</span>
                 <span v-else>{{ $t('features.redis.settings.saving') }}</span>
               </button>
-            </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </TabsContent>
 
       <!-- Statistics Tab -->
-      <TabsContent value="statistics" class="statistics-tab">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">🚀</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.version') }}</div>
-              <div class="stat-value">{{ stats.version || 'N/A' }}</div>
+      <TabsContent value="statistics" class="statistics-tab space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">🚀</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.version') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.version || 'N/A' }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">💾</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.memory') }}</div>
-              <div class="stat-value">{{ stats.used_memory || 'N/A' }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">💾</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.memory') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.used_memory || 'N/A' }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">🔑</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.keys') }}</div>
-              <div class="stat-value">{{ stats.total_keys || 0 }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">🔑</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.keys') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.total_keys || 0 }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">⏱️</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.uptime') }}</div>
-              <div class="stat-value">{{ stats.uptime_days || 'N/A' }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">⏱️</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.uptime') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.uptime_days || 'N/A' }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.clients') }}</div>
-              <div class="stat-value">{{ stats.connected_clients || 0 }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">👥</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.clients') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.connected_clients || 0 }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.hitRate') }}</div>
-              <div class="stat-value">{{ stats.hit_rate || '0%' }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">🎯</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.hitRate') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.hit_rate || '0%' }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.ops') }}</div>
-              <div class="stat-value">{{ stats.operations_per_sec || 0 }}</div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">📊</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.ops') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ stats.operations_per_sec || 0 }}</div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon">💥</div>
-            <div class="stat-content">
-              <div class="stat-label">{{ $t('features.redis.statistics.grid.commands') }}</div>
-              <div class="stat-value">{{ formatNumber(stats.total_commands) || 0 }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card mt-4">
-          <div class="card-header">
-            <h3>{{ $t('features.redis.statistics.hitMiss.title') }}</h3>
-          </div>
-          <div class="card-body">
-            <div class="hit-miss-stats">
-              <div class="stat-row">
-                <span class="label">{{ $t('features.redis.statistics.hitMiss.hits') }}:</span>
-                <span class="value success">{{ formatNumber(stats.hits) || 0 }}</span>
-              </div>
-              <div class="stat-row">
-                <span class="label">{{ $t('features.redis.statistics.hitMiss.misses') }}:</span>
-                <span class="value danger">{{ formatNumber(stats.misses) || 0 }}</span>
-              </div>
-              <div class="stat-row">
-                <span class="label">{{ $t('features.redis.statistics.hitMiss.hitRate') }}:</span>
-                <span class="value primary">{{ stats.hit_rate || '0%' }}</span>
-              </div>
+          <div class="bg-card border border-border rounded-lg p-6 flex items-center gap-4 shadow-sm">
+            <div class="text-4xl">💥</div>
+            <div class="flex-1">
+              <div class="text-sm text-muted-foreground font-medium mb-1">{{ $t('features.redis.statistics.grid.commands') }}</div>
+              <div class="text-2xl font-bold text-foreground">{{ formatNumber(stats.total_commands) || 0 }}</div>
             </div>
           </div>
         </div>
 
-        <div class="refresh-info">
-          <button @click="loadStats" :disabled="loadingStats" class="btn btn-sm btn-outline">
+        <div class="bg-card border border-border rounded-lg p-6 mt-6">
+          <div class="mb-4 pb-4 border-b border-border">
+            <h3 class="text-lg font-semibold text-foreground">{{ $t('features.redis.statistics.hitMiss.title') }}</h3>
+          </div>
+          <div>
+            <div class="flex flex-col gap-4">
+              <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                <span class="font-medium text-foreground">{{ $t('features.redis.statistics.hitMiss.hits') }}:</span>
+                <span class="text-lg font-bold text-emerald-600">{{ formatNumber(stats.hits) || 0 }}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                <span class="font-medium text-foreground">{{ $t('features.redis.statistics.hitMiss.misses') }}:</span>
+                <span class="text-lg font-bold text-red-600">{{ formatNumber(stats.misses) || 0 }}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                <span class="font-medium text-foreground">{{ $t('features.redis.statistics.hitMiss.hitRate') }}:</span>
+                <span class="text-lg font-bold text-blue-600">{{ stats.hit_rate || '0%' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-border mt-6">
+          <button 
+            @click="loadStats" 
+            :disabled="loadingStats" 
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+          >
             <span v-if="!loadingStats">{{ $t('features.redis.statistics.refresh') }}</span>
             <span v-else>{{ $t('features.redis.messages.loading') }}</span>
           </button>
-          <span class="text-muted">{{ $t('features.redis.statistics.autoRefresh') }}</span>
+          <span class="text-sm text-muted-foreground">{{ $t('features.redis.statistics.autoRefresh') }}</span>
         </div>
       </TabsContent>
 
       <!-- Cache Tab -->
-      <TabsContent value="cache" class="cache-tab">
-        <div class="card">
-          <div class="card-header">
-            <h3>{{ $t('features.redis.cache.title') }}</h3>
+      <TabsContent value="cache" class="cache-tab space-y-6">
+        <div class="bg-card border border-border rounded-lg p-6">
+          <div class="mb-6 pb-4 border-b border-border">
+            <h3 class="text-lg font-semibold text-foreground">{{ $t('features.redis.cache.title') }}</h3>
           </div>
 
-          <div class="cache-actions">
-            <div class="cache-action-card">
-              <div class="icon">🧹</div>
-              <h4>{{ $t('features.redis.cache.actions.all.title') }}</h4>
-              <p>{{ $t('features.redis.cache.actions.all.desc') }}</p>
-              <button @click="flushCache('all')" :disabled="flushing" class="btn btn-danger">
-                {{ $t('features.redis.cache.actions.all.button') }}
-              </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Warm Cache -->
+              <div class="rounded-lg p-6 text-center border-2 border-primary/20 bg-primary/5 hover:border-primary/50 transition-all">
+                <div class="text-4xl mb-4">🔥</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.warm.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.warm.desc') }}</p>
+                <button 
+                  @click="warmCache" 
+                  :disabled="warming" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                >
+                  <span v-if="!warming">{{ $t('features.redis.cache.actions.warm.button') }}</span>
+                  <span v-else>{{ $t('features.redis.cache.actions.warm.warming') }}</span>
+                </button>
+              </div>
+
+              <div class="rounded-lg p-6 text-center border border-border bg-card hover:border-destructive/50 transition-all">
+                <div class="text-4xl mb-4">🧹</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.all.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.all.desc') }}</p>
+                <button 
+                  @click="flushCache('all')" 
+                  :disabled="flushing" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2"
+                >
+                  {{ $t('features.redis.cache.actions.all.button') }}
+                </button>
+              </div>
+
+              <div class="rounded-lg p-6 text-center border border-border bg-card hover:border-orange-500/50 transition-all">
+                <div class="text-4xl mb-4">💾</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.cache.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.cache.desc') }}</p>
+                <button 
+                  @click="flushCache('cache')" 
+                  :disabled="flushing" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-orange-500 text-white hover:bg-orange-600 h-10 px-4 py-2"
+                >
+                  {{ $t('features.redis.cache.actions.cache.button') }}
+                </button>
+              </div>
+
+              <div class="rounded-lg p-6 text-center border border-border bg-card hover:border-orange-500/50 transition-all">
+                <div class="text-4xl mb-4">⚙️</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.config.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.config.desc') }}</p>
+                <button 
+                  @click="flushCache('config')" 
+                  :disabled="flushing" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-orange-500 text-white hover:bg-orange-600 h-10 px-4 py-2"
+                >
+                  {{ $t('features.redis.cache.actions.config.button') }}
+                </button>
+              </div>
+
+              <div class="rounded-lg p-6 text-center border border-border bg-card hover:border-orange-500/50 transition-all">
+                <div class="text-4xl mb-4">🛣️</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.route.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.route.desc') }}</p>
+                <button 
+                  @click="flushCache('route')" 
+                  :disabled="flushing" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-orange-500 text-white hover:bg-orange-600 h-10 px-4 py-2"
+                >
+                  {{ $t('features.redis.cache.actions.route.button') }}
+                </button>
+              </div>
+
+              <div class="rounded-lg p-6 text-center border border-border bg-card hover:border-orange-500/50 transition-all">
+                <div class="text-4xl mb-4">👁️</div>
+                <h4 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.redis.cache.actions.view.title') }}</h4>
+                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.redis.cache.actions.view.desc') }}</p>
+                <button 
+                  @click="flushCache('view')" 
+                  :disabled="flushing" 
+                  class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-orange-500 text-white hover:bg-orange-600 h-10 px-4 py-2"
+                >
+                  {{ $t('features.redis.cache.actions.view.button') }}
+                </button>
+              </div>
             </div>
 
-            <div class="cache-action-card">
-              <div class="icon">💾</div>
-              <h4>{{ $t('features.redis.cache.actions.cache.title') }}</h4>
-              <p>{{ $t('features.redis.cache.actions.cache.desc') }}</p>
-              <button @click="flushCache('cache')" :disabled="flushing" class="btn btn-warning">
-                {{ $t('features.redis.cache.actions.cache.button') }}
-              </button>
+          <div v-if="cacheStats" class="bg-card border border-border rounded-lg p-6 mt-8">
+            <div class="mb-4 pb-4 border-b border-border">
+              <h3 class="text-lg font-semibold text-foreground">{{ $t('features.redis.cache.stats.title') }}</h3>
             </div>
-
-            <div class="cache-action-card">
-              <div class="icon">⚙️</div>
-              <h4>{{ $t('features.redis.cache.actions.config.title') }}</h4>
-              <p>{{ $t('features.redis.cache.actions.config.desc') }}</p>
-              <button @click="flushCache('config')" :disabled="flushing" class="btn btn-warning">
-                {{ $t('features.redis.cache.actions.config.button') }}
-              </button>
-            </div>
-
-            <div class="cache-action-card">
-              <div class="icon">🛣️</div>
-              <h4>{{ $t('features.redis.cache.actions.route.title') }}</h4>
-              <p>{{ $t('features.redis.cache.actions.route.desc') }}</p>
-              <button @click="flushCache('route')" :disabled="flushing" class="btn btn-warning">
-                {{ $t('features.redis.cache.actions.route.button') }}
-              </button>
-            </div>
-
-            <div class="cache-action-card">
-              <div class="icon">👁️</div>
-              <h4>{{ $t('features.redis.cache.actions.view.title') }}</h4>
-              <p>{{ $t('features.redis.cache.actions.view.desc') }}</p>
-              <button @click="flushCache('view')" :disabled="flushing" class="btn btn-warning">
-                {{ $t('features.redis.cache.actions.view.button') }}
-              </button>
-            </div>
-          </div>
-
-          <div v-if="cacheStats" class="card mt-4">
-            <div class="card-header">
-              <h3>{{ $t('features.redis.cache.stats.title') }}</h3>
-            </div>
-            <div class="card-body">
-              <div class="cache-stats-grid">
-                <div class="stat">
-                  <span class="label">{{ $t('features.redis.cache.stats.keys') }}:</span>
-                  <span class="value">{{ cacheStats.total_keys || 0 }}</span>
+            <div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                  <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.keys') }}:</span>
+                  <span class="font-bold text-foreground">{{ cacheStats.total_keys || 0 }}</span>
                 </div>
-                <div class="stat">
-                  <span class="label">{{ $t('features.redis.cache.stats.size') }}:</span>
-                  <span class="value">{{ cacheStats.cache_size || 'N/A' }}</span>
+                <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                  <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.size') }}:</span>
+                  <span class="font-bold text-blue-600">{{ cacheStats.cache_size || 'N/A' }}</span>
                 </div>
-                <div class="stat">
-                  <span class="label">{{ $t('features.redis.cache.stats.expired') }}:</span>
-                  <span class="value">{{ cacheStats.expired_keys || 0 }}</span>
+                <div class="flex justify-between items-center p-3 bg-muted/50 rounded-md">
+                  <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.expired') }}:</span>
+                  <span class="font-bold text-foreground">{{ cacheStats.expired_keys || 0 }}</span>
                 </div>
               </div>
 
-              <div v-if="cacheStats.top_keys && cacheStats.top_keys.length" class="top-keys mt-4">
-                <h4>{{ $t('features.redis.cache.stats.topKeys') }}</h4>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>{{ $t('features.redis.cache.stats.table.key') }}</th>
-                      <th>{{ $t('features.redis.cache.stats.table.size') }}</th>
-                      <th>{{ $t('features.redis.cache.stats.table.ttl') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(key, index) in cacheStats.top_keys" :key="index">
-                      <td><code>{{ key.key }}</code></td>
-                      <td>{{ key.size }}</td>
-                      <td>{{ key.ttl }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div v-if="cacheStats.top_keys && cacheStats.top_keys.length" class="top-keys space-y-4">
+                <h4 class="font-semibold text-foreground">{{ $t('features.redis.cache.stats.topKeys') }}</h4>
+                <div class="overflow-x-auto rounded-md border border-border">
+                  <table class="table w-full">
+                    <thead class="bg-muted">
+                      <tr>
+                        <th class="p-3 text-left font-medium text-muted-foreground text-sm">{{ $t('features.redis.cache.stats.table.key') }}</th>
+                        <th class="p-3 text-left font-medium text-muted-foreground text-sm">{{ $t('features.redis.cache.stats.table.size') }}</th>
+                        <th class="p-3 text-left font-medium text-muted-foreground text-sm">{{ $t('features.redis.cache.stats.table.ttl') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                      <tr v-for="(key, index) in cacheStats.top_keys" :key="index" class="hover:bg-muted/50">
+                        <td class="p-3"><code>{{ key.key }}</code></td>
+                        <td class="p-3 text-sm">{{ key.size }}</td>
+                        <td class="p-3 text-sm">{{ key.ttl }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -276,6 +361,13 @@ import Tabs from '@/components/ui/tabs.vue'
 import TabsList from '@/components/ui/tabs-list.vue'
 import TabsTrigger from '@/components/ui/tabs-trigger.vue'
 import TabsContent from '@/components/ui/tabs-content.vue'
+import Input from '@/components/ui/input.vue'
+import Label from '@/components/ui/label.vue'
+import Select from '@/components/ui/select.vue'
+import SelectContent from '@/components/ui/select-content.vue'
+import SelectItem from '@/components/ui/select-item.vue'
+import SelectTrigger from '@/components/ui/select-trigger.vue'
+import SelectValue from '@/components/ui/select-value.vue'
 
 const { t } = useI18n()
 const activeTab = ref('statistics')
@@ -288,13 +380,20 @@ const tabs = [
 // Settings
 const settings = ref({})
 const settingsForm = ref({})
+const cacheDriver = ref(null) // Global cache driver status
+
 const groupedSettings = computed(() => {
   const groups = {}
   
   Object.entries(settings.value).forEach(([groupName, items]) => {
+    // Filter out only redis_enabled (which was duplicative).
+    // Allow cache_enabled, redis_queue_enabled, redis_session_enabled to show.
+    const filteredItems = items.filter(item => item.key !== 'redis_enabled')
+     if (filteredItems.length === 0) return
+
     groups[groupName] = {
       name: formatGroupName(groupName),
-      items: items
+      items: filteredItems
     }
   })
   
@@ -313,6 +412,7 @@ const statsInterval = ref(null)
 // Cache
 const cacheStats = ref(null)
 const flushing = ref(false)
+const warming = ref(false)
 
 // Methods
 const loadSettings = async () => {
@@ -402,6 +502,24 @@ const loadCacheStats = async () => {
   }
 }
 
+const getCacheStatus = async () => {
+    try {
+        const response = await api.get('/admin/cms/system/cache-status')
+        // We know from Index.vue fix that this returns { driver: ... }
+        // Depending on parse logic, might need ensuring.
+        // Let's assume response.data.data or utilize responseParser if imported
+        // But api.get usually returns axios object.
+        // Let's check api.js again. It usually returns response.
+        // Assuming typical structure: response.data.data contains the payload if standard success.
+        // But BaseApiController returns { success: true, data: ... }
+        // So response.data.data is correct.
+        const data = response.data.data
+        cacheDriver.value = data.driver
+    } catch (error) {
+        console.error('Failed to get global cache status:', error)
+    }
+}
+
 const flushCache = async (type) => {
   if (!confirm(t('features.redis.messages.flushConfirm', { type }))) {
     return
@@ -416,6 +534,24 @@ const flushCache = async (type) => {
     alert(error.response?.data?.message || t('features.redis.messages.flushFailed'))
   } finally {
     flushing.value = false
+  }
+}
+
+const warmCache = async () => {
+  if (!confirm(t('features.redis.messages.warmConfirm'))) {
+    return
+  }
+
+  warming.value = true
+  try {
+    await api.post('/admin/cms/redis/warm-cache')
+    alert(t('features.redis.messages.warmSuccess'))
+    loadCacheStats()
+    loadStats()
+  } catch (error) {
+    alert(error.response?.data?.message || t('features.redis.messages.warmFailed'))
+  } finally {
+    warming.value = false
   }
 }
 
@@ -440,6 +576,7 @@ onMounted(() => {
   loadSettings()
   loadStats()
   loadCacheStats()
+  getCacheStatus()
 
   // Auto-refresh stats every 30 seconds
   statsInterval.value = setInterval(() => {
@@ -479,398 +616,14 @@ onUnmounted(() => {
   font-size: 1rem;
 }
 
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 2px solid hsl(var(--border));
-  margin-bottom: 2rem;
-}
-
-.tab {
-  padding: 0.75rem 1.5rem;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: hsl(var(--muted-foreground));
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: -2px;
-}
-
-.tab:hover {
-  color: #2563eb;
-}
-
-.tab.active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
-}
-
-/* Card */
-.card {
-  background: hsl(var(--card));
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.card-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid hsl(var(--border));
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
+/* Ensure code blocks in table look good */
+code {
+  background-color: hsl(var(--muted));
   color: hsl(var(--foreground));
-  margin: 0;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-/* Alert */
-.alert {
-  padding: 1rem;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-}
-
-.alert.success {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #6ee7b7;
-}
-
-.alert.error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-/* Forms */
-.settings-form {
-  padding: 1.5rem;
-}
-
-.settings-group {
-  margin-bottom: 2rem;
-}
-
-.settings-group h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: hsl(var(--foreground));
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid hsl(var(--border));
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 500;
-  color: hsl(var(--foreground));
-  margin-bottom: 0.5rem;
-}
-
-.form-group .description {
-  display: block;
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  font-weight: 400;
-  margin-top: 0.25rem;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  transition: border-color 0.2s;
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid hsl(var(--border));
-}
-
-/* Buttons */
-.btn {
-  padding: 0.625rem 1.25rem;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #2563eb;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-.btn-success {
-  background: #10b981;
-  color: white;
-}
-
-.btn-success:hover:not(:disabled) {
-  background: #059669;
-}
-
-.btn-warning {
-  background: #f59e0b;
-  color: white;
-}
-
-.btn-warning:hover:not(:disabled) {
-  background: #d97706;
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #dc2626;
-}
-
-.btn-outline {
-  background: hsl(var(--card));
-  color: hsl(var(--foreground));
-  border: 1px solid hsl(var(--border));
-}
-
-.btn-outline:hover:not(:disabled) {
-  background: hsl(var(--muted));
-}
-
-.btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-}
-
-/* Statistics */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: hsl(var(--card));
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.stat-icon {
-  font-size: 2.5rem;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: hsl(var(--foreground));
-}
-
-.hit-miss-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: hsl(var(--muted));
-  border-radius: 0.375rem;
-}
-
-.stat-row .label {
-  font-weight: 500;
-  color: hsl(var(--foreground));
-}
-
-.stat-row .value {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.stat-row .value.success {
-  color: #10b981;
-}
-
-.stat-row .value.danger {
-  color: #ef4444;
-}
-
-.stat-row .value.primary {
-  color: #2563eb;
-}
-
-.refresh-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid hsl(var(--border));
-}
-
-.text-muted {
-  color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-}
-
-/* Cache Actions */
-.cache-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem;
-}
-
-.cache-action-card {
-  background: hsl(var(--muted));
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  text-align: center;
-  border: 2px solid hsl(var(--border));
-  transition: all 0.2s;
-}
-
-.cache-action-card:hover {
-  border-color: #2563eb;
-  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
-}
-
-.cache-action-card .icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.cache-action-card h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: hsl(var(--foreground));
-  margin-bottom: 0.5rem;
-}
-
-.cache-action-card p {
-  color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.cache-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.cache-stats-grid .stat {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem;
-  background: hsl(var(--muted));
-  border-radius: 0.375rem;
-}
-
-.cache-stats-grid .label {
-  font-weight: 500;
-  color: hsl(var(--foreground));
-}
-
-.cache-stats-grid .value {
-  font-weight: 700;
-  color: #2563eb;
-}
-
-/* Table */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid hsl(var(--border));
-}
-
-.table th {
-  font-weight: 600;
-  color: hsl(var(--foreground));
-  background: hsl(var(--muted));
-}
-
-.table code {
-  background: #f3f4f6;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
-  font-family: 'Courier New', monospace;
-}
-
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.top-keys h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: hsl(var(--foreground));
-  margin-bottom: 1rem;
 }
 </style>
 

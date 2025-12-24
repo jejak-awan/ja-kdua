@@ -1,0 +1,38 @@
+{
+    "title": "Scheduled Tasks",
+    "description": "Manage scheduled tasks and cron jobs",
+    "create": "Create Task",
+    "edit": "Edit Task",
+    "no_tasks": "No scheduled tasks found",
+    "table": {
+        "name": "Name",
+        "command": "Command",
+        "schedule": "Schedule",
+        "last_run": "Last Run",
+        "status": "Status",
+        "active": "Active",
+        "actions": "Actions"
+    },
+    "form": {
+        "name": "Task Name",
+        "command": "Command",
+        "select_command": "Select a command",
+        "schedule": "Cron Schedule",
+        "preset": "Quick preset",
+        "description": "Description",
+        "active": "Active",
+        "cron_help": "Format: minute hour day month weekday (e.g., 0 * * * * = every hour)"
+    },
+    "output": {
+        "title": "Task Output"
+    },
+    "confirm_run": "Are you sure you want to run task \"{name}\"?",
+    "confirm_delete": "Are you sure you want to delete task \"{name}\"?",
+    "messages": {
+        "created": "Task created successfully",
+        "updated": "Task updated successfully",
+        "deleted": "Task deleted successfully",
+        "executed": "Task executed successfully",
+        "toggled": "Task status updated"
+    }
+}

@@ -38,6 +38,12 @@
     "cache": {
         "title": "Cache Management",
         "actions": {
+            "warm": {
+                "title": "Warm Cache",
+                "desc": "Regenerate optimized cache files",
+                "button": "Warm Cache",
+                "warming": "Warming..."
+            },
             "all": {
                 "title": "Clear All Cache",
                 "desc": "Clear all cached data including config, routes, and views",
@@ -85,6 +91,9 @@
         "flushConfirm": "Are you sure you want to clear {type} cache?",
         "flushSuccess": "{type} cache cleared successfully!",
         "flushFailed": "Failed to flush cache",
+        "warmConfirm": "Are you sure you want to warm the cache? This will regenerate config, route, and view caches.",
+        "warmSuccess": "Cache warmed successfully!",
+        "warmFailed": "Failed to warm cache",
         "loading": "Loading..."
     }
 }

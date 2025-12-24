@@ -427,6 +427,7 @@ Route::prefix('v1')->group(function () {
         Route::get('redis/info', [App\Http\Controllers\Api\V1\RedisController::class, 'info'])->middleware('permission:manage settings');
         Route::get('redis/cache-stats', [App\Http\Controllers\Api\V1\RedisController::class, 'cacheStats'])->middleware('permission:manage settings');
         Route::post('redis/flush-cache', [App\Http\Controllers\Api\V1\RedisController::class, 'flushCache'])->middleware('permission:manage settings');
+        Route::post('redis/warm-cache', [App\Http\Controllers\Api\V1\RedisController::class, 'warmCache'])->middleware('permission:manage settings');
 
         // Multi-language Support
         // These routes must be defined BEFORE apiResource to avoid route conflicts

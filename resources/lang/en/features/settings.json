@@ -52,6 +52,30 @@
         "recentLogs": "Recent Email Logs",
         "noLogs": "No email logs found"
     },
+    "cache": {
+        "configTitle": "Cache Configuration",
+        "managementTitle": "Cache Management",
+        "clear": "Clear Cache",
+        "warm": "Warm Cache",
+        "clearing": "Clearing...",
+        "warming": "Warming...",
+        "cleared": "Cache cleared successfully",
+        "warmed": "Cache warmed successfully",
+        "status": "Status",
+        "size": "Size",
+        "driver": "Driver",
+        "drivers": {
+            "file": "File System",
+            "redis": "Redis",
+            "database": "Database",
+            "array": "Array (Memory)"
+        },
+        "redisInfo": {
+            "title": "Redis Configuration",
+            "description": "When using Redis as a cache driver, ensure you have a running Redis server. You can configure the connection details in the Redis Management page.",
+            "linkText": "Go to Redis Settings"
+        }
+    },
     "labels": {
         "site_name": "Site Name",
         "site_description": "Site Description",

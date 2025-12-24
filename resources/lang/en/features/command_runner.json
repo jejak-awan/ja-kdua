@@ -1,0 +1,21 @@
+{
+    "title": "Command Runner",
+    "description": "Execute artisan commands manually (Super Admin only)",
+    "access_denied": "Access Denied",
+    "super_admin_only": "This feature is only available to super administrators",
+    "super_admin": "Super Admin Only",
+    "execute": "Execute Command",
+    "select_command": "Select Command",
+    "select_placeholder": "Choose a command to run...",
+    "parameters": "Parameters",
+    "parameters_placeholder": "Optional parameters (e.g., --force)",
+    "run": "Run",
+    "running": "Running...",
+    "clear": "Clear",
+    "output": "Output",
+    "executing": "Executing command...",
+    "history": "Command History",
+    "no_history": "No commands executed yet",
+    "executed_success": "Command executed successfully",
+    "executed_error": "Command executed with errors"
+}

@@ -1,0 +1,38 @@
+{
+    "title": "Tugas Terjadwal",
+    "description": "Kelola tugas terjadwal dan cron jobs",
+    "create": "Buat Tugas",
+    "edit": "Edit Tugas",
+    "no_tasks": "Tidak ada tugas terjadwal",
+    "table": {
+        "name": "Nama",
+        "command": "Perintah",
+        "schedule": "Jadwal",
+        "last_run": "Terakhir Dijalankan",
+        "status": "Status",
+        "active": "Aktif",
+        "actions": "Aksi"
+    },
+    "form": {
+        "name": "Nama Tugas",
+        "command": "Perintah",
+        "select_command": "Pilih perintah",
+        "schedule": "Jadwal Cron",
+        "preset": "Preset cepat",
+        "description": "Deskripsi",
+        "active": "Aktif",
+        "cron_help": "Format: menit jam hari bulan hari-minggu (mis., 0 * * * * = setiap jam)"
+    },
+    "output": {
+        "title": "Output Tugas"
+    },
+    "confirm_run": "Yakin ingin menjalankan tugas \"{name}\"?",
+    "confirm_delete": "Yakin ingin menghapus tugas \"{name}\"?",
+    "messages": {
+        "created": "Tugas berhasil dibuat",
+        "updated": "Tugas berhasil diperbarui",
+        "deleted": "Tugas berhasil dihapus",
+        "executed": "Tugas berhasil dijalankan",
+        "toggled": "Status tugas diperbarui"
+    }
+}

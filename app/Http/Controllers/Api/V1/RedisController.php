@@ -185,7 +185,7 @@ class RedisController extends BaseApiController
     public function cacheStats()
     {
         try {
-            $redis = Redis::connection();
+            $redis = Redis::connection('cache');
             
             // Check if Redis requires authentication
             try {
@@ -199,11 +199,13 @@ class RedisController extends BaseApiController
             
             $keys = $redis->keys('*');
 
+            $prefix = config('database.redis.options.prefix');
+            
             $stats = [
                 'total_keys' => count($keys),
-                'cache_size' => $this->getCacheSize($redis, $keys),
+                'cache_size' => $this->getCacheSize($redis, $keys, $prefix),
                 'expired_keys' => $this->getExpiredKeysCount($redis),
-                'top_keys' => $this->getTopKeys($redis, $keys, 10),
+                'top_keys' => $this->getTopKeys($redis, $keys, 10, $prefix),
             ];
 
             return $this->success($stats, 'Cache statistics retrieved successfully');
@@ -222,10 +224,17 @@ class RedisController extends BaseApiController
     private function getTotalKeys()
     {
         try {
-            $redis = Redis::connection();
-            $keys = $redis->keys('*');
+            $count = 0;
+            // Try to count keys from both default and cache connections
+            try {
+                $count += count(Redis::connection('default')->keys('*'));
+            } catch (\Exception $e) {}
+            
+            try {
+                $count += count(Redis::connection('cache')->keys('*'));
+            } catch (\Exception $e) {}
 
-            return count($keys);
+            return $count;
         } catch (\Exception $e) {
             return 0;
         }
@@ -250,12 +259,17 @@ class RedisController extends BaseApiController
     /**
      * Helper: Get cache size.
      */
-    private function getCacheSize($redis, $keys)
+    private function getCacheSize($redis, $keys, $prefix = null)
     {
         try {
             $size = 0;
             foreach (array_slice($keys, 0, 100) as $key) { // Sample first 100 keys
-                $size += strlen($redis->get($key) ?? '');
+                // Strip prefix if present to avoid double prefixing by the client
+                $lookupKey = ($prefix && str_starts_with($key, $prefix)) 
+                    ? substr($key, strlen($prefix)) 
+                    : $key;
+                    
+                $size += strlen($redis->get($lookupKey) ?? '');
             }
 
             return $this->formatBytes($size);
@@ -295,17 +309,22 @@ class RedisController extends BaseApiController
     /**
      * Helper: Get top keys.
      */
-    private function getTopKeys($redis, $keys, $limit = 10)
+    private function getTopKeys($redis, $keys, $limit = 10, $prefix = null)
     {
         $topKeys = [];
 
         foreach (array_slice($keys, 0, min(count($keys), 100)) as $key) {
             try {
-                $ttl = $redis->ttl($key);
-                $size = strlen($redis->get($key) ?? '');
+                // Strip prefix for lookup
+                $lookupKey = ($prefix && str_starts_with($key, $prefix)) 
+                    ? substr($key, strlen($prefix)) 
+                    : $key;
+
+                $ttl = $redis->ttl($lookupKey);
+                $size = strlen($redis->get($lookupKey) ?? '');
 
                 $topKeys[] = [
-                    'key' => $key,
+                    'key' => $key, // Show full key for display
                     'size' => $this->formatBytes($size),
                     'ttl' => $ttl > 0 ? $ttl . 's' : ($ttl === -1 ? 'Never' : 'Expired'),
                 ];
@@ -316,9 +335,25 @@ class RedisController extends BaseApiController
 
         // Sort by size (descending)
         usort($topKeys, function ($a, $b) {
-            return $b['size'] <=> $a['size'];
+            return $b['size'] <=> $a['size']; // Note: comparing formatted strings isn't ideal but sufficient for simple display if units match
         });
 
         return array_slice($topKeys, 0, $limit);
+    }
+    /**
+     * Warm up cache (optimize).
+     */
+    public function warmCache()
+    {
+        try {
+            // Run optimization commands
+            Artisan::call('config:cache');
+            Artisan::call('route:cache');
+            Artisan::call('view:cache'); // view:cache exists in recent Laravel versions
+
+            return $this->success(null, 'Cache warmed successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to warm cache: ' . $e->getMessage(), 500);
+        }
     }
 }

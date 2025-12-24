@@ -59,6 +59,7 @@ export const navigationGroups = {
         { name: 'redis', to: '/admin/redis', label: 'Redis Cache' },
         { name: 'system', to: '/admin/system', label: 'System Info' },
         { name: 'scheduled-tasks', to: '/admin/scheduled-tasks', label: 'Scheduled Tasks' },
+        { name: 'command-runner', to: '/admin/command-runner', label: 'Command Runner' },
     ],
 
     // Developer (3 items)

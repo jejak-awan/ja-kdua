@@ -1,0 +1,21 @@
+{
+    "title": "Command Runner",
+    "description": "Jalankan perintah artisan secara manual (Super Admin saja)",
+    "access_denied": "Akses Ditolak",
+    "super_admin_only": "Fitur ini hanya tersedia untuk super administrator",
+    "super_admin": "Super Admin Saja",
+    "execute": "Jalankan Perintah",
+    "select_command": "Pilih Perintah",
+    "select_placeholder": "Pilih perintah untuk dijalankan...",
+    "parameters": "Parameter",
+    "parameters_placeholder": "Parameter opsional (mis., --force)",
+    "run": "Jalankan",
+    "running": "Menjalankan...",
+    "clear": "Bersihkan",
+    "output": "Output",
+    "executing": "Menjalankan perintah...",
+    "history": "Riwayat Perintah",
+    "no_history": "Belum ada perintah yang dijalankan",
+    "executed_success": "Perintah berhasil dijalankan",
+    "executed_error": "Perintah dijalankan dengan error"
+}

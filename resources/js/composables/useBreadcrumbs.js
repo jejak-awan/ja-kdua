@@ -28,6 +28,7 @@ const breadcrumbConfig = {
     '/admin/redis': 'common.navigation.menu.redis',
     '/admin/system': 'common.navigation.menu.system',
     '/admin/scheduled-tasks': 'common.navigation.menu.scheduledTasks',
+    '/admin/command-runner': 'features.command_runner.title',
     '/admin/webhooks': 'common.navigation.menu.webhooks',
     '/admin/plugins': 'common.navigation.menu.plugins',
     '/admin/custom-fields': 'common.navigation.menu.customFields',

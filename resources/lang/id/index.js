@@ -40,6 +40,9 @@ import content_templates from './features/content_templates.json';
 import system from './features/system.json';
 import profile from './features/profile.json';
 
+import scheduled_tasks from './features/scheduled_tasks.json';
+import command_runner from './features/command_runner.json';
+
 export default {
     common: {
         actions,
@@ -84,6 +87,8 @@ export default {
         developer,
         content_templates,
         system,
-        profile
+        profile,
+        scheduled_tasks,
+        command_runner
     },
 };

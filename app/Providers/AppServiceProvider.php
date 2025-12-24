@@ -25,6 +25,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                $cacheDriver = \App\Models\Setting::where('key', 'cache_driver')->value('value');
+                if ($cacheDriver) {
+                    config(['cache.default' => $cacheDriver]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail if database is not available
+        }
     }
 }

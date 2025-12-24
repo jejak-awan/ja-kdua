@@ -108,6 +108,203 @@
                         </div>
                     </div>
 
+                    <!-- Performance Settings -->
+                    <div v-else-if="activeTab === 'performance'" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Left Column: Cache Management (Priority) -->
+                            <div class="bg-card border border-border rounded-lg overflow-hidden h-fit flex flex-col">
+                                <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/50">
+                                    <h3 class="text-base font-semibold text-foreground flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                        {{ $t('features.settings.cache.managementTitle') }}
+                                    </h3>
+                                    <button
+                                        type="button"
+                                        @click="getCacheStatus"
+                                        :disabled="loadingCacheStatus"
+                                        class="text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                    >
+                                        <svg v-if="loadingCacheStatus" class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        {{ loadingCacheStatus ? $t('features.settings.loading') : $t('features.settings.emailTest.refresh') }}
+                                    </button>
+                                </div>
+
+                                <div class="p-6 space-y-6 flex-1">
+                                    <!-- Status Cards (Compact Row) -->
+                                    <div v-if="cacheStatus" class="grid grid-cols-3 gap-4">
+                                        <div class="p-3 bg-muted/30 rounded-md border border-border">
+                                            <p class="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{{ $t('features.settings.cache.driver') }}</p>
+                                            <p class="text-sm font-bold text-foreground capitalize mt-1 truncate" :title="cacheStatus.driver">{{ cacheStatus.driver }}</p>
+                                        </div>
+                                        <div class="p-3 bg-muted/30 rounded-md border border-border">
+                                            <p class="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{{ $t('features.settings.cache.status') }}</p>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="relative flex h-2 w-2">
+                                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                                </span>
+                                                <p class="text-sm font-bold text-green-600">{{ cacheStatus.status }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-muted/30 rounded-md border border-border">
+                                            <p class="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{{ $t('features.settings.cache.size') }}</p>
+                                            <p class="text-sm font-bold text-foreground mt-1">{{ cacheStatus.size }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions (Side by side) -->
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <button
+                                            type="button"
+                                            @click="clearSystemCache"
+                                            :disabled="clearingCache"
+                                            class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border border-red-200 bg-red-50 text-red-700 rounded-md hover:bg-red-100 disabled:opacity-50 transition-colors"
+                                        >
+                                            <svg v-if="clearingCache" class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                            {{ clearingCache ? $t('features.settings.cache.clearing') : $t('features.settings.cache.clear') }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @click="warmSystemCache"
+                                            :disabled="warmingCache"
+                                            class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
+                                        >
+                                            <svg v-if="warmingCache" class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.24-2.14.7-3.09C7.07 13.1 8 13.9 8.5 14.5z"/></svg>
+                                            {{ warmingCache ? $t('features.settings.cache.warming') : $t('features.settings.cache.warm') }}
+                                        </button>
+                                    </div>
+
+                                    <!-- Redis Info Card -->
+                                    <div v-if="formData.cache_driver === 'redis'" class="mt-6 p-4 rounded-md border border-blue-200 bg-blue-50 text-blue-800 transition-all duration-300">
+                                        <div class="flex items-start gap-3">
+                                            <div class="text-xl">ℹ️</div>
+                                            <div>
+                                                <h4 class="font-bold text-sm uppercase tracking-wider mb-1">{{ $t('features.settings.cache.redisInfo.title') }}</h4>
+                                                <p class="text-xs mb-2 leading-relaxed">
+                                                    {{ $t('features.settings.cache.redisInfo.description') }}
+                                                </p>
+                                                <router-link to="/admin/redis" class="text-xs font-semibold underline hover:text-blue-900 inline-flex items-center gap-1">
+                                                    {{ $t('features.settings.cache.redisInfo.linkText') }}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                                                </router-link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Cache Configuration -->
+                            <div class="bg-card border border-border rounded-lg p-6 h-fit">
+                                <h3 class="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                    {{ $t('features.settings.cache.configTitle') }}
+                                </h3>
+                                <div class="space-y-4">
+                                    <template v-for="setting in currentSettings" :key="setting.id">
+                                        <!-- Only Driver, Enable, TTL -->
+                                        <div v-if="['cache_driver', 'enable_cache', 'cache_ttl'].includes(setting.key)" class="border-b border-border last:border-0 pb-4 last:pb-0">
+                                            <label class="block text-sm font-medium text-foreground mb-1">
+                                                {{ $t('features.settings.labels.' + setting.key) }}
+                                            </label>
+                                            <p v-if="setting.description" class="text-xs text-muted-foreground mb-2">
+                                                {{ $t('features.settings.descriptions.' + setting.key) }}
+                                            </p>
+
+                                            <!-- Cache Driver Selector -->
+                                            <div v-if="setting.key === 'cache_driver'">
+                                                <select
+                                                    v-model="formData[setting.key]"
+                                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                                >
+                                                    <option value="file">{{ $t('features.settings.cache.drivers.file') }}</option>
+                                                    <option value="redis">{{ $t('features.settings.cache.drivers.redis') }}</option>
+                                                    <option value="database">{{ $t('features.settings.cache.drivers.database') }}</option>
+                                                    <option value="array">{{ $t('features.settings.cache.drivers.array') }}</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Generic Inputs for others -->
+                                            <div v-else>
+                                                <input
+                                                    v-if="setting.type === 'string'"
+                                                    v-model="formData[setting.key]"
+                                                    type="text"
+                                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                                >
+                                                <input
+                                                    v-else-if="setting.type === 'integer'"
+                                                    v-model.number="formData[setting.key]"
+                                                    type="number"
+                                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                                >
+                                                <div v-else-if="setting.type === 'boolean'" class="mt-1">
+                                                    <label class="flex items-center cursor-pointer">
+                                                        <input
+                                                            v-model="formData[setting.key]"
+                                                            type="checkbox"
+                                                            class="h-4 w-4 text-primary focus:ring-primary border-input rounded cursor-pointer"
+                                                        >
+                                                        <span class="ml-2 text-sm text-foreground">
+                                                            {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom: Optimization & Media (Other Performance Settings) -->
+                        <div class="bg-card border border-border rounded-lg p-6">
+                            <h3 class="text-base font-semibold text-foreground mb-4">{{ $t('features.settings.tabs.performance') }} Settings</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <template v-for="setting in currentSettings" :key="setting.id + '_opt'">
+                                    <!-- Render everything NOT in the cache specific list -->
+                                    <div v-if="!['cache_driver', 'enable_cache', 'cache_ttl'].includes(setting.key)" class="border-b border-border last:border-0 pb-4 md:border-0 md:pb-0">
+                                         <label class="block text-sm font-medium text-foreground mb-1">
+                                            {{ $t('features.settings.labels.' + setting.key) }}
+                                        </label>
+                                        <p v-if="setting.description" class="text-xs text-muted-foreground mb-2">
+                                            {{ $t('features.settings.descriptions.' + setting.key) }}
+                                        </p>
+                                        
+                                        <!-- Generic Inputs -->
+                                        <div>
+                                            <input
+                                                v-if="setting.type === 'string'"
+                                                v-model="formData[setting.key]"
+                                                type="text"
+                                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                            >
+                                            <input
+                                                v-else-if="setting.type === 'integer'"
+                                                v-model.number="formData[setting.key]"
+                                                type="number"
+                                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                            >
+                                            <div v-else-if="setting.type === 'boolean'" class="mt-1">
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input
+                                                        v-model="formData[setting.key]"
+                                                        type="checkbox"
+                                                        class="h-4 w-4 text-primary focus:ring-primary border-input rounded cursor-pointer"
+                                                    >
+                                                    <span class="ml-2 text-sm text-foreground">
+                                                        {{ formData[setting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Default Layout for Other Tabs -->
                     <div v-else class="space-y-6">
                         <div
@@ -367,7 +564,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
 import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
@@ -395,6 +592,12 @@ const loadingQueueStatus = ref(false);
 const queueStatus = ref(null);
 const loadingLogs = ref(false);
 const emailLogs = ref([]);
+
+// Cache Management State
+const cacheStatus = ref(null);
+const loadingCacheStatus = ref(false);
+const clearingCache = ref(false);
+const warmingCache = ref(false);
 
 const tabs = [
     { id: 'general', label: 'General' },
@@ -718,6 +921,47 @@ const getRecentLogs = async () => {
     }
 };
 
+// Cache Management Methods
+const getCacheStatus = async () => {
+    loadingCacheStatus.value = true;
+    try {
+        const response = await api.get('/admin/cms/system/cache-status');
+        cacheStatus.value = parseSingleResponse(response);
+    } catch (error) {
+        console.error('Failed to get cache status:', error);
+    } finally {
+        loadingCacheStatus.value = false;
+    }
+};
+
+const clearSystemCache = async () => {
+    if (!confirm('Are you sure you want to clear the system cache?')) return;
+    
+    clearingCache.value = true;
+    try {
+        await api.post('/admin/cms/system/cache/clear');
+        alert(t('features.settings.cache.cleared'));
+        getCacheStatus();
+    } catch (error) {
+        alert(error.response?.data?.message || t('features.settings.failed'));
+    } finally {
+        clearingCache.value = false;
+    }
+};
+
+const warmSystemCache = async () => {
+    warmingCache.value = true;
+    try {
+        await api.post('/admin/cms/system/cache/warm');
+        alert(t('features.settings.cache.warmed'));
+        getCacheStatus();
+    } catch (error) {
+        alert(error.response?.data?.message || t('features.settings.failed'));
+    } finally {
+        warmingCache.value = false;
+    }
+};
+
 const formatDate = (dateString) => {
     if (!dateString) return '';
     try {
@@ -741,6 +985,8 @@ watch(activeTab, (newTab) => {
     if (newTab === 'email') {
         getQueueStatus();
         getRecentLogs();
+    } else if (newTab === 'performance') {
+        getCacheStatus();
     }
 });
 
@@ -750,6 +996,8 @@ onMounted(() => {
     if (activeTab.value === 'email') {
         getQueueStatus();
         getRecentLogs();
+    } else if (activeTab.value === 'performance') {
+        getCacheStatus();
     }
 });
 </script>

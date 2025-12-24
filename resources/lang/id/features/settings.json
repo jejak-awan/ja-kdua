@@ -53,6 +53,30 @@
         "recentLogs": "Log Email Terbaru",
         "noLogs": "Tidak ada log email ditemukan"
     },
+    "cache": {
+        "configTitle": "Konfigurasi Cache",
+        "managementTitle": "Manajemen Cache",
+        "clear": "Bersihkan Cache",
+        "warm": "Warm Cache",
+        "clearing": "Membersihkan...",
+        "warming": "Memproses...",
+        "cleared": "Cache berhasil dibersihkan",
+        "warmed": "Cache berhasil di-warm",
+        "status": "Status",
+        "size": "Ukuran",
+        "driver": "Driver",
+        "drivers": {
+            "file": "File System",
+            "redis": "Redis",
+            "database": "Database",
+            "array": "Array (Memori)"
+        },
+        "redisInfo": {
+            "title": "Konfigurasi Redis",
+            "description": "Saat menggunakan Redis sebagai driver cache, pastikan Anda memiliki server Redis yang berjalan. Anda dapat mengonfigurasi detail koneksi di halaman Manajemen Redis.",
+            "linkText": "Ke Pengaturan Redis"
+        }
+    },
     "labels": {
         "site_name": "Nama Situs",
         "site_description": "Deskripsi Situs",

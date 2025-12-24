@@ -1,20 +1,20 @@
 <template>
-  <div class="command-runner">
+  <div class="space-y-6">
     <!-- Access Check -->
-    <div v-if="!isSuperAdmin" class="access-denied">
+    <div v-if="!isSuperAdmin" class="flex flex-col items-center justify-center min-h-[60vh] text-center">
       <AlertCircle class="w-12 h-12 text-destructive mb-4" />
-      <h2>{{ $t('features.command_runner.access_denied') }}</h2>
-      <p>{{ $t('features.command_runner.super_admin_only') }}</p>
+      <h2 class="text-xl font-bold mb-2">{{ $t('features.command_runner.access_denied') }}</h2>
+      <p class="text-muted-foreground">{{ $t('features.command_runner.super_admin_only') }}</p>
       <Button @click="$router.push('/admin/dashboard')" class="mt-4">
-        {{ $t('common.back_to_dashboard') }}
+        {{ $t('common.navigation.dashboard') }}
       </Button>
     </div>
 
     <template v-else>
-      <div class="page-header">
+      <div class="flex justify-between items-start">
         <div>
-          <h1 class="page-title">{{ $t('features.command_runner.title') }}</h1>
-          <p class="page-description">{{ $t('features.command_runner.description') }}</p>
+          <h1 class="text-2xl font-bold text-foreground">{{ $t('features.command_runner.title') }}</h1>
+          <p class="text-muted-foreground mt-1">{{ $t('features.command_runner.description') }}</p>
         </div>
         <Badge variant="destructive" class="ml-auto">
           {{ $t('features.command_runner.super_admin') }}
@@ -22,13 +22,13 @@
       </div>
 
       <!-- Command Execution Card -->
-      <div class="card mb-6">
-        <div class="card-header">
-          <h3>{{ $t('features.command_runner.execute') }}</h3>
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="p-6 border-b border-border">
+          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.execute') }}</h3>
         </div>
-        <div class="card-body space-y-4">
+        <div class="p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2">
+            <div class="md:col-span-2 space-y-2">
               <Label>{{ $t('features.command_runner.select_command') }}</Label>
               <Select v-model="selectedCommand">
                 <SelectTrigger>
@@ -45,7 +45,7 @@
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div class="space-y-2">
               <Label>{{ $t('features.command_runner.parameters') }}</Label>
               <Input 
                 v-model="parameters" 
@@ -77,9 +77,9 @@
       </div>
 
       <!-- Output Card -->
-      <div class="card mb-6" v-if="output || executing">
-        <div class="card-header flex items-center justify-between">
-          <h3>{{ $t('features.command_runner.output') }}</h3>
+      <div class="bg-card border border-border rounded-lg overflow-hidden" v-if="output || executing">
+        <div class="p-6 border-b border-border flex items-center justify-between">
+          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.output') }}</h3>
           <div class="flex items-center gap-2">
             <Badge v-if="exitCode !== null" :variant="exitCode === 0 ? 'success' : 'destructive'">
               Exit Code: {{ exitCode }}
@@ -89,21 +89,21 @@
             </span>
           </div>
         </div>
-        <div class="terminal">
-          <div v-if="executing" class="flex items-center gap-2 text-green-400">
+        <div class="bg-black text-green-400 p-6 font-mono text-sm overflow-auto max-h-[500px]">
+          <div v-if="executing" class="flex items-center gap-2">
             <Loader2 class="w-4 h-4 animate-spin" />
             <span>{{ $t('features.command_runner.executing') }}</span>
           </div>
-          <pre v-else>{{ output }}</pre>
+          <pre v-else class="whitespace-pre-wrap break-words">{{ output }}</pre>
         </div>
       </div>
 
       <!-- Command History Card -->
-      <div class="card">
-        <div class="card-header">
-          <h3>{{ $t('features.command_runner.history') }}</h3>
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="p-6 border-b border-border">
+          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.history') }}</h3>
         </div>
-        <div class="card-body">
+        <div class="p-6">
           <div v-if="history.length === 0" class="text-center py-8 text-muted-foreground">
             {{ $t('features.command_runner.no_history') }}
           </div>
@@ -111,11 +111,11 @@
             <div 
               v-for="(item, index) in history" 
               :key="index"
-              class="history-item"
+              class="p-3 border border-border rounded hover:bg-muted cursor-pointer transition-colors"
               @click="loadFromHistory(item)"
             >
               <div class="flex items-center justify-between">
-                <code class="text-sm">{{ item.command }}</code>
+                <code class="text-sm bg-muted-foreground/10 px-2 py-1 rounded">{{ item.command }}</code>
                 <div class="flex items-center gap-2">
                   <Badge size="sm" :variant="item.exitCode === 0 ? 'success' : 'destructive'">
                     {{ item.exitCode }}
@@ -138,11 +138,19 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
-import apiService from '@/services/apiService';
-import {
-  Button, Input, Label, Badge,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem
-} from '@/components/ui';
+import api from '@/services/api';
+
+// UI Components - individual imports
+import Button from '@/components/ui/button.vue';
+import Input from '@/components/ui/input.vue';
+import Label from '@/components/ui/label.vue';
+import Badge from '@/components/ui/badge.vue';
+import Select from '@/components/ui/select.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+
 import { Play, X, Loader2, AlertCircle } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -160,7 +168,7 @@ const history = ref([]);
 
 const isSuperAdmin = computed(() => {
   return authStore.user?.roles?.some(role => role.name === 'super-admin');
-);
+});
 
 onMounted(async () => {
   if (!isSuperAdmin.value) {
@@ -169,18 +177,14 @@ onMounted(async () => {
   
   await fetchAllowedCommands();
   loadHistory();
-);
+});
 
 async function fetchAllowedCommands() {
   try {
-    const response = await apiService.get('/admin/cms/scheduled-tasks/meta/allowed-commands');
+    const response = await api.get('/admin/cms/scheduled-tasks/meta/allowed-commands');
     allowedCommands.value = response.data.data.commands;
   } catch (error) {
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.message
-    );
+    console.error('Failed to fetch allowed commands:', error.message);
   }
 }
 
@@ -200,55 +204,43 @@ async function runCommand() {
     const startTime = Date.now();
 
     // Create a temporary task and run it
-    const createResponse = await apiService.post('/admin/cms/scheduled-tasks', {
+    const createResponse = await api.post('/admin/cms/scheduled-tasks', {
       name: `Temp Command - ${Date.now()}`,
       command: fullCommand,
       schedule: '0 0 1 1 *', // Never runs automatically
       description: 'Temporary task created by command runner',
       is_active: false
-    );
+    });
 
     const taskId = createResponse.data.data.id;
 
     // Run the task
-    const runResponse = await apiService.post(`/admin/cms/scheduled-tasks/${taskId}/run`);
+    const runResponse = await api.post(`/admin/cms/scheduled-tasks/${taskId}/run`);
 
     executionTime.value = Date.now() - startTime;
     output.value = runResponse.data.data.output || 'No output';
     exitCode.value = runResponse.data.data.exit_code || 0;
 
     // Delete temporary task
-    await apiService.delete(`/admin/cms/scheduled-tasks/${taskId}`);
+    await api.delete(`/admin/cms/scheduled-tasks/${taskId}`);
 
     // Add to history
     addToHistory({
       command: fullCommand,
       exitCode: exitCode.value,
       timestamp: new Date().toISOString()
-    );
+    });
 
     if (exitCode.value === 0) {
-      console.log('Success:', 
-        title: t('common.success'),
-        description: t('features.command_runner.executed_success')
-      );
+      console.log('Command executed successfully');
     } else {
-      console.log('Success:', 
-        variant: 'destructive',
-        title: t('features.command_runner.executed_error'),
-        description: `Exit code: ${exitCode.value}`
-      );
+      console.warn('Command executed with exit code:', exitCode.value);
     }
 
   } catch (error) {
     output.value = error.response?.data?.message || error.message;
     exitCode.value = 1;
-    
-    console.log('Success:', 
-      variant: 'destructive',
-      title: t('common.error'),
-      description: error.message
-    );
+    console.error('Failed to execute command:', error.message);
   } finally {
     executing.value = false;
   }
@@ -290,90 +282,4 @@ function formatDate(dateString) {
 }
 </script>
 
-<style scoped>
-.command-runner {
-  padding: 2rem;
-}
 
-.access-denied {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-description {
-  color: var(--muted-foreground);
-  margin: 0.5rem 0 0 0;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.card-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.terminal {
-  background: #0a0a0a;
-  color: #00ff00;
-  padding: 1.5rem;
-  border-radius: 0.375rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.terminal pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.history-item {
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.history-item:hover {
-  background: var(--muted);
-}
-</style>
