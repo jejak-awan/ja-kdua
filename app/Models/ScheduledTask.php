@@ -1,0 +1,159 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Cron\CronExpression;
+
+class ScheduledTask extends Model
+{
+    use HasFactory;
+
+    protected $table = 'scheduled_tasks';
+
+    protected $fillable = [
+        'name',
+        'command',
+        'schedule',
+        'description',
+        'is_active',
+        'options',
+        'last_run_at',
+        'status',
+        'output',
+    ];
+
+    protected $casts = [
+        'options' => 'array',
+        'is_active' => 'boolean',
+        'last_run_at' => 'datetime',
+    ];
+
+    /**
+     * Whitelist of allowed commands that can be executed from UI
+     * Only these commands are safe to run via admin interface
+     */
+    const ALLOWED_COMMANDS = [
+        // Cache management
+        'cache:clear',
+        'cache:warm',
+        'cms:clear-cache',
+        
+        // Maintenance
+        'logs:cleanup',
+        'analytics:cleanup',
+        'media:thumbnails',
+        
+        // Health & diagnostics
+        'cms:health-check',
+        'config:clear',
+        'route:clear',
+        'view:clear',
+        
+        // Backup
+        'cms:backup',
+        
+        // Security
+        'security:clear-blocked-ips',
+        'security:clear-rate-limit',
+    ];
+
+    /**
+     * Commands that are NEVER allowed from UI
+     */
+    const BLOCKED_COMMANDS = [
+        'migrate',
+        'migrate:fresh',
+        'migrate:rollback',
+        'migrate:reset',
+        'db:wipe',
+        'db:seed',
+        'down',
+        'key:generate',
+        'env:decrypt',
+        'tinker',
+        'make:',
+    ];
+
+    /**
+     * Check if a command is allowed to be executed
+     */
+    public static function isCommandAllowed(string $command): bool
+    {
+        // Extract base command (before any arguments/options)
+        $baseCommand = trim(explode(' ', $command)[0]);
+        
+        // Check against blocked commands (including partials like 'make:')
+        foreach (self::BLOCKED_COMMANDS as $blocked) {
+            if (str_starts_with($baseCommand, $blocked)) {
+                return false;
+            }
+        }
+        
+        // Check if in allowed list
+        return in_array($baseCommand, self::ALLOWED_COMMANDS);
+    }
+
+    /**
+     * Validate cron expression
+     */
+    public static function isValidCronExpression(string $expression): bool
+    {
+        try {
+            return CronExpression::isValidExpression($expression);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get allowed commands list for UI dropdown
+     */
+    public static function getAllowedCommands(): array
+    {
+        return array_map(function ($cmd) {
+            return [
+                'value' => $cmd,
+                'label' => ucfirst(str_replace([':', '-'], [' › ', ' '], $cmd)),
+            ];
+        }, self::ALLOWED_COMMANDS);
+    }
+
+    /**
+     * Get next run time based on cron expression
+     */
+    public function getNextRunAt(): ?\DateTime
+    {
+        if (!$this->schedule || !self::isValidCronExpression($this->schedule)) {
+            return null;
+        }
+
+        try {
+            $cron = new CronExpression($this->schedule);
+            return $cron->getNextRunDate();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Scope for active tasks only
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for tasks due to run
+     */
+    public function scopeDue($query)
+    {
+        return $query->active()
+            ->where(function ($q) {
+                $q->whereNull('last_run_at')
+                    ->orWhere('last_run_at', '<', now()->subMinute());
+            });
+    }
+}

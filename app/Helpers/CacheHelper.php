@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Log;
  *
  * Provides convenient methods for caching operations including
  * content, media, categories, statistics, and API responses.
- * Supports tagged cache for grouped invalidation (Redis only).
+ * Supports tagged cache for grouped invalidation (Redis/Memcached only).
+ * Falls back to regular cache for other drivers.
  */
 class CacheHelper
 {
@@ -18,38 +19,37 @@ class CacheHelper
      * Cache key prefixes
      */
     const PREFIX_CONTENT = 'content:';
-
     const PREFIX_MEDIA = 'media:';
-
     const PREFIX_CATEGORY = 'category:';
-
     const PREFIX_TAG = 'tag:';
-
     const PREFIX_USER = 'user:';
-
     const PREFIX_SETTINGS = 'settings:';
-
     const PREFIX_STATISTICS = 'statistics:';
-
     const PREFIX_API = 'api:';
 
     /**
      * Default cache TTL (Time To Live) in seconds
      */
     const TTL_SHORT = 300;      // 5 minutes
-
     const TTL_MEDIUM = 1800;    // 30 minutes
-
     const TTL_LONG = 3600;      // 1 hour
-
     const TTL_VERY_LONG = 86400; // 24 hours
+
+    /**
+     * Check if current cache driver supports tags
+     */
+    protected static function supportsTagging(): bool
+    {
+        $driver = config('cache.default');
+        return in_array($driver, ['redis', 'memcached', 'redis_failover']);
+    }
 
     /**
      * Get cache key with prefix
      */
     public static function key(string $prefix, string $key): string
     {
-        return $prefix.$key;
+        return $prefix . $key;
     }
 
     /**
@@ -63,7 +63,7 @@ class CacheHelper
             try {
                 return $callback();
             } catch (\Exception $e) {
-                Log::error('Cache callback error: '.$e->getMessage());
+                Log::error('Cache callback error: ' . $e->getMessage());
                 throw $e;
             }
         });
@@ -76,7 +76,11 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_CONTENT, $id);
 
-        return Cache::tags(['content'])->remember($cacheKey, $ttl, $callback);
+        if (self::supportsTagging()) {
+            return Cache::tags(['content'])->remember($cacheKey, $ttl, $callback);
+        }
+
+        return Cache::remember($cacheKey, $ttl, $callback);
     }
 
     /**
@@ -86,7 +90,11 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_MEDIA, $id);
 
-        return Cache::tags(['media'])->remember($cacheKey, $ttl, $callback);
+        if (self::supportsTagging()) {
+            return Cache::tags(['media'])->remember($cacheKey, $ttl, $callback);
+        }
+
+        return Cache::remember($cacheKey, $ttl, $callback);
     }
 
     /**
@@ -96,7 +104,11 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_CATEGORY, $id);
 
-        return Cache::tags(['categories'])->remember($cacheKey, $ttl, $callback);
+        if (self::supportsTagging()) {
+            return Cache::tags(['categories'])->remember($cacheKey, $ttl, $callback);
+        }
+
+        return Cache::remember($cacheKey, $ttl, $callback);
     }
 
     /**
@@ -116,7 +128,14 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_CONTENT, $id);
         Cache::forget($cacheKey);
-        Cache::tags(['content'])->flush();
+
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['content'])->flush();
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
@@ -126,7 +145,14 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_MEDIA, $id);
         Cache::forget($cacheKey);
-        Cache::tags(['media'])->flush();
+
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['media'])->flush();
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
@@ -136,7 +162,14 @@ class CacheHelper
     {
         $cacheKey = self::key(self::PREFIX_CATEGORY, $id);
         Cache::forget($cacheKey);
-        Cache::tags(['categories'])->flush();
+
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['categories'])->flush();
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
@@ -144,7 +177,18 @@ class CacheHelper
      */
     public static function invalidateAllContent(): void
     {
-        Cache::tags(['content'])->flush();
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['content'])->flush();
+                return;
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback: clear prefixed keys (less efficient)
+        // For non-tagging drivers, we just log a warning
+        Log::info('Content cache invalidation requested (non-tagging driver)');
     }
 
     /**
@@ -152,7 +196,16 @@ class CacheHelper
      */
     public static function invalidateAllMedia(): void
     {
-        Cache::tags(['media'])->flush();
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['media'])->flush();
+                return;
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
+
+        Log::info('Media cache invalidation requested (non-tagging driver)');
     }
 
     /**
@@ -160,7 +213,16 @@ class CacheHelper
      */
     public static function invalidateAllCategories(): void
     {
-        Cache::tags(['categories'])->flush();
+        if (self::supportsTagging()) {
+            try {
+                Cache::tags(['categories'])->flush();
+                return;
+            } catch (\Exception $e) {
+                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+            }
+        }
+
+        Log::info('Category cache invalidation requested (non-tagging driver)');
     }
 
     /**
@@ -172,8 +234,11 @@ class CacheHelper
             $cacheKey = self::key(self::PREFIX_STATISTICS, $type);
             Cache::forget($cacheKey);
         } else {
-            // Invalidate all statistics
-            Cache::flush(); // Note: This clears ALL cache, use with caution
+            // Clear common statistics keys instead of full flush
+            $statKeys = ['dashboard', 'content', 'users', 'analytics'];
+            foreach ($statKeys as $key) {
+                Cache::forget(self::key(self::PREFIX_STATISTICS, $key));
+            }
         }
     }
 
@@ -206,7 +271,7 @@ class CacheHelper
 
             return $result;
         } catch (\Exception $e) {
-            Log::warning('Cache not available: '.$e->getMessage());
+            Log::warning('Cache not available: ' . $e->getMessage());
 
             return false;
         }
@@ -217,10 +282,10 @@ class CacheHelper
      */
     public static function getStats(): array
     {
-        // This is a placeholder - actual implementation depends on cache driver
         return [
             'driver' => config('cache.default'),
             'available' => self::isAvailable(),
+            'supports_tagging' => self::supportsTagging(),
         ];
     }
 }

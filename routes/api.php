@@ -391,6 +391,7 @@ Route::prefix('v1')->group(function () {
 
         // Scheduled Tasks
         Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage settings');
+        Route::get('scheduled-tasks/meta/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage settings');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage settings');
 
         // File Manager
