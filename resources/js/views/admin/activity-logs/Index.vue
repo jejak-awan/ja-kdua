@@ -310,6 +310,26 @@ const fetchLogs = async () => {
     }
 };
 
+const clearDateFilter = () => {
+    dateFrom.value = '';
+    dateTo.value = '';
+    fetchLogs();
+};
+
+const clearLogs = async () => {
+    if (!confirm(t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?')) {
+        return;
+    }
+
+    try {
+        await api.post('/admin/cms/activity-logs/clear');
+        fetchLogs();
+        if (typeof fetchStatistics === 'function') fetchStatistics();
+    } catch (error) {
+        console.error('Failed to clear logs:', error);
+    }
+};
+
 const exportLogs = async () => {
     exporting.value = true;
     try {
