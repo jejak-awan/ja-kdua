@@ -267,7 +267,7 @@ const routes = [
             {
                 path: 'scheduled-tasks',
                 name: 'scheduled-tasks',
-                component: () => import('../views/admin/scheduled-tasks/Index.vue'),
+                component: () => import('../views/admin/system/ScheduledTasks.vue'),
             },
             {
                 path: 'logs',
