@@ -15,10 +15,24 @@ use Illuminate\Support\Facades\Schema;
 
 class AnalyticsController extends BaseApiController
 {
-    public function overview(Request $request)
+    /**
+     * Get properly formatted date range for queries
+     * Ensures end date includes the entire day (23:59:59)
+     */
+    protected function getDateRange(Request $request): array
     {
         $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        
+        return [
+            $dateFrom . ' 00:00:00',
+            $dateTo . ' 23:59:59',
+        ];
+    }
+
+    public function overview(Request $request)
+    {
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
 
         $stats = [
             'total_visits' => AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])->count(),
@@ -38,8 +52,7 @@ class AnalyticsController extends BaseApiController
 
     public function visits(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
         $groupBy = $request->input('group_by', 'day'); // day, week, month
 
         $visits = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
@@ -53,8 +66,7 @@ class AnalyticsController extends BaseApiController
 
     public function topPages(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
         $limit = $request->input('limit', 10);
 
         $topPages = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
@@ -69,8 +81,7 @@ class AnalyticsController extends BaseApiController
 
     public function topContent(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
         $limit = $request->input('limit', 10);
 
         // Optimized: Use content.views column instead of N+1 visits queries
