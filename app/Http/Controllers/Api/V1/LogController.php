@@ -9,98 +9,80 @@ class LogController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $logFile = storage_path('logs/laravel.log');
-        $lines = $request->input('lines', 100);
-        $level = $request->input('level'); // error, warning, info, etc.
+        $logPath = storage_path('logs');
+        $files = [];
 
-        if (! File::exists($logFile)) {
-            return $this->success(['logs' => []], 'Log file not found');
+        if (File::isDirectory($logPath)) {
+            $filesInDir = File::files($logPath);
+            foreach ($filesInDir as $file) {
+                if ($file->getExtension() === 'log') {
+                    $files[] = [
+                        'name' => $file->getFilename(),
+                        'size' => $file->getSize(),
+                        'modified' => $file->getMTime(),
+                    ];
+                }
+            }
         }
 
-        $content = File::get($logFile);
-        $logEntries = $this->parseLogFile($content, $lines, $level);
+        // Sort by modified date desc
+        usort($files, function ($a, $b) {
+            return $b['modified'] <=> $a['modified'];
+        });
 
-        return $this->success([
-            'logs' => $logEntries,
-            'total' => count($logEntries),
-        ], 'Logs retrieved successfully');
+        return $this->success($files, 'Log files retrieved successfully');
     }
 
-    public function clear()
+    public function show($filename)
     {
-        $logFile = storage_path('logs/laravel.log');
+        $logFile = storage_path('logs/' . basename($filename));
+
+        if (! File::exists($logFile)) {
+            return $this->notFound('Log file');
+        }
+
+        // Limit content to last 2MB to avoid huge payload
+        $content = $this->tailFile($logFile, 2000); 
+
+        return $this->success(['content' => $content], 'Log content retrieved successfully');
+    }
+
+    public function download($filename)
+    {
+        $logFile = storage_path('logs/' . basename($filename));
+
+        if (File::exists($logFile)) {
+            return response()->download($logFile, basename($filename));
+        }
+
+        return $this->notFound('Log file');
+    }
+
+    public function clear(Request $request)
+    {
+         // Default to laravel.log or specific file
+        $filename = $request->input('filename', 'laravel.log');
+        $logFile = storage_path('logs/' . basename($filename));
 
         if (File::exists($logFile)) {
             File::put($logFile, '');
-
             return $this->success(null, 'Log file cleared successfully');
         }
 
         return $this->notFound('Log file');
     }
 
-    public function download()
+    protected function tailFile($filepath, $lines = 100)
     {
-        $logFile = storage_path('logs/laravel.log');
-
-        if (File::exists($logFile)) {
-            return response()->download($logFile, 'laravel.log');
+        // Simple file get for now, or sophisticated tail logic
+        // Since admin might want to see whole file but pagination is hard with text files
+        // We will return the last 100 KB text
+        
+        $content = File::get($filepath);
+        // If too large, truncate
+        if (strlen($content) > 1024 * 500) { // 500KB limit
+             return '... (File too large, showing last 500KB) ...' . "\n" . substr($content, -1024 * 500);
         }
-
-        return $this->notFound('Log file');
-    }
-
-    protected function parseLogFile($content, $limit = 100, $level = null)
-    {
-        $lines = explode("\n", $content);
-        $entries = [];
-        $currentEntry = '';
-
-        foreach (array_reverse($lines) as $line) {
-            if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.+?)\.(.+?): (.+)$/', $line, $matches)) {
-                if ($currentEntry) {
-                    $entry = $this->parseLogEntry($currentEntry);
-                    if (! $level || $entry['level'] === $level) {
-                        $entries[] = $entry;
-                        if (count($entries) >= $limit) {
-                            break;
-                        }
-                    }
-                }
-                $currentEntry = $line;
-            } else {
-                $currentEntry .= "\n".$line;
-            }
-        }
-
-        if ($currentEntry && count($entries) < $limit) {
-            $entry = $this->parseLogEntry($currentEntry);
-            if (! $level || $entry['level'] === $level) {
-                $entries[] = $entry;
-            }
-        }
-
-        return $entries;
-    }
-
-    protected function parseLogEntry($entry)
-    {
-        if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.+?)\.(.+?): (.+)$/s', $entry, $matches)) {
-            return [
-                'timestamp' => $matches[1],
-                'environment' => $matches[2],
-                'level' => strtolower($matches[3]),
-                'message' => $matches[4],
-                'raw' => $entry,
-            ];
-        }
-
-        return [
-            'timestamp' => now()->toDateTimeString(),
-            'environment' => 'local',
-            'level' => 'info',
-            'message' => $entry,
-            'raw' => $entry,
-        ];
+        return $content;
     }
 }

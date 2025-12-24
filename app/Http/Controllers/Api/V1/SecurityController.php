@@ -42,7 +42,8 @@ class SecurityController extends BaseApiController
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $logs = $query->latest()->paginate(50);
+        $perPage = $request->input('per_page', 50);
+        $logs = $query->latest()->paginate($perPage);
 
         return $this->paginated($logs, 'Security logs retrieved successfully');
     }

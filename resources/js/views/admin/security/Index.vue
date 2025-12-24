@@ -1,7 +1,14 @@
 <template>
     <div>
         <div class="mb-6 flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.security.title') }}</h1>
+            <div class="flex items-center gap-4">
+                <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </router-link>
+                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.security.title') }}</h1>
+            </div>
             <button 
                 @click="refreshAll" 
                 :disabled="loading"
