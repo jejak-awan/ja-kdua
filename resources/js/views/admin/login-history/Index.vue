@@ -1,6 +1,11 @@
 <template>
     <div>
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex items-center gap-4">
+            <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </router-link>
             <div>
                 <h1 class="text-2xl font-bold text-foreground">{{ t('features.login_history.title') }}</h1>
                 <p class="text-sm text-muted-foreground mt-1">{{ t('features.login_history.description') }}</p>
@@ -171,7 +176,7 @@ const userFilter = ref('');
 const statusFilter = ref('');
 const dateFrom = ref('');
 const dateTo = ref('');
-const perPage = ref(50);
+const perPage = ref(25);
 const totalRecords = ref(0);
 
 const fetchHistory = async () => {

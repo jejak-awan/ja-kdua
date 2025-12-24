@@ -188,11 +188,11 @@ const fetchStats = async () => {
 const fetchRecentLogs = async () => {
     try {
         // Fetch recent activity
-        const activityResponse = await api.get('/admin/cms/activity-logs/recent?limit=5').catch(() => ({ data: {} }));
+        const activityResponse = await api.get('/admin/cms/activity-logs/recent?limit=10').catch(() => ({ data: {} }));
         recentActivity.value = activityResponse.data?.data || [];
 
         // Fetch recent security
-        const securityResponse = await api.get('/admin/cms/security/logs?per_page=5').catch(() => ({ data: {} }));
+        const securityResponse = await api.get('/admin/cms/security/logs?per_page=10').catch(() => ({ data: {} }));
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
     } catch (error) {

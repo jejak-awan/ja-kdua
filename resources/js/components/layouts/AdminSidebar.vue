@@ -202,6 +202,30 @@
                     </div>
                 </div>
 
+                <!-- Logs & Monitoring -->
+                <div>
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
+                        {{ t('common.navigation.sections.logs') }}
+                    </h3>
+                    <div class="space-y-1">
+                        <router-link
+                            v-for="item in navigationGroups.logs"
+                            :key="item.name"
+                            :to="item.to"
+                            class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
+                            :class="[
+                                $route.name === item.name
+                                    ? 'bg-accent text-foreground'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            ]"
+                            :title="sidebarMinimized ? getNavigationLabel(item) : ''"
+                        >
+                            <component :is="getIcon(item.name)" class="w-5 h-5 flex-shrink-0" :class="sidebarMinimized ? '' : 'mr-3'" />
+                            <span v-if="!sidebarMinimized" class="truncate">{{ getNavigationLabel(item) }}</span>
+                        </router-link>
+                    </div>
+                </div>
+
                 <!-- System -->
                 <div>
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
