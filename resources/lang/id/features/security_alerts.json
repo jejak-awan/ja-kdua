@@ -1,0 +1,16 @@
+{
+    "title": "Peringatan Keamanan",
+    "show": "Tampilkan Detail",
+    "hide": "Sembunyikan",
+    "severity": {
+        "critical": "Kritis",
+        "warning": "Peringatan",
+        "info": "Info"
+    },
+    "types": {
+        "failed_login": "Login Gagal Berulang",
+        "ip_blocked": "IP Diblokir",
+        "brute_force": "Serangan Brute Force",
+        "multiple_ip_login": "Login dari Banyak IP"
+    }
+}

@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\SecurityLog;
 use App\Services\SecurityService;
+use App\Services\SecurityAlertService;
 use Illuminate\Http\Request;
 
 class SecurityController extends BaseApiController
 {
     protected $securityService;
+    protected $alertService;
 
-    public function __construct(SecurityService $securityService)
+    public function __construct(SecurityService $securityService, SecurityAlertService $alertService)
     {
         $this->securityService = $securityService;
+        $this->alertService = $alertService;
     }
 
     public function index(Request $request)
@@ -55,6 +58,20 @@ class SecurityController extends BaseApiController
         $stats = $this->securityService->getSecurityStats($days);
 
         return $this->success($stats, 'Security statistics retrieved successfully');
+    }
+
+    /**
+     * Get security alerts for suspicious activity
+     */
+    public function alerts()
+    {
+        $alerts = $this->alertService->getAlerts();
+        $count = $this->alertService->getAlertCount();
+
+        return $this->success([
+            'alerts' => $alerts,
+            'count' => $count,
+        ], 'Security alerts retrieved successfully');
     }
 
     // =====================

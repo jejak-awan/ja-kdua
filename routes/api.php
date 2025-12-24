@@ -235,6 +235,7 @@ Route::prefix('v1')->group(function () {
         Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
         Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');
+        Route::get('security/alerts', [App\Http\Controllers\Api\V1\SecurityController::class, 'alerts'])->middleware('permission:manage settings');
         
         // IP Blocklist
         Route::get('security/blocklist', [App\Http\Controllers\Api\V1\SecurityController::class, 'getBlocklist'])->middleware('permission:manage settings');
