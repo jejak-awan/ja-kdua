@@ -22,6 +22,12 @@
         "topReferrers": "Top Referrers",
         "realtime": "Real-time Activity"
     },
+    "sections": {
+        "traffic": "Traffic",
+        "technology": "Technology",
+        "geography": "Geography",
+        "content": "Top Content"
+    },
     "realtime": {
         "activeSessions": "Active Sessions",
         "visitsLastHour": "Visits (Last Hour)",

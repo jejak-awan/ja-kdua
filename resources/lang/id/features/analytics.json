@@ -22,6 +22,12 @@
         "topReferrers": "Perujuk Teratas",
         "realtime": "Aktivitas Real-time"
     },
+    "sections": {
+        "traffic": "Lalu Lintas",
+        "technology": "Teknologi",
+        "geography": "Geografi",
+        "content": "Konten Teratas"
+    },
     "realtime": {
         "activeSessions": "Sesi Aktif",
         "visitsLastHour": "Kunjungan (Jam Terakhir)",

@@ -1,62 +1,41 @@
 <template>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
+    <div class="space-y-4">
+        <!-- Header with Stats -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.analytics.title') }}</h1>
-                <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.analytics.subtitle') }}</p>
+                <p class="text-sm text-muted-foreground">{{ $t('features.analytics.subtitle') }}</p>
             </div>
-            <div class="flex items-center space-x-3">
-                <input
-                    v-model="dateFrom"
-                    type="date"
-                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                >
-                <span class="text-muted-foreground">{{ $t('features.analytics.to') }}</span>
-                <input
-                    v-model="dateTo"
-                    type="date"
-                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                >
-                <Button @click="fetchAnalytics">
-                    {{ $t('features.analytics.apply') }}
-                </Button>
+            
+            <!-- Date Range & Actions -->
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-2 bg-card border border-border rounded-md px-2">
+                    <input v-model="dateFrom" type="date" class="px-2 py-1.5 bg-transparent text-foreground text-sm focus:outline-none" />
+                    <span class="text-muted-foreground text-sm">{{ $t('features.analytics.to') }}</span>
+                    <input v-model="dateTo" type="date" class="px-2 py-1.5 bg-transparent text-foreground text-sm focus:outline-none" />
+                </div>
+                <Button size="sm" @click="fetchAnalytics">{{ $t('features.analytics.apply') }}</Button>
                 
                 <!-- Export Dropdown -->
                 <div class="relative" ref="exportDropdownRef">
-                    <Button 
-                        variant="outline" 
-                        @click="toggleExportMenu"
-                        :disabled="exporting"
-                    >
-                        <svg v-if="!exporting" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Button variant="outline" size="sm" @click="toggleExportMenu" :disabled="exporting">
+                        <svg v-if="!exporting" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        <svg v-else class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <svg v-else class="w-4 h-4 mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
                         {{ exporting ? $t('features.analytics.export.exporting') : $t('features.analytics.export.button') }}
                     </Button>
-                    <div 
-                        v-if="showExportMenu" 
-                        class="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg z-50"
-                    >
-                        <button 
-                            @click="exportData('visits')" 
-                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground first:rounded-t-md"
-                        >
+                    <div v-if="showExportMenu" class="absolute right-0 mt-1 w-40 bg-popover border border-border rounded-md shadow-lg z-50">
+                        <button @click="exportData('visits')" class="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent first:rounded-t-md">
                             {{ $t('features.analytics.export.visits') }}
                         </button>
-                        <button 
-                            @click="exportData('events')" 
-                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                        >
+                        <button @click="exportData('events')" class="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent">
                             {{ $t('features.analytics.export.events') }}
                         </button>
-                        <button 
-                            @click="exportData('sessions')" 
-                            class="w-full px-4 py-2 text-left text-sm text-popover-foreground hover:bg-accent hover:text-accent-foreground last:rounded-b-md"
-                        >
+                        <button @click="exportData('sessions')" class="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent last:rounded-b-md">
                             {{ $t('features.analytics.export.sessions') }}
                         </button>
                     </div>
@@ -64,247 +43,184 @@
             </div>
         </div>
 
-        <!-- Overview Stats -->
+        <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
             <p class="text-muted-foreground">{{ $t('features.analytics.loading') }}</p>
         </div>
 
-        <div v-else>
-            <!-- Overview Cards -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                <div class="bg-card overflow-hidden border border-border rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
+        <template v-else>
+            <!-- Overview Stats - Compact Row -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-500/10 rounded-lg">
+                            <svg class="h-5 w-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground">{{ $t('features.analytics.overview.totalVisits') }}</p>
+                            <p class="text-xl font-bold text-foreground">{{ formatNumber(overview.total_visits || 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-500/10 rounded-lg">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground">{{ $t('features.analytics.overview.uniqueVisitors') }}</p>
+                            <p class="text-xl font-bold text-foreground">{{ formatNumber(overview.unique_visitors || 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-500/10 rounded-lg">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground">{{ $t('features.analytics.overview.totalSessions') }}</p>
+                            <p class="text-xl font-bold text-foreground">{{ formatNumber(overview.total_sessions || 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-purple-500/10 rounded-lg">
+                            <svg class="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground">{{ $t('features.analytics.overview.bounceRate') }}</p>
+                            <p class="text-xl font-bold text-foreground">{{ overview.bounce_rate || 0 }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Activity - Compact -->
+            <div class="bg-gradient-to-r from-indigo-500/5 via-green-500/5 to-blue-500/5 border border-border rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-foreground flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        {{ $t('features.analytics.charts.realtime') }}
+                    </h3>
+                    <div class="flex items-center gap-6">
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-indigo-500">{{ realtime.active_sessions || 0 }}</span>
+                            <span class="text-xs text-muted-foreground ml-1">{{ $t('features.analytics.realtime.activeSessions') }}</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-green-500">{{ formatNumber(realtime.visits_last_hour || 0) }}</span>
+                            <span class="text-xs text-muted-foreground ml-1">{{ $t('features.analytics.realtime.visitsLastHour') }}</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-blue-500">{{ realtime.top_pages_now?.length || 0 }}</span>
+                            <span class="text-xs text-muted-foreground ml-1">{{ $t('features.analytics.realtime.activePages') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traffic Section -->
+            <div class="bg-card border border-border rounded-lg p-4">
+                <h3 class="text-sm font-medium text-foreground mb-3">📈 {{ $t('features.analytics.sections.traffic') }}</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <!-- Visits Chart -->
+                    <div class="lg:col-span-2">
+                        <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.visitsOverTime') }}</h4>
+                        <div class="h-48">
+                            <LineChart v-if="visits.length > 0" :data="visits" :label="$t('features.analytics.charts.visits')" />
+                            <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">{{ $t('features.analytics.noData') }}</div>
+                        </div>
+                    </div>
+                    <!-- Top Pages -->
+                    <div>
+                        <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.topPages') }}</h4>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            <div v-for="(page, i) in topPages.slice(0, 5)" :key="i" class="flex items-center justify-between text-sm">
+                                <span class="truncate flex-1 text-foreground">{{ formatUrl(page.url) }}</span>
+                                <span class="text-muted-foreground ml-2">{{ page.visits }}</span>
                             </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.totalVisits') }}</dt>
-                                    <dd class="text-lg font-semibold text-foreground">{{ overview.total_visits || 0 }}</dd>
-                                </dl>
+                            <p v-if="topPages.length === 0" class="text-sm text-muted-foreground text-center py-2">{{ $t('features.analytics.noData') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology & Geography Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Technology -->
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-foreground mb-3">🖥️ {{ $t('features.analytics.sections.technology') }}</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Devices -->
+                        <div>
+                            <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.devices') }}</h4>
+                            <div class="h-32">
+                                <DoughnutChart v-if="devices.length > 0" :data="devices" label-key="device_type" value-key="count" />
+                                <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">{{ $t('features.analytics.noData') }}</div>
+                            </div>
+                        </div>
+                        <!-- Browsers -->
+                        <div>
+                            <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.browsers') }}</h4>
+                            <div class="h-32">
+                                <DoughnutChart v-if="browsers.length > 0" :data="browsers" label-key="browser" value-key="count" />
+                                <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">{{ $t('features.analytics.noData') }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-card overflow-hidden border border-border rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.uniqueVisitors') }}</dt>
-                                    <dd class="text-lg font-semibold text-foreground">{{ overview.unique_visitors || 0 }}</dd>
-                                </dl>
+                <!-- Geography -->
+                <div class="bg-card border border-border rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-foreground mb-3">🌍 {{ $t('features.analytics.sections.geography') }}</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Countries -->
+                        <div>
+                            <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.topCountries') }}</h4>
+                            <div class="h-32">
+                                <BarChart v-if="countries.length > 0" :data="countries.slice(0, 5)" label-key="country" value-key="count" :horizontal="true" />
+                                <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">{{ $t('features.analytics.noData') }}</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="bg-card overflow-hidden border border-border rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.totalSessions') }}</dt>
-                                    <dd class="text-lg font-semibold text-foreground">{{ overview.total_sessions || 0 }}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-card overflow-hidden border border-border rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-muted-foreground truncate">{{ $t('features.analytics.overview.bounceRate') }}</dt>
-                                    <dd class="text-lg font-semibold text-foreground">{{ overview.bounce_rate || 0 }}%</dd>
-                                </dl>
+                        <!-- Referrers -->
+                        <div>
+                            <h4 class="text-xs font-medium text-muted-foreground mb-2">{{ $t('features.analytics.charts.topReferrers') }}</h4>
+                            <div class="space-y-1.5 max-h-32 overflow-y-auto">
+                                <div v-for="(ref, i) in referrers.slice(0, 5)" :key="i" class="flex items-center justify-between text-xs">
+                                    <span class="truncate flex-1 text-foreground">{{ formatUrl(ref.referer) }}</span>
+                                    <span class="text-muted-foreground ml-2">{{ ref.count }}</span>
+                                </div>
+                                <p v-if="referrers.length === 0" class="text-xs text-muted-foreground text-center py-2">{{ $t('features.analytics.noData') }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Visits Chart -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.visitsOverTime') }}</h2>
-                    <div class="h-64">
-                         <LineChart
-                            v-if="visits.length > 0"
-                            :data="visits"
-                            :label="$t('features.analytics.charts.visits')"
-                        />
-                        <div v-else class="h-full flex items-center justify-center text-muted-foreground">
-                            {{ $t('features.analytics.noData') }}
-                        </div>
+            <!-- Content Section -->
+            <div class="bg-card border border-border rounded-lg p-4">
+                <h3 class="text-sm font-medium text-foreground mb-3">📄 {{ $t('features.analytics.sections.content') }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                    <div v-for="content in topContent.slice(0, 10)" :key="content.id" class="bg-muted/30 rounded-lg p-3">
+                        <p class="text-sm font-medium text-foreground truncate">{{ content.title }}</p>
+                        <p class="text-xs text-muted-foreground truncate">{{ content.author?.name }}</p>
+                        <p class="text-lg font-bold text-primary mt-1">{{ content.visits_count || 0 }} <span class="text-xs font-normal text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span></p>
                     </div>
-                </div>
-
-                <!-- Top Pages -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topPages') }}</h2>
-                    <div class="space-y-3">
-                        <div
-                            v-for="(page, index) in topPages"
-                            :key="index"
-                            class="flex items-center justify-between"
-                        >
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-foreground truncate">{{ page.url }}</p>
-                            </div>
-                            <div class="ml-4 flex items-center">
-                                <span class="text-sm text-foreground font-medium">{{ page.visits }}</span>
-                                <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
-                            </div>
-                        </div>
-                        <p v-if="topPages.length === 0" class="text-sm text-muted-foreground text-center py-4">
-                            {{ $t('features.analytics.noData') }}
-                        </p>
-                    </div>
+                    <p v-if="topContent.length === 0" class="text-sm text-muted-foreground text-center py-4 col-span-full">{{ $t('features.analytics.noData') }}</p>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Devices -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.devices') }}</h2>
-                    <div class="h-64">
-                        <DoughnutChart
-                            v-if="devices.length > 0"
-                            :data="devices"
-                            label-key="device_type"
-                            value-key="count"
-                        />
-                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
-                            {{ $t('features.analytics.noData') }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Browsers -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.browsers') }}</h2>
-                    <div class="h-64">
-                         <DoughnutChart
-                            v-if="browsers.length > 0"
-                            :data="browsers"
-                            label-key="browser"
-                            value-key="count"
-                        />
-                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
-                            {{ $t('features.analytics.noData') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Top Content -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topContent') }}</h2>
-                    <div class="space-y-3">
-                        <div
-                            v-for="content in topContent"
-                            :key="content.id"
-                            class="flex items-center justify-between"
-                        >
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-foreground truncate">{{ content.title }}</p>
-                                <p class="text-xs text-muted-foreground">{{ content.author?.name }}</p>
-                            </div>
-                            <div class="ml-4 flex items-center">
-                                <span class="text-sm text-foreground font-medium">{{ content.visits_count || 0 }}</span>
-                                <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
-                            </div>
-                        </div>
-                        <p v-if="topContent.length === 0" class="text-sm text-muted-foreground text-center py-4">
-                            {{ $t('features.analytics.noData') }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Countries -->
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topCountries') }}</h2>
-                    <div class="h-64">
-                         <BarChart
-                            v-if="countries.length > 0"
-                            :data="countries"
-                            label-key="country"
-                            value-key="count"
-                            :horizontal="true"
-                        />
-                         <div v-else class="h-full flex items-center justify-center text-muted-foreground">
-                            {{ $t('features.analytics.noData') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Referrers -->
-            <div class="bg-card border border-border rounded-lg p-6 mb-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h2>
-                <div class="space-y-3">
-                    <div
-                        v-for="referrer in referrers"
-                        :key="referrer.referer"
-                        class="flex items-center justify-between"
-                    >
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-foreground truncate">{{ referrer.referer }}</p>
-                        </div>
-                        <div class="ml-4 flex items-center">
-                            <span class="text-sm text-foreground font-medium">{{ referrer.count }}</span>
-                            <span class="ml-2 text-xs text-muted-foreground">{{ $t('features.analytics.labels.visits') }}</span>
-                        </div>
-                    </div>
-                    <p v-if="referrers.length === 0" class="text-sm text-muted-foreground text-center py-4">
-                        {{ $t('features.analytics.noData') }}
-                    </p>
-                </div>
-            </div>
-
-            <!-- Real-time Stats -->
-            <div class="bg-card border border-border rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.realtime') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="text-center p-4 bg-indigo-500/10 rounded-lg">
-                        <p class="text-2xl font-bold text-indigo-600">{{ realtime.active_sessions || 0 }}</p>
-                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.activeSessions') }}</p>
-                    </div>
-                    <div class="text-center p-4 bg-green-500/10 rounded-lg">
-                        <p class="text-2xl font-bold text-green-600">{{ realtime.visits_last_hour || 0 }}</p>
-                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.visitsLastHour') }}</p>
-                    </div>
-                    <div class="text-center p-4 bg-blue-500/10 rounded-lg">
-                        <p class="text-2xl font-bold text-blue-600">{{ realtime.top_pages_now?.length || 0 }}</p>
-                        <p class="text-sm text-muted-foreground mt-1">{{ $t('features.analytics.realtime.activePages') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </template>
     </div>
 </template>
 
@@ -336,42 +252,28 @@ const countries = ref([]);
 const referrers = ref([]);
 const realtime = ref({});
 
-const maxVisits = computed(() => {
-    return Math.max(...visits.value.map(v => v.visits), 1);
-});
+// Utility functions
+const formatNumber = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+};
 
-const maxDeviceCount = computed(() => {
-    return Math.max(...devices.value.map(d => d.count), 1);
-});
-
-const maxBrowserCount = computed(() => {
-    return Math.max(...browsers.value.map(b => b.count), 1);
-});
-
-const maxCountryCount = computed(() => {
-    return Math.max(...countries.value.map(c => c.count), 1);
-});
+const formatUrl = (url) => {
+    if (!url) return '-';
+    try {
+        const parsed = new URL(url);
+        return parsed.pathname === '/' ? parsed.hostname : parsed.pathname;
+    } catch {
+        return url.substring(0, 30);
+    }
+};
 
 const fetchAnalytics = async () => {
     loading.value = true;
     try {
-        const params = {
-            date_from: dateFrom.value,
-            date_to: dateTo.value,
-        };
-
-        // Fetch all analytics data in parallel
-        const [
-            overviewRes,
-            visitsRes,
-            topPagesRes,
-            topContentRes,
-            devicesRes,
-            browsersRes,
-            countriesRes,
-            referrersRes,
-            realtimeRes,
-        ] = await Promise.all([
+        const params = { date_from: dateFrom.value, date_to: dateTo.value };
+        const [overviewRes, visitsRes, topPagesRes, topContentRes, devicesRes, browsersRes, countriesRes, referrersRes, realtimeRes] = await Promise.all([
             api.get('/admin/cms/analytics/overview', { params }),
             api.get('/admin/cms/analytics/visits', { params }),
             api.get('/admin/cms/analytics/top-pages', { params }),
@@ -384,20 +286,13 @@ const fetchAnalytics = async () => {
         ]);
 
         overview.value = parseSingleResponse(overviewRes) || {};
-        const visitsData = parseResponse(visitsRes);
-        visits.value = ensureArray(visitsData.data);
-        const topPagesData = parseResponse(topPagesRes);
-        topPages.value = ensureArray(topPagesData.data);
-        const topContentData = parseResponse(topContentRes);
-        topContent.value = ensureArray(topContentData.data);
-        const devicesData = parseResponse(devicesRes);
-        devices.value = ensureArray(devicesData.data);
-        const browsersData = parseResponse(browsersRes);
-        browsers.value = ensureArray(browsersData.data);
-        const countriesData = parseResponse(countriesRes);
-        countries.value = ensureArray(countriesData.data);
-        const referrersData = parseResponse(referrersRes);
-        referrers.value = ensureArray(referrersData.data);
+        visits.value = ensureArray(parseResponse(visitsRes).data);
+        topPages.value = ensureArray(parseResponse(topPagesRes).data);
+        topContent.value = ensureArray(parseResponse(topContentRes).data);
+        devices.value = ensureArray(parseResponse(devicesRes).data);
+        browsers.value = ensureArray(parseResponse(browsersRes).data);
+        countries.value = ensureArray(parseResponse(countriesRes).data);
+        referrers.value = ensureArray(parseResponse(referrersRes).data);
         realtime.value = parseSingleResponse(realtimeRes) || {};
     } catch (error) {
         console.error('Failed to fetch analytics:', error);
@@ -406,29 +301,7 @@ const fetchAnalytics = async () => {
     }
 };
 
-onMounted(() => {
-    fetchAnalytics();
-    // Refresh real-time data every 30 seconds
-    setInterval(() => {
-        api.get('/admin/cms/analytics/realtime').then(res => {
-            realtime.value = parseSingleResponse(res) || {};
-        }).catch(err => {
-            console.error('Failed to fetch real-time data:', err);
-        });
-    }, 30000);
-    
-    // Click outside handler for export dropdown
-    document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
-});
-
-// Export functionality
-const toggleExportMenu = () => {
-    showExportMenu.value = !showExportMenu.value;
-};
+const toggleExportMenu = () => showExportMenu.value = !showExportMenu.value;
 
 const handleClickOutside = (event) => {
     if (exportDropdownRef.value && !exportDropdownRef.value.contains(event.target)) {
@@ -439,18 +312,11 @@ const handleClickOutside = (event) => {
 const exportData = async (type) => {
     showExportMenu.value = false;
     exporting.value = true;
-    
     try {
         const response = await api.get('/admin/cms/analytics/export', {
-            params: {
-                date_from: dateFrom.value,
-                date_to: dateTo.value,
-                type: type
-            },
+            params: { date_from: dateFrom.value, date_to: dateTo.value, type },
             responseType: 'blob'
         });
-        
-        // Create download link
         const blob = new Blob([response.data], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -461,10 +327,23 @@ const exportData = async (type) => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Failed to export analytics:', error);
+        console.error('Failed to export:', error);
     } finally {
         exporting.value = false;
     }
 };
-</script>
 
+onMounted(() => {
+    fetchAnalytics();
+    setInterval(() => {
+        api.get('/admin/cms/analytics/realtime').then(res => {
+            realtime.value = parseSingleResponse(res) || {};
+        }).catch(err => console.error('Realtime fetch failed:', err));
+    }, 30000);
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+</script>
