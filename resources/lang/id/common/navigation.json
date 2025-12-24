@@ -14,6 +14,8 @@
         "users": "Pengguna",
         "roles": "Peran & Izin",
         "activityLogs": "Log Aktivitas",
+        "logsDashboard": "Pusat Log",
+        "loginHistory": "Riwayat Login",
         "themes": "Tema",
         "menus": "Menu",
         "widgets": "Widget",

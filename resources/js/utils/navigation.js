@@ -23,11 +23,13 @@ export const navigationGroups = {
         { name: 'newsletter', to: '/admin/newsletter', label: 'Newsletter' },
     ],
 
-    // Users & Access (3 items)
+    // Users & Access (5 items)
     users: [
         { name: 'users', to: '/admin/users', label: 'Users' },
         { name: 'roles', to: '/admin/roles', label: 'Roles & Permissions' },
+        { name: 'logs-dashboard', to: '/admin/logs-dashboard', label: 'Logs Dashboard' },
         { name: 'activity-logs', to: '/admin/activity-logs', label: 'Activity Logs' },
+        { name: 'login-history', to: '/admin/login-history', label: 'Login History' },
     ],
 
     // Appearance (4 items)
