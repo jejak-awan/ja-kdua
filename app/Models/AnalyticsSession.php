@@ -56,8 +56,8 @@ class AnalyticsSession extends Model
         $sessionId = $sessionId ?? session()->getId();
 
         $userAgent = $request->userAgent();
-        $deviceInfo = \App\Models\AnalyticsVisit::parseUserAgent($userAgent);
-        $location = \App\Models\AnalyticsVisit::getLocation($request->ip());
+        $deviceInfo = self::parseUserAgent($userAgent);
+        $location = self::getLocation($request->ip());
 
         return self::firstOrCreate(
             ['session_id' => $sessionId],
@@ -87,5 +87,52 @@ class AnalyticsSession extends Model
     public function incrementPageViews()
     {
         $this->increment('page_views');
+    }
+
+    protected static function parseUserAgent($userAgent)
+    {
+        $deviceType = 'desktop';
+        $browser = 'unknown';
+        $os = 'unknown';
+
+        if (preg_match('/mobile|android|iphone|ipad/i', $userAgent)) {
+            $deviceType = 'mobile';
+        } elseif (preg_match('/tablet|ipad/i', $userAgent)) {
+            $deviceType = 'tablet';
+        }
+
+        if (preg_match('/chrome/i', $userAgent)) {
+            $browser = 'chrome';
+        } elseif (preg_match('/firefox/i', $userAgent)) {
+            $browser = 'firefox';
+        } elseif (preg_match('/safari/i', $userAgent)) {
+            $browser = 'safari';
+        } elseif (preg_match('/edge/i', $userAgent)) {
+            $browser = 'edge';
+        }
+
+        if (preg_match('/windows/i', $userAgent)) {
+            $os = 'windows';
+        } elseif (preg_match('/mac|os x/i', $userAgent)) {
+            $os = 'macos';
+        } elseif (preg_match('/linux/i', $userAgent)) {
+            $os = 'linux';
+        } elseif (preg_match('/android/i', $userAgent)) {
+            $os = 'android';
+        } elseif (preg_match('/ios|iphone|ipad/i', $userAgent)) {
+            $os = 'ios';
+        }
+
+        return [
+            'device_type' => $deviceType,
+            'browser' => $browser,
+            'os' => $os,
+        ];
+    }
+
+    public static function getLocation($ipAddress)
+    {
+        $geoService = app(\App\Services\GeoIpService::class);
+        return $geoService->getLocation($ipAddress);
     }
 }
