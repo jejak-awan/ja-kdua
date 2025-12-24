@@ -1,12 +1,20 @@
 <template>
     <div>
-        <div class="mb-6 flex items-center gap-4">
-            <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </router-link>
-            <h1 class="text-2xl font-bold text-foreground">{{ t('features.activityLogs.title') }}</h1>
+        <div class="mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </router-link>
+                <h1 class="text-2xl font-bold text-foreground">{{ t('features.activityLogs.title') }}</h1>
+            </div>
+            <button
+                @click="clearLogs"
+                class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20"
+            >
+                {{ t('features.system.logs.clear') }}
+            </button>
         </div>
 
         <!-- Statistics -->
@@ -330,12 +338,6 @@ const exportLogs = async () => {
     } finally {
         exporting.value = false;
     }
-};
-
-const clearDateFilter = () => {
-    dateFrom.value = '';
-    dateTo.value = '';
-    fetchLogs();
 };
 
 const fetchUsers = async () => {

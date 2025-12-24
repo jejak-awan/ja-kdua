@@ -9,16 +9,24 @@
                 </router-link>
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.security.title') }}</h1>
             </div>
-            <button 
-                @click="refreshAll" 
-                :disabled="loading"
-                class="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <div class="flex items-center space-x-2">
+                <button
+                    @click="clearLogs"
+                    class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20"
+                >
+                    {{ $t('features.system.logs.clear') }}
+                </button>
+                <button 
+                    @click="refreshAll" 
+                    :disabled="loading"
+                    class="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                 <svg class="h-4 w-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 <span>{{ $t('common.actions.refresh') }}</span>
             </button>
+            </div>
         </div>
 
         <!-- Shadcn Tabs -->
@@ -488,7 +496,7 @@ const selectedBlocklistIds = ref([]);
 const selectedWhitelistIds = ref([]);
 
 // Pagination State
-const logsPerPage = ref(10);
+const logsPerPage = ref(25);
 const logsCurrentPage = ref(1);
 const blocklistPerPage = ref(10);
 const blocklistCurrentPage = ref(1);
@@ -553,13 +561,29 @@ const paginatedWhitelist = computed(() => whitelist.value.slice(whitelistStartIn
 const fetchLogs = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/security/logs');
+        const response = await api.get('/admin/cms/security/logs', {
+            params: { per_page: logsPerPage.value }
+        });
         const result = parseResponse(response);
         logs.value = result.data || [];
     } catch (error) {
         console.error('Failed to fetch logs:', error);
     } finally {
         loading.value = false;
+    }
+};
+
+const clearLogs = async () => {
+    if (!confirm(t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?')) {
+        return;
+    }
+
+    try {
+        await api.post('/admin/cms/security/logs/clear');
+        fetchLogs();
+        fetchStats();
+    } catch (error) {
+        console.error('Failed to clear logs:', error);
     }
 };
 

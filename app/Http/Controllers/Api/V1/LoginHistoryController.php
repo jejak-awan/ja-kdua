@@ -136,5 +136,25 @@ class LoginHistoryController extends BaseApiController
             Log::error('Login history export error: '.$e->getMessage());
             return $this->error('Failed to export login history', 500);
         }
+            return $this->error('Failed to export login history', 500);
+        }
+    }
+
+    public function clear(Request $request)
+    {
+        try {
+            $retainDays = $request->input('retain_days');
+
+            if ($retainDays) {
+                $count = LoginHistory::where('login_at', '<', now()->subDays($retainDays))->delete();
+                return $this->success(null, "Cleared $count login history records older than $retainDays days");
+            }
+
+            LoginHistory::truncate();
+            return $this->success(null, 'All login history cleared successfully');
+        } catch (\Exception $e) {
+            Log::error('Login history clear error: '.$e->getMessage());
+            return $this->error('Failed to clear login history', 500);
+        }
     }
 }

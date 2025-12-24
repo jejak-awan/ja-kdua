@@ -176,6 +176,7 @@ Route::prefix('v1')->group(function () {
 
         // Activity Logs
         Route::get('activity-logs', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'index'])->middleware('permission:manage users');
+        Route::post('activity-logs/clear', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('activity-logs/recent', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'recent'])->middleware('permission:manage users');
         Route::get('activity-logs/statistics', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'statistics'])->middleware('permission:manage users');
         Route::get('activity-logs/export', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'export'])->middleware('permission:manage users');
@@ -184,6 +185,7 @@ Route::prefix('v1')->group(function () {
 
         // Login History (Admin)
         Route::get('login-history', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'index'])->middleware('permission:manage users');
+        Route::post('login-history/clear', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('login-history/statistics', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'statistics'])->middleware('permission:manage users');
         Route::get('login-history/export', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'export'])->middleware('permission:manage users');
 
@@ -233,6 +235,7 @@ Route::prefix('v1')->group(function () {
 
         // Security
         Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
+        Route::post('security/logs/clear', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');
         Route::get('security/alerts', [App\Http\Controllers\Api\V1\SecurityController::class, 'alerts'])->middleware('permission:manage settings');

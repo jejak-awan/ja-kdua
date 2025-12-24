@@ -255,4 +255,27 @@ class SecurityController extends BaseApiController
 
         return $this->success(null, 'Security cache cleared for IP: ' . $ipAddress);
     }
+
+    public function clear(Request $request)
+    {
+        try {
+            // Use SecurityLog model directly since we don't have it imported above, or import it.
+            // Assuming App\Models\SecurityLog is available or use full path.
+            // Wait, SecurityLog is imported? Let's check imports in file view (Step 1089).
+            // It uses App\Models\SecurityLog in `show` method type hint, so likely imported.
+            
+            $retainDays = $request->input('retain_days');
+
+            if ($retainDays) {
+                $count = \App\Models\SecurityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+                return $this->success(null, "Cleared $count security logs older than $retainDays days");
+            }
+
+            \App\Models\SecurityLog::truncate();
+            return $this->success(null, 'All security logs cleared successfully');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Security logs clear error: '.$e->getMessage());
+            return $this->error('Failed to clear security logs', 500);
+        }
+    }
 }

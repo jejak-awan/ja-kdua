@@ -198,4 +198,23 @@ class ActivityLogController extends BaseApiController
 
         return $this->success($stats, 'Activity log statistics retrieved successfully');
     }
+
+    public function clear(Request $request)
+    {
+        try {
+            // Optional: retain last X days
+            $retainDays = $request->input('retain_days');
+
+            if ($retainDays) {
+                $count = ActivityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+                return $this->success(null, "Cleared $count activity logs older than $retainDays days");
+            }
+
+            ActivityLog::truncate();
+            return $this->success(null, 'All activity logs cleared successfully');
+        } catch (\Exception $e) {
+            Log::error('Activity logs clear error: '.$e->getMessage());
+            return $this->error('Failed to clear activity logs', 500);
+        }
+    }
 }
