@@ -443,7 +443,7 @@ const securitySettingsGrouped = computed(() => {
             title: 'Manajemen Sesi',
             description: 'Kontrol durasi dan batasan sesi login',
             icon: ClockIcon,
-            keys: ['session_lifetime', 'single_session_enabled', 'max_concurrent_sessions'],
+            keys: ['session_lifetime', 'single_session_enabled', 'max_concurrent_sessions', 'log_retention_days'],
             settings: [],
         },
         {
