@@ -30,6 +30,7 @@ import themes from './features/themes.json';
 import forms from './features/forms.json';
 import menus from './features/menus.json';
 import activityLogs from './features/activity_logs.json';
+import loginHistory from './features/login_history.json';
 import search from './features/search.json';
 import frontend from './features/frontend.json';
 import errors from './features/errors.json';
@@ -72,6 +73,7 @@ export default {
         forms,
         menus,
         activityLogs,
+        login_history: loginHistory,
         search,
         frontend,
         errors,

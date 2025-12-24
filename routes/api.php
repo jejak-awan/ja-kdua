@@ -182,6 +182,11 @@ Route::prefix('v1')->group(function () {
         Route::get('activity-logs/user/{userId}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'userActivity'])->middleware('permission:manage users');
         Route::get('activity-logs/{activityLog}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'show'])->middleware('permission:manage users');
 
+        // Login History (Admin)
+        Route::get('login-history', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'index'])->middleware('permission:manage users');
+        Route::get('login-history/statistics', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'statistics'])->middleware('permission:manage users');
+        Route::get('login-history/export', [App\Http\Controllers\Api\V1\LoginHistoryController::class, 'export'])->middleware('permission:manage users');
+
         // SEO Tools
         Route::get('seo/sitemap', [App\Http\Controllers\Api\V1\SeoController::class, 'generateSitemap']);
         Route::get('seo/robots-txt', [App\Http\Controllers\Api\V1\SeoController::class, 'getRobotsTxt'])->middleware('permission:manage settings');

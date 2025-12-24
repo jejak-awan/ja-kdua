@@ -1,0 +1,33 @@
+{
+    "title": "Login History",
+    "description": "View all login activities from users",
+    "stats": {
+        "totalLogins": "Total Successful Logins",
+        "failedLogins": "Failed Logins",
+        "todayLogins": "Logins Today",
+        "uniqueIps": "Unique IPs Today",
+        "activeSessions": "Active Sessions"
+    },
+    "filters": {
+        "allUsers": "All Users",
+        "allStatus": "All Status",
+        "dateFrom": "From",
+        "dateTo": "To"
+    },
+    "status": {
+        "success": "Success",
+        "failed": "Failed"
+    },
+    "export": {
+        "button": "Export CSV",
+        "exporting": "Exporting...",
+        "failed": "Failed to export login history"
+    },
+    "messages": {
+        "loading": "Loading...",
+        "empty": "No login history found"
+    },
+    "pagination": {
+        "showing": "Showing {count} of {total} records"
+    }
+}
