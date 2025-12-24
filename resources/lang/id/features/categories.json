@@ -1,5 +1,7 @@
 {
     "title": "Kategori",
+    "title_singular": "Kategori",
+    "description": "Kelola kategori konten",
     "createNew": "Kategori Baru",
     "search": "Cari kategori...",
     "viewMode": {

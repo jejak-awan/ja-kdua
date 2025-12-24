@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.scheduled_tasks.title') }}</h1>
             <button
                 @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -13,7 +13,7 @@
             </button>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
@@ -44,22 +44,22 @@
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.command') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.schedule') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.last_run') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.status') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.scheduled_tasks.table.actions') }}
                         </th>
                     </tr>

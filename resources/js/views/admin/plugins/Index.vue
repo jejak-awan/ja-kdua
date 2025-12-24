@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="mb-6"><h1 class="text-2xl font-bold text-foreground">{{ t('features.developer.plugins.title') }}</h1></div>
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div v-if="loading" class="p-6 text-center"><p class="text-muted-foreground">{{ t('features.developer.plugins.loading') }}</p></div>
             <div v-else-if="plugins.length === 0" class="p-6 text-center"><p class="text-muted-foreground">{{ t('features.developer.plugins.empty') }}</p></div>
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ t('features.developer.plugins.table.name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ t('features.developer.plugins.table.version') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ t('features.developer.plugins.table.status') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">{{ t('features.developer.plugins.table.actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ t('features.developer.plugins.table.name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ t('features.developer.plugins.table.version') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ t('features.developer.plugins.table.status') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground">{{ t('features.developer.plugins.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-card divide-y divide-border">

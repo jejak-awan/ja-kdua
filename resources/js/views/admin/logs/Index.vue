@@ -16,7 +16,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Log Files List -->
             <div class="lg:col-span-1">
-                <div class="bg-card shadow rounded-lg">
+                <div class="bg-card border border-border rounded-lg">
                     <div class="px-6 py-4 border-b border-border">
                         <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.logs.files') }}</h2>
                     </div>
@@ -51,7 +51,7 @@
 
             <!-- Log Viewer -->
             <div class="lg:col-span-2">
-                <div class="bg-card shadow rounded-lg">
+                <div class="bg-card border border-border rounded-lg">
                     <div class="px-6 py-4 border-b border-border flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-foreground">
                             {{ selectedLogFile ? selectedLogFile.name : t('features.system.logs.select') }}
@@ -73,7 +73,7 @@
                     </div>
                     <div class="p-6">
                         <div v-if="!selectedLogFile" class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <p class="mt-4 text-muted-foreground">{{ t('features.system.logs.empty') }}</p>
@@ -81,7 +81,7 @@
                         <div v-else-if="loadingLog" class="text-center py-12">
                             <p class="text-muted-foreground">{{ t('features.system.logs.loading') }}</p>
                         </div>
-                        <div v-else class="bg-gray-900 rounded-lg p-4 overflow-x-auto max-h-[600px] overflow-y-auto">
+                        <div v-else class="bg-background rounded-lg p-4 overflow-x-auto max-h-[600px] overflow-y-auto">
                             <pre class="text-xs font-mono text-green-400" v-html="highlightedLogContent" />
                         </div>
                     </div>

@@ -2,134 +2,279 @@
 
 namespace App\Services;
 
-use App\Helpers\IpHelper;
 use App\Models\IpList;
 use App\Models\SecurityLog;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class SecurityService
 {
+    // Cache prefix for all security-related keys
+    protected $cachePrefix = 'security:';
+
+    // Failed attempts threshold before blocking
     protected $maxFailedAttempts = 5;
 
-    protected $lockoutDuration = 15; // minutes
+    // Progressive blocking settings
+    protected $baseBlockMinutes = 1;      // Start with 1 minute block
+    protected $maxBlockMinutes = 60;      // Max 60 minutes block
+    protected $offenseResetHours = 24;    // Reset offense count after 24 hours
 
-    public function recordFailedLogin($email, $ipAddress)
+    // Account lockout settings
+    protected $accountLockMinutes = 15;
+
+    /**
+     * Record a failed login attempt.
+     * Uses progressive blocking - block duration increases with each offense.
+     */
+    public function recordFailedLogin(string $email, string $ipAddress): array
     {
         SecurityLog::log('login_failed', null, $ipAddress, "Failed login attempt for email: {$email}", [
             'email' => $email,
         ]);
 
         // Track failed attempts by IP
-        $ipKey = "failed_login_attempts_{$ipAddress}";
-        $ipAttempts = Cache::get($ipKey, 0) + 1;
-        Cache::put($ipKey, $ipAttempts, now()->addMinutes($this->lockoutDuration));
+        $ipAttempts = $this->incrementFailedAttempts($ipAddress);
 
-        // Track failed attempts by email (for account lockout)
-        $emailKey = "failed_login_attempts_email_{$email}";
-        $emailAttempts = Cache::get($emailKey, 0) + 1;
-        Cache::put($emailKey, $emailAttempts, now()->addMinutes($this->lockoutDuration));
+        // Track failed attempts by email
+        $emailAttempts = $this->incrementFailedAttempts($email, 'email');
 
-        // Block IP if too many attempts (but not localhost/private IPs)
-        if ($ipAttempts >= $this->maxFailedAttempts && !$this->isProtectedIp($ipAddress)) {
-            $this->blockIp($ipAddress, "Too many failed login attempts ({$ipAttempts})");
-            SecurityLog::log('login_blocked', null, $ipAddress, "IP blocked due to {$ipAttempts} failed login attempts");
+        $result = [
+            'ip_attempts' => $ipAttempts,
+            'email_attempts' => $emailAttempts,
+            'ip_blocked' => false,
+            'account_locked' => false,
+            'block_duration' => 0,
+        ];
+
+        // Block IP if too many attempts (progressive blocking)
+        if ($ipAttempts >= $this->maxFailedAttempts && ! $this->isProtectedIp($ipAddress)) {
+            $blockSeconds = $this->blockIpTemporarily($ipAddress, "Too many failed login attempts ({$ipAttempts})");
+            $result['ip_blocked'] = true;
+            $result['block_duration'] = $blockSeconds;
         }
 
         // Lock account if too many attempts
         if ($emailAttempts >= $this->maxFailedAttempts) {
             $this->lockAccount($email, "Too many failed login attempts ({$emailAttempts})");
+            $result['account_locked'] = true;
             SecurityLog::log('account_locked', null, $ipAddress, "Account locked due to {$emailAttempts} failed login attempts", [
                 'email' => $email,
             ]);
         }
+
+        return $result;
     }
 
-    public function recordSuccessfulLogin(User $user, $ipAddress)
+    /**
+     * Record a successful login and clear all security counters.
+     */
+    public function recordSuccessfulLogin(User $user, string $ipAddress): void
     {
         SecurityLog::log('login_success', $user, $ipAddress, "Successful login for user: {$user->email}");
 
-        // Clear failed attempts for IP
-        $ipKey = "failed_login_attempts_{$ipAddress}";
-        Cache::forget($ipKey);
-
-        // Clear failed attempts for email
-        $emailKey = "failed_login_attempts_email_{$user->email}";
-        Cache::forget($emailKey);
-
-        // Unlock account if locked
+        // Clear all security restrictions for this user
+        $this->clearSecurityCache($ipAddress);
+        $this->clearSecurityCache($user->email, 'email');
         $this->unlockAccount($user->email);
     }
 
-    public function isIpBlocked($ipAddress)
+    /**
+     * Increment failed attempts counter with cache TTL for auto-expiry.
+     */
+    protected function incrementFailedAttempts(string $identifier, string $type = 'ip'): int
     {
-        // Never block protected IPs (localhost, private ranges)
+        $key = $this->cachePrefix . "failed_attempts:{$type}:{$identifier}";
+        $attempts = Cache::get($key, 0) + 1;
+        
+        // Store with TTL so it auto-expires (no manual cache:clear needed)
+        Cache::put($key, $attempts, now()->addMinutes($this->accountLockMinutes));
+
+        return $attempts;
+    }
+
+    /**
+     * Get current failed attempts count.
+     */
+    public function getFailedAttempts(string $identifier, string $type = 'ip'): int
+    {
+        $key = $this->cachePrefix . "failed_attempts:{$type}:{$identifier}";
+
+        return Cache::get($key, 0);
+    }
+
+    /**
+     * Block IP temporarily with progressive duration.
+     * Duration doubles with each offense (1min → 2min → 4min → 8min... max 60min).
+     *
+     * @return int Block duration in seconds
+     */
+    public function blockIpTemporarily(string $ipAddress, string $reason = null): int
+    {
+        if ($this->isProtectedIp($ipAddress)) {
+            return 0;
+        }
+
+        if (IpList::isWhitelisted($ipAddress)) {
+            return 0;
+        }
+
+        // Get and increment offense count
+        $offenseKey = $this->cachePrefix . "offense_count:{$ipAddress}";
+        $offenseCount = Cache::get($offenseKey, 0) + 1;
+        Cache::put($offenseKey, $offenseCount, now()->addHours($this->offenseResetHours));
+
+        // Calculate progressive block duration (exponential backoff)
+        $blockMinutes = min(
+            $this->baseBlockMinutes * pow(2, $offenseCount - 1),
+            $this->maxBlockMinutes
+        );
+
+        // Store block_until timestamp (auto-expires via cache TTL)
+        $blockUntil = now()->addMinutes($blockMinutes);
+        Cache::put(
+            $this->cachePrefix . "block_until:{$ipAddress}",
+            $blockUntil->toIso8601String(),
+            $blockMinutes * 60 // TTL in seconds
+        );
+
+        SecurityLog::log('ip_blocked_temp', null, $ipAddress,
+            "IP temporarily blocked for {$blockMinutes} minute(s): " . ($reason ?? 'Too many failed attempts'),
+            [
+                'duration_minutes' => $blockMinutes,
+                'offense_count' => $offenseCount,
+                'block_until' => $blockUntil->toIso8601String(),
+            ]
+        );
+
+        return $blockMinutes * 60; // Return seconds
+    }
+
+    /**
+     * Check if IP is currently blocked.
+     * Temporary blocks auto-expire via cache TTL (no manual cache:clear needed).
+     */
+    public function isIpBlocked(string $ipAddress): bool
+    {
+        // Never block protected IPs
         if ($this->isProtectedIp($ipAddress)) {
             return false;
         }
-        
-        // Check whitelist first - whitelisted IPs are never blocked
+
+        // Whitelisted IPs are never blocked
         if (IpList::isWhitelisted($ipAddress)) {
             return false;
         }
-        
-        // Check database blocklist
+
+        // Check permanent blocklist (database)
         if (IpList::isBlocked($ipAddress)) {
             return true;
         }
-        
-        // Check cache (temporary blocks from failed login attempts)
-        return Cache::has("blocked_ip_{$ipAddress}");
+
+        // Check temporary block (auto-expires via cache TTL)
+        return Cache::has($this->cachePrefix . "block_until:{$ipAddress}");
     }
 
-    public function blockIp($ipAddress, $reason = null)
+    /**
+     * Get remaining block time in seconds.
+     */
+    public function getRemainingBlockTime(string $ipAddress): int
     {
-        // Don't block protected IPs (localhost, private ranges)
+        $key = $this->cachePrefix . "block_until:{$ipAddress}";
+        $blockUntil = Cache::get($key);
+
+        if (! $blockUntil) {
+            return 0;
+        }
+
+        $remaining = Carbon::parse($blockUntil)->diffInSeconds(now(), false);
+
+        return max(0, -$remaining);
+    }
+
+    /**
+     * Get block info for API response.
+     */
+    public function getBlockInfo(string $ipAddress): array
+    {
+        return [
+            'is_blocked' => $this->isIpBlocked($ipAddress),
+            'remaining_seconds' => $this->getRemainingBlockTime($ipAddress),
+            'offense_count' => Cache::get($this->cachePrefix . "offense_count:{$ipAddress}", 0),
+            'failed_attempts' => $this->getFailedAttempts($ipAddress),
+        ];
+    }
+
+    /**
+     * Permanently block an IP (adds to database).
+     */
+    public function blockIpPermanently(string $ipAddress, string $reason = null): bool
+    {
         if ($this->isProtectedIp($ipAddress)) {
             return false;
         }
-        
-        // Don't block whitelisted IPs
+
         if (IpList::isWhitelisted($ipAddress)) {
             return false;
         }
-        
-        // Add to database blocklist (permanent)
+
         IpList::updateOrCreate(
             ['ip_address' => $ipAddress, 'type' => 'blocklist'],
             [
-                'reason' => $reason ?? 'IP address blocked',
+                'reason' => $reason ?? 'IP address blocked permanently',
                 'created_by' => Auth::id(),
             ]
         );
-        
-        // Also add to cache for faster lookup
-        Cache::put("blocked_ip_{$ipAddress}", true, now()->addHours(24));
 
-        SecurityLog::log('ip_blocked', null, $ipAddress, $reason ?? 'IP address blocked');
-        
+        SecurityLog::log('ip_blocked_permanent', null, $ipAddress, $reason ?? 'IP address blocked permanently');
+
         return true;
     }
 
-    public function unblockIp($ipAddress)
+    /**
+     * Unblock an IP (removes from both cache and database).
+     */
+    public function unblockIp(string $ipAddress): void
     {
         // Remove from database blocklist
         IpList::where('ip_address', $ipAddress)->where('type', 'blocklist')->delete();
-        
-        // Remove from cache
-        Cache::forget("blocked_ip_{$ipAddress}");
+
+        // Clear all cache entries for this IP
+        $this->clearSecurityCache($ipAddress);
 
         SecurityLog::log('ip_unblocked', null, $ipAddress, 'IP address unblocked');
     }
-    
-    public function addToWhitelist($ipAddress, $reason = null)
+
+    /**
+     * Clear all security-related cache for an identifier.
+     */
+    public function clearSecurityCache(string $identifier, string $type = 'ip'): void
+    {
+        $keys = $type === 'ip' ? [
+            "block_until:{$identifier}",
+            "failed_attempts:ip:{$identifier}",
+            "offense_count:{$identifier}",
+        ] : [
+            "failed_attempts:email:{$identifier}",
+            "account_locked:{$identifier}",
+        ];
+
+        foreach ($keys as $key) {
+            Cache::forget($this->cachePrefix . $key);
+        }
+    }
+
+    /**
+     * Add IP to whitelist.
+     */
+    public function addToWhitelist(string $ipAddress, string $reason = null): bool
     {
         // Remove from blocklist if exists
         IpList::where('ip_address', $ipAddress)->where('type', 'blocklist')->delete();
-        Cache::forget("blocked_ip_{$ipAddress}");
-        
-        // Add to whitelist
+        $this->clearSecurityCache($ipAddress);
+
         IpList::updateOrCreate(
             ['ip_address' => $ipAddress, 'type' => 'whitelist'],
             [
@@ -137,90 +282,111 @@ class SecurityService
                 'created_by' => Auth::id(),
             ]
         );
-        
+
         SecurityLog::log('ip_whitelisted', null, $ipAddress, $reason ?? 'IP address whitelisted');
-        
+
         return true;
     }
-    
-    public function removeFromWhitelist($ipAddress)
+
+    /**
+     * Remove IP from whitelist.
+     */
+    public function removeFromWhitelist(string $ipAddress): void
     {
         IpList::where('ip_address', $ipAddress)->where('type', 'whitelist')->delete();
-        
         SecurityLog::log('ip_whitelist_removed', null, $ipAddress, 'IP address removed from whitelist');
     }
-    
+
+    /**
+     * Get all blocked IPs.
+     */
     public function getBlocklist()
     {
         return IpList::blocklist()->with('creator')->latest()->get();
     }
-    
+
+    /**
+     * Get all whitelisted IPs.
+     */
     public function getWhitelist()
     {
         return IpList::whitelist()->with('creator')->latest()->get();
     }
 
-    public function getFailedAttempts($ipAddress)
+    /**
+     * Check if account is locked.
+     */
+    public function isAccountLocked(string $email): bool
     {
-        return Cache::get("failed_login_attempts_{$ipAddress}", 0);
+        return Cache::has($this->cachePrefix . "account_locked:{$email}");
     }
 
-    public function clearFailedAttempts($ipAddress)
+    /**
+     * Lock an account temporarily.
+     */
+    public function lockAccount(string $email, string $reason = null): void
     {
-        Cache::forget("failed_login_attempts_{$ipAddress}");
+        Cache::put(
+            $this->cachePrefix . "account_locked:{$email}",
+            now()->addMinutes($this->accountLockMinutes)->toIso8601String(),
+            $this->accountLockMinutes * 60
+        );
     }
 
-    public function isAccountLocked($email)
+    /**
+     * Unlock an account.
+     */
+    public function unlockAccount(string $email): void
     {
-        return Cache::has("account_locked_{$email}");
+        Cache::forget($this->cachePrefix . "account_locked:{$email}");
+        Cache::forget($this->cachePrefix . "failed_attempts:email:{$email}");
     }
 
-    public function lockAccount($email, $reason = null)
+    /**
+     * Get remaining account lockout time in seconds.
+     */
+    public function getAccountLockoutRemaining(string $email): int
     {
-        Cache::put("account_locked_{$email}", true, now()->addMinutes($this->lockoutDuration));
-    }
+        $key = $this->cachePrefix . "account_locked:{$email}";
+        $lockUntil = Cache::get($key);
 
-    public function unlockAccount($email)
-    {
-        Cache::forget("account_locked_{$email}");
-        Cache::forget("failed_login_attempts_email_{$email}");
-    }
-
-    public function getAccountLockoutTime($email)
-    {
-        $lockoutKey = "account_locked_{$email}";
-        if (!Cache::has($lockoutKey)) {
-            return null;
+        if (! $lockUntil) {
+            return 0;
         }
 
-        // Get remaining time from cache TTL
-        // Note: This is approximate, as Cache doesn't expose TTL directly
-        return now()->addMinutes($this->lockoutDuration);
+        $remaining = Carbon::parse($lockUntil)->diffInSeconds(now(), false);
+
+        return max(0, -$remaining);
     }
 
-    public function getLockoutDuration()
+    /**
+     * Get lockout duration in minutes.
+     */
+    public function getLockoutDuration(): int
     {
-        return $this->lockoutDuration;
+        return $this->accountLockMinutes;
     }
 
-    public function getMaxFailedAttempts()
+    /**
+     * Get max failed attempts threshold.
+     */
+    public function getMaxFailedAttempts(): int
     {
         return $this->maxFailedAttempts;
     }
 
-    public function clearAllBlockedIPs()
+    /**
+     * Record suspicious activity.
+     */
+    public function recordSuspiciousActivity(string $description, User $user = null, array $metadata = []): void
     {
-        // This is a simple approach - in production you might want to track blocked IPs in database
-        // For now, we'll just clear the cache patterns
-        Cache::flush();
+        SecurityLog::log('suspicious_activity', $user, request()?->ip(), $description, $metadata);
     }
 
-    public function recordSuspiciousActivity($description, $user = null, $metadata = [])
-    {
-        SecurityLog::log('suspicious_activity', $user, request()->ip(), $description, $metadata);
-    }
-
-    public function getSecurityStats($days = 30)
+    /**
+     * Get security statistics.
+     */
+    public function getSecurityStats(int $days = 30): array
     {
         $since = now()->subDays($days);
 
@@ -232,7 +398,7 @@ class SecurityService
             'successful_logins' => SecurityLog::where('event_type', 'login_success')
                 ->where('created_at', '>=', $since)
                 ->count(),
-            'blocked_ips' => SecurityLog::where('event_type', 'ip_blocked')
+            'blocked_ips' => SecurityLog::whereIn('event_type', ['ip_blocked_temp', 'ip_blocked_permanent'])
                 ->where('created_at', '>=', $since)
                 ->count(),
             'suspicious_activities' => SecurityLog::where('event_type', 'suspicious_activity')
@@ -248,10 +414,6 @@ class SecurityService
 
     /**
      * Check if an IP is protected (should never be blocked).
-     * This prevents false positives from blocking server/localhost IPs.
-     *
-     * @param string $ip
-     * @return bool
      */
     public function isProtectedIp(string $ip): bool
     {
@@ -261,17 +423,14 @@ class SecurityService
             return true;
         }
 
-        // Private IP ranges (shouldn't be blocked as they're typically server IPs)
-        // 10.0.0.0 - 10.255.255.255
-        // 172.16.0.0 - 172.31.255.255
-        // 192.168.0.0 - 192.168.255.255
+        // Private IP ranges
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $isPrivate = filter_var(
                 $ip,
                 FILTER_VALIDATE_IP,
                 FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
             ) === false;
-            
+
             if ($isPrivate) {
                 return true;
             }

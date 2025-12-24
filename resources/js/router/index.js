@@ -84,14 +84,44 @@ const routes = [
                 component: () => import('../views/admin/categories/Index.vue'),
             },
             {
+                path: 'categories/create',
+                name: 'categories.create',
+                component: () => import('../views/admin/categories/Create.vue'),
+            },
+            {
+                path: 'categories/:id/edit',
+                name: 'categories.edit',
+                component: () => import('../views/admin/categories/Edit.vue'),
+            },
+            {
                 path: 'users',
-                name: 'users',
+                name: 'users.index',
                 component: () => import('../views/admin/users/Index.vue'),
+            },
+            {
+                path: 'users/create',
+                name: 'users.create',
+                component: () => import('../views/admin/users/Create.vue'),
+            },
+            {
+                path: 'users/:id/edit',
+                name: 'users.edit',
+                component: () => import('../views/admin/users/Edit.vue'),
             },
             {
                 path: 'roles',
                 name: 'roles',
                 component: () => import('../views/admin/roles/Index.vue'),
+            },
+            {
+                path: 'roles/create',
+                name: 'roles.create',
+                component: () => import('../views/admin/roles/Create.vue'),
+            },
+            {
+                path: 'roles/:id/edit',
+                name: 'roles.edit',
+                component: () => import('../views/admin/roles/Edit.vue'),
             },
             {
                 path: 'settings',
@@ -124,9 +154,29 @@ const routes = [
                 component: () => import('../views/admin/forms/Index.vue'),
             },
             {
+                path: 'forms/create',
+                name: 'forms.create',
+                component: () => import('../views/admin/forms/Create.vue'),
+            },
+            {
+                path: 'forms/:id/edit',
+                name: 'forms.edit',
+                component: () => import('../views/admin/forms/Edit.vue'),
+            },
+            {
                 path: 'tags',
                 name: 'tags',
                 component: () => import('../views/admin/tags/Index.vue'),
+            },
+            {
+                path: 'tags/create',
+                name: 'tags.create',
+                component: () => import('../views/admin/tags/Create.vue'),
+            },
+            {
+                path: 'tags/:id/edit',
+                name: 'tags.edit',
+                component: () => import('../views/admin/tags/Edit.vue'),
             },
             {
                 path: 'email-templates',

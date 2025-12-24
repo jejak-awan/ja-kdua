@@ -1,5 +1,6 @@
 {
     "title": "Peran & Izin",
+    "title_singular": "Peran",
     "subtitle": "Kelola peran pengguna dan izin akses mereka",
     "create": "Buat Peran",
     "edit": "Edit Peran",

@@ -1,5 +1,7 @@
 {
     "title": "Categories",
+    "title_singular": "Category",
+    "description": "Manage content categories",
     "createNew": "New Category",
     "search": "Search categories...",
     "viewMode": {

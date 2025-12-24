@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <button
-      @click="showMenu = !showMenu"
+      @click="toggleMenu"
       class="p-2 rounded-lg hover:bg-accent transition-colors"
       aria-label="Toggle dark mode"
       :aria-expanded="showMenu"
@@ -13,7 +13,7 @@
     <!-- Dropdown Menu -->
     <div
       v-if="showMenu"
-      class="absolute right-0 mt-2 w-48 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg z-50"
+      class="absolute right-0 mt-2 w-48 bg-popover text-popover-foreground border border-border rounded-lg z-50"
       @click.stop
     >
       <div class="p-1">
@@ -50,6 +50,21 @@ const modeOptions = computed(() => [
   { value: modes.SYSTEM, label: t('common.labels.system'), icon: Monitor },
 ]);
 
+// Toggle dropdown and dispatch event to close other dropdowns
+const toggleMenu = () => {
+  const wasOpen = showMenu.value;
+  if (!wasOpen) {
+    // Close other dropdowns before opening this one
+    window.dispatchEvent(new CustomEvent('close-navbar-dropdowns'));
+  }
+  showMenu.value = !wasOpen;
+};
+
+// Listen for close events from other dropdowns
+const handleCloseDropdowns = () => {
+  showMenu.value = false;
+};
+
 const selectMode = (mode) => {
   setMode(mode);
   showMenu.value = false;
@@ -64,9 +79,11 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
+  window.addEventListener('close-navbar-dropdowns', handleCloseDropdowns);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('close-navbar-dropdowns', handleCloseDropdowns);
 });
 </script>

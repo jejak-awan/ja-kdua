@@ -5,7 +5,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg p-6">
+        <div class="bg-card border border-border rounded-lg p-6">
             <h2 class="text-lg font-semibold text-foreground mb-4">Cache Actions</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
@@ -82,16 +82,16 @@
             </div>
         </div>
 
-        <div v-if="cacheStats.details" class="mt-6 bg-card shadow rounded-lg p-6">
+        <div v-if="cacheStats.details" class="mt-6 bg-card border border-border rounded-lg p-6">
             <h2 class="text-lg font-semibold text-foreground mb-4">Cache Statistics</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-border">
                     <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 Key
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 Value
                             </th>
                         </tr>

@@ -18,17 +18,16 @@
         "noRoles": "Tidak ada peran yang ditetapkan",
         "never": "Belum pernah"
     },
-    "actions": {
-        "edit": "Ubah",
-        "delete": "Hapus"
-    },
     "messages": {
         "deleteConfirm": "Apakah Anda yakin ingin menghapus pengguna \"{name}\"?",
         "deleteFailed": "Gagal menghapus pengguna",
         "saveSuccess": "Pengguna berhasil disimpan",
         "saveFailed": "Gagal menyimpan pengguna",
         "roleRequired": "Harap pilih setidaknya satu peran",
-        "passwordRequired": "Kata sandi wajib diisi untuk pengguna baru"
+        "passwordRequired": "Kata sandi wajib diisi untuk pengguna baru",
+        "fetchFailed": "Gagal memuat data pengguna",
+        "updateFailed": "Gagal memperbarui pengguna",
+        "createFailed": "Gagal membuat pengguna"
     },
     "modals": {
         "user": {
@@ -40,7 +39,7 @@
             "name": "Nama",
             "namePlaceholder": "Nama lengkap",
             "email": "Email",
-            "emailPlaceholder": "user@teladan.com",
+            "emailPlaceholder": "user{'@'}teladan.com",
             "password": "Kata Sandi",
             "passwordPlaceholder": "Minimal 8 karakter",
             "passwordHint": "Biarkan kosong saat mengubah untuk tetap menggunakan kata sandi saat ini",
@@ -56,6 +55,36 @@
             "loadingRoles": "Memuat peran...",
             "noRoles": "Tidak ada peran tersedia",
             "saving": "Menyimpan..."
+        }
+    },
+    "form": {
+        "titleCreate": "Buat Pengguna",
+        "titleEdit": "Ubah Pengguna",
+        "avatar": "Avatar",
+        "selectAvatar": "Pilih Avatar",
+        "removeAvatar": "Hapus Avatar",
+        "name": "Nama",
+        "namePlaceholder": "Nama lengkap",
+        "email": "Email",
+        "emailPlaceholder": "user{'@'}teladan.com",
+        "password": "Kata Sandi",
+        "phone": "Telepon",
+        "bio": "Bio",
+        "website": "Situs Web",
+        "location": "Lokasi",
+        "roles": "Peran",
+        "placeholders": {
+            "passwordCurrent": "Kata sandi",
+            "password": "Minimal 8 karakter",
+            "phone": "+6281234567890",
+            "bio": "Biografi pengguna",
+            "website": "https://contoh.com",
+            "location": "Kota, Negara",
+            "name": "Nama lengkap",
+            "email": "user{'@'}teladan.com"
+        },
+        "hints": {
+            "passwordUpdate": "Biarkan kosong jika tidak ingin mengubah kata sandi"
         }
     }
 }

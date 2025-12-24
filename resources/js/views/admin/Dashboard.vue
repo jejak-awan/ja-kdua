@@ -8,7 +8,7 @@
         <!-- Row 1: Statistics Cards -->
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             <!-- Contents Card -->
-            <div class="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+            <div class="bg-card overflow-hidden border border-border rounded-lg hover:shadow-md transition-shadow">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 bg-indigo-500/10 p-3 rounded-md">
@@ -28,7 +28,7 @@
             </div>
 
             <!-- Media Card -->
-            <div class="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+            <div class="bg-card overflow-hidden border border-border rounded-lg hover:shadow-md transition-shadow">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 bg-green-500/10 p-3 rounded-md">
@@ -47,7 +47,7 @@
             </div>
 
             <!-- Users Card -->
-            <div class="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+            <div class="bg-card overflow-hidden border border-border rounded-lg hover:shadow-md transition-shadow">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 bg-purple-500/10 p-3 rounded-md">
@@ -66,7 +66,7 @@
             </div>
 
             <!-- Pending Card -->
-            <div class="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+            <div class="bg-card overflow-hidden border border-border rounded-lg hover:shadow-md transition-shadow">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 bg-yellow-500/10 p-3 rounded-md">
@@ -89,7 +89,7 @@
         <!-- Row 2: Traffic Chart & System Health -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Traffic Chart (Main) -->
-            <div class="lg:col-span-2 bg-card shadow rounded-lg p-6">
+            <div class="lg:col-span-2 bg-card border border-border rounded-lg p-6">
                  <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-foreground">{{ $t('features.dashboard.traffic.title') }}</h3>
                     <span class="text-sm text-muted-foreground">{{ $t('features.dashboard.traffic.last7Days') }}</span>

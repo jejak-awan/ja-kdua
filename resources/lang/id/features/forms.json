@@ -57,6 +57,39 @@
             "redirectUrl": "https://example.com/terima-kasih"
         }
     },
+    "fieldModal": {
+        "createTitle": "Tambah Bidang Baru",
+        "editTitle": "Edit Bidang",
+        "fieldType": "Tipe Bidang",
+        "fieldName": "Nama Bidang",
+        "fieldNamePlaceholder": "nama_bidang",
+        "fieldNameHelp": "Hanya huruf kecil, angka, dan garis bawah",
+        "fieldLabel": "Label Bidang",
+        "fieldLabelPlaceholder": "Label Bidang",
+        "placeholder": "Placeholder",
+        "placeholderHint": "Masukkan teks placeholder...",
+        "helpText": "Teks Bantuan",
+        "helpTextPlaceholder": "Teks bantuan untuk ditampilkan di bawah bidang...",
+        "options": "Opsi",
+        "addOption": "Tambah Opsi",
+        "required": "Bidang wajib diisi",
+        "addField": "Tambah Bidang",
+        "updateField": "Perbarui Bidang",
+        "optionRequired": "Silakan tambahkan setidaknya satu opsi untuk tipe bidang ini.",
+        "types": {
+            "text": "Teks",
+            "email": "Email",
+            "textarea": "Area Teks",
+            "number": "Angka",
+            "select": "Pilihan",
+            "radio": "Radio",
+            "checkbox": "Kotak Centang",
+            "file": "Unggah File",
+            "date": "Tanggal",
+            "url": "URL",
+            "tel": "Telepon"
+        }
+    },
     "messages": {
         "loading": "Memuat formulir...",
         "empty": "Tidak ada formulir ditemukan",

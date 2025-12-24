@@ -1,4 +1,5 @@
 import { ref, computed, watch, onMounted } from 'vue';
+import api from '../services/api';
 
 const THEME_KEY = 'admin-dark-mode';
 const MODES = {
@@ -7,13 +8,20 @@ const MODES = {
     SYSTEM: 'system',
 };
 
+// Initialize IMMEDIATELY from localStorage (before any component mounts)
+const savedMode = localStorage.getItem(THEME_KEY);
+const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? MODES.DARK : MODES.LIGHT;
+
 // Global state (shared across all components)
-const currentMode = ref(MODES.SYSTEM);
-const systemMode = ref(MODES.LIGHT);
+const currentMode = ref(savedMode && Object.values(MODES).includes(savedMode) ? savedMode : MODES.SYSTEM);
+const systemMode = ref(systemPreference);
+const initialized = ref(false);
 
 /**
  * Composable for dark/light mode management in admin panel
  * Separate from frontend theme system (useTheme)
+ * 
+ * Priority: Backend (if authenticated) → localStorage → System default
  */
 export function useDarkMode() {
     // Get actual mode (resolve 'system' to light/dark)
@@ -79,23 +87,32 @@ export function useDarkMode() {
         return () => mediaQuery.removeEventListener('change', handler);
     };
 
+    // Check if user is authenticated
+    const isAuthenticated = () => {
+        return !!localStorage.getItem('auth_token');
+    };
+
+    // Load preferences from backend (if authenticated)
+    const loadFromBackend = async () => {
+        if (!isAuthenticated()) return null;
+
+        try {
+            const response = await api.get('/profile/preferences');
+            if (response.data?.success && response.data?.data?.dark_mode) {
+                return response.data.data.dark_mode;
+            }
+        } catch (error) {
+            console.debug('Failed to load preferences from backend:', error.message);
+        }
+        return null;
+    };
+
     // Sync mode with backend
     const syncModeWithBackend = async (mode) => {
-        try {
-            const response = await fetch('/api/user/preferences', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ dark_mode: mode }),
-            });
+        if (!isAuthenticated()) return;
 
-            if (!response.ok) {
-                throw new Error('Failed to sync mode');
-            }
+        try {
+            await api.put('/profile/preferences', { dark_mode: mode });
         } catch (error) {
             // Silent fail - user can still use mode locally
             console.debug('Mode sync failed:', error.message);
@@ -103,21 +120,36 @@ export function useDarkMode() {
     };
 
     // Initialize mode
-    const initMode = () => {
-        // 1. Try to get from localStorage
-        const saved = localStorage.getItem(THEME_KEY);
-
-        if (saved && Object.values(MODES).includes(saved)) {
-            currentMode.value = saved;
+    const initMode = async () => {
+        // Prevent double initialization
+        if (initialized.value) {
+            applyMode(actualMode.value);
+            return;
         }
+        initialized.value = true;
 
-        // 2. Detect system mode
+        // 1. Detect system mode
         detectSystemMode();
 
-        // 3. Apply mode
+        // 2. Try to load from backend first (source of truth for logged-in users)
+        const backendMode = await loadFromBackend();
+
+        if (backendMode && Object.values(MODES).includes(backendMode)) {
+            // Backend is source of truth - also update localStorage
+            currentMode.value = backendMode;
+            localStorage.setItem(THEME_KEY, backendMode);
+        } else {
+            // 3. Fallback to localStorage
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved && Object.values(MODES).includes(saved)) {
+                currentMode.value = saved;
+            }
+        }
+
+        // 4. Apply mode
         applyMode(actualMode.value);
 
-        // 4. Watch system mode changes
+        // 5. Watch system mode changes
         watchSystemMode();
     };
 
@@ -138,5 +170,6 @@ export function useDarkMode() {
         setMode,
         toggleMode,
         modes: MODES,
+        loadFromBackend,
     };
 }

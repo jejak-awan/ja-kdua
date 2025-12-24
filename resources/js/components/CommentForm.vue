@@ -10,7 +10,7 @@
                         v-model="form.name"
                         type="text"
                         required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
                     >
                 </div>
                 <div>
@@ -20,7 +20,7 @@
                         v-model="form.email"
                         type="email"
                         required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
                     >
                 </div>
             </div>
@@ -32,7 +32,7 @@
                     v-model="form.body"
                     rows="4"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
                 />
             </div>
 
@@ -40,7 +40,7 @@
                 <button
                     type="submit"
                     :disabled="loading"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/80 disabled:opacity-50"
                 >
                     {{ loading ? 'Posting...' : 'Post Comment' }}
                 </button>

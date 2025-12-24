@@ -83,28 +83,41 @@ class AuthController extends BaseApiController
         $securityService = new SecurityService;
         $ipAddress = $request->ip();
 
-        // Check if IP is blocked
+        // Check if IP is blocked (auto-expires via cache TTL)
         if ($securityService->isIpBlocked($ipAddress)) {
-            return $this->validationError([
-                'email' => ['Your IP address has been temporarily blocked due to too many failed login attempts. Please try again later.'],
-            ]);
+            $remainingSeconds = $securityService->getRemainingBlockTime($ipAddress);
+            $remainingMinutes = max(1, ceil($remainingSeconds / 60));
+            
+            return response()->json([
+                'success' => false,
+                'message' => "Your IP address has been temporarily blocked. Please try again in {$remainingMinutes} minute(s).",
+                'retry_after' => $remainingSeconds,
+                'errors' => [
+                    'email' => ["Too many failed login attempts. Please try again in {$remainingMinutes} minute(s)."],
+                ],
+            ], 429);
         }
 
-        // Check if account is locked
+        // Check if account is locked (auto-expires via cache TTL)
         if ($securityService->isAccountLocked($request->email)) {
-            $lockoutTime = $securityService->getAccountLockoutTime($request->email);
-            $remainingMinutes = $lockoutTime ? max(1, now()->diffInMinutes($lockoutTime)) : $securityService->getLockoutDuration();
+            $remainingSeconds = $securityService->getAccountLockoutRemaining($request->email);
+            $remainingMinutes = max(1, ceil($remainingSeconds / 60));
             
-            return $this->validationError([
-                'email' => ["Account temporarily locked due to too many failed login attempts. Please try again in {$remainingMinutes} minutes."],
-            ], 'Account locked', 423);
+            return response()->json([
+                'success' => false,
+                'message' => "Account temporarily locked. Please try again in {$remainingMinutes} minute(s).",
+                'retry_after' => $remainingSeconds,
+                'errors' => [
+                    'email' => ["Account temporarily locked due to too many failed login attempts. Please try again in {$remainingMinutes} minute(s)."],
+                ],
+            ], 429);
         }
 
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            // Record failed login
-            $securityService->recordFailedLogin($request->email, $ipAddress);
+            // Record failed login (may trigger progressive blocking)
+            $result = $securityService->recordFailedLogin($request->email, $ipAddress);
 
             // Record failed login history if user exists
             if ($user) {
@@ -116,6 +129,18 @@ class AuthController extends BaseApiController
                     'status' => 'failed',
                     'failure_reason' => 'Invalid password',
                 ]);
+            }
+
+            // If IP was just blocked, return 429 with retry_after
+            if ($result['ip_blocked']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Too many failed attempts. Your IP has been temporarily blocked.',
+                    'retry_after' => $result['block_duration'],
+                    'errors' => [
+                        'email' => ['Too many failed login attempts. Please try again later.'],
+                    ],
+                ], 429);
             }
 
             return $this->validationError([

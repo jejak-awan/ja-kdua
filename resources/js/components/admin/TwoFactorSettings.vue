@@ -1,12 +1,12 @@
 <template>
-    <div class="bg-card rounded-lg shadow p-6 space-y-6">
+    <div class="bg-card rounded-lg border border-border p-6 space-y-6">
         <!-- Status Header -->
         <div class="flex items-center justify-between pb-4 border-b border-border">
             <div>
                 <h3 class="text-lg font-medium text-foreground">
                     Two-Factor Authentication
                 </h3>
-                <p class="text-sm text-muted-foreground dark:text-gray-400 mt-1">
+                <p class="text-sm text-muted-foreground mt-1">
                     {{ status.enabled ? '2FA is enabled on your account' : 'Add an extra layer of security to your account' }}
                 </p>
             </div>
@@ -15,7 +15,7 @@
                     'px-3 py-1 rounded-full text-sm font-medium',
                     status.enabled
                         ? 'bg-green-500/20 text-green-400 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-secondary text-secondary-foreground dark:bg-gray-600 dark:text-gray-200'
+                        : 'bg-secondary text-secondary-foreground'
                 ]"
             >
                 {{ status.enabled ? 'Enabled' : 'Disabled' }}
@@ -28,7 +28,7 @@
                 <h4 class="text-md font-medium text-foreground mb-2">
                     Enable Two-Factor Authentication
                 </h4>
-                <p class="text-sm text-muted-foreground dark:text-gray-400 mb-4">
+                <p class="text-sm text-muted-foreground mb-4">
                     Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
                 </p>
             </div>
@@ -38,7 +38,7 @@
                 <button
                     @click="generateSecret"
                     :disabled="generating"
-                    class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+                    class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 flex items-center gap-2"
                 >
                     <svg
                         v-if="generating"
@@ -55,7 +55,7 @@
 
             <!-- QR Code Display -->
             <div v-if="qrCodeUrl" class="flex flex-col items-center space-y-4">
-                <div class="p-4 bg-card dark:bg-gray-700 rounded-lg border border-border dark:border-gray-600">
+                <div class="p-4 bg-card rounded-lg border border-border">
                     <img :src="qrCodeUrl" alt="2FA QR Code" class="w-48 h-48" />
                 </div>
 
@@ -82,7 +82,7 @@
 
                 <!-- Verification Code Input -->
                 <div class="w-full">
-                    <label class="block text-sm font-medium text-foreground dark:text-gray-300 mb-2">
+                    <label class="block text-sm font-medium text-foreground mb-2">
                         Enter verification code from authenticator app *
                     </label>
                     <input
@@ -90,7 +90,7 @@
                         type="text"
                         maxlength="6"
                         placeholder="000000"
-                        class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-2xl tracking-widest"
+                        class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-2xl tracking-widest"
                         @input="verificationCode = verificationCode.replace(/\D/g, '')"
                     />
                 </div>
@@ -100,7 +100,7 @@
                     <button
                         @click="enable2FA"
                         :disabled="!verificationCode || verificationCode.length !== 6 || enabling"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         <svg
                             v-if="enabling"
@@ -123,7 +123,7 @@
                 <h4 class="text-md font-medium text-foreground mb-2">
                     Disable Two-Factor Authentication
                 </h4>
-                <p class="text-sm text-muted-foreground dark:text-gray-400 mb-4">
+                <p class="text-sm text-muted-foreground mb-4">
                     To disable 2FA, enter your password
                 </p>
                 <div v-if="status.required" class="mb-4 p-3 bg-yellow-500/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -135,14 +135,14 @@
 
             <!-- Password Input -->
             <div>
-                <label class="block text-sm font-medium text-foreground dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-foreground mb-2">
                     Password *
                 </label>
                 <input
                     v-model="disablePassword"
                     type="password"
                     :disabled="status.required"
-                    class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+                    class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
                 />
             </div>
 
@@ -193,7 +193,7 @@
                     <button
                         @click="regenerateBackupCodes"
                         :disabled="regenerating"
-                        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm disabled:opacity-50"
+                        class="px-4 py-2 bg-muted text-white rounded hover:bg-muted text-sm disabled:opacity-50"
                     >
                         {{ regenerating ? 'Regenerating...' : 'Regenerate Codes' }}
                     </button>
@@ -201,14 +201,14 @@
             </div>
 
             <!-- Backup Codes Count -->
-            <div v-else-if="status.backup_codes_count > 0" class="bg-muted dark:bg-gray-700 rounded-lg p-4">
-                <p class="text-sm text-muted-foreground dark:text-gray-400">
+            <div v-else-if="status.backup_codes_count > 0" class="bg-muted rounded-lg p-4">
+                <p class="text-sm text-muted-foreground">
                     You have <strong>{{ status.backup_codes_count }}</strong> backup code(s) remaining.
                 </p>
                 <button
                     @click="regenerateBackupCodes"
                     :disabled="regenerating"
-                    class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm disabled:opacity-50"
+                    class="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80 text-sm disabled:opacity-50"
                 >
                     {{ regenerating ? 'Regenerating...' : 'Regenerate Backup Codes' }}
                 </button>

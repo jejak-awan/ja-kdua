@@ -1,5 +1,7 @@
 {
     "title": "Tag",
+    "title_singular": "Tag",
+    "description": "Kelola tag konten",
     "createNew": "Tag Baru",
     "search": "Cari tag...",
     "stats": {

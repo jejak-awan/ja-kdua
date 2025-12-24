@@ -18,17 +18,16 @@
         "noRoles": "No roles assigned",
         "never": "Never"
     },
-    "actions": {
-        "edit": "Edit",
-        "delete": "Delete"
-    },
     "messages": {
         "deleteConfirm": "Are you sure you want to delete user \"{name}\"?",
         "deleteFailed": "Failed to delete user",
         "saveSuccess": "User saved successfully",
         "saveFailed": "Failed to save user",
         "roleRequired": "Please select at least one role",
-        "passwordRequired": "Password is required for new users"
+        "passwordRequired": "Password is required for new users",
+        "fetchFailed": "Failed to fetch user data",
+        "updateFailed": "Failed to update user",
+        "createFailed": "Failed to create user"
     },
     "modals": {
         "user": {
@@ -40,7 +39,7 @@
             "name": "Name",
             "namePlaceholder": "Full name",
             "email": "Email",
-            "emailPlaceholder": "user@example.com",
+            "emailPlaceholder": "user{'@'}example.com",
             "password": "Password",
             "passwordPlaceholder": "Minimum 8 characters",
             "passwordHint": "Leave empty when editing to keep current password",
@@ -56,6 +55,31 @@
             "loadingRoles": "Loading roles...",
             "noRoles": "No roles available",
             "saving": "Saving..."
+        }
+    },
+    "form": {
+        "avatar": "Avatar",
+        "selectAvatar": "Select Avatar",
+        "removeAvatar": "Remove Avatar",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password",
+        "phone": "Phone",
+        "bio": "Bio",
+        "website": "Website",
+        "location": "Location",
+        "roles": "Roles",
+        "placeholders": {
+            "name": "Full name",
+            "email": "user{'@'}example.com",
+            "password": "Minimum 8 characters",
+            "phone": "+1234567890",
+            "bio": "User biography",
+            "website": "https://example.com",
+            "location": "City, Country"
+        },
+        "hints": {
+            "passwordUpdate": "Leave empty if you don't want to change password"
         }
     }
 }

@@ -15,7 +15,7 @@
         </div>
 
         <form v-else @submit.prevent="handleSubmit" class="space-y-6">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Template Details</h2>
                 
                 <div class="space-y-4">
@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-foreground">Template Content</h2>
                     <div class="flex items-center space-x-2">
@@ -123,7 +123,7 @@
                 <button
                     type="submit"
                     :disabled="saving"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                 >
                     {{ saving ? 'Updating...' : 'Update Template' }}
                 </button>

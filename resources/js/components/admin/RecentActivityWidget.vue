@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-card rounded-lg shadow-sm border border-border h-full flex flex-col">
+    <div class="bg-card rounded-lg border border-border h-full flex flex-col">
         <div class="px-6 py-4 border-b border-border flex justify-between items-center">
             <h3 class="text-lg font-semibold text-foreground flex items-center">
                 <svg class="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -7,7 +7,7 @@
                 </svg>
                 {{ $t('features.dashboard.widgets.recentActivity.title') }}
             </h3>
-            <span class="text-xs text-muted-foreground dark:text-gray-400 flex items-center">
+            <span class="text-xs text-muted-foreground flex items-center">
                 <span class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span>
                 {{ $t('features.dashboard.widgets.recentActivity.live') }}
             </span>
@@ -37,7 +37,7 @@
                             <p class="text-sm font-medium text-foreground truncate">
                                 {{ activity.user?.name || 'System' }}
                             </p>
-                            <p class="text-sm text-muted-foreground dark:text-gray-400">
+                            <p class="text-sm text-muted-foreground">
                                 <span 
                                     class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium mr-1"
                                     :class="getActionBadgeClass(activity.action || activity.type)"
@@ -46,7 +46,7 @@
                                 </span>
                                 {{ activity.description }}
                             </p>
-                             <p class="text-xs text-gray-400 mt-1 flex items-center">
+                             <p class="text-xs text-muted-foreground mt-1 flex items-center">
                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -58,7 +58,7 @@
             </div>
         </div>
         
-        <div class="p-3 border-t border-border bg-muted dark:bg-gray-800/50 rounded-b-lg">
+        <div class="p-3 border-t border-border bg-muted/50 rounded-b-lg">
             <router-link :to="{ name: 'activity-logs' }" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium flex items-center justify-center">
                 {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,7 +142,7 @@ const getActionBadgeClass = (action) => {
     if (a.includes('update')) return 'bg-blue-500/20 text-blue-400 dark:bg-blue-900/30 dark:text-blue-400';
     if (a.includes('delete')) return 'bg-red-500/20 text-red-400 dark:bg-red-900/30 dark:text-red-400';
     if (a.includes('login') || a.includes('logout')) return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-    return 'bg-secondary text-secondary-foreground dark:bg-gray-700 dark:text-gray-400';
+    return 'bg-secondary text-secondary-foreground';
 };
 
 onMounted(() => {

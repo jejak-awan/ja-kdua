@@ -5,172 +5,164 @@
             <p class="text-muted-foreground mt-1">{{ $t('features.profile.subtitle') }}</p>
         </div>
 
-        <!-- Tabs -->
-        <div class="mb-6 border-b border-border">
-            <nav class="flex space-x-8">
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="activeTab = tab.key"
-                    :class="[
-                        'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
-                        activeTab === tab.key
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                    ]"
-                >
-                    {{ $t('features.profile.tabs.' + tab.key) }}
-                </button>
-            </nav>
-        </div>
+        <!-- Shadcn Tabs -->
+        <Tabs v-model="activeTab" class="w-full">
+            <TabsList class="mb-6">
+                <TabsTrigger value="profile">{{ $t('features.profile.tabs.profile') }}</TabsTrigger>
+                <TabsTrigger value="password">{{ $t('features.profile.tabs.password') }}</TabsTrigger>
+                <TabsTrigger value="two-factor">{{ $t('features.profile.tabs.two-factor') }}</TabsTrigger>
+                <TabsTrigger value="history">{{ $t('features.profile.tabs.history') }}</TabsTrigger>
+            </TabsList>
 
-        <!-- Profile Info Tab -->
-        <div v-if="activeTab === 'profile'" class="bg-card rounded-lg shadow p-6">
-            <form @submit.prevent="updateProfile" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.profile.form.name') }}
-                        </label>
-                        <input
-                            v-model="profileForm.name"
-                            type="text"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
+            <!-- Profile Info Tab -->
+            <TabsContent value="profile">
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <form @submit.prevent="updateProfile" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">
+                                    {{ $t('features.profile.form.name') }}
+                                </label>
+                                <input
+                                    v-model="profileForm.name"
+                                    type="text"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.profile.form.email') }}
-                        </label>
-                        <input
-                            v-model="profileForm.email"
-                            type="email"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">
+                                    {{ $t('features.profile.form.email') }}
+                                </label>
+                                <input
+                                    v-model="profileForm.email"
+                                    type="email"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.profile.form.phone') }}
-                        </label>
-                        <input
-                            v-model="profileForm.phone"
-                            type="text"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">
+                                    {{ $t('features.profile.form.phone') }}
+                                </label>
+                                <input
+                                    v-model="profileForm.phone"
+                                    type="text"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.profile.form.location') }}
-                        </label>
-                        <input
-                            v-model="profileForm.location"
-                            type="text"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">
+                                    {{ $t('features.profile.form.location') }}
+                                </label>
+                                <input
+                                    v-model="profileForm.location"
+                                    type="text"
+                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">
+                                {{ $t('features.profile.form.bio') }}
+                            </label>
+                            <textarea
+                                v-model="profileForm.bio"
+                                rows="4"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button
+                                :disabled="saving"
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
+                            >
+                                {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </TabsContent>
 
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        {{ $t('features.profile.form.bio') }}
-                    </label>
-                    <textarea
-                        v-model="profileForm.bio"
-                        rows="4"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    />
+            <!-- Password Tab -->
+            <TabsContent value="password">
+                <div class="bg-card rounded-lg border border-border p-6">
+                    <form @submit.prevent="updatePassword" class="space-y-6 max-w-md">
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">
+                                {{ $t('features.profile.form.currentPassword') }}
+                            </label>
+                            <input
+                                v-model="passwordForm.current_password"
+                                type="password"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">
+                                {{ $t('features.profile.form.newPassword') }}
+                            </label>
+                            <input
+                                v-model="passwordForm.password"
+                                type="password"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <p class="mt-1 text-xs text-muted-foreground">
+                                {{ $t('features.profile.form.passwordHelp') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">
+                                {{ $t('features.profile.form.confirmPassword') }}
+                            </label>
+                            <input
+                                v-model="passwordForm.password_confirmation"
+                                type="password"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
+                            >
+                                {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </TabsContent>
 
-                <div class="flex justify-end">
-                    <button
-                        :disabled="saving"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                        {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Two-Factor Authentication Tab -->
+            <TabsContent value="two-factor">
+                <TwoFactorSettings />
+            </TabsContent>
 
-        <!-- Password Tab -->
-        <div v-if="activeTab === 'password'" class="bg-card rounded-lg shadow p-6">
-            <form @submit.prevent="updatePassword" class="space-y-6 max-w-md">
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        {{ $t('features.profile.form.currentPassword') }}
-                    </label>
-                    <input
-                        v-model="passwordForm.current_password"
-                        type="password"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        {{ $t('features.profile.form.newPassword') }}
-                    </label>
-                    <input
-                        v-model="passwordForm.password"
-                        type="password"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    />
-                    <p class="mt-1 text-xs text-muted-foreground">
-                        {{ $t('features.profile.form.passwordHelp') }}
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        {{ $t('features.profile.form.confirmPassword') }}
-                    </label>
-                    <input
-                        v-model="passwordForm.password_confirmation"
-                        type="password"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
-
-                <div class="flex justify-end">
-                    <button
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                        {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Two-Factor Authentication Tab -->
-        <div v-if="activeTab === 'two-factor'">
-            <TwoFactorSettings />
-        </div>
-
-        <!-- Login History Tab -->
-        <div v-if="activeTab === 'history'">
-            <LoginHistory />
-        </div>
+            <!-- Login History Tab -->
+            <TabsContent value="history">
+                <LoginHistory />
+            </TabsContent>
+        </Tabs>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import LoginHistory from '../../components/admin/LoginHistory.vue';
 import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
+import Tabs from '../../components/ui/tabs.vue';
+import TabsList from '../../components/ui/tabs-list.vue';
+import TabsTrigger from '../../components/ui/tabs-trigger.vue';
+import TabsContent from '../../components/ui/tabs-content.vue';
 
 const { t } = useI18n();
-
-const tabs = [
-    { key: 'profile', label: 'Profile Information' },
-    { key: 'password', label: 'Change Password' },
-    { key: 'two-factor', label: 'Two-Factor Authentication' },
-    { key: 'history', label: 'Login History' },
-];
 
 const activeTab = ref('profile');
 const saving = ref(false);
@@ -244,4 +236,3 @@ onMounted(() => {
     fetchProfile();
 });
 </script>
-

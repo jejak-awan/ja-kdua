@@ -29,6 +29,7 @@
     "loading": {
         "default": "Loading...",
         "saving": "Saving...",
+        "creating": "Creating...",
         "deleting": "Deleting...",
         "uploading": "Uploading...",
         "processing": "Processing...",

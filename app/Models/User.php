@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'location',
         'last_login_at',
         'last_login_ip',
+        'preferences',
     ];
 
     /**
@@ -53,8 +54,37 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'preferences' => 'array',
         ];
     }
+
+    /**
+     * Get a user preference value.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getPreference(string $key, mixed $default = null): mixed
+    {
+        return data_get($this->preferences, $key, $default);
+    }
+
+    /**
+     * Set a user preference value.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return $this
+     */
+    public function setPreference(string $key, mixed $value): self
+    {
+        $preferences = $this->preferences ?? [];
+        data_set($preferences, $key, $value);
+        $this->preferences = $preferences;
+        return $this;
+    }
+
 
     public function activityLogs()
     {

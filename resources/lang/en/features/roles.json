@@ -1,5 +1,6 @@
 {
     "title": "Roles & Permissions",
+    "title_singular": "Role",
     "subtitle": "Manage user roles and their permissions",
     "create": "Create Role",
     "edit": "Edit Role",

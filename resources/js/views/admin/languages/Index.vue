@@ -3,13 +3,13 @@
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.languages.title') }}</h1>
             <div class="flex items-center space-x-3">
-                <button @click="showImportModal = true" class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md shadow-sm text-foreground bg-card hover:bg-muted">
+                <button @click="showImportModal = true" class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     {{ $t('features.languages.importPack') }}
                 </button>
-                <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -19,7 +19,7 @@
         </div>
 
         <!-- UI Languages Info Card -->
-        <div class="mb-6 bg-card shadow rounded-lg p-6">
+        <div class="mb-6 bg-card border border-border rounded-lg p-6">
             <div class="flex items-start justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.languages.uiLanguages.title') }}</h2>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Languages Table -->
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <h2 class="text-lg font-semibold text-foreground">{{ $t('features.languages.list.title') }}</h2>
                 <p class="text-sm text-muted-foreground">{{ $t('features.languages.list.description') }}</p>
@@ -55,11 +55,11 @@
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.languages.list.headers.name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.languages.list.headers.code') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.languages.list.headers.default') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.languages.uiLanguages.translationKeys') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">{{ $t('features.languages.list.headers.actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.code') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.default') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.uiLanguages.translationKeys') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-card divide-y divide-border">
@@ -103,8 +103,8 @@
         </div>
 
         <!-- Import Modal -->
-        <div v-if="showImportModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-card rounded-lg shadow-lg w-full max-w-md p-6">
+        <div v-if="showImportModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" @click.self="showImportModal = false">
+            <div class="bg-card rounded-lg w-full max-w-md p-6">
                 <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.languages.import.title') }}</h3>
                 <p class="text-sm text-muted-foreground mb-4">{{ $t('features.languages.import.description') }}</p>
                 
@@ -125,7 +125,7 @@
                     <button 
                         @click="importPack" 
                         :disabled="!selectedFile || importing"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="importing">{{ $t('common.loading.default') }}</span>
                         <span v-else>{{ $t('features.languages.import.button') }}</span>
@@ -135,8 +135,8 @@
         </div>
 
         <!-- Create Modal -->
-        <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-card rounded-lg shadow-lg w-full max-w-md p-6">
+        <div v-if="showCreateModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" @click.self="showCreateModal = false">
+            <div class="bg-card rounded-lg w-full max-w-md p-6">
                 <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.languages.create.title') }}</h3>
                 
                 <div class="mb-4">
@@ -178,7 +178,7 @@
                     <button 
                         @click="createLanguage" 
                         :disabled="!newLanguage.code || !newLanguage.name || creating"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="creating">{{ $t('common.loading.default') }}</span>
                         <span v-else>{{ $t('common.actions.create') }}</span>

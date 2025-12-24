@@ -5,7 +5,7 @@
             <div class="flex items-center space-x-2">
                 <router-link
                     :to="{ name: 'content-templates' }"
-                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md shadow-sm text-foreground bg-card hover:bg-muted"
+                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
@@ -14,7 +14,7 @@
                 </router-link>
                 <router-link
                     :to="{ name: 'contents.create' }"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
@@ -82,22 +82,22 @@
                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                             >
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.content.form.title') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.comments.detail.author') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('common.labels.status') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.content.form.featured') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.content.form.publishDate') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.languages.list.headers.actions') }}
                         </th>
                     </tr>
@@ -140,7 +140,7 @@
                                 <span class="sr-only">Use setting</span>
                                 <span
                                     aria-hidden="true"
-                                    class="pointer-events-none inline-block h-5 w-5 rounded-full bg-card shadow transform ring-0 transition ease-in-out duration-200"
+                                    class="pointer-events-none inline-block h-5 w-5 rounded-full bg-card border border-border transform ring-0 transition ease-in-out duration-200"
                                     :class="content.is_featured ? 'translate-x-5' : 'translate-x-0'"
                                 ></span>
                             </button>

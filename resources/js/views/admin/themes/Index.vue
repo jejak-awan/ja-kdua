@@ -27,7 +27,7 @@
         </div>
 
         <div v-if="themes.length === 0" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
             </svg>
             <h3 class="mt-2 text-sm font-medium text-foreground">{{ $t('features.themes.list.empty') }}</h3>
@@ -35,7 +35,7 @@
             <div class="mt-6">
                 <button
                     @click="scanThemes"
-                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     {{ $t('features.themes.scan') }}
                 </button>
@@ -46,7 +46,7 @@
             <div
                 v-for="theme in themes"
                 :key="theme.id"
-                class="bg-card shadow rounded-lg overflow-hidden transition-shadow hover:shadow-lg"
+                class="bg-card border border-border rounded-lg overflow-hidden transition-shadow "
                 :class="{ 'ring-2 ring-indigo-500': theme.is_active }"
             >
                 <!-- Preview Image -->
@@ -57,7 +57,7 @@
                         :alt="theme.name"
                         class="w-full h-full object-cover"
                     >
-                    <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                    <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
                         <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -95,7 +95,7 @@
                         <button
                             v-if="theme.is_active"
                             @click="openCustomizer(theme)"
-                            class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                            class="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/80"
                         >
                             {{ $t('features.themes.actions.customize') }}
                         </button>
@@ -133,7 +133,7 @@
                         <button
                             v-if="theme.is_active"
                             @click="openCustomizer(theme)"
-                            class="flex-1 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"
+                            class="flex-1 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/80 flex items-center justify-center gap-2"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -143,7 +143,7 @@
                         <button
                             v-else
                             @click="activateTheme(theme)"
-                            class="flex-1 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 flex items-center justify-center gap-2"
+                            class="flex-1 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/80 flex items-center justify-center gap-2"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -192,12 +192,12 @@
             class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
             @click.self="showPreviewModal = false"
         >
-            <div class="bg-card rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
+            <div class="bg-card rounded-lg w-full max-w-6xl h-[90vh] flex flex-col">
                 <div class="flex items-center justify-between p-4 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.themes.modals.previewTitle', { name: selectedTheme?.name }) }}</h3>
                     <button
                         @click="showPreviewModal = false"
-                        class="text-gray-400 hover:text-muted-foreground"
+                        class="text-muted-foreground hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

@@ -72,12 +72,18 @@ class SecurityController extends BaseApiController
         $request->validate([
             'ip_address' => 'required|ip',
             'reason' => 'nullable|string',
+            'permanent' => 'sometimes|boolean',
         ]);
 
-        $result = $this->securityService->blockIp($request->ip_address, $request->reason);
+        if ($request->input('permanent', false)) {
+            $result = $this->securityService->blockIpPermanently($request->ip_address, $request->reason);
+        } else {
+            $seconds = $this->securityService->blockIpTemporarily($request->ip_address, $request->reason);
+            $result = $seconds > 0;
+        }
         
         if (!$result) {
-            return $this->error('Cannot block whitelisted IP address', 400);
+            return $this->error('Cannot block whitelisted or protected IP address', 400);
         }
 
         return $this->success(null, 'IP address blocked successfully');
@@ -202,22 +208,31 @@ class SecurityController extends BaseApiController
     public function checkIp(Request $request)
     {
         $ipAddress = $request->input('ip_address', $request->ip());
-        $isBlocked = $this->securityService->isIpBlocked($ipAddress);
-        $failedAttempts = $this->securityService->getFailedAttempts($ipAddress);
+        $blockInfo = $this->securityService->getBlockInfo($ipAddress);
 
         return $this->success([
             'ip_address' => $ipAddress,
-            'is_blocked' => $isBlocked,
-            'failed_attempts' => $failedAttempts,
+            'is_blocked' => $blockInfo['is_blocked'],
+            'remaining_seconds' => $blockInfo['remaining_seconds'],
+            'failed_attempts' => $blockInfo['failed_attempts'],
+            'offense_count' => $blockInfo['offense_count'],
         ], 'IP status retrieved successfully');
     }
 
     public function clearFailedAttempts(Request $request)
     {
         $ipAddress = $request->input('ip_address', $request->ip());
-        $this->securityService->clearFailedAttempts($ipAddress);
+        
+        // Clear all security cache for IP
+        $this->securityService->clearSecurityCache($ipAddress);
         $this->securityService->unblockIp($ipAddress);
+        
+        // Also clear email-based locks if provided
+        if ($request->has('email')) {
+            $this->securityService->clearSecurityCache($request->email, 'email');
+            $this->securityService->unlockAccount($request->email);
+        }
 
-        return $this->success(null, 'Failed attempts and block status cleared for IP: '.$ipAddress);
+        return $this->success(null, 'Security cache cleared for IP: ' . $ipAddress);
     }
 }

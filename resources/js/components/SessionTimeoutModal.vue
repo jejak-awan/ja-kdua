@@ -12,7 +12,7 @@
         <!-- Modal -->
         <div class="flex min-h-full items-center justify-center p-4">
           <div
-            class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-card dark:bg-gray-800 shadow-2xl transition-all"
+            class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-card shadow-2xl transition-all"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -45,7 +45,7 @@
                 Sesi Anda Akan Berakhir
               </h3>
               
-              <p class="text-center text-muted-foreground dark:text-gray-400 mb-6">
+              <p class="text-center text-muted-foreground mb-6">
                 Sesi Anda akan berakhir dalam
               </p>
 
@@ -55,7 +55,7 @@
                   <div class="text-5xl font-bold text-amber-600 dark:text-amber-400 tabular-nums">
                     {{ formatTime(timeRemaining) }}
                   </div>
-                  <div class="text-sm text-muted-foreground dark:text-gray-400 mt-1">
+                  <div class="text-sm text-muted-foreground mt-1">
                     {{ timeRemaining > 60 ? 'menit:detik' : 'detik' }}
                   </div>
                 </div>
@@ -132,7 +132,7 @@
                 
                 <button
                   @click="logout"
-                  class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-700 hover:bg-muted dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+                  class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-input text-base font-medium rounded-lg text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
                 >
                   <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -147,7 +147,7 @@
               </div>
 
               <!-- Additional Info -->
-              <div class="mt-4 text-center text-xs text-muted-foreground dark:text-gray-400">
+              <div class="mt-4 text-center text-xs text-muted-foreground">
                 <p>Jika tidak ada aktivitas, Anda akan otomatis logout</p>
               </div>
             </div>

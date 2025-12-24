@@ -18,7 +18,7 @@ const LOCALE_STORAGE_KEY = 'locale';
  * Composable for language management
  * 
  * IMPORTANT: This composable syncs with Vue I18n (i18n.js).
- * The source of truth for current locale is localStorage['locale'].
+ * Priority: Backend (if authenticated) → localStorage → Browser detect → Default
  */
 export function useLanguage() {
   /**
@@ -53,6 +53,41 @@ export function useLanguage() {
     }
   };
 
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('auth_token');
+  };
+
+  /**
+   * Load locale preference from backend (if authenticated)
+   */
+  const loadFromBackend = async () => {
+    if (!isAuthenticated()) return null;
+
+    try {
+      const response = await api.get('/profile/preferences');
+      if (response.data?.success && response.data?.data?.locale) {
+        return response.data.data.locale;
+      }
+    } catch (error) {
+      console.debug('Failed to load locale from backend:', error.message);
+    }
+    return null;
+  };
+
+  /**
+   * Sync locale with backend
+   */
+  const syncLanguageWithBackend = async (locale) => {
+    if (!isAuthenticated()) return;
+
+    try {
+      await api.put('/profile/preferences', { locale });
+    } catch (error) {
+      console.debug('Locale sync failed:', error.message);
+    }
+  };
+
   /**
    * Set current language with full persistence
    */
@@ -72,7 +107,8 @@ export function useLanguage() {
     // Update document attributes
     updateDocumentLanguage(languageCode);
 
-
+    // Sync with backend
+    syncLanguageWithBackend(languageCode);
   };
 
   /**
@@ -96,12 +132,13 @@ export function useLanguage() {
   };
 
   /**
-   * Initialize language from localStorage (persisted preference)
+   * Initialize language from backend/localStorage
    * 
    * Priority:
-   * 1. localStorage['locale'] (user preference - ALWAYS wins)
-   * 2. Browser language (if supported)
-   * 3. Database default
+   * 1. Backend (if authenticated - source of truth)
+   * 2. localStorage['locale'] (fallback)
+   * 3. Browser language (if supported)
+   * 4. Database default
    */
   const initializeLanguage = async () => {
     // Prevent double initialization
@@ -113,15 +150,24 @@ export function useLanguage() {
     // Load languages for dropdown
     await loadLanguages();
 
-    // Get current locale from Vue I18n (which already read from localStorage)
-    const currentLocale = i18nGetLocale();
+    // Try to load from backend first (source of truth for logged-in users)
+    const backendLocale = await loadFromBackend();
+
+    let currentLocale;
+    if (backendLocale) {
+      // Backend is source of truth - also update localStorage and Vue I18n
+      currentLocale = backendLocale;
+      i18nSetLocale(backendLocale);
+    } else {
+      // Fallback to Vue I18n (which already read from localStorage/browser)
+      currentLocale = i18nGetLocale();
+    }
 
     // Find matching language object
     let language = languages.value.find(l => l.code === currentLocale);
 
     if (!language && languages.value.length > 0) {
       // Locale not found in DB, but we still honor user preference
-      // Create a temporary language object
       language = { code: currentLocale, name: currentLocale.toUpperCase() };
     }
 
@@ -129,8 +175,6 @@ export function useLanguage() {
       currentLanguage.value = language;
       updateDocumentLanguage(language.code);
     }
-
-
   };
 
   /**
@@ -194,5 +238,6 @@ export function useLanguage() {
     t,
     initializeLanguage,
     resetInitialization,
+    loadFromBackend,
   };
 }

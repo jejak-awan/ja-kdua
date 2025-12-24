@@ -13,7 +13,7 @@
                 <!-- Item Content -->
                 <div class="flex items-center justify-between p-3 bg-card rounded-lg hover:bg-muted">
                     <div class="flex items-center space-x-3 flex-1">
-                        <div class="drag-handle cursor-move text-gray-400 hover:text-muted-foreground p-1">
+                        <div class="drag-handle cursor-move text-muted-foreground hover:text-muted-foreground p-1">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
                             </svg>

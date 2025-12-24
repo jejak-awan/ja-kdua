@@ -1,5 +1,5 @@
 <template>
-  <div :class="compact ? '' : 'p-4 bg-muted dark:bg-gray-800 rounded-lg border border-border'">
+  <div :class="compact ? '' : 'p-4 bg-muted rounded-lg border border-border'">
     <h3 v-if="!compact" class="text-sm font-semibold text-foreground mb-3">
       {{ title }}
     </h3>
@@ -23,7 +23,7 @@
         @click="shareTwitter"
         :title="'Bagikan ke Twitter'"
         :class="buttonClasses"
-        class="bg-black hover:bg-gray-800 text-white"
+        class="bg-black hover:bg-card text-white"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -61,7 +61,7 @@
       <button
         @click="copyLink"
         :title="copied ? 'Tersalin!' : 'Salin Link'"
-        :class="[buttonClasses, copied ? 'bg-green-600' : 'bg-gray-600 hover:bg-gray-700', 'text-white transition-colors']"
+        :class="[buttonClasses, copied ? 'bg-green-600' : 'bg-muted hover:bg-muted', 'text-white transition-colors']"
       >
         <svg v-if="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Share count (optional) -->
-    <div v-if="showCount && shareCount > 0" class="mt-3 text-sm text-muted-foreground dark:text-gray-400">
+    <div v-if="showCount && shareCount > 0" class="mt-3 text-sm text-muted-foreground">
       {{ shareCount }} kali dibagikan
     </div>
   </div>
@@ -122,8 +122,8 @@ const copied = ref(false);
 
 const buttonClasses = computed(() => 
   props.compact 
-    ? 'p-2 rounded-full flex items-center justify-center transition-colors shadow-sm hover:shadow-md'
-    : 'px-4 py-2 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:shadow-md'
+    ? 'p-2 rounded-full flex items-center justify-center transition-colors hover:shadow-md'
+    : 'px-4 py-2 rounded-lg flex items-center justify-center transition-colors hover:shadow-md'
 );
 
 const shareFacebook = () => {

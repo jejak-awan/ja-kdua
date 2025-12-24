@@ -20,10 +20,10 @@
         <h2 class="text-3xl font-bold text-foreground mb-4">
           {{ t('features.errors.403.title') }}
         </h2>
-        <p class="text-lg text-muted-foreground dark:text-gray-400 mb-2">
+        <p class="text-lg text-muted-foreground mb-2">
           {{ t('features.errors.403.message') }}
         </p>
-        <p class="text-sm text-muted-foreground dark:text-muted-foreground">
+        <p class="text-sm text-muted-foreground">
           {{ t('features.errors.403.description') }}
         </p>
       </div>
@@ -49,8 +49,8 @@
 
       <!-- User Status -->
       <div v-if="user" class="mb-8">
-        <div class="inline-flex items-center px-4 py-2 bg-card dark:bg-gray-800 border border-border rounded-lg shadow-sm">
-          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="inline-flex items-center px-4 py-2 bg-card border border-border rounded-lg shadow-sm">
+          <svg class="w-5 h-5 text-muted-foreground mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span class="text-sm text-foreground">
@@ -85,7 +85,7 @@
 
         <button
           @click="goBack"
-          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-800 hover:bg-muted dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+          class="inline-flex items-center justify-center px-6 py-3 border border-input text-base font-medium rounded-lg text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -96,7 +96,7 @@
 
       <!-- Contact Support -->
       <div class="mb-8">
-        <p class="text-sm text-muted-foreground dark:text-gray-400 mb-3">
+        <p class="text-sm text-muted-foreground mb-3">
           {{ t('features.errors.403.support') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -123,7 +123,7 @@
 
       <!-- Required Permissions -->
       <div v-if="requiredPermissions.length" class="max-w-md mx-auto mb-8">
-        <div class="text-left p-4 bg-muted dark:bg-gray-800 border border-border rounded-lg">
+        <div class="text-left p-4 bg-muted border border-border rounded-lg">
           <h3 class="text-sm font-semibold text-foreground mb-2">
             {{ t('features.errors.403.requiredPermissions') }}
           </h3>
@@ -131,9 +131,9 @@
             <li
               v-for="permission in requiredPermissions"
               :key="permission"
-              class="flex items-center text-sm text-muted-foreground dark:text-gray-400"
+              class="flex items-center text-sm text-muted-foreground"
             >
-              <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {{ permission }}
@@ -143,7 +143,7 @@
       </div>
 
       <!-- Error Code for Reference -->
-      <div class="mt-8 text-xs text-gray-400 dark:text-muted-foreground">
+      <div class="mt-8 text-xs text-muted-foreground">
         Error Code: 403 | {{ new Date().toISOString() }}
       </div>
     </div>

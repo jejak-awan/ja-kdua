@@ -8,7 +8,7 @@
                         <h3 class="text-lg font-semibold">Customize Theme</h3>
                         <button
                             @click="$emit('close')"
-                            class="text-gray-400 hover:text-muted-foreground"
+                            class="text-muted-foreground hover:text-muted-foreground"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -24,7 +24,7 @@
                         :key="section.id"
                         class="space-y-4 border-b border-border pb-6 last:border-b-0"
                     >
-                        <h4 class="text-sm font-semibold text-foreground uppercase tracking-wider">
+                        <h4 class="text-sm font-semibold text-foreground tracking-wider">
                             {{ section.label }}
                         </h4>
 
@@ -170,7 +170,7 @@
                     <!-- Custom CSS -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-semibold text-foreground uppercase tracking-wider">
+                            <h4 class="text-sm font-semibold text-foreground tracking-wider">
                                 Custom CSS
                             </h4>
                             <button
@@ -196,7 +196,7 @@
                     <button
                         @click="saveSettings"
                         :disabled="saving"
-                        class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? 'Saving...' : 'Save Changes' }}
                     </button>

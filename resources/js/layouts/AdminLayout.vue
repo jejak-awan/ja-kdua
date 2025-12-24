@@ -11,11 +11,16 @@
         />
 
         <!-- Main Content -->
-        <div :class="['transition-all duration-300 ease-in-out', sidebarMinimized ? 'lg:pl-20' : 'lg:pl-64']">
+        <div :class="[
+            'transition-all duration-300 ease-in-out',
+            sidebarMinimized ? 'lg:pl-20' : 'lg:pl-64'
+        ]">
             <!-- Top Navbar -->
             <AdminNavbar
                 :is-authenticated="authStore.isAuthenticated"
+                :user="authStore.user"
                 @toggle-sidebar="toggleSidebarOpen"
+                @logout="handleLogout"
             />
 
             <!-- Page Content -->
@@ -30,12 +35,16 @@
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useSidebar } from '../composables/useSidebar';
+import { useLayoutMount } from '../composables/useLayoutMount';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
 import AdminNavbar from '../components/layouts/AdminNavbar.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen, closeSidebar } = useSidebar();
+
+// Use shared mounted state for synchronized transitions
+const { mounted } = useLayoutMount();
 
 const handleLogout = async () => {
     await authStore.logout();

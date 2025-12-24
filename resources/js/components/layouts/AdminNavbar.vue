@@ -21,24 +21,94 @@
             <div class="flex items-center space-x-4 ml-auto">
                 <!-- Search -->
                 <div class="relative">
-                    <div class="relative">
+                    <!-- Mobile Search Button -->
+                    <button
+                        @click="toggleMobileSearch"
+                        class="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-accent transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+
+                    <!-- Desktop Search Input -->
+                    <div class="hidden md:block relative">
                         <input
                             v-model="searchQuery"
                             @focus="showSearchResults = true"
                             @input="handleSearch"
                             type="text"
                             :placeholder="t('common.actions.search') + '...'"
-                            class="w-64 pl-10 pr-4 py-2 border border-input border-input rounded-md bg-input text-foreground placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
+                            class="w-64 pl-10 pr-4 py-2 border border-input rounded-md bg-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
                         >
-                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
-                    
-                    <!-- Search Results Dropdown -->
+
+                    <!-- Mobile Search Dropdown -->
                     <div
-                        v-if="showSearchResults && searchQuery"
-                        class="absolute right-0 mt-2 w-96 bg-popover text-popover-foreground rounded-lg shadow-lg z-50 border border-border max-h-96 overflow-y-auto"
+                        v-if="showMobileSearch"
+                        class="md:hidden absolute left-0 mt-2 w-72 bg-popover text-popover-foreground rounded-lg z-50 border border-border p-3"
+                        @click.stop
+                    >
+                        <div class="relative">
+                            <input
+                                ref="mobileSearchInput"
+                                v-model="searchQuery"
+                                @input="handleSearch"
+                                type="text"
+                                :placeholder="t('common.actions.search') + '...'"
+                                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
+                            >
+                            <svg class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <!-- Mobile Search Results -->
+                        <div v-if="searchQuery" class="mt-2 max-h-64 overflow-y-auto">
+                            <div v-if="searching" class="p-3 text-center text-sm text-muted-foreground">
+                                {{ t('common.messages.loading.searching') }}
+                            </div>
+                            <div v-else-if="searchResults.length === 0" class="p-3 text-center text-sm text-muted-foreground">
+                                {{ t('common.messages.empty.search', { query: searchQuery }) }}
+                            </div>
+                            <div v-else class="divide-y divide-border">
+                                <div
+                                    v-for="result in searchResults"
+                                    :key="`${result.type}-${result.id}`"
+                                    @click="handleSearchResultClick(result); showMobileSearch = false"
+                                    class="p-3 hover:bg-muted cursor-pointer rounded-md"
+                                >
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <span class="px-2 py-1 text-xs font-semibold rounded" :class="getResultTypeClass(result.type)">
+                                                {{ getResultLabel(result.type) }}
+                                            </span>
+                                        </div>
+                                        <div class="ml-3 flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-foreground">{{ result.title }}</p>
+                                            <p v-if="result.description" class="text-xs text-muted-foreground mt-1 truncate">{{ result.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-2 text-center">
+                                    <router-link
+                                        :to="{ name: 'search', query: { q: searchQuery } }"
+                                        @click="showMobileSearch = false"
+                                        class="text-xs text-primary hover:text-primary/80"
+                                    >
+                                        {{ t('common.actions.viewAll') }}
+                                    </router-link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Desktop Search Results Dropdown -->
+                    <div
+                        v-if="showSearchResults && searchQuery && !showMobileSearch"
+                        class="hidden md:block absolute right-0 mt-2 w-96 bg-popover text-popover-foreground rounded-lg z-50 border border-border max-h-96 overflow-y-auto"
                         @click.stop
                     >
                         <div v-if="searching" class="p-4 text-center text-sm text-muted-foreground">
@@ -52,7 +122,7 @@
                                 v-for="result in searchResults"
                                 :key="`${result.type}-${result.id}`"
                                 @click="handleSearchResultClick(result)"
-                                class="p-4 hover:bg-muted dark:hover:bg-gray-700 cursor-pointer"
+                                class="p-4 hover:bg-muted cursor-pointer"
                             >
                                 <div class="flex items-start">
                                     <div class="flex-shrink-0">
@@ -70,7 +140,7 @@
                                 <router-link
                                     :to="{ name: 'search', query: { q: searchQuery } }"
                                     @click="showSearchResults = false"
-                                    class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
+                                    class="text-xs text-primary hover:text-primary/80"
                                 >
                                     {{ t('common.actions.viewAll') }}
                                 </router-link>
@@ -82,8 +152,8 @@
                 <!-- Notifications -->
                 <div class="relative">
                     <button
-                        @click="showNotificationsDropdown = !showNotificationsDropdown"
-                        class="relative p-2 text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-300"
+                        @click="toggleNotifications"
+                        class="relative p-2 text-muted-foreground hover:text-foreground dark:hover:text-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -99,14 +169,14 @@
                     <!-- Notifications Dropdown -->
                     <div
                         v-if="showNotificationsDropdown"
-                        class="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground rounded-lg shadow-lg z-50 border border-border"
+                        class="fixed inset-x-4 top-[64px] md:absolute md:inset-x-auto md:top-auto md:right-0 mt-2 md:w-80 bg-popover text-popover-foreground rounded-lg z-50 border border-border shadow-lg"
                         @click.stop
                     >
                         <div class="p-4 border-b border-border flex items-center justify-between">
                             <h3 class="text-sm font-semibold text-foreground">{{ t('common.labels.notifications') }}</h3>
                             <router-link
                                 :to="{ name: 'notifications' }"
-                                class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
+                                class="text-xs text-primary hover:text-primary/80"
                                 @click="showNotificationsDropdown = false"
                             >
                                 {{ t('common.actions.viewAll') }}
@@ -123,7 +193,7 @@
                                 <div
                                     v-for="notification in recentNotifications"
                                     :key="notification.id"
-                                    class="p-4 hover:bg-muted dark:hover:bg-gray-700 cursor-pointer"
+                                    class="p-4 hover:bg-muted cursor-pointer"
                                     :class="{ 'bg-blue-500/10': !notification.read_at }"
                                     @click="handleNotificationClick(notification)"
                                 >
@@ -135,7 +205,7 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
                                             <p class="text-xs text-muted-foreground mt-1 truncate">{{ notification.message }}</p>
-                                            <p class="text-xs text-gray-400 dark:text-muted-foreground mt-1">{{ formatNotificationDate(notification.created_at) }}</p>
+                                            <p class="text-xs text-muted-foreground mt-1">{{ formatNotificationDate(notification.created_at) }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -153,7 +223,7 @@
                 <!-- User Menu -->
                 <div class="relative">
                     <button
-                        @click="showUserMenu = !showUserMenu"
+                        @click="toggleUserMenu"
                         class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors"
                     >
                         <img
@@ -173,7 +243,7 @@
                             <p class="text-sm font-medium text-foreground">{{ user?.name || t('common.labels.user') }}</p>
                             <p class="text-xs text-muted-foreground">{{ user?.email || '' }}</p>
                         </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -181,7 +251,7 @@
                     <!-- User Dropdown -->
                     <div
                         v-if="showUserMenu"
-                        class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-lg shadow-lg z-50 border border-border"
+                        class="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-lg z-50 border border-border"
                         @click.stop
                     >
                         <div class="p-3 border-b border-border">
@@ -269,6 +339,8 @@ const searchResults = ref([]);
 const searching = ref(false);
 const searchTimeout = ref(null);
 const avatarError = ref(false);
+const showMobileSearch = ref(false);
+const mobileSearchInput = ref(null);
 
 const unreadNotificationsCount = computed(() => {
     if (!Array.isArray(notifications.value)) {
@@ -403,12 +475,47 @@ const getResultTypeClass = (type) => {
         media: 'bg-yellow-500/20 text-yellow-400 dark:bg-yellow-900 dark:text-yellow-200',
         page: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
     };
-    return classes[type] || 'bg-secondary text-secondary-foreground dark:bg-gray-700 dark:text-gray-200';
+    return classes[type] || 'bg-secondary text-secondary-foreground';
 };
 
 const getResultLabel = (type) => {
     const key = `common.labels.${type?.toLowerCase()}`;
     return te(key) ? t(key) : type;
+};
+
+// Close all dropdowns helper
+const closeAllDropdowns = () => {
+    showNotificationsDropdown.value = false;
+    showUserMenu.value = false;
+    showMobileSearch.value = false;
+    showSearchResults.value = false;
+};
+
+// Dispatch event to close child component dropdowns (LanguageSwitcher, DarkModeToggle)
+const closeChildDropdowns = () => {
+    window.dispatchEvent(new CustomEvent('close-navbar-dropdowns'));
+};
+
+// Toggle functions that close other dropdowns first
+const toggleMobileSearch = () => {
+    const wasOpen = showMobileSearch.value;
+    closeAllDropdowns();
+    closeChildDropdowns();
+    showMobileSearch.value = !wasOpen;
+};
+
+const toggleNotifications = () => {
+    const wasOpen = showNotificationsDropdown.value;
+    closeAllDropdowns();
+    closeChildDropdowns();
+    showNotificationsDropdown.value = !wasOpen;
+};
+
+const toggleUserMenu = () => {
+    const wasOpen = showUserMenu.value;
+    closeAllDropdowns();
+    closeChildDropdowns();
+    showUserMenu.value = !wasOpen;
 };
 
 const handleLogout = () => {
@@ -422,6 +529,9 @@ const handleClickOutside = (event) => {
     }
     if (showSearchResults.value && !event.target.closest('.relative')) {
         showSearchResults.value = false;
+    }
+    if (showMobileSearch.value && !event.target.closest('.relative')) {
+        showMobileSearch.value = false;
     }
     if (showUserMenu.value && !event.target.closest('.relative')) {
         showUserMenu.value = false;

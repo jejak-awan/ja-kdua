@@ -10,30 +10,30 @@
 
         <!-- Statistics Cards -->
         <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-            <div class="bg-card shadow rounded-lg p-4">
+            <div class="bg-card border border-border rounded-lg p-4">
                 <p class="text-2xl font-bold text-foreground">{{ statistics.total }}</p>
                 <p class="text-sm text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
             </div>
-            <div class="bg-yellow-500/20 shadow rounded-lg p-4 cursor-pointer" @click="statusFilter = 'pending'">
+            <div class="bg-yellow-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'pending'">
                 <p class="text-2xl font-bold text-yellow-600">{{ statistics.pending }}</p>
                 <p class="text-sm text-yellow-400">{{ $t('features.comments.stats.pending') }}</p>
             </div>
-            <div class="bg-green-500/20 shadow rounded-lg p-4 cursor-pointer" @click="statusFilter = 'approved'">
+            <div class="bg-green-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'approved'">
                 <p class="text-2xl font-bold text-green-600">{{ statistics.approved }}</p>
                 <p class="text-sm text-green-400">{{ $t('features.comments.stats.approved') }}</p>
             </div>
-            <div class="bg-red-500/20 shadow rounded-lg p-4 cursor-pointer" @click="statusFilter = 'rejected'">
+            <div class="bg-red-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'rejected'">
                 <p class="text-2xl font-bold text-red-600">{{ statistics.rejected }}</p>
                 <p class="text-sm text-red-400">{{ $t('features.comments.stats.rejected') }}</p>
             </div>
-            <div class="bg-muted shadow rounded-lg p-4 cursor-pointer" @click="statusFilter = 'spam'">
+            <div class="bg-muted border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'spam'">
                 <p class="text-2xl font-bold text-muted-foreground">{{ statistics.spam }}</p>
                 <p class="text-sm text-foreground">{{ $t('features.comments.stats.spam') }}</p>
             </div>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card shadow rounded-lg p-4 mb-4">
+        <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
@@ -64,12 +64,12 @@
         </div>
 
         <!-- Comments List -->
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
         </div>
 
-        <div v-else-if="comments.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="comments.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <p class="mt-4 text-muted-foreground">{{ $t('features.comments.list.empty') }}</p>
@@ -79,7 +79,7 @@
             <div
                 v-for="comment in comments"
                 :key="comment.id"
-                class="bg-card shadow rounded-lg p-6"
+                class="bg-card border border-border rounded-lg p-6"
             >
                 <!-- Comment Header -->
                 <div class="flex items-start justify-between mb-4">
@@ -246,7 +246,7 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.last_page > 1" class="bg-card shadow rounded-lg p-4 flex items-center justify-between">
+            <div v-if="pagination && pagination.last_page > 1" class="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
                 <div class="text-sm text-foreground">
                     Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
                 </div>

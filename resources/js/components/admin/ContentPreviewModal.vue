@@ -7,7 +7,7 @@
         >
             <div class="absolute inset-0 bg-black bg-opacity-50"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4">
-                <div class="bg-card rounded-lg shadow-xl w-full h-full max-w-7xl flex flex-col">
+                <div class="bg-card rounded-lg w-full h-full max-w-7xl flex flex-col">
                     <!-- Header -->
                     <div class="flex items-center justify-between p-4 border-b">
                         <div class="flex items-center space-x-4">
@@ -20,7 +20,7 @@
                                     :class="[
                                         'px-3 py-1 text-sm rounded',
                                         selectedDevice === device.name
-                                            ? 'bg-indigo-600 text-white'
+                                            ? 'bg-primary text-primary-foreground'
                                             : 'bg-secondary text-foreground hover:bg-accent'
                                     ]"
                                 >
@@ -32,13 +32,13 @@
                             <button
                                 v-if="canPublish"
                                 @click="handlePublish"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                             >
                                 Publish
                             </button>
                             <button
                                 @click="handleClose"
-                                class="p-2 text-gray-400 hover:text-muted-foreground"
+                                class="p-2 text-muted-foreground hover:text-muted-foreground"
                             >
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

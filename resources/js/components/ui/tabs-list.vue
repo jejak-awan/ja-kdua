@@ -1,7 +1,7 @@
 <template>
   <TabsList
     :class="cn(
-      'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      'inline-flex flex-wrap h-auto items-center justify-start rounded-lg bg-muted border border-border p-1.5 text-muted-foreground gap-1',
       props.class
     )"
   >

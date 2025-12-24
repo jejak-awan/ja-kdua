@@ -14,7 +14,7 @@
                 <p class="text-sm">{{ message }}</p>
             </div>
 
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="text-center mb-6">
                     <svg class="mx-auto h-12 w-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -28,7 +28,7 @@
                     <button
                         @click="handleResend"
                         :disabled="loading || resendCooldown > 0"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="loading">{{ t('features.auth.verifyEmail.sending') }}</span>
                         <span v-else-if="resendCooldown > 0">{{ t('features.auth.verifyEmail.cooldown', { seconds: resendCooldown }) }}</span>

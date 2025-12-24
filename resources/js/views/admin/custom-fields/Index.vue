@@ -14,7 +14,7 @@
                 </button>
                 <button
                     @click="showCreateFieldModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="border-b border-border">
                 <nav class="-mb-px flex px-6" aria-label="Tabs">
                     <button
@@ -34,7 +34,7 @@
                         :class="[
                             currentTab === tab.name
                                 ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300',
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-input',
                             'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm mr-8'
                         ]"
                     >
@@ -54,16 +54,16 @@
                 <table v-else class="min-w-full divide-y divide-border">
                     <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.groups.table.name') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.groups.table.fields') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.groups.table.attached_to') }}
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.groups.table.actions') }}
                             </th>
                         </tr>
@@ -122,19 +122,19 @@
                 <table v-else class="min-w-full divide-y divide-border">
                     <thead class="bg-muted">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.fields.table.label') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.fields.table.name') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.fields.table.type') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.fields.table.group') }}
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                                 {{ t('features.developer.custom_fields.fields.table.actions') }}
                             </th>
                         </tr>

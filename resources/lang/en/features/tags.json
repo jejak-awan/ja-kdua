@@ -1,5 +1,7 @@
 {
     "title": "Tags",
+    "title_singular": "Tag",
+    "description": "Manage content tags",
     "createNew": "New Tag",
     "search": "Search tags...",
     "stats": {

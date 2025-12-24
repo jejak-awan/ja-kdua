@@ -5,33 +5,24 @@
             <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.settings.description') }}</p>
         </div>
 
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('features.settings.loading') }}</p>
         </div>
 
-        <div v-else class="bg-card shadow rounded-lg">
-            <!-- Tabs -->
-            <div class="border-b border-border">
-                <nav class="flex -mb-px overflow-x-auto">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        @click="activeTab = tab.id"
-                        :class="[
-                            'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
-                            activeTab === tab.id
-                                ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-input'
-                        ]"
-                    >
-                        {{ $t('features.settings.tabs.' + tab.id) }}
-                    </button>
-                </nav>
-            </div>
+        <div v-else class="bg-card border border-border rounded-lg">
+            <!-- Shadcn Tabs -->
+            <Tabs v-model="activeTab" class="w-full">
+                <div class="p-4 border-b border-border">
+                    <TabsList class="flex-wrap">
+                        <TabsTrigger v-for="tab in tabs" :key="tab.id" :value="tab.id">
+                            {{ $t('features.settings.tabs.' + tab.id) }}
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-            <!-- Tab Content -->
-            <div class="p-6">
-                <form @submit.prevent="handleSubmit" class="space-y-6">
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <form @submit.prevent="handleSubmit" class="space-y-6">
                     <div v-if="currentSettings.length === 0" class="text-center py-8">
                         <p class="text-muted-foreground">{{ $t('features.settings.noSettings') }}</p>
                     </div>
@@ -99,7 +90,7 @@
                             </div>
 
                             <!-- Current Value Display -->
-                            <p v-if="setting.value" class="mt-1 text-xs text-gray-400">
+                            <p v-if="setting.value" class="mt-1 text-xs text-muted-foreground">
                                 {{ $t('features.settings.current') }}: {{ formatValue(setting.value, setting.type) }}
                             </p>
                         </div>
@@ -202,7 +193,7 @@
                                     type="button"
                                     @click="sendTestEmail"
                                     :disabled="sendingTestEmail || !testEmail.to"
-                                    class="w-full px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                    class="w-full px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                                 >
                                     {{ sendingTestEmail ? $t('features.settings.emailTest.sending') : $t('features.settings.emailTest.sendTest') }}
                                 </button>
@@ -256,7 +247,7 @@
                                             <p class="font-medium text-foreground">{{ log.to }}</p>
                                             <p class="text-muted-foreground">{{ log.subject }}</p>
                                         </div>
-                                        <span class="text-gray-400">{{ formatDate(log.sent_at) }}</span>
+                                        <span class="text-muted-foreground">{{ formatDate(log.sent_at) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -278,13 +269,14 @@
                         <button
                             type="submit"
                             :disabled="saving"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ saving ? $t('features.settings.saving') : $t('features.settings.save') }}
                         </button>
                     </div>
                 </form>
             </div>
+            </Tabs>
         </div>
     </div>
 </template>
@@ -294,6 +286,9 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Tabs from '../../../components/ui/tabs.vue';
+import TabsList from '../../../components/ui/tabs-list.vue';
+import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 
 const { t } = useI18n();
 const loading = ref(false);

@@ -4,28 +4,20 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.seo.title') }}</h1>
         </div>
 
-        <!-- Tabs -->
-        <div class="bg-card shadow rounded-lg">
-            <div class="border-b border-border">
-                <nav class="flex -mb-px">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        @click="activeTab = tab.id"
-                        :class="[
-                            'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
-                            activeTab === tab.id
-                                ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-input'
-                        ]"
-                    >
-                        {{ tab.label }}
-                    </button>
-                </nav>
-            </div>
+        <!-- Shadcn Tabs -->
+        <div class="bg-card border border-border rounded-lg">
+            <Tabs v-model="activeTab" class="w-full">
+                <div class="p-4 border-b border-border">
+                    <TabsList>
+                        <TabsTrigger value="sitemap">{{ $t('features.seo.tabs.sitemap') }}</TabsTrigger>
+                        <TabsTrigger value="robots">{{ $t('features.seo.tabs.robots') }}</TabsTrigger>
+                        <TabsTrigger value="analysis">{{ $t('features.seo.tabs.analysis') }}</TabsTrigger>
+                        <TabsTrigger value="schema">{{ $t('features.seo.tabs.schema') }}</TabsTrigger>
+                    </TabsList>
+                </div>
 
-            <!-- Sitemap Tab -->
-            <div v-if="activeTab === 'sitemap'" class="p-6">
+                <!-- Sitemap Tab -->
+                <TabsContent value="sitemap" class="p-6">
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.sitemap.title') }}</h3>
@@ -43,16 +35,16 @@
                         <button
                             @click="generateSitemap"
                             :disabled="generatingSitemap"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ generatingSitemap ? $t('features.seo.sitemap.generating') : $t('features.seo.sitemap.generate') }}
                         </button>
                     </div>
                 </div>
-            </div>
+                </TabsContent>
 
-            <!-- Robots.txt Tab -->
-            <div v-if="activeTab === 'robots'" class="p-6">
+                <!-- Robots.txt Tab -->
+                <TabsContent value="robots" class="p-6">
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.robots.title') }}</h3>
@@ -71,7 +63,7 @@
                             <button
                                 @click="saveRobotsTxt"
                                 :disabled="savingRobots"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                             >
                                 {{ savingRobots ? $t('features.seo.robots.saving') : $t('features.seo.robots.save') }}
                             </button>
@@ -84,10 +76,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </TabsContent>
 
-            <!-- SEO Analysis Tab -->
-            <div v-if="activeTab === 'analysis'" class="p-6">
+                <!-- SEO Analysis Tab -->
+                <TabsContent value="analysis" class="p-6">
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.analysis.title') }}</h3>
@@ -112,7 +104,7 @@
                         <button
                             @click="runAnalysis"
                             :disabled="analyzing || !selectedContentId"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ analyzing ? $t('features.seo.analysis.analyzing') : $t('features.seo.analysis.run') }}
                         </button>
@@ -154,10 +146,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </TabsContent>
 
-            <!-- Schema Generation Tab -->
-            <div v-if="activeTab === 'schema'" class="p-6">
+                <!-- Schema Generation Tab -->
+                <TabsContent value="schema" class="p-6">
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.schema.title') }}</h3>
@@ -182,7 +174,7 @@
                         <button
                             @click="generateSchema"
                             :disabled="generatingSchema || !selectedContentForSchema"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ generatingSchema ? $t('features.seo.schema.generating') : $t('features.seo.schema.generate') }}
                         </button>
@@ -194,7 +186,7 @@
                             <h4 class="text-md font-semibold text-foreground">{{ $t('features.seo.schema.jsonTitle') }}</h4>
                             <button
                                 @click="copySchema"
-                                class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                class="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                             >
                                 {{ $t('features.seo.schema.copy') }}
                             </button>
@@ -202,7 +194,8 @@
                         <pre class="bg-card rounded-lg p-4 overflow-x-auto text-xs font-mono">{{ schemaJson }}</pre>
                     </div>
                 </div>
-            </div>
+                </TabsContent>
+            </Tabs>
         </div>
     </div>
 </template>
@@ -212,6 +205,10 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Tabs from '../../../components/ui/tabs.vue';
+import TabsList from '../../../components/ui/tabs-list.vue';
+import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
+import TabsContent from '../../../components/ui/tabs-content.vue';
 
 const { t } = useI18n();
 const activeTab = ref('sitemap');

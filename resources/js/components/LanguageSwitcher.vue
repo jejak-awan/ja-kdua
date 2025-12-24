@@ -1,8 +1,8 @@
 <template>
     <div class="relative" v-click-outside="closeDropdown">
         <button
-            @click="isOpen = !isOpen"
-            class="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-muted dark:hover:bg-gray-700"
+            @click="toggleDropdown"
+            class="flex items-center justify-center p-2 rounded-md transition-colors hover:bg-muted"
             :class="{ 'bg-indigo-500/10 text-indigo-500': isOpen, 'text-muted-foreground hover:text-foreground': !isOpen }"
             :title="currentLanguage?.native_name || 'Select Language'"
         >
@@ -20,7 +20,7 @@
         >
             <div
                 v-if="isOpen"
-                class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-card dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 transform origin-top-right"
+                class="absolute right-0 mt-2 w-56 rounded-md bg-card ring-1 ring-black ring-opacity-5 z-50 transform origin-top-right"
             >
                 <div class="py-1 max-h-64 overflow-y-auto">
                     <button
@@ -37,7 +37,7 @@
                             <div class="font-medium text-foreground">
                                 {{ language.native_name || language.name }}
                             </div>
-                            <div v-if="language.native_name && language.native_name !== language.name" class="text-xs text-muted-foreground dark:text-gray-400">
+                            <div v-if="language.native_name && language.native_name !== language.name" class="text-xs text-muted-foreground">
                                 {{ language.name }}
                             </div>
                         </div>
@@ -72,6 +72,21 @@ const {
 const isOpen = ref(false);
 
 const closeDropdown = () => {
+    isOpen.value = false;
+};
+
+// Toggle dropdown and dispatch event to close other dropdowns
+const toggleDropdown = () => {
+    const wasOpen = isOpen.value;
+    if (!wasOpen) {
+        // Close other dropdowns before opening this one
+        window.dispatchEvent(new CustomEvent('close-navbar-dropdowns'));
+    }
+    isOpen.value = !wasOpen;
+};
+
+// Listen for close events from other dropdowns
+const handleCloseDropdowns = () => {
     isOpen.value = false;
 };
 
@@ -113,10 +128,12 @@ const vClickOutside = {
 onMounted(async () => {
     await initializeLanguage();
     document.addEventListener('keydown', handleEscape);
+    window.addEventListener('close-navbar-dropdowns', handleCloseDropdowns);
 });
 
 onUnmounted(() => {
     document.removeEventListener('keydown', handleEscape);
+    window.removeEventListener('close-navbar-dropdowns', handleCloseDropdowns);
 });
 </script>
 

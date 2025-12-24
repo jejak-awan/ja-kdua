@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="fields.length === 0" class="text-center py-8 border-2 border-dashed border-input rounded-lg">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             <p class="mt-2 text-sm text-muted-foreground">No fields yet. Click "Add Field" to get started.</p>

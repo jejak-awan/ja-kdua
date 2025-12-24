@@ -3,7 +3,7 @@
         <button
             type="button"
             @click="showModal = true"
-            class="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+            class="w-full px-4 py-2 border-2 border-dashed border-input rounded-lg text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-colors"
         >
             {{ label || $t('features.media.modals.picker.select') }}
         </button>
@@ -11,16 +11,16 @@
         <!-- Media Picker Modal -->
         <div
             v-if="showModal"
-            class="fixed inset-0 z-50 overflow-y-auto"
+            class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm"
             @click.self="showModal = false"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+                <div class="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
                     <div class="flex items-center justify-between p-4 border-b">
                         <h3 class="text-lg font-semibold">{{ $t('features.media.modals.picker.title') }}</h3>
                         <button
                             @click="showModal = false"
-                            class="text-gray-400 hover:text-muted-foreground"
+                            class="text-muted-foreground hover:text-muted-foreground"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -42,7 +42,7 @@
                                 :key="media.id"
                                 @click="selectMedia(media)"
                                 class="cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:border-indigo-500"
-                                :class="selectedMedia?.id === media.id ? 'border-indigo-500' : 'border-gray-200'"
+                                :class="selectedMedia?.id === media.id ? 'border-indigo-500' : 'border-input'"
                             >
                                 <div class="aspect-square bg-secondary flex items-center justify-center">
                                     <img
@@ -51,7 +51,7 @@
                                         :alt="media.name"
                                         class="w-full h-full object-cover"
                                     >
-                                    <div v-else class="text-gray-400">
+                                    <div v-else class="text-muted-foreground">
                                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
@@ -68,21 +68,21 @@
                     <div class="flex items-center justify-between p-4 border-t">
                         <button
                             @click="showUpload = true"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                         >
                             {{ $t('features.media.actions.uploadNew') }}
                         </button>
                         <div class="flex space-x-2">
                             <button
                                 @click="showModal = false"
-                                class="px-4 py-2 border border-gray-300 rounded-md text-foreground hover:bg-muted"
+                                class="px-4 py-2 border border-input rounded-md text-foreground hover:bg-muted"
                             >
                                 {{ $t('features.media.actions.cancel') }}
                             </button>
                             <button
                                 @click="confirmSelection"
                                 :disabled="!selectedMedia"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                             >
                                 {{ $t('features.media.actions.select') }}
                             </button>
@@ -95,16 +95,16 @@
         <!-- Upload Modal -->
         <div
             v-if="showUpload"
-            class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50"
+            class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm"
             @click.self="showUpload = false"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="bg-card rounded-lg max-w-md w-full p-6">
                     <h3 class="text-lg font-semibold mb-4">{{ $t('features.media.modals.upload.title') }}</h3>
                     <MediaUpload @uploaded="handleMediaUploaded" />
                     <button
                         @click="showUpload = false"
-                        class="mt-4 w-full px-4 py-2 border border-gray-300 rounded-md text-foreground hover:bg-muted"
+                        class="mt-4 w-full px-4 py-2 border border-input rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.media.actions.close') }}
                     </button>

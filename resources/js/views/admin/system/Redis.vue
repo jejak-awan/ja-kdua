@@ -5,22 +5,16 @@
       <p class="page-description">{{ $t('features.redis.description') }}</p>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        :class="['tab', { active: activeTab === tab.id }]"
-        @click="activeTab = tab.id"
-      >
-        {{ $t(`features.redis.tabs.${tab.id}`) }}
-      </button>
-    </div>
+    <!-- Shadcn Tabs -->
+    <Tabs v-model="activeTab" class="w-full">
+      <TabsList class="mb-6">
+        <TabsTrigger v-for="tab in tabs" :key="tab.id" :value="tab.id">
+          {{ $t(`features.redis.tabs.${tab.id}`) }}
+        </TabsTrigger>
+      </TabsList>
 
-    <!-- Tab Content -->
-    <div class="tab-content">
       <!-- Settings Tab -->
-      <div v-if="activeTab === 'settings'" class="settings-tab">
+      <TabsContent value="settings" class="settings-tab">
         <div class="card">
           <div class="card-header">
             <h3>{{ $t('features.redis.settings.connection') }}</h3>
@@ -72,10 +66,10 @@
             </div>
           </form>
         </div>
-      </div>
+      </TabsContent>
 
       <!-- Statistics Tab -->
-      <div v-if="activeTab === 'statistics'" class="statistics-tab">
+      <TabsContent value="statistics" class="statistics-tab">
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">🚀</div>
@@ -171,10 +165,10 @@
           </button>
           <span class="text-muted">{{ $t('features.redis.statistics.autoRefresh') }}</span>
         </div>
-      </div>
+      </TabsContent>
 
       <!-- Cache Tab -->
-      <div v-if="activeTab === 'cache'" class="cache-tab">
+      <TabsContent value="cache" class="cache-tab">
         <div class="card">
           <div class="card-header">
             <h3>{{ $t('features.redis.cache.title') }}</h3>
@@ -269,8 +263,8 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </TabsContent>
+    </Tabs>
   </div>
 </template>
 
@@ -278,6 +272,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
+import Tabs from '@/components/ui/tabs.vue'
+import TabsList from '@/components/ui/tabs-list.vue'
+import TabsTrigger from '@/components/ui/tabs-trigger.vue'
+import TabsContent from '@/components/ui/tabs-content.vue'
 
 const { t } = useI18n()
 const activeTab = ref('statistics')

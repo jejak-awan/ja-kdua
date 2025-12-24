@@ -2,13 +2,13 @@
     <div class="rich-text-editor">
         <!-- Editor Mode Toggle -->
         <div class="flex items-center justify-end mb-2">
-            <div class="flex items-center space-x-2 border border-gray-300 rounded-md p-1 bg-card">
+            <div class="flex items-center space-x-2 border border-input rounded-md p-1 bg-card">
                 <button
                     @click="editorMode = 'wysiwyg'"
                     :class="[
                         'px-3 py-1 text-sm rounded',
                         editorMode === 'wysiwyg'
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-primary text-primary-foreground'
                             : 'text-foreground hover:bg-accent'
                     ]"
                 >
@@ -19,7 +19,7 @@
                     :class="[
                         'px-3 py-1 text-sm rounded',
                         editorMode === 'markdown'
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-primary text-primary-foreground'
                             : 'text-foreground hover:bg-accent'
                     ]"
                 >
@@ -30,7 +30,7 @@
 
         <!-- WYSIWYG Editor -->
         <div v-if="editorMode === 'wysiwyg'">
-            <div ref="editor" class="editor-container" />
+            <div ref="editor" class="editor-container"></div>
         </div>
 
         <!-- Markdown Editor -->

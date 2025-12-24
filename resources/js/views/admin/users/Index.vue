@@ -3,19 +3,19 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
-            <button
-                @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            <router-link
+                :to="{ name: 'users.create' }"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 {{ $t('features.users.createNew') }}
-            </button>
+            </router-link>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card shadow rounded-lg p-4 mb-4">
+        <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
@@ -40,34 +40,34 @@
         </div>
 
         <!-- Users List -->
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('features.users.loading') }}</p>
         </div>
 
-        <div v-else-if="users.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="users.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <p class="mt-4 text-muted-foreground">{{ $t('features.users.empty') }}</p>
         </div>
 
-        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.users.table.user') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.users.table.email') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.users.table.roles') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.users.table.lastLogin') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.users.table.actions') }}
                         </th>
                     </tr>
@@ -85,9 +85,9 @@
                                     >
                                     <div
                                         v-else
-                                        class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center"
+                                        class="h-10 w-10 rounded-full bg-muted flex items-center justify-center border border-border"
                                     >
-                                        <span class="text-indigo-600 font-medium text-sm">
+                                        <span class="text-muted-foreground font-medium text-sm">
                                             {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
                                         </span>
                                     </div>
@@ -112,11 +112,11 @@
                                 <span
                                     v-for="role in (user.roles || [])"
                                     :key="role.id"
-                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800"
+                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-secondary text-secondary-foreground border border-secondary"
                                 >
                                     {{ role.name }}
                                 </span>
-                                <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-gray-400">
+                                <span v-if="!user.roles || user.roles.length === 0" class="text-xs text-muted-foreground">
                                     {{ $t('features.users.status.noRoles') }}
                                 </span>
                             </div>
@@ -125,7 +125,7 @@
                             <div v-if="user.last_login_at">
                                 {{ formatDate(user.last_login_at) }}
                             </div>
-                            <div v-else class="text-gray-400">
+                            <div v-else class="text-muted-foreground">
                                 {{ $t('features.users.status.never') }}
                             </div>
                         </td>
@@ -135,13 +135,13 @@
                                     @click="editUser(user)"
                                     class="text-indigo-600 hover:text-indigo-900"
                                 >
-                                    {{ $t('features.users.actions.edit') }}
+                                    {{ $t('common.actions.edit') }}
                                 </button>
                                 <button
                                     @click="deleteUser(user)"
                                     class="text-red-600 hover:text-red-900"
                                 >
-                                    {{ $t('features.users.actions.delete') }}
+                                    {{ $t('common.actions.delete') }}
                                 </button>
                             </div>
                         </td>
@@ -173,33 +173,25 @@
             </div>
         </div>
 
-        <!-- Create/Edit Modal -->
-        <UserModal
-            v-if="showCreateModal || showEditModal"
-            @close="closeModal"
-            @saved="handleUserSaved"
-            :user="editingUser"
-        />
+        <!-- Create/Edit Modal Removed -->
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import api from '../../../services/api';
-import UserModal from '../../../components/users/UserModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const router = useRouter();
 const loading = ref(false);
 const users = ref([]);
 const roles = ref([]);
 const search = ref('');
 const roleFilter = ref('');
 const pagination = ref(null);
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
-const editingUser = ref(null);
 
 const fetchUsers = async () => {
     loading.value = true;
@@ -235,8 +227,6 @@ const fetchUsers = async () => {
 
 const fetchRoles = async () => {
     try {
-        // Fetch roles from Spatie Permission
-        // Note: You may need to create a roles endpoint or use a different approach
         const response = await api.get('/admin/cms/roles').catch(() => null);
         if (response) {
             const { data: rolesData } = parseResponse(response);
@@ -266,8 +256,7 @@ const changePage = (page) => {
 };
 
 const editUser = (user) => {
-    editingUser.value = user;
-    showEditModal.value = true;
+    router.push({ name: 'users.edit', params: { id: user.id } });
 };
 
 const deleteUser = async (user) => {
@@ -283,18 +272,6 @@ const deleteUser = async (user) => {
         const message = error.response?.data?.message || t('features.users.messages.deleteFailed');
         alert(message);
     }
-};
-
-const closeModal = () => {
-    showCreateModal.value = false;
-    showEditModal.value = false;
-    editingUser.value = null;
-};
-
-const handleUserSaved = () => {
-    fetchUsers();
-    fetchRoles();
-    closeModal();
 };
 
 const formatDate = (date) => {

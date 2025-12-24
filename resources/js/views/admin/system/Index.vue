@@ -6,7 +6,7 @@
 
         <!-- System Health -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.info.health.title') }}</p>
@@ -40,7 +40,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,13 +69,13 @@
         </div>
 
         <!-- System Info -->
-        <div class="bg-card shadow rounded-lg p-6 mb-6">
+        <div class="bg-card border border-border rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.info.title') }}</h2>
                 <button
                     @click="clearCache"
                     :disabled="clearingCache"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 text-sm"
                 >
                     {{ clearingCache ? t('features.system.info.cache.clearing') : t('features.system.info.cache.clear') }}
                 </button>
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Statistics -->
-        <div v-if="statistics" class="bg-card shadow rounded-lg p-6">
+        <div v-if="statistics" class="bg-card border border-border rounded-lg p-6">
             <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.statistics.title') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center p-4 bg-muted rounded-lg">

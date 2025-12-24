@@ -1,6 +1,6 @@
 <template>
-    <div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-10 mx-auto p-5 border w-full max-w-6xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="close">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-6xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-foreground">{{ t('features.forms.submissions.title') }}</h2>
@@ -8,7 +8,7 @@
                 </div>
                 <button
                     @click="close"
-                    class="text-gray-400 hover:text-muted-foreground"
+                    class="text-muted-foreground hover:text-muted-foreground"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -68,7 +68,7 @@
                 <div class="mt-4 flex justify-end">
                     <button
                         @click="exportSubmissions"
-                        class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted"
+                        class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted"
                     >
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -84,7 +84,7 @@
             </div>
 
             <div v-else-if="submissions.length === 0" class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p class="mt-4 text-muted-foreground">{{ t('features.forms.submissions.empty') }}</p>
@@ -178,15 +178,15 @@
             <!-- Submission Detail Modal -->
             <div
                 v-if="selectedSubmission"
-                class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50"
+                class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50"
                 @click.self="selectedSubmission = null"
             >
-                <div class="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-3xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-foreground">{{ t('features.forms.submissions.detailTitle') }}</h3>
                         <button
                             @click="selectedSubmission = null"
-                            class="text-gray-400 hover:text-muted-foreground"
+                            class="text-muted-foreground hover:text-muted-foreground"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -217,7 +217,7 @@
                         <div class="border-t border-border pt-4">
                             <h4 class="font-semibold text-foreground mb-3">{{ t('features.forms.submissions.formData') }}</h4>
                             <dl class="space-y-3">
-                                <div v-for="(value, key) in selectedSubmission.data" :key="key" class="border-b border-gray-100 pb-2">
+                                <div v-for="(value, key) in selectedSubmission.data" :key="key" class="border-b border-border pb-2">
                                     <dt class="text-sm font-medium text-foreground">{{ key }}</dt>
                                     <dd class="mt-1 text-sm text-foreground">{{ formatValue(value) }}</dd>
                                 </div>

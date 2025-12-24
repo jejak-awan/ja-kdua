@@ -52,7 +52,9 @@
         "seoTitlePlaceholder": "Judul SEO (bawaan dari judul konten)",
         "seoDescPlaceholder": "Deskripsi SEO (bawaan dari kutipan)",
         "keywordsPlaceholder": "kata kunci1, kata kunci2, kata kunci3",
-        "selectOgImage": "Pilih Gambar OG"
+        "selectOgImage": "Pilih Gambar OG",
+        "metaKeywords": "Kata Kunci Meta",
+        "ogImage": "Gambar Open Graph"
     },
     "messages": {
         "loadFailed": "Gagal memuat konten",

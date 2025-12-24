@@ -6,7 +6,7 @@
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +19,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
@@ -136,7 +136,7 @@
                                 <span>{{ log.model_type || '' }}</span>
                                 <span>{{ formatDate(log.created_at) }}</span>
                             </div>
-                            <div v-if="log.properties" class="mt-2 text-xs text-gray-400">
+                            <div v-if="log.properties" class="mt-2 text-xs text-muted-foreground">
                                 <details>
                                     <summary class="cursor-pointer hover:text-muted-foreground">{{ t('features.activityLogs.messages.viewDetails') }}</summary>
                                     <pre class="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">{{ JSON.stringify(log.properties, null, 2) }}</pre>

@@ -19,7 +19,7 @@
                 >
                 <button
                     @click="fetchAnalytics"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                 >
                     {{ $t('features.analytics.apply') }}
                 </button>
@@ -34,7 +34,7 @@
         <div v-else>
             <!-- Overview Cards -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                <div class="bg-card overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden border border-border rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
 
-                <div class="bg-card overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden border border-border rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -71,7 +71,7 @@
                     </div>
                 </div>
 
-                <div class="bg-card overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden border border-border rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                <div class="bg-card overflow-hidden shadow rounded-lg">
+                <div class="bg-card overflow-hidden border border-border rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -110,7 +110,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Visits Chart -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.visitsOverTime') }}</h2>
                     <div class="h-64">
                          <LineChart
@@ -125,7 +125,7 @@
                 </div>
 
                 <!-- Top Pages -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topPages') }}</h2>
                     <div class="space-y-3">
                         <div
@@ -150,7 +150,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Devices -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.devices') }}</h2>
                     <div class="h-64">
                         <DoughnutChart
@@ -166,7 +166,7 @@
                 </div>
 
                 <!-- Browsers -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.browsers') }}</h2>
                     <div class="h-64">
                          <DoughnutChart
@@ -184,7 +184,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Top Content -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topContent') }}</h2>
                     <div class="space-y-3">
                         <div
@@ -208,7 +208,7 @@
                 </div>
 
                 <!-- Countries -->
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topCountries') }}</h2>
                     <div class="h-64">
                          <BarChart
@@ -226,7 +226,7 @@
             </div>
 
             <!-- Referrers -->
-            <div class="bg-card shadow rounded-lg p-6 mb-6">
+            <div class="bg-card border border-border rounded-lg p-6 mb-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h2>
                 <div class="space-y-3">
                     <div
@@ -249,7 +249,7 @@
             </div>
 
             <!-- Real-time Stats -->
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.analytics.charts.realtime') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="text-center p-4 bg-indigo-500/10 rounded-lg">

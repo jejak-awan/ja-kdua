@@ -23,7 +23,7 @@
                 </select>
                 <router-link
                     :to="{ name: 'contents.create' }"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg p-4">
+        <div class="bg-card border border-border rounded-lg p-4">
             <FullCalendar
                 ref="calendar"
                 :options="calendarOptions"

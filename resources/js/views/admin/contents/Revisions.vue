@@ -13,34 +13,34 @@
             </router-link>
         </div>
 
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">Loading revisions...</p>
         </div>
 
-        <div v-else-if="revisions.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="revisions.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p class="mt-4 text-muted-foreground">No revisions found</p>
         </div>
 
-        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             Version
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             Author
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             Date
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             Changes
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             Actions
                         </th>
                     </tr>
@@ -63,7 +63,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-muted-foreground">{{ formatDate(revision.created_at) }}</div>
-                            <div class="text-xs text-gray-400">{{ formatTime(revision.created_at) }}</div>
+                            <div class="text-xs text-muted-foreground">{{ formatTime(revision.created_at) }}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-muted-foreground">
@@ -99,14 +99,14 @@
             @click.self="viewingRevision = null"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                     <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-card">
                         <h3 class="text-lg font-semibold">
                             Revision v{{ viewingRevision.version }}
                         </h3>
                         <button
                             @click="viewingRevision = null"
-                            class="text-gray-400 hover:text-muted-foreground"
+                            class="text-muted-foreground hover:text-muted-foreground"
                         >
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

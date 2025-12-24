@@ -1,6 +1,6 @@
 <template>
     <div class="media-upload">
-        <div v-if="!preview" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+        <div v-if="!preview" class="border-2 border-dashed border-input rounded-lg p-6 text-center">
             <input
                 ref="fileInput"
                 type="file"
@@ -10,7 +10,7 @@
             >
             <button
                 @click="$refs.fileInput.click()"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/80"
             >
                 Choose File
             </button>
@@ -29,7 +29,7 @@
                 </button>
                 <button
                     @click="clearPreview"
-                    class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                    class="bg-muted text-white px-4 py-2 rounded-md hover:bg-muted"
                 >
                     Cancel
                 </button>

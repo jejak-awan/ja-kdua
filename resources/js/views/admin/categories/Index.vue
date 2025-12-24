@@ -3,19 +3,19 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.categories.title') }}</h1>
-            <button
-                @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            <router-link
+                :to="{ name: 'categories.create' }"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 {{ $t('features.categories.createNew') }}
-            </button>
+            </router-link>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card shadow rounded-lg p-4 mb-4">
+        <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
@@ -34,19 +34,19 @@
         </div>
 
         <!-- Categories List -->
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('features.categories.loading') }}</p>
         </div>
 
-        <div v-else-if="filteredCategories.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="filteredCategories.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
             <p class="mt-4 text-muted-foreground">{{ $t('features.categories.empty') }}</p>
         </div>
 
         <!-- Tree View -->
-        <div v-else-if="viewMode === 'tree'" class="bg-card shadow rounded-lg overflow-hidden">
+        <div v-else-if="viewMode === 'tree'" class="bg-card border border-border rounded-lg overflow-hidden">
             <div class="divide-y divide-border">
                 <CategoryTreeItem
                     v-for="category in rootCategories"
@@ -55,32 +55,32 @@
                     :all-categories="allCategories"
                     @edit="editCategory"
                     @delete="deleteCategory"
-                    @move="moveCategory"
+                    @move="showMoveModal"
                 />
             </div>
         </div>
 
         <!-- List View -->
-        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.slug') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.parent') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.contents') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.status') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.categories.table.actions') }}
                         </th>
                     </tr>
@@ -152,15 +152,7 @@
             </table>
         </div>
 
-        <!-- Create/Edit Modal -->
-        <CategoryModal
-            v-if="showCreateModal || showEditModal"
-            @close="closeModal"
-            @saved="handleCategorySaved"
-            :category="editingCategory"
-        />
-
-        <!-- Move Modal -->
+        <!-- Move Modal (Kept as is) -->
         <MoveCategoryModal
             v-if="movingCategory"
             @close="closeMoveModal"
@@ -174,21 +166,19 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import CategoryTreeItem from '../../../components/categories/CategoryTreeItem.vue';
-import CategoryModal from '../../../components/categories/CategoryModal.vue';
 import MoveCategoryModal from '../../../components/categories/MoveCategoryModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const router = useRouter();
 const loading = ref(false);
 const categories = ref([]);
 const treeCategories = ref([]);
 const search = ref('');
 const viewMode = ref('tree');
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
-const editingCategory = ref(null);
 const movingCategory = ref(null);
 
 const allCategories = computed(() => categories.value);
@@ -264,8 +254,7 @@ const fetchCategories = async () => {
 };
 
 const editCategory = (category) => {
-    editingCategory.value = category;
-    showEditModal.value = true;
+    router.push({ name: 'categories.edit', params: { id: category.id } });
 };
 
 const deleteCategory = async (category) => {
@@ -286,30 +275,6 @@ const deleteCategory = async (category) => {
     }
 };
 
-const moveCategory = async (category, newParentId, newSortOrder) => {
-    try {
-        await api.post(`/admin/cms/categories/${category.id}/move`, {
-            parent_id: newParentId,
-            sort_order: newSortOrder,
-        });
-        await fetchCategories();
-    } catch (error) {
-        console.error('Failed to move category:', error);
-        alert('Failed to move category');
-    }
-};
-
-const closeModal = () => {
-    showCreateModal.value = false;
-    showEditModal.value = false;
-    editingCategory.value = null;
-};
-
-const handleCategorySaved = () => {
-    fetchCategories();
-    closeModal();
-};
-
 const showMoveModal = (category) => {
     movingCategory.value = category;
 };
@@ -319,8 +284,8 @@ const closeMoveModal = () => {
 };
 
 const handleCategoryMoved = () => {
-    fetchCategories();
     closeMoveModal();
+    fetchCategories();
 };
 
 onMounted(() => {

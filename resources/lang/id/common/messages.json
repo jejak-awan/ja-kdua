@@ -29,6 +29,7 @@
     "loading": {
         "default": "Memuat...",
         "saving": "Menyimpan...",
+        "creating": "Membuat...",
         "deleting": "Menghapus...",
         "uploading": "Mengunggah...",
         "processing": "Memproses...",

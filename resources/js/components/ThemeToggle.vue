@@ -2,7 +2,7 @@
   <button
     @click="toggleTheme"
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-    class="p-2 rounded-lg hover:bg-accent dark:hover:bg-gray-800 transition-colors"
+    class="p-2 rounded-lg hover:bg-accent dark:hover:bg-card transition-colors"
     type="button"
   >
     <svg

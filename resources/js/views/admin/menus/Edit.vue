@@ -7,7 +7,7 @@
             </div>
             <button
                 @click="addMenuItem"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -23,7 +23,7 @@
         <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Menu Items Tree -->
             <div class="lg:col-span-2">
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.items') }}</h2>
                     <div v-if="menuItems.length === 0" class="text-center py-8">
                         <p class="text-muted-foreground">{{ t('features.menus.messages.emptyItems') }}</p>
@@ -41,7 +41,7 @@
 
             <!-- Menu Settings -->
             <div class="lg:col-span-1">
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.settings') }}</h2>
                     <form @submit.prevent="saveMenu" class="space-y-4">
                         <div>
@@ -69,7 +69,7 @@
                         <button
                             type="submit"
                             :disabled="saving"
-                            class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ saving ? t('features.menus.actions.saving') : t('features.menus.actions.save') }}
                         </button>

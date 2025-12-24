@@ -13,17 +13,17 @@
         <h2 class="text-3xl font-bold text-foreground mb-4">
           {{ t('features.errors.404.title') }}
         </h2>
-        <p class="text-lg text-muted-foreground dark:text-gray-400 mb-2">
+        <p class="text-lg text-muted-foreground mb-2">
           {{ t('features.errors.404.message') }}
         </p>
-        <p class="text-sm text-muted-foreground dark:text-muted-foreground">
+        <p class="text-sm text-muted-foreground">
           {{ t('features.errors.404.description') }}
         </p>
       </div>
 
       <!-- Illustration -->
       <div class="mb-8 flex justify-center">
-        <svg class="w-64 h-64 text-gray-300 dark:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-64 h-64 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
@@ -41,7 +41,7 @@
         </button>
         <router-link
           to="/"
-          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-800 hover:bg-muted dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+          class="inline-flex items-center justify-center px-6 py-3 border border-input text-base font-medium rounded-lg text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -57,12 +57,12 @@
             v-model="searchQuery"
             type="text"
             :placeholder="t('features.errors.404.searchPlaceholder')"
-            class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card dark:bg-gray-800 text-foreground placeholder-gray-500 dark:placeholder-gray-400"
+            class="w-full px-4 py-3 pr-12 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-gray-500 dark:placeholder-gray-400"
             @keyup.enter="search"
           />
           <button
             @click="search"
-            class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-muted-foreground hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -81,7 +81,7 @@
             v-for="link in popularLinks"
             :key="link.path"
             :to="link.path"
-            class="block px-4 py-2 text-sm text-foreground hover:bg-accent dark:hover:bg-gray-800 rounded-lg transition-colors"
+            class="block px-4 py-2 text-sm text-foreground hover:bg-accent dark:hover:bg-card rounded-lg transition-colors"
           >
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -92,7 +92,7 @@
       </div>
 
       <!-- Error Code for Reference -->
-      <div class="mt-8 text-xs text-gray-400 dark:text-muted-foreground">
+      <div class="mt-8 text-xs text-muted-foreground">
         Error Code: 404 | {{ new Date().toISOString() }}
       </div>
     </div>

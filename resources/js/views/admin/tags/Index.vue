@@ -3,19 +3,19 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.tags.title') }}</h1>
-            <button
-                @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            <router-link
+                :to="{ name: 'tags.create' }"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 {{ $t('features.tags.createNew') }}
-            </button>
+            </router-link>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card shadow rounded-lg p-4 mb-4">
+        <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
                 <input
                     v-model="search"
@@ -28,7 +28,7 @@
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,34 +70,34 @@
         </div>
 
         <!-- Tags List -->
-        <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('features.tags.loading') }}</p>
         </div>
 
-        <div v-else-if="filteredTags.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="filteredTags.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
             <p class="mt-4 text-muted-foreground">{{ $t('features.tags.empty') }}</p>
         </div>
 
-        <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.tags.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.tags.table.slug') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.tags.table.description') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.tags.table.usage') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ $t('features.tags.table.actions') }}
                         </th>
                     </tr>
@@ -138,32 +138,22 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Create/Edit Modal -->
-        <TagModal
-            v-if="showCreateModal || showEditModal"
-            @close="closeModal"
-            @saved="handleTagSaved"
-            :tag="editingTag"
-        />
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import api from '../../../services/api';
-import TagModal from '../../../components/tags/TagModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const router = useRouter();
 const loading = ref(false);
 const tags = ref([]);
 const statistics = ref(null);
 const search = ref('');
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
-const editingTag = ref(null);
 
 const filteredTags = computed(() => {
     if (!search.value) return tags.value;
@@ -203,8 +193,7 @@ const fetchTags = async () => {
 };
 
 const editTag = (tag) => {
-    editingTag.value = tag;
-    showEditModal.value = true;
+    router.push({ name: 'tags.edit', params: { id: tag.id } });
 };
 
 const deleteTag = async (tag) => {
@@ -222,19 +211,7 @@ const deleteTag = async (tag) => {
     }
 };
 
-const closeModal = () => {
-    showCreateModal.value = false;
-    showEditModal.value = false;
-    editingTag.value = null;
-};
-
-const handleTagSaved = () => {
-    fetchTags();
-    closeModal();
-};
-
 onMounted(() => {
     fetchTags();
 });
 </script>
-

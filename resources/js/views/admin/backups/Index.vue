@@ -5,7 +5,7 @@
             <button
                 @click="createBackup"
                 :disabled="creating"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80 disabled:opacity-50"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -16,7 +16,7 @@
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card shadow rounded-lg p-6">
+            <div class="bg-card border border-border rounded-lg p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Schedule Settings -->
-        <div class="bg-card shadow rounded-lg p-6 mb-6">
+        <div class="bg-card border border-border rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-foreground">{{ t('features.system.backups.schedule.title') }}</h3>
                 <button
@@ -103,7 +103,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
@@ -126,16 +126,16 @@
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.backups.table.name') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.backups.table.size') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.backups.table.created') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                             {{ t('features.system.backups.table.actions') }}
                         </th>
                     </tr>
@@ -180,11 +180,11 @@
         </div>
 
         <!-- Schedule Modal -->
-        <div v-if="showScheduleModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="showScheduleModal = false">
-            <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-card">
+        <div v-if="showScheduleModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="showScheduleModal = false">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-md rounded-md bg-card">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium text-foreground">{{ t('features.system.backups.schedule.modal.title') }}</h3>
-                    <button @click="showScheduleModal = false" class="text-gray-400 hover:text-muted-foreground">
+                    <button @click="showScheduleModal = false" class="text-muted-foreground hover:text-muted-foreground">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -220,7 +220,7 @@
                     <button @click="showScheduleModal = false" class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted">
                         {{ t('features.system.backups.schedule.modal.cancel') }}
                     </button>
-                    <button @click="saveSchedule" :disabled="savingSchedule" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
+                    <button @click="saveSchedule" :disabled="savingSchedule" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/80 disabled:opacity-50">
                         {{ savingSchedule ? t('features.system.backups.schedule.modal.saving') : t('features.system.backups.schedule.modal.save') }}
                     </button>
                 </div>

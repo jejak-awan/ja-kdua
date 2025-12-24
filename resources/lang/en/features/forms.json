@@ -57,6 +57,39 @@
             "redirectUrl": "https://example.com/thank-you"
         }
     },
+    "fieldModal": {
+        "createTitle": "Add New Field",
+        "editTitle": "Edit Field",
+        "fieldType": "Field Type",
+        "fieldName": "Field Name",
+        "fieldNamePlaceholder": "field_name",
+        "fieldNameHelp": "Only lowercase letters, numbers, and underscores",
+        "fieldLabel": "Field Label",
+        "fieldLabelPlaceholder": "Field Label",
+        "placeholder": "Placeholder",
+        "placeholderHint": "Enter placeholder text...",
+        "helpText": "Help Text",
+        "helpTextPlaceholder": "Help text to display below the field...",
+        "options": "Options",
+        "addOption": "Add Option",
+        "required": "Field is required",
+        "addField": "Add Field",
+        "updateField": "Update Field",
+        "optionRequired": "Please add at least one option for this field type.",
+        "types": {
+            "text": "Text",
+            "email": "Email",
+            "textarea": "Textarea",
+            "number": "Number",
+            "select": "Select",
+            "radio": "Radio",
+            "checkbox": "Checkbox",
+            "file": "File Upload",
+            "date": "Date",
+            "url": "URL",
+            "tel": "Phone"
+        }
+    },
     "messages": {
         "loading": "Loading forms...",
         "empty": "No forms found",

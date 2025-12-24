@@ -135,6 +135,44 @@ class UserController extends BaseApiController
         return $this->success(null, 'Password updated successfully');
     }
 
+    /**
+     * Get user preferences.
+     */
+    public function getPreferences(Request $request)
+    {
+        $user = $request->user();
+        
+        return $this->success([
+            'dark_mode' => $user->getPreference('dark_mode', 'system'),
+            'locale' => $user->getPreference('locale', 'en'),
+        ], 'Preferences retrieved successfully');
+    }
+
+    /**
+     * Update user preferences.
+     */
+    public function updatePreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'dark_mode' => 'sometimes|string|in:light,dark,system',
+            'locale' => 'sometimes|string|max:10',
+        ]);
+
+        $user = $request->user();
+        
+        foreach ($validated as $key => $value) {
+            $user->setPreference($key, $value);
+        }
+        
+        $user->save();
+
+        return $this->success([
+            'dark_mode' => $user->getPreference('dark_mode', 'system'),
+            'locale' => $user->getPreference('locale', 'en'),
+        ], 'Preferences updated successfully');
+    }
+
+
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([

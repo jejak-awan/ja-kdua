@@ -19,7 +19,7 @@
                     @click="togglePreview"
                     :class="[
                         'px-3 py-1 text-sm rounded',
-                        showPreview ? 'bg-indigo-600 text-white' : 'bg-muted text-foreground hover:bg-gray-300'
+                        showPreview ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground hover:bg-gray-300'
                     ]"
                 >
                     {{ showPreview ? 'Edit' : 'Preview' }}

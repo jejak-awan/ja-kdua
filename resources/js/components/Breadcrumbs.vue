@@ -1,7 +1,7 @@
 <template>
   <nav 
     v-if="breadcrumbs.length > 0" 
-    :class="compact ? 'flex items-center' : 'py-3 px-4 mb-4 bg-card dark:bg-gray-800 border-b border-border'"
+    :class="compact ? 'flex items-center' : 'py-3 px-4 mb-4 bg-card border-b border-border'"
     aria-label="Breadcrumb"
   >
     <ol :class="compact ? 'flex items-center space-x-1 text-xs' : 'flex items-center flex-wrap space-x-2 text-sm'">
@@ -11,8 +11,8 @@
           v-if="index === 0"
           :to="crumb.path"
           :class="compact 
-            ? 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors' 
-            : 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors'"
+            ? 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors' 
+            : 'flex items-center text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors'"
           :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined"
         >
           <svg :class="compact ? 'h-3.5 w-3.5' : 'h-4 w-4'" fill="currentColor" viewBox="0 0 20 20">
@@ -26,8 +26,8 @@
           <!-- Separator -->
           <svg
             :class="compact 
-              ? 'flex-shrink-0 h-3 w-3 text-gray-400 dark:text-muted-foreground mx-1' 
-              : 'flex-shrink-0 h-4 w-4 text-gray-400 dark:text-muted-foreground mx-2'"
+              ? 'flex-shrink-0 h-3 w-3 text-muted-foreground mx-1' 
+              : 'flex-shrink-0 h-4 w-4 text-muted-foreground mx-2'"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -43,8 +43,8 @@
             v-if="index < breadcrumbs.length - 1"
             :to="crumb.path"
             :class="compact 
-              ? 'text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors truncate max-w-[100px]' 
-              : 'text-muted-foreground hover:text-foreground dark:hover:text-gray-200 transition-colors truncate max-w-[200px] sm:max-w-[120px]'"
+              ? 'text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors truncate max-w-[100px]' 
+              : 'text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors truncate max-w-[200px] sm:max-w-[120px]'"
           >
             {{ crumb.label }}
           </router-link>

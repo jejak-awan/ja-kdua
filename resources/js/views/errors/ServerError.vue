@@ -23,10 +23,10 @@
         <h2 class="text-3xl font-bold text-foreground mb-4">
           {{ t('features.errors.500.title') }}
         </h2>
-        <p class="text-lg text-muted-foreground dark:text-gray-400 mb-2">
+        <p class="text-lg text-muted-foreground mb-2">
           {{ t('features.errors.500.message') }}
         </p>
-        <p class="text-sm text-muted-foreground dark:text-muted-foreground">
+        <p class="text-sm text-muted-foreground">
           {{ t('features.errors.500.description') }}
         </p>
       </div>
@@ -35,7 +35,7 @@
       <div v-if="errorDetails" class="mb-8 max-w-lg mx-auto">
         <button
           @click="showDetails = !showDetails"
-          class="text-sm text-muted-foreground dark:text-gray-400 hover:text-foreground dark:hover:text-white transition-colors flex items-center justify-center mx-auto"
+          class="text-sm text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors flex items-center justify-center mx-auto"
         >
           <span>{{ showDetails ? t('features.errors.500.hideDetails') : t('features.errors.500.showDetails') }}</span>
           <svg
@@ -77,7 +77,7 @@
         
         <router-link
           to="/"
-          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-foreground bg-card dark:bg-gray-800 hover:bg-muted dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+          class="inline-flex items-center justify-center px-6 py-3 border border-input text-base font-medium rounded-lg text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -90,7 +90,7 @@
       <div class="mb-8">
         <button
           @click="reportIssue"
-          class="text-sm text-muted-foreground dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          class="text-sm text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors"
         >
           <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -100,7 +100,7 @@
       </div>
 
       <!-- Status Check -->
-      <div class="text-sm text-muted-foreground dark:text-muted-foreground">
+      <div class="text-sm text-muted-foreground">
         <p class="mb-2">{{ t('features.errors.500.checkStatus') }}</p>
         <div class="flex items-center justify-center gap-2">
           <div class="flex items-center gap-1">
@@ -119,7 +119,7 @@
       </div>
 
       <!-- Error Code for Reference -->
-      <div class="mt-8 text-xs text-gray-400 dark:text-muted-foreground">
+      <div class="mt-8 text-xs text-muted-foreground">
         Error Code: 500 | {{ errorId }} | {{ new Date().toISOString() }}
       </div>
     </div>

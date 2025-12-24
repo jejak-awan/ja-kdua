@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
                 <div class="flex items-center space-x-4">
                     <input
@@ -79,7 +79,7 @@
                                 <h3 class="text-sm font-medium text-foreground">{{ notification.title }}</h3>
                             </div>
                             <p class="mt-1 text-sm text-muted-foreground">{{ notification.message }}</p>
-                            <p class="mt-1 text-xs text-gray-400">{{ formatDate(notification.created_at) }}</p>
+                            <p class="mt-1 text-xs text-muted-foreground">{{ formatDate(notification.created_at) }}</p>
                         </div>
                         <div class="flex items-center space-x-2 ml-4">
                             <button

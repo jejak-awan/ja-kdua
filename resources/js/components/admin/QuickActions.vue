@@ -1,5 +1,5 @@
 <template>
-  <div class="quick-actions bg-card rounded-lg shadow-sm border border-border p-6">
+  <div class="quick-actions bg-card rounded-lg border border-border p-6">
     <h3 class="text-lg font-semibold text-foreground mb-4 flex items-center">
       <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -112,8 +112,8 @@
         class="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-border hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
         :disabled="loading"
       >
-        <div class="w-12 h-12 rounded-full flex items-center justify-center bg-gray-500/20 group-hover:bg-gray-600 dark:group-hover:bg-gray-600 transition-colors">
-          <svg class="w-6 h-6 text-muted-foreground dark:text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center bg-muted group-hover:bg-muted dark:group-hover:bg-muted transition-colors">
+          <svg class="w-6 h-6 text-muted-foreground group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -124,12 +124,12 @@
     
     <!-- Recent Actions (Optional) -->
     <div v-if="showRecent && recentActions.length > 0" class="mt-6 pt-6 border-t border-border">
-      <h4 class="text-sm font-medium text-foreground dark:text-gray-300 mb-3">{{ $t('features.dashboard.widgets.quickActions.recentActions') }}</h4>
+      <h4 class="text-sm font-medium text-foreground mb-3">{{ $t('features.dashboard.widgets.quickActions.recentActions') }}</h4>
       <div class="space-y-2">
         <div
           v-for="action in recentActions.slice(0, 3)"
           :key="action.id"
-          class="flex items-center text-sm text-muted-foreground dark:text-gray-400 hover:text-foreground dark:hover:text-white transition-colors cursor-pointer"
+          class="flex items-center text-sm text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors cursor-pointer"
           @click="repeatAction(action)"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

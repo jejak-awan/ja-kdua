@@ -1,13 +1,13 @@
 <template>
-    <div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-card max-h-[90vh] overflow-y-auto">
+    <div class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="close">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-foreground">
-                    {{ field ? 'Edit Field' : 'Add New Field' }}
+                    {{ field ? $t('features.forms.fieldModal.editTitle') : $t('features.forms.fieldModal.createTitle') }}
                 </h2>
                 <button
                     @click="close"
-                    class="text-gray-400 hover:text-muted-foreground"
+                    class="text-muted-foreground hover:text-foreground"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -19,88 +19,88 @@
                 <!-- Field Type -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Field Type <span class="text-red-500">*</span>
+                        {{ $t('features.forms.fieldModal.fieldType') }} <span class="text-destructive">*</span>
                     </label>
                     <select
                         v-model="fieldData.type"
                         required
                         @change="handleTypeChange"
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                        <option value="text">Text</option>
-                        <option value="email">Email</option>
-                        <option value="textarea">Textarea</option>
-                        <option value="number">Number</option>
-                        <option value="select">Select</option>
-                        <option value="radio">Radio</option>
-                        <option value="checkbox">Checkbox</option>
-                        <option value="file">File Upload</option>
-                        <option value="date">Date</option>
-                        <option value="url">URL</option>
-                        <option value="tel">Phone</option>
+                        <option value="text">{{ $t('features.forms.fieldModal.types.text') }}</option>
+                        <option value="email">{{ $t('features.forms.fieldModal.types.email') }}</option>
+                        <option value="textarea">{{ $t('features.forms.fieldModal.types.textarea') }}</option>
+                        <option value="number">{{ $t('features.forms.fieldModal.types.number') }}</option>
+                        <option value="select">{{ $t('features.forms.fieldModal.types.select') }}</option>
+                        <option value="radio">{{ $t('features.forms.fieldModal.types.radio') }}</option>
+                        <option value="checkbox">{{ $t('features.forms.fieldModal.types.checkbox') }}</option>
+                        <option value="file">{{ $t('features.forms.fieldModal.types.file') }}</option>
+                        <option value="date">{{ $t('features.forms.fieldModal.types.date') }}</option>
+                        <option value="url">{{ $t('features.forms.fieldModal.types.url') }}</option>
+                        <option value="tel">{{ $t('features.forms.fieldModal.types.tel') }}</option>
                     </select>
                 </div>
 
                 <!-- Field Name -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Field Name <span class="text-red-500">*</span>
+                        {{ $t('features.forms.fieldModal.fieldName') }} <span class="text-destructive">*</span>
                     </label>
                     <input
                         v-model="fieldData.name"
                         type="text"
                         required
                         pattern="[a-z0-9_]+"
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="field_name"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        :placeholder="$t('features.forms.fieldModal.fieldNamePlaceholder')"
                     >
-                    <p class="mt-1 text-xs text-muted-foreground">Only lowercase letters, numbers, and underscores</p>
+                    <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.forms.fieldModal.fieldNameHelp') }}</p>
                 </div>
 
                 <!-- Field Label -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Field Label <span class="text-red-500">*</span>
+                        {{ $t('features.forms.fieldModal.fieldLabel') }} <span class="text-destructive">*</span>
                     </label>
                     <input
                         v-model="fieldData.label"
                         type="text"
                         required
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Field Label"
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        :placeholder="$t('features.forms.fieldModal.fieldLabelPlaceholder')"
                     >
                 </div>
 
                 <!-- Placeholder -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Placeholder
+                        {{ $t('features.forms.fieldModal.placeholder') }}
                     </label>
                     <input
                         v-model="fieldData.placeholder"
                         type="text"
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Enter placeholder text..."
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        :placeholder="$t('features.forms.fieldModal.placeholderHint')"
                     >
                 </div>
 
                 <!-- Help Text -->
                 <div>
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Help Text
+                        {{ $t('features.forms.fieldModal.helpText') }}
                     </label>
                     <textarea
                         v-model="fieldData.help_text"
                         rows="2"
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Help text to display below the field..."
+                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        :placeholder="$t('features.forms.fieldModal.helpTextPlaceholder')"
                     />
                 </div>
 
                 <!-- Options (for select, radio, checkbox) -->
                 <div v-if="needsOptions">
                     <label class="block text-sm font-medium text-foreground mb-1">
-                        Options <span class="text-red-500">*</span>
+                        {{ $t('features.forms.fieldModal.options') }} <span class="text-destructive">*</span>
                     </label>
                     <div class="space-y-2">
                         <div
@@ -111,13 +111,13 @@
                             <input
                                 v-model="fieldData.options[index]"
                                 type="text"
-                                class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                                 :placeholder="`Option ${index + 1}`"
                             >
                             <button
                                 type="button"
                                 @click="removeOption(index)"
-                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-500/20 rounded transition-colors"
+                                class="p-2 text-destructive hover:bg-destructive/10 rounded transition-colors"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -127,12 +127,12 @@
                         <button
                             type="button"
                             @click="addOption"
-                            class="inline-flex items-center px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted"
+                            class="inline-flex items-center px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium hover:bg-muted"
                         >
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Add Option
+                            {{ $t('features.forms.fieldModal.addOption') }}
                         </button>
                     </div>
                 </div>
@@ -143,10 +143,10 @@
                         v-model="fieldData.is_required"
                         type="checkbox"
                         id="is_required"
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
+                        class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                     >
                     <label for="is_required" class="ml-2 block text-sm text-foreground">
-                        Field is required
+                        {{ $t('features.forms.fieldModal.required') }}
                     </label>
                 </div>
 
@@ -155,15 +155,15 @@
                     <button
                         type="button"
                         @click="close"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md shadow-sm text-sm font-medium text-foreground bg-card hover:bg-muted"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium hover:bg-muted"
                     >
-                        Cancel
+                        {{ $t('common.actions.cancel') }}
                     </button>
                     <button
                         type="submit"
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                        class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/80"
                     >
-                        {{ field ? 'Update Field' : 'Add Field' }}
+                        {{ field ? $t('features.forms.fieldModal.updateField') : $t('features.forms.fieldModal.addField') }}
                     </button>
                 </div>
             </form>
@@ -173,6 +173,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     field: {
@@ -237,7 +240,7 @@ const removeOption = (index) => {
 
 const saveField = () => {
     if (needsOptions.value && fieldData.options.length === 0) {
-        alert('Please add at least one option for this field type.');
+        alert(t('features.forms.fieldModal.optionRequired'));
         return;
     }
 
@@ -257,4 +260,3 @@ const close = () => {
     emit('close');
 };
 </script>
-

@@ -1,5 +1,5 @@
 <template>
-  <div class="system-health-widget bg-card rounded-lg shadow-sm border border-border p-6">
+  <div class="system-health-widget bg-card rounded-lg border border-border p-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-foreground flex items-center">
         <svg class="w-5 h-5 mr-2" :class="overallStatusClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,7 +10,7 @@
       <button
         @click="refresh"
         :disabled="loading"
-        class="text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+        class="text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors"
         title="Refresh"
       >
         <svg class="w-5 h-5" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,7 +22,7 @@
     <!-- Overall Status -->
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium text-foreground dark:text-gray-300">{{ $t('features.dashboard.widgets.systemHealth.overallStatus') }}</span>
+        <span class="text-sm font-medium text-foreground">{{ $t('features.dashboard.widgets.systemHealth.overallStatus') }}</span>
         <span :class="overallStatusBadgeClass" class="px-3 py-1 rounded-full text-xs font-semibold">
           {{ overallStatusText }}
         </span>
@@ -34,7 +34,7 @@
       <!-- CPU -->
       <div class="health-metric">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground dark:text-gray-300 flex items-center">
+          <span class="text-sm font-medium text-foreground flex items-center">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
             </svg>
@@ -59,7 +59,7 @@
       <!-- Memory -->
       <div class="health-metric">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground dark:text-gray-300 flex items-center">
+          <span class="text-sm font-medium text-foreground flex items-center">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
             </svg>
@@ -84,7 +84,7 @@
       <!-- Disk -->
       <div class="health-metric">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground dark:text-gray-300 flex items-center">
+          <span class="text-sm font-medium text-foreground flex items-center">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
             </svg>
@@ -109,7 +109,7 @@
       <!-- Database -->
       <div class="health-metric">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground dark:text-gray-300 flex items-center">
+          <span class="text-sm font-medium text-foreground flex items-center">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
             </svg>
@@ -127,7 +127,7 @@
       <!-- Redis -->
       <div class="health-metric">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground dark:text-gray-300 flex items-center">
+          <span class="text-sm font-medium text-foreground flex items-center">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -144,7 +144,7 @@
     </div>
 
     <!-- Last Updated -->
-    <div v-if="lastUpdated" class="mt-4 text-xs text-muted-foreground dark:text-gray-400 text-center">
+    <div v-if="lastUpdated" class="mt-4 text-xs text-muted-foreground text-center">
       {{ $t('features.dashboard.widgets.systemHealth.lastUpdated', { time: formatTime(lastUpdated) }) }}
     </div>
   </div>
@@ -183,7 +183,7 @@ const overallStatusClass = computed(() => {
   if (status === 'healthy') return 'text-green-600 dark:text-green-400';
   if (status === 'warning') return 'text-yellow-600 dark:text-yellow-400';
   if (status === 'critical') return 'text-red-600 dark:text-red-400';
-  return 'text-muted-foreground dark:text-gray-400';
+  return 'text-muted-foreground';
 });
 
 const overallStatusBadgeClass = computed(() => {
@@ -191,14 +191,14 @@ const overallStatusBadgeClass = computed(() => {
   if (status === 'healthy') return 'bg-green-500/20 text-green-400 dark:bg-green-900/30 dark:text-green-400';
   if (status === 'warning') return 'bg-yellow-500/20 text-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-400';
   if (status === 'critical') return 'bg-red-500/20 text-red-400 dark:bg-red-900/30 dark:text-red-400';
-  return 'bg-secondary text-secondary-foreground dark:bg-gray-700 dark:text-gray-400';
+  return 'bg-secondary text-secondary-foreground';
 });
 
 const getStatusClass = (status) => {
   if (status === 'ok') return 'text-green-600 dark:text-green-400';
   if (status === 'warning') return 'text-yellow-600 dark:text-yellow-400';
   if (status === 'critical' || status === 'error') return 'text-red-600 dark:text-red-400';
-  return 'text-muted-foreground dark:text-gray-400';
+  return 'text-muted-foreground';
 };
 
 const getProgressBarClass = (status) => {

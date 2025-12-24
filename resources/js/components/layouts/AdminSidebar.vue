@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 bg-card text-card-foreground border-r border-border transform transition-all duration-300 ease-in-out shadow-lg',
+            'fixed inset-y-0 left-0 z-50 bg-card text-card-foreground border-r border-border shadow-sm',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             sidebarMinimized ? 'w-20' : 'w-64'
         ]"
@@ -60,7 +60,7 @@
 
                 <!-- Content -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.content') }}
                     </h3>
                     <div class="space-y-1">
@@ -84,7 +84,7 @@
 
                 <!-- Media -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.media') }}
                     </h3>
                     <div class="space-y-1">
@@ -108,7 +108,7 @@
 
                 <!-- Engagement -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.engagement') }}
                     </h3>
                     <div class="space-y-1">
@@ -132,7 +132,7 @@
 
                 <!-- Users & Access -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.usersAccess') }}
                     </h3>
                     <div class="space-y-1">
@@ -156,7 +156,7 @@
 
                 <!-- Appearance -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.appearance') }}
                     </h3>
                     <div class="space-y-1">
@@ -180,7 +180,7 @@
 
                 <!-- Analytics & SEO -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.analyticsSeo') }}
                     </h3>
                     <div class="space-y-1">
@@ -204,7 +204,7 @@
 
                 <!-- System -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.system') }}
                     </h3>
                     <div class="space-y-1">
@@ -228,7 +228,7 @@
 
                 <!-- Developer -->
                 <div>
-                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.developer') }}
                     </h3>
                     <div class="space-y-1">
@@ -258,6 +258,7 @@
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useLayoutMount } from '../../composables/useLayoutMount';
 import { navigationGroups } from '../../utils/navigation';
 import { getIcon } from '../../utils/icons';
 
@@ -281,6 +282,9 @@ defineEmits(['toggle-minimize', 'close', 'logout']);
 const { t, te } = useI18n();
 const $route = useRoute();
 const avatarError = ref(false);
+
+// Use shared mounted state for synchronized transitions
+const { mounted } = useLayoutMount();
 
 const getNavigationLabel = (item) => {
     const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());

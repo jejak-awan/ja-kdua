@@ -5,7 +5,7 @@
             <button 
                 @click="refreshAll" 
                 :disabled="loading"
-                class="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <svg class="h-4 w-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -14,30 +14,19 @@
             </button>
         </div>
 
-        <!-- Tabs -->
-        <div class="border-b border-border mb-6">
-            <nav class="-mb-px flex space-x-8">
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="activeTab = tab.key"
-                    :class="[
-                        activeTab === tab.key
-                            ? 'border-indigo-500 text-indigo-600'
-                            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground',
-                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                    ]"
-                >
-                    {{ tab.label }}
-                </button>
-            </nav>
-        </div>
+        <!-- Shadcn Tabs -->
+        <Tabs v-model="activeTab" class="w-full">
+            <TabsList class="mb-6">
+                <TabsTrigger value="overview">{{ $t('features.security.tabs.overview') }}</TabsTrigger>
+                <TabsTrigger value="blocklist">{{ $t('features.security.tabs.blocklist') }}</TabsTrigger>
+                <TabsTrigger value="whitelist">{{ $t('features.security.tabs.whitelist') }}</TabsTrigger>
+            </TabsList>
 
-        <!-- Overview Tab -->
-        <div v-if="activeTab === 'overview'">
+            <!-- Overview Tab -->
+            <TabsContent value="overview">
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +39,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +65,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-card shadow rounded-lg p-6">
+                <div class="bg-card border border-border rounded-lg p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +81,7 @@
             </div>
 
             <!-- IP Management - Single Row -->
-            <div class="bg-card shadow rounded-lg p-6 mb-6">
+            <div class="bg-card border border-border rounded-lg p-6 mb-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.security.ipManagement.title') }}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -127,7 +116,7 @@
                             >
                             <button
                                 @click="checkIPStatus"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                             >
                                 {{ $t('features.security.ipManagement.check.button') }}
                             </button>
@@ -142,7 +131,7 @@
             </div>
 
             <!-- Security Logs -->
-            <div class="bg-card shadow rounded-lg">
+            <div class="bg-card border border-border rounded-lg">
                 <div class="px-6 py-4 border-b border-border">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div class="flex items-center space-x-4">
@@ -193,12 +182,12 @@
                                 <th class="px-6 py-3 text-left">
                                     <input type="checkbox" @change="toggleAllLogs" :checked="selectedLogIds.length === paginatedLogs.length && paginatedLogs.length > 0" class="rounded">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.event') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.user') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.details') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.actions') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.event') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.ip') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.user') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.details') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.date') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-card divide-y divide-border">
@@ -257,11 +246,11 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </TabsContent>
 
-        <!-- Blocklist Tab -->
-        <div v-if="activeTab === 'blocklist'">
-            <div class="bg-card shadow rounded-lg">
+            <!-- Blocklist Tab -->
+            <TabsContent value="blocklist">
+            <div class="bg-card border border-border rounded-lg">
                 <div class="px-6 py-4 border-b border-border">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
@@ -292,11 +281,11 @@
                                 <th class="px-6 py-3 text-left">
                                     <input type="checkbox" @change="toggleAllBlocklist" :checked="selectedBlocklistIds.length === paginatedBlocklist.length && paginatedBlocklist.length > 0" class="rounded">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.reason') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.createdBy') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.actions') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.ip') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.reason') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.createdBy') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.date') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-card divide-y divide-border">
@@ -347,11 +336,11 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </TabsContent>
 
-        <!-- Whitelist Tab -->
-        <div v-if="activeTab === 'whitelist'">
-            <div class="bg-card shadow rounded-lg">
+            <!-- Whitelist Tab -->
+            <TabsContent value="whitelist">
+            <div class="bg-card border border-border rounded-lg">
                 <div class="px-6 py-4 border-b border-border">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
@@ -402,11 +391,11 @@
                                 <th class="px-6 py-3 text-left">
                                     <input type="checkbox" @change="toggleAllWhitelist" :checked="selectedWhitelistIds.length === paginatedWhitelist.length && paginatedWhitelist.length > 0" class="rounded">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.reason') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.createdBy') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.actions') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.ip') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.reason') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.createdBy') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.date') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-card divide-y divide-border">
@@ -454,7 +443,8 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </TabsContent>
+        </Tabs>
     </div>
 </template>
 
@@ -463,6 +453,10 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Tabs from '../../../components/ui/tabs.vue';
+import TabsList from '../../../components/ui/tabs-list.vue';
+import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
+import TabsContent from '../../../components/ui/tabs-content.vue';
 
 const { t } = useI18n();
 

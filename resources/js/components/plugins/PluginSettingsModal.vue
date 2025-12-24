@@ -1,10 +1,10 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="bg-card rounded-lg max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ t('features.developer.plugins.modal.settings_title', { name: plugin?.name }) }}</h3>
-                    <button @click="$emit('close')" class="text-gray-400 hover:text-muted-foreground">
+                    <button @click="$emit('close')" class="text-muted-foreground hover:text-muted-foreground">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>

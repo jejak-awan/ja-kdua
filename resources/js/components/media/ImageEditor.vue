@@ -1,13 +1,13 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="bg-card rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+            <div class="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">Edit Image: {{ media.name }}</h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-muted-foreground"
+                        class="text-muted-foreground hover:text-muted-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -43,7 +43,7 @@
                                         :class="[
                                             'px-3 py-1 text-sm rounded-md border',
                                             currentAspectRatio === preset.value
-                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                ? 'bg-primary text-primary-foreground border-indigo-600'
                                                 : 'bg-card text-foreground border-input hover:bg-muted'
                                         ]"
                                     >
@@ -54,7 +54,7 @@
                                         :class="[
                                             'px-3 py-1 text-sm rounded-md border',
                                             currentAspectRatio === null
-                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                ? 'bg-primary text-primary-foreground border-indigo-600'
                                                 : 'bg-card text-foreground border-input hover:bg-muted'
                                         ]"
                                     >
@@ -185,7 +185,7 @@
                                     </div>
                                     <button
                                         @click="applyResize"
-                                        class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+                                        class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/80"
                                     >
                                         Apply Resize
                                     </button>
@@ -222,7 +222,7 @@
                         <button
                             @click="saveImage"
                             :disabled="saving"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 text-sm"
                         >
                             {{ saving ? 'Saving...' : 'Save Image' }}
                         </button>

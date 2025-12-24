@@ -7,9 +7,8 @@ Route::prefix('v1')->group(function () {
     // Public endpoint to clear rate limit (no auth required for emergency)
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
     
-    // Authentication Routes (with rate limiting)
-    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
-        ->middleware('throttle:10,1'); // 10 attempts per minute (increased for better UX)
+    // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
+    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
     Route::post('/register', [App\Http\Controllers\Api\V1\AuthController::class, 'register'])
         ->middleware('throttle:3,1'); // 3 attempts per minute
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -34,6 +33,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/profile/avatar', [App\Http\Controllers\Api\V1\UserController::class, 'uploadAvatar']);
         Route::put('/profile/password', [App\Http\Controllers\Api\V1\UserController::class, 'updatePassword']);
         Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
+        Route::get('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'getPreferences']);
+        Route::put('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'updatePreferences']);
+
 
         // Two-Factor Authentication Routes
         Route::prefix('two-factor')->group(function () {

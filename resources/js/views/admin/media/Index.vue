@@ -10,7 +10,7 @@
                         @click="viewMode = 'grid'"
                         :class="[
                             'px-3 py-2',
-                            viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-foreground hover:bg-muted'
+                            viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
                         ]"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
                         @click="viewMode = 'list'"
                         :class="[
                             'px-3 py-2',
-                            viewMode === 'list' ? 'bg-indigo-600 text-white' : 'text-foreground hover:bg-muted'
+                            viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
                         ]"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@
                 <!-- Upload Button -->
                 <button
                     @click="showUploadModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -44,7 +44,7 @@
 
         <div class="flex gap-6">
             <!-- Sidebar: Folders -->
-            <div class="w-64 bg-card shadow rounded-lg p-4">
+            <div class="w-64 bg-card border border-border rounded-lg p-4">
                 <h2 class="text-sm font-semibold text-foreground mb-3">{{ $t('features.media.folders') }}</h2>
                 <div class="space-y-1">
                     <button
@@ -79,7 +79,7 @@
             <!-- Main Content -->
             <div class="flex-1">
                 <!-- Filters -->
-                <div class="bg-card shadow rounded-lg p-4 mb-4">
+                <div class="bg-card border border-border rounded-lg p-4 mb-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
                             <input
@@ -128,12 +128,12 @@
                 </div>
 
                 <!-- Media Grid/List -->
-                <div v-if="loading" class="bg-card shadow rounded-lg p-12 text-center">
+                <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
                     <p class="text-muted-foreground">{{ $t('features.media.loading') }}</p>
                 </div>
 
-                <div v-else-if="mediaList.length === 0" class="bg-card shadow rounded-lg p-12 text-center">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div v-else-if="mediaList.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p class="mt-4 text-muted-foreground">{{ $t('features.media.empty') }}</p>
@@ -145,7 +145,7 @@
                         v-for="media in mediaList"
                         :key="media.id"
                         @click="toggleMediaSelection(media)"
-                        class="bg-card shadow rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow relative"
+                        class="bg-card border border-border rounded-lg overflow-hidden cursor-pointer  transition-shadow relative"
                         :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500' : ''"
                     >
                         <!-- Checkbox -->
@@ -165,7 +165,7 @@
                                 image-class="w-full h-full object-cover"
                                 @error="handleImageError($event)"
                             />
-                            <div v-else class="text-gray-400">
+                            <div v-else class="text-muted-foreground">
                                 <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
@@ -212,7 +212,7 @@
                 </div>
 
                 <!-- List View -->
-                <div v-else class="bg-card shadow rounded-lg overflow-hidden">
+                <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
                     <table class="min-w-full divide-y divide-border">
                         <thead class="bg-muted">
                             <tr>
@@ -225,22 +225,22 @@
                                     >
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.media') }}
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.name') }}
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.type') }}
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.size') }}
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.folder') }}
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
                                     {{ $t('features.media.table.actions') }}
                                 </th>
                             </tr>
@@ -264,7 +264,7 @@
                                             image-class="w-full h-full object-cover rounded"
                                             @error="handleImageError($event)"
                                         />
-                                        <svg v-else class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg v-else class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
                                     </div>
@@ -377,10 +377,10 @@
 
         <div
             v-if="showUpdateAltModal"
-            class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+            class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
             @click.self="showUpdateAltModal = false"
         >
-            <div class="relative w-full max-w-md p-6 border shadow-lg rounded-md bg-card">
+            <div class="relative w-full max-w-md p-6 border rounded-md bg-card">
                 <div class="mt-3">
                     <h3 class="text-lg font-medium text-foreground mb-4">{{ t('features.media.modals.updateAlt.title') }}</h3>
                     <p class="text-sm text-muted-foreground mb-4">
@@ -407,7 +407,7 @@
                         <button
                             @click="handleUpdateAltText"
                             :disabled="bulkProcessing"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ bulkProcessing ? t('features.media.modals.updateAlt.updating') : t('features.media.modals.updateAlt.update') }}
                         </button>
@@ -419,7 +419,7 @@
         <!-- Bulk Processing Progress -->
         <div
             v-if="bulkProcessing"
-            class="fixed bottom-4 right-4 bg-card shadow-lg rounded-lg p-4 w-80 z-50"
+            class="fixed bottom-4 right-4 bg-card rounded-lg p-4 w-80 z-50"
         >
             <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-foreground">{{ t('features.media.modals.bulk.processing') }}</span>

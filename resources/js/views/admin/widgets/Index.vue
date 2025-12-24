@@ -2,23 +2,23 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.widgets.title') }}</h1>
-            <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+            <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 {{ $t('features.widgets.new') }}
             </button>
         </div>
-        <div class="bg-card shadow rounded-lg">
+        <div class="bg-card border border-border rounded-lg">
             <div v-if="loading" class="p-6 text-center"><p class="text-muted-foreground">{{ $t('features.widgets.loading') }}</p></div>
             <div v-else-if="widgets.length === 0" class="p-6 text-center"><p class="text-muted-foreground">{{ $t('features.widgets.empty') }}</p></div>
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.widgets.table.name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.widgets.table.type') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">{{ $t('features.widgets.table.position') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">{{ $t('features.widgets.table.actions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.widgets.table.name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.widgets.table.type') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.widgets.table.position') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.widgets.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-card divide-y divide-border">

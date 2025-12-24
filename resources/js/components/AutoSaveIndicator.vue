@@ -76,7 +76,7 @@ const props = defineProps({
 
 const statusClass = computed(() => {
   return {
-    'text-gray-500': props.status === 'idle',
+    'text-muted-foreground': props.status === 'idle',
     'text-blue-600': props.status === 'saving',
     'text-green-600': props.status === 'saved',
     'text-red-600': props.status === 'error',

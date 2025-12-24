@@ -5,6 +5,7 @@
         "profile": "Profile Information",
         "password": "Change Password",
         "twoFactor": "Two-Factor Authentication",
+        "two-factor": "Two-Factor",
         "history": "Login History"
     },
     "form": {

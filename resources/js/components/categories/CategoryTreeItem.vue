@@ -6,7 +6,7 @@
                     <button
                         v-if="hasChildren"
                         @click="expanded = !expanded"
-                        class="text-gray-400 hover:text-muted-foreground"
+                        class="text-muted-foreground hover:text-muted-foreground"
                     >
                         <svg
                             class="w-5 h-5 transition-transform"
@@ -43,7 +43,7 @@
                     <p v-if="category.description" class="text-sm text-muted-foreground truncate">
                         {{ category.description }}
                     </p>
-                    <p class="text-xs text-gray-400 mt-1">{{ category.slug }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">{{ category.slug }}</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -5,7 +5,7 @@
             <div class="flex items-center space-x-2">
                 <button
                     @click="showCreateFolderModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md shadow-sm text-foreground bg-card hover:bg-muted"
+                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -14,7 +14,7 @@
                 </button>
                 <button
                     @click="showUploadModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -26,7 +26,7 @@
 
         <div class="flex gap-6">
             <!-- Sidebar: Folders -->
-            <div class="w-64 bg-card shadow rounded-lg p-4">
+            <div class="w-64 bg-card border border-border rounded-lg p-4">
                 <h2 class="text-sm font-semibold text-foreground mb-3">{{ $t('features.file_manager.labels.folders') }}</h2>
                 <div class="space-y-1">
                     <button
@@ -65,7 +65,7 @@
             <!-- Main Content -->
             <div class="flex-1">
                 <!-- Breadcrumb -->
-                <div class="bg-card shadow rounded-lg p-4 mb-4">
+                <div class="bg-card border border-border rounded-lg p-4 mb-4">
                     <nav class="flex" aria-label="Breadcrumb">
                         <ol class="flex items-center space-x-2">
                             <li>
@@ -81,7 +81,7 @@
                                 :key="index"
                                 class="flex items-center"
                             >
-                                <svg class="w-4 h-4 text-gray-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-muted-foreground mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                                 <button
@@ -96,7 +96,7 @@
                 </div>
 
                 <!-- Files & Folders -->
-                <div class="bg-card shadow rounded-lg">
+                <div class="bg-card border border-border rounded-lg">
                     <div v-if="loading" class="p-12 text-center">
                         <p class="text-muted-foreground">{{ $t('features.file_manager.messages.loading') }}</p>
                     </div>

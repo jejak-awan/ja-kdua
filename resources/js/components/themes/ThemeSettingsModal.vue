@@ -1,14 +1,14 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" @click.self="$emit('close')">
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-                <div class="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card dark:bg-gray-800 z-10">
-                    <h3 class="text-lg font-semibold text-foreground dark:text-gray-100">
+            <div class="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+                <div class="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
+                    <h3 class="text-lg font-semibold text-foreground">
                         Theme Settings: {{ theme?.name }}
                     </h3>
                     <button
                         @click="$emit('close')"
-                        class="text-gray-400 hover:text-muted-foreground dark:hover:text-gray-300"
+                        class="text-muted-foreground hover:text-muted-foreground dark:hover:text-foreground"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -18,11 +18,11 @@
 
                 <form @submit.prevent="handleSubmit" class="flex-1 overflow-y-auto p-6 space-y-6">
                     <div v-if="settings.length === 0" class="text-center py-8">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <p class="mt-2 text-muted-foreground dark:text-gray-400">No settings available for this theme</p>
+                        <p class="mt-2 text-muted-foreground">No settings available for this theme</p>
                     </div>
 
                     <div v-else class="space-y-6">
@@ -32,7 +32,7 @@
                             :key="groupIndex"
                             class="space-y-4"
                         >
-                            <h4 v-if="group.category" class="text-sm font-semibold text-foreground dark:text-gray-300 uppercase tracking-wider border-b border-border pb-2">
+                            <h4 v-if="group.category" class="text-sm font-semibold text-foreground tracking-wider border-b border-border pb-2">
                                 {{ group.category }}
                             </h4>
 
@@ -42,7 +42,7 @@
                                     :key="setting.key"
                                     class="space-y-2"
                                 >
-                                    <label class="block text-sm font-medium text-foreground dark:text-gray-300">
+                                    <label class="block text-sm font-medium text-foreground">
                                         {{ setting.label }}
                                         <span v-if="setting.required" class="text-red-500">*</span>
                                     </label>
@@ -52,7 +52,7 @@
                                         <input
                                             v-model="form[setting.key]"
                                             type="color"
-                                            class="h-12 w-20 border border-input dark:border-gray-600 rounded-md cursor-pointer"
+                                            class="h-12 w-20 border border-input rounded-md cursor-pointer"
                                             @input="updateForm(setting.key, $event.target.value)"
                                         >
                                         <input
@@ -60,11 +60,11 @@
                                             type="text"
                                             pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
                                             placeholder="#000000"
-                                            class="flex-1 px-3 py-2 border border-input dark:border-gray-600 rounded-md bg-card dark:bg-gray-700 text-foreground dark:text-gray-100 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 font-mono text-sm"
+                                            class="flex-1 px-3 py-2 border border-input rounded-md bg-card text-foreground focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 font-mono text-sm"
                                             @input="updateForm(setting.key, $event.target.value)"
                                         >
                                         <div
-                                            class="h-10 w-10 rounded border border-input dark:border-gray-600"
+                                            class="h-10 w-10 rounded border border-input"
                                             :style="{ backgroundColor: form[setting.key] || setting.default || '#000000' }"
                                         ></div>
                                     </div>
@@ -75,7 +75,7 @@
                                         v-model="form[setting.key]"
                                         :type="setting.type"
                                         :placeholder="setting.placeholder || ''"
-                                        class="w-full px-3 py-2 border border-input dark:border-gray-600 rounded-md bg-card dark:bg-gray-700 text-foreground dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
+                                        class="w-full px-3 py-2 border border-input rounded-md bg-card text-foreground placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
                                         @input="updateForm(setting.key, $event.target.value)"
                                     >
 
@@ -88,7 +88,7 @@
                                         :max="setting.max"
                                         :step="setting.step || 1"
                                         :placeholder="setting.placeholder || ''"
-                                        class="w-full px-3 py-2 border border-input dark:border-gray-600 rounded-md bg-card dark:bg-gray-700 text-foreground dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
+                                        class="w-full px-3 py-2 border border-input rounded-md bg-card text-foreground placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
                                         @input="updateForm(setting.key, parseFloat($event.target.value))"
                                     >
 
@@ -98,7 +98,7 @@
                                         v-model="form[setting.key]"
                                         :rows="setting.rows || 3"
                                         :placeholder="setting.placeholder || ''"
-                                        class="w-full px-3 py-2 border border-input dark:border-gray-600 rounded-md bg-card dark:bg-gray-700 text-foreground dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
+                                        class="w-full px-3 py-2 border border-input rounded-md bg-card text-foreground placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
                                         @input="updateForm(setting.key, $event.target.value)"
                                     />
 
@@ -106,7 +106,7 @@
                                     <select
                                         v-else-if="setting.type === 'select'"
                                         v-model="form[setting.key]"
-                                        class="w-full px-3 py-2 border border-input dark:border-gray-600 rounded-md bg-card dark:bg-gray-700 text-foreground dark:text-gray-100 focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
+                                        class="w-full px-3 py-2 border border-input rounded-md bg-card text-foreground focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400"
                                         @change="updateForm(setting.key, $event.target.value)"
                                     >
                                         <option value="">{{ setting.placeholder || 'Select...' }}</option>
@@ -133,7 +133,7 @@
                                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input"
                                                 @change="updateForm(setting.key, option.value)"
                                             >
-                                            <span class="ml-2 text-sm text-foreground dark:text-gray-300">{{ option.label }}</span>
+                                            <span class="ml-2 text-sm text-foreground">{{ option.label }}</span>
                                         </label>
                                     </div>
 
@@ -146,15 +146,15 @@
                                             @change="updateForm(setting.key, $event.target.checked)"
                                         >
                                         <div class="ml-3">
-                                            <span class="text-sm text-foreground dark:text-gray-300">{{ setting.description || setting.label }}</span>
+                                            <span class="text-sm text-foreground">{{ setting.description || setting.label }}</span>
                                         </div>
                                     </div>
 
                                     <!-- Range/Slider -->
                                     <div v-else-if="setting.type === 'range'" class="space-y-2">
                                         <div class="flex items-center justify-between">
-                                            <span class="text-sm text-muted-foreground dark:text-gray-400">{{ form[setting.key] || setting.default || setting.min || 0 }}</span>
-                                            <span class="text-sm text-muted-foreground dark:text-gray-400">{{ setting.max || 100 }}</span>
+                                            <span class="text-sm text-muted-foreground">{{ form[setting.key] || setting.default || setting.min || 0 }}</span>
+                                            <span class="text-sm text-muted-foreground">{{ setting.max || 100 }}</span>
                                         </div>
                                         <input
                                             v-model.number="form[setting.key]"
@@ -168,7 +168,7 @@
                                     </div>
 
                                     <!-- Description -->
-                                    <p v-if="setting.description && setting.type !== 'checkbox'" class="text-xs text-muted-foreground dark:text-gray-400">
+                                    <p v-if="setting.description && setting.type !== 'checkbox'" class="text-xs text-muted-foreground">
                                         {{ setting.description }}
                                     </p>
                                 </div>
@@ -177,17 +177,17 @@
                     </div>
                 </form>
 
-                <div class="flex items-center justify-end space-x-3 p-6 border-t border-border sticky bottom-0 bg-card dark:bg-gray-800">
+                <div class="flex items-center justify-end space-x-3 p-6 border-t border-border sticky bottom-0 bg-card">
                     <button
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input dark:border-gray-600 rounded-md text-foreground dark:text-gray-300 hover:bg-muted dark:hover:bg-gray-700"
+                        class="px-4 py-2 border border-input rounded-md text-foreground hover:bg-muted"
                     >
                         Cancel
                     </button>
                     <button
                         @click="handleSubmit"
                         :disabled="saving"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? 'Saving...' : 'Save Settings' }}
                     </button>

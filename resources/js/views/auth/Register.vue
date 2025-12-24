@@ -16,7 +16,7 @@
                             name="name"
                             type="text"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             :placeholder="t('features.auth.register.namePlaceholder')"
                         >
                         <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name[0] }}</p>
@@ -29,7 +29,7 @@
                             name="email"
                             type="email"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             :placeholder="t('features.auth.login.emailPlaceholder')"
                         >
                         <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email[0] }}</p>
@@ -42,7 +42,7 @@
                             name="password"
                             type="password"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             :placeholder="t('features.auth.login.passwordPlaceholder')"
                         >
                         <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password[0] }}</p>
@@ -55,7 +55,7 @@
                             name="password_confirmation"
                             type="password"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             :placeholder="t('common.labels.confirmPassword')"
                         >
                     </div>
@@ -69,7 +69,7 @@
                     <button
                         type="submit"
                         :disabled="loading"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="loading">{{ t('common.loading.processing') }}</span>
                         <span v-else>{{ t('features.auth.register.submit') }}</span>
