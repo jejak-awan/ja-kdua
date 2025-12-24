@@ -199,21 +199,26 @@ const fetchLogs = async () => {
     loading.value = true;
     try {
         const response = await api.get('/admin/cms/activity-logs');
-        // Handle paginated response
+        
+        // API response structure: { success: true, data: { data: [...items], current_page, ... } }
         let data = [];
-        if (response.data?.data && Array.isArray(response.data.data)) {
+        if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+            // Paginated response from BaseApiController.paginated()
+            data = response.data.data.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+            // Direct array in data
             data = response.data.data;
         } else if (Array.isArray(response.data)) {
+            // Raw array response
             data = response.data;
-        } else if (response.data?.items && Array.isArray(response.data.items)) {
-            data = response.data.items;
         }
         logs.value = data;
         
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/activity-logs/statistics');
-            statistics.value = statsResponse.data;
+            // Also nested in data property
+            statistics.value = statsResponse.data?.data || statsResponse.data;
         } catch (error) {
             // Calculate from logs if endpoint doesn't exist
             const now = new Date();
