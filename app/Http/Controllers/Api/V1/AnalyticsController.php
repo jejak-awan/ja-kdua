@@ -206,8 +206,7 @@ class AnalyticsController extends BaseApiController
 
     public function referrers(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
         $limit = $request->input('limit', 10);
 
         $referrers = AnalyticsVisit::whereBetween('visited_at', [$dateFrom, $dateTo])
@@ -224,8 +223,7 @@ class AnalyticsController extends BaseApiController
 
     public function events(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
         $eventType = $request->input('event_type');
 
         $query = AnalyticsEvent::whereBetween('occurred_at', [$dateFrom, $dateTo]);
@@ -243,8 +241,7 @@ class AnalyticsController extends BaseApiController
 
     public function eventStats(Request $request)
     {
-        $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
-        $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        [$dateFrom, $dateTo] = $this->getDateRange($request);
 
         $stats = AnalyticsEvent::whereBetween('occurred_at', [$dateFrom, $dateTo])
             ->select('event_type', 'event_name', DB::raw('count(*) as count'))
