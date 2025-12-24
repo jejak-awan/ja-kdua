@@ -178,6 +178,7 @@ Route::prefix('v1')->group(function () {
         Route::get('activity-logs', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'index'])->middleware('permission:manage users');
         Route::get('activity-logs/recent', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'recent'])->middleware('permission:manage users');
         Route::get('activity-logs/statistics', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'statistics'])->middleware('permission:manage users');
+        Route::get('activity-logs/export', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'export'])->middleware('permission:manage users');
         Route::get('activity-logs/user/{userId}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'userActivity'])->middleware('permission:manage users');
         Route::get('activity-logs/{activityLog}', [App\Http\Controllers\Api\V1\ActivityLogController::class, 'show'])->middleware('permission:manage users');
 

@@ -62,17 +62,18 @@
 
         <div class="bg-card border border-border rounded-lg">
             <div class="px-6 py-4 border-b border-border">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
+                <!-- Row 1: Search, Filters, Export -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div class="flex flex-wrap items-center gap-3">
                         <input
                             v-model="search"
                             type="text"
                             :placeholder="t('features.activityLogs.filters.search')"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-48 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
                         >
                         <select
                             v-model="typeFilter"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
                         >
                             <option value="">{{ t('features.activityLogs.filters.allTypes') }}</option>
                             <option value="created">{{ t('features.activityLogs.filters.types.created') }}</option>
@@ -86,7 +87,7 @@
                         </select>
                         <select
                             v-model="userFilter"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
                         >
                             <option value="">{{ t('features.activityLogs.filters.allUsers') }}</option>
                             <option
@@ -96,6 +97,58 @@
                             >
                                 {{ user.name }}
                             </option>
+                        </select>
+                    </div>
+                    <button
+                        @click="exportLogs"
+                        :disabled="exporting"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        {{ exporting ? 'Exporting...' : 'Export CSV' }}
+                    </button>
+                </div>
+                
+                <!-- Row 2: Date Range & Per Page -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-muted-foreground">{{ t('features.activityLogs.filters.dateFrom') || 'Dari' }}:</label>
+                            <input
+                                v-model="dateFrom"
+                                type="date"
+                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            >
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-muted-foreground">{{ t('features.activityLogs.filters.dateTo') || 'Sampai' }}:</label>
+                            <input
+                                v-model="dateTo"
+                                type="date"
+                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            >
+                        </div>
+                        <button
+                            v-if="dateFrom || dateTo"
+                            @click="clearDateFilter"
+                            class="text-sm text-muted-foreground hover:text-foreground"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-muted-foreground">Per halaman:</label>
+                        <select
+                            v-model="perPage"
+                            @change="fetchLogs"
+                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        >
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                            <option :value="100">100</option>
+                            <option :value="200">200</option>
                         </select>
                     </div>
                 </div>
@@ -164,6 +217,10 @@ const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('');
 const userFilter = ref('');
+const dateFrom = ref('');
+const dateTo = ref('');
+const perPage = ref(50);
+const exporting = ref(false);
 
 const filteredLogs = computed(() => {
     if (!Array.isArray(logs.value)) {
@@ -172,17 +229,7 @@ const filteredLogs = computed(() => {
     
     let filtered = logs.value;
     
-    if (typeFilter.value) {
-        // Check both 'type' and 'action' fields
-        filtered = filtered.filter(log => 
-            log?.type === typeFilter.value || log?.action === typeFilter.value
-        );
-    }
-    
-    if (userFilter.value) {
-        filtered = filtered.filter(log => log?.user_id === parseInt(userFilter.value));
-    }
-    
+    // Client-side filtering for search (server already filtered by action/user/date)
     if (search.value) {
         const searchLower = search.value.toLowerCase();
         filtered = filtered.filter(log => 
@@ -198,18 +245,24 @@ const filteredLogs = computed(() => {
 const fetchLogs = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/activity-logs');
+        // Build query params for server-side filtering
+        const params = new URLSearchParams();
+        params.append('per_page', perPage.value);
+        
+        if (typeFilter.value) params.append('action', typeFilter.value);
+        if (userFilter.value) params.append('user_id', userFilter.value);
+        if (dateFrom.value) params.append('date_from', dateFrom.value);
+        if (dateTo.value) params.append('date_to', dateTo.value);
+        
+        const response = await api.get(`/admin/cms/activity-logs?${params.toString()}`);
         
         // API response structure: { success: true, data: { data: [...items], current_page, ... } }
         let data = [];
         if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-            // Paginated response from BaseApiController.paginated()
             data = response.data.data.data;
         } else if (response.data?.data && Array.isArray(response.data.data)) {
-            // Direct array in data
             data = response.data.data;
         } else if (Array.isArray(response.data)) {
-            // Raw array response
             data = response.data;
         }
         logs.value = data;
@@ -217,10 +270,8 @@ const fetchLogs = async () => {
         // Fetch statistics
         try {
             const statsResponse = await api.get('/admin/cms/activity-logs/statistics');
-            // Also nested in data property
             statistics.value = statsResponse.data?.data || statsResponse.data;
         } catch (error) {
-            // Calculate from logs if endpoint doesn't exist
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -233,12 +284,7 @@ const fetchLogs = async () => {
                     active_users: new Set(logs.value.map(l => l?.user_id).filter(Boolean)).size,
                 };
             } else {
-                statistics.value = {
-                    total: 0,
-                    today: 0,
-                    this_week: 0,
-                    active_users: 0,
-                };
+                statistics.value = { total: 0, today: 0, this_week: 0, active_users: 0 };
             }
         }
     } catch (error) {
@@ -248,10 +294,46 @@ const fetchLogs = async () => {
     }
 };
 
+const exportLogs = async () => {
+    exporting.value = true;
+    try {
+        const params = new URLSearchParams();
+        if (typeFilter.value) params.append('action', typeFilter.value);
+        if (userFilter.value) params.append('user_id', userFilter.value);
+        if (dateFrom.value) params.append('date_from', dateFrom.value);
+        if (dateTo.value) params.append('date_to', dateTo.value);
+        
+        const response = await api.get(`/admin/cms/activity-logs/export?${params.toString()}`, {
+            responseType: 'blob'
+        });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `activity-logs-${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Failed to export activity logs:', error);
+        alert('Gagal mengekspor log aktivitas');
+    } finally {
+        exporting.value = false;
+    }
+};
+
+const clearDateFilter = () => {
+    dateFrom.value = '';
+    dateTo.value = '';
+    fetchLogs();
+};
+
 const fetchUsers = async () => {
     try {
         const response = await api.get('/admin/cms/users');
-        const data = response.data?.data || response.data || [];
+        const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -263,6 +345,13 @@ const formatDate = (date) => {
     if (!date) return '-';
     return new Date(date).toLocaleString();
 };
+
+// Watch filters for auto-refresh
+import { watch } from 'vue';
+
+watch([typeFilter, userFilter, dateFrom, dateTo], () => {
+    fetchLogs();
+});
 
 onMounted(() => {
     fetchLogs();

@@ -13,43 +13,119 @@ class ActivityLogController extends BaseApiController
         try {
             $query = ActivityLog::with('user');
 
-            if ($request->has('user_id')) {
+            // Filters
+            if ($request->has('user_id') && $request->user_id) {
                 $query->where('user_id', $request->user_id);
             }
 
-            if ($request->has('action')) {
+            if ($request->has('action') && $request->action) {
                 $query->where('action', $request->action);
             }
 
-            if ($request->has('model_type')) {
-                $query->where('model_type', $request->model_type);
+            if ($request->has('model_type') && $request->model_type) {
+                $query->where('model_type', 'like', '%' . $request->model_type . '%');
             }
 
-            if ($request->has('date_from')) {
+            if ($request->has('ip_address') && $request->ip_address) {
+                $query->where('ip_address', $request->ip_address);
+            }
+
+            if ($request->has('date_from') && $request->date_from) {
                 $query->whereDate('created_at', '>=', $request->date_from);
             }
 
-            if ($request->has('date_to')) {
+            if ($request->has('date_to') && $request->date_to) {
                 $query->whereDate('created_at', '<=', $request->date_to);
             }
 
-            $logs = $query->latest()->paginate(50);
+            if ($request->has('search') && $request->search) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('description', 'like', "%{$search}%")
+                      ->orWhere('model_type', 'like', "%{$search}%")
+                      ->orWhereHas('user', function ($userQuery) use ($search) {
+                          $userQuery->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            // Sorting
+            $sortBy = $request->input('sort_by', 'created_at');
+            $sortDir = $request->input('sort_dir', 'desc');
+            $allowedSorts = ['created_at', 'action', 'model_type', 'user_id'];
+            if (in_array($sortBy, $allowedSorts)) {
+                $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
+            } else {
+                $query->latest();
+            }
+
+            // Pagination with customizable per_page
+            $perPage = min(max((int) $request->input('per_page', 50), 10), 500);
+            $logs = $query->paginate($perPage);
 
             return $this->paginated($logs, 'Activity logs retrieved successfully');
         } catch (\Exception $e) {
             Log::error('Activity logs index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
-            // Return empty paginated response instead of error
-            try {
-                return $this->paginated(
-                    ActivityLog::query()->paginate(50, ['*'], 'page', 1),
-                    'Activity logs retrieved successfully'
-                );
-            } catch (\Exception $e2) {
-                // If even empty query fails, return minimal response
-                return $this->success([], 'Activity logs retrieved successfully');
+            return $this->success([], 'Activity logs retrieved successfully');
+        }
+    }
+
+    /**
+     * Export activity logs to CSV
+     */
+    public function export(Request $request)
+    {
+        try {
+            $query = ActivityLog::with('user');
+
+            // Apply same filters as index
+            if ($request->has('user_id') && $request->user_id) {
+                $query->where('user_id', $request->user_id);
             }
+
+            if ($request->has('action') && $request->action) {
+                $query->where('action', $request->action);
+            }
+
+            if ($request->has('model_type') && $request->model_type) {
+                $query->where('model_type', 'like', '%' . $request->model_type . '%');
+            }
+
+            if ($request->has('date_from') && $request->date_from) {
+                $query->whereDate('created_at', '>=', $request->date_from);
+            }
+
+            if ($request->has('date_to') && $request->date_to) {
+                $query->whereDate('created_at', '<=', $request->date_to);
+            }
+
+            $logs = $query->latest()->limit(10000)->get();
+
+            // Generate CSV content
+            $csv = "ID,User,Action,Model Type,Model ID,Description,IP Address,Created At\n";
+            foreach ($logs as $log) {
+                $csv .= sprintf(
+                    "%d,\"%s\",\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\"\n",
+                    $log->id,
+                    $log->user?->name ?? 'System',
+                    $log->action,
+                    $log->model_type ?? '',
+                    $log->model_id ?? '',
+                    str_replace('"', '""', $log->description ?? ''),
+                    $log->ip_address ?? '',
+                    $log->created_at->format('Y-m-d H:i:s')
+                );
+            }
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="activity-logs-' . now()->format('Y-m-d') . '.csv"',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Activity logs export error: '.$e->getMessage());
+            return $this->error('Failed to export activity logs', 500);
         }
     }
 
