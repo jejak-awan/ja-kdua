@@ -12,6 +12,8 @@
         "testing": "Testing...",
         "save": "Save Settings",
         "saving": "Saving...",
+        "cancel": "Reset",
+        "select": "Select...",
         "enabled": "Enabled",
         "disabled": "Disabled"
     },

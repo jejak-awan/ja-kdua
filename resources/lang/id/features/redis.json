@@ -12,6 +12,8 @@
         "testing": "Menguji...",
         "save": "Simpan Pengaturan",
         "saving": "Menyimpan...",
+        "cancel": "Reset",
+        "select": "Pilih...",
         "enabled": "Diaktifkan",
         "disabled": "Dinonaktifkan"
     },

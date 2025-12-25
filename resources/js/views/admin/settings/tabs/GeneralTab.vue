@@ -1,0 +1,89 @@
+<template>
+    <div class="space-y-8">
+        <SettingGroup
+            v-for="group in generalSettingsGrouped"
+            :key="group.id"
+            :title="group.title"
+            :description="group.description"
+            :icon="group.icon"
+        >
+            <SettingField
+                v-for="setting in group.settings"
+                :key="setting.id"
+                :model-value="formData[setting.key]"
+                @update:model-value="(value) => updateField(setting.key, value)"
+                :field-key="setting.key"
+                :label="$t('features.settings.labels.' + setting.key)"
+                :description="$t('features.settings.descriptions.' + setting.key)"
+                :type="setting.type"
+                :enabled-text="$t('features.settings.enabled')"
+                :disabled-text="$t('features.settings.disabled')"
+            />
+        </SettingGroup>
+    </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import SettingGroup from '../../../../components/settings/SettingGroup.vue'
+import SettingField from '../../../../components/settings/SettingField.vue'
+
+const { t } = useI18n()
+
+const props = defineProps({
+    settings: {
+        type: Array,
+        required: true
+    },
+    formData: {
+        type: Object,
+        required: true
+    }
+})
+
+const emit = defineEmits(['update:formData'])
+
+const updateField = (key, value) => {
+    emit('update:formData', { ...props.formData, [key]: value })
+}
+
+// SVG Icon Components
+const GlobeIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 2.25c-2.998 0-5.74 1.1-7.843 2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>`
+}
+
+const ClockIcon = {
+    template: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+}
+
+// General settings grouped by category
+const generalSettingsGrouped = computed(() => {
+    const generalSettings = props.settings.filter(s => s && s.group === 'general')
+    
+    const groups = [
+        {
+            id: 'site',
+            title: t('features.settings.groups.siteInfo.title'),
+            description: t('features.settings.groups.siteInfo.description'),
+            icon: GlobeIcon,
+            keys: ['site_name', 'site_description', 'site_url', 'admin_email'],
+            settings: [],
+        },
+        {
+            id: 'localization',
+            title: t('features.settings.groups.localization.title'),
+            description: t('features.settings.groups.localization.description'),
+            icon: ClockIcon,
+            keys: ['timezone', 'date_format', 'time_format', 'items_per_page'],
+            settings: [],
+        },
+    ]
+    
+    groups.forEach(group => {
+        group.settings = generalSettings.filter(s => group.keys.includes(s.key))
+    })
+    
+    return groups.filter(group => group.settings.length > 0)
+})
+</script>

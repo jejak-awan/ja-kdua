@@ -16,100 +16,126 @@
       <!-- Settings Tab -->
       <TabsContent value="settings" class="settings-tab space-y-6">
         <!-- Global Driver Warning -->
-        <div v-if="cacheDriver !== 'redis'" class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-yellow-800 flex items-start gap-3">
-             <div class="text-xl">⚠️</div>
-             <div>
-                <h4 class="font-bold text-sm uppercase tracking-wider mb-1">Redis Disabled</h4>
-                <p class="text-sm">
-                   Redis is currently disabled in system settings. To enable it, go to 
-                   <router-link to="/admin/settings?tab=performance" class="underline font-semibold hover:text-yellow-900">Settings &gt; Performance</router-link>
-                   and select "Redis" as the Cache Driver.
-                </p>
-             </div>
+        <div v-if="cacheDriver !== 'redis'" class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800/50 dark:text-yellow-200">
+          <div class="flex items-start gap-3">
+            <div class="text-xl">⚠️</div>
+            <div>
+              <h4 class="font-bold text-sm uppercase tracking-wider mb-1">Redis Disabled</h4>
+              <p class="text-sm leading-relaxed">
+                Redis is currently disabled in system settings. To enable it, go to 
+                <router-link to="/admin/settings?tab=performance" class="underline font-semibold hover:text-yellow-900 dark:hover:text-yellow-100 inline-flex items-center gap-1">
+                  Settings &gt; Performance
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                </router-link>
+                and select "Redis" as the Cache Driver.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Connection Test Card -->
-        <div class="bg-card border border-border rounded-lg p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-semibold text-foreground">{{ $t('features.redis.settings.connection') }}</h3>
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/50">
+            <h3 class="text-base font-semibold text-foreground flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+              {{ $t('features.redis.settings.connection') }}
+            </h3>
             <button 
               type="button"
               @click="testConnection" 
               :disabled="testing" 
               class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
             >
+              <svg v-if="testing" class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
               <span v-if="!testing">{{ $t('features.redis.settings.test') }}</span>
               <span v-else>{{ $t('features.redis.settings.testing') }}</span>
             </button>
           </div>
           
-          <div v-if="connectionStatus" class="rounded-lg p-3 text-sm" :class="connectionStatus.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'">
-            {{ connectionStatus.message }}
+          <div class="p-6">
+            <div v-if="connectionStatus" class="rounded-lg p-4 text-sm border" :class="connectionStatus.type === 'success' ? 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800/50' : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800/50'">
+              <div class="flex items-center gap-2">
+                <span v-if="connectionStatus.type === 'success'">✅</span>
+                <span v-else>❌</span>
+                <span>{{ connectionStatus.message }}</span>
+              </div>
+            </div>
+            <div v-else class="text-sm text-muted-foreground text-center py-4">
+              Click "Test Connection" to verify Redis connectivity
+            </div>
           </div>
         </div>
 
         <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis'" class="space-y-6">
-            <!-- Opacity overlay for disabled state -->
-            <div :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis'}" class="space-y-6">
-              
-              <div v-for="group in groupedSettings" :key="group.name" class="bg-card border border-border rounded-lg p-6">
-                <!-- Group Header -->
-                <h3 class="text-base font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  {{ group.name }}
-                </h3>
-              
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div v-for="setting in group.items" :key="setting.key" class="space-y-2">
-                    <Label :for="setting.key" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      {{ formatLabel(setting.key) }}
-                      <span v-if="setting.description" class="block text-xs text-muted-foreground font-normal mt-1">{{ setting.description }}</span>
-                    </Label>
-
-                    <Input
-                      v-if="setting.type === 'string' || setting.type === 'integer'"
-                      :id="setting.key"
-                      :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
-                      v-model="settingsForm[setting.key]"
-                      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-
-                    <Select
-                      v-else-if="setting.type === 'boolean'"
-                      :model-value="String(settingsForm[setting.key])"
-                      @update:model-value="(val) => settingsForm[setting.key] = val"
-                    >
-                      <SelectTrigger class="w-full">
-                        <SelectValue :placeholder="$t('features.redis.settings.select')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">{{ $t('features.redis.settings.enabled') }}</SelectItem>
-                        <SelectItem value="false">{{ $t('features.redis.settings.disabled') }}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <!-- Opacity overlay for disabled state -->
+          <div :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis'}" class="space-y-6">
+            
+            <div v-for="group in groupedSettings" :key="group.name" class="bg-muted/20 rounded-xl border border-border p-5">
+              <!-- Group Header -->
+              <div class="flex items-center gap-3 mb-4 pb-3 border-b border-border">
+                <div class="p-2 rounded-lg bg-primary/10">
+                  <component :is="getGroupIcon(group.name)" class="w-5 h-5 text-primary" />
                 </div>
-            </div>
-          </div>
+                <div>
+                  <h3 class="text-base font-semibold text-foreground">{{ group.name }}</h3>
+                  <p class="text-xs text-muted-foreground">{{ getGroupDescription(group.name) }}</p>
+                </div>
+              </div>
+            
+              <!-- Group Settings Grid with Individual Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-for="setting in group.items" :key="setting.key" class="p-4 bg-card rounded-lg border border-border">
+                  <Label :for="setting.key" class="block text-sm font-medium text-foreground mb-1">
+                    {{ formatLabel(setting.key) }}
+                  </Label>
+                  <p v-if="setting.description" class="text-xs text-muted-foreground mb-2">{{ setting.description }}</p>
 
-          <!-- Footer Actions -->
-          <div class="flex justify-end space-x-4 pt-6 border-t border-border mt-8">
-              <button
-                  type="button"
-                  @click="loadSettings"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-              >
-                  {{ $t('features.redis.settings.cancel') || 'Reset' }}
-              </button>
-              <button 
-                type="submit" 
-                :disabled="saving" 
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-              >
-                <span v-if="!saving">{{ $t('features.redis.settings.save') }}</span>
-                <span v-else>{{ $t('features.redis.settings.saving') }}</span>
-              </button>
+                  <Input
+                    v-if="setting.type === 'string' || setting.type === 'integer'"
+                    :id="setting.key"
+                    :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
+                    v-model="settingsForm[setting.key]"
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+
+                  <Select
+                    v-else-if="setting.type === 'boolean'"
+                    :model-value="String(settingsForm[setting.key])"
+                    @update:model-value="(val) => settingsForm[setting.key] = val"
+                  >
+                    <SelectTrigger class="w-full">
+                      <SelectValue :placeholder="$t('features.redis.settings.select')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{{ $t('features.redis.settings.enabled') }}</SelectItem>
+                      <SelectItem value="false">{{ $t('features.redis.settings.disabled') }}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
           </div>
-        </form>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="bg-muted/30 rounded-lg border border-border p-4 flex justify-end space-x-4">
+            <button
+                type="button"
+                @click="loadSettings"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            >
+                {{ $t('features.redis.settings.cancel') }}
+            </button>
+            <button 
+              type="submit" 
+              :disabled="saving" 
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              <svg v-if="saving" class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span v-if="!saving">{{ $t('features.redis.settings.save') }}</span>
+              <span v-else>{{ $t('features.redis.settings.saving') }}</span>
+            </button>
+        </div>
+      </form>
       </TabsContent>
 
       <!-- Statistics Tab -->
@@ -391,9 +417,20 @@ const groupedSettings = computed(() => {
     const filteredItems = items.filter(item => item.key !== 'redis_enabled')
      if (filteredItems.length === 0) return
 
-    groups[groupName] = {
-      name: formatGroupName(groupName),
-      items: filteredItems
+    // Merge session and queue into one group
+    if (groupName === 'session' || groupName === 'queue') {
+      if (!groups['session_queue']) {
+        groups['session_queue'] = {
+          name: 'Session & Queue',
+          items: []
+        }
+      }
+      groups['session_queue'].items.push(...filteredItems)
+    } else {
+      groups[groupName] = {
+        name: formatGroupName(groupName),
+        items: filteredItems
+      }
     }
   })
   
@@ -564,6 +601,37 @@ const formatLabel = (key) => {
 
 const formatGroupName = (group) => {
   return group.charAt(0).toUpperCase() + group.slice(1)
+}
+
+// SVG Icon Components
+const DatabaseIcon = {
+  template: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>`
+}
+
+const ZapIcon = {
+  template: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+}
+
+const ClockIcon = {
+  template: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+}
+
+const getGroupIcon = (groupName) => {
+  const icons = {
+    'Connection': DatabaseIcon,
+    'Cache': ZapIcon,
+    'Session & Queue': ClockIcon
+  }
+  return icons[groupName] || DatabaseIcon
+}
+
+const getGroupDescription = (groupName) => {
+  const descriptions = {
+    'Connection': 'Configure Redis server connection details',
+    'Cache': 'Manage application cache settings',
+    'Session & Queue': 'Configure session and queue driver settings'
+  }
+  return descriptions[groupName] || ''
 }
 
 const formatNumber = (num) => {

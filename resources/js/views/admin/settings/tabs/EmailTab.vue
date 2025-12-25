@@ -1,0 +1,140 @@
+<template>
+    <div class="space-y-8">
+        <SettingGroup
+            v-for="group in emailSettingsGrouped"
+            :key="group.id"
+            :title="group.title"
+            :description="group.description"
+            :icon="group.icon"
+        >
+            <SettingField
+                v-for="setting in group.settings"
+                :key="setting.id"
+                v-model="formData[setting.key]"
+                :field-key="setting.key"
+                :label="$t('features.settings.labels.' + setting.key)"
+                :description="$t('features.settings.descriptions.' + setting.key)"
+                :type="setting.type"
+                :enabled-text="$t('features.settings.enabled')"
+                :disabled-text="$t('features.settings.disabled')"
+            />
+
+            <!-- SMTP Group Actions -->
+            <template v-if="group.id === 'smtp'" #footer>
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-wrap gap-4">
+                        <!-- Config Validation -->
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="button"
+                                @click="$emit('validate-config')"
+                                :disabled="validatingConfig"
+                                class="px-4 py-2 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                            >
+                                {{ validatingConfig ? $t('features.settings.emailTest.validating') : $t('features.settings.emailTest.validate') }}
+                            </button>
+                            <div v-if="configValidation" class="text-sm">
+                                <span v-if="configValidation.valid" class="text-green-600">✓ {{ $t('features.settings.emailTest.valid') }}</span>
+                                <span v-else class="text-red-600">✗ {{ $t('features.settings.emailTest.invalid') }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- SMTP Connection Test -->
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="button"
+                                @click="$emit('test-connection')"
+                                :disabled="testingConnection"
+                                class="px-4 py-2 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
+                            >
+                                {{ testingConnection ? $t('features.settings.emailTest.testing') : $t('features.settings.emailTest.testConnection') }}
+                            </button>
+                            <div v-if="connectionResult" class="text-sm">
+                                <span v-if="connectionResult.connected" class="text-green-600">✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}</span>
+                                <span v-else class="text-red-600">✗ {{ $t('features.settings.emailTest.failed') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Errors/Warnings -->
+                    <div v-if="configValidation && (!configValidation.valid || (configValidation.warnings && configValidation.warnings.length > 0))" class="p-4 bg-muted rounded-lg">
+                        <div v-if="configValidation.errors && configValidation.errors.length > 0" class="mb-2">
+                            <p class="text-xs font-medium text-red-600 mb-1">{{ $t('features.settings.emailTest.errors') }}</p>
+                            <ul class="text-xs text-red-600 list-disc list-inside">
+                                <li v-for="error in configValidation.errors" :key="error">{{ error }}</li>
+                            </ul>
+                        </div>
+                        <div v-if="configValidation.warnings && configValidation.warnings.length > 0">
+                            <p class="text-xs font-medium text-yellow-600 mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
+                            <ul class="text-xs text-yellow-600 list-disc list-inside">
+                                <li v-for="warning in configValidation.warnings" :key="warning">{{ warning }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </SettingGroup>
+    </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { MailIcon, UserIcon } from 'lucide-vue-next'
+import SettingGroup from '../../../../components/settings/SettingGroup.vue'
+import SettingField from '../../../../components/settings/SettingField.vue'
+
+const props = defineProps({
+    settings: {
+        type: Array,
+        required: true
+    },
+    formData: {
+        type: Object,
+        required: true
+    },
+    validatingConfig: Boolean,
+    configValidation: Object,
+    testingConnection: Boolean,
+    connectionResult: Object
+})
+
+defineEmits(['validate-config', 'test-connection'])
+
+const { t } = useI18n()
+
+const emailSettingsGrouped = computed(() => {
+    const emailSettings = props.settings.filter(s => s && s.group === 'email')
+    
+    const groups = [
+        {
+            id: 'smtp',
+            title: t('features.settings.groups.smtp.title'),
+            description: t('features.settings.groups.smtp.description'),
+            icon: MailIcon,
+            keys: [
+                'mail_from_address', 
+                'mail_from_name',
+                'mail_driver', 
+                'mail_host', 
+                'mail_port', 
+                'mail_username', 
+                'mail_password', 
+                'mail_encryption'
+            ],
+            settings: [],
+        },
+    ]
+    
+    groups.forEach(group => {
+        group.settings = emailSettings.filter(s => group.keys.includes(s.key))
+        
+        // Sort settings based on the order in keys
+        group.settings.sort((a, b) => {
+            return group.keys.indexOf(a.key) - group.keys.indexOf(b.key)
+        })
+    })
+    
+    return groups.filter(group => group.settings.length > 0)
+})
+</script>
