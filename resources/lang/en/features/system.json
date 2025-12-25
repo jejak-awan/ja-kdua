@@ -13,7 +13,8 @@
             "clear": "Clear Cache",
             "clearing": "Clearing...",
             "success": "Cache cleared successfully",
-            "failed": "Failed to clear cache"
+            "failed": "Failed to clear cache",
+            "manage": "Manage Cache"
         },
         "uptime": "Uptime",
         "sections": {
@@ -36,6 +37,14 @@
             "users": "Total Users",
             "media": "Total Media",
             "visits": "Total Visits"
+        },
+        "quickActions": {
+            "title": "Quick Actions",
+            "settings": "Settings",
+            "backups": "Backups",
+            "redis": "Redis Cache",
+            "scheduledTasks": "Scheduled Tasks",
+            "commandRunner": "Command Runner"
         }
     },
     "backups": {

@@ -72,13 +72,15 @@
         <div class="bg-card border border-border rounded-lg p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.info.title') }}</h2>
-                <button
-                    @click="clearCache"
-                    :disabled="clearingCache"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 text-sm"
+                <router-link
+                    to="/admin/settings?tab=performance"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 text-sm"
                 >
-                    {{ clearingCache ? t('features.system.info.cache.clearing') : t('features.system.info.cache.clear') }}
-                </button>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {{ t('features.system.info.cache.manage') }}
+                </router-link>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -111,11 +113,11 @@
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.memoryUsage') }}</dt>
-                            <dd class="text-sm text-foreground">{{ formatMemory(systemInfo.memory_usage) }}</dd>
+                            <dd class="text-sm text-foreground">{{ displayMemory }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.diskUsage') }}</dt>
-                            <dd class="text-sm text-foreground">{{ formatDiskUsage(systemInfo.disk_usage) }}</dd>
+                            <dd class="text-sm text-foreground">{{ displayDisk }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.database') }}</dt>
@@ -126,26 +128,60 @@
             </div>
         </div>
 
-        <!-- Statistics -->
-        <div v-if="statistics" class="bg-card border border-border rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.statistics.title') }}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="text-center p-4 bg-muted rounded-lg">
-                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_contents || 0 }}</p>
-                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.contents') }}</p>
-                </div>
-                <div class="text-center p-4 bg-muted rounded-lg">
-                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_users || 0 }}</p>
-                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.users') }}</p>
-                </div>
-                <div class="text-center p-4 bg-muted rounded-lg">
-                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_media || 0 }}</p>
-                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.media') }}</p>
-                </div>
-                <div class="text-center p-4 bg-muted rounded-lg">
-                    <p class="text-2xl font-semibold text-foreground">{{ statistics.total_visits || 0 }}</p>
-                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.system.info.statistics.visits') }}</p>
-                </div>
+        <!-- Quick Actions -->
+        <div class="bg-card border border-border rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.quickActions.title') }}</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <router-link
+                    to="/admin/settings"
+                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                    <svg class="h-8 w-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.settings') }}</span>
+                </router-link>
+                
+                <router-link
+                    to="/admin/backups"
+                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                    <svg class="h-8 w-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.backups') }}</span>
+                </router-link>
+                
+                <router-link
+                    to="/admin/redis"
+                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                    <svg class="h-8 w-8 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                    </svg>
+                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.redis') }}</span>
+                </router-link>
+                
+                <router-link
+                    to="/admin/scheduled-tasks"
+                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                    <svg class="h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.scheduledTasks') }}</span>
+                </router-link>
+                
+                <router-link
+                    to="/admin/command-runner"
+                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                >
+                    <svg class="h-8 w-8 text-yellow-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.commandRunner') }}</span>
+                </router-link>
             </div>
         </div>
     </div>
@@ -160,9 +196,7 @@ import { parseSingleResponse } from '../../../utils/responseParser';
 const { t } = useI18n();
 
 const systemInfo = ref({});
-const statistics = ref(null);
 const cacheStatus = ref('Active');
-const clearingCache = ref(false);
 
 const systemHealth = computed(() => {
     if (!systemInfo.value) return 'healthy';
@@ -175,24 +209,30 @@ const systemHealth = computed(() => {
     return 'healthy';
 });
 
+// Computed for display - handle pre-formatted strings from backend
+const displayMemory = computed(() => {
+    if (!systemInfo.value.memory_usage) return '-';
+    // Backend now sends formatted string like "2.44 GB"
+    if (typeof systemInfo.value.memory_usage === 'string') {
+        return systemInfo.value.memory_usage;
+    }
+    return formatBytes(systemInfo.value.memory_usage);
+});
+
+const displayDisk = computed(() => {
+    const usage = systemInfo.value.disk_usage;
+    if (!usage) return '-';
+    if (typeof usage === 'object') {
+        // Backend sends: { used: "30.85 GB", total: "97.87 GB", percent: 31.52 }
+        return `${usage.used} / ${usage.total} (${usage.percent || 0}%)`;
+    }
+    return usage;
+});
+
 const fetchSystemInfo = async () => {
     try {
         const response = await api.get('/admin/cms/system/info');
         systemInfo.value = parseSingleResponse(response) || {};
-        
-        // Fetch statistics
-        try {
-            const statsResponse = await api.get('/admin/cms/system/statistics');
-            statistics.value = parseSingleResponse(statsResponse) || {};
-        } catch (error) {
-            // Set default if endpoint doesn't exist
-            statistics.value = {
-                total_contents: 0,
-                total_users: 0,
-                total_media: 0,
-                total_visits: 0,
-            };
-        }
         
         // Fetch cache status
         try {
@@ -207,20 +247,6 @@ const fetchSystemInfo = async () => {
     }
 };
 
-const clearCache = async () => {
-    clearingCache.value = true;
-    try {
-        await api.post('/admin/cms/cache/clear');
-        alert(t('features.system.info.cache.success'));
-        await fetchSystemInfo();
-    } catch (error) {
-        console.error('Failed to clear cache:', error);
-        alert(t('features.system.info.cache.failed'));
-    } finally {
-        clearingCache.value = false;
-    }
-};
-
 const formatUptime = (seconds) => {
     if (!seconds) return '-';
     const days = Math.floor(seconds / 86400);
@@ -229,24 +255,15 @@ const formatUptime = (seconds) => {
     return `${days}d ${hours}h ${minutes}m`;
 };
 
-const formatMemory = (bytes) => {
-    if (!bytes) return '-';
+const formatBytes = (bytes) => {
+    if (!bytes || typeof bytes !== 'number') return '-';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
 
-const formatDiskUsage = (usage) => {
-    if (!usage) return '-';
-    if (typeof usage === 'object') {
-        return `${formatMemory(usage.used)} / ${formatMemory(usage.total)} (${usage.percent || 0}%)`;
-    }
-    return usage;
-};
-
 onMounted(() => {
     fetchSystemInfo();
 });
 </script>
-

@@ -13,7 +13,8 @@
             "clear": "Bersihkan Cache",
             "clearing": "Membersihkan...",
             "success": "Cache berhasil dibersihkan",
-            "failed": "Gagal membersihkan cache"
+            "failed": "Gagal membersihkan cache",
+            "manage": "Kelola Cache"
         },
         "uptime": "Waktu Operasional",
         "sections": {
@@ -36,6 +37,14 @@
             "users": "Total Pengguna",
             "media": "Total Media",
             "visits": "Total Kunjungan"
+        },
+        "quickActions": {
+            "title": "Aksi Cepat",
+            "settings": "Pengaturan",
+            "backups": "Cadangan",
+            "redis": "Cache Redis",
+            "scheduledTasks": "Tugas Terjadwal",
+            "commandRunner": "Command Runner"
         }
     },
     "backups": {

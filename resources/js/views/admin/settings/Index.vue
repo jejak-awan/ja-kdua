@@ -125,6 +125,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/responseParser';
 import Tabs from '../../../components/ui/tabs.vue';
@@ -141,9 +142,14 @@ import PerformanceTab from './tabs/PerformanceTab.vue';
 import EmailTestSection from './EmailTestSection.vue';
 
 const { t } = useI18n();
+const route = useRoute();
+
 const loading = ref(false);
 const saving = ref(false);
-const activeTab = ref('general');
+// Initialize tab from query param if present (e.g., ?tab=performance)
+const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media'];
+const initialTab = validTabs.includes(route.query.tab) ? route.query.tab : 'general';
+const activeTab = ref(initialTab);
 const settings = ref([]);
 const formData = ref({});
 

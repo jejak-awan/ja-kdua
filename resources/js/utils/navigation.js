@@ -52,12 +52,12 @@ export const navigationGroups = {
         { name: 'redirects', to: '/admin/redirects', label: 'Redirects' },
     ],
 
-    // System (5 items)
+    // System (6 items) - Info Sistem at top as system dashboard
     system: [
+        { name: 'system', to: '/admin/system', label: 'System Info' },
         { name: 'settings', to: '/admin/settings', label: 'Settings' },
         { name: 'backups', to: '/admin/backups', label: 'Backups' },
         { name: 'redis', to: '/admin/redis', label: 'Redis Cache' },
-        { name: 'system', to: '/admin/system', label: 'System Info' },
         { name: 'scheduled-tasks', to: '/admin/scheduled-tasks', label: 'Scheduled Tasks' },
         { name: 'command-runner', to: '/admin/command-runner', label: 'Command Runner' },
     ],

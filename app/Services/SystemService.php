@@ -13,10 +13,14 @@ class SystemService
      */
     public function getSystemInfo(): array
     {
+        $memoryInfo = $this->getMemoryUsage();
+        $diskInfo = $this->getDiskUsage();
+        
         return [
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
             'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
             'database' => DB::connection()->getDatabaseName(),
             'timezone' => config('app.timezone'),
             'locale' => config('app.locale'),
@@ -25,6 +29,19 @@ class SystemService
             'cache_driver' => config('cache.default'),
             'queue_driver' => config('queue.default'),
             'session_driver' => config('session.driver'),
+            // Memory usage info
+            'memory_usage' => $memoryInfo['used'] ?? null,
+            'memory_usage_percent' => $memoryInfo['percent'] ?? 0,
+            'memory_total' => $memoryInfo['total'] ?? null,
+            // Disk usage info
+            'disk_usage' => [
+                'used' => $diskInfo['used'] ?? '0 B',
+                'total' => $diskInfo['total'] ?? '0 B',
+                'percent' => $diskInfo['percent'] ?? 0,
+            ],
+            'disk_usage_percent' => $diskInfo['percent'] ?? 0,
+            // Uptime
+            'uptime' => $this->getUptime(),
         ];
     }
 
@@ -34,7 +51,25 @@ class SystemService
     public function getStatistics(): array
     {
         try {
+            // Get page views/visits count (if analytics exists)
+            $totalVisits = 0;
+            try {
+                if (class_exists(\App\Models\PageView::class)) {
+                    $totalVisits = \App\Models\PageView::count();
+                } elseif (class_exists(\App\Models\Analytics::class)) {
+                    $totalVisits = \App\Models\Analytics::count();
+                }
+            } catch (\Exception $e) {
+                // Visits tracking not available
+            }
+
             return [
+                // Flat keys for frontend compatibility
+                'total_contents' => \App\Models\Content::count(),
+                'total_users' => \App\Models\User::count(),
+                'total_media' => \App\Models\Media::count(),
+                'total_visits' => $totalVisits,
+                // Detailed nested data (for extended use)
                 'contents' => [
                     'total' => \App\Models\Content::count(),
                     'published' => \App\Models\Content::where('status', 'published')->count(),
@@ -66,6 +101,10 @@ class SystemService
     protected function getDefaultStatistics(): array
     {
         return [
+            'total_contents' => 0,
+            'total_users' => 0,
+            'total_media' => 0,
+            'total_visits' => 0,
             'contents' => ['total' => 0, 'published' => 0, 'draft' => 0],
             'users' => ['total' => 0, 'verified' => 0],
             'media' => ['total' => 0, 'total_size' => 0],
@@ -75,6 +114,34 @@ class SystemService
             'forms' => 0,
             'form_submissions' => 0,
         ];
+    }
+
+    /**
+     * Get system uptime
+     */
+    public function getUptime(): ?int
+    {
+        try {
+            // Try reading from /proc/uptime (Linux)
+            if (file_exists('/proc/uptime')) {
+                $uptime = file_get_contents('/proc/uptime');
+                $uptime = explode(' ', $uptime);
+                return (int) $uptime[0];
+            }
+            
+            // Fallback: try uptime command
+            $output = @shell_exec('uptime -s 2>/dev/null');
+            if ($output) {
+                $bootTime = strtotime(trim($output));
+                if ($bootTime) {
+                    return time() - $bootTime;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::debug('Uptime error: ' . $e->getMessage());
+        }
+        
+        return null;
     }
 
     /**
