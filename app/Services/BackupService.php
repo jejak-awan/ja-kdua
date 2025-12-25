@@ -45,16 +45,19 @@ class BackupService
     {
         $name = $name ?? 'backup_'.now()->format('Y-m-d_His');
 
-        // Prepare path first
-        $filename = $name.'.sql';
-        $path = 'backups/'.date('Y/m').'/'.$filename;
+        // Prepare paths
+        // We'll first create a temporary .sql file, then zip and encrypt it
+        $sqlFilename = $name.'.sql';
+        $zipFilename = $name.'.zip';
+        $targetPath = 'backups/'.date('Y/m').'/'.$zipFilename;
+        $relativePath = 'backups/'.date('Y/m').'/'.$sqlFilename; // Temp path for SQL
 
-        // Create backup record with temporary path
+        // Create backup record
         $backup = Backup::create([
             'name' => $name,
             'type' => 'database',
             'status' => 'in_progress',
-            'path' => $path, // Set path immediately to avoid NOT NULL constraint
+            'path' => $targetPath,
             'disk' => 'local',
         ]);
 
@@ -64,18 +67,28 @@ class BackupService
             $password = config('database.connections.'.config('database.default').'.password');
             $host = config('database.connections.'.config('database.default').'.host');
 
-            // For SQLite
+            // Determine temporary path for the SQL file
+            // We use the same directory structure but temporary filename
+            $backupDir = dirname(Storage::disk('local')->path($targetPath));
+            if (!is_dir($backupDir)) {
+                mkdir($backupDir, 0755, true);
+            }
+
+            // We need absolute path for the SQL dump to work
+            $tempSqlFile = $backupDir . '/' . $sqlFilename;
+
+            // 1. Generate SQL Dump
             if (config('database.default') === 'sqlite') {
-                // Check if database path is already absolute
+                 // Check database path logic (existing)
                 if (str_starts_with($database, '/')) {
                     $dbPath = $database;
                 } else {
                     $dbPath = database_path($database);
                 }
 
-                // Try with .sqlite extension if not found
                 if (! file_exists($dbPath)) {
-                    if (str_starts_with($database, '/')) {
+                    // Try with .sqlite extension
+                     if (str_starts_with($database, '/')) {
                         $dbPath = $database.'.sqlite';
                     } else {
                         $dbPath = database_path($database.'.sqlite');
@@ -83,27 +96,13 @@ class BackupService
                 }
 
                 if (file_exists($dbPath)) {
-                    // Ensure backup directory exists
-                    $backupDir = dirname(Storage::disk('local')->path($path));
-                    if (! is_dir($backupDir)) {
-                        mkdir($backupDir, 0755, true);
-                    }
-
-                    Storage::disk('local')->put($path, file_get_contents($dbPath));
+                   copy($dbPath, $tempSqlFile);
                 } else {
                     throw new \Exception('Database file not found: '.$dbPath);
                 }
             } elseif (config('database.default') === 'mysql') {
-                // For MySQL - use mysqldump
-                $backupDir = dirname(Storage::disk('local')->path($path));
-                if (!is_dir($backupDir)) {
-                    mkdir($backupDir, 0755, true);
-                }
-                
-                $fullPath = Storage::disk('local')->path($path);
                 $port = config('database.connections.mysql.port', 3306);
                 
-                // Build mysqldump command
                 $command = sprintf(
                     'mysqldump --host=%s --port=%s --user=%s --password=%s --single-transaction --routines --triggers %s > %s 2>&1',
                     escapeshellarg($host),
@@ -111,32 +110,15 @@ class BackupService
                     escapeshellarg($username),
                     escapeshellarg($password),
                     escapeshellarg($database),
-                    escapeshellarg($fullPath)
+                    escapeshellarg($tempSqlFile)
                 );
                 
                 $result = $this->executeCommand($command);
-                $output = $result['output'];
-                $returnCode = $result['returnCode'];
-                
-                if ($returnCode !== 0) {
-                    throw new \Exception('mysqldump failed: ' . implode("\n", $output));
-                }
-                
-                // Verify file was created
-                if (!file_exists($fullPath) || filesize($fullPath) === 0) {
-                    throw new \Exception('Backup file was not created or is empty');
+                if ($result['returnCode'] !== 0) {
+                     throw new \Exception('mysqldump failed: ' . implode("\n", $result['output']));
                 }
             } elseif (config('database.default') === 'pgsql') {
-                // For PostgreSQL - use pg_dump
-                $backupDir = dirname(Storage::disk('local')->path($path));
-                if (!is_dir($backupDir)) {
-                    mkdir($backupDir, 0755, true);
-                }
-                
-                $fullPath = Storage::disk('local')->path($path);
-                $port = config('database.connections.pgsql.port', 5432);
-                
-                // Set PGPASSWORD environment variable for pg_dump
+                 $port = config('database.connections.pgsql.port', 5432);
                 \putenv("PGPASSWORD={$password}");
                 
                 $command = sprintf(
@@ -145,28 +127,56 @@ class BackupService
                     escapeshellarg($port),
                     escapeshellarg($username),
                     escapeshellarg($database),
-                    escapeshellarg($fullPath)
+                    escapeshellarg($tempSqlFile)
                 );
                 
                 $result = $this->executeCommand($command);
-                $output = $result['output'];
-                $returnCode = $result['returnCode'];
-                
-                // Clear password from environment
                 \putenv("PGPASSWORD");
                 
-                if ($returnCode !== 0) {
-                    throw new \Exception('pg_dump failed: ' . implode("\n", $output));
+                if ($result['returnCode'] !== 0) {
+                    throw new \Exception('pg_dump failed: ' . implode("\n", $result['output']));
                 }
             } else {
-                throw new \Exception('Unsupported database driver: ' . config('database.default'));
+                 throw new \Exception('Unsupported database driver: ' . config('database.default'));
             }
 
-            $fullPath = Storage::disk('local')->path($path);
-            $size = file_exists($fullPath) ? filesize($fullPath) : 0;
+            // Verify SQL file creation
+            if (!file_exists($tempSqlFile) || filesize($tempSqlFile) === 0) {
+                throw new \Exception('Backup SQL file was not created or is empty');
+            }
+
+            // 2. Compress and Encrypt
+            $zipPath = Storage::disk('local')->path($targetPath);
+            $zip = new \ZipArchive();
+            
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+                // Add SQL file
+                $zip->addFile($tempSqlFile, $sqlFilename);
+                
+                // Encrypt if password provided (default to APP_KEY)
+                $encryptionPassword = env('BACKUP_ARCHIVE_PASSWORD') ?: config('app.key');
+                
+                if ($encryptionPassword && method_exists($zip, 'setEncryptionName')) {
+                    if (!$zip->setEncryptionName($sqlFilename, \ZipArchive::EM_AES_256, $encryptionPassword)) {
+                        throw new \Exception('Failed to set encryption for backup file');
+                    }
+                }
+                
+                $zip->close();
+            } else {
+                throw new \Exception('Failed to create Zip archive');
+            }
+
+            // 3. Cleanup
+            // Delete the raw SQL file
+            if (file_exists($tempSqlFile)) {
+                unlink($tempSqlFile);
+            }
+
+            $size = file_exists($zipPath) ? filesize($zipPath) : 0;
 
             $backup->update([
-                'path' => $path,
+                'path' => $targetPath,
                 'disk' => 'local',
                 'size' => $size,
                 'status' => 'completed',
@@ -179,6 +189,11 @@ class BackupService
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
             ]);
+
+            // Attempt cleanup on failure
+            if (isset($tempSqlFile) && file_exists($tempSqlFile)) {
+                @unlink($tempSqlFile);
+            }
 
             return $backup;
         }
@@ -197,65 +212,124 @@ class BackupService
                 throw new \Exception('Backup file not found');
             }
 
-            if (config('database.default') === 'sqlite') {
-                $database = config('database.connections.'.config('database.default').'.database');
-                $dbPath = database_path($database);
+            // Determine if it is a zip file
+            $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $isZip = strtolower($extension) === 'zip';
+            $sqlPath = $fullPath; // Default to full path if not zip
+            $tempExtractDir = null;
 
-                if (file_exists($fullPath)) {
-                    copy($fullPath, $dbPath);
+            if ($isZip) {
+                // Extract zip file
+                $zip = new \ZipArchive();
+                if ($zip->open($fullPath) === TRUE) {
+                    // Create temp directory for extraction
+                    $tempExtractDir = dirname($fullPath) . '/restore_' . uniqid();
+                    if (!is_dir($tempExtractDir)) {
+                        mkdir($tempExtractDir, 0755, true);
+                    }
+
+                    // Set password if encrypted
+                    $encryptionPassword = env('BACKUP_ARCHIVE_PASSWORD') ?: config('app.key');
+                    if ($encryptionPassword) {
+                        $zip->setPassword($encryptionPassword);
+                    }
+
+                    // Extract all files
+                    if (!$zip->extractTo($tempExtractDir)) {
+                        $zip->close();
+                        throw new \Exception('Failed to extract backup archive. Incorrect password?');
+                    }
+                    $zip->close();
+
+                    // Find the SQL file inside
+                    $files = glob($tempExtractDir . '/*.sql');
+                    if (empty($files)) {
+                        // Try .sqlite
+                        $files = glob($tempExtractDir . '/*.sqlite');
+                        if (empty($files)) {
+                            throw new \Exception('No SQL file found in archive');
+                        }
+                    }
+                    
+                    $sqlPath = $files[0];
+                } else {
+                    throw new \Exception('Failed to open zip archive');
                 }
-            } elseif (config('database.default') === 'mysql') {
-                $database = config('database.connections.mysql.database');
-                $username = config('database.connections.mysql.username');
-                $password = config('database.connections.mysql.password');
-                $host = config('database.connections.mysql.host');
-                $port = config('database.connections.mysql.port', 3306);
-                
-                $command = sprintf(
-                    'mysql --host=%s --port=%s --user=%s --password=%s %s < %s 2>&1',
-                    escapeshellarg($host),
-                    escapeshellarg($port),
-                    escapeshellarg($username),
-                    escapeshellarg($password),
-                    escapeshellarg($database),
-                    escapeshellarg($fullPath)
-                );
-                
-                $result = $this->executeCommand($command);
-                $output = $result['output'];
-                $returnCode = $result['returnCode'];
-                
-                if ($returnCode !== 0) {
-                    throw new \Exception('MySQL restore failed: ' . implode("\n", $output));
+            }
+
+            try {
+                if (config('database.default') === 'sqlite') {
+                    $database = config('database.connections.'.config('database.default').'.database');
+                    
+                    // Logic to find target DB path
+                    if (str_starts_with($database, '/')) {
+                        $dbPath = $database;
+                    } else {
+                        $dbPath = database_path($database);
+                    }
+                    
+                     // Try with .sqlite extension if not found (legacy fallback)
+                    if (! file_exists($dbPath) && !str_ends_with($dbPath, '.sqlite')) {
+                         $dbPath .= '.sqlite';
+                    }
+
+                    if (file_exists($sqlPath)) {
+                        copy($sqlPath, $dbPath);
+                    }
+                } elseif (config('database.default') === 'mysql') {
+                    $database = config('database.connections.mysql.database');
+                    $username = config('database.connections.mysql.username');
+                    $password = config('database.connections.mysql.password');
+                    $host = config('database.connections.mysql.host');
+                    $port = config('database.connections.mysql.port', 3306);
+                    
+                    $command = sprintf(
+                        'mysql --host=%s --port=%s --user=%s --password=%s %s < %s 2>&1',
+                        escapeshellarg($host),
+                        escapeshellarg($port),
+                        escapeshellarg($username),
+                        escapeshellarg($password),
+                        escapeshellarg($database),
+                        escapeshellarg($sqlPath)
+                    );
+                    
+                    $result = $this->executeCommand($command);
+                    if ($result['returnCode'] !== 0) {
+                        throw new \Exception('MySQL restore failed: ' . implode("\n", $result['output']));
+                    }
+                } elseif (config('database.default') === 'pgsql') {
+                    $database = config('database.connections.pgsql.database');
+                    $username = config('database.connections.pgsql.username');
+                    $password = config('database.connections.pgsql.password');
+                    $host = config('database.connections.pgsql.host');
+                    $port = config('database.connections.pgsql.port', 5432);
+                    
+                    \putenv("PGPASSWORD={$password}");
+                    
+                    $command = sprintf(
+                        'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
+                        escapeshellarg($host),
+                        escapeshellarg($port),
+                        escapeshellarg($username),
+                        escapeshellarg($database),
+                        escapeshellarg($sqlPath)
+                    );
+                    
+                    $result = $this->executeCommand($command);
+                    \putenv("PGPASSWORD");
+                    
+                    if ($result['returnCode'] !== 0) {
+                        throw new \Exception('PostgreSQL restore failed: ' . implode("\n", $result['output']));
+                    }
+                } else {
+                    throw new \Exception('Unsupported database driver for restore');
                 }
-            } elseif (config('database.default') === 'pgsql') {
-                $database = config('database.connections.pgsql.database');
-                $username = config('database.connections.pgsql.username');
-                $password = config('database.connections.pgsql.password');
-                $host = config('database.connections.pgsql.host');
-                $port = config('database.connections.pgsql.port', 5432);
-                
-                \putenv("PGPASSWORD={$password}");
-                
-                $command = sprintf(
-                    'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
-                    escapeshellarg($host),
-                    escapeshellarg($port),
-                    escapeshellarg($username),
-                    escapeshellarg($database),
-                    escapeshellarg($fullPath)
-                );
-                
-                $result = $this->executeCommand($command);
-                $output = $result['output'];
-                $returnCode = $result['returnCode'];
-                \putenv("PGPASSWORD");
-                
-                if ($returnCode !== 0) {
-                    throw new \Exception('PostgreSQL restore failed: ' . implode("\n", $output));
+            } finally {
+                // Cleanup temporary extracted files
+                if ($tempExtractDir && is_dir($tempExtractDir)) {
+                    array_map('unlink', glob("$tempExtractDir/*.*"));
+                    rmdir($tempExtractDir);
                 }
-            } else {
-                throw new \Exception('Unsupported database driver for restore');
             }
 
             return true;
