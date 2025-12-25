@@ -45,8 +45,12 @@ class BackupController extends BaseApiController
             }
 
             return $this->success($backup, 'Backup created successfully', 201);
-        } catch (\Exception $e) {
-            \Log::error('Backup creation error: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            \Log::error('Backup creation error: '.$e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return $this->error(
                 'Failed to create backup: '.$e->getMessage(),

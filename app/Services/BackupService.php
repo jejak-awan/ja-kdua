@@ -4,9 +4,43 @@ namespace App\Services;
 
 use App\Models\Backup;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class BackupService
 {
+    /**
+     * Execute a shell command using Symfony Process with fallback to native exec
+     */
+    protected function executeCommand(string $command, ?int $timeout = 300): array
+    {
+        $output = [];
+        $returnCode = 0;
+
+        // Try Symfony Process first (works even when exec is disabled)
+        if (class_exists(Process::class)) {
+            try {
+                $process = Process::fromShellCommandline($command);
+                $process->setTimeout($timeout);
+                $process->run();
+                
+                $output = explode("\n", $process->getOutput() . $process->getErrorOutput());
+                $returnCode = $process->getExitCode();
+                
+                return ['output' => $output, 'returnCode' => $returnCode];
+            } catch (\Exception $e) {
+                // Fall through to native exec
+            }
+        }
+
+        // Fallback to native exec if Symfony Process fails or exec function is available
+        if (function_exists('exec')) {
+            \exec($command, $output, $returnCode);
+            return ['output' => $output, 'returnCode' => $returnCode];
+        }
+
+        throw new \Exception('No shell execution method available. Please enable exec() or install symfony/process.');
+    }
     public function createDatabaseBackup($name = null)
     {
         $name = $name ?? 'backup_'.now()->format('Y-m-d_His');
@@ -80,7 +114,9 @@ class BackupService
                     escapeshellarg($fullPath)
                 );
                 
-                exec($command, $output, $returnCode);
+                $result = $this->executeCommand($command);
+                $output = $result['output'];
+                $returnCode = $result['returnCode'];
                 
                 if ($returnCode !== 0) {
                     throw new \Exception('mysqldump failed: ' . implode("\n", $output));
@@ -101,7 +137,7 @@ class BackupService
                 $port = config('database.connections.pgsql.port', 5432);
                 
                 // Set PGPASSWORD environment variable for pg_dump
-                putenv("PGPASSWORD={$password}");
+                \putenv("PGPASSWORD={$password}");
                 
                 $command = sprintf(
                     'pg_dump --host=%s --port=%s --username=%s --format=plain %s > %s 2>&1',
@@ -112,10 +148,12 @@ class BackupService
                     escapeshellarg($fullPath)
                 );
                 
-                exec($command, $output, $returnCode);
+                $result = $this->executeCommand($command);
+                $output = $result['output'];
+                $returnCode = $result['returnCode'];
                 
                 // Clear password from environment
-                putenv("PGPASSWORD");
+                \putenv("PGPASSWORD");
                 
                 if ($returnCode !== 0) {
                     throw new \Exception('pg_dump failed: ' . implode("\n", $output));
@@ -183,7 +221,9 @@ class BackupService
                     escapeshellarg($fullPath)
                 );
                 
-                exec($command, $output, $returnCode);
+                $result = $this->executeCommand($command);
+                $output = $result['output'];
+                $returnCode = $result['returnCode'];
                 
                 if ($returnCode !== 0) {
                     throw new \Exception('MySQL restore failed: ' . implode("\n", $output));
@@ -195,7 +235,7 @@ class BackupService
                 $host = config('database.connections.pgsql.host');
                 $port = config('database.connections.pgsql.port', 5432);
                 
-                putenv("PGPASSWORD={$password}");
+                \putenv("PGPASSWORD={$password}");
                 
                 $command = sprintf(
                     'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
@@ -206,8 +246,10 @@ class BackupService
                     escapeshellarg($fullPath)
                 );
                 
-                exec($command, $output, $returnCode);
-                putenv("PGPASSWORD");
+                $result = $this->executeCommand($command);
+                $output = $result['output'];
+                $returnCode = $result['returnCode'];
+                \putenv("PGPASSWORD");
                 
                 if ($returnCode !== 0) {
                     throw new \Exception('PostgreSQL restore failed: ' . implode("\n", $output));
