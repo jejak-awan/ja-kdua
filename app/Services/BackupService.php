@@ -59,15 +59,69 @@ class BackupService
                 } else {
                     throw new \Exception('Database file not found: '.$dbPath);
                 }
+            } elseif (config('database.default') === 'mysql') {
+                // For MySQL - use mysqldump
+                $backupDir = dirname(Storage::disk('local')->path($path));
+                if (!is_dir($backupDir)) {
+                    mkdir($backupDir, 0755, true);
+                }
+                
+                $fullPath = Storage::disk('local')->path($path);
+                $port = config('database.connections.mysql.port', 3306);
+                
+                // Build mysqldump command
+                $command = sprintf(
+                    'mysqldump --host=%s --port=%s --user=%s --password=%s --single-transaction --routines --triggers %s > %s 2>&1',
+                    escapeshellarg($host),
+                    escapeshellarg($port),
+                    escapeshellarg($username),
+                    escapeshellarg($password),
+                    escapeshellarg($database),
+                    escapeshellarg($fullPath)
+                );
+                
+                exec($command, $output, $returnCode);
+                
+                if ($returnCode !== 0) {
+                    throw new \Exception('mysqldump failed: ' . implode("\n", $output));
+                }
+                
+                // Verify file was created
+                if (!file_exists($fullPath) || filesize($fullPath) === 0) {
+                    throw new \Exception('Backup file was not created or is empty');
+                }
+            } elseif (config('database.default') === 'pgsql') {
+                // For PostgreSQL - use pg_dump
+                $backupDir = dirname(Storage::disk('local')->path($path));
+                if (!is_dir($backupDir)) {
+                    mkdir($backupDir, 0755, true);
+                }
+                
+                $fullPath = Storage::disk('local')->path($path);
+                $port = config('database.connections.pgsql.port', 5432);
+                
+                // Set PGPASSWORD environment variable for pg_dump
+                putenv("PGPASSWORD={$password}");
+                
+                $command = sprintf(
+                    'pg_dump --host=%s --port=%s --username=%s --format=plain %s > %s 2>&1',
+                    escapeshellarg($host),
+                    escapeshellarg($port),
+                    escapeshellarg($username),
+                    escapeshellarg($database),
+                    escapeshellarg($fullPath)
+                );
+                
+                exec($command, $output, $returnCode);
+                
+                // Clear password from environment
+                putenv("PGPASSWORD");
+                
+                if ($returnCode !== 0) {
+                    throw new \Exception('pg_dump failed: ' . implode("\n", $output));
+                }
             } else {
-                // For MySQL/PostgreSQL - would need mysqldump/pg_dump
-                // This is a simplified version
-                $backup->update([
-                    'status' => 'failed',
-                    'error_message' => 'MySQL/PostgreSQL backup requires mysqldump/pg_dump command',
-                ]);
-
-                return $backup;
+                throw new \Exception('Unsupported database driver: ' . config('database.default'));
             }
 
             $fullPath = Storage::disk('local')->path($path);
@@ -101,6 +155,10 @@ class BackupService
         try {
             $fullPath = Storage::disk($backup->disk)->path($backup->path);
 
+            if (!file_exists($fullPath)) {
+                throw new \Exception('Backup file not found');
+            }
+
             if (config('database.default') === 'sqlite') {
                 $database = config('database.connections.'.config('database.default').'.database');
                 $dbPath = database_path($database);
@@ -108,8 +166,54 @@ class BackupService
                 if (file_exists($fullPath)) {
                     copy($fullPath, $dbPath);
                 }
+            } elseif (config('database.default') === 'mysql') {
+                $database = config('database.connections.mysql.database');
+                $username = config('database.connections.mysql.username');
+                $password = config('database.connections.mysql.password');
+                $host = config('database.connections.mysql.host');
+                $port = config('database.connections.mysql.port', 3306);
+                
+                $command = sprintf(
+                    'mysql --host=%s --port=%s --user=%s --password=%s %s < %s 2>&1',
+                    escapeshellarg($host),
+                    escapeshellarg($port),
+                    escapeshellarg($username),
+                    escapeshellarg($password),
+                    escapeshellarg($database),
+                    escapeshellarg($fullPath)
+                );
+                
+                exec($command, $output, $returnCode);
+                
+                if ($returnCode !== 0) {
+                    throw new \Exception('MySQL restore failed: ' . implode("\n", $output));
+                }
+            } elseif (config('database.default') === 'pgsql') {
+                $database = config('database.connections.pgsql.database');
+                $username = config('database.connections.pgsql.username');
+                $password = config('database.connections.pgsql.password');
+                $host = config('database.connections.pgsql.host');
+                $port = config('database.connections.pgsql.port', 5432);
+                
+                putenv("PGPASSWORD={$password}");
+                
+                $command = sprintf(
+                    'psql --host=%s --port=%s --username=%s %s < %s 2>&1',
+                    escapeshellarg($host),
+                    escapeshellarg($port),
+                    escapeshellarg($username),
+                    escapeshellarg($database),
+                    escapeshellarg($fullPath)
+                );
+                
+                exec($command, $output, $returnCode);
+                putenv("PGPASSWORD");
+                
+                if ($returnCode !== 0) {
+                    throw new \Exception('PostgreSQL restore failed: ' . implode("\n", $output));
+                }
             } else {
-                throw new \Exception('MySQL/PostgreSQL restore requires manual process');
+                throw new \Exception('Unsupported database driver for restore');
             }
 
             return true;
