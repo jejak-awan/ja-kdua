@@ -15,7 +15,7 @@ export function useThemeComponents() {
    */
   const loadComponent = async (type, name = 'default') => {
     const key = `${type}.${name}`
-    
+
     // Return cached component
     if (loadedComponents.value[key]) {
       return loadedComponents.value[key]
@@ -23,7 +23,7 @@ export function useThemeComponents() {
 
     loading.value = true
     error.value = null
-    
+
     try {
       if (!activeTheme.value) {
         throw new Error('No active theme')
@@ -31,7 +31,7 @@ export function useThemeComponents() {
 
       const manifest = activeTheme.value.manifest || {}
       const componentPath = manifest.components?.[type]?.[name]?.path
-      
+
       if (!componentPath) {
         console.warn(`Component not found in manifest: ${type}.${name}`)
         return null
@@ -39,14 +39,14 @@ export function useThemeComponents() {
 
       // Construct full path
       const themeSlug = activeTheme.value.slug
-      const fullPath = `/storage/app/themes/${themeSlug}/${componentPath}`
+      const fullPath = `/themes/${themeSlug}/${componentPath}`
 
       // Dynamic import
       const module = await import(/* @vite-ignore */ fullPath)
-      
+
       // Cache the component (use markRaw to avoid reactivity overhead)
       loadedComponents.value[key] = markRaw(module.default || module)
-      
+
       return loadedComponents.value[key]
     } catch (err) {
       error.value = `Failed to load component: ${type}.${name}`
@@ -100,7 +100,7 @@ export function useThemeComponents() {
     loadedComponents,
     loading,
     error,
-    
+
     // Methods
     loadComponent,
     getComponent,
