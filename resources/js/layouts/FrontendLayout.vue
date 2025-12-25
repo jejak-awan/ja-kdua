@@ -42,16 +42,27 @@ const DynamicFooter = ref(null)
 // Hide breadcrumbs on homepage
 const isHomePage = computed(() => route.path === '/')
 
-// Load active theme and its specific components
+// Load active theme and its specific components reactively
+watch(activeTheme, async (newTheme) => {
+  if (newTheme) {
+    console.log('Active theme detected in Layout, loading Header/Footer')
+    try {
+      const [header, footer] = await Promise.all([
+        loadComponent('headers', 'default'),
+        loadComponent('footers', 'default')
+      ])
+      
+      if (header) DynamicHeader.value = markRaw(header)
+      if (footer) DynamicFooter.value = markRaw(footer)
+    } catch (err) {
+      console.error('Failed to load Layout components:', err)
+    }
+  }
+}, { immediate: true })
+
 onMounted(async () => {
-  await loadActiveTheme()
-  if (activeTheme.value) {
-    // Try to load theme-specific Header and Footer
-    const header = await loadComponent('headers', 'default')
-    const footer = await loadComponent('footers', 'default')
-    
-    if (header) DynamicHeader.value = markRaw(header)
-    if (footer) DynamicFooter.value = markRaw(footer)
+  if (!activeTheme.value) {
+    await loadActiveTheme()
   }
 })
 

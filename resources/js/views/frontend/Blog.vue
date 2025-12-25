@@ -105,14 +105,21 @@ watch(() => route.query.page, (newPage) => {
   fetchPosts()
 })
 
+// Load theme specific components reactively
+watch(activeTheme, async (newTheme) => {
+  if (newTheme) {
+    try {
+      const card = await loadComponent('cards', 'post')
+      if (card) DynamicPostCard.value = markRaw(card)
+    } catch (err) {
+      console.error('Failed to load Blog theme components:', err)
+    }
+  }
+}, { immediate: true })
+
 onMounted(async () => {
   currentPage.value = parseInt(route.query.page) || 1
   fetchPosts()
-
-  if (activeTheme.value) {
-    const card = await loadComponent('cards', 'post')
-    if (card) DynamicPostCard.value = markRaw(card)
-  }
 })
 </script>
 

@@ -71,9 +71,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, markRaw } from 'vue'
+import { ref, computed, onMounted, watch, markRaw } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
+import { useThemeComponents } from '@/composables/useThemeComponents'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
@@ -99,21 +100,40 @@ const stats = ref({
 const settings = computed(() => themeSettings.value || {})
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
-// Fetch homepage data
+// Load theme specific components reactively
+watch(activeTheme, async (newTheme) => {
+  if (newTheme) {
+    console.log('Active theme detected, loading components:', newTheme.slug)
+    try {
+      const [hero, card] = await Promise.all([
+        loadComponent('heroes', 'default'),
+        loadComponent('cards', 'post')
+      ])
+      
+      if (hero) {
+        console.log('Hero component loaded successfully')
+        DynamicHero.value = markRaw(hero)
+      } else {
+        console.warn('Hero component failed to load, using default')
+      }
+
+      if (card) {
+        console.log('PostCard component loaded successfully')
+        DynamicPostCard.value = markRaw(card)
+      }
+    } catch (err) {
+      console.error('Failed to load theme components:', err)
+    }
+  }
+}, { immediate: true })
+
 onMounted(async () => {
-  await Promise.all([
+  console.log('Home.vue mounted, fetching data...')
+  await Promise.allSettled([
     fetchFeaturedPosts(),
     fetchRecentPosts(),
     fetchStats()
   ])
-
-  if (activeTheme.value) {
-    const hero = await loadComponent('heroes', 'default')
-    const card = await loadComponent('cards', 'post')
-    
-    if (hero) DynamicHero.value = markRaw(hero)
-    if (card) DynamicPostCard.value = markRaw(card)
-  }
 })
 
 const fetchFeaturedPosts = async () => {
