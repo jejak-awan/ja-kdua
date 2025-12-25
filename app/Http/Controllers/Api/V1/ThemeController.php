@@ -161,6 +161,9 @@ class ThemeController extends BaseApiController
             // Load assets
             $assets = $this->themeService->loadThemeAssets($theme);
             $theme->assets = $assets;
+            
+            // Load manifest
+            $theme->manifest = $theme->getManifest();
 
             return $this->success($theme, 'Active theme retrieved successfully');
         } catch (\Exception $e) {

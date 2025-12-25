@@ -41,11 +41,24 @@ export function useThemeComponents() {
       const themeSlug = activeTheme.value.slug
       const fullPath = `/themes/${themeSlug}/${componentPath}`
 
+      // Skip raw .vue files in browser as they cannot be imported natively
+      // This ensures we fall back to default components instead of crashing/blanking
+      if (componentPath.endsWith('.vue')) {
+        console.warn(`Theme component [${type}.${name}] is a raw .vue file. Skipping dynamic import and using fallback.`)
+        return null
+      }
+
       // Dynamic import
       const module = await import(/* @vite-ignore */ fullPath)
+      const component = module.default || module
+
+      // Basic validation that we actually got a component
+      if (!component || (typeof component !== 'object' && typeof component !== 'function')) {
+        return null
+      }
 
       // Cache the component (use markRaw to avoid reactivity overhead)
-      loadedComponents.value[key] = markRaw(module.default || module)
+      loadedComponents.value[key] = markRaw(component)
 
       return loadedComponents.value[key]
     } catch (err) {
