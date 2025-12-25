@@ -15,7 +15,8 @@
         />
       </div>
       <div v-else-if="posts.length > 0" class="posts-grid">
-        <PostCard 
+        <component 
+          :is="DynamicPostCard || PostCard"
           v-for="post in posts" 
           :key="post.id" 
           :post="post"
@@ -48,9 +49,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useTheme } from '@/composables/useTheme'
+import { useThemeComponents } from '@/composables/useThemeComponents'
 import api from '@/services/api'
 import PostCard from '@/components/theme/PostCard.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
@@ -58,8 +61,11 @@ import SkeletonLoader from '@/components/SkeletonLoader.vue'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { activeTheme } = useTheme()
+const { loadComponent } = useThemeComponents()
 
 const posts = ref([])
+const DynamicPostCard = ref(null)
 const loading = ref(true)
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -99,9 +105,14 @@ watch(() => route.query.page, (newPage) => {
   fetchPosts()
 })
 
-onMounted(() => {
+onMounted(async () => {
   currentPage.value = parseInt(route.query.page) || 1
   fetchPosts()
+
+  if (activeTheme.value) {
+    const card = await loadComponent('cards', 'post')
+    if (card) DynamicPostCard.value = markRaw(card)
+  }
 })
 </script>
 

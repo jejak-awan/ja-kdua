@@ -1,7 +1,7 @@
 <template>
   <div class="frontend-layout">
-    <!-- Theme Header -->
-    <ThemeHeader />
+    <!-- Theme Header (Dynamic or Default) -->
+    <component :is="DynamicHeader || ThemeHeaderDefault" />
     
     <!-- Breadcrumbs -->
     <Breadcrumbs v-if="!isHomePage" />
@@ -15,31 +15,44 @@
       </router-view>
     </main>
     
-    <!-- Theme Footer -->
-    <ThemeFooter />
+    <!-- Theme Footer (Dynamic or Default) -->
+    <component :is="DynamicFooter || ThemeFooterDefault" />
   </div>
 </template>
 
 <script setup>
-import { onMounted, watch, computed } from 'vue'
+import { onMounted, watch, computed, ref, markRaw, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@vueuse/head'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from '@/composables/useTheme'
-import ThemeHeader from '@/components/theme/ThemeHeader.vue'
-import ThemeFooter from '@/components/theme/ThemeFooter.vue'
+import { useThemeComponents } from '@/composables/useThemeComponents'
+import ThemeHeaderDefault from '@/components/theme/ThemeHeader.vue'
+import ThemeFooterDefault from '@/components/theme/ThemeFooter.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 
 const { t } = useI18n()
 const route = useRoute()
 const { activeTheme, loadActiveTheme } = useTheme()
+const { loadComponent } = useThemeComponents()
+
+const DynamicHeader = ref(null)
+const DynamicFooter = ref(null)
 
 // Hide breadcrumbs on homepage
 const isHomePage = computed(() => route.path === '/')
 
-// Load active theme on mount
+// Load active theme and its specific components
 onMounted(async () => {
   await loadActiveTheme()
+  if (activeTheme.value) {
+    // Try to load theme-specific Header and Footer
+    const header = await loadComponent('headers', 'default')
+    const footer = await loadComponent('footers', 'default')
+    
+    if (header) DynamicHeader.value = markRaw(header)
+    if (footer) DynamicFooter.value = markRaw(footer)
+  }
 })
 
 // Update page title and meta tags on route change

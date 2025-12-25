@@ -1,7 +1,12 @@
 <template>
   <div class="homepage">
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- Hero Section (Dynamic or Default) -->
+    <component 
+      :is="DynamicHero" 
+      v-if="DynamicHero"
+      v-bind="{ settings, stats, isAuthenticated }"
+    />
+    <section v-else class="hero">
       <div class="container">
         <div class="hero-content">
           <h1 class="hero-title">{{ settings.site_title || t('features.frontend.home.title') }}</h1>
@@ -40,7 +45,8 @@
       <div class="container">
         <h2 class="section-title">{{ t('features.frontend.home.sections.featured') }}</h2>
         <div class="posts-grid">
-          <PostCard 
+          <component 
+            :is="DynamicPostCard || PostCard"
             v-for="post in featuredPosts" 
             :key="post.id" 
             :post="post"
@@ -54,7 +60,8 @@
       <div class="container">
         <h2 class="section-title">{{ t('features.frontend.home.sections.recent') }}</h2>
         <div class="posts-grid">
-          <PostCard 
+          <component 
+            :is="DynamicPostCard || PostCard"
             v-for="post in recentPosts" 
             :key="post.id" 
             :post="post"
@@ -108,7 +115,11 @@ import NewsletterWidget from '@/components/NewsletterWidget.vue'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const { themeSettings } = useTheme()
+const { activeTheme, themeSettings } = useTheme()
+const { loadComponent } = useThemeComponents()
+
+const DynamicHero = ref(null)
+const DynamicPostCard = ref(null)
 
 const featuredPosts = ref([])
 const recentPosts = ref([])
@@ -128,6 +139,14 @@ onMounted(async () => {
     fetchRecentPosts(),
     fetchStats()
   ])
+
+  if (activeTheme.value) {
+    const hero = await loadComponent('heroes', 'default')
+    const card = await loadComponent('cards', 'post')
+    
+    if (hero) DynamicHero.value = markRaw(hero)
+    if (card) DynamicPostCard.value = markRaw(card)
+  }
 })
 
 const fetchFeaturedPosts = async () => {
