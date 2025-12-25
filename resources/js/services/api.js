@@ -1,4 +1,8 @@
-import axios from 'axios';
+import router from '../router';
+
+let isRedirecting = false;
+// Global flag to prevent multiple toasts and parallel redirect attempts
+window.__isSessionTerminated = false;
 
 const api = axios.create({
     baseURL: '/api/v1',
@@ -23,6 +27,15 @@ export const getCsrfCookie = async () => {
 // Request interceptor - Add auth token
 api.interceptors.request.use(
     (config) => {
+        // Whitelist auth-related endpoints so they are NOT blocked even if session is marked as dead
+        const authEndpoints = ['/login', '/register', '/forgot-password', '/reset-password', '/sanctum/csrf-cookie'];
+        const isAuthRequest = authEndpoints.some(endpoint => config.url?.includes(endpoint));
+
+        // Instantly block any non-auth request if session is already known to be dead
+        if (window.__isSessionTerminated && !isAuthRequest) {
+            return Promise.reject(new Error('Session terminated'));
+        }
+
         const token = localStorage.getItem('auth_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -40,74 +53,90 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Handle 419 CSRF token mismatch - refresh CSRF cookie and retry
-        if (error.response?.status === 419 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            try {
-                await getCsrfCookie();
-                return api(originalRequest);
-            } catch (csrfError) {
-                console.error('Failed to refresh CSRF token:', csrfError);
+        // Skip global redirect if requested by the caller
+        if (originalRequest?._skipManualRedirect) {
+            return Promise.reject(error);
+        }
+
+        // Handle 419 CSRF token mismatch / Session Expired
+        // NOTE: We do NOT retry here as it can cause infinite loops
+        // If session is truly expired, retrying won't help
+        if (error.response?.status === 419) {
+            if (window.__isSessionTerminated) return Promise.reject(error);
+
+            const currentPath = window.location.pathname;
+            if (!currentPath.includes('/419') && !currentPath.includes('/login')) {
+                // NUCLEAR SHUTDOWN: Stop all pending requests/animations/scripts
+                if (typeof window.stop === 'function') window.stop();
+
+                window.__isSessionTerminated = true;
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+
+                // Instant hard redirect to clear all zombie states and the termination flag.
+                // We use replace to prevent back-button loops.
+                const redirectUrl = `/419?reason=concurrent&redirect=${encodeURIComponent(currentPath !== '/' ? currentPath : '/admin')}`;
+                window.location.replace(redirectUrl);
             }
         }
 
-        // Handle 401 Unauthorized
+        // Handle 401 Unauthorized (session expired from Sanctum)
         if (error.response?.status === 401) {
+            if (window.__isSessionTerminated) return Promise.reject(error);
+
             const url = error.config?.url || '';
             const responseData = error.response?.data || {};
 
-            // Don't redirect for public endpoints
+            // Public endpoints are frontend routes that don't require session termination on 401
+            // We use anchored paths to avoid matching '/admin/cms/...'
             const publicEndpoints = [
-                '/cms/',
-                '/cms/contents',
-                '/cms/categories',
-                '/cms/tags',
-                '/cms/themes/active',
-                '/cms/search',
-                '/cms/languages',
+                '/api/v1/cms/',
+                '/api/v1/cms/contents',
+                '/api/v1/cms/categories',
+                '/api/v1/cms/tags',
+                '/api/v1/cms/themes/active',
+                '/api/v1/cms/search',
+                '/api/v1/cms/languages',
             ];
 
-            const isPublicEndpoint = publicEndpoints.some(endpoint => url.includes(endpoint));
+            const isPublicEndpoint = publicEndpoints.some(endpoint => url.startsWith(endpoint));
+            const hasAuthHeader = !!error.config?.headers?.Authorization;
 
-            if (!isPublicEndpoint) {
-                // Only redirect to login for protected endpoints
-                // Check if we're already on login page to avoid redirect loop
-                if (window.location.pathname !== '/login') {
-                    // Check if this is a session invalidation (concurrent login)
-                    const isSessionInvalidated = responseData.session_expired ||
-                        responseData.message?.includes('session') ||
-                        responseData.message?.includes('expired');
+            // If it has an auth header, it was intended to be authenticated, 
+            // so a 401 is always a session termination event.
+            if (hasAuthHeader || !isPublicEndpoint) {
+                const currentPath = window.location.pathname;
 
-                    // Show toast notification before redirect
-                    if (window.__toastInstance?.addToast) {
-                        const message = isSessionInvalidated
-                            ? (responseData.message || 'Sesi Anda telah berakhir. Silakan login kembali.')
-                            : 'Sesi berakhir. Silakan login kembali.';
+                if (!currentPath.includes('/login') && !currentPath.includes('/419')) {
+                    // NUCLEAR SHUTDOWN: Stop everything
+                    if (typeof window.stop === 'function') window.stop();
 
-                        window.__toastInstance.addToast({
-                            title: 'Sesi Berakhir',
-                            description: message,
-                            variant: 'warning',
-                            duration: 4000,
-                        });
-                    }
-
+                    window.__isSessionTerminated = true;
                     localStorage.removeItem('auth_token');
                     localStorage.removeItem('user');
 
-                    // Delay redirect to allow toast to be seen
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 1500);
+                    // Instant hard redirect to ensure clean state
+                    window.location.replace(`/419?reason=concurrent&redirect=${encodeURIComponent(currentPath)}`);
                 }
             }
         }
 
-        // Handle 403 Forbidden - use direct navigation to avoid circular import
+        // Handle 403 Forbidden - use router instead of hard redirect
         if (error.response?.status === 403) {
+            const currentPath = window.location.pathname;
             // Only redirect if not already on error page
-            if (!window.location.pathname.includes('/403')) {
-                window.location.href = '/403';
+            if (!currentPath.includes('/403')) {
+                const responseData = error.response?.data || {};
+                router.push({
+                    name: 'forbidden',
+                    state: {
+                        reason: responseData.message,
+                        requiredPermissions: responseData.required_permissions || []
+                    }
+                }).catch(() => {
+                    // Fallback to hard redirect if router fails
+                    window.location.href = '/403';
+                });
             }
         }
 
@@ -122,11 +151,18 @@ api.interceptors.response.use(
             }
         }
 
-        // Handle 500 Server Error - use direct navigation to avoid circular import
+        // Handle 500 Server Error - use router instead of hard redirect
         if (error.response?.status === 500) {
+            const currentPath = window.location.pathname;
             // Only redirect if not already on error page
-            if (!window.location.pathname.includes('/500')) {
-                window.location.href = '/500';
+            if (!currentPath.includes('/500')) {
+                router.push({
+                    name: 'server-error',
+                    state: { errorDetails: error.response?.data?.message || error.message }
+                }).catch(() => {
+                    // Fallback to hard redirect if router fails
+                    window.location.href = '/500';
+                });
             }
         }
 

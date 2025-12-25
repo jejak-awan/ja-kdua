@@ -1,8 +1,8 @@
 <template>
     <ErrorLayout>
         <template #icon>
-            <div class="h-24 w-24 rounded-[2rem] bg-purple-50 dark:bg-purple-900/10 flex items-center justify-center transform hover:scale-105 transition-transform duration-300">
-                <svg class="h-12 w-12 text-purple-600 dark:text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="h-20 w-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                <svg class="h-10 w-10 text-purple-600 dark:text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
@@ -21,13 +21,13 @@
         </template>
 
         <template #details>
-            <div v-if="retryAfter" class="mt-2 mb-4 bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 rounded-xl p-4 flex flex-col items-center justify-center">
-                 <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600/70 dark:text-purple-400 mb-1">
+            <div v-if="retryAfter" class="mt-2 mb-4 bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
                     {{ t('features.errors.429.retryAfter', { seconds: '' }).replace(':', '').trim() }}
-                 </span>
-                 <div class="text-2xl font-mono font-bold text-purple-700 dark:text-purple-300">
+                </span>
+                <div class="text-2xl font-mono font-bold text-purple-600 dark:text-purple-400">
                     {{ retryAfter }}s
-                 </div>
+                </div>
             </div>
             <div v-else class="text-center text-sm text-muted-foreground/80 my-4">
                 {{ t('features.errors.429.description') }}
@@ -59,7 +59,7 @@
             <div class="flex items-center justify-center gap-3">
                  <span>Error Code: 429</span>
                 <span class="w-0.5 h-3 bg-border"></span>
-                <span class="opacity-50 text-[10px]">{{ new Date().toLocaleTimeString() }}</span>
+                <span class="font-mono text-[10px] opacity-50">{{ traceId }}</span>
             </div>
         </template>
     </ErrorLayout>
@@ -73,6 +73,7 @@ import ErrorLayout from '@/layouts/ErrorLayout.vue';
 
 const router = useRouter();
 const { t } = useI18n();
+const traceId = ref(`TRC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(7).toUpperCase()}`);
 
 const retryAfter = computed(() => {
     // Retry-After header or value passed in state

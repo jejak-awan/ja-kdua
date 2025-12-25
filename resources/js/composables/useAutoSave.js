@@ -18,7 +18,7 @@ export function useAutoSave(form, contentId = null, options = {}) {
   } = options;
 
   // Support both boolean and getter function for enabled
-  const enabled = typeof enabledOption === 'function' 
+  const enabled = typeof enabledOption === 'function'
     ? computed(enabledOption)
     : (typeof enabledOption === 'object' && enabledOption !== null && 'value' in enabledOption
       ? enabledOption
@@ -63,8 +63,9 @@ export function useAutoSave(form, contentId = null, options = {}) {
 
   // Auto-save function
   const performAutoSave = async () => {
-    // Don't save if no changes or already saving
-    if (!hasChanges.value || isSaving.value || !getEnabled()) {
+    // Don't save if session terminated, no changes, already saving, or disabled
+    if (window.__isSessionTerminated || !hasChanges.value || isSaving.value || !getEnabled()) {
+      if (window.__isSessionTerminated) stopAutoSave();
       return;
     }
 
@@ -78,8 +79,8 @@ export function useAutoSave(form, contentId = null, options = {}) {
 
     try {
       let response;
-      const currentContentId = typeof contentId === 'object' && contentId !== null && 'value' in contentId 
-        ? contentId.value 
+      const currentContentId = typeof contentId === 'object' && contentId !== null && 'value' in contentId
+        ? contentId.value
         : contentId;
 
       // Prepare payload (tags should already be in form.value if using formWithTags)

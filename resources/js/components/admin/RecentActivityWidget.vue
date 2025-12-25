@@ -81,6 +81,12 @@ const loading = ref(false);
 let refreshInterval = null;
 
 const fetchActivities = async () => {
+    // Stop all activity if session is terminated
+    if (window.__isSessionTerminated) {
+        if (refreshInterval) clearInterval(refreshInterval);
+        return;
+    }
+
     // Only set loading on first load
     if (activities.value.length === 0) {
         loading.value = true;

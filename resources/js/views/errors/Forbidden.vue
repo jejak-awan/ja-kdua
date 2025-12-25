@@ -1,8 +1,8 @@
 <template>
     <ErrorLayout>
         <template #icon>
-            <div class="h-24 w-24 rounded-[2rem] bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center transform -rotate-3 hover:-rotate-6 transition-transform duration-300">
-                <svg class="h-12 w-12 text-amber-600 dark:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="h-20 w-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <svg class="h-10 w-10 text-amber-600 dark:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
             </div>
@@ -23,15 +23,15 @@
         <template #details>
             <div class="space-y-4">
                 <!-- Reason -->
-                <div v-if="reason" class="flex flex-col bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-3">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600/70 dark:text-amber-500/70 mb-1">{{ t('features.errors.403.reason') }}</span>
-                    <p class="text-sm text-amber-900 dark:text-amber-100 leading-snug break-words">
+                <div v-if="reason" class="flex flex-col bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500 mb-1">{{ t('features.errors.403.reason') }}</span>
+                    <p class="text-sm text-foreground leading-snug break-words">
                         {{ reason }}
                     </p>
                 </div>
 
                 <!-- Required Permissions -->
-                <div v-if="requiredPermissions.length" class="bg-muted/30 border border-border/50 rounded-xl p-3">
+                <div v-if="requiredPermissions.length" class="bg-muted border border-border rounded-xl p-3">
                     <h3 class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -42,7 +42,7 @@
                         <span 
                             v-for="permission in requiredPermissions" 
                             :key="permission"
-                            class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-background border border-border text-foreground/80 shadow-sm"
+                            class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-card border border-border text-foreground"
                         >
                             {{ permission }}
                         </span>
@@ -93,7 +93,9 @@
                 </div>
                 <div class="flex items-center gap-3 mt-1">
                     <span>Error Code: 403</span>
-                     <span class="w-0.5 h-3 bg-border"></span>
+                    <span class="w-0.5 h-3 bg-border"></span>
+                    <span class="font-mono text-[10px] opacity-50">{{ traceId }}</span>
+                    <span class="w-0.5 h-3 bg-border"></span>
                     <a href="mailto:admin@jejakawan.com" class="hover:text-amber-500 transition-colors underline decoration-dotted underline-offset-2">Contact Support</a>
                 </div>
             </div>
@@ -115,6 +117,7 @@ const { t } = useI18n();
 const user = computed(() => authStore.user);
 const reason = ref(window.history.state?.reason || null);
 const requiredPermissions = ref(window.history.state?.requiredPermissions || []);
+const traceId = ref(`TRC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(7).toUpperCase()}`);
 
 const goBack = () => {
   if (window.history.length > 1) {

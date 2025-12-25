@@ -209,6 +209,12 @@ const getProgressBarClass = (status) => {
 };
 
 const fetchHealth = async () => {
+  // Stop all activity if session is terminated
+  if (window.__isSessionTerminated) {
+    if (refreshInterval) clearInterval(refreshInterval);
+    return;
+  }
+
   loading.value = true;
   try {
     const response = await api.get('/admin/cms/system/health/detailed');

@@ -39,7 +39,9 @@
         "message": "Your session has expired due to inactivity.",
         "description": "Please refresh the page or log in again to continue.",
         "refresh": "Refresh Page",
-        "login": "Login Again"
+        "login": "Login Again",
+        "concurrent": "Your account has been detected logging in from another device or browser. This session has been automatically terminated for your security.",
+        "timeout": "Your session has expired due to inactivity for a significant amount of time."
     },
     "429": {
         "title": "Too Many Requests",

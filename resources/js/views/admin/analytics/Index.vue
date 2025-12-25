@@ -251,6 +251,7 @@ const browsers = ref([]);
 const countries = ref([]);
 const referrers = ref([]);
 const realtime = ref({});
+let refreshInterval = null;
 
 // Utility functions
 const formatNumber = (num) => {
@@ -335,15 +336,21 @@ const exportData = async (type) => {
 
 onMounted(() => {
     fetchAnalytics();
-    setInterval(() => {
+    refreshInterval = setInterval(() => {
         api.get('/admin/cms/analytics/realtime').then(res => {
             realtime.value = parseSingleResponse(res) || {};
-        }).catch(err => console.error('Realtime fetch failed:', err));
+        }).catch(err => {
+            console.error('Realtime fetch failed:', err);
+            if (err.response?.status === 401 || err.response?.status === 419) {
+                if (refreshInterval) clearInterval(refreshInterval);
+            }
+        });
     }, 30000);
     document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
+    if (refreshInterval) clearInterval(refreshInterval);
     document.removeEventListener('click', handleClickOutside);
 });
 </script>

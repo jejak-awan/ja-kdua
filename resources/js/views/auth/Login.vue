@@ -214,21 +214,20 @@ const handleLogin = async () => {
             messageType.value = 'success';
             rateLimited.value = false;
             
-            // Ensure auth state is properly set
-            // Fetch user data to ensure we have the latest info
+            // Fetch user data to ensure we have the latest info (roles, permissions)
             await authStore.fetchUser();
             
             // Check if there's a redirect query parameter
-            const redirect = router.currentRoute.value.query.redirect;
+            const redirectPath = route.query.redirect;
+            
+            // Use a slightly longer delay to let Pinia/Router fully settled
             setTimeout(() => {
-                if (redirect && typeof redirect === 'string') {
-                    // Redirect to the original destination
-                    router.push(redirect);
-                } else {
-                    // Default to dashboard
-                    router.push({ name: 'dashboard' });
-                }
-            }, 500);
+                const target = (redirectPath && typeof redirectPath === 'string' && !redirectPath.includes('/login') && !redirectPath.includes('/419')) 
+                    ? redirectPath 
+                    : { name: 'dashboard' };
+                
+                router.replace(target);
+            }, 600);
         } else {
             // Handle rate limiting
             if (result.rateLimited && result.retryAfter) {

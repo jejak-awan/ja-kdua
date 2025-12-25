@@ -6,78 +6,78 @@ import api from '@/services/api';
 export function useSessionTimeout() {
     const router = useRouter();
     const authStore = useAuthStore();
-    
+
     // Session configuration (in seconds)
     const SESSION_LIFETIME = parseInt(import.meta.env.VITE_SESSION_LIFETIME || '28800'); // 8 hours default
     const WARNING_TIME = 300; // Show warning 5 minutes before expiry
-    
+
     // State
     const isWarningVisible = ref(false);
     const timeRemaining = ref(WARNING_TIME);
     const lastActivityTime = ref(Date.now());
-    
+
     // Timers
     let warningTimer = null;
     let countdownTimer = null;
     let activityCheckTimer = null;
-    
+
     // Computed
     const sessionExpiryTime = computed(() => {
         return lastActivityTime.value + (SESSION_LIFETIME * 1000);
     });
-    
+
     const timeUntilExpiry = computed(() => {
         return Math.max(0, Math.floor((sessionExpiryTime.value - Date.now()) / 1000));
     });
-    
+
     const isAuthenticated = computed(() => authStore.isAuthenticated);
-    
+
     // Activity tracking
     const trackActivity = () => {
         if (!isAuthenticated.value) return;
-        
+
         lastActivityTime.value = Date.now();
         resetTimers();
     };
-    
+
     // Event listeners for user activity
     const activityEvents = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
-    
+
     const setupActivityListeners = () => {
         activityEvents.forEach(event => {
             window.addEventListener(event, trackActivity, { passive: true });
         });
     };
-    
+
     const removeActivityListeners = () => {
         activityEvents.forEach(event => {
             window.removeEventListener(event, trackActivity);
         });
     };
-    
+
     // Timer management
     const startWarningTimer = () => {
         clearWarningTimer();
-        
+
         if (!isAuthenticated.value) return;
-        
+
         const timeUntilWarning = (SESSION_LIFETIME - WARNING_TIME) * 1000;
-        
+
         warningTimer = setTimeout(() => {
             showWarning();
         }, timeUntilWarning);
     };
-    
+
     const clearWarningTimer = () => {
         if (warningTimer) {
             clearTimeout(warningTimer);
             warningTimer = null;
         }
     };
-    
+
     const startCountdownTimer = () => {
         clearCountdownTimer();
-        
+
         countdownTimer = setInterval(() => {
             if (timeRemaining.value > 0) {
                 timeRemaining.value--;
@@ -86,26 +86,82 @@ export function useSessionTimeout() {
             }
         }, 1000);
     };
-    
+
     const clearCountdownTimer = () => {
         if (countdownTimer) {
             clearInterval(countdownTimer);
             countdownTimer = null;
         }
     };
-    
+
+    // Heartbeat logic
+    const HEARTBEAT_INTERVAL = 30 * 1000; // Check every 30 seconds for faster detection
+    let heartbeatTimer = null;
+
+    const startHeartbeat = () => {
+        clearHeartbeat();
+        if (!isAuthenticated.value) return;
+
+        heartbeatTimer = setInterval(async () => {
+            // Early exit if session is already dead to prevent redundant calls/loops
+            if (window.__isSessionTerminated) {
+                stopAllTimers();
+                return;
+            }
+
+            try {
+                // Lightweight check to validate session
+                await api.get('/user', { _skipManualRedirect: true });
+            } catch (error) {
+                // Double check flag to prevent race conditions with api.js interceptor
+                if (window.__isSessionTerminated) {
+                    stopAllTimers();
+                    return;
+                }
+
+                // If it's a session error (401 or 419)
+                if (error.response?.status === 401 || error.response?.status === 419) {
+                    // NUCLEAR SHUTDOWN: Stop everything instantly
+                    if (typeof window.stop === 'function') window.stop();
+                    window.__isSessionTerminated = true;
+
+                    // Stop heartbeat and cleanup locally
+                    stopAllTimers();
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    authStore.isAuthenticated = false;
+
+                    // Logic: Concurrent because it's a heartbeat failure
+                    const reason = 'concurrent';
+
+                    // Hard redirect to error page with specific reason
+                    const currentPath = router.currentRoute.value.fullPath;
+                    const redirectUrl = `/419?reason=${reason}&redirect=${encodeURIComponent(currentPath)}`;
+                    window.location.replace(redirectUrl);
+                }
+            }
+        }, HEARTBEAT_INTERVAL);
+    };
+
+    const clearHeartbeat = () => {
+        if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+    };
+
     const startActivityCheckTimer = () => {
         clearActivityCheckTimer();
-        
+
         // Check every 30 seconds if session should show warning
         activityCheckTimer = setInterval(() => {
             if (!isAuthenticated.value) {
                 stopAllTimers();
                 return;
             }
-            
+
             const timeLeft = timeUntilExpiry.value;
-            
+
             if (timeLeft <= 0) {
                 handleTimeout();
             } else if (timeLeft <= WARNING_TIME && !isWarningVisible.value) {
@@ -113,54 +169,56 @@ export function useSessionTimeout() {
             }
         }, 30000); // Check every 30 seconds
     };
-    
+
     const clearActivityCheckTimer = () => {
         if (activityCheckTimer) {
             clearInterval(activityCheckTimer);
             activityCheckTimer = null;
         }
     };
-    
+
     const stopAllTimers = () => {
         clearWarningTimer();
         clearCountdownTimer();
         clearActivityCheckTimer();
+        clearHeartbeat();
     };
-    
+
     const resetTimers = () => {
         if (!isWarningVisible.value) {
             startWarningTimer();
+            // No need to reset heartbeat on activity, it should run independently
         }
     };
-    
+
     // Warning modal
     const showWarning = () => {
         if (!isAuthenticated.value) return;
-        
+
         isWarningVisible.value = true;
         timeRemaining.value = timeUntilExpiry.value;
         startCountdownTimer();
     };
-    
+
     const hideWarning = () => {
         isWarningVisible.value = false;
         clearCountdownTimer();
         timeRemaining.value = WARNING_TIME;
     };
-    
+
     // Actions
     const extendSession = async () => {
         try {
             // Make a lightweight API call to extend the session
             await api.get('/user');
-            
+
             // Reset activity time
             lastActivityTime.value = Date.now();
-            
+
             // Hide warning and reset timers
             hideWarning();
             startWarningTimer();
-            
+
             console.log('Session extended successfully');
         } catch (error) {
             console.error('Failed to extend session:', error);
@@ -168,58 +226,60 @@ export function useSessionTimeout() {
             handleTimeout();
         }
     };
-    
-    const handleTimeout = async () => {
+
+    const handleTimeout = () => {
+        // NUCLEAR SHUTDOWN: Stop everything
+        if (typeof window.stop === 'function') window.stop();
+        window.__isSessionTerminated = true;
         stopAllTimers();
         hideWarning();
-        
-        // Logout user
-        await authStore.logout();
-        
-        // Redirect to login with message
-        router.push({
-            path: '/login',
-            query: {
-                timeout: '1',
-                redirect: router.currentRoute.value.fullPath,
-            },
-        });
+
+        // Logout user locally
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        authStore.isAuthenticated = false;
+
+        // Hard redirect to Session Expired page with timeout reason
+        const currentPath = router.currentRoute.value.fullPath;
+        const redirectUrl = `/419?reason=timeout&redirect=${encodeURIComponent(currentPath)}`;
+        window.location.replace(redirectUrl);
     };
-    
+
     const manualLogout = async () => {
         stopAllTimers();
         hideWarning();
         removeActivityListeners();
-        
+
         await authStore.logout();
         router.push('/login');
     };
-    
+
     // Initialization
     const initialize = () => {
         if (!isAuthenticated.value) return;
-        
+
         setupActivityListeners();
         startWarningTimer();
         startActivityCheckTimer();
+        startHeartbeat();
         lastActivityTime.value = Date.now();
     };
-    
+
     const cleanup = () => {
         stopAllTimers();
         removeActivityListeners();
         hideWarning();
     };
-    
+
     // Lifecycle hooks
     onMounted(() => {
         initialize();
     });
-    
+
     onUnmounted(() => {
         cleanup();
     });
-    
+
     // Watch for auth changes
     const watchAuth = () => {
         const unwatch = authStore.$subscribe((mutation, state) => {
@@ -229,25 +289,25 @@ export function useSessionTimeout() {
                 cleanup();
             }
         });
-        
+
         onUnmounted(unwatch);
     };
-    
+
     watchAuth();
-    
+
     return {
         // State
         isWarningVisible,
         timeRemaining,
         timeUntilExpiry,
-        
+
         // Actions
         extendSession,
         manualLogout,
         showWarning,
         hideWarning,
         trackActivity,
-        
+
         // Utilities
         initialize,
         cleanup,

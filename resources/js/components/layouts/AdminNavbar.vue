@@ -376,7 +376,7 @@ const userInitial = computed(() => {
 });
 
 const fetchNotifications = async () => {
-    if (!props.isAuthenticated) return;
+    if (!props.isAuthenticated || window.__isSessionTerminated) return;
     
     loadingNotifications.value = true;
     try {

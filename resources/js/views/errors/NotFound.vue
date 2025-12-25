@@ -1,8 +1,8 @@
 <template>
     <ErrorLayout>
         <template #icon>
-            <div class="h-24 w-24 rounded-[2rem] bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center transform rotate-3 hover:rotate-6 transition-transform duration-300">
-                <svg class="h-12 w-12 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="h-20 w-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                <svg class="h-10 w-10 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
@@ -33,14 +33,14 @@
                         v-model="searchQuery"
                         type="text"
                         :placeholder="t('features.errors.404.searchPlaceholder')"
-                        class="block w-full pl-10 pr-3 py-2.5 border border-border bg-muted/30 dark:bg-muted/10 rounded-xl leading-5 placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-all"
+                        class="block w-full pl-10 pr-3 py-2.5 border border-border bg-muted rounded-xl leading-5 placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-all"
                         @keyup.enter="search"
                     />
                 </div>
             </div>
 
             <!-- Popular Links -->
-            <div class="bg-gray-50/50 dark:bg-zinc-800/30 border border-border/50 rounded-xl p-4">
+            <div class="bg-muted border border-border rounded-xl p-4">
                 <h3 class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3 px-1">
                     {{ t('features.errors.404.popular') }}
                 </h3>
@@ -49,7 +49,7 @@
                         v-for="link in popularLinks"
                         :key="link.path"
                         :to="link.path"
-                        class="flex items-center px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-all group"
+                        class="flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-accent rounded-lg transition-all group"
                     >
                         <span class="w-1.5 h-1.5 rounded-full bg-border group-hover:bg-primary transition-colors mr-3 flex-shrink-0"></span>
                         <span class="truncate">{{ link.label }}</span>
@@ -83,6 +83,8 @@
             <div class="flex items-center justify-center gap-3">
                 <span>Error Code: 404</span>
                 <span class="w-0.5 h-3 bg-border"></span>
+                <span class="font-mono text-[10px] opacity-50">{{ traceId }}</span>
+                <span class="w-0.5 h-3 bg-border"></span>
                 <a href="#" @click.prevent="router.back()" class="hover:text-primary transition-colors underline decoration-dotted underline-offset-2">Report Broken Link</a>
             </div>
         </template>
@@ -98,6 +100,7 @@ import ErrorLayout from '@/layouts/ErrorLayout.vue';
 const router = useRouter();
 const { t } = useI18n();
 const searchQuery = ref('');
+const traceId = ref(`TRC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(7).toUpperCase()}`);
 
 const popularLinks = computed(() => [
   { path: '/', label: t('common.navigation.breadcrumbs.home') || 'Home' },

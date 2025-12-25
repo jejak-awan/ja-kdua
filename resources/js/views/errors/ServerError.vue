@@ -1,9 +1,8 @@
 <template>
     <ErrorLayout>
         <template #icon>
-            <div class="h-24 w-24 rounded-[2rem] bg-red-50 dark:bg-red-900/10 flex items-center justify-center relative">
-                <div class="absolute inset-0 bg-red-500/10 rounded-[2rem] animate-pulse"></div>
-                <svg class="h-12 w-12 text-red-600 dark:text-red-500 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="h-20 w-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                <svg class="h-10 w-10 text-red-600 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
@@ -22,19 +21,19 @@
         </template>
 
         <template #details>
-             <!-- Status Check (Compact) -->
-            <div class="flex items-center justify-center gap-4 text-xs font-mono bg-muted/30 border border-border/40 rounded-xl p-3 mb-4">
+            <!-- Status Check (Compact) -->
+            <div class="flex items-center justify-center gap-4 text-xs font-mono bg-muted border border-border rounded-xl p-3 mb-4">
                 <div class="flex items-center gap-1.5">
                     <span class="relative flex h-2 w-2">
-                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="serverStatus.api ? 'bg-green-500' : 'bg-red-500'"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="serverStatus.api ? 'bg-green-500' : 'bg-red-500'"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2" :class="serverStatus.api ? 'bg-green-500' : 'bg-red-500'"></span>
                     </span>
-                    <span class="opacity-70">{{ t('features.errors.500.api') }}</span>
+                    <span class="text-muted-foreground">{{ t('features.errors.500.api') }}</span>
                 </div>
-                 <div class="w-px h-3 bg-border"></div>
+                <div class="w-px h-3 bg-border"></div>
                 <div class="flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full" :class="serverStatus.database ? 'bg-green-500' : 'bg-red-500'"></span>
-                    <span class="opacity-70">{{ t('features.errors.500.database') }}</span>
+                    <span class="text-muted-foreground">{{ t('features.errors.500.database') }}</span>
                 </div>
             </div>
 
@@ -57,8 +56,8 @@
                 </button>
                 
                 <transition name="slide-fade">
-                    <div v-if="showDetails" class="mt-2 p-3 bg-muted/50 border border-border rounded-xl text-left shadow-inner max-h-48 overflow-y-auto custom-scrollbar">
-                        <pre class="text-[10px] sm:text-xs font-mono text-foreground/80 whitespace-pre-wrap break-all leading-relaxed">{{ errorDetails }}</pre>
+                    <div v-if="showDetails" class="mt-2 p-3 bg-muted border border-border rounded-xl text-left max-h-48 overflow-y-auto custom-scrollbar">
+                        <pre class="text-[10px] sm:text-xs font-mono text-foreground whitespace-pre-wrap break-all leading-relaxed">{{ errorDetails }}</pre>
                     </div>
                 </transition>
             </div>
