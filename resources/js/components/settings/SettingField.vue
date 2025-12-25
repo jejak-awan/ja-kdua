@@ -41,10 +41,10 @@
 
         <!-- Text Input -->
         <input
-            v-else-if="type === 'string' && !isTextarea"
+            v-else-if="(type === 'string' || type === 'password') && !isTextarea"
             v-model="localValue"
             @input="updateValue"
-            :type="isPassword ? 'password' : 'text'"
+            :type="(isPassword || type === 'password') ? 'password' : 'text'"
             class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
         >
 
@@ -133,7 +133,9 @@ const localValue = ref(props.modelValue)
 
 // Watch for external changes
 watch(() => props.modelValue, (newValue) => {
-    localValue.value = newValue
+    if (newValue !== localValue.value) {
+        localValue.value = newValue
+    }
 })
 
 // Computed properties

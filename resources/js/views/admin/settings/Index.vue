@@ -193,6 +193,50 @@ const fetchSettings = async () => {
         const response = await api.get('/admin/cms/settings');
         const { data } = parseResponse(response);
         settings.value = ensureArray(data);
+
+        // Inject missing CDN settings with defaults
+        const ensureSetting = (key, value, type, group, description = '') => {
+            if (!settings.value.find(s => s.key === key)) {
+                settings.value.push({
+                    id: 'temp_' + key,
+                    key,
+                    value,
+                    type,
+                    group,
+                    description,
+                    is_public: 0
+                });
+            }
+        };
+
+        ensureSetting('cdn_preset', 'custom', 'string', 'performance');
+        ensureSetting('cdn_included_dirs', 'assets, storage', 'string', 'performance');
+        ensureSetting('cdn_excluded_extensions', '.php, .json', 'string', 'performance');
+
+        // Inject AWS/S3 Settings
+        ensureSetting('aws_access_key_id', '', 'string', 'media');
+        ensureSetting('aws_secret_access_key', '', 'password', 'media');
+        ensureSetting('aws_default_region', 'us-east-1', 'string', 'media');
+        ensureSetting('aws_bucket', '', 'string', 'media');
+        ensureSetting('aws_endpoint', '', 'string', 'media');
+
+        // Inject Google Drive Settings
+        ensureSetting('google_client_id', '', 'string', 'media');
+        ensureSetting('google_client_secret', '', 'password', 'media');
+        ensureSetting('google_refresh_token', '', 'password', 'media');
+        ensureSetting('google_folder_id', '', 'string', 'media');
+
+        // Inject FTP Settings
+        ensureSetting('ftp_host', '', 'string', 'media');
+        ensureSetting('ftp_username', '', 'string', 'media');
+        ensureSetting('ftp_password', '', 'password', 'media');
+        ensureSetting('ftp_root', '', 'string', 'media');
+        ensureSetting('ftp_port', '21', 'number', 'media');
+        ensureSetting('ftp_ssl', false, 'boolean', 'media');
+
+        // Inject Dropbox Settings
+        ensureSetting('dropbox_authorization_token', '', 'password', 'media');
+
         initializeFormData();
     } catch (error) {
         settings.value = [];
@@ -271,6 +315,11 @@ const handleSubmit = async () => {
         
         alert(t('features.settings.saved'));
         await fetchSettings();
+
+        // Refresh cache status if on performance tab
+        if (activeTab.value === 'performance') {
+            getCacheStatus();
+        }
     } catch (error) {
         alert(error.response?.data?.message || t('features.settings.failed'));
     } finally {

@@ -37,6 +37,10 @@
 
     {{-- Blocking script - Apply dark mode class immediately --}}
     <script>
+        window.siteConfig = {
+            lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
+        };
+
         (function() {
             const savedMode = localStorage.getItem('admin-dark-mode');
             const isDark = savedMode === 'dark' || 

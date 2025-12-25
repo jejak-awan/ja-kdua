@@ -234,21 +234,35 @@ class SystemService
     }
 
     /**
-     * Get cache size
+     * Get cache size and count
+     */
+    public function getCacheStats(string $driver = 'file'): array
+    {
+        if ($driver === 'file') {
+            $cachePath = storage_path('framework/cache');
+            if (is_dir($cachePath)) {
+                $size = 0;
+                $count = 0;
+                foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($cachePath)) as $file) {
+                    if ($file->isFile()) {
+                        $size += $file->getSize();
+                        $count++;
+                    }
+                }
+                return ['size' => $this->formatBytes($size), 'count' => $count];
+            }
+            return ['size' => '0 B', 'count' => 0];
+        }
+
+        return ['size' => '0 B', 'count' => 0];
+    }
+
+    /**
+     * Get cache size (backward compatibility)
      */
     public function getCacheSize(): string
     {
-        $cachePath = storage_path('framework/cache');
-        if (is_dir($cachePath)) {
-            $size = 0;
-            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($cachePath)) as $file) {
-                if ($file->isFile()) {
-                    $size += $file->getSize();
-                }
-            }
-            return $this->formatBytes($size);
-        }
-        return '0 B';
+        return $this->getCacheStats('file')['size'];
     }
 
     /**
@@ -259,25 +273,55 @@ class SystemService
         $driver = config('cache.default', 'file');
         $hits = 0;
         $misses = 0;
+        $keys = 0;
+        $enabled = false;
+        $size = '0 B';
 
         if ($driver === 'redis') {
             try {
                 $redis = \Illuminate\Support\Facades\Redis::connection();
                 $redis->ping();
+                $enabled = true;
+                
                 $info = $redis->info('stats');
                 $hits = $info['keyspace_hits'] ?? 0;
                 $misses = $info['keyspace_misses'] ?? 0;
+                $keys = $redis->dbsize();
+                
+                // Estimate size for Redis (not accurate but better than nothing)
+                $memory = $redis->info('memory');
+                $size = $this->formatBytes($memory['used_memory'] ?? 0);
+
             } catch (\Exception $e) {
                 Log::debug('Redis stats not available: ' . $e->getMessage());
+                // Try to get file cache size as fallback if redis fails but driver is set
+                // Or leave as 0
+            }
+        } elseif ($driver === 'file') {
+            $enabled = true; // File driver is always active
+            $stats = $this->getCacheStats('file');
+            $size = $stats['size'];
+            $keys = $stats['count'];
+        } else {
+            // Other drivers (database, etc)
+            $enabled = true; // Assume active if config exists
+            try {
+                if ($driver === 'database') {
+                    $keys = DB::table(config('cache.stores.database.table', 'cache'))->count();
+                }
+            } catch (\Exception $e) {
+                $enabled = false;
             }
         }
 
         return [
-            'status' => 'Active',
+            'status' => $enabled ? 'Active' : 'Inactive',
+            'enabled' => $enabled,
             'driver' => $driver,
             'hits' => $hits,
             'misses' => $misses,
-            'size' => $this->getCacheSize(),
+            'keys' => $keys,
+            'size' => $size,
         ];
     }
 

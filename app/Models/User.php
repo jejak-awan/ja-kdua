@@ -109,6 +109,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasTwoFactorEnabled(): bool
     {
+        if (! \App\Models\Setting::get('enable_2fa', false)) {
+            return false;
+        }
+
         return $this->twoFactorAuth && $this->twoFactorAuth->enabled;
     }
 
@@ -117,6 +121,21 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function requiresTwoFactor(): bool
     {
-        return $this->hasRole('admin') || $this->hasRole('super-admin');
+        // Check global enable switch
+        if (! \App\Models\Setting::get('enable_2fa', false)) {
+            return false;
+        }
+
+        $enforcement = \App\Models\Setting::get('two_factor_enforced_roles', 'no');
+
+        if ($enforcement === 'all') {
+            return true;
+        }
+
+        if ($enforcement === 'admin') {
+            return $this->hasRole('admin') || $this->hasRole('super-admin');
+        }
+
+        return false;
     }
 }

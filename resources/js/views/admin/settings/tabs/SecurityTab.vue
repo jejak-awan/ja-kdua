@@ -62,7 +62,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.authentication.title'),
             description: t('features.settings.groups.authentication.description'),
             icon: ShieldCheckIcon,
-            keys: ['password_min_length', 'enable_2fa', 'require_email_verification', 'enable_registration'],
+            keys: ['enable_registration', 'require_email_verification', 'enable_2fa', 'two_factor_method', 'two_factor_enforced_roles', 'password_min_length'],
             settings: [],
         },
         {
@@ -84,7 +84,13 @@ const securitySettingsGrouped = computed(() => {
     ]
     
     groups.forEach(group => {
-        group.settings = securitySettings.filter(s => group.keys.includes(s.key))
+        // Filter settings for this group
+        const groupSettings = securitySettings.filter(s => group.keys.includes(s.key))
+        
+        // Sort settings based on the order in the keys array
+        group.settings = groupSettings.sort((a, b) => {
+            return group.keys.indexOf(a.key) - group.keys.indexOf(b.key)
+        })
     })
     
     return groups.filter(group => group.settings.length > 0)

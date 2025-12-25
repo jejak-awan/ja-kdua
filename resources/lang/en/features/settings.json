@@ -108,6 +108,7 @@
         "cleared": "Cache cleared successfully",
         "warmed": "Cache warmed successfully",
         "status": "Status",
+        "keys": "Total Keys",
         "size": "Size",
         "driver": "Driver",
         "drivers": {
@@ -189,7 +190,8 @@
             "local": "Local Storage",
             "s3": "Amazon S3",
             "ftp": "FTP Server",
-            "dropbox": "Dropbox"
+            "dropbox": "Dropbox",
+            "google": "Google Drive"
         },
         "thumbnailSize": {
             "150": "150px",
@@ -258,6 +260,15 @@
             "10240": "10 MB",
             "20480": "20 MB",
             "51200": "50 MB"
+        },
+        "twoFactorMethod": {
+            "app": "Authenticator App (TOTP)",
+            "email": "Email Code"
+        },
+        "twoFactorEnforced": {
+            "no": "Optional for all users",
+            "admin": "Mandatory for Admins",
+            "all": "Mandatory for All Users"
         }
     },
     "labels": {
@@ -290,6 +301,8 @@
         "login_attempts_limit": "Login Attempts Limit",
         "block_duration_minutes": "Block Duration (minutes)",
         "enable_2fa": "Enable 2FA",
+        "two_factor_method": "2FA Method",
+        "two_factor_enforced_roles": "2FA Enforcement",
         "session_lifetime": "Session Lifetime (minutes)",
         "single_session_enabled": "Single Session Mode",
         "max_concurrent_sessions": "Max Concurrent Sessions",
@@ -308,7 +321,23 @@
         "thumbnail_height": "Thumbnail Height (px)",
         "enable_watermark": "Enable Watermark",
         "watermark_text": "Watermark Text",
-        "storage_driver": "Storage Driver"
+        "storage_driver": "Storage Driver",
+        "aws_access_key_id": "AWS Access Key ID",
+        "aws_secret_access_key": "AWS Secret Access Key",
+        "aws_default_region": "AWS Default Region",
+        "aws_bucket": "AWS Bucket",
+        "aws_endpoint": "AWS Endpoint",
+        "google_client_id": "Google Client ID",
+        "google_client_secret": "Google Client Secret",
+        "google_refresh_token": "Google Refresh Token",
+        "google_folder_id": "Google Folder ID",
+        "ftp_host": "FTP Host",
+        "ftp_username": "FTP Username",
+        "ftp_password": "FTP Password",
+        "ftp_root": "FTP Root Path",
+        "ftp_port": "FTP Port",
+        "ftp_ssl": "Use SSL/TLS",
+        "dropbox_authorization_token": "Dropbox Auth Token"
     },
     "descriptions": {
         "site_name": "The name of your application displayed throughout the site",
@@ -340,6 +369,8 @@
         "login_attempts_limit": "Number of failed logins allowed before temporary lockout",
         "block_duration_minutes": "How long an IP is blocked after exceeding login limits",
         "enable_2fa": "Enable or disable two-factor authentication system-wide",
+        "two_factor_method": "Method used for 2FA verification",
+        "two_factor_enforced_roles": "Enforce 2FA for specific user roles",
         "session_lifetime": "How long a user session lasts before expiring due to inactivity",
         "single_session_enabled": "When enabled, new login will automatically logout previous sessions (1 account = 1 device)",
         "max_concurrent_sessions": "Maximum number of active sessions per user. Set 0 for unlimited",
@@ -358,6 +389,22 @@
         "thumbnail_height": "The height used when generating thumbnails",
         "enable_watermark": "Add a text watermark to images on upload",
         "watermark_text": "The text to display on the watermark",
-        "storage_driver": "The system used to store uploaded files (local or external)"
+        "storage_driver": "The system used to store uploaded files (local or external)",
+        "aws_access_key_id": "Your AWS IAM Access Key ID",
+        "aws_secret_access_key": "Your AWS IAM Secret Access Key",
+        "aws_default_region": "Region code, e.g. us-east-1",
+        "aws_bucket": "S3 Bucket Name",
+        "aws_endpoint": "Optional custom endpoint for S3 compatible services (MinIO, Spaces)",
+        "google_client_id": "OAuth2 Client ID from Google Cloud Console",
+        "google_client_secret": "OAuth2 Client Secret",
+        "google_refresh_token": "Long-lived refresh token for offline access",
+        "google_folder_id": "ID of the folder to store files in (optional)",
+        "ftp_host": "Hostname or IP address of the FTP server",
+        "ftp_username": "FTP Account Username",
+        "ftp_password": "FTP Account Password",
+        "ftp_root": "Root directory for file storage (e.g. /public_html)",
+        "ftp_port": "FTP connection port (default 21)",
+        "ftp_ssl": "Enable secure connection (FTPS)",
+        "dropbox_authorization_token": "Generated Access Token from Dropbox App Console"
     }
 }

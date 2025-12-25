@@ -79,6 +79,7 @@ export const mailPortOptions = {
 export const storageDriverOptions = [
     { value: 'local', labelKey: 'features.settings.options.storageDriver.local' },
     { value: 's3', labelKey: 'features.settings.options.storageDriver.s3' },
+    { value: 'google', labelKey: 'features.settings.options.storageDriver.google' },
     { value: 'ftp', labelKey: 'features.settings.options.storageDriver.ftp' },
     { value: 'dropbox', labelKey: 'features.settings.options.storageDriver.dropbox' },
 ]
@@ -168,6 +169,17 @@ export const cacheDriverOptions = [
     { value: 'array', labelKey: 'features.settings.cache.drivers.array' },
 ]
 
+export const twoFactorMethodOptions = [
+    { value: 'app', labelKey: 'features.settings.options.twoFactorMethod.app' },
+    { value: 'email', labelKey: 'features.settings.options.twoFactorMethod.email' },
+]
+
+export const twoFactorEnforcedOptions = [
+    { value: 'no', labelKey: 'features.settings.options.twoFactorEnforced.no' },
+    { value: 'admin', labelKey: 'features.settings.options.twoFactorEnforced.admin' },
+    { value: 'all', labelKey: 'features.settings.options.twoFactorEnforced.all' },
+]
+
 // Helper function to get options for a specific field
 export function getFieldOptions(fieldKey) {
     const optionsMap = {
@@ -182,6 +194,8 @@ export function getFieldOptions(fieldKey) {
         thumbnail_height: thumbnailSizeOptions,
         // Security options
         password_min_length: passwordMinLengthOptions,
+        two_factor_method: twoFactorMethodOptions,
+        two_factor_enforced_roles: twoFactorEnforcedOptions,
         login_attempts_limit: loginAttemptsOptions,
         block_duration_minutes: blockDurationOptions,
         session_lifetime: sessionLifetimeOptions,

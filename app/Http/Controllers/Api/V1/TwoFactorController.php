@@ -25,6 +25,16 @@ class TwoFactorController extends BaseApiController
     {
         $user = $request->user();
 
+        // Check global 2FA setting
+        if (! \App\Models\Setting::get('enable_2fa', false)) {
+            return $this->error(
+                'Two-factor authentication is globally disabled.',
+                400,
+                [],
+                '2FA_DISABLED'
+            );
+        }
+
         // Check if 2FA is already enabled
         if ($user->hasTwoFactorEnabled()) {
             return $this->error(
@@ -71,6 +81,15 @@ class TwoFactorController extends BaseApiController
         $request->validate([
             'code' => 'required|string|size:6',
         ]);
+
+        if (! \App\Models\Setting::get('enable_2fa', false)) {
+            return $this->error(
+                'Two-factor authentication is globally disabled.',
+                400,
+                [],
+                '2FA_DISABLED'
+            );
+        }
 
         $user = $request->user();
         $twoFactorAuth = $user->twoFactorAuth;
@@ -262,6 +281,7 @@ class TwoFactorController extends BaseApiController
             'required' => $user->requiresTwoFactor(),
             'backup_codes_count' => $twoFactorAuth ? $twoFactorAuth->getRemainingBackupCodesCount() : 0,
             'enabled_at' => $twoFactorAuth?->enabled_at,
+            'global_enabled' => \App\Models\Setting::get('enable_2fa', false),
         ], '2FA status retrieved successfully');
     }
 

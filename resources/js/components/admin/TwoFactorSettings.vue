@@ -1,37 +1,55 @@
 <template>
     <div class="bg-card rounded-lg border border-border p-6 space-y-6">
-        <!-- Status Header -->
-        <div class="flex items-center justify-between pb-4 border-b border-border">
-            <div>
-                <h3 class="text-lg font-medium text-foreground">
-                    Two-Factor Authentication
-                </h3>
-                <p class="text-sm text-muted-foreground mt-1">
-                    {{ status.enabled ? '2FA is enabled on your account' : 'Add an extra layer of security to your account' }}
-                </p>
-            </div>
-            <span
-                :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    status.enabled
-                        ? 'bg-green-500/20 text-green-400 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-secondary text-secondary-foreground'
-                ]"
-            >
-                {{ status.enabled ? 'Enabled' : 'Disabled' }}
-            </span>
+        <!-- Global Disabled Warning -->
+        <div v-if="status.global_enabled === false" class="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-destructive">
+                Two-Factor Authentication is Disabled
+            </h3>
+            <p class="text-sm text-destructive/80 mt-1">
+                The administrator has disabled 2FA for this system.
+            </p>
         </div>
 
-        <!-- Enable 2FA Section -->
-        <div v-if="!status.enabled" class="space-y-4">
-            <div>
-                <h4 class="text-md font-medium text-foreground mb-2">
-                    Enable Two-Factor Authentication
-                </h4>
-                <p class="text-sm text-muted-foreground mb-4">
-                    Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
-                </p>
+        <template v-else>
+            <!-- Status Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-border">
+                <div>
+                    <h3 class="text-lg font-medium text-foreground">
+                        Two-Factor Authentication
+                    </h3>
+                    <p class="text-sm text-muted-foreground mt-1">
+                        {{ status.enabled ? '2FA is enabled on your account' : (status.required ? 'You are required to set up 2FA' : 'Add an extra layer of security to your account') }}
+                    </p>
+                </div>
+                <span
+                    :class="[
+                        'px-3 py-1 rounded-full text-sm font-medium',
+                        status.enabled
+                            ? 'bg-green-500/20 text-green-400 dark:bg-green-900 dark:text-green-200'
+                            : (status.required 
+                                ? 'bg-orange-500/20 text-orange-600 dark:bg-orange-900 dark:text-orange-200' 
+                                : 'bg-secondary text-secondary-foreground')
+                    ]"
+                >
+                    {{ status.enabled ? 'Enabled' : (status.required ? 'Setup Required' : 'Disabled') }}
+                </span>
             </div>
+
+            <!-- Enable 2FA Section -->
+            <div v-if="!status.enabled" class="space-y-4">
+                <div>
+                    <h4 class="text-md font-medium text-foreground mb-2">
+                        {{ status.required ? 'Setup Two-Factor Authentication' : 'Enable Two-Factor Authentication' }}
+                    </h4>
+                    <p class="text-sm text-muted-foreground mb-4">
+                        Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                    </p>
+                    <div v-if="status.required" class="mb-4 p-3 bg-orange-500/10 border border-orange-200 dark:border-orange-800 rounded-lg">
+                        <p class="text-sm text-orange-800 dark:text-orange-200">
+                            ⚠️ Security policy requires you to enable Two-Factor Authentication.
+                        </p>
+                    </div>
+                </div>
 
             <!-- Generate Button -->
             <div v-if="!qrCodeUrl" class="flex justify-center">
@@ -214,13 +232,14 @@
                 </button>
             </div>
         </div>
+        </template>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../services/api';
-import { parseResponse } from '../../utils/responseParser';
+import { parseResponse, parseSingleResponse } from '../../utils/responseParser';
 import QRCode from 'qrcode';
 
 const status = ref({
@@ -243,7 +262,7 @@ const regenerating = ref(false);
 const fetchStatus = async () => {
     try {
         const response = await api.get('/two-factor/status');
-        const { data } = parseResponse(response);
+        const data = parseSingleResponse(response);
         status.value = data;
     } catch (error) {
         console.error('Error fetching 2FA status:', error);
@@ -258,7 +277,7 @@ const generateSecret = async () => {
 
     try {
         const response = await api.post('/two-factor/generate');
-        const { data } = parseResponse(response);
+        const data = parseSingleResponse(response);
         
         secret.value = data.secret;
         
@@ -292,7 +311,7 @@ const enable2FA = async () => {
         const response = await api.post('/two-factor/verify', {
             code: verificationCode.value,
         });
-        const { data, message } = parseResponse(response);
+        const message = response.data.message;
         
         alert(message || 'Two-factor authentication enabled successfully');
         verificationCode.value = '';
@@ -321,7 +340,7 @@ const disable2FA = async () => {
         const response = await api.post('/two-factor/disable', {
             password: disablePassword.value,
         });
-        const { message } = parseResponse(response);
+        const message = response.data.message;
         
         alert(message || 'Two-factor authentication disabled successfully');
         disablePassword.value = '';
@@ -349,7 +368,8 @@ const regenerateBackupCodes = async () => {
         const response = await api.post('/two-factor/regenerate-backup-codes', {
             password: password,
         });
-        const { data, message } = parseResponse(response);
+        const data = parseSingleResponse(response);
+        const message = response.data.message;
         
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;

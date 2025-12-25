@@ -109,6 +109,7 @@
         "cleared": "Cache berhasil dibersihkan",
         "warmed": "Cache berhasil di-warm",
         "status": "Status",
+        "keys": "Total Key",
         "size": "Ukuran",
         "driver": "Driver",
         "drivers": {

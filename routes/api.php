@@ -360,6 +360,11 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('settings', App\Http\Controllers\Api\V1\SettingController::class)->middleware('permission:manage settings');
         Route::get('settings/group/{group}', [App\Http\Controllers\Api\V1\SettingController::class, 'getGroup'])->middleware('permission:manage settings');
         Route::post('settings/bulk-update', [App\Http\Controllers\Api\V1\SettingController::class, 'bulkUpdate'])->middleware('permission:manage settings');
+        Route::post('settings/test-storage', [App\Http\Controllers\Api\V1\SettingController::class, 'testStorage'])->middleware('permission:manage settings');
+
+        // Storage Migration
+        Route::get('storage/migration/files', [App\Http\Controllers\Api\V1\StorageMigrationController::class, 'index'])->middleware('permission:manage settings');
+        Route::post('storage/migration/batch', [App\Http\Controllers\Api\V1\StorageMigrationController::class, 'migrate'])->middleware('permission:manage settings');
 
         // Email Templates
         Route::apiResource('email-templates', App\Http\Controllers\Api\V1\EmailTemplateController::class)->middleware('permission:manage settings');

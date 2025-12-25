@@ -75,7 +75,7 @@ class MediaController extends BaseApiController
         $media = $this->mediaService->upload(
             $request->file('file'),
             $request->input('folder_id'),
-            $request->input('optimize', true)
+            $request->input('optimize', config('media.optimize', true))
         );
 
         return $this->success([

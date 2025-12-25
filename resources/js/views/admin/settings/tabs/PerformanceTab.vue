@@ -131,6 +131,106 @@
         <div class="mt-6 bg-card border border-border rounded-lg p-6">
             <h3 class="text-base font-semibold text-foreground mb-4">{{ $t('features.settings.tabs.performance') }} Settings</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- CDN Settings (Custom Layout) -->
+                <div class="col-span-1 md:col-span-2 border-b border-border pb-6 mb-6">
+                     <h4 class="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        CDN Configuration
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Enable CDN (Left) -->
+                        <div v-if="cdnEnabledSetting">
+                            <label class="block text-sm font-medium text-foreground mb-1">
+                                {{ $t('features.settings.labels.' + cdnEnabledSetting.key) }}
+                            </label>
+                            <p v-if="cdnEnabledSetting.description" class="text-xs text-muted-foreground mb-3">
+                                {{ $t('features.settings.descriptions.' + cdnEnabledSetting.key) }}
+                            </p>
+                            <label class="flex items-center cursor-pointer">
+                                <div class="relative">
+                                    <input v-model="formData[cdnEnabledSetting.key]" type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
+                                </div>
+                                <span class="ml-3 text-sm text-foreground">
+                                    {{ formData[cdnEnabledSetting.key] ? $t('features.settings.enabled') : $t('features.settings.disabled') }}
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- CDN Provider -->
+                        <div v-if="cdnPresetSetting">
+                            <label class="block text-sm font-medium text-foreground mb-1" :class="{'opacity-50': !formData.enable_cdn}">
+                                CDN Provider
+                            </label>
+                            <p class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
+                                Select your CDN provider for optimized configuration
+                            </p>
+                            <select
+                                v-model="formData[cdnPresetSetting.key]"
+                                :disabled="!formData.enable_cdn"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="custom">Custom / Other</option>
+                                <option value="bunny">BunnyCDN</option>
+                                <option value="cloudflare">Cloudflare</option>
+                                <option value="aws">AWS CloudFront</option>
+                            </select>
+                        </div>
+
+                        <!-- CDN URL (Full Width) -->
+                        <div v-if="cdnUrlSetting" class="md:col-span-2">
+                            <label class="block text-sm font-medium text-foreground mb-1" :class="{'opacity-50': !formData.enable_cdn}">
+                                {{ $t('features.settings.labels.' + cdnUrlSetting.key) }}
+                            </label>
+                            <p v-if="cdnUrlSetting.description" class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
+                                {{ $t('features.settings.descriptions.' + cdnUrlSetting.key) }}
+                            </p>
+                            <input
+                                v-model="formData[cdnUrlSetting.key]"
+                                type="text"
+                                :disabled="!formData.enable_cdn"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                :placeholder="!formData.enable_cdn ? 'Enable CDN to configure URL' : 'https://cdn.example.com'"
+                            >
+                             <p v-if="formData.cdn_preset === 'bunny'" class="text-xs text-blue-600 mt-1">
+                                Tip: Use your BunnyCDN Pull Zone URL (e.g. https://my-zone.b-cdn.net)
+                            </p>
+                        </div>
+
+                        <!-- Included Dirs -->
+                        <div v-if="cdnIncludedDirsSetting">
+                            <label class="block text-sm font-medium text-foreground mb-1" :class="{'opacity-50': !formData.enable_cdn}">
+                                Included Directories
+                            </label>
+                            <p class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
+                                Comma-separated list of directories to serve via CDN
+                            </p>
+                            <input
+                                v-model="formData[cdnIncludedDirsSetting.key]"
+                                type="text"
+                                :disabled="!formData.enable_cdn"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                        </div>
+
+                         <!-- Excluded Extensions -->
+                        <div v-if="cdnExcludedExtsSetting">
+                            <label class="block text-sm font-medium text-foreground mb-1" :class="{'opacity-50': !formData.enable_cdn}">
+                                Excluded Extensions
+                            </label>
+                            <p class="text-xs text-muted-foreground mb-2" :class="{'opacity-50': !formData.enable_cdn}">
+                                File extensions to exclude from CDN
+                            </p>
+                            <input
+                                v-model="formData[cdnExcludedExtsSetting.key]"
+                                type="text"
+                                :disabled="!formData.enable_cdn"
+                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                        </div>
+                    </div>
+                </div>
+
                 <template v-for="setting in otherSettings" :key="setting.id">
                     <div class="border-b border-border last:border-0 pb-4 md:border-0 md:pb-0">
                         <label class="block text-sm font-medium text-foreground mb-1">
@@ -208,9 +308,16 @@ const cacheSettings = computed(() => {
     )
 })
 
+const cdnEnabledSetting = computed(() => performanceSettings.value.find(s => s.key === 'enable_cdn'))
+const cdnUrlSetting = computed(() => performanceSettings.value.find(s => s.key === 'cdn_url'))
+const cdnPresetSetting = computed(() => performanceSettings.value.find(s => s.key === 'cdn_preset'))
+const cdnIncludedDirsSetting = computed(() => performanceSettings.value.find(s => s.key === 'cdn_included_dirs'))
+const cdnExcludedExtsSetting = computed(() => performanceSettings.value.find(s => s.key === 'cdn_excluded_extensions'))
+
+
 const otherSettings = computed(() => {
     return performanceSettings.value.filter(s => 
-        !['cache_driver', 'enable_cache', 'cache_ttl'].includes(s.key)
+        !['cache_driver', 'enable_cache', 'cache_ttl', 'enable_cdn', 'cdn_url', 'cdn_preset', 'cdn_included_dirs', 'cdn_excluded_extensions'].includes(s.key)
     )
 })
 </script>

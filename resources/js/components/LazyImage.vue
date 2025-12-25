@@ -97,8 +97,10 @@ onMounted(() => {
         return;
     }
     
-    // Check if IntersectionObserver is supported
-    if ('IntersectionObserver' in window) {
+    // Check if IntersectionObserver is supported AND lazy loading is enabled via config
+    const lazyEnabled = typeof window.siteConfig !== 'undefined' ? window.siteConfig.lazyLoading : true;
+
+    if ('IntersectionObserver' in window && lazyEnabled) {
         observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
