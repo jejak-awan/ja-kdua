@@ -12,9 +12,9 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
-    esbuild: {
-        drop: ['console', 'debugger'],
-    },
+    // esbuild: {
+    //     drop: ['console', 'debugger'],
+    // },
     resolve: {
         alias: {
             'vue': 'vue/dist/vue.esm-bundler.js',

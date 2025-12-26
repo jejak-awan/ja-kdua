@@ -160,6 +160,7 @@ export const maxUploadSizeOptions = [
     { value: 10240, labelKey: 'features.settings.options.maxUploadSize.10240' },
     { value: 20480, labelKey: 'features.settings.options.maxUploadSize.20480' },
     { value: 51200, labelKey: 'features.settings.options.maxUploadSize.51200' },
+    { value: 102400, labelKey: 'features.settings.options.maxUploadSize.102400' },
 ]
 
 export const cacheDriverOptions = [

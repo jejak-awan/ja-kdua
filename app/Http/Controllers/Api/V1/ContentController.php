@@ -121,6 +121,8 @@ class ContentController extends BaseApiController
                 'create_revision' => 'boolean',
                 'custom_fields' => 'nullable|array',
                 'is_featured' => 'boolean',
+                'new_tags' => 'nullable|array',
+                'new_tags.*' => 'string|max:50',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -172,6 +174,8 @@ class ContentController extends BaseApiController
                 'revision_note' => 'nullable|string|max:500',
                 'custom_fields' => 'nullable|array',
                 'is_featured' => 'boolean',
+                'new_tags' => 'nullable|array',
+                'new_tags.*' => 'string|max:50',
             ];
 
             // If publishing, require body

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use App\Models\Tag;
 
 class ContentService
 {
@@ -166,15 +167,25 @@ class ContentService
         }
 
         // Extract related data
-        $tags = $data['tags'] ?? null;
+        $tags = $data['tags'] ?? [];
+        $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
         
-        unset($data['create_revision'], $data['tags'], $data['custom_fields']);
+        unset($data['create_revision'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         $content = Content::create($data);
 
+        // Create new tags and get their IDs
+        foreach ($newTags as $tagName) {
+            $tag = Tag::firstOrCreate(
+                ['slug' => Str::slug($tagName)],
+                ['name' => $tagName, 'slug' => Str::slug($tagName)]
+            );
+            $tags[] = $tag->id;
+        }
+
         // Sync tags
-        if ($tags !== null) {
+        if (!empty($tags)) {
             $content->tags()->sync($tags);
         }
 
@@ -221,10 +232,11 @@ class ContentService
         }
 
         // Extract related data
-        $tags = $data['tags'] ?? null;
+        $tags = $data['tags'] ?? [];
+        $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
 
-        unset($data['create_revision'], $data['revision_note'], $data['tags'], $data['custom_fields']);
+        unset($data['create_revision'], $data['revision_note'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         // Handle published_at
         if (isset($data['published_at'])) {
@@ -233,8 +245,17 @@ class ContentService
 
         $content->update($data);
 
+        // Create new tags and get their IDs
+        foreach ($newTags as $tagName) {
+            $tag = Tag::firstOrCreate(
+                ['slug' => Str::slug($tagName)],
+                ['name' => $tagName, 'slug' => Str::slug($tagName)]
+            );
+            $tags[] = $tag->id;
+        }
+
         // Sync tags
-        if ($tags !== null) {
+        if (!empty($tags)) {
             $content->tags()->sync($tags);
         }
 

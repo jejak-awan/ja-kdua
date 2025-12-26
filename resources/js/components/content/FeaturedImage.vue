@@ -29,14 +29,28 @@
                     <MediaPicker
                         @selected="(media) => $emit('update:modelValue', media.url)"
                         :label="$t('features.content.form.selectImage')"
+                        :constraints="{
+                            allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                            minWidth: 600,
+                            minHeight: 400
+                        }"
                     >
-                        <template #trigger>
-                            <Button variant="outline" class="gap-2">
+                        <template #trigger="{ open }">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                class="gap-2 border-2 border-dashed h-12 hover:border-primary transition-all" 
+                                @click="open"
+                            >
                                 <Plus class="w-4 h-4" />
                                 {{ $t('features.content.form.selectImage') }}
                             </Button>
                         </template>
                     </MediaPicker>
+                    <div class="mt-4 text-[10px] text-muted-foreground/60 text-center italic leading-relaxed">
+                        <p>{{ $t('features.content.form.recommendedHint', { dimensions: '1200x630px' }) }} {{ $t('features.content.form.minHint', { dimensions: '600x400px' }) }}</p>
+                        <p>{{ $t('features.content.form.maxSizeHint', { size: Math.round(maxUploadSizeMB), extensions: 'JPG, PNG, WEBP' }) }}</p>
+                    </div>
                 </div>
             </div>
         </CardContent>
@@ -44,6 +58,8 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import MediaPicker from '../MediaPicker.vue';
 import Card from '@/components/ui/card.vue';
@@ -52,8 +68,22 @@ import CardTitle from '@/components/ui/card-title.vue';
 import CardContent from '@/components/ui/card-content.vue';
 import Button from '@/components/ui/button.vue';
 import { Image, Trash2, Plus } from 'lucide-vue-next';
+import { useCmsStore } from '../../stores/cms';
 
 const { t } = useI18n();
+const cmsStore = useCmsStore();
+const { settings } = storeToRefs(cmsStore);
+
+const maxUploadSizeMB = computed(() => {
+    // Setting is in KB, convert to MB
+    const sizeKB = settings.value.max_upload_size || 10240;
+    return sizeKB / 1024;
+});
+
+onMounted(async () => {
+    // Ensure media settings are loaded for the limits
+    await cmsStore.fetchSettingsGroup('media');
+});
 
 defineProps({
     modelValue: {

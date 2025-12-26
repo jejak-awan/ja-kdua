@@ -79,7 +79,10 @@
             "formats": "PNG, JPG, GIF, PDF, MP4 up to 10MB",
             "selectedFiles": "Selected Files:",
             "uploading": "Uploading...",
-            "uploadAction": "Upload {count} File|Upload {count} Files"
+            "uploadAction": "Upload {count} File|Upload {count} Files",
+            "chooseFile": "Choose File",
+            "upload": "Upload",
+            "uploadedSuccess": "Uploaded successfully!"
         },
         "edit": {
             "title": "Edit Media",

@@ -79,7 +79,10 @@
             "formats": "PNG, JPG, GIF, PDF, MP4 hingga 10MB",
             "selectedFiles": "File Terpilih:",
             "uploading": "Mengunggah...",
-            "uploadAction": "Unggah {count} File"
+            "uploadAction": "Unggah {count} File",
+            "chooseFile": "Pilih File",
+            "upload": "Unggah",
+            "uploadedSuccess": "Berhasil diunggah!"
         },
         "edit": {
             "title": "Edit Media",

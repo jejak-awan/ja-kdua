@@ -251,6 +251,7 @@ const handleStopMigration = () => {
                 :disabled-text="$t('features.settings.disabled')"
             />
 
+
             <!-- Test Connection Button for External Drivers -->
             <div v-if="group.isExternal" class="col-span-1 md:col-span-2 mt-4">
                 <div class="flex items-center gap-4">

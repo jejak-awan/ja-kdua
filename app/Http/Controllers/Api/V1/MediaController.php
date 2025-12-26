@@ -63,11 +63,32 @@ class MediaController extends BaseApiController
         }
 
         try {
+            $maxSize = \App\Models\Setting::get('max_upload_size', 10240);
+            
             $request->validate([
-                'file' => 'required|file|max:10240',
+                'file' => ['required', 'file', 'max:' . $maxSize],
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
+                'min_width' => 'nullable|integer|min:1',
+                'min_height' => 'nullable|integer|min:1',
+                'max_width' => 'nullable|integer|min:1',
+                'max_height' => 'nullable|integer|min:1',
             ]);
+
+            // Additional image dimension validation if requested
+            if (str_starts_with($request->file('file')->getMimeType(), 'image/')) {
+                $dimensions = [];
+                if ($request->has('min_width')) $dimensions[] = 'min_width=' . $request->min_width;
+                if ($request->has('min_height')) $dimensions[] = 'min_height=' . $request->min_height;
+                if ($request->has('max_width')) $dimensions[] = 'max_width=' . $request->max_width;
+                if ($request->has('max_height')) $dimensions[] = 'max_height=' . $request->max_height;
+
+                if (!empty($dimensions)) {
+                    $request->validate([
+                        'file' => 'dimensions:' . implode(',', $dimensions),
+                    ]);
+                }
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }

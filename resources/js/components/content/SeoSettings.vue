@@ -88,15 +88,29 @@
                 <div v-else class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border/40 rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
                     <MediaPicker
                         @selected="(media) => $emit('update:modelValue', { ...modelValue, og_image: media.url })"
-                        label="Select OG Image"
+                        :label="$t('features.content.form.selectOgImage')"
+                        :constraints="{
+                            allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                            minWidth: 1200,
+                            minHeight: 630
+                        }"
                     >
-                        <template #trigger>
-                            <Button variant="outline" class="gap-2">
+                        <template #trigger="{ open }">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                class="w-full gap-2 border-2 border-dashed h-12 hover:border-primary transition-all" 
+                                @click="open"
+                            >
                                 <ImageIcon class="w-4 h-4" />
-                                Select OG Image
+                                {{ $t('features.content.form.selectOgImage') }}
                             </Button>
                         </template>
                     </MediaPicker>
+                    <div class="mt-4 text-[10px] text-muted-foreground/60 text-center italic leading-relaxed">
+                        <p>{{ $t('features.content.form.recommendedHint', { dimensions: '1200x630px' }) }}</p>
+                        <p>{{ $t('features.content.form.maxSizeHint', { size: Math.round(maxUploadSizeMB), extensions: 'JPG, PNG, WEBP' }) }}</p>
+                    </div>
                 </div>
             </div>
         </CardContent>
@@ -104,6 +118,8 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import MediaPicker from '../MediaPicker.vue';
 import Card from '@/components/ui/card.vue';
@@ -115,8 +131,22 @@ import Input from '@/components/ui/input.vue';
 import Textarea from '@/components/ui/textarea.vue';
 import Button from '@/components/ui/button.vue';
 import { Globe, Type, Hash, Image as ImageIcon, Trash2 } from 'lucide-vue-next';
+import { useCmsStore } from '../../stores/cms';
 
 const { t } = useI18n();
+const cmsStore = useCmsStore();
+const { settings } = storeToRefs(cmsStore);
+
+const maxUploadSizeMB = computed(() => {
+    // Setting is in KB, convert to MB
+    const sizeKB = settings.value.max_upload_size || 10240;
+    return sizeKB / 1024;
+});
+
+onMounted(async () => {
+    // Ensure media settings are loaded for the limits
+    await cmsStore.fetchSettingsGroup('media');
+});
 
 defineProps({
     modelValue: {

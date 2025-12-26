@@ -81,8 +81,9 @@
                         <Label>
                             {{ t('features.content_templates.form.body') }}
                         </Label>
-                        <RichTextEditor
-                            v-model="form.body"
+                        <TiptapEditor
+                            :model-value="form.body"
+                            @update:model-value="(val) => form.body = val"
                             :placeholder="t('features.content_templates.form.bodyPlaceholder')"
                         />
                     </div>
@@ -136,7 +137,7 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
-import RichTextEditor from '../../../components/RichTextEditor.vue';
+import TiptapEditor from '@/components/TiptapEditor.vue';
 import { 
     ChevronLeft, 
     Save, 
