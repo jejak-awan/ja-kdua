@@ -6,7 +6,9 @@
         "createNew": "Buat Konten Baru",
         "templates": "Template",
         "bulkActions": "Aksi Massal",
-        "selected": "{count} dipilih"
+        "selected": "{count} dipilih",
+        "description": "Kelola konten, postingan blog, dan halaman Anda",
+        "revisions": "Revisi"
     },
     "form": {
         "title": "Judul Konten",
@@ -77,7 +79,8 @@
         "schedule": "Jadwalkan",
         "saveDraft": "Simpan Draf",
         "unpublish": "Batalkan Terbit",
-        "moveToTrash": "Pindahkan ke Sampah"
+        "moveToTrash": "Pindahkan ke Sampah",
+        "duplicate": "Duplikat"
     },
     "tabs": {
         "content": "Konten",

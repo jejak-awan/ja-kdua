@@ -2,30 +2,29 @@
     <div>
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                </router-link>
+                <Button variant="ghost" size="icon" as-child>
+                    <router-link to="/admin/logs-dashboard">
+                        <ArrowLeft class="w-5 h-5" />
+                    </router-link>
+                </Button>
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.security.title') }}</h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button
+                <Button
+                    variant="destructive"
                     @click="clearLogs"
-                    class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20"
                 >
+                    <Trash2 class="w-4 h-4 mr-2" />
                     {{ $t('features.system.logs.clear') }}
-                </button>
-                <button 
+                </Button>
+                <Button 
                     @click="refreshAll" 
                     :disabled="loading"
-                    class="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                <svg class="h-4 w-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>{{ $t('common.actions.refresh') }}</span>
-            </button>
+                    <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+                    <RefreshCw v-else class="w-4 h-4 mr-2" />
+                    <span>{{ $t('common.actions.refresh') }}</span>
+                </Button>
             </div>
         </div>
 
@@ -41,423 +40,521 @@
             <TabsContent value="overview">
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                <Card>
+                    <CardContent class="p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-red-500/10 rounded-lg">
+                                <ShieldAlert class="h-6 w-6 text-red-500" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.events') }}</p>
+                                <p class="text-2xl font-bold text-foreground">{{ statistics.total_events || 0 }}</p>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.events') }}</p>
-                            <p class="text-2xl font-semibold text-foreground">{{ statistics.total_events || 0 }}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent class="p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-500/10 rounded-lg">
+                                <ShieldX class="h-6 w-6 text-yellow-600" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.blockedIps') }}</p>
+                                <p class="text-2xl font-bold text-foreground">{{ blocklist.length || 0 }}</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent class="p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-orange-500/10 rounded-lg">
+                                <UserX class="h-6 w-6 text-orange-600" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.failedLogins') }}</p>
+                                <p class="text-2xl font-bold text-foreground">{{ statistics.failed_logins || 0 }}</p>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.blockedIps') }}</p>
-                            <p class="text-2xl font-semibold text-foreground">{{ blocklist.length || 0 }}</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent class="p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-500/10 rounded-lg">
+                                <ShieldCheck class="h-6 w-6 text-green-600" />
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.whitelist.title') }}</p>
+                                <p class="text-2xl font-bold text-foreground">{{ whitelist.length || 0 }}</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.statistics.failedLogins') }}</p>
-                            <p class="text-2xl font-semibold text-foreground">{{ statistics.failed_logins || 0 }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.security.whitelist.title') }}</p>
-                            <p class="text-2xl font-semibold text-foreground">{{ whitelist.length || 0 }}</p>
-                        </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- IP Management - Single Row -->
-            <div class="bg-card border border-border rounded-lg p-6 mb-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.security.ipManagement.title') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.security.ipManagement.block.label') }}
-                        </label>
-                        <div class="flex space-x-2">
-                            <input
-                                v-model="ipToBlock"
-                                type="text"
-                                :placeholder="$t('features.security.ipManagement.block.placeholder')"
-                                class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <button
-                                @click="blockIP"
-                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                            >
-                                {{ $t('features.security.ipManagement.block.button') }}
-                            </button>
+            <Card class="mb-6">
+                <CardHeader>
+                    <CardTitle class="text-lg">{{ $t('features.security.ipManagement.title') }}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <Label>
+                                {{ $t('features.security.ipManagement.block.label') }}
+                            </Label>
+                            <div class="flex space-x-2">
+                                <Input
+                                    v-model="ipToBlock"
+                                    type="text"
+                                    :placeholder="$t('features.security.ipManagement.block.placeholder')"
+                                />
+                                <Button
+                                    variant="destructive"
+                                    @click="blockIP"
+                                >
+                                    {{ $t('features.security.ipManagement.block.button') }}
+                                </Button>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <Label>
+                                {{ $t('features.security.ipManagement.check.label') }}
+                            </Label>
+                            <div class="flex space-x-2">
+                                <Input
+                                    v-model="ipToCheck"
+                                    type="text"
+                                    :placeholder="$t('features.security.ipManagement.check.placeholder')"
+                                />
+                                <Button
+                                    @click="checkIPStatus"
+                                >
+                                    {{ $t('features.security.ipManagement.check.button') }}
+                                </Button>
+                            </div>
+                            <div v-if="ipStatus" class="mt-2">
+                                <Badge
+                                    :variant="ipStatus.is_blocked ? 'destructive' : 'default'"
+                                    class="w-full justify-center py-2"
+                                    :class="!ipStatus.is_blocked ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' : ''"
+                                >
+                                    {{ $t('features.security.ipManagement.status.label') }}: {{ ipStatus.is_blocked ? $t('features.security.ipManagement.status.blocked') : $t('features.security.ipManagement.status.allowed') }}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">
-                            {{ $t('features.security.ipManagement.check.label') }}
-                        </label>
-                        <div class="flex space-x-2">
-                            <input
-                                v-model="ipToCheck"
-                                type="text"
-                                :placeholder="$t('features.security.ipManagement.check.placeholder')"
-                                class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <button
-                                @click="checkIPStatus"
-                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
-                            >
-                                {{ $t('features.security.ipManagement.check.button') }}
-                            </button>
-                        </div>
-                        <div v-if="ipStatus" class="mt-2 p-3 rounded-md" :class="ipStatus.is_blocked ? 'bg-red-500/20 text-red-800' : 'bg-green-500/20 text-green-800'">
-                            <p class="text-sm font-medium">
-                                {{ $t('features.security.ipManagement.status.label') }}: {{ ipStatus.is_blocked ? $t('features.security.ipManagement.status.blocked') : $t('features.security.ipManagement.status.allowed') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             <!-- Security Logs -->
-            <div class="bg-card border border-border rounded-lg">
-                <div class="px-6 py-4 border-b border-border">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div class="flex items-center space-x-4">
-                            <h2 class="text-lg font-semibold text-foreground">{{ $t('features.security.logs.title') }}</h2>
-                            <span v-if="selectedLogIds.length > 0" class="text-sm text-muted-foreground">
-                                {{ $t('features.security.bulkActions.selected', { count: selectedLogIds.length }) }}
-                            </span>
-                            <button 
-                                v-if="selectedLogIds.length > 0"
-                                @click="bulkBlockFromLogs" 
-                                class="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
-                            >
-                                {{ $t('features.security.bulkActions.blockSelected') }}
-                            </button>
-                        </div>
-                        <div class="flex items-center space-x-4">
-                            <select
-                                v-model="logFilter"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option value="">{{ $t('features.security.logs.all') }}</option>
-                                <option value="login_failed">{{ $t('features.security.logs.failedLogin') }}</option>
-                                <option value="ip_blocked">{{ $t('features.security.logs.blockedIp') }}</option>
-                                <option value="suspicious_activity">{{ $t('features.security.logs.suspiciousActivity') }}</option>
-                            </select>
-                            <input
-                                v-model="logSearch"
-                                type="text"
-                                :placeholder="$t('features.security.logs.search')"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <select
-                                v-model="logsPerPage"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option :value="10">10</option>
-                                <option :value="25">25</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
-                            </select>
-                        </div>
+            <Card>
+                <CardHeader class="flex flex-row items-center justify-between pb-4">
+                    <div class="flex items-center space-x-4">
+                        <CardTitle class="text-lg">{{ $t('features.security.logs.title') }}</CardTitle>
+                        <Badge v-if="selectedLogIds.length > 0" variant="secondary">
+                            {{ $t('features.security.bulkActions.selected', { count: selectedLogIds.length }) }}
+                        </Badge>
+                        <Button
+                            v-if="selectedLogIds.length > 0"
+                            variant="destructive"
+                            size="sm"
+                            @click="bulkBlockFromLogs"
+                        >
+                            {{ $t('features.security.bulkActions.blockSelected') }}
+                        </Button>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-border">
-                        <thead class="bg-muted/50">
-                            <tr>
-                                <th class="px-6 py-3 text-left">
-                                    <input type="checkbox" @change="toggleAllLogs" :checked="selectedLogIds.length === paginatedLogs.length && paginatedLogs.length > 0" class="rounded">
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.event') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.user') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.details') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.logs.table.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-card divide-y divide-border">
-                            <tr v-if="loading">
-                                <td colspan="7" class="px-6 py-4 text-center text-muted-foreground">{{ $t('features.security.logs.loading') }}</td>
-                            </tr>
-                            <tr v-else-if="paginatedLogs.length === 0">
-                                <td colspan="7" class="px-6 py-4 text-center text-muted-foreground">{{ $t('features.security.logs.empty') }}</td>
-                            </tr>
-                            <tr v-for="log in paginatedLogs" :key="log.id">
-                                <td class="px-6 py-4">
-                                    <input type="checkbox" v-model="selectedLogIds" :value="log.ip_address" class="rounded">
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getEventClass(log.event_type)">
-                                        {{ getEventLabel(log.event_type) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ log.ip_address }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ log.user?.name || '-' }}</td>
-                                <td class="px-6 py-4 text-sm text-muted-foreground max-w-xs truncate">{{ log.details }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ formatDate(log.created_at) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button
-                                        @click="blockIPFromLog(log.ip_address)"
-                                        class="text-red-600 hover:text-red-900"
-                                    >
-                                        {{ $t('features.security.logs.actions.blockIp') }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    <div class="flex items-center space-x-2">
+                        <Select v-model="logFilter">
+                            <SelectTrigger class="w-48">
+                                <SelectValue :placeholder="$t('features.security.logs.all')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">{{ $t('features.security.logs.all') }}</SelectItem>
+                                <SelectItem value="login_failed">{{ $t('features.security.logs.failedLogin') }}</SelectItem>
+                                <SelectItem value="ip_blocked">{{ $t('features.security.logs.blockedIp') }}</SelectItem>
+                                <SelectItem value="suspicious_activity">{{ $t('features.security.logs.suspiciousActivity') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <div class="relative w-64">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                v-model="logSearch"
+                                :placeholder="$t('features.security.logs.search')"
+                                class="pl-10"
+                            />
+                        </div>
+                        <Select v-model="logsPerPage">
+                            <SelectTrigger class="w-20">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem :value="10">10</SelectItem>
+                                <SelectItem :value="25">25</SelectItem>
+                                <SelectItem :value="50">50</SelectItem>
+                                <SelectItem :value="100">100</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardHeader>
+                <CardContent class="p-0">
+                    <div class="relative w-full overflow-auto">
+                        <table class="w-full divide-y divide-border">
+                            <thead class="bg-muted/50">
+                                <tr>
+                                    <th class="w-12 px-4 py-3 text-left">
+                                        <Checkbox 
+                                            :checked="selectedLogIds.length === paginatedLogs.length && paginatedLogs.length > 0"
+                                            @update:checked="toggleAllLogs"
+                                        />
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.event') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.ip') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.user') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.details') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.date') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                <tr v-if="loading">
+                                    <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                        <Loader2 class="w-6 h-6 animate-spin mx-auto mb-2" />
+                                        {{ $t('features.security.logs.loading') }}
+                                    </td>
+                                </tr>
+                                <tr v-else-if="paginatedLogs.length === 0">
+                                    <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                        {{ $t('features.security.logs.empty') }}
+                                    </td>
+                                </tr>
+                                <tr v-for="log in paginatedLogs" :key="log.id" class="hover:bg-muted/50 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <Checkbox 
+                                            :checked="selectedLogIds.includes(log.ip_address)"
+                                            @update:checked="(checked) => handleSelectLog(checked, log.ip_address)"
+                                        />
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <Badge :class="getEventClass(log.event_type)" variant="outline">
+                                            {{ getEventLabel(log.event_type) }}
+                                        </Badge>
+                                    </td>
+                                    <td class="px-4 py-3 font-mono text-sm">{{ log.ip_address }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ log.user?.name || '-' }}</td>
+                                    <td class="px-4 py-3 max-w-xs truncate text-muted-foreground text-sm" :title="log.details">
+                                        {{ log.details }}
+                                    </td>
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap text-sm">
+                                        {{ formatDate(log.created_at) }}
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            class="text-destructive hover:text-destructive hover:bg-destructive/10 h-8"
+                                            @click="blockIPFromLog(log.ip_address)"
+                                        >
+                                            {{ $t('features.security.logs.actions.blockIp') }}
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-border flex items-center justify-between">
+                <div class="px-6 py-4 border-t flex items-center justify-between">
                     <div class="text-sm text-muted-foreground">
                         {{ $t('common.pagination.showing') }} {{ logsStartIndex + 1 }} - {{ logsEndIndex }} {{ $t('common.pagination.of') }} {{ filteredLogs.length }}
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button 
-                            @click="logsCurrentPage--" 
+                        <Button
+                            variant="outline"
+                            size="sm"
                             :disabled="logsCurrentPage === 1"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
+                            @click="logsCurrentPage--"
                         >
                             {{ $t('common.actions.previous') }}
-                        </button>
-                        <span class="text-sm text-muted-foreground">{{ logsCurrentPage }} / {{ logsTotalPages }}</span>
-                        <button 
-                            @click="logsCurrentPage++" 
+                        </Button>
+                        <Badge variant="secondary" class="h-8">
+                            {{ logsCurrentPage }} / {{ logsTotalPages }}
+                        </Badge>
+                        <Button
+                            variant="outline"
+                            size="sm"
                             :disabled="logsCurrentPage >= logsTotalPages"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
+                            @click="logsCurrentPage++"
                         >
                             {{ $t('common.actions.next') }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
-            </div>
+            </Card>
             </TabsContent>
 
             <!-- Blocklist Tab -->
             <TabsContent value="blocklist">
-            <div class="bg-card border border-border rounded-lg">
-                <div class="px-6 py-4 border-b border-border">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <Card>
+                    <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
-                            <h2 class="text-lg font-semibold text-foreground">{{ $t('features.security.blocklist.title') }}</h2>
-                            <p class="text-sm text-muted-foreground">{{ $t('features.security.blocklist.description') }}</p>
+                            <CardTitle class="text-lg">{{ $t('features.security.blocklist.title') }}</CardTitle>
+                            <CardDescription>{{ $t('features.security.blocklist.description') }}</CardDescription>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span v-if="selectedBlocklistIds.length > 0" class="text-sm text-muted-foreground">{{ $t('features.security.bulkActions.selected', { count: selectedBlocklistIds.length }) }}</span>
-                            <button v-if="selectedBlocklistIds.length > 0" @click="bulkUnblock" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">
-                                {{ $t('features.security.bulkActions.unblockSelected') }}
-                            </button>
-                            <select
-                                v-model="blocklistPerPage"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                             <Badge v-if="selectedBlocklistIds.length > 0" variant="secondary">
+                                {{ $t('features.security.bulkActions.selected', { count: selectedBlocklistIds.length }) }}
+                            </Badge>
+                            <Button
+                                v-if="selectedBlocklistIds.length > 0"
+                                variant="outline"
+                                size="sm"
+                                @click="bulkUnblock"
                             >
-                                <option :value="10">10</option>
-                                <option :value="25">25</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
-                            </select>
+                                <ShieldCheck class="w-4 h-4 mr-2 text-green-500" />
+                                {{ $t('features.security.bulkActions.unblockSelected') }}
+                            </Button>
+                            <Select v-model="blocklistPerPage">
+                                <SelectTrigger class="w-20">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="10">10</SelectItem>
+                                    <SelectItem :value="25">25</SelectItem>
+                                    <SelectItem :value="50">50</SelectItem>
+                                    <SelectItem :value="100">100</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <div class="relative w-full overflow-auto">
+                            <table class="w-full divide-y divide-border">
+                                <thead class="bg-muted/50">
+                                    <tr>
+                                        <th class="w-12 px-4 py-3 text-left">
+                                            <Checkbox 
+                                                :checked="selectedBlocklistIds.length === paginatedBlocklist.length && paginatedBlocklist.length > 0"
+                                                @update:checked="toggleAllBlocklist"
+                                            />
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.reason') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.createdBy') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.date') }}</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <tr v-if="paginatedBlocklist.length === 0">
+                                        <td colspan="6" class="h-24 text-center text-muted-foreground">
+                                            {{ $t('features.security.blocklist.empty') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-for="item in paginatedBlocklist" :key="item.id" class="hover:bg-muted/50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <Checkbox 
+                                                :checked="selectedBlocklistIds.includes(item.ip_address)"
+                                                @update:checked="(checked) => handleSelectBlocklist(checked, item.ip_address)"
+                                            />
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-sm">{{ item.ip_address }}</td>
+                                        <td class="px-4 py-3 max-w-xs truncate text-muted-foreground text-sm">{{ item.reason || '-' }}</td>
+                                        <td class="px-4 py-3 text-sm">{{ item.creator?.name || '-' }}</td>
+                                        <td class="px-4 py-3 text-muted-foreground whitespace-nowrap text-sm">
+                                            {{ formatDate(item.created_at) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    @click="moveToWhitelist(item.ip_address)"
+                                                    class="h-8"
+                                                >
+                                                    <ShieldCheck class="w-4 h-4 mr-1 text-green-500" />
+                                                    {{ $t('features.security.blocklist.actions.moveToWhitelist') }}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    @click="removeFromBlocklist(item.ip_address)"
+                                                    class="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <Trash2 class="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t flex items-center justify-between">
+                        <div class="text-sm text-muted-foreground">
+                            {{ $t('common.pagination.showing') }} {{ blocklistStartIndex + 1 }} - {{ blocklistEndIndex }} {{ $t('common.pagination.of') }} {{ blocklist.length }}
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                :disabled="blocklistCurrentPage === 1"
+                                @click="blocklistCurrentPage--"
+                            >
+                                {{ $t('common.actions.previous') }}
+                            </Button>
+                            <Badge variant="secondary" class="h-8">
+                                {{ blocklistCurrentPage }} / {{ blocklistTotalPages }}
+                            </Badge>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                :disabled="blocklistCurrentPage >= blocklistTotalPages"
+                                @click="blocklistCurrentPage++"
+                            >
+                                {{ $t('common.actions.next') }}
+                            </Button>
                         </div>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-border">
-                        <thead class="bg-muted/50">
-                            <tr>
-                                <th class="px-6 py-3 text-left">
-                                    <input type="checkbox" @change="toggleAllBlocklist" :checked="selectedBlocklistIds.length === paginatedBlocklist.length && paginatedBlocklist.length > 0" class="rounded">
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.reason') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.createdBy') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.blocklist.table.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-card divide-y divide-border">
-                            <tr v-if="paginatedBlocklist.length === 0">
-                                <td colspan="6" class="px-6 py-4 text-center text-muted-foreground">{{ $t('features.security.blocklist.empty') }}</td>
-                            </tr>
-                            <tr v-for="item in paginatedBlocklist" :key="item.id">
-                                <td class="px-6 py-4">
-                                    <input type="checkbox" v-model="selectedBlocklistIds" :value="item.ip_address" class="rounded">
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{{ item.ip_address }}</td>
-                                <td class="px-6 py-4 text-sm text-muted-foreground">{{ item.reason || '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ item.creator?.name || '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ formatDate(item.created_at) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                    <button @click="removeFromBlocklist(item.ip_address)" class="text-green-600 hover:text-green-900">
-                                        {{ $t('features.security.blocklist.actions.remove') }}
-                                    </button>
-                                    <button @click="moveToWhitelist(item.ip_address)" class="text-blue-600 hover:text-blue-900">
-                                        {{ $t('features.security.blocklist.actions.moveToWhitelist') }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-border flex items-center justify-between">
-                    <div class="text-sm text-muted-foreground">
-                        {{ $t('common.pagination.showing') }} {{ blocklistStartIndex + 1 }} - {{ blocklistEndIndex }} {{ $t('common.pagination.of') }} {{ blocklist.length }}
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button 
-                            @click="blocklistCurrentPage--" 
-                            :disabled="blocklistCurrentPage === 1"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-                        >
-                            {{ $t('common.actions.previous') }}
-                        </button>
-                        <span class="text-sm text-muted-foreground">{{ blocklistCurrentPage }} / {{ blocklistTotalPages }}</span>
-                        <button 
-                            @click="blocklistCurrentPage++" 
-                            :disabled="blocklistCurrentPage >= blocklistTotalPages"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-                        >
-                            {{ $t('common.actions.next') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+                </Card>
             </TabsContent>
 
             <!-- Whitelist Tab -->
             <TabsContent value="whitelist">
-            <div class="bg-card border border-border rounded-lg">
-                <div class="px-6 py-4 border-b border-border">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <Card>
+                    <CardHeader class="flex flex-row items-center justify-between pb-4">
                         <div>
-                            <h2 class="text-lg font-semibold text-foreground">{{ $t('features.security.whitelist.title') }}</h2>
-                            <p class="text-sm text-muted-foreground">{{ $t('features.security.whitelist.description') }}</p>
+                            <CardTitle class="text-lg">{{ $t('features.security.whitelist.title') }}</CardTitle>
+                            <CardDescription>{{ $t('features.security.whitelist.description') }}</CardDescription>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span v-if="selectedWhitelistIds.length > 0" class="text-sm text-muted-foreground">{{ $t('features.security.bulkActions.selected', { count: selectedWhitelistIds.length }) }}</span>
-                            <button v-if="selectedWhitelistIds.length > 0" @click="bulkRemoveWhitelist" class="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700">
-                                {{ $t('features.security.bulkActions.removeSelected') }}
-                            </button>
-                            <select
-                                v-model="whitelistPerPage"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                             <Badge v-if="selectedWhitelistIds.length > 0" variant="secondary">
+                                {{ $t('features.security.bulkActions.selected', { count: selectedWhitelistIds.length }) }}
+                            </Badge>
+                            <Button
+                                v-if="selectedWhitelistIds.length > 0"
+                                variant="destructive"
+                                size="sm"
+                                @click="bulkRemoveWhitelist"
                             >
-                                <option :value="10">10</option>
-                                <option :value="25">25</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
-                            </select>
+                                <Trash2 class="w-4 h-4 mr-2" />
+                                {{ $t('features.security.bulkActions.removeSelected') }}
+                            </Button>
+                            <Select v-model="whitelistPerPage">
+                                <SelectTrigger class="w-20">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="10">10</SelectItem>
+                                    <SelectItem :value="25">25</SelectItem>
+                                    <SelectItem :value="50">50</SelectItem>
+                                    <SelectItem :value="100">100</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                    </div>
-                    <!-- Add IP Form -->
-                    <div class="mt-4 pt-4 border-t border-border">
-                        <label class="block text-sm font-medium text-foreground mb-2">
+                    </CardHeader>
+                    <div class="px-6 py-4 bg-muted/20">
+                         <Label class="text-sm font-medium mb-2 block">
                             {{ $t('features.security.whitelist.addIp') }}
-                        </label>
+                        </Label>
                         <div class="flex space-x-2">
-                            <input
+                            <Input
                                 v-model="ipToWhitelist"
                                 type="text"
                                 placeholder="192.168.1.1"
-                                class="flex-1 max-w-md px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <button
+                                class="max-w-md"
+                            />
+                            <Button
                                 @click="addToWhitelist(ipToWhitelist)"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                             >
+                                <Plus class="w-4 h-4 mr-2" />
                                 {{ $t('common.actions.add') }}
-                            </button>
+                            </Button>
                         </div>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-border">
-                        <thead class="bg-muted/50">
-                            <tr>
-                                <th class="px-6 py-3 text-left">
-                                    <input type="checkbox" @change="toggleAllWhitelist" :checked="selectedWhitelistIds.length === paginatedWhitelist.length && paginatedWhitelist.length > 0" class="rounded">
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.ip') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.reason') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.createdBy') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">{{ $t('features.security.whitelist.table.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-card divide-y divide-border">
-                            <tr v-if="paginatedWhitelist.length === 0">
-                                <td colspan="6" class="px-6 py-4 text-center text-muted-foreground">{{ $t('features.security.whitelist.empty') }}</td>
-                            </tr>
-                            <tr v-for="item in paginatedWhitelist" :key="item.id">
-                                <td class="px-6 py-4">
-                                    <input type="checkbox" v-model="selectedWhitelistIds" :value="item.ip_address" class="rounded">
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{{ item.ip_address }}</td>
-                                <td class="px-6 py-4 text-sm text-muted-foreground">{{ item.reason || '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ item.creator?.name || '-' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ formatDate(item.created_at) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button @click="removeFromWhitelist(item.ip_address)" class="text-red-600 hover:text-red-900">
-                                        {{ $t('features.security.whitelist.actions.remove') }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination -->
-                <div class="px-6 py-4 border-t border-border flex items-center justify-between">
-                    <div class="text-sm text-muted-foreground">
-                        {{ $t('common.pagination.showing') }} {{ whitelistStartIndex + 1 }} - {{ whitelistEndIndex }} {{ $t('common.pagination.of') }} {{ whitelist.length }}
+                    <CardContent class="p-0">
+                        <div class="relative w-full overflow-auto">
+                            <table class="w-full divide-y divide-border">
+                                <thead class="bg-muted/50">
+                                    <tr>
+                                        <th class="w-12 px-4 py-3 text-left">
+                                            <Checkbox 
+                                                :checked="selectedWhitelistIds.length === paginatedWhitelist.length && paginatedWhitelist.length > 0"
+                                                @update:checked="toggleAllWhitelist"
+                                            />
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.reason') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.createdBy') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.date') }}</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <tr v-if="paginatedWhitelist.length === 0">
+                                        <td colspan="6" class="h-24 text-center text-muted-foreground">
+                                            {{ $t('features.security.whitelist.empty') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-for="item in paginatedWhitelist" :key="item.id" class="hover:bg-muted/50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <Checkbox 
+                                                :checked="selectedWhitelistIds.includes(item.ip_address)"
+                                                @update:checked="(checked) => handleSelectWhitelist(checked, item.ip_address)"
+                                            />
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-sm">{{ item.ip_address }}</td>
+                                        <td class="px-4 py-3 text-muted-foreground text-sm">{{ item.reason || '-' }}</td>
+                                        <td class="px-4 py-3 text-sm">{{ item.creator?.name || '-' }}</td>
+                                        <td class="px-4 py-3 text-muted-foreground whitespace-nowrap text-sm">
+                                            {{ formatDate(item.created_at) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                @click="removeFromWhitelist(item.ip_address)"
+                                                class="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                                            >
+                                                <Trash2 class="w-4 h-4" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t flex items-center justify-between">
+                        <div class="text-sm text-muted-foreground">
+                            {{ $t('common.pagination.showing') }} {{ whitelistStartIndex + 1 }} - {{ whitelistEndIndex }} {{ $t('common.pagination.of') }} {{ whitelist.length }}
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                :disabled="whitelistCurrentPage === 1"
+                                @click="whitelistCurrentPage--"
+                            >
+                                {{ $t('common.actions.previous') }}
+                            </Button>
+                            <Badge variant="secondary" class="h-8">
+                                {{ whitelistCurrentPage }} / {{ whitelistTotalPages }}
+                            </Badge>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                :disabled="whitelistCurrentPage >= whitelistTotalPages"
+                                @click="whitelistCurrentPage++"
+                            >
+                                {{ $t('common.actions.next') }}
+                            </Button>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button 
-                            @click="whitelistCurrentPage--" 
-                            :disabled="whitelistCurrentPage === 1"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-                        >
-                            {{ $t('common.actions.previous') }}
-                        </button>
-                        <span class="text-sm text-muted-foreground">{{ whitelistCurrentPage }} / {{ whitelistTotalPages }}</span>
-                        <button 
-                            @click="whitelistCurrentPage++" 
-                            :disabled="whitelistCurrentPage >= whitelistTotalPages"
-                            class="px-3 py-1 border border-input rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-                        >
-                            {{ $t('common.actions.next') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+                </Card>
             </TabsContent>
         </Tabs>
     </div>
@@ -472,6 +569,39 @@ import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import TabsContent from '../../../components/ui/tabs-content.vue';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardDescription from '../../../components/ui/card-description.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Label from '../../../components/ui/label.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import { 
+    ShieldAlert, 
+    ShieldX, 
+    ShieldCheck, 
+    UserX, 
+    Trash2, 
+    RefreshCw, 
+    Search, 
+    Loader2, 
+    ArrowLeft,
+    Plus
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -708,11 +838,21 @@ const bulkBlockFromLogs = async () => {
     }
 };
 
-const toggleAllLogs = (e) => {
-    if (e.target.checked) {
+const toggleAllLogs = (checked) => {
+    if (checked) {
         selectedLogIds.value = paginatedLogs.value.map(log => log.ip_address);
     } else {
         selectedLogIds.value = [];
+    }
+};
+
+const handleSelectLog = (checked, ip) => {
+    if (checked) {
+        if (!selectedLogIds.value.includes(ip)) {
+            selectedLogIds.value.push(ip);
+        }
+    } else {
+        selectedLogIds.value = selectedLogIds.value.filter(id => id !== ip);
     }
 };
 
@@ -749,11 +889,21 @@ const bulkUnblock = async () => {
     }
 };
 
-const toggleAllBlocklist = (e) => {
-    if (e.target.checked) {
+const toggleAllBlocklist = (checked) => {
+    if (checked) {
         selectedBlocklistIds.value = paginatedBlocklist.value.map(item => item.ip_address);
     } else {
         selectedBlocklistIds.value = [];
+    }
+};
+
+const handleSelectBlocklist = (checked, ip) => {
+    if (checked) {
+        if (!selectedBlocklistIds.value.includes(ip)) {
+            selectedBlocklistIds.value.push(ip);
+        }
+    } else {
+        selectedBlocklistIds.value = selectedBlocklistIds.value.filter(id => id !== ip);
     }
 };
 
@@ -802,11 +952,21 @@ const bulkRemoveWhitelist = async () => {
     }
 };
 
-const toggleAllWhitelist = (e) => {
-    if (e.target.checked) {
+const toggleAllWhitelist = (checked) => {
+    if (checked) {
         selectedWhitelistIds.value = paginatedWhitelist.value.map(item => item.ip_address);
     } else {
         selectedWhitelistIds.value = [];
+    }
+};
+
+const handleSelectWhitelist = (checked, ip) => {
+    if (checked) {
+        if (!selectedWhitelistIds.value.includes(ip)) {
+            selectedWhitelistIds.value.push(ip);
+        }
+    } else {
+        selectedWhitelistIds.value = selectedWhitelistIds.value.filter(id => id !== ip);
     }
 };
 

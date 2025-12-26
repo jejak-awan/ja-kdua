@@ -3,13 +3,15 @@
         <div class="px-6 py-4 hover:bg-muted flex items-center justify-between group">
             <div class="flex items-center flex-1">
                 <div class="flex-shrink-0 mr-4">
-                    <button
+                    <Button
                         v-if="hasChildren"
                         @click="expanded = !expanded"
-                        class="text-muted-foreground hover:text-muted-foreground"
+                        variant="ghost"
+                        size="icon"
+                        class="h-6 w-6 p-0"
                     >
                         <svg
-                            class="w-5 h-5 transition-transform"
+                            class="w-4 h-4 transition-transform"
                             :class="{ 'rotate-90': expanded }"
                             fill="none"
                             stroke="currentColor"
@@ -17,7 +19,7 @@
                         >
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                    </button>
+                    </Button>
                     <div v-else class="w-5" />
                 </div>
                 <div
@@ -33,12 +35,12 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center">
                         <p class="text-sm font-medium text-foreground">{{ category.name }}</p>
-                        <span
-                            class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                            :class="category.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
+                        <Badge
+                            class="ml-2"
+                            :variant="category.is_active ? 'success' : 'secondary'"
                         >
                             {{ category.is_active ? 'Active' : 'Inactive' }}
-                        </span>
+                        </Badge>
                     </div>
                     <p v-if="category.description" class="text-sm text-muted-foreground truncate">
                         {{ category.description }}
@@ -47,18 +49,22 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
+                <Button
                     @click="$emit('edit', category)"
-                    class="text-indigo-600 hover:text-indigo-900 text-sm"
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 px-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-100"
                 >
                     Edit
-                </button>
-                <button
+                </Button>
+                <Button
                     @click="$emit('delete', category)"
-                    class="text-red-600 hover:text-red-900 text-sm"
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                     Delete
-                </button>
+                </Button>
             </div>
         </div>
         <div v-if="expanded && hasChildren" class="pl-12 bg-muted">
@@ -77,6 +83,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import Button from '../ui/button.vue';
+import Badge from '../ui/badge.vue';
 
 const props = defineProps({
     category: {

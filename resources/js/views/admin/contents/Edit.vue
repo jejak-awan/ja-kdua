@@ -1,56 +1,62 @@
 <template>
-    <div class="max-w-7xl mx-auto">
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.content.form.editTitle') }}</h1>
-                <div v-if="lockStatus" class="mt-2 flex items-center space-x-2">
-                    <span
-                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                        :class="lockStatus.is_locked ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'"
+    <div class="max-w-5xl mx-auto pb-20">
+        <div class="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.content.form.editTitle') }}</h1>
+                <div v-if="lockStatus" class="flex flex-wrap items-center gap-2">
+                    <Badge
+                        variant="outline"
+                        :class="lockStatus.is_locked ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'"
+                        class="gap-1.5"
                     >
+                        <Lock v-if="lockStatus.is_locked" class="w-3 h-3" />
+                        <Unlock v-else class="w-3 h-3" />
                         {{ lockStatus.is_locked ? $t('features.content.form.locked') : $t('features.content.form.unlocked') }}
-                    </span>
-                    <span v-if="lockStatus.is_locked && lockStatus.locked_by" class="text-xs text-muted-foreground">
+                    </Badge>
+                    <span v-if="lockStatus.is_locked && lockStatus.locked_by" class="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <div class="w-1 h-1 rounded-full bg-muted-foreground/30"></div>
                         {{ $t('features.content.form.lockedBy', { name: lockStatus.locked_by.name }) }}
                     </span>
-                    <button
+                    <Button
                         v-if="lockStatus.is_locked && lockStatus.can_unlock"
                         @click="handleUnlock"
-                        class="text-xs text-indigo-600 hover:text-indigo-900"
+                        variant="link"
+                        size="sm"
+                        class="h-auto p-0 text-xs text-primary hover:text-primary/80"
                     >
                         {{ $t('features.content.form.unlock') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
+            
+            <div class="flex items-center gap-2">
                 <AutoSaveIndicator
                     :status="autoSaveStatus"
                     :last-saved="lastSaved"
                 />
-                <button
+                <Button
                     @click="handlePreview"
-                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted"
+                    variant="outline"
+                    class="gap-2"
                 >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <Eye class="w-4 h-4" />
                     {{ $t('features.content.form.preview') }}
-                </button>
-                <router-link
-                    :to="{ name: 'contents' }"
-                    class="text-muted-foreground hover:text-foreground"
-                >
-                    ← {{ $t('features.content.form.back') }}
-                </router-link>
+                </Button>
+                <Button variant="ghost" asChild class="w-fit">
+                    <router-link :to="{ name: 'contents' }">
+                        <ArrowLeft class="w-4 h-4 mr-2" />
+                        {{ $t('features.content.form.back') }}
+                    </router-link>
+                </Button>
             </div>
         </div>
 
-        <div v-if="loading && !form.title" class="text-center py-8">
-            <p class="text-muted-foreground">{{ $t('features.content.form.loading') }}</p>
+        <div v-if="loading && !form.title" class="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-4">
+            <Loader2 class="w-10 h-10 animate-spin opacity-20" />
+            <p class="text-sm font-medium animate-pulse">{{ $t('features.content.form.loading') }}</p>
         </div>
 
-        <form v-else @submit.prevent="handleSubmit" class="space-y-6">
+        <form v-else @submit.prevent="handleSubmit" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <!-- Main Content Section -->
             <ContentDetails
                 v-model="form"
@@ -59,31 +65,41 @@
                 :tags="tags"
             />
 
-            <!-- Featured Image Section -->
-            <FeaturedImage
-                v-model="form.featured_image"
-                @update:modelValue="form.featured_image = $event"
-            />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Featured Image Section -->
+                <FeaturedImage
+                    v-model="form.featured_image"
+                    @update:modelValue="form.featured_image = $event"
+                />
 
-            <!-- SEO Section -->
-            <SeoSettings v-model="form" />
+                <!-- SEO Section -->
+                <SeoSettings v-model="form" />
+            </div>
 
             <!-- Actions -->
-            <div class="flex justify-end space-x-4">
-                <router-link
-                    :to="{ name: 'contents' }"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                >
-                    {{ $t('features.content.form.cancel') }}
-                </router-link>
-                <button
-                    type="submit"
-                    :disabled="loading"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                >
-                    {{ loading ? $t('features.content.form.updating') : $t('features.content.form.update') }}
-                </button>
-            </div>
+            <Card class="border-none shadow-lg bg-card/80 backdrop-blur-sm sticky bottom-6 z-10">
+                <CardContent class="p-4 flex justify-end items-center gap-4">
+                    <Button variant="ghost" asChild>
+                        <router-link :to="{ name: 'contents' }">
+                            {{ $t('features.content.form.cancel') }}
+                        </router-link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        :disabled="loading"
+                        class="min-w-[140px] shadow-primary/20 shadow-lg"
+                    >
+                        <template v-if="loading">
+                            <Loader2 class="w-4 h-4 mr-2 animate-spin" />
+                            {{ $t('features.content.form.updating') }}
+                        </template>
+                        <template v-else>
+                            <Save class="w-4 h-4 mr-2" />
+                            {{ $t('features.content.form.update') }}
+                        </template>
+                    </Button>
+                </CardContent>
+            </Card>
         </form>
 
         <!-- Preview Modal -->
@@ -103,6 +119,18 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
+import Button from '@/components/ui/button.vue';
+import Badge from '@/components/ui/badge.vue';
+import Card from '@/components/ui/card.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import { 
+    ArrowLeft, 
+    Save, 
+    Loader2, 
+    Eye,
+    Lock,
+    Unlock
+} from 'lucide-vue-next';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
 import ContentPreviewModal from '../../../components/admin/ContentPreviewModal.vue';

@@ -5,9 +5,10 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('common.actions.create') }} {{ $t('features.users.table.user') }}</h1>
             <router-link
                 :to="{ name: 'users.index' }"
-                class="text-muted-foreground hover:text-foreground"
+                class="text-muted-foreground hover:text-foreground text-sm flex items-center"
             >
-                ← {{ $t('common.actions.back') }}
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                {{ $t('common.actions.back') }}
             </router-link>
         </div>
 
@@ -37,14 +38,16 @@
                                 @selected="(media) => form.avatar = media.url"
                                 :label="$t('features.users.form.selectAvatar')"
                             ></MediaPicker>
-                            <button
+                            <Button
                                 v-if="form.avatar"
                                 type="button"
+                                variant="destructive"
+                                size="sm"
                                 @click="form.avatar = null"
-                                class="mt-2 text-sm text-destructive hover:text-destructive/90 block"
+                                class="mt-2"
                             >
                                 {{ $t('features.users.form.removeAvatar') }}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -55,11 +58,10 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.name') }} <span class="text-destructive">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.name')"
                         />
                     </div>
@@ -68,11 +70,10 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.email') }} <span class="text-destructive">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="form.email"
                             type="email"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.email')"
                         />
                     </div>
@@ -81,11 +82,10 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.password') }} <span class="text-destructive">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="form.password"
                             type="password"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.password')"
                         />
                     </div>
@@ -94,10 +94,9 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.phone') }}
                         </label>
-                        <input
+                        <Input
                             v-model="form.phone"
                             type="tel"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.phone')"
                         />
                     </div>
@@ -109,22 +108,20 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.bio') }}
                         </label>
-                        <textarea
+                        <Textarea
                             v-model="form.bio"
-                            rows="3"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            :rows="3"
                             :placeholder="$t('features.users.form.placeholders.bio')"
-                        ></textarea>
+                        />
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.website') }}
                         </label>
-                        <input
+                        <Input
                             v-model="form.website"
                             type="url"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.website')"
                         />
                     </div>
@@ -133,10 +130,9 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.location') }}
                         </label>
-                        <input
+                        <Input
                             v-model="form.location"
                             type="text"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             :placeholder="$t('features.users.form.placeholders.location')"
                         />
                     </div>
@@ -173,19 +169,20 @@
 
             <!-- Actions -->
             <div class="flex justify-end space-x-4">
-                <router-link
-                    :to="{ name: 'users.index' }"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                <Button
+                    variant="outline"
+                    as-child
                 >
-                    {{ $t('common.actions.cancel') }}
-                </router-link>
-                <button
+                    <router-link :to="{ name: 'users.index' }">
+                        {{ $t('common.actions.cancel') }}
+                    </router-link>
+                </Button>
+                <Button
                     type="submit"
                     :disabled="saving"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/80 h-10 px-4 py-2"
                 >
                     {{ saving ? $t('common.messages.loading.creating') : $t('common.actions.create') }}
-                </button>
+                </Button>
             </div>
         </form>
     </div>
@@ -198,6 +195,9 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Textarea from '../../../components/ui/textarea.vue';
 
 const router = useRouter();
 const { t } = useI18n();

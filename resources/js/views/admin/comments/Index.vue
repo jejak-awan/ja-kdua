@@ -9,264 +9,322 @@
         </div>
 
         <!-- Statistics Cards -->
-        <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-            <div class="bg-card border border-border rounded-lg p-4">
-                <p class="text-2xl font-bold text-foreground">{{ statistics.total }}</p>
-                <p class="text-sm text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
-            </div>
-            <div class="bg-yellow-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'pending'">
-                <p class="text-2xl font-bold text-yellow-600">{{ statistics.pending }}</p>
-                <p class="text-sm text-yellow-400">{{ $t('features.comments.stats.pending') }}</p>
-            </div>
-            <div class="bg-green-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'approved'">
-                <p class="text-2xl font-bold text-green-600">{{ statistics.approved }}</p>
-                <p class="text-sm text-green-400">{{ $t('features.comments.stats.approved') }}</p>
-            </div>
-            <div class="bg-red-500/20 border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'rejected'">
-                <p class="text-2xl font-bold text-red-600">{{ statistics.rejected }}</p>
-                <p class="text-sm text-red-400">{{ $t('features.comments.stats.rejected') }}</p>
-            </div>
-            <div class="bg-muted border border-border rounded-lg p-4 cursor-pointer" @click="statusFilter = 'spam'">
+        <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <Card class="p-4">
+                <p class="text-2xl font-bold">{{ statistics.total }}</p>
+                <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
+            </Card>
+            <Card 
+                class="p-4 cursor-pointer hover:bg-yellow-500/5 transition-colors border-yellow-500/20" 
+                @click="statusFilter = 'pending'"
+                :class="{ 'ring-2 ring-yellow-500/50': statusFilter === 'pending' }"
+            >
+                <p class="text-2xl font-bold text-yellow-500">{{ statistics.pending }}</p>
+                <p class="text-xs text-yellow-500/70">{{ $t('features.comments.stats.pending') }}</p>
+            </Card>
+            <Card 
+                class="p-4 cursor-pointer hover:bg-green-500/5 transition-colors border-green-500/20" 
+                @click="statusFilter = 'approved'"
+                :class="{ 'ring-2 ring-green-500/50': statusFilter === 'approved' }"
+            >
+                <p class="text-2xl font-bold text-green-500">{{ statistics.approved }}</p>
+                <p class="text-xs text-green-500/70">{{ $t('features.comments.stats.approved') }}</p>
+            </Card>
+            <Card 
+                class="p-4 cursor-pointer hover:bg-red-500/5 transition-colors border-red-500/20" 
+                @click="statusFilter = 'rejected'"
+                :class="{ 'ring-2 ring-red-500/50': statusFilter === 'rejected' }"
+            >
+                <p class="text-2xl font-bold text-red-500">{{ statistics.rejected }}</p>
+                <p class="text-xs text-red-500/70">{{ $t('features.comments.stats.rejected') }}</p>
+            </Card>
+            <Card 
+                class="p-4 cursor-pointer hover:bg-muted/50 transition-colors" 
+                @click="statusFilter = 'spam'"
+                :class="{ 'ring-2 ring-muted-foreground/50': statusFilter === 'spam' }"
+            >
                 <p class="text-2xl font-bold text-muted-foreground">{{ statistics.spam }}</p>
-                <p class="text-sm text-foreground">{{ $t('features.comments.stats.spam') }}</p>
-            </div>
+                <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.spam') }}</p>
+            </Card>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card border border-border rounded-lg p-4 mb-4">
-            <div class="flex items-center space-x-4">
-                <input
-                    v-model="search"
-                    type="text"
-                    :placeholder="$t('features.comments.filter.searchPlaceholder')"
-                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                <select
-                    v-model="statusFilter"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                    <option value="">{{ $t('features.comments.filter.allStatus') }}</option>
-                    <option value="pending">{{ $t('features.comments.status.pending') }}</option>
-                    <option value="approved">{{ $t('features.comments.status.approved') }}</option>
-                    <option value="rejected">{{ $t('features.comments.status.rejected') }}</option>
-                    <option value="spam">{{ $t('features.comments.status.spam') }}</option>
-                </select>
+        <Card class="p-4 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <div class="relative flex-1">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        v-model="search"
+                        :placeholder="$t('features.comments.filter.searchPlaceholder')"
+                        class="pl-9"
+                    />
+                </div>
+                <Select v-model="statusFilter">
+                    <SelectTrigger class="w-full md:w-[200px]">
+                        <SelectValue :placeholder="$t('features.comments.filter.allStatus')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                        <SelectItem value="pending">{{ $t('features.comments.status.pending') }}</SelectItem>
+                        <SelectItem value="approved">{{ $t('features.comments.status.approved') }}</SelectItem>
+                        <SelectItem value="rejected">{{ $t('features.comments.status.rejected') }}</SelectItem>
+                        <SelectItem value="spam">{{ $t('features.comments.status.spam') }}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <!-- Bulk Actions -->
-            <div v-if="selectedIds.length > 0" class="mt-3 flex items-center space-x-2 pt-3 border-t">
-                <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected:</span>
-                <button @click="bulkAction('approve')" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200">{{ $t('features.comments.actions.approveAll') }}</button>
-                <button @click="bulkAction('reject')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200">{{ $t('features.comments.actions.rejectAll') }}</button>
-                <button @click="bulkAction('spam')" class="px-3 py-1 text-sm bg-secondary text-foreground rounded-md hover:bg-muted">{{ $t('features.comments.actions.markSpam') }}</button>
-                <button @click="bulkAction('delete')" class="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600">{{ $t('common.actions.delete') }}</button>
-                <button @click="selectedIds = []" class="px-3 py-1 text-sm text-muted-foreground hover:text-foreground">{{ $t('common.actions.clear') }}</button>
+            <div v-if="selectedIds.length > 0" class="mt-4 flex items-center flex-wrap gap-2 pt-4 border-t">
+                <span class="text-sm text-muted-foreground mr-2">{{ selectedIds.length }} selected:</span>
+                <Button variant="outline" size="sm" @click="bulkAction('approve')" class="text-green-600 hover:text-green-600 hover:bg-green-500/10 border-green-500/20">
+                    <Check class="w-4 h-4 mr-2" />
+                    {{ $t('features.comments.actions.approveAll') }}
+                </Button>
+                <Button variant="outline" size="sm" @click="bulkAction('reject')" class="text-red-600 hover:text-red-600 hover:bg-red-500/10 border-red-500/20">
+                    <X class="w-4 h-4 mr-2" />
+                    {{ $t('features.comments.actions.rejectAll') }}
+                </Button>
+                <Button variant="outline" size="sm" @click="bulkAction('spam')">
+                    <AlertTriangle class="w-4 h-4 mr-2" />
+                    {{ $t('features.comments.actions.markSpam') }}
+                </Button>
+                <Button variant="destructive" size="sm" @click="bulkAction('delete')">
+                    <Trash2 class="w-4 h-4 mr-2" />
+                    {{ $t('common.actions.delete') }}
+                </Button>
+                <Button variant="ghost" size="sm" @click="selectedIds = []">
+                    {{ $t('common.actions.clear') }}
+                </Button>
             </div>
-        </div>
+        </Card>
 
         <!-- Comments List -->
         <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
             <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
         </div>
 
-        <div v-else-if="comments.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+        <Card v-else-if="comments.length === 0" class="p-12 text-center">
+            <MessageSquare class="mx-auto h-12 w-12 text-muted-foreground opacity-20" />
             <p class="mt-4 text-muted-foreground">{{ $t('features.comments.list.empty') }}</p>
-        </div>
+        </Card>
 
         <div v-else class="space-y-4">
-            <div
+            <Card
                 v-for="comment in comments"
                 :key="comment.id"
-                class="bg-card border border-border rounded-lg p-6"
+                class="p-0 overflow-hidden"
             >
-                <!-- Comment Header -->
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-start space-x-3 flex-1">
-                        <!-- Checkbox for selection -->
-                        <div class="flex-shrink-0 pt-1">
-                            <input
-                                type="checkbox"
-                                :checked="selectedIds.includes(comment.id)"
-                                @change="toggleSelection(comment.id)"
-                                class="h-4 w-4 text-indigo-600 border-input rounded focus:ring-indigo-500"
-                            >
-                        </div>
-                        <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                <span class="text-indigo-600 font-medium text-sm">
-                                    {{ ((comment.user?.name || comment.name || 'U')?.charAt(0) || 'U').toUpperCase() }}
-                                </span>
+                <div class="p-6">
+                    <!-- Comment Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-start space-x-3 flex-1">
+                            <!-- Checkbox for selection -->
+                            <div class="flex-shrink-0 pt-1">
+                                <Checkbox
+                                    :checked="selectedIds.includes(comment.id)"
+                                    @update:checked="toggleSelection(comment.id)"
+                                />
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                                    <span class="text-primary font-semibold text-sm">
+                                        {{ ((comment.user?.name || comment.name || 'U')?.charAt(0) || 'U').toUpperCase() }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center space-x-2">
+                                    <p class="text-sm font-semibold text-foreground">
+                                        {{ comment.user?.name || comment.name || 'Anonymous' }}
+                                    </p>
+                                    <Badge
+                                        variant="outline"
+                                        :class="{
+                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': comment.status === 'pending',
+                                            'bg-green-500/10 text-green-500 border-green-500/20': comment.status === 'approved',
+                                            'bg-red-500/10 text-red-500 border-red-500/20': comment.status === 'rejected',
+                                            'bg-muted text-muted-foreground': comment.status === 'spam',
+                                        }"
+                                    >
+                                        {{ comment.status }}
+                                    </Badge>
+                                </div>
+                                <div class="flex items-center gap-x-3 mt-1 text-xs text-muted-foreground">
+                                    <span>{{ comment.user?.email || comment.email || 'No email' }}</span>
+                                    <span class="flex items-center">
+                                        <clock class="w-3 h-3 mr-1" />
+                                        {{ formatDate(comment.created_at) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm font-medium text-foreground">
-                                    {{ comment.user?.name || comment.name || 'Anonymous' }}
-                                </p>
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                    :class="{
-                                        'bg-yellow-500/20 text-yellow-400': comment.status === 'pending',
-                                        'bg-green-500/20 text-green-400': comment.status === 'approved',
-                                        'bg-red-500/20 text-red-400': comment.status === 'rejected',
-                                        'bg-secondary text-secondary-foreground': comment.status === 'spam',
-                                    }"
+                        <div class="flex items-center gap-1">
+                            <Button
+                                v-if="comment.status === 'pending' || comment.status === 'rejected'"
+                                variant="ghost"
+                                size="sm"
+                                @click="approveComment(comment)"
+                                class="h-8 text-green-600 hover:text-green-600 hover:bg-green-500/10"
+                            >
+                                <Check class="w-4 h-4 mr-1" />
+                                Approve
+                            </Button>
+                            <Button
+                                v-if="comment.status === 'pending' || comment.status === 'approved'"
+                                variant="ghost"
+                                size="sm"
+                                @click="rejectComment(comment)"
+                                class="h-8 text-yellow-600 hover:text-yellow-600 hover:bg-yellow-500/10"
+                            >
+                                <X class="w-4 h-4 mr-1" />
+                                Reject
+                            </Button>
+                            <Button
+                                v-if="comment.status !== 'spam'"
+                                variant="ghost"
+                                size="sm"
+                                @click="markAsSpam(comment)"
+                                class="h-8 text-muted-foreground"
+                            >
+                                <AlertTriangle class="w-4 h-4 mr-1" />
+                                Spam
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                @click="deleteComment(comment)"
+                                class="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                                <Trash2 class="w-4 h-4 mr-1" />
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Comment Body -->
+                    <div class="mb-4 pl-[52px]">
+                        <p class="text-sm text-foreground leading-relaxed">{{ comment.body }}</p>
+                    </div>
+
+                    <!-- Comment Meta -->
+                    <div class="flex items-center justify-between text-[10px] text-muted-foreground pt-4 border-t pl-[52px]">
+                        <div class="flex items-center space-x-4">
+                            <span v-if="comment.content" class="flex items-center">
+                                <ArrowUpRight class="w-3 h-3 mr-1" />
+                                {{ $t('features.comments.list.on') }}: 
+                                <router-link
+                                    :to="{ name: 'contents.edit', params: { id: comment.content.id } }"
+                                    class="text-primary hover:underline ml-1 font-medium"
                                 >
-                                    {{ comment.status }}
-                                </span>
-                            </div>
-                            <p class="text-xs text-muted-foreground mt-1">
-                                {{ comment.user?.email || comment.email || 'No email' }}
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                {{ formatDate(comment.created_at) }}
-                            </p>
+                                    {{ comment.content.title }}
+                                </router-link>
+                            </span>
+                            <span v-if="comment.parent" class="flex items-center">
+                                <Reply class="w-3 h-3 mr-1" />
+                                {{ $t('features.comments.list.replyTo') }}: <b>{{ comment.parent.user?.name || comment.parent.name || 'Anonymous' }}</b>
+                            </span>
                         </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button
-                            v-if="comment.status === 'pending'"
-                            @click="approveComment(comment)"
-                            class="text-green-600 hover:text-green-800 text-sm font-medium"
-                        >
-                            Approve
-                        </button>
-                        <button
-                            v-if="comment.status === 'pending'"
-                            @click="rejectComment(comment)"
-                            class="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                            Reject
-                        </button>
-                        <button
-                            v-if="comment.status !== 'spam'"
-                            @click="markAsSpam(comment)"
-                            class="text-muted-foreground hover:text-foreground text-sm font-medium"
-                        >
-                            Spam
-                        </button>
-                        <button
-                            @click="deleteComment(comment)"
-                            class="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                            Delete
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Comment Body -->
-                <div class="mb-4">
-                    <p class="text-sm text-foreground whitespace-pre-wrap">{{ comment.body }}</p>
-                </div>
-
-                <!-- Comment Meta -->
-                <div class="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t">
-                    <div class="flex items-center space-x-4">
-                        <span v-if="comment.content">
-                            On: 
-                            <router-link
-                                :to="{ name: 'contents.edit', params: { id: comment.content.id } }"
-                                class="text-indigo-600 hover:text-indigo-800"
-                            >
-                                {{ comment.content.title }}
-                            </router-link>
-                        </span>
-                        <span v-if="comment.parent">
-                            Reply to: {{ comment.parent.user?.name || comment.parent.name || 'Anonymous' }}
-                        </span>
-                    </div>
-                    <div>
-                        <span v-if="comment.replies_count > 0">
-                            {{ comment.replies_count }} {{ comment.replies_count === 1 ? 'reply' : 'replies' }}
-                        </span>
+                        <div class="font-medium">
+                            <span v-if="comment.replies_count > 0">
+                                {{ comment.replies_count }} {{ comment.replies_count === 1 ? 'reply' : 'replies' }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Replies (if any) -->
-                <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 pl-8 border-l-2 border-border">
+                <div v-if="comment.replies && comment.replies.length > 0" class="bg-muted/30 border-t border-border p-6 pl-16 space-y-4">
                     <div
                         v-for="reply in comment.replies"
                         :key="reply.id"
-                        class="mb-4 last:mb-0"
+                        class="relative"
                     >
                         <div class="flex items-start space-x-3">
                             <div class="flex-shrink-0">
-                                <div class="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
-                                    <span class="text-muted-foreground font-medium text-xs">
+                                <div class="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center">
+                                    <span class="text-muted-foreground font-semibold text-[10px]">
                                         {{ ((reply.user?.name || reply.name || 'U')?.charAt(0) || 'U').toUpperCase() }}
                                     </span>
                                 </div>
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <div class="flex items-center space-x-2 mb-1">
-                                    <p class="text-xs font-medium text-foreground">
+                                    <p class="text-xs font-semibold text-foreground">
                                         {{ reply.user?.name || reply.name || 'Anonymous' }}
                                     </p>
-                                    <span
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                    <Badge
+                                        variant="outline"
+                                        class="text-[10px] h-4 px-1"
                                         :class="{
-                                            'bg-yellow-500/20 text-yellow-400': reply.status === 'pending',
-                                            'bg-green-500/20 text-green-400': reply.status === 'approved',
-                                            'bg-red-500/20 text-red-400': reply.status === 'rejected',
+                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': reply.status === 'pending',
+                                            'bg-green-500/10 text-green-500 border-green-500/20': reply.status === 'approved',
+                                            'bg-red-500/10 text-red-500 border-red-500/20': reply.status === 'rejected',
                                         }"
                                     >
                                         {{ reply.status }}
-                                    </span>
+                                    </Badge>
                                 </div>
-                                <p class="text-xs text-foreground whitespace-pre-wrap">{{ reply.body }}</p>
-                                <p class="text-xs text-muted-foreground mt-1">{{ formatDate(reply.created_at) }}</p>
+                                <p class="text-xs text-foreground/80 leading-relaxed">{{ reply.body }}</p>
+                                <p class="text-[10px] text-muted-foreground mt-1">{{ formatDate(reply.created_at) }}</p>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <button
+                            <div class="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
+                                <Button
                                     v-if="reply.status === 'pending'"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="w-6 h-6 text-green-600"
                                     @click="approveComment(reply)"
-                                    class="text-green-600 hover:text-green-800 text-xs"
                                 >
-                                    Approve
-                                </button>
-                                <button
+                                    <Check class="w-3 h-3" />
+                                </Button>
+                                <Button
                                     v-if="reply.status === 'pending'"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="w-6 h-6 text-yellow-600"
                                     @click="rejectComment(reply)"
-                                    class="text-red-600 hover:text-red-800 text-xs"
                                 >
-                                    Reject
-                                </button>
-                                <button
+                                    <X class="w-3 h-3" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="w-6 h-6 text-destructive"
                                     @click="deleteComment(reply)"
-                                    class="text-red-600 hover:text-red-800 text-xs"
                                 >
-                                    Delete
-                                </button>
+                                    <Trash2 class="w-3 h-3" />
+                                </Button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </Card>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.last_page > 1" class="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-                <div class="text-sm text-foreground">
-                    Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} results
+            <Card v-if="pagination && pagination.last_page > 1" class="p-4 flex items-center justify-between">
+                <div class="text-xs text-muted-foreground">
+                    {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
                 </div>
                 <div class="flex space-x-2">
-                    <button
+                    <Button
+                        variant="outline"
+                        size="sm"
                         @click="changePage(pagination.current_page - 1)"
                         :disabled="pagination.current_page === 1"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                     >
-                        Previous
-                    </button>
-                    <button
+                        <ChevronLeft class="w-4 h-4 mr-1" />
+                        {{ $t('common.pagination.previous') }}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
                         @click="changePage(pagination.current_page + 1)"
                         :disabled="pagination.current_page === pagination.last_page"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                     >
-                        Next
-                    </button>
+                        {{ $t('common.pagination.next') }}
+                        <ChevronRight class="w-4 h-4 ml-1" />
+                    </Button>
                 </div>
-            </div>
+            </Card>
         </div>
     </div>
 </template>
@@ -276,6 +334,21 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import { 
+    MessageSquare, Check, X, AlertTriangle, 
+    Trash2, Search, ArrowUpRight, Reply,
+    Clock, ChevronLeft, ChevronRight 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 

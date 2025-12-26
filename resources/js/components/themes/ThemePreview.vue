@@ -3,31 +3,37 @@
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold">Theme Preview</h3>
             <div class="flex items-center gap-2">
-                <select
-                    v-model="selectedDevice"
-                    class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm"
-                >
-                    <option value="desktop">Desktop</option>
-                    <option value="tablet">Tablet</option>
-                    <option value="mobile">Mobile</option>
-                </select>
-                <button
+                <Select v-model="selectedDevice">
+                    <SelectTrigger class="h-8 w-[100px]">
+                        <SelectValue placeholder="Device" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="desktop">Desktop</SelectItem>
+                        <SelectItem value="tablet">Tablet</SelectItem>
+                        <SelectItem value="mobile">Mobile</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button
+                    variant="secondary"
+                    size="icon"
+                    class="h-8 w-8"
                     @click="refreshPreview"
-                    class="px-3 py-1 bg-secondary hover:bg-muted rounded-md text-sm"
                     title="Refresh preview"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-8 w-8"
                     @click="$emit('close')"
-                    class="px-3 py-1 text-muted-foreground hover:text-foreground"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -54,6 +60,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import Button from '../ui/button.vue';
+import Select from '../ui/select.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
 
 const props = defineProps({
     theme: {
@@ -220,10 +232,11 @@ onMounted(() => {
 <style scoped>
 .theme-preview-container {
     position: relative;
-    background-color: white;
-    border-radius: 0.5rem;
+    background-color: hsl(var(--card));
+    border-radius: var(--radius);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
+    border: 1px solid hsl(var(--border));
 }
 
 iframe {

@@ -1,103 +1,103 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">
-                        {{ redirect ? $t('features.redirects.modals.redirect.titleEdit') : $t('features.redirects.modals.redirect.titleCreate') }}
-                    </h3>
-                    <button
-                        @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ redirect ? $t('features.redirects.modals.redirect.titleEdit') : $t('features.redirects.modals.redirect.titleCreate') }}
+                </DialogTitle>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="space-y-4 py-4">
+                <div class="space-y-2">
+                    <Label>
+                        {{ $t('features.redirects.modals.redirect.from') }} <span class="text-destructive">*</span>
+                    </Label>
+                    <Input
+                        v-model="form.from_url"
+                        required
+                        :placeholder="$t('features.redirects.modals.redirect.fromPlaceholder')"
+                    />
+                    <p class="text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.fromHint') }}</p>
                 </div>
 
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.redirects.modals.redirect.from') }} <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.from_url"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="$t('features.redirects.modals.redirect.fromPlaceholder')"
-                        >
-                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.fromHint') }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.redirects.modals.redirect.to') }} <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.to_url"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="$t('features.redirects.modals.redirect.toPlaceholder')"
-                        >
-                        <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.toHint') }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ $t('features.redirects.modals.redirect.code') }} <span class="text-red-500">*</span>
-                        </label>
-                        <select
-                            v-model.number="form.status_code"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option :value="301">{{ $t('features.redirects.modals.redirect.codes.p301') }}</option>
-                            <option :value="302">{{ $t('features.redirects.modals.redirect.codes.t302') }}</option>
-                            <option :value="307">{{ $t('features.redirects.modals.redirect.codes.t307') }}</option>
-                            <option :value="308">{{ $t('features.redirects.modals.redirect.codes.p308') }}</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input
-                            v-model="form.is_active"
-                            type="checkbox"
-                            id="is_active"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                        >
-                        <label for="is_active" class="ml-2 block text-sm text-foreground">
-                            {{ $t('features.redirects.modals.redirect.active') }}
-                        </label>
-                    </div>
-                </form>
-
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
-                        @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                    >
-                        {{ $t('common.actions.cancel') }}
-                    </button>
-                    <button
-                        @click="handleSubmit"
-                        :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                    >
-                        {{ saving ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
-                    </button>
+                <div class="space-y-2">
+                    <Label>
+                        {{ $t('features.redirects.modals.redirect.to') }} <span class="text-destructive">*</span>
+                    </Label>
+                    <Input
+                        v-model="form.to_url"
+                        required
+                        :placeholder="$t('features.redirects.modals.redirect.toPlaceholder')"
+                    />
+                    <p class="text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.toHint') }}</p>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <div class="space-y-2">
+                    <Label>
+                        {{ $t('features.redirects.modals.redirect.code') }} <span class="text-destructive">*</span>
+                    </Label>
+                    <Select v-model="form.status_code">
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="301">{{ $t('features.redirects.modals.redirect.codes.p301') }}</SelectItem>
+                            <SelectItem :value="302">{{ $t('features.redirects.modals.redirect.codes.t302') }}</SelectItem>
+                            <SelectItem :value="307">{{ $t('features.redirects.modals.redirect.codes.t307') }}</SelectItem>
+                            <SelectItem :value="308">{{ $t('features.redirects.modals.redirect.codes.p308') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                        v-model:checked="form.is_active"
+                        id="is_active"
+                    />
+                    <Label for="is_active" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {{ $t('features.redirects.modals.redirect.active') }}
+                    </Label>
+                </div>
+            </form>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                >
+                    {{ $t('common.actions.cancel') }}
+                </Button>
+                <Button
+                    @click="handleSubmit"
+                    :disabled="saving"
+                >
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ saving ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Label from '../ui/label.vue';
+import Checkbox from '../ui/checkbox.vue';
+import Select from '../ui/select.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const props = defineProps({
     redirect: {

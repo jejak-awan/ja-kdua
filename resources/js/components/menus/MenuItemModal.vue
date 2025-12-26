@@ -1,73 +1,119 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ item ? t('features.menus.form.editItemTitle') : t('features.menus.form.createItemTitle') }}</h3>
-                    <button @click="$emit('close')" class="text-muted-foreground hover:text-muted-foreground">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-[500px]">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ item ? t('features.menus.form.editItemTitle') : t('features.menus.form.createItemTitle') }}
+                </DialogTitle>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+                <div class="space-y-2">
+                    <Label>{{ t('features.menus.form.label') }} <span class="text-red-500">*</span></Label>
+                    <Input v-model="form.label" type="text" required />
                 </div>
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.label') }} <span class="text-red-500">*</span></label>
-                        <input v-model="form.label" type="text" required class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.type') }} <span class="text-red-500">*</span></label>
-                        <select v-model="form.type" required @change="handleTypeChange" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="link">{{ t('features.menus.form.types.link') }}</option>
-                            <option value="page">{{ t('features.menus.form.types.page') }}</option>
-                            <option value="category">{{ t('features.menus.form.types.category') }}</option>
-                            <option value="content">{{ t('features.menus.form.types.content') }}</option>
-                        </select>
-                    </div>
-                    <div v-if="form.type === 'link'">
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.url') }} <span class="text-red-500">*</span></label>
-                        <input v-model="form.url" type="url" required class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div v-else-if="form.type === 'page'">
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.page') }}</label>
-                        <select v-model="form.target_id" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option :value="null">{{ t('features.menus.form.placeholders.selectPage') }}</option>
-                        </select>
-                    </div>
-                    <div v-else-if="form.type === 'category'">
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.category') }}</label>
-                        <select v-model="form.target_id" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option :value="null">{{ t('features.menus.form.placeholders.selectCategory') }}</option>
-                        </select>
-                    </div>
-                    <div v-else-if="form.type === 'content'">
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.content') }}</label>
-                        <select v-model="form.target_id" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option :value="null">{{ t('features.menus.form.placeholders.selectContent') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.menus.form.cssClasses') }}</label>
-                        <input v-model="form.css_classes" type="text" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div class="flex items-center">
-                        <input v-model="form.open_in_new_tab" type="checkbox" id="new_tab" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded">
-                        <label for="new_tab" class="ml-2 block text-sm text-foreground">{{ t('features.menus.form.openInNewTab') }}</label>
-                    </div>
-                </form>
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button @click="$emit('close')" class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted">{{ t('features.menus.actions.cancel') }}</button>
-                    <button @click="handleSubmit" :disabled="saving" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50">{{ saving ? t('features.menus.actions.saving') : (item ? t('features.menus.actions.update') : t('features.menus.actions.createAction')) }}</button>
+
+                <div class="space-y-2">
+                    <Label>{{ t('features.menus.form.type') }} <span class="text-red-500">*</span></Label>
+                    <Select v-model="form.type" @update:modelValue="handleTypeChange">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.menus.form.type')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="link">{{ t('features.menus.form.types.link') }}</SelectItem>
+                            <SelectItem value="page">{{ t('features.menus.form.types.page') }}</SelectItem>
+                            <SelectItem value="category">{{ t('features.menus.form.types.category') }}</SelectItem>
+                            <SelectItem value="content">{{ t('features.menus.form.types.content') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <div v-if="form.type === 'link'" class="space-y-2">
+                    <Label>{{ t('features.menus.form.url') }} <span class="text-red-500">*</span></Label>
+                    <Input v-model="form.url" type="url" required />
+                </div>
+
+                <div v-else-if="form.type === 'page'" class="space-y-2">
+                    <Label>{{ t('features.menus.form.page') }}</Label>
+                    <Select v-model="form.target_id">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.menus.form.placeholders.selectPage')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectPage') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div v-else-if="form.type === 'category'" class="space-y-2">
+                    <Label>{{ t('features.menus.form.category') }}</Label>
+                    <Select v-model="form.target_id">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.menus.form.placeholders.selectCategory')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectCategory') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div v-else-if="form.type === 'content'" class="space-y-2">
+                    <Label>{{ t('features.menus.form.content') }}</Label>
+                    <Select v-model="form.target_id">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.menus.form.placeholders.selectContent')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectContent') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div class="space-y-2">
+                    <Label>{{ t('features.menus.form.cssClasses') }}</Label>
+                    <Input v-model="form.css_classes" type="text" />
+                </div>
+
+                <div class="flex items-center space-x-2 pt-2">
+                    <Checkbox id="new_tab" v-model:checked="form.open_in_new_tab" />
+                    <Label for="new_tab" class="text-sm font-normal cursor-pointer">
+                        {{ t('features.menus.form.openInNewTab') }}
+                    </Label>
+                </div>
+            </form>
+
+            <DialogFooter>
+                <Button variant="outline" @click="$emit('close')">
+                    {{ t('features.menus.actions.cancel') }}
+                </Button>
+                <Button @click="handleSubmit" :disabled="saving">
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ saving ? t('features.menus.actions.saving') : (item ? t('features.menus.actions.update') : t('features.menus.actions.createAction')) }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Label from '../ui/label.vue';
+import Checkbox from '../ui/checkbox.vue';
+import Select from '../ui/select.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

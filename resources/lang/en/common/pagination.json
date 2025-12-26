@@ -6,5 +6,8 @@
     "total": "Total",
     "first": "First",
     "last": "Last",
-    "noData": "No data"
+    "noData": "No data",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page"
 }

@@ -22,11 +22,11 @@
       </div>
 
       <!-- Command Execution Card -->
-      <div class="bg-card border border-border rounded-lg overflow-hidden">
-        <div class="p-6 border-b border-border">
-          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.execute') }}</h3>
-        </div>
-        <div class="p-6 space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle class="text-lg font-semibold">{{ $t('features.command_runner.execute') }}</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2 space-y-2">
               <Label>{{ $t('features.command_runner.select_command') }}</Label>
@@ -73,13 +73,13 @@
               {{ $t('features.command_runner.clear') }}
             </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <!-- Output Card -->
-      <div class="bg-card border border-border rounded-lg overflow-hidden" v-if="output || executing">
-        <div class="p-6 border-b border-border flex items-center justify-between">
-          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.output') }}</h3>
+      <Card v-if="output || executing">
+        <CardHeader class="flex flex-row items-center justify-between space-y-0">
+          <CardTitle class="text-lg font-semibold">{{ $t('features.command_runner.output') }}</CardTitle>
           <div class="flex items-center gap-2">
             <Badge v-if="exitCode !== null" :variant="exitCode === 0 ? 'success' : 'destructive'">
               Exit Code: {{ exitCode }}
@@ -88,47 +88,68 @@
               {{ executionTime }}ms
             </span>
           </div>
-        </div>
-        <div class="bg-black text-green-400 p-6 font-mono text-sm overflow-auto max-h-[500px]">
-          <div v-if="executing" class="flex items-center gap-2">
-            <Loader2 class="w-4 h-4 animate-spin" />
-            <span>{{ $t('features.command_runner.executing') }}</span>
+        </CardHeader>
+        <CardContent class="p-0">
+          <div class="bg-black text-green-400 p-6 font-mono text-sm overflow-auto max-h-[500px]">
+            <div v-if="executing" class="flex items-center gap-2">
+              <Loader2 class="w-4 h-4 animate-spin" />
+              <span>{{ $t('features.command_runner.executing') }}</span>
+            </div>
+            <pre v-else class="whitespace-pre-wrap break-words">{{ output }}</pre>
           </div>
-          <pre v-else class="whitespace-pre-wrap break-words">{{ output }}</pre>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <!-- Command History Card -->
-      <div class="bg-card border border-border rounded-lg overflow-hidden">
-        <div class="p-6 border-b border-border">
-          <h3 class="text-lg font-semibold">{{ $t('features.command_runner.history') }}</h3>
-        </div>
-        <div class="p-6">
-          <div v-if="history.length === 0" class="text-center py-8 text-muted-foreground">
+      <Card>
+        <CardHeader>
+          <CardTitle class="text-lg font-semibold">{{ $t('features.command_runner.history') }}</CardTitle>
+        </CardHeader>
+        <CardContent class="p-0">
+          <div v-if="historyLoading" class="p-8 text-center">
+            <Loader2 class="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
+          </div>
+          <div v-else-if="history.length === 0" class="p-8 text-center text-muted-foreground">
             {{ $t('features.command_runner.no_history') }}
           </div>
-          <div v-else class="space-y-2">
-            <div 
-              v-for="(item, index) in history" 
-              :key="index"
-              class="p-3 border border-border rounded hover:bg-muted cursor-pointer transition-colors"
-              @click="loadFromHistory(item)"
-            >
-              <div class="flex items-center justify-between">
-                <code class="text-sm bg-muted-foreground/10 px-2 py-1 rounded">{{ item.command }}</code>
-                <div class="flex items-center gap-2">
-                  <Badge size="sm" :variant="item.exitCode === 0 ? 'success' : 'destructive'">
-                    {{ item.exitCode }}
+          <Table v-else>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{{ $t('features.command_runner.table.command') }}</TableHead>
+                <TableHead>{{ $t('features.command_runner.table.parameters') }}</TableHead>
+                <TableHead>{{ $t('features.command_runner.table.runner') }}</TableHead>
+                <TableHead>{{ $t('features.command_runner.table.status') }}</TableHead>
+                <TableHead>{{ $t('features.command_runner.table.date') }}</TableHead>
+                <TableHead class="text-right">{{ $t('common.actions.title') }}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="item in history" :key="item.id">
+                <TableCell class="font-medium">{{ item.command }}</TableCell>
+                <TableCell>
+                  <code class="text-xs bg-muted px-1 py-0.5 rounded" v-if="item.parameters">{{ item.parameters }}</code>
+                  <span v-else class="text-muted-foreground italic">-</span>
+                </TableCell>
+                <TableCell>{{ item.user?.name || 'Unknown' }}</TableCell>
+                <TableCell>
+                  <Badge :variant="item.exit_code === 0 ? 'success' : 'destructive'">
+                    {{ item.exit_code === 0 ? $t('common.status.success') : $t('common.status.failed') }}
                   </Badge>
-                  <span class="text-xs text-muted-foreground">
-                    {{ formatDate(item.timestamp) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                </TableCell>
+                <TableCell class="text-sm text-muted-foreground">
+                  {{ formatDate(item.created_at) }}
+                </TableCell>
+                <TableCell class="text-right">
+                  <Button variant="ghost" size="sm" @click="viewHistoryOutput(item)">
+                    <Eye class="w-4 h-4 mr-2" />
+                    {{ $t('common.actions.view') }}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </template>
   </div>
 </template>
@@ -150,8 +171,14 @@ import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
+import Table from '@/components/ui/table.vue';
+import TableHeader from '@/components/ui/table-header.vue';
+import TableBody from '@/components/ui/table-body.vue';
+import TableRow from '@/components/ui/table-row.vue';
+import TableCell from '@/components/ui/table-cell.vue';
+import TableHead from '@/components/ui/table-head.vue';
 
-import { Play, X, Loader2, AlertCircle } from 'lucide-vue-next';
+import { Play, X, Loader2, AlertCircle, Eye } from 'lucide-vue-next';
 
 const router = useRouter();
 const { t } = useI18n();

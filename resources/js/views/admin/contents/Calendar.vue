@@ -1,62 +1,77 @@
 <template>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">Content Calendar</h1>
-            <div class="flex items-center space-x-3">
-                <select
-                    v-model="statusFilter"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                    <option value="">All Status</option>
-                    <option value="draft">Draft</option>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="published">Published</option>
-                </select>
-                <select
-                    v-model="categoryFilter"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                    <option value="">All Categories</option>
-                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                        {{ cat.name }}
-                    </option>
-                </select>
-                <router-link
-                    :to="{ name: 'contents.create' }"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
-                >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    New Content
-                </router-link>
+    <div class="max-w-6xl mx-auto pb-10">
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.calendar') || 'Content Calendar' }}</h1>
+            <div class="flex flex-wrap items-center gap-3">
+                <Select v-model="statusFilter">
+                    <SelectTrigger class="w-[140px] bg-background/50">
+                        <SelectValue :placeholder="$t('features.comments.filter.allStatus')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.comments.filter.allStatus') }}</SelectItem>
+                        <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
+                        <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select v-model="categoryFilter">
+                    <SelectTrigger class="w-[180px] bg-background/50">
+                        <SelectValue :placeholder="$t('features.content.form.selectCategory')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.content.form.selectCategory') }}</SelectItem>
+                        <SelectItem v-for="cat in categories" :key="cat.id" :value="cat.id.toString()">
+                            {{ cat.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+                
+                <Button asChild class="shadow-lg shadow-primary/20">
+                    <router-link :to="{ name: 'contents.create' }">
+                        <Plus class="w-4 h-4 mr-2" />
+                        {{ $t('features.content.list.createNew') }}
+                    </router-link>
+                </Button>
             </div>
         </div>
 
-        <div class="bg-card border border-border rounded-lg p-4">
-            <FullCalendar
-                ref="calendar"
-                :options="calendarOptions"
-            />
-        </div>
+        <Card class="border-none shadow-sm p-6 bg-card/50 overflow-hidden">
+            <div class="calendar-modern-container">
+                <FullCalendar
+                    ref="calendar"
+                    :options="calendarOptions"
+                />
+            </div>
+        </Card>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Card from '@/components/ui/card.vue';
+import Button from '@/components/ui/button.vue';
+import Select from '@/components/ui/select.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
+import { Plus } from 'lucide-vue-next';
 
+const { t } = useI18n();
 const router = useRouter();
 const calendar = ref(null);
 const contents = ref([]);
 const categories = ref([]);
-const statusFilter = ref('');
-const categoryFilter = ref('');
+const statusFilter = ref('all');
+const categoryFilter = ref('all');
 
 const calendarOptions = computed(() => ({
     plugins: [dayGridPlugin, interactionPlugin],
@@ -79,8 +94,8 @@ const calendarOptions = computed(() => ({
 const calendarEvents = computed(() => {
     return contents.value
         .filter(content => {
-            if (statusFilter.value && content.status !== statusFilter.value) return false;
-            if (categoryFilter.value && content.category_id != categoryFilter.value) return false;
+            if (statusFilter.value && statusFilter.value !== 'all' && content.status !== statusFilter.value) return false;
+            if (categoryFilter.value && categoryFilter.value !== 'all' && content.category_id != categoryFilter.value) return false;
             return true;
         })
         .map(content => ({
@@ -192,34 +207,90 @@ onMounted(() => {
 </script>
 
 <style>
-/* FullCalendar styles are imported via JavaScript */
+/* FullCalendar styles */
+.calendar-modern-container {
+    --fc-border-color: hsl(var(--border) / 0.4);
+    --fc-button-bg-color: transparent;
+    --fc-button-border-color: hsl(var(--border));
+    --fc-button-text-color: hsl(var(--foreground));
+    --fc-button-hover-bg-color: hsl(var(--muted));
+    --fc-button-hover-border-color: hsl(var(--border));
+    --fc-button-active-bg-color: hsl(var(--accent));
+    --fc-button-active-border-color: hsl(var(--border));
+    --fc-today-bg-color: hsl(var(--primary) / 0.05);
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.025em;
+}
+
+.fc .fc-button {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    text-transform: capitalize !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.fc .fc-button-primary:not(:disabled):active, 
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: hsl(var(--primary)) !important;
+    border-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+}
+
+.fc .fc-daygrid-day-number {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 8px !important;
+    opacity: 0.6;
+}
+
+.fc .fc-col-header-cell-cushion {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 12px !important;
+    color: hsl(var(--muted-foreground)) !important;
+}
 
 .fc-event-title-container {
-    padding: 2px 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
 .fc-event-title {
-    font-weight: 600;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1.1;
 }
 
 .fc-event-category {
-    font-size: 0.75rem;
+    font-size: 10px;
     opacity: 0.8;
     margin-top: 2px;
+    font-weight: 500;
 }
 
-.fc-event.status-draft {
-    opacity: 0.7;
+.fc-v-event {
+    border: none !important;
+    background: transparent !important;
 }
 
-.fc-event.status-scheduled {
-    border-width: 2px;
+.fc-daygrid-event {
+    border-radius: 6px !important;
+    margin: 2px 4px !important;
+    transition: transform 0.2s ease !important;
+    border: none !important;
 }
 
-.fc-event.status-published {
-    font-weight: 600;
+.fc-daygrid-event:hover {
+    transform: translateY(-1px) !important;
+    filter: brightness(1.1) !important;
 }
 </style>
 

@@ -6,7 +6,9 @@
         "createNew": "Create New Content",
         "templates": "Templates",
         "bulkActions": "Bulk Actions",
-        "selected": "{count} selected"
+        "selected": "{count} selected",
+        "description": "Manage your content, blog posts, and pages",
+        "revisions": "Revisions"
     },
     "form": {
         "title": "Content Title",
@@ -75,7 +77,8 @@
         "schedule": "Schedule",
         "saveDraft": "Save as Draft",
         "unpublish": "Unpublish",
-        "moveToTrash": "Move to Trash"
+        "moveToTrash": "Move to Trash",
+        "duplicate": "Duplicate"
     },
     "tabs": {
         "content": "Content",

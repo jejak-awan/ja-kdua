@@ -1,160 +1,177 @@
 <template>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">Content Revisions</h1>
-                <p class="text-sm text-muted-foreground mt-1">{{ contentTitle }}</p>
+    <div class="max-w-6xl mx-auto pb-10">
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.revisions') }}</h1>
+                <p class="text-sm text-muted-foreground flex items-center gap-2">
+                    <FileText class="w-4 h-4" />
+                    {{ contentTitle }}
+                </p>
             </div>
-            <router-link
-                :to="{ name: 'contents.edit', params: { id: contentId } }"
-                class="text-muted-foreground hover:text-foreground"
-            >
-                ← Back to Content
-            </router-link>
+            <Button variant="ghost" asChild class="w-fit">
+                <router-link :to="{ name: 'contents.edit', params: { id: contentId } }">
+                    <ArrowLeft class="w-4 h-4 mr-2" />
+                    {{ $t('features.content.form.back') }}
+                </router-link>
+            </Button>
         </div>
 
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">Loading revisions...</p>
+        <div v-if="loading" class="flex flex-col items-center justify-center py-20 bg-card/30 border border-border/40 rounded-xl space-y-4">
+            <Loader2 class="w-10 h-10 animate-spin opacity-20" />
+            <p class="text-sm font-medium animate-pulse text-muted-foreground">Loading revisions...</p>
         </div>
 
-        <div v-else-if="revisions.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="mt-4 text-muted-foreground">No revisions found</p>
+        <div v-else-if="revisions.length === 0" class="flex flex-col items-center justify-center py-20 bg-card/30 border border-border/40 rounded-xl space-y-4 text-center">
+            <div class="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center">
+                <History class="w-8 h-8 text-muted-foreground/50" />
+            </div>
+            <div class="space-y-1">
+                <p class="text-lg font-semibold text-foreground">No revisions found</p>
+                <p class="text-sm text-muted-foreground">This content hasn't been modified yet.</p>
+            </div>
         </div>
 
-        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Version
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Author
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Date
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Changes
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="revision in revisions" :key="revision.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <span
+        <Card v-else class="border-none shadow-sm overflow-hidden bg-card/50">
+            <Table>
+                <TableHeader>
+                    <TableRow class="bg-muted/30 hover:bg-muted/30 border-b border-border/40">
+                        <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Version</TableHead>
+                        <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Author</TableHead>
+                        <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</TableHead>
+                        <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Changes</TableHead>
+                        <TableHead class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-for="revision in revisions" :key="revision.id" class="group hover:bg-muted/30 transition-colors border-b border-border/40">
+                        <TableCell class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <Badge
                                     v-if="revision.is_current"
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500/20 text-green-400 mr-2"
+                                    variant="outline"
+                                    class="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0.5"
                                 >
                                     Current
-                                </span>
-                                <div class="text-sm font-medium text-foreground">v{{ revision.version }}</div>
+                                </Badge>
+                                <span class="text-sm font-mono font-bold text-foreground">v{{ revision.version }}</span>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-foreground">{{ revision.author?.name || 'System' }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-muted-foreground">{{ formatDate(revision.created_at) }}</div>
-                            <div class="text-xs text-muted-foreground">{{ formatTime(revision.created_at) }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-muted-foreground">
+                        </TableCell>
+                        <TableCell class="px-6 py-4">
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="text-foreground/80 font-medium">{{ revision.author?.name || 'System' }}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell class="px-6 py-4">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-sm text-foreground/80">{{ formatDate(revision.created_at) }}</span>
+                                <span class="text-[11px] text-muted-foreground font-mono uppercase">{{ formatTime(revision.created_at) }}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell class="px-6 py-4">
+                            <p class="text-sm text-muted-foreground line-clamp-1 italic">
                                 {{ revision.changes_summary || 'No changes summary' }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button
+                            </p>
+                        </TableCell>
+                        <TableCell class="px-6 py-4 text-right">
+                            <div class="flex justify-end items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-primary hover:bg-primary/10"
                                     @click="viewRevision(revision)"
-                                    class="text-indigo-600 hover:text-indigo-900"
                                 >
+                                    <Eye class="w-4 h-4 mr-2" />
                                     View
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     v-if="!revision.is_current"
+                                    variant="outline"
+                                    size="sm"
+                                    class="text-emerald-600 hover:bg-emerald-500/10 border-emerald-500/20"
                                     @click="restoreRevision(revision)"
-                                    class="text-green-600 hover:text-green-900"
                                 >
+                                    <RotateCcw class="w-4 h-4 mr-2" />
                                     Restore
-                                </button>
+                                </Button>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </Card>
 
         <!-- Revision Detail Modal -->
         <div
             v-if="viewingRevision"
-            class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in transition-all duration-300"
             @click.self="viewingRevision = null"
         >
-            <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="flex items-center justify-between p-6 border-b sticky top-0 bg-card">
-                        <h3 class="text-lg font-semibold">
-                            Revision v{{ viewingRevision.version }}
-                        </h3>
-                        <button
+            <Card class="max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                <CardHeader class="border-b border-border/40 sticky top-0 bg-card/95 backdrop-blur-sm z-10">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <CardTitle class="text-xl font-bold flex items-center gap-2">
+                                <History class="w-5 h-5 text-primary" />
+                                Revision v{{ viewingRevision.version }}
+                            </CardTitle>
+                            <p class="text-xs text-muted-foreground">{{ formatDate(viewingRevision.created_at) }} at {{ formatTime(viewingRevision.created_at) }}</p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             @click="viewingRevision = null"
-                            class="text-muted-foreground hover:text-muted-foreground"
                         >
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                            <X class="w-5 h-5" />
+                        </Button>
                     </div>
-                    <div class="p-6">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-1">Title</label>
-                                <div class="text-sm text-foreground">{{ viewingRevision.data?.title || '-' }}</div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-1">Content</label>
-                                <div
-                                    class="text-sm text-foreground prose max-w-none"
-                                    v-html="viewingRevision.data?.content || '-'"
-                                />
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
+                </CardHeader>
+                <CardContent class="p-0 overflow-y-auto max-h-[calc(90vh-140px)]">
+                    <div class="p-8 space-y-8">
+                        <div class="space-y-2">
+                            <Label class="text-xs font-bold uppercase tracking-widest text-muted-foreground">Title</Label>
+                            <div class="text-2xl font-bold text-foreground">{{ viewingRevision.data?.title || '-' }}</div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <Label class="text-xs font-bold uppercase tracking-widest text-muted-foreground">Body Content</Label>
+                            <div
+                                class="p-6 rounded-xl bg-muted/30 border border-border/40 text-sm prose dark:prose-invert max-w-none"
+                                v-html="viewingRevision.data?.content || '-'"
+                            />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <Label class="text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</Label>
                                 <div>
-                                    <label class="block text-sm font-medium text-foreground mb-1">Status</label>
-                                    <div class="text-sm text-foreground">{{ viewingRevision.data?.status || '-' }}</div>
+                                    <Badge variant="outline" class="capitalize">{{ viewingRevision.data?.status || '-' }}</Badge>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-foreground mb-1">Type</label>
-                                    <div class="text-sm text-foreground">{{ viewingRevision.data?.type || '-' }}</div>
-                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <Label class="text-xs font-bold uppercase tracking-widest text-muted-foreground">Type</Label>
+                                <div class="text-sm font-medium capitalize">{{ viewingRevision.data?.type || '-' }}</div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-end space-x-3 p-6 border-t sticky bottom-0 bg-card">
-                        <button
-                            @click="viewingRevision = null"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                        >
-                            Close
-                        </button>
-                        <button
-                            v-if="!viewingRevision.is_current"
-                            @click="restoreRevision(viewingRevision)"
-                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                        >
-                            Restore This Revision
-                        </button>
-                    </div>
+                </CardContent>
+                <div class="p-4 border-t border-border/40 flex items-center justify-end gap-3 sticky bottom-0 bg-card/95 backdrop-blur-sm z-10">
+                    <Button
+                        variant="ghost"
+                        @click="viewingRevision = null"
+                    >
+                        Close
+                    </Button>
+                    <Button
+                        v-if="!viewingRevision.is_current"
+                        variant="default"
+                        class="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20 shadow-lg px-6"
+                        @click="restoreRevision(viewingRevision)"
+                    >
+                        <RotateCcw class="w-4 h-4 mr-2" />
+                        Restore This Version
+                    </Button>
                 </div>
-            </div>
+            </Card>
         </div>
     </div>
 </template>
@@ -162,8 +179,32 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardTitle from '@/components/ui/card-title.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import Button from '@/components/ui/button.vue';
+import Badge from '@/components/ui/badge.vue';
+import Label from '@/components/ui/label.vue';
+import Table from '@/components/ui/table.vue';
+import TableBody from '@/components/ui/table-body.vue';
+import TableCell from '@/components/ui/table-cell.vue';
+import TableHead from '@/components/ui/table-head.vue';
+import TableHeader from '@/components/ui/table-header.vue';
+import TableRow from '@/components/ui/table-row.vue';
+import { 
+    ArrowLeft, 
+    History, 
+    Loader2, 
+    Eye, 
+    RotateCcw, 
+    X,
+    FileText
+} from 'lucide-vue-next';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const contentId = route.params.id;

@@ -6,6 +6,7 @@
         "published": "published",
         "mediaFiles": "Media Files",
         "totalUsers": "Total Users",
+        "activeUsers": "Active users",
         "pendingContent": "Pending Content",
         "requiresReview": "Requires review"
     },
@@ -49,6 +50,7 @@
         },
         "recentActivity": {
             "title": "Recent Activity",
+            "description": "Latest system activities",
             "live": "Live",
             "loading": "Loading activities...",
             "empty": "No recent activity found",

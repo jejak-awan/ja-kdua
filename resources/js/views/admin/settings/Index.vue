@@ -100,20 +100,19 @@
 
                     <!-- Actions -->
                     <div class="flex justify-end space-x-4 pt-6 border-t">
-                        <button
+                        <Button
                             type="button"
+                            variant="outline"
                             @click="resetForm"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                         >
                             {{ $t('features.settings.reset') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
                             :disabled="saving"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ saving ? $t('features.settings.saving') : $t('features.settings.save') }}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>
@@ -131,6 +130,7 @@ import { parseResponse, parseSingleResponse, ensureArray } from '../../../utils/
 import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
+import Button from '../../../components/ui/button.vue';
 
 // Import tab components
 import GeneralTab from './tabs/GeneralTab.vue';

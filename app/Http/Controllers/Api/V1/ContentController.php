@@ -83,13 +83,13 @@ class ContentController extends BaseApiController
             $query->where('category_id', $request->category_id);
         }
 
-        // For calendar view, return all without pagination
-        if ($request->has('per_page') && $request->per_page > 100) {
-            $contents = $query->latest()->get();
-            return $this->success($contents, 'Contents retrieved successfully');
+        // Create a limit for per_page to prevent abuse, e.g., max 100
+        $perPage = (int) $request->input('per_page', 12);
+        if ($perPage <= 0 || $perPage > 100) {
+            $perPage = 12;
         }
 
-        $contents = $query->latest()->paginate(12);
+        $contents = $query->latest()->paginate($perPage);
 
         return $this->paginated($contents, 'Contents retrieved successfully');
     }

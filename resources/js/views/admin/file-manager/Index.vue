@@ -3,33 +3,34 @@
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.file_manager.title') }}</h1>
             <div class="flex items-center space-x-2">
-                <button
-                    @click="showHelp = !showHelp"
-                    class="inline-flex items-center px-3 py-2 border border-input text-sm font-medium rounded-md text-muted-foreground bg-card hover:bg-muted"
-                    :title="$t('features.file_manager.help.toggle')"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-                <button
+                <Button
+                    variant="outline"
                     @click="showCreateFolderModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted"
                 >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                     </svg>
                     {{ $t('features.file_manager.actions.newFolder') }}
-                </button>
-                <button
+                </Button>
+                <Button
                     @click="showUploadModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    {{ $t('features.file_manager.actions.uploadFiles') }}
-                </button>
+                    {{ $t('features.file_manager.actions.upload') }}
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    @click="showHelp = !showHelp"
+                    :class="showHelp ? 'text-primary' : 'text-muted-foreground'"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.443.1.201.201.3.411.332.617L13 19h-2v-4a1 1 0 011-1 1 1 0 100-2 1.637 1.637 0 011-1.637C13 10.328 11.66 9.1 10.114 9.1c-1.164 0-2.146.685-2.5 1.5l1.614 1.068C9.328 11.535 9.1 11.1 9c1.068-1.5 2.5-2.1 2.5-2.1z" />
+                        <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+                    </svg>
+                </Button>
             </div>
         </div>
 
@@ -143,87 +144,98 @@
         <!-- Search, Filter, Sort Toolbar -->
         <div class="mb-4 flex flex-wrap gap-3 items-center">
             <!-- Search -->
-            <div class="flex-1 min-w-[200px]">
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        :placeholder="$t('features.file_manager.search.placeholder')"
-                        class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
+            <div class="flex-1 max-w-md">
+                <Input
+                    v-model="searchQuery"
+                    type="text"
+                    :placeholder="$t('features.file_manager.actions.search')"
+                />
+            </div>
+            <div class="flex items-center space-x-3">
+                <Select v-model="filterType">
+                    <SelectTrigger class="w-[140px]">
+                        <SelectValue :placeholder="$t('features.file_manager.filter.all')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.file_manager.filter.all') }}</SelectItem>
+                        <SelectItem value="image">{{ $t('features.file_manager.filter.images') }}</SelectItem>
+                        <SelectItem value="video">{{ $t('features.file_manager.filter.videos') }}</SelectItem>
+                        <SelectItem value="pdf">{{ $t('features.file_manager.filter.documents') }}</SelectItem>
+                        <SelectItem value="other">{{ $t('features.file_manager.filter.other') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select v-model="sortBy">
+                    <SelectTrigger class="w-[140px]">
+                        <SelectValue :placeholder="$t('features.file_manager.sort.name')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="name">{{ $t('features.file_manager.sort.name') }}</SelectItem>
+                        <SelectItem value="size">{{ $t('features.file_manager.sort.size') }}</SelectItem>
+                        <SelectItem value="date">{{ $t('features.file_manager.sort.date') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <div class="flex p-1 border border-input rounded-md bg-card">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        @click="viewMode = 'grid'"
+                        :class="[
+                            'w-8 h-8 p-0',
+                            viewMode === 'grid' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
+                        ]"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        @click="viewMode = 'list'"
+                        :class="[
+                            'w-8 h-8 p-0',
+                            viewMode === 'list' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
+                        ]"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </Button>
                 </div>
             </div>
-
-            <!-- Filter -->
-            <select
-                v-model="filterType"
-                class="px-4 py-2 border border-input rounded-md bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-                <option value="all">{{ $t('features.file_manager.filter.all') }}</option>
-                <option value="images">{{ $t('features.file_manager.filter.images') }}</option>
-                <option value="documents">{{ $t('features.file_manager.filter.documents') }}</option>
-                <option value="videos">{{ $t('features.file_manager.filter.videos') }}</option>
-                <option value="audio">{{ $t('features.file_manager.filter.audio') }}</option>
-                <option value="archives">{{ $t('features.file_manager.filter.archives') }}</option>
-            </select>
-
-            <!-- Sort -->
-            <select
-                v-model="sortBy"
-                class="px-4 py-2 border border-input rounded-md bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-                <option value="name">{{ $t('features.file_manager.sort.name') }}</option>
-                <option value="size">{{ $t('features.file_manager.sort.size') }}</option>
-                <option value="date">{{ $t('features.file_manager.sort.date') }}</option>
-            </select>
-
-            <!-- Sort Direction -->
-            <button
-                @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
-                class="px-3 py-2 border border-input rounded-md bg-card text-foreground hover:bg-muted"
-                :title="sortDirection === 'asc' ? $t('features.file_manager.sort.asc') : $t('features.file_manager.sort.desc')"
-            >
-                <svg v-if="sortDirection === 'asc'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                </svg>
-                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                </svg>
-            </button>
         </div>
 
         <!-- Bulk Actions Toolbar -->
         <div v-if="selectedItems.length > 0" class="mb-4 bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <span class="text-sm font-medium text-foreground">
-                    {{ $tc('features.file_manager.bulk.selected', selectedItems.length, { count: selectedItems.length }) }}
-                </span>
-                <button
-                    @click="selectAllInPage"
-                    class="text-sm text-primary hover:underline"
-                >
-                    {{ $t('features.file_manager.bulk.selectAll') }}
-                </button>
-                <button
-                    @click="clearSelection"
-                    class="text-sm text-muted-foreground hover:underline"
-                >
-                    {{ $t('features.file_manager.bulk.clearSelection') }}
-                </button>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button
-                    @click="bulkDelete"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-destructive hover:bg-destructive/90"
-                >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    {{ $t('features.file_manager.bulk.deleteSelected') }}
-                </button>
+                <span class="text-sm font-medium text-muted-foreground">{{ $t('features.file_manager.bulk.label', { count: selectedItems.length }) }}</span>
+                <div class="flex items-center space-x-2">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        @click="bulkDelete"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        {{ $t('features.file_manager.bulk.delete') }}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        @click="clearSelection"
+                        class="text-muted-foreground"
+                    >
+                        {{ $t('features.file_manager.bulk.cancel') }}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="selectAllInPage"
+                    >
+                        {{ $t('features.file_manager.bulk.selectAll') }}
+                    </Button>
+                </div>
             </div>
         </div>
 
@@ -236,7 +248,7 @@
                         @click="currentPath = '/'"
                         :class="[
                             'w-full text-left px-3 py-2 rounded-md text-sm',
-                            currentPath === '/' ? 'bg-indigo-100 text-indigo-700' : 'text-foreground hover:bg-muted'
+                            currentPath === '/' ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted'
                         ]"
                     >
                         <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +265,7 @@
                             @click="navigateToFolder(folder.path)"
                             :class="[
                                 'w-full text-left px-3 py-2 rounded-md text-sm',
-                                currentPath === folder.path ? 'bg-indigo-100 text-indigo-700' : 'text-foreground hover:bg-muted'
+                                currentPath === folder.path ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted'
                             ]"
                         >
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,33 +281,29 @@
             <div class="flex-1">
                 <!-- Breadcrumb -->
                 <div class="bg-card border border-border rounded-lg p-4 mb-4">
-                    <nav class="flex" aria-label="Breadcrumb">
-                        <ol class="flex items-center space-x-2">
-                            <li>
-                                <button
-                                    @click="currentPath = '/'"
-                                    class="text-muted-foreground hover:text-foreground"
-                                >
-                                    {{ $t('features.file_manager.nav.root') }}
-                                </button>
-                            </li>
-                            <li
-                                v-for="(part, index) in pathParts"
-                                :key="index"
-                                class="flex items-center"
+                    <div class="flex items-center space-x-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            @click="currentPath = '/'"
+                            class="p-2 h-8 w-8"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                        </Button>
+                        <div v-for="(part, index) in breadcrumbs" :key="index" class="flex items-center">
+                            <span class="mx-1 text-muted-foreground">/</span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                @click="currentPath = part.path"
+                                class="px-2 py-1 h-8"
                             >
-                                <svg class="w-4 h-4 text-muted-foreground mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                                <button
-                                    @click="navigateToPath(part.path)"
-                                    class="text-muted-foreground hover:text-foreground"
-                                >
-                                    {{ part.name }}
-                                </button>
-                            </li>
-                        </ol>
-                    </nav>
+                                {{ part.name }}
+                            </Button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Files & Folders -->
@@ -311,19 +319,17 @@
                         <div
                             v-for="folder in paginatedFolders"
                             :key="folder.path"
-                            class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer relative"
+                            class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer relative group"
                             :class="{ 'ring-2 ring-primary': isSelected(folder.path) }"
                         >
-                            <div class="absolute top-2 left-2 z-10">
-                                <input
-                                    type="checkbox"
+                            <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Checkbox
                                     :checked="isSelected(folder.path)"
-                                    @click.stop="toggleSelection(folder.path)"
-                                    class="w-4 h-4 rounded border-input"
+                                    @update:checked="toggleSelection(folder.path)"
                                 />
                             </div>
                             <div class="text-center" @click="navigateToFolder(folder.path)" @contextmenu.prevent="showFolderContextMenu($event, folder)">
-                                <svg class="w-12 h-12 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 mx-auto text-primary/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
                                 <p class="mt-2 text-sm font-medium text-foreground truncate">{{ folder.name }}</p>
@@ -333,15 +339,13 @@
                         <div
                             v-for="file in paginatedFiles"
                             :key="file.path"
-                            class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer relative"
+                            class="p-4 border border-border rounded-lg hover:bg-muted cursor-pointer relative group"
                             :class="{ 'ring-2 ring-primary': isSelected(file.path) }"
                         >
-                            <div class="absolute top-2 left-2 z-10">
-                                <input
-                                    type="checkbox"
+                            <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Checkbox
                                     :checked="isSelected(file.path)"
-                                    @click.stop="toggleSelection(file.path)"
-                                    class="w-4 h-4 rounded border-input"
+                                    @update:checked="toggleSelection(file.path)"
                                 />
                             </div>
                             <div class="text-center" @click="viewFile(file)" @contextmenu.prevent="showFileContextMenu($event, file)">
@@ -350,7 +354,7 @@
                                     <img :src="file.url" :alt="file.name" class="max-w-full max-h-full object-contain" />
                                 </div>
                                 <!-- File Icon -->
-                                <svg v-else class="w-12 h-12 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg v-else class="w-12 h-12 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                                 <p class="mt-2 text-sm font-medium text-foreground truncate">{{ file.name }}</p>
@@ -370,23 +374,34 @@
                         }) }}
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button
+                        <Button
+                            variant="outline"
                             @click="currentPage--"
                             :disabled="currentPage === 1"
-                            class="px-3 py-2 border border-input rounded-md bg-card text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {{ $t('features.file_manager.pagination.previous') }}
-                        </button>
-                        <span class="px-4 py-2 text-sm text-foreground">
-                            {{ currentPage }} / {{ totalPages }}
-                        </span>
-                        <button
+                            {{ $t('common.pagination.previous') }}
+                        </Button>
+                        <div class="flex items-center space-x-1">
+                            <Button
+                                v-for="page in totalPages"
+                                :key="page"
+                                variant="outline"
+                                :class="[
+                                    'w-10 h-10 p-0',
+                                    currentPage === page ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
+                                ]"
+                                @click="currentPage = page"
+                            >
+                                {{ page }}
+                            </Button>
+                        </div>
+                        <Button
+                            variant="outline"
                             @click="currentPage++"
                             :disabled="currentPage === totalPages"
-                            class="px-3 py-2 border border-input rounded-md bg-card text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {{ $t('features.file_manager.pagination.next') }}
-                        </button>
+                            {{ $t('common.pagination.next') }}
+                        </Button>
                     </div>
                     <select
                         v-model="itemsPerPage"
@@ -404,13 +419,13 @@
         <!-- Image Preview Modal -->
         <div
             v-if="showImagePreview && previewImage"
-            class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             @click="closeImagePreview"
         >
             <div class="relative max-w-7xl max-h-full" @click.stop>
                 <button
                     @click="closeImagePreview"
-                    class="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 hover:bg-black/70"
+                    class="absolute top-4 right-4 bg-background/50 text-foreground rounded-full p-2 hover:bg-background/80"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -421,9 +436,9 @@
                     :alt="previewImage.name"
                     class="max-w-full max-h-[90vh] object-contain rounded-lg"
                 />
-                <div class="mt-4 text-center text-white">
+                <div class="mt-4 text-center text-foreground">
                     <p class="text-lg font-medium">{{ previewImage.name }}</p>
-                    <p class="text-sm text-gray-300">{{ formatFileSize(previewImage.size) }}</p>
+                    <p class="text-sm text-muted-foreground">{{ formatFileSize(previewImage.size) }}</p>
                 </div>
             </div>
         </div>
@@ -435,34 +450,37 @@
             :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
             @click.stop
         >
-            <button
-                v-if="contextMenu.type === 'file'"
-                @click="handleContextMenuAction('download')"
-                class="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center"
-            >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download
-            </button>
-            <button
+            <Button
+                variant="ghost"
+                class="w-full justify-start text-sm h-9 px-3"
                 @click="handleContextMenuAction('rename')"
-                class="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center"
             >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Rename
-            </button>
-            <button
+                {{ $t('features.file_manager.actions.rename') }}
+            </Button>
+            <Button
+                v-if="contextMenu.type === 'file'"
+                variant="ghost"
+                class="w-full justify-start text-sm h-9 px-3"
+                @click="handleContextMenuAction('download')"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                {{ $t('features.file_manager.actions.download') }}
+            </Button>
+            <Button
+                variant="ghost"
+                class="w-full justify-start text-sm h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
                 @click="handleContextMenuAction('delete')"
-                class="w-full px-4 py-2 text-left text-sm hover:bg-destructive hover:text-destructive-foreground flex items-center text-destructive"
             >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Delete
-            </button>
+                {{ $t('features.file_manager.actions.delete') }}
+            </Button>
         </div>
 
         <!-- Upload Modal -->
@@ -492,6 +510,14 @@ import { parseSingleResponse } from '../../../utils/responseParser';
 const { t } = useI18n();
 import FileUploadModal from '../../../components/file-manager/FileUploadModal.vue';
 import CreateFolderModal from '../../../components/file-manager/CreateFolderModal.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
 
 const files = ref([]);
 const folders = ref([]);

@@ -1,55 +1,80 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ widget ? $t('features.widgets.modals.widget.titleEdit') : $t('features.widgets.modals.widget.titleCreate') }}</h3>
-                    <button @click="$emit('close')" class="text-muted-foreground hover:text-muted-foreground">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ widget ? $t('features.widgets.modals.widget.titleEdit') : $t('features.widgets.modals.widget.titleCreate') }}
+                </DialogTitle>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+                <div class="space-y-2">
+                    <Label>{{ $t('features.widgets.modals.widget.name') }} <span class="text-red-500">*</span></Label>
+                    <Input v-model="form.name" type="text" required />
                 </div>
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ $t('features.widgets.modals.widget.name') }} <span class="text-red-500">*</span></label>
-                        <input v-model="form.name" type="text" required class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ $t('features.widgets.modals.widget.type') }} <span class="text-red-500">*</span></label>
-                        <select v-model="form.type" required class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="text">Text</option>
-                            <option value="html">HTML</option>
-                            <option value="menu">Menu</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ $t('features.widgets.modals.widget.position') }}</label>
-                        <input v-model="form.position" type="text" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" :placeholder="$t('features.widgets.modals.widget.positionPlaceholder')">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ $t('features.widgets.modals.widget.content') }}</label>
-                        <textarea v-model="form.content" rows="6" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-                    </div>
-                    <div class="flex items-center">
-                        <input v-model="form.is_active" type="checkbox" id="is_active" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded">
-                        <label for="is_active" class="ml-2 block text-sm text-foreground">{{ $t('features.widgets.modals.widget.active') }}</label>
-                    </div>
-                </form>
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button @click="$emit('close')" class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted">{{ $t('common.cancel') }}</button>
-                    <button @click="handleSubmit" :disabled="saving" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50">{{ saving ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.update') : $t('common.create')) }}</button>
+                <div class="space-y-2">
+                    <Label>{{ $t('features.widgets.modals.widget.type') }} <span class="text-red-500">*</span></Label>
+                    <Select v-model="form.type">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="$t('features.widgets.modals.widget.type')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="text">Text</SelectItem>
+                            <SelectItem value="html">HTML</SelectItem>
+                            <SelectItem value="menu">Menu</SelectItem>
+                            <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
-            </div>
-        </div>
-    </div>
+                <div class="space-y-2">
+                    <Label>{{ $t('features.widgets.modals.widget.position') }}</Label>
+                    <Input v-model="form.position" type="text" :placeholder="$t('features.widgets.modals.widget.positionPlaceholder')" />
+                </div>
+                <div class="space-y-2">
+                    <Label>{{ $t('features.widgets.modals.widget.content') }}</Label>
+                    <Textarea v-model="form.content" :rows="6" />
+                </div>
+                <div class="flex items-center space-x-2 pt-2">
+                    <Checkbox id="is_active" v-model:checked="form.is_active" />
+                    <Label for="is_active" class="text-sm font-normal cursor-pointer">
+                        {{ $t('features.widgets.modals.widget.active') }}
+                    </Label>
+                </div>
+            </form>
+
+            <DialogFooter>
+                <Button variant="outline" @click="$emit('close')">
+                    {{ $t('common.cancel') }}
+                </Button>
+                <Button @click="handleSubmit" :disabled="saving">
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ saving ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.update') : $t('common.create')) }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Label from '../ui/label.vue';
+import Textarea from '../ui/textarea.vue';
+import Checkbox from '../ui/checkbox.vue';
+import Select from '../ui/select.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const props = defineProps({ widget: { type: Object, default: null } });
 const emit = defineEmits(['close', 'saved']);

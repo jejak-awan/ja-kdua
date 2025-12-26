@@ -4,6 +4,7 @@ import validation from './common/validation.json';
 import messages from './common/messages.json';
 import navigation from './common/navigation.json';
 import pagination from './common/pagination.json';
+import status from './common/status.json';
 import auth from './features/auth.json';
 import content from './features/content.json';
 import comments from './features/comments.json';
@@ -51,6 +52,7 @@ export default {
         messages,
         navigation,
         pagination,
+        status,
     },
     features: {
         auth,

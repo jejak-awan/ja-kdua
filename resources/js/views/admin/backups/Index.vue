@@ -1,231 +1,267 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.backups.title') }}</h1>
-            <button
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.system.backups.title') }}</h1>
+                <p class="text-sm text-muted-foreground">{{ t('features.system.backups.description') }}</p>
+            </div>
+            <Button
                 @click="createBackup"
                 :disabled="creating"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80 disabled:opacity-50"
+                class="min-w-[140px]"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
+                <Plus v-else class="w-4 h-4 mr-2" />
                 {{ creating ? t('features.system.backups.creating') : t('features.system.backups.create') }}
-            </button>
+            </Button>
         </div>
 
         <!-- Statistics -->
-        <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                        </svg>
+        <div v-if="statistics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-indigo-500/10 rounded-xl">
+                            <Database class="h-6 w-6 text-indigo-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.total') }}</p>
+                            <p class="text-2xl font-bold tracking-tight text-foreground">{{ statistics.total || 0 }}</p>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.total') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total || 0 }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-emerald-500/10 rounded-xl">
+                            <HardDrive class="h-6 w-6 text-emerald-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.size') }}</p>
+                            <p class="text-2xl font-bold tracking-tight text-foreground">{{ formatFileSize(statistics.total_size || 0) }}</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-blue-500/10 rounded-xl">
+                            <Clock class="h-6 w-6 text-blue-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.last') }}</p>
+                            <p class="text-xl font-bold tracking-tight text-foreground truncate max-w-[150px]" :title="formatDate(statistics.last_backup)">
+                                {{ formatDate(statistics.last_backup) || t('features.system.backups.stats.never') }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.size') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ formatFileSize(statistics.total_size || 0) }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-amber-500/10 rounded-xl">
+                            <Calendar class="h-6 w-6 text-amber-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.auto') }}</p>
+                            <Badge :variant="statistics.schedule?.enabled ? 'success' : 'secondary'">
+                                {{ statistics.schedule?.enabled ? t('features.system.backups.stats.enabled') : t('features.system.backups.stats.disabled') }}
+                            </Badge>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.last') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ formatDate(statistics.last_backup) || t('features.system.backups.stats.never') }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.system.backups.stats.auto') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ statistics.schedule?.enabled ? t('features.system.backups.stats.enabled') : t('features.system.backups.stats.disabled') }}</p>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
 
         <!-- Schedule Settings -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-foreground">{{ t('features.system.backups.schedule.title') }}</h3>
-                <button
+        <Card class="mb-6">
+            <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle class="text-lg font-semibold">{{ t('features.system.backups.schedule.title') }}</CardTitle>
+                <Button
+                    variant="ghost"
+                    size="sm"
                     @click="showScheduleModal = true"
-                    class="text-sm text-indigo-600 hover:text-indigo-800"
+                    class="h-8 text-primary hover:text-primary hover:bg-primary/10"
                 >
+                    <Settings class="w-4 h-4 mr-2" />
                     {{ t('features.system.backups.schedule.configure') }}
-                </button>
-            </div>
-            <div v-if="statistics?.schedule" class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                    <p class="text-muted-foreground">{{ t('features.system.backups.schedule.status') }}</p>
-                    <p class="font-medium" :class="statistics.schedule.enabled ? 'text-green-600' : 'text-muted-foreground'">
-                        {{ statistics.schedule.enabled ? t('features.system.backups.stats.enabled') : t('features.system.backups.stats.disabled') }}
-                    </p>
+                </Button>
+            </CardHeader>
+            <CardContent>
+                <div v-if="statistics?.schedule" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ t('features.system.backups.schedule.status') }}</p>
+                        <div class="flex items-center gap-2">
+                             <span class="w-2 h-2 rounded-full" :class="statistics.schedule.enabled ? 'bg-emerald-500' : 'bg-muted-foreground/30'"></span>
+                             <p class="text-sm font-medium" :class="statistics.schedule.enabled ? 'text-emerald-600' : 'text-muted-foreground'">
+                                 {{ statistics.schedule.enabled ? t('features.system.backups.stats.enabled') : t('features.system.backups.stats.disabled') }}
+                             </p>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ t('features.system.backups.schedule.frequency') }}</p>
+                        <p class="text-sm font-medium text-foreground capitalize">{{ t(`features.system.backups.schedule.frequencies.${statistics.schedule.frequency}`) || 'Daily' }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ t('features.system.backups.schedule.time') }}</p>
+                        <p class="text-sm font-medium text-foreground">{{ statistics.schedule.time || '02:00' }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ t('features.system.backups.schedule.retention') }}</p>
+                        <p class="text-sm font-medium text-foreground">{{ statistics.schedule.retention_days || 30 }} {{ t('features.system.backups.schedule.days') }}</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-muted-foreground">{{ t('features.system.backups.schedule.frequency') }}</p>
-                    <p class="font-medium text-foreground capitalize">{{ t(`features.system.backups.schedule.frequencies.${statistics.schedule.frequency}`) || 'Daily' }}</p>
-                </div>
-                <div>
-                    <p class="text-muted-foreground">{{ t('features.system.backups.schedule.time') }}</p>
-                    <p class="font-medium text-foreground">{{ statistics.schedule.time || '02:00' }}</p>
-                </div>
-                <div>
-                    <p class="text-muted-foreground">{{ t('features.system.backups.schedule.retention') }}</p>
-                    <p class="font-medium text-foreground">{{ statistics.schedule.retention_days || 30 }} {{ t('features.system.backups.schedule.days') }}</p>
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div class="px-6 py-4 border-b border-border">
-                <div class="flex items-center space-x-4">
-                    <input
-                        v-model="search"
-                        type="text"
-                        :placeholder="t('features.system.backups.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
+        <Card>
+            <CardHeader class="pb-0 border-b-0 space-y-4">
+                <div class="flex items-center gap-4">
+                    <div class="relative flex-1 max-w-sm">
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                            v-model="search"
+                            :placeholder="t('features.system.backups.search')"
+                            class="pl-9"
+                        />
+                    </div>
                 </div>
-            </div>
+            </CardHeader>
+            <CardContent class="p-0">
+                <div v-if="loading" class="p-12 text-center">
+                    <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
+                    <p class="text-muted-foreground font-medium">{{ t('features.system.backups.loading') }}</p>
+                </div>
 
-            <div v-if="loading" class="p-6 text-center">
-                <p class="text-muted-foreground">{{ t('features.system.backups.loading') }}</p>
-            </div>
+                <div v-else-if="filteredBackups.length === 0" class="p-12 text-center">
+                    <Database class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+                    <p class="text-muted-foreground font-medium">{{ t('features.system.backups.empty') }}</p>
+                </div>
 
-            <div v-else-if="filteredBackups.length === 0" class="p-6 text-center">
-                <p class="text-muted-foreground">{{ t('features.system.backups.empty') }}</p>
-            </div>
-
-            <table v-else class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.system.backups.table.name') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.system.backups.table.size') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.system.backups.table.created') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.system.backups.table.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="backup in filteredBackups" :key="backup.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-foreground">{{ backup.name }}</div>
-                            <div class="text-sm text-muted-foreground">{{ backup.type || 'Full' }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            {{ formatFileSize(backup.size) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            {{ formatDate(backup.created_at) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button
-                                    @click="downloadBackup(backup)"
-                                    class="text-blue-600 hover:text-blue-900"
-                                >
-                                    {{ t('features.system.backups.table.download') }}
-                                </button>
-                                <button
-                                    @click="restoreBackup(backup)"
-                                    class="text-green-600 hover:text-green-900"
-                                >
-                                    {{ t('features.system.backups.table.restore') }}
-                                </button>
-                                <button
-                                    @click="deleteBackup(backup)"
-                                    class="text-red-600 hover:text-red-900"
-                                >
-                                    {{ t('features.system.backups.table.delete') }}
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <Table v-else>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{{ t('features.system.backups.table.name') }}</TableHead>
+                            <TableHead>{{ t('features.system.backups.table.size') }}</TableHead>
+                            <TableHead>{{ t('features.system.backups.table.created') }}</TableHead>
+                            <TableHead class="text-right">{{ t('features.system.backups.table.actions') }}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="backup in filteredBackups" :key="backup.id" class="hover:bg-muted/50 transition-colors group">
+                            <TableCell>
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-muted rounded-lg group-hover:bg-background transition-colors">
+                                        <FileArchive class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-foreground">{{ backup.name }}</div>
+                                        <div class="text-xs text-muted-foreground tracking-tight">{{ backup.type || 'Full System Backup' }}</div>
+                                    </div>
+                                </div>
+                            </TableCell>
+                            <TableCell class="text-sm tabular-nums">
+                                {{ formatFileSize(backup.size) }}
+                            </TableCell>
+                            <TableCell class="text-sm text-muted-foreground">
+                                {{ formatDate(backup.created_at) }}
+                            </TableCell>
+                            <TableCell class="text-right">
+                                <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        @click="downloadBackup(backup)"
+                                        :title="t('features.system.backups.table.download')"
+                                        class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                    >
+                                        <Download class="w-4 h-4" />
+                                    </Button>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        @click="restoreBackup(backup)"
+                                        :title="t('features.system.backups.table.restore')"
+                                        class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    >
+                                        <RotateCcw class="w-4 h-4" />
+                                    </Button>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        @click="deleteBackup(backup)"
+                                        :title="t('features.system.backups.table.delete')"
+                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
 
         <!-- Schedule Modal -->
-        <div v-if="showScheduleModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="showScheduleModal = false">
-            <div class="relative top-20 mx-auto p-5 border w-full max-w-md rounded-md bg-card">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-foreground">{{ t('features.system.backups.schedule.modal.title') }}</h3>
-                    <button @click="showScheduleModal = false" class="text-muted-foreground hover:text-muted-foreground">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+        <Dialog v-model:open="showScheduleModal">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{{ t('features.system.backups.schedule.modal.title') }}</DialogTitle>
+                </DialogHeader>
+                <div class="grid gap-4 py-4">
+                    <div class="flex items-center space-x-2">
+                        <Checkbox 
+                            id="scheduleEnabled" 
+                            :checked="scheduleForm.backup_schedule_enabled"
+                            @update:checked="scheduleForm.backup_schedule_enabled = $event"
+                        />
+                        <Label for="scheduleEnabled" class="text-sm font-medium leading-none cursor-pointer">
+                            {{ t('features.system.backups.schedule.modal.enable') }}
+                        </Label>
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ t('features.system.backups.schedule.frequency') }}</Label>
+                        <Select v-model="scheduleForm.backup_schedule_frequency">
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="daily">{{ t('features.system.backups.schedule.frequencies.daily') }}</SelectItem>
+                                <SelectItem value="weekly">{{ t('features.system.backups.schedule.frequencies.weekly') }}</SelectItem>
+                                <SelectItem value="monthly">{{ t('features.system.backups.schedule.frequencies.monthly') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ t('features.system.backups.schedule.time') }}</Label>
+                        <Input type="time" v-model="scheduleForm.backup_schedule_time" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="grid gap-2">
+                            <Label>{{ t('features.system.backups.schedule.retention') }} ({{ t('features.system.backups.schedule.days') }})</Label>
+                            <Input type="number" v-model.number="scheduleForm.backup_retention_days" min="1" max="365" />
+                        </div>
+                        <div class="grid gap-2">
+                            <Label>{{ t('features.system.backups.schedule.modal.max') }}</Label>
+                            <Input type="number" v-model.number="scheduleForm.backup_max_count" min="1" max="100" />
+                        </div>
+                    </div>
                 </div>
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="scheduleEnabled" v-model="scheduleForm.backup_schedule_enabled" class="h-4 w-4 text-indigo-600 border-input rounded">
-                        <label for="scheduleEnabled" class="ml-2 text-sm text-foreground">{{ t('features.system.backups.schedule.modal.enable') }}</label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.system.backups.schedule.frequency') }}</label>
-                        <select v-model="scheduleForm.backup_schedule_frequency" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md">
-                            <option value="daily">{{ t('features.system.backups.schedule.frequencies.daily') }}</option>
-                            <option value="weekly">{{ t('features.system.backups.schedule.frequencies.weekly') }}</option>
-                            <option value="monthly">{{ t('features.system.backups.schedule.frequencies.monthly') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.system.backups.schedule.time') }}</label>
-                        <input type="time" v-model="scheduleForm.backup_schedule_time" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.system.backups.schedule.retention') }} ({{ t('features.system.backups.schedule.days') }})</label>
-                        <input type="number" v-model.number="scheduleForm.backup_retention_days" min="1" max="365" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">{{ t('features.system.backups.schedule.modal.max') }}</label>
-                        <input type="number" v-model.number="scheduleForm.backup_max_count" min="1" max="100" class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md">
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button @click="showScheduleModal = false" class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted">
+                <DialogFooter>
+                    <Button variant="outline" @click="showScheduleModal = false">
                         {{ t('features.system.backups.schedule.modal.cancel') }}
-                    </button>
-                    <button @click="saveSchedule" :disabled="savingSchedule" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/80 disabled:opacity-50">
+                    </Button>
+                    <Button @click="saveSchedule" :disabled="savingSchedule">
+                        <Loader2 v-if="savingSchedule" class="w-4 h-4 mr-2 animate-spin" />
                         {{ savingSchedule ? t('features.system.backups.schedule.modal.saving') : t('features.system.backups.schedule.modal.save') }}
-                    </button>
-                </div>
-            </div>
-        </div>
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -234,6 +270,45 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Dialog from '../../../components/ui/dialog.vue';
+import DialogContent from '../../../components/ui/dialog-content.vue';
+import DialogHeader from '../../../components/ui/dialog-header.vue';
+import DialogTitle from '../../../components/ui/dialog-title.vue';
+import DialogFooter from '../../../components/ui/dialog-footer.vue';
+import Label from '../../../components/ui/label.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import { 
+    Plus, 
+    Loader2, 
+    Database, 
+    HardDrive, 
+    Clock, 
+    Calendar, 
+    Settings, 
+    Search,
+    FileArchive,
+    Download,
+    RotateCcw,
+    Trash2
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 const backups = ref([]);

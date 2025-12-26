@@ -15,15 +15,13 @@
                 </button>
             </div>
             <div class="flex items-center space-x-2">
-                <button
+                <Button
                     @click="togglePreview"
-                    :class="[
-                        'px-3 py-1 text-sm rounded',
-                        showPreview ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground hover:bg-gray-300'
-                    ]"
+                    size="sm"
+                    :variant="showPreview ? 'default' : 'secondary'"
                 >
                     {{ showPreview ? 'Edit' : 'Preview' }}
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -61,6 +59,7 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.min.css';
+import Button from './ui/button.vue';
 
 // Configure marked
 marked.setOptions({
@@ -247,54 +246,31 @@ const htmlToMarkdown = (html) => {
 textarea {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     line-height: 1.6;
+    background-color: transparent;
+    color: hsl(var(--foreground));
 }
 
 .prose {
-    color: #374151;
+    color: hsl(var(--foreground));
 }
 
-.prose :deep(h1) {
-    font-size: 2.25em;
-    font-weight: 800;
-    margin-top: 0;
-    margin-bottom: 0.8888889em;
-    line-height: 1.1111111;
-}
-
-.prose :deep(h2) {
-    font-size: 1.5em;
-    font-weight: 700;
-    margin-top: 2em;
-    margin-bottom: 1em;
-    line-height: 1.3333333;
+.prose :deep(h1), .prose :deep(h2), .prose :deep(h3), .prose :deep(h4) {
+    color: hsl(var(--foreground));
 }
 
 .prose :deep(code) {
-    background-color: #f3f4f6;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
 }
 
-.prose :deep(pre) {
-    background-color: #1f2937;
-    color: #f9fafb;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    overflow-x: auto;
-}
-
-.prose :deep(pre code) {
-    background-color: transparent;
-    padding: 0;
-    color: inherit;
-}
-
 .prose :deep(blockquote) {
-    border-left: 4px solid #e5e7eb;
+    border-left: 4px solid hsl(var(--border));
     padding-left: 1rem;
     font-style: italic;
-    color: #6b7280;
+    color: hsl(var(--muted-foreground));
 }
 </style>
 

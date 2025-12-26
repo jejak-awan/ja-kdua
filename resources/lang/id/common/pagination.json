@@ -6,5 +6,8 @@
     "total": "Total",
     "first": "Pertama",
     "last": "Terakhir",
-    "noData": "Tidak ada data"
+    "noData": "Tidak ada data",
+    "previous": "Sebelumnya",
+    "next": "Selanjutnya",
+    "rowsPerPage": "Baris per halaman"
 }

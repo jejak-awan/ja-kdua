@@ -8,80 +8,78 @@
         </p>
 
         <!-- Dropdown Select (if field has options) -->
-        <select
+        <Select
             v-if="hasOptions && !isMailPort"
-            v-model="localValue"
-            @change="updateValue"
-            class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+            :model-value="localValue"
+            @update:model-value="localValue = $event; updateValue()"
         >
-            <option
-                v-for="option in translatedFieldOptions"
-                :key="option.value"
-                :value="option.value"
-            >
-                {{ option.label }}
-            </option>
-        </select>
+            <SelectTrigger>
+                <SelectValue :placeholder="$t('common.actions.select')" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem
+                    v-for="option in translatedFieldOptions"
+                    :key="option.value"
+                    :value="option.value"
+                >
+                    {{ option.label }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
 
         <!-- Mail Port Dropdown (dynamic based on encryption) -->
-        <select
+        <Select
             v-else-if="isMailPort"
-            v-model.number="localValue"
-            @change="updateValue"
-            class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+            :model-value="String(localValue)"
+            @update:model-value="localValue = Number($event); updateValue()"
         >
-            <option
-                v-for="option in translatedMailPortOptions"
-                :key="option.value"
-                :value="option.value"
-            >
-                {{ option.label }}
-            </option>
-        </select>
+            <SelectTrigger>
+                <SelectValue :placeholder="$t('common.actions.select')" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem
+                    v-for="option in translatedMailPortOptions"
+                    :key="option.value"
+                    :value="String(option.value)"
+                >
+                    {{ option.label }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
 
         <!-- Text Input -->
-        <input
+        <Input
             v-else-if="(type === 'string' || type === 'password') && !isTextarea"
             v-model="localValue"
             @input="updateValue"
             :type="(isPassword || type === 'password') ? 'password' : 'text'"
-            class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-        >
+        />
 
         <!-- Textarea -->
-        <textarea
+        <Textarea
             v-else-if="isTextarea"
             v-model="localValue"
             @input="updateValue"
-            rows="3"
-            class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+            :rows="3"
         />
 
         <!-- Number Input -->
-        <input
+        <Input
             v-else-if="type === 'integer'"
             v-model.number="localValue"
             @input="updateValue"
             type="number"
-            class="mt-1 w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
-        >
+        />
 
         <!-- Boolean Toggle -->
-        <div v-else-if="type === 'boolean'" class="mt-1">
-            <label class="flex items-center cursor-pointer">
-                <div class="relative">
-                    <input
-                        v-model="localValue"
-                        @change="updateValue"
-                        type="checkbox"
-                        class="sr-only peer"
-                    >
-                    <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-emerald-500"></div>
-                </div>
-                <span class="ml-3 text-sm text-foreground">
-                    {{ localValue ? enabledText : disabledText }}
-                </span>
-            </label>
+        <div v-else-if="type === 'boolean'" class="mt-1 flex items-center space-x-2">
+            <Switch
+                :checked="localValue"
+                @update:checked="localValue = $event; updateValue()"
+            />
+            <span class="text-sm text-foreground">
+                {{ localValue ? enabledText : disabledText }}
+            </span>
         </div>
     </div>
 </template>
@@ -90,6 +88,14 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getFieldOptions, getMailPortOptions } from '../../config/settingsFieldOptions'
+import Input from '../../components/ui/input.vue'
+import Textarea from '../../components/ui/textarea.vue'
+import Switch from '../../components/ui/switch.vue'
+import Select from '../../components/ui/select.vue'
+import SelectContent from '../../components/ui/select-content.vue'
+import SelectItem from '../../components/ui/select-item.vue'
+import SelectTrigger from '../../components/ui/select-trigger.vue'
+import SelectValue from '../../components/ui/select-value.vue'
 
 const { t } = useI18n()
 

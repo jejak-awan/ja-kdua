@@ -5,24 +5,25 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.tags.title') }}</h1>
             <router-link
                 :to="{ name: 'tags.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ $t('features.tags.createNew') }}
+                <Button>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ $t('features.tags.createNew') }}
+                </Button>
             </router-link>
         </div>
 
         <!-- Filters -->
         <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
-                <input
+                <Input
                     v-model="search"
                     type="text"
                     :placeholder="$t('features.tags.search')"
-                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
+                    class="flex-1"
+                />
             </div>
         </div>
 
@@ -120,18 +121,22 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
-                                <button
+                                <Button
                                     @click="editTag(tag)"
-                                    class="text-indigo-600 hover:text-indigo-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-indigo-600 hover:text-indigo-900 hover:bg-indigo-100"
                                 >
                                     {{ $t('features.tags.actions.edit') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     @click="deleteTag(tag)"
-                                    class="text-red-600 hover:text-red-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                     {{ $t('features.tags.actions.delete') }}
-                                </button>
+                                </Button>
                             </div>
                         </td>
                     </tr>
@@ -147,6 +152,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
 const router = useRouter();

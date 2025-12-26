@@ -5,31 +5,36 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.categories.title') }}</h1>
             <router-link
                 :to="{ name: 'categories.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ $t('features.categories.createNew') }}
+                <Button>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ $t('features.categories.createNew') }}
+                </Button>
             </router-link>
         </div>
 
         <!-- Filters -->
         <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
-                <input
+                <Input
                     v-model="search"
                     type="text"
                     :placeholder="$t('features.categories.search')"
-                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                <select
+                    class="flex-1"
+                />
+                <Select
                     v-model="viewMode"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                    <option value="tree">{{ $t('features.categories.viewMode.tree') }}</option>
-                    <option value="list">{{ $t('features.categories.viewMode.list') }}</option>
-                </select>
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('features.categories.viewMode.tree')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="tree">{{ $t('features.categories.viewMode.tree') }}</SelectItem>
+                        <SelectItem value="list">{{ $t('features.categories.viewMode.list') }}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </div>
 
@@ -117,34 +122,39 @@
                             <div class="text-sm text-foreground">{{ category.contents_count || 0 }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                :class="category.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
+                            <Badge
+                                :variant="category.is_active ? 'success' : 'secondary'"
                             >
                                 {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
-                            </span>
+                            </Badge>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
-                                <button
+                                <Button
                                     @click="showMoveModal(category)"
-                                    class="text-blue-600 hover:text-blue-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-blue-600 hover:text-blue-900 hover:bg-blue-100"
                                     :title="$t('features.categories.actions.move')"
                                 >
                                     {{ $t('features.categories.actions.move') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     @click="editCategory(category)"
-                                    class="text-indigo-600 hover:text-indigo-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-indigo-600 hover:text-indigo-900 hover:bg-indigo-100"
                                 >
                                     {{ $t('features.categories.actions.edit') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     @click="deleteCategory(category)"
-                                    class="text-red-600 hover:text-red-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                     {{ $t('features.categories.actions.delete') }}
-                                </button>
+                                </Button>
                             </div>
                         </td>
                     </tr>
@@ -171,6 +181,14 @@ import api from '../../../services/api';
 import CategoryTreeItem from '../../../components/categories/CategoryTreeItem.vue';
 import MoveCategoryModal from '../../../components/categories/MoveCategoryModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 const router = useRouter();

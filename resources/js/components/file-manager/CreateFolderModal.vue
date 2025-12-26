@@ -4,14 +4,15 @@
             <div class="bg-card rounded-lg max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.file_manager.modals.createFolder.title') }}</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
@@ -19,30 +20,28 @@
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.file_manager.labels.folderName') }} <span class="text-red-500">*</span>
                         </label>
-                        <input
+                        <Input
                             v-model="folderName"
                             type="text"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             :placeholder="$t('features.file_manager.placeholders.folderName')"
-                        >
+                        />
                     </div>
                 </form>
 
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.file_manager.actions.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleSubmit"
                         :disabled="creating || !folderName"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ creating ? $t('features.file_manager.actions.creating') : $t('features.file_manager.actions.create') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -53,6 +52,8 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
 
 const { t } = useI18n();
 

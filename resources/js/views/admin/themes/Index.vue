@@ -6,23 +6,27 @@
                 <p class="text-sm text-muted-foreground mt-1">{{ $t('features.themes.subtitle') }}</p>
             </div>
             <div class="flex items-center gap-3">
-                <select
+                <Select
                     v-model="selectedType"
-                    @change="fetchThemes"
-                    class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
+                    @update:modelValue="fetchThemes"
                 >
-                    <option value="">{{ $t('features.themes.types.all') }}</option>
-                    <option value="frontend">{{ $t('features.themes.types.frontend') }}</option>
-                    <option value="admin">{{ $t('features.themes.types.admin') }}</option>
-                    <option value="email">{{ $t('features.themes.types.email') }}</option>
-                </select>
-                <button
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('features.themes.types.all')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.themes.types.all') }}</SelectItem>
+                        <SelectItem value="frontend">{{ $t('features.themes.types.frontend') }}</SelectItem>
+                        <SelectItem value="admin">{{ $t('features.themes.types.admin') }}</SelectItem>
+                        <SelectItem value="email">{{ $t('features.themes.types.email') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button
                     @click="scanThemes"
                     :disabled="scanning"
-                    class="px-4 py-2 bg-secondary hover:bg-accent text-foreground text-sm font-medium rounded-md disabled:opacity-50"
+                    variant="secondary"
                 >
                     {{ scanning ? $t('features.themes.scanning') : $t('features.themes.scan') }}
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -33,12 +37,11 @@
             <h3 class="mt-2 text-sm font-medium text-foreground">{{ $t('features.themes.list.empty') }}</h3>
             <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.themes.list.emptySubtitle') }}</p>
             <div class="mt-6">
-                <button
+                <Button
                     @click="scanThemes"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
                     {{ $t('features.themes.scan') }}
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -65,40 +68,38 @@
                     
                     <!-- Status Badge -->
                     <div class="absolute top-2 right-2">
-                        <span
+                        <Badge
                             v-if="theme.is_active"
-                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-500 text-white shadow-sm"
+                            variant="success"
+                            class="shadow-sm"
                         >
                             {{ $t('features.themes.status.active') }}
-                        </span>
-                        <span
+                        </Badge>
+                        <Badge
                             v-else-if="theme.status && theme.status !== 'active'"
-                            class="px-2 py-1 text-xs font-semibold rounded-full shadow-sm"
-                            :class="{
-                                'bg-red-500/20 text-red-400': theme.status === 'broken',
-                                'bg-secondary text-gray-800': theme.status === 'inactive',
-                                'bg-yellow-500/20 text-yellow-400': theme.status === 'pending',
-                            }"
+                            class="shadow-sm"
+                            :variant="theme.status === 'broken' ? 'destructive' : (theme.status === 'pending' ? 'warning' : 'secondary')"
                         >
                             {{ theme.status }}
-                        </span>
+                        </Badge>
                     </div>
 
                     <!-- Hover Actions -->
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                        <button
+                    <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                        <Button
                             @click="openPreview(theme)"
-                            class="px-3 py-2 bg-card text-foreground rounded-md text-sm font-medium hover:bg-accent"
+                            variant="secondary"
+                            size="sm"
                         >
                             {{ $t('features.themes.actions.preview') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             v-if="theme.is_active"
                             @click="openCustomizer(theme)"
-                            class="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/80"
+                            size="sm"
                         >
                             {{ $t('features.themes.actions.customize') }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -130,47 +131,49 @@
                     <!-- Actions -->
                     <div class="mt-4 flex items-center gap-2 flex-wrap">
                         <!-- Primary Action Button -->
-                        <button
+                        <Button
                             v-if="theme.is_active"
                             @click="openCustomizer(theme)"
-                            class="flex-1 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/80 flex items-center justify-center gap-2"
+                            class="flex-1"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                             </svg>
                             {{ $t('features.themes.actions.customize') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             v-else
                             @click="activateTheme(theme)"
-                            class="flex-1 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/80 flex items-center justify-center gap-2"
+                            class="flex-1"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             {{ $t('features.themes.actions.activate') }}
-                        </button>
+                        </Button>
                         
                         <!-- Secondary Action Buttons -->
-                        <button
+                        <Button
                             @click="openPreview(theme)"
-                            class="px-4 py-2 border border-input text-foreground text-sm font-medium rounded-md hover:bg-muted"
-                            title="Preview theme"
+                            variant="outline"
+                            size="icon"
+                            :title="$t('features.themes.actions.preview')"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="validateTheme(theme)"
-                            class="px-4 py-2 border border-input text-foreground text-sm font-medium rounded-md hover:bg-muted"
-                            title="Validate theme"
+                            variant="outline"
+                            size="icon"
+                            :title="$t('features.themes.actions.validate')"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -227,7 +230,15 @@ import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import ThemePreview from '../../../components/themes/ThemePreview.vue';
 import ThemeCustomizer from '../../../components/themes/ThemeCustomizer.vue';
+
 import { useI18n } from 'vue-i18n';
+import Button from '../../../components/ui/button.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 

@@ -1,81 +1,120 @@
 <template>
-    <div class="bg-card border border-border rounded-lg p-6">
-        <h2 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.content.form.seoSettings') }}</h2>
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-foreground mb-1">
+    <Card class="border-none shadow-sm bg-card/50">
+        <CardHeader class="pb-4">
+            <CardTitle class="text-xl font-bold flex items-center gap-2">
+                <Globe class="w-5 h-5 text-primary" />
+                {{ $t('features.content.form.seoSettings') }}
+            </CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-6">
+            <div class="space-y-1.5">
+                <Label class="text-sm font-semibold tracking-tight">
                     {{ $t('features.content.form.metaTitle') }}
-                </label>
-                <input
-                    :value="modelValue.meta_title"
-                    @input="$emit('update:modelValue', { ...modelValue, meta_title: $event.target.value })"
-                    type="text"
-                    maxlength="255"
-                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="SEO title (defaults to content title)"
-                />
-                <p class="mt-1 text-xs text-muted-foreground">{{ modelValue.meta_title?.length || 0 }}/255 characters</p>
+                </Label>
+                <div class="relative">
+                    <Type class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <Input
+                        :model-value="modelValue.meta_title"
+                        @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_title: val })"
+                        type="text"
+                        maxlength="255"
+                        class="pl-9 bg-background/50"
+                        placeholder="SEO title (defaults to content title)"
+                    />
+                </div>
+                <div class="flex justify-end">
+                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_title?.length || 0) > 60 ? 'text-amber-500' : 'text-muted-foreground/60'">
+                        {{ modelValue.meta_title?.length || 0 }}/255 characters
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-foreground mb-1">
+            <div class="space-y-1.5">
+                <Label class="text-sm font-semibold tracking-tight">
                     {{ $t('features.content.form.metaDescription') }}
-                </label>
-                <textarea
-                    :value="modelValue.meta_description"
-                    @input="$emit('update:modelValue', { ...modelValue, meta_description: $event.target.value })"
+                </Label>
+                <Textarea
+                    :model-value="modelValue.meta_description"
+                    @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_description: val })"
                     rows="3"
                     maxlength="500"
-                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    class="bg-background/50 resize-none"
                     placeholder="SEO description (defaults to excerpt)"
-                ></textarea>
-                <p class="mt-1 text-xs text-muted-foreground">{{ modelValue.meta_description?.length || 0 }}/500 characters</p>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-foreground mb-1">
-                    {{ $t('features.content.form.metaKeywords') }}
-                </label>
-                <input
-                    :value="modelValue.meta_keywords"
-                    @input="$emit('update:modelValue', { ...modelValue, meta_keywords: $event.target.value })"
-                    type="text"
-                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    :placeholder="$t('features.content.form.keywordsPlaceholder')"
                 />
+                <div class="flex justify-end">
+                    <p class="text-[10px] font-medium transition-colors" :class="(modelValue.meta_description?.length || 0) > 160 ? 'text-amber-500' : 'text-muted-foreground/60'">
+                        {{ modelValue.meta_description?.length || 0 }}/500 characters
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-foreground mb-1">
+            <div class="space-y-1.5">
+                <Label class="text-sm font-semibold tracking-tight">
+                    {{ $t('features.content.form.metaKeywords') }}
+                </Label>
+                <div class="relative">
+                    <Hash class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <Input
+                        :model-value="modelValue.meta_keywords"
+                        @update:model-value="(val) => $emit('update:modelValue', { ...modelValue, meta_keywords: val })"
+                        type="text"
+                        class="pl-9 bg-background/50"
+                        :placeholder="$t('features.content.form.keywordsPlaceholder')"
+                    />
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <Label class="text-sm font-semibold tracking-tight">
                     {{ $t('features.content.form.ogImage') }}
-                </label>
-                <div v-if="modelValue.og_image" class="relative mb-2">
+                </Label>
+                <div v-if="modelValue.og_image" class="relative group aspect-video">
                     <img
                         :src="modelValue.og_image"
                         alt="OG Image"
-                        class="w-full h-48 object-cover rounded-lg"
+                        class="w-full h-full object-cover rounded-lg border border-border/40 shadow-sm"
                     />
-                    <button
-                        type="button"
-                        @click="$emit('update:modelValue', { ...modelValue, og_image: null })"
-                        class="absolute top-2 right-2 bg-destructive text-destructive-foreground px-3 py-1 rounded-md hover:bg-destructive/90"
-                    >
-                        {{ $t('features.content.form.remove') }}
-                    </button>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            @click="$emit('update:modelValue', { ...modelValue, og_image: null })"
+                        >
+                            <Trash2 class="w-4 h-4 mr-2" />
+                            {{ $t('features.content.form.remove') }}
+                        </Button>
+                    </div>
                 </div>
-                <MediaPicker
-                    v-else
-                    @selected="(media) => $emit('update:modelValue', { ...modelValue, og_image: media.url })"
-                    label="Select OG Image"
-                ></MediaPicker>
+                <div v-else class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border/40 rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
+                    <MediaPicker
+                        @selected="(media) => $emit('update:modelValue', { ...modelValue, og_image: media.url })"
+                        label="Select OG Image"
+                    >
+                        <template #trigger>
+                            <Button variant="outline" class="gap-2">
+                                <ImageIcon class="w-4 h-4" />
+                                Select OG Image
+                            </Button>
+                        </template>
+                    </MediaPicker>
+                </div>
             </div>
-        </div>
-    </div>
+        </CardContent>
+    </Card>
 </template>
 
 <script setup>
 import { useI18n } from 'vue-i18n';
 import MediaPicker from '../MediaPicker.vue';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardTitle from '@/components/ui/card-title.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import Label from '@/components/ui/label.vue';
+import Input from '@/components/ui/input.vue';
+import Textarea from '@/components/ui/textarea.vue';
+import Button from '@/components/ui/button.vue';
+import { Globe, Type, Hash, Image as ImageIcon, Trash2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

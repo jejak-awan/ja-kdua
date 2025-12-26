@@ -6,6 +6,7 @@
         "published": "diterbitkan",
         "mediaFiles": "File Media",
         "totalUsers": "Total Pengguna",
+        "activeUsers": "Pengguna aktif",
         "pendingContent": "Konten Tertunda",
         "requiresReview": "Butuh tinjauan"
     },
@@ -49,6 +50,7 @@
         },
         "recentActivity": {
             "title": "Aktivitas Terkini",
+            "description": "Aktivitas sistem terbaru",
             "live": "Langsung",
             "loading": "Memuat aktivitas...",
             "empty": "Tidak ada aktivitas terkini",

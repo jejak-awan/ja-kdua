@@ -2,147 +2,141 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.redirects.title') }}</h1>
-            <button
+            <Button
                 @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus class="w-5 h-5 mr-2" />
                 {{ $t('features.redirects.new') }}
-            </button>
+            </Button>
         </div>
 
         <!-- Statistics -->
         <div v-if="statistics" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-indigo-500/10 rounded-lg">
+                            <ArrowRightLeft class="h-6 w-6 text-indigo-500" />
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.total') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ statistics.total || 0 }}</p>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.total') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total || 0 }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-500/10 rounded-lg">
+                            <CheckCircle2 class="h-6 w-6 text-green-500" />
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.active') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ statistics.active || 0 }}</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-500/10 rounded-lg">
+                            <BarChart3 class="h-6 w-6 text-blue-500" />
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.hits') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ statistics.total_hits || 0 }}</p>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.active') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ statistics.active || 0 }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redirects.statistics.hits') }}</p>
-                        <p class="text-2xl font-semibold text-foreground">{{ statistics.total_hits || 0 }}</p>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div class="px-6 py-4 border-b border-border">
-                <div class="flex items-center space-x-4">
-                    <input
+        <Card>
+            <div class="px-6 py-4 border-b">
+                <div class="relative max-w-sm">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
                         v-model="search"
                         type="text"
                         :placeholder="$t('features.redirects.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
+                        class="pl-10"
+                    />
                 </div>
             </div>
 
-            <div v-if="loading" class="p-6 text-center">
+            <div v-if="loading" class="p-12 text-center">
+                <Loader2 class="w-8 h-8 animate-spin mx-auto text-primary mb-4" />
                 <p class="text-muted-foreground">{{ $t('features.redirects.loading') }}</p>
             </div>
 
-            <div v-else-if="filteredRedirects.length === 0" class="p-6 text-center">
+            <div v-else-if="filteredRedirects.length === 0" class="p-12 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-4">
+                    <Search class="h-6 w-6 text-muted-foreground" />
+                </div>
                 <p class="text-muted-foreground">{{ $t('features.redirects.empty') }}</p>
             </div>
 
-            <table v-else class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.from') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.to') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.code') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.hits') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.status') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.redirects.table.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="redirect in filteredRedirects" :key="redirect.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
+            <Table v-else>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>{{ $t('features.redirects.table.from') }}</TableHead>
+                        <TableHead>{{ $t('features.redirects.table.to') }}</TableHead>
+                        <TableHead>{{ $t('features.redirects.table.code') }}</TableHead>
+                        <TableHead>{{ $t('features.redirects.table.hits') }}</TableHead>
+                        <TableHead>{{ $t('features.redirects.table.status') }}</TableHead>
+                        <TableHead class="text-right">{{ $t('features.redirects.table.actions') }}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-for="redirect in filteredRedirects" :key="redirect.id">
+                        <TableCell>
                             <div class="text-sm font-medium text-foreground">{{ redirect.from_url }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        </TableCell>
+                        <TableCell>
                             <div class="text-sm text-foreground">{{ redirect.to_url }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/20 text-blue-400">
+                        </TableCell>
+                        <TableCell>
+                            <Badge variant="secondary" class="font-mono bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">
                                 {{ redirect.status_code || 301 }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                            </Badge>
+                        </TableCell>
+                        <TableCell class="text-sm text-muted-foreground">
                             {{ redirect.hits || 0 }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                :class="redirect.is_active ? 'bg-green-500/20 text-green-400' : 'bg-secondary text-secondary-foreground'"
+                        </TableCell>
+                        <TableCell>
+                            <Badge
+                                :variant="redirect.is_active ? 'default' : 'secondary'"
+                                :class="redirect.is_active ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : ''"
                             >
                                 {{ redirect.is_active ? $t('features.redirects.status.active') : $t('features.redirects.status.inactive') }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button
+                            </Badge>
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     @click="editRedirect(redirect)"
-                                    class="text-indigo-600 hover:text-indigo-900"
+                                    class="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                                 >
-                                    {{ $t('features.redirects.actions.edit') }}
-                                </button>
-                                <button
+                                    <Pencil class="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     @click="deleteRedirect(redirect)"
-                                    class="text-red-600 hover:text-red-900"
+                                    class="text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
-                                    {{ $t('features.redirects.actions.delete') }}
-                                </button>
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </Card>
 
         <!-- Create/Edit Modal -->
         <RedirectModal
@@ -159,6 +153,22 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import RedirectModal from '../../../components/redirects/RedirectModal.vue';
+import Card from '../../../components/ui/card.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import { 
+    Plus, Search, Pencil, 
+    Trash2, ArrowRightLeft, CheckCircle2, 
+    BarChart3, Loader2 
+} from 'lucide-vue-next';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();

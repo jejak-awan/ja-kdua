@@ -6,164 +6,148 @@
                 <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.newsletter.subtitle') }}</p>
             </div>
             <div class="flex gap-2">
-                <button
+                <Button
+                    variant="outline"
                     @click="exportCsv"
-                    class="px-4 py-2 bg-card border border-input rounded-lg text-sm font-medium text-foreground hover:bg-muted flex items-center"
                 >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <Download class="w-4 h-4 mr-2" />
                     {{ $t('features.newsletter.actions.export') }}
-                </button>
+                </Button>
             </div>
         </div>
 
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <Card>
             <!-- Filters & Search -->
             <div class="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
-                    <select
+                    <Select
                         v-model="filters.status"
-                        @change="fetchSubscribers"
-                        class="block w-full pl-3 pr-10 py-2 text-base border-input focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        @update:modelValue="fetchSubscribers"
                     >
-                        <option value="">{{ $t('features.newsletter.filters.allStatus') }}</option>
-                        <option value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</option>
-                        <option value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</option>
-                    </select>
+                        <SelectTrigger class="w-[180px]">
+                            <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                            <SelectItem value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</SelectItem>
+                            <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div class="relative max-w-xs w-full">
-                    <input
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
                         v-model="filters.q"
                         @input="debounceSearch"
-                        type="text"
                         :placeholder="$t('features.newsletter.filters.search')"
-                        class="block w-full pl-10 pr-3 py-2 border border-input bg-card text-foreground rounded-md leading-5 bg-card placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
+                        class="pl-9"
+                    />
                 </div>
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-border">
-                    <thead class="bg-muted">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ $t('features.newsletter.table.subscriber') }}
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ $t('features.newsletter.table.status') }}
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ $t('features.newsletter.table.joinedAt') }}
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ $t('features.newsletter.table.source') }}
-                            </th>
-                            <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">{{ $t('features.newsletter.table.actions') }}</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-card divide-y divide-border">
-                        <tr v-if="loading">
-                            <td colspan="5" class="px-6 py-4 text-center text-sm text-muted-foreground">
-                                {{ $t('features.newsletter.messages.loading') }}
-                            </td>
-                        </tr>
-                        <tr v-else-if="subscribers.length === 0">
-                            <td colspan="5" class="px-6 py-4 text-center text-sm text-muted-foreground">
-                                {{ $t('features.newsletter.messages.empty') }}
-                            </td>
-                        </tr>
-                        <tr v-for="subscriber in subscribers" :key="subscriber.id" class="hover:bg-muted">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">
-                                            {{ (subscriber.name || subscriber.email).charAt(0).toUpperCase() }}
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-foreground">
-                                            {{ subscriber.name || $t('features.newsletter.messages.noName') }}
-                                        </div>
-                                        <div class="text-sm text-muted-foreground">
-                                            {{ subscriber.email }}
-                                        </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>{{ $t('features.newsletter.table.subscriber') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.status') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.joinedAt') }}</TableHead>
+                        <TableHead>{{ $t('features.newsletter.table.source') }}</TableHead>
+                        <TableHead class="text-right">{{ $t('features.newsletter.table.actions') }}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-if="loading">
+                        <TableCell colspan="5" class="h-24 text-center">
+                            {{ $t('features.newsletter.messages.loading') }}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow v-else-if="subscribers.length === 0">
+                        <TableCell colspan="5" class="h-24 text-center">
+                            {{ $t('features.newsletter.messages.empty') }}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow v-for="subscriber in subscribers" :key="subscriber.id">
+                        <TableCell>
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-9 w-9">
+                                    <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20">
+                                        {{ (subscriber.name || subscriber.email).charAt(0).toUpperCase() }}
                                     </div>
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                    :class="subscriber.status === 'subscribed' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'"
-                                >
-                                    {{ $t(`features.newsletter.filters.${subscriber.status}`) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                {{ formatDate(subscriber.created_at) }}
-                            </td>
-                             <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground truncated max-w-xs overflow-hidden text-ellipsis" :title="subscriber.source">
-                                {{ subscriber.source }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button
-                                    @click="deleteSubscriber(subscriber)"
-                                    class="text-red-600 hover:text-red-900"
-                                >
-                                    {{ $t('features.newsletter.actions.delete') }}
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-foreground">
+                                        {{ subscriber.name || $t('features.newsletter.messages.noName') }}
+                                    </div>
+                                    <div class="text-xs text-muted-foreground">
+                                        {{ subscriber.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <Badge
+                                variant="outline"
+                                :class="subscriber.status === 'subscribed' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'"
+                            >
+                                {{ $t(`features.newsletter.filters.${subscriber.status}`) }}
+                            </Badge>
+                        </TableCell>
+                        <TableCell class="text-xs text-muted-foreground">
+                            {{ formatDate(subscriber.created_at) }}
+                        </TableCell>
+                        <TableCell class="text-xs text-muted-foreground truncated max-w-[150px]" :title="subscriber.source">
+                            {{ subscriber.source }}
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                @click="deleteSubscriber(subscriber)"
+                                class="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                                <Trash2 class="w-4 h-4 mr-2" />
+                                {{ $t('features.newsletter.actions.delete') }}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
 
             <!-- Pagination -->
             <div
                 v-if="pagination.total > 0"
-                class="bg-card px-4 py-3 border-t border-border flex items-center justify-between sm:px-6"
+                class="px-4 py-3 border-t border-border flex items-center justify-between sm:px-6"
             >
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div class="flex-1 flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-foreground">
+                        <p class="text-xs text-muted-foreground">
                             {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
                         </p>
                     </div>
-                    <div>
-                        <nav class="relative z-0 inline-flex rounded-md -space-x-px" aria-label="Pagination">
-                            <button
-                                @click="changePage(pagination.current_page - 1)"
-                                :disabled="pagination.current_page === 1"
-                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-input bg-card text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
-                            >
-                                <span class="sr-only">{{ $t('common.pagination.previous') }}</span>
-                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            <button
-                                @click="changePage(pagination.current_page + 1)"
-                                :disabled="pagination.current_page === pagination.last_page"
-                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-input bg-card text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
-                            >
-                                <span class="sr-only">{{ $t('common.pagination.next') }}</span>
-                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </nav>
+                    <div class="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            @click="changePage(pagination.current_page - 1)"
+                            :disabled="pagination.current_page === 1"
+                        >
+                            <ChevronLeft class="w-4 h-4 mr-1" />
+                            {{ $t('common.pagination.previous') }}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            @click="changePage(pagination.current_page + 1)"
+                            :disabled="pagination.current_page === pagination.last_page"
+                        >
+                            {{ $t('common.pagination.next') }}
+                            <ChevronRight class="w-4 h-4 ml-1" />
+                        </Button>
                     </div>
                 </div>
             </div>
-        </div>
+        </Card>
     </div>
 </template>
 
@@ -172,6 +156,25 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import { 
+    Download, Search, Trash2, 
+    ChevronLeft, ChevronRight 
+} from 'lucide-vue-next';
 import _ from 'lodash';
 
 const { t } = useI18n();

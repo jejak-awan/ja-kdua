@@ -5,9 +5,10 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('common.actions.create') }} {{ $t('features.roles.title_singular') }}</h1>
             <router-link
                 :to="{ name: 'roles' }"
-                class="text-muted-foreground hover:text-foreground"
+                class="text-muted-foreground hover:text-foreground text-sm flex items-center"
             >
-                ← {{ $t('common.actions.back') }}
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                {{ $t('common.actions.back') }}
             </router-link>
         </div>
 
@@ -19,11 +20,10 @@
                     <label class="block text-sm font-medium text-foreground mb-2">
                         {{ $t('features.roles.form.name') }} <span class="text-destructive">*</span>
                     </label>
-                    <input
+                    <Input
                         v-model="form.name"
                         type="text"
                         required
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                         :placeholder="$t('features.roles.form.namePlaceholder')"
                     />
                 </div>
@@ -68,19 +68,20 @@
 
             <!-- Actions -->
             <div class="flex justify-end space-x-4">
-                <router-link
-                    :to="{ name: 'roles' }"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                <Button
+                    variant="outline"
+                    as-child
                 >
-                    {{ $t('common.actions.cancel') }}
-                </router-link>
-                <button
+                    <router-link :to="{ name: 'roles' }">
+                        {{ $t('common.actions.cancel') }}
+                    </router-link>
+                </Button>
+                <Button
                     type="submit"
                     :disabled="saving"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/80 h-10 px-4 py-2"
                 >
                     {{ saving ? $t('common.messages.loading.creating') : $t('common.actions.create') }}
-                </button>
+                </Button>
             </div>
         </form>
     </div>
@@ -91,6 +92,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
 
 const router = useRouter();
 const { t } = useI18n();

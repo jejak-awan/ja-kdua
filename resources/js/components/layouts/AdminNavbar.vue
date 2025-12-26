@@ -160,7 +160,7 @@
                         </svg>
                         <span
                             v-if="unreadNotificationsCount > 0"
-                            class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center"
+                            class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center"
                         >
                             {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
                         </span>
@@ -200,7 +200,7 @@
                                     <div class="flex items-start">
                                         <span
                                             v-if="!notification.read_at"
-                                            class="h-2 w-2 bg-blue-600 rounded-full mt-2 mr-2"
+                                            class="h-2 w-2 bg-primary rounded-full mt-2 mr-2"
                                         />
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-foreground">{{ notification.title }}</p>
@@ -235,7 +235,7 @@
                         >
                         <div
                             v-else
-                            class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm"
+                            class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm"
                         >
                             {{ userInitial }}
                         </div>
@@ -284,7 +284,7 @@
                         <div class="border-t border-border">
                             <button
                                 @click="handleLogout"
-                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-accent"
+                                class="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -469,11 +469,11 @@ const handleSearchResultClick = (result) => {
 
 const getResultTypeClass = (type) => {
     const classes = {
-        content: 'bg-blue-500/20 text-blue-400 dark:bg-blue-900 dark:text-blue-200',
-        category: 'bg-green-500/20 text-green-400 dark:bg-green-900 dark:text-green-200',
-        user: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-        media: 'bg-yellow-500/20 text-yellow-400 dark:bg-yellow-900 dark:text-yellow-200',
-        page: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+        content: 'bg-muted text-foreground',
+        category: 'bg-muted text-foreground',
+        user: 'bg-muted text-foreground',
+        media: 'bg-muted text-foreground',
+        page: 'bg-muted text-foreground',
     };
     return classes[type] || 'bg-secondary text-secondary-foreground';
 };

@@ -5,198 +5,225 @@
         </div>
 
         <!-- Shadcn Tabs -->
-        <div class="bg-card border border-border rounded-lg">
-            <Tabs v-model="activeTab" class="w-full">
-                <div class="p-4 border-b border-border">
-                    <TabsList>
-                        <TabsTrigger value="sitemap">{{ $t('features.seo.tabs.sitemap') }}</TabsTrigger>
-                        <TabsTrigger value="robots">{{ $t('features.seo.tabs.robots') }}</TabsTrigger>
-                        <TabsTrigger value="analysis">{{ $t('features.seo.tabs.analysis') }}</TabsTrigger>
-                        <TabsTrigger value="schema">{{ $t('features.seo.tabs.schema') }}</TabsTrigger>
-                    </TabsList>
-                </div>
+            <Card>
+                <Tabs v-model="activeTab" class="w-full">
+                    <div class="p-4 border-b">
+                        <TabsList>
+                            <TabsTrigger value="sitemap" class="flex items-center gap-2">
+                                <Globe class="w-4 h-4" />
+                                {{ $t('features.seo.tabs.sitemap') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="robots" class="flex items-center gap-2">
+                                <FileText class="w-4 h-4" />
+                                {{ $t('features.seo.tabs.robots') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="analysis" class="flex items-center gap-2">
+                                <Search class="w-4 h-4" />
+                                {{ $t('features.seo.tabs.analysis') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="schema" class="flex items-center gap-2">
+                                <FileJson class="w-4 h-4" />
+                                {{ $t('features.seo.tabs.schema') }}
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
-                <!-- Sitemap Tab -->
-                <TabsContent value="sitemap" class="p-6">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.sitemap.title') }}</h3>
-                        <div class="bg-muted rounded-lg p-4 mb-4">
-                            <p class="text-sm text-muted-foreground mb-2">
-                                {{ $t('features.seo.sitemap.urlLabel') }}: <code class="px-2 py-1 bg-card rounded text-indigo-600">{{ sitemapUrl }}</code>
-                            </p>
-                            <button
-                                @click="copySitemapUrl"
-                                class="text-sm text-indigo-600 hover:text-indigo-800"
-                            >
-                                {{ $t('features.seo.sitemap.copyUrl') }}
-                            </button>
+                    <!-- Sitemap Tab -->
+                    <TabsContent value="sitemap" class="p-6 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.sitemap.title') }}</h3>
+                            <Card class="bg-muted/50 border-none">
+                                <CardContent class="p-4">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-bold">
+                                                {{ $t('features.seo.sitemap.urlLabel') }}
+                                            </p>
+                                            <code class="text-sm font-mono text-indigo-500 truncate block">
+                                                {{ windowLocationOrigin }}{{ sitemapUrl }}
+                                            </code>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            @click="copySitemapUrl"
+                                        >
+                                            <Copy class="w-4 h-4 mr-2" />
+                                            {{ $t('features.seo.sitemap.copyUrl') }}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
-                        <button
+                        <Button
                             @click="generateSitemap"
                             :disabled="generatingSitemap"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
+                            size="lg"
                         >
+                            <Loader2 v-if="generatingSitemap" class="w-4 h-4 mr-2 animate-spin" />
+                            <RefreshCw v-else class="w-4 h-4 mr-2" />
                             {{ generatingSitemap ? $t('features.seo.sitemap.generating') : $t('features.seo.sitemap.generate') }}
-                        </button>
-                    </div>
-                </div>
-                </TabsContent>
+                        </Button>
+                    </TabsContent>
 
-                <!-- Robots.txt Tab -->
-                <TabsContent value="robots" class="p-6">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.robots.title') }}</h3>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.seo.robots.contentLabel') }}
-                            </label>
-                            <textarea
-                                v-model="robotsContent"
-                                rows="15"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                                :placeholder="$t('features.seo.robots.placeholder')"
-                            />
-                        </div>
-                        <div class="flex space-x-3">
-                            <button
-                                @click="saveRobotsTxt"
-                                :disabled="savingRobots"
-                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                            >
-                                {{ savingRobots ? $t('features.seo.robots.saving') : $t('features.seo.robots.save') }}
-                            </button>
-                            <button
-                                @click="fetchRobotsTxt"
-                                class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                            >
-                                {{ $t('features.seo.robots.reload') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                </TabsContent>
-
-                <!-- SEO Analysis Tab -->
-                <TabsContent value="analysis" class="p-6">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.analysis.title') }}</h3>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.seo.analysis.selectContent') }}
-                            </label>
-                            <select
-                                v-model="selectedContentId"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option :value="null">{{ $t('features.seo.analysis.placeholder') }}</option>
-                                <option
-                                    v-for="content in contents"
-                                    :key="content.id"
-                                    :value="content.id"
+                    <!-- Robots.txt Tab -->
+                    <TabsContent value="robots" class="p-6 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.robots.title') }}</h3>
+                            <div class="space-y-2 mb-4">
+                                <Label class="text-sm font-medium">
+                                    {{ $t('features.seo.robots.contentLabel') }}
+                                </Label>
+                                <Textarea
+                                    v-model="robotsContent"
+                                    :rows="15"
+                                    class="font-mono text-sm resize-none"
+                                    :placeholder="$t('features.seo.robots.placeholder')"
+                                />
+                            </div>
+                            <div class="flex gap-3">
+                                <Button
+                                    @click="saveRobotsTxt"
+                                    :disabled="savingRobots"
                                 >
-                                    {{ content.title }}
-                                </option>
-                            </select>
-                        </div>
-                        <button
-                            @click="runAnalysis"
-                            :disabled="analyzing || !selectedContentId"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                        >
-                            {{ analyzing ? $t('features.seo.analysis.analyzing') : $t('features.seo.analysis.run') }}
-                        </button>
-                    </div>
-
-                    <!-- Analysis Results -->
-                    <div v-if="analysisResults" class="mt-6 bg-muted rounded-lg p-6">
-                        <h4 class="text-md font-semibold text-foreground mb-4">{{ $t('features.seo.analysis.results') }}</h4>
-                        <div class="space-y-4">
-                            <div
-                                v-for="(result, key) in analysisResults"
-                                :key="key"
-                                class="bg-card rounded-lg p-4"
-                            >
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-sm font-medium text-foreground capitalize">{{ key.replace(/_/g, ' ') }}</span>
-                                    <span
-                                        :class="[
-                                            'px-2 py-1 text-xs font-semibold rounded-full',
-                                            result.score >= 80 ? 'bg-green-500/20 text-green-400' :
-                                            result.score >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                                            'bg-red-500/20 text-red-400'
-                                        ]"
-                                    >
-                                        {{ $t('features.seo.analysis.score', { score: result.score }) }}
-                                    </span>
-                                </div>
-                                <p class="text-sm text-muted-foreground">{{ result.message }}</p>
-                                <ul v-if="result.suggestions && result.suggestions.length > 0" class="mt-2 space-y-1">
-                                    <li
-                                        v-for="(suggestion, idx) in result.suggestions"
-                                        :key="idx"
-                                        class="text-xs text-muted-foreground"
-                                    >
-                                        • {{ suggestion }}
-                                    </li>
-                                </ul>
+                                    <Loader2 v-if="savingRobots" class="w-4 h-4 mr-2 animate-spin" />
+                                    <Save v-else class="w-4 h-4 mr-2" />
+                                    {{ savingRobots ? $t('features.seo.robots.saving') : $t('features.seo.robots.save') }}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    @click="fetchRobotsTxt"
+                                >
+                                    <RotateCcw class="w-4 h-4 mr-2" />
+                                    {{ $t('features.seo.robots.reload') }}
+                                </Button>
                             </div>
                         </div>
-                    </div>
-                </div>
-                </TabsContent>
+                    </TabsContent>
 
-                <!-- Schema Generation Tab -->
-                <TabsContent value="schema" class="p-6">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.schema.title') }}</h3>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.seo.schema.selectContent') }}
-                            </label>
-                            <select
-                                v-model="selectedContentForSchema"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    <!-- SEO Analysis Tab -->
+                    <TabsContent value="analysis" class="p-6 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.analysis.title') }}</h3>
+                            <div class="space-y-2 mb-4">
+                                <Label>{{ $t('features.seo.analysis.selectContent') }}</Label>
+                                <Select v-model="selectedContentId">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('features.seo.analysis.placeholder')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem 
+                                            v-for="content in contents" 
+                                            :key="content.id" 
+                                            :value="content.id"
+                                        >
+                                            {{ content.title }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button
+                                @click="runAnalysis"
+                                :disabled="analyzing || !selectedContentId"
                             >
-                                <option :value="null">{{ $t('features.seo.analysis.placeholder') }}</option>
-                                <option
-                                    v-for="content in contents"
-                                    :key="content.id"
-                                    :value="content.id"
+                                <Loader2 v-if="analyzing" class="w-4 h-4 mr-2 animate-spin" />
+                                <Activity v-else class="w-4 h-4 mr-2" />
+                                {{ analyzing ? $t('features.seo.analysis.analyzing') : $t('features.seo.analysis.run') }}
+                            </Button>
+                        </div>
+
+                        <!-- Analysis Results -->
+                        <div v-if="analysisResults" class="space-y-4">
+                            <h4 class="text-md font-semibold text-foreground">{{ $t('features.seo.analysis.results') }}</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card
+                                    v-for="(result, key) in analysisResults"
+                                    :key="key"
+                                    class="bg-muted/30"
                                 >
-                                    {{ content.title }}
-                                </option>
-                            </select>
+                                    <CardContent class="p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-foreground capitalize">{{ key.replace(/_/g, ' ') }}</span>
+                                            <Badge
+                                                :variant="result.score >= 80 ? 'default' : result.score >= 60 ? 'secondary' : 'destructive'"
+                                                class="font-bold"
+                                                :class="[
+                                                    result.score >= 80 ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                    result.score >= 60 ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
+                                                    'bg-destructive/10 text-destructive border-destructive/20'
+                                                ]"
+                                            >
+                                                {{ $t('features.seo.analysis.score', { score: result.score }) }}
+                                            </Badge>
+                                        </div>
+                                        <p class="text-sm text-muted-foreground mb-3">{{ result.message }}</p>
+                                        <ul v-if="result.suggestions && result.suggestions.length > 0" class="space-y-1">
+                                            <li
+                                                v-for="(suggestion, idx) in result.suggestions"
+                                                :key="idx"
+                                                class="text-xs text-muted-foreground flex items-start"
+                                            >
+                                                <span class="mr-2 mt-0.5 text-indigo-500">•</span>
+                                                {{ suggestion }}
+                                            </li>
+                                        </ul>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         </div>
-                        <button
-                            @click="generateSchema"
-                            :disabled="generatingSchema || !selectedContentForSchema"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                        >
-                            {{ generatingSchema ? $t('features.seo.schema.generating') : $t('features.seo.schema.generate') }}
-                        </button>
-                    </div>
+                    </TabsContent>
 
-                    <!-- Schema JSON -->
-                    <div v-if="schemaJson" class="mt-6 bg-muted rounded-lg p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-md font-semibold text-foreground">{{ $t('features.seo.schema.jsonTitle') }}</h4>
-                            <button
-                                @click="copySchema"
-                                class="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
+                    <!-- Schema Generation Tab -->
+                    <TabsContent value="schema" class="p-6 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.seo.schema.title') }}</h3>
+                            <div class="space-y-2 mb-4">
+                                <Label>{{ $t('features.seo.schema.selectContent') }}</Label>
+                                <Select v-model="selectedContentForSchema">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('features.seo.analysis.placeholder')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem 
+                                            v-for="content in contents" 
+                                            :key="content.id" 
+                                            :value="content.id"
+                                        >
+                                            {{ content.title }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button
+                                @click="generateSchema"
+                                :disabled="generatingSchema || !selectedContentForSchema"
                             >
-                                {{ $t('features.seo.schema.copy') }}
-                            </button>
+                                <Loader2 v-if="generatingSchema" class="w-4 h-4 mr-2 animate-spin" />
+                                <Code2 v-else class="w-4 h-4 mr-2" />
+                                {{ generatingSchema ? $t('features.seo.schema.generating') : $t('features.seo.schema.generate') }}
+                            </Button>
                         </div>
-                        <pre class="bg-card rounded-lg p-4 overflow-x-auto text-xs font-mono">{{ schemaJson }}</pre>
-                    </div>
-                </div>
-                </TabsContent>
-            </Tabs>
-        </div>
+
+                        <!-- Schema JSON -->
+                        <Card v-if="schemaJson" class="bg-muted/30 overflow-hidden">
+                            <CardHeader class="flex flex-row items-center justify-between py-3 px-6 bg-muted/50 border-b">
+                                <CardTitle class="text-sm font-medium">{{ $t('features.seo.schema.jsonTitle') }}</CardTitle>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    @click="copySchema"
+                                >
+                                    <Copy class="w-3.5 h-3.5 mr-2" />
+                                    {{ $t('features.seo.schema.copy') }}
+                                </Button>
+                            </CardHeader>
+                            <CardContent class="p-0">
+                                <pre class="p-6 overflow-x-auto text-[13px] font-mono leading-relaxed bg-card text-foreground">{{ schemaJson }}</pre>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </Card>
     </div>
 </template>
 
@@ -204,11 +231,30 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Textarea from '../../../components/ui/textarea.vue';
+import Label from '../../../components/ui/label.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
 import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import TabsContent from '../../../components/ui/tabs-content.vue';
+import { 
+    Globe, FileText, Search, 
+    FileJson, RefreshCw, Copy, 
+    Save, RotateCcw, Activity, 
+    Code2, Loader2 
+} from 'lucide-vue-next';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();
 const activeTab = ref('sitemap');
@@ -219,6 +265,7 @@ const tabs = computed(() => [
     { id: 'schema', label: t('features.seo.tabs.schema') },
 ]);
 
+const windowLocationOrigin = ref(window.location.origin);
 const sitemapUrl = ref('/sitemap.xml');
 const generatingSitemap = ref(false);
 const robotsContent = ref('');

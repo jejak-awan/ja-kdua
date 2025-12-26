@@ -74,6 +74,7 @@ class SystemService
                     'total' => \App\Models\Content::count(),
                     'published' => \App\Models\Content::where('status', 'published')->count(),
                     'draft' => \App\Models\Content::where('status', 'draft')->count(),
+                    'archived' => \App\Models\Content::where('status', 'archived')->count(),
                 ],
                 'users' => [
                     'total' => \App\Models\User::count(),

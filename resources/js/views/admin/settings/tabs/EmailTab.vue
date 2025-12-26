@@ -25,33 +25,35 @@
                     <div class="flex flex-wrap gap-4">
                         <!-- Config Validation -->
                         <div class="flex items-center gap-3">
-                            <button
+                            <Button
                                 type="button"
+                                variant="outline"
+                                size="sm"
                                 @click="$emit('validate-config')"
                                 :disabled="validatingConfig"
-                                class="px-4 py-2 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
                             >
                                 {{ validatingConfig ? $t('features.settings.emailTest.validating') : $t('features.settings.emailTest.validate') }}
-                            </button>
+                            </Button>
                             <div v-if="configValidation" class="text-sm">
-                                <span v-if="configValidation.valid" class="text-green-600">✓ {{ $t('features.settings.emailTest.valid') }}</span>
-                                <span v-else class="text-red-600">✗ {{ $t('features.settings.emailTest.invalid') }}</span>
+                                <span v-if="configValidation.valid" class="text-green-600 dark:text-green-500">✓ {{ $t('features.settings.emailTest.valid') }}</span>
+                                <span v-else class="text-destructive">✗ {{ $t('features.settings.emailTest.invalid') }}</span>
                             </div>
                         </div>
                         
                         <!-- SMTP Connection Test -->
                         <div class="flex items-center gap-3">
-                            <button
+                            <Button
                                 type="button"
+                                variant="outline"
+                                size="sm"
                                 @click="$emit('test-connection')"
                                 :disabled="testingConnection"
-                                class="px-4 py-2 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted disabled:opacity-50"
                             >
                                 {{ testingConnection ? $t('features.settings.emailTest.testing') : $t('features.settings.emailTest.testConnection') }}
-                            </button>
+                            </Button>
                             <div v-if="connectionResult" class="text-sm">
-                                <span v-if="connectionResult.connected" class="text-green-600">✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}</span>
-                                <span v-else class="text-red-600">✗ {{ $t('features.settings.emailTest.failed') }}</span>
+                                <span v-if="connectionResult.connected" class="text-green-600 dark:text-green-500">✓ {{ $t('features.settings.emailTest.connected', { host: connectionResult.host, port: connectionResult.port }) }}</span>
+                                <span v-else class="text-destructive">✗ {{ $t('features.settings.emailTest.failed') }}</span>
                             </div>
                         </div>
                     </div>
@@ -59,14 +61,14 @@
                     <!-- Validation Errors/Warnings -->
                     <div v-if="configValidation && (!configValidation.valid || (configValidation.warnings && configValidation.warnings.length > 0))" class="p-4 bg-muted rounded-lg">
                         <div v-if="configValidation.errors && configValidation.errors.length > 0" class="mb-2">
-                            <p class="text-xs font-medium text-red-600 mb-1">{{ $t('features.settings.emailTest.errors') }}</p>
-                            <ul class="text-xs text-red-600 list-disc list-inside">
+                            <p class="text-xs font-medium text-destructive mb-1">{{ $t('features.settings.emailTest.errors') }}</p>
+                            <ul class="text-xs text-destructive list-disc list-inside">
                                 <li v-for="error in configValidation.errors" :key="error">{{ error }}</li>
                             </ul>
                         </div>
                         <div v-if="configValidation.warnings && configValidation.warnings.length > 0">
-                            <p class="text-xs font-medium text-yellow-600 mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
-                            <ul class="text-xs text-yellow-600 list-disc list-inside">
+                            <p class="text-xs font-medium text-yellow-600 dark:text-yellow-500 mb-1">{{ $t('features.settings.emailTest.warnings') }}</p>
+                            <ul class="text-xs text-yellow-600 dark:text-yellow-500 list-disc list-inside">
                                 <li v-for="warning in configValidation.warnings" :key="warning">{{ warning }}</li>
                             </ul>
                         </div>
@@ -83,6 +85,7 @@ import { useI18n } from 'vue-i18n'
 import { MailIcon, UserIcon } from 'lucide-vue-next'
 import SettingGroup from '../../../../components/settings/SettingGroup.vue'
 import SettingField from '../../../../components/settings/SettingField.vue'
+import Button from '../../../../components/ui/button.vue'
 
 const props = defineProps({
     settings: {

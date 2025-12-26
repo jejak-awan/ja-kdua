@@ -2,74 +2,74 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.title') }}</h1>
-            <button
+            <Button
                 @click="showCreateModal = true"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus class="w-4 h-4 mr-2" />
                 {{ t('features.menus.actions.create') }}
-            </button>
+            </Button>
         </div>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div v-if="loading" class="p-6 text-center">
+        <Card>
+            <div v-if="loading" class="p-12 text-center">
+                <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-2" />
                 <p class="text-muted-foreground">{{ t('features.menus.messages.loading') }}</p>
             </div>
 
-            <div v-else-if="menus.length === 0" class="p-6 text-center">
+            <div v-else-if="menus.length === 0" class="p-12 text-center">
+                <MenuSquare class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
                 <p class="text-muted-foreground">{{ t('features.menus.messages.empty') }}</p>
             </div>
 
-            <table v-else class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.menus.headers.name') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.menus.headers.location') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.menus.headers.items') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ t('features.menus.headers.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="menu in menus" :key="menu.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-foreground">{{ menu.name }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            {{ menu.location || '-' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                            {{ menu.items_count || 0 }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <router-link
+            <Table v-else>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>{{ t('features.menus.headers.name') }}</TableHead>
+                        <TableHead>{{ t('features.menus.headers.location') }}</TableHead>
+                        <TableHead>{{ t('features.menus.headers.items') }}</TableHead>
+                        <TableHead class="text-right">{{ t('features.menus.headers.actions') }}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-for="menu in menus" :key="menu.id">
+                        <TableCell class="font-medium">{{ menu.name }}</TableCell>
+                        <TableCell>
+                            <Badge variant="outline" v-if="menu.location">
+                                {{ menu.location }}
+                            </Badge>
+                            <span v-else class="text-muted-foreground">-</span>
+                        </TableCell>
+                        <TableCell>
+                            <Badge variant="secondary">
+                                {{ menu.items_count || 0 }} {{ t('features.menus.headers.items') }}
+                            </Badge>
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end gap-2">
+                                <Button
+                                    as="router-link"
                                     :to="{ name: 'menus.edit', params: { id: menu.id } }"
-                                    class="text-indigo-600 hover:text-indigo-900"
+                                    variant="ghost"
+                                    size="sm"
                                 >
+                                    <Pencil class="w-4 h-4 mr-2" />
                                     {{ t('features.menus.actions.edit') }}
-                                </router-link>
-                                <button
+                                </Button>
+                                <Button
                                     @click="deleteMenu(menu)"
-                                    class="text-red-600 hover:text-red-900"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
+                                    <Trash2 class="w-4 h-4 mr-2" />
                                     {{ t('features.menus.actions.delete') }}
-                                </button>
+                                </Button>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </Card>
 
         <!-- Create Menu Modal -->
         <MenuModal
@@ -84,6 +84,19 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
+import Card from '../../../components/ui/card.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import { 
+    Plus, Pencil, Trash2, 
+    Loader2, MenuSquare 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 import MenuModal from '../../../components/menus/MenuModal.vue';

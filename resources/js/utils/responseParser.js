@@ -18,35 +18,46 @@ export function parseResponse(response) {
     let data = [];
     let pagination = null;
 
-    // Handle paginated response from BaseApiController.paginated()
-    if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-        // Paginated: { success: true, data: { data: [...], pagination: {...} } }
-        data = response.data.data.data;
-        if (response.data.data.pagination) {
-            pagination = response.data.data.pagination;
+    // Helper to extract pagination from an object
+    const extractPagination = (obj) => {
+        if (obj.pagination) return obj.pagination;
+        if (obj.meta?.pagination) return obj.meta.pagination;
+        if (obj.current_page) {
+            return {
+                current_page: obj.current_page,
+                last_page: obj.last_page,
+                from: obj.from,
+                to: obj.to,
+                total: obj.total,
+                per_page: obj.per_page
+            };
         }
-    } 
-    // Handle simple success response from BaseApiController.success()
+        return null;
+    };
+
+    // Handle paginated response from BaseApiController where data is a Paginator object
+    // Structure: { success: true, data: { data: [...], current_page: 1, ... } }
+    // OR Structure: { success: true, data: { data: [...], pagination: {...} } }
+    if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+        data = response.data.data.data;
+        pagination = extractPagination(response.data.data);
+    }
+    // Handle simple success response or where data is the array and pagination is sibling
+    // Structure: { success: true, data: [...], meta: { current_page: 1... } }
+    // OR Structure: { data: [...], current_page: 1... } (Paginator at root)
     else if (response.data?.data && Array.isArray(response.data.data)) {
-        // Simple array: { success: true, data: [...] }
         data = response.data.data;
-    } 
+        // Check if response.data itself has pagination info (common in Resources)
+        pagination = extractPagination(response.data);
+    }
     // Handle direct array response (fallback)
     else if (Array.isArray(response.data)) {
         data = response.data;
     }
-    // Handle alternative paginated format
+    // Handle alternative paginated format (items key)
     else if (response.data?.items && Array.isArray(response.data.items)) {
         data = response.data.items;
-        if (response.data.current_page) {
-            pagination = {
-                current_page: response.data.current_page,
-                last_page: response.data.last_page,
-                from: response.data.from,
-                to: response.data.to,
-                total: response.data.total,
-            };
-        }
+        pagination = extractPagination(response.data);
     }
     // Handle single object response
     else if (response.data?.data && !Array.isArray(response.data.data)) {

@@ -12,12 +12,13 @@
                     <p class="text-sm text-muted-foreground mt-1">{{ t('features.login_history.description') }}</p>
                 </div>
             </div>
-            <button
+            <Button
+                variant="destructive"
+                variant-type="outline"
                 @click="clearLogs"
-                class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20"
             >
                 {{ t('features.system.logs.clear') }}
-            </button>
+            </Button>
         </div>
 
         <!-- Statistics -->
@@ -49,54 +50,61 @@
                 <!-- Filters Row -->
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div class="flex flex-wrap items-center gap-3">
-                        <select
+                        <Select
                             v-model="userFilter"
-                            @change="fetchHistory"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            @update:model-value="fetchHistory"
                         >
-                            <option value="">{{ t('features.login_history.filters.allUsers') }}</option>
-                            <option v-for="user in users" :key="user.id" :value="user.id">
-                                {{ user.name }}
-                            </option>
-                        </select>
-                        <select
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue :placeholder="t('features.login_history.filters.allUsers')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ t('features.login_history.filters.allUsers') }}</SelectItem>
+                                <SelectItem v-for="user in users" :key="user.id" :value="String(user.id)">
+                                    {{ user.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
                             v-model="statusFilter"
-                            @change="fetchHistory"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            @update:model-value="fetchHistory"
                         >
-                            <option value="">{{ t('features.login_history.filters.allStatus') }}</option>
-                            <option value="success">{{ t('features.login_history.status.success') }}</option>
-                            <option value="failed">{{ t('features.login_history.status.failed') }}</option>
-                        </select>
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue :placeholder="t('features.login_history.filters.allStatus')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ t('features.login_history.filters.allStatus') }}</SelectItem>
+                                <SelectItem value="success">{{ t('features.login_history.status.success') }}</SelectItem>
+                                <SelectItem value="failed">{{ t('features.login_history.status.failed') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-muted-foreground">{{ t('features.login_history.filters.dateFrom') }}:</label>
-                            <input
+                            <Input
                                 v-model="dateFrom"
                                 type="date"
                                 @change="fetchHistory"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                            >
+                                class="w-36"
+                            />
                         </div>
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-muted-foreground">{{ t('features.login_history.filters.dateTo') }}:</label>
-                            <input
+                            <Input
                                 v-model="dateTo"
                                 type="date"
                                 @change="fetchHistory"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                            >
+                                class="w-36"
+                            />
                         </div>
                     </div>
-                    <button
+                    <Button
                         @click="exportHistory"
                         :disabled="exporting"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         {{ exporting ? t('features.login_history.export.exporting') : t('features.login_history.export.button') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -141,7 +149,7 @@
                         <div class="text-right">
                             <p class="text-sm text-foreground">{{ entry.ip_address }}</p>
                             <p class="text-xs text-muted-foreground">{{ formatDate(entry.login_at) }}</p>
-                            <p v-if="entry.failure_reason" class="text-xs text-red-500">{{ entry.failure_reason }}</p>
+                            <p v-if="entry.failure_reason" class="text-xs text-destructive">{{ entry.failure_reason }}</p>
                         </div>
                     </div>
                 </div>
@@ -153,15 +161,19 @@
                     {{ t('features.login_history.pagination.showing', { count: history.length, total: totalRecords }) }}
                 </p>
                 <div class="flex items-center gap-2">
-                    <select
-                        v-model="perPage"
-                        @change="fetchHistory"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
+                    <Select
+                        :model-value="String(perPage)"
+                        @update:model-value="perPage = Number($event); fetchHistory()"
                     >
-                        <option :value="25">25</option>
-                        <option :value="50">50</option>
-                        <option :value="100">100</option>
-                    </select>
+                        <SelectTrigger class="w-[80px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </div>
@@ -172,6 +184,13 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 
@@ -192,8 +211,8 @@ const fetchHistory = async () => {
     try {
         const params = new URLSearchParams();
         params.append('per_page', perPage.value);
-        if (userFilter.value) params.append('user_id', userFilter.value);
-        if (statusFilter.value) params.append('status', statusFilter.value);
+        if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
+        if (statusFilter.value && statusFilter.value !== 'all') params.append('status', statusFilter.value);
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 
@@ -259,8 +278,8 @@ const exportHistory = async () => {
     exporting.value = true;
     try {
         const params = new URLSearchParams();
-        if (userFilter.value) params.append('user_id', userFilter.value);
-        if (statusFilter.value) params.append('status', statusFilter.value);
+        if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
+        if (statusFilter.value && statusFilter.value !== 'all') params.append('status', statusFilter.value);
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 

@@ -1,87 +1,87 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">
-                        {{ fieldGroup ? t('features.developer.custom_fields.groups.modal.title_edit') : t('features.developer.custom_fields.groups.modal.title_create') }}
-                    </h3>
-                    <button
-                        @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ fieldGroup ? t('features.developer.custom_fields.groups.modal.title_edit') : t('features.developer.custom_fields.groups.modal.title_create') }}
+                </DialogTitle>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="space-y-4">
+                <div class="space-y-2">
+                    <Label for="name">
+                        {{ t('features.developer.custom_fields.groups.modal.name_label') }} <span class="text-destructive">*</span>
+                    </Label>
+                    <Input
+                        id="name"
+                        v-model="form.name"
+                        required
+                        :placeholder="t('features.developer.custom_fields.groups.modal.name_placeholder')"
+                    />
                 </div>
 
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.developer.custom_fields.groups.modal.name_label') }} <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="t('features.developer.custom_fields.groups.modal.name_placeholder')"
-                        >
-                    </div>
+                <div class="space-y-2">
+                    <Label for="description">
+                        {{ t('features.developer.custom_fields.groups.modal.description_label') }}
+                    </Label>
+                    <Textarea
+                        id="description"
+                        v-model="form.description"
+                        rows="3"
+                        :placeholder="t('features.developer.custom_fields.groups.modal.description_placeholder')"
+                    />
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.developer.custom_fields.groups.modal.description_label') }}
-                        </label>
-                        <textarea
-                            v-model="form.description"
-                            rows="3"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="t('features.developer.custom_fields.groups.modal.description_placeholder')"
-                        />
-                    </div>
+                <div class="space-y-2">
+                    <Label for="attachable_type">
+                        {{ t('features.developer.custom_fields.groups.modal.attach_label') }}
+                    </Label>
+                    <Select v-model="form.attachable_type">
+                        <SelectTrigger id="attachable_type">
+                            <SelectValue :placeholder="t('features.developer.custom_fields.groups.modal.attach_options.none')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem :value="null">{{ t('features.developer.custom_fields.groups.modal.attach_options.none') }}</SelectItem>
+                            <SelectItem value="App\\Models\\Content">{{ t('features.developer.custom_fields.groups.modal.attach_options.content') }}</SelectItem>
+                            <SelectItem value="App\\Models\\Category">{{ t('features.developer.custom_fields.groups.modal.attach_options.category') }}</SelectItem>
+                            <SelectItem value="App\\Models\\Media">{{ t('features.developer.custom_fields.groups.modal.attach_options.media') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.developer.custom_fields.groups.modal.attach_label') }}
-                        </label>
-                        <select
-                            v-model="form.attachable_type"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option :value="null">{{ t('features.developer.custom_fields.groups.modal.attach_options.none') }}</option>
-                            <option value="App\\Models\\Content">{{ t('features.developer.custom_fields.groups.modal.attach_options.content') }}</option>
-                            <option value="App\\Models\\Category">{{ t('features.developer.custom_fields.groups.modal.attach_options.category') }}</option>
-                            <option value="App\\Models\\Media">{{ t('features.developer.custom_fields.groups.modal.attach_options.media') }}</option>
-                        </select>
-                    </div>
-                </form>
-
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
-                        @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                    >
+                <DialogFooter>
+                    <Button variant="outline" type="button" @click="$emit('close')">
                         {{ t('features.developer.custom_fields.groups.modal.cancel') }}
-                    </button>
-                    <button
-                        @click="handleSubmit"
-                        :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                    >
+                    </Button>
+                    <Button type="submit" :disabled="saving">
+                        <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? t('features.developer.custom_fields.groups.modal.saving') : (fieldGroup ? t('features.developer.custom_fields.groups.modal.update') : t('features.developer.custom_fields.groups.modal.create')) }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Dialog from '../../components/ui/dialog.vue';
+import DialogContent from '../../components/ui/dialog-content.vue';
+import DialogHeader from '../../components/ui/dialog-header.vue';
+import DialogTitle from '../../components/ui/dialog-title.vue';
+import DialogFooter from '../../components/ui/dialog-footer.vue';
+import Button from '../../components/ui/button.vue';
+import Input from '../../components/ui/input.vue';
+import Label from '../../components/ui/label.vue';
+import Textarea from '../../components/ui/textarea.vue';
+import Select from '../../components/ui/select.vue';
+import SelectTrigger from '../../components/ui/select-trigger.vue';
+import SelectValue from '../../components/ui/select-value.vue';
+import SelectContent from '../../components/ui/select-content.vue';
+import SelectItem from '../../components/ui/select-item.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

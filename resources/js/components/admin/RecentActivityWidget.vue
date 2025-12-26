@@ -1,78 +1,96 @@
 <template>
-    <div class="bg-card rounded-lg border border-border h-full flex flex-col">
-        <div class="px-6 py-4 border-b border-border flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-foreground flex items-center">
-                <svg class="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ $t('features.dashboard.widgets.recentActivity.title') }}
-            </h3>
-            <span class="text-xs text-muted-foreground flex items-center">
-                <span class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span>
-                {{ $t('features.dashboard.widgets.recentActivity.live') }}
-            </span>
-        </div>
+    <Card class="flex flex-col h-full overflow-hidden border-none shadow-sm">
+        <CardHeader class="flex flex-row items-center justify-between pb-4 space-y-0">
+            <div class="space-y-1">
+                <CardTitle class="text-xl font-bold flex items-center gap-2">
+                    <History class="w-5 h-5 text-indigo-500" />
+                    {{ $t('features.dashboard.widgets.recentActivity.title') }}
+                </CardTitle>
+                <CardDescription v-if="activities.length > 0">
+                    {{ $t('features.dashboard.widgets.recentActivity.description') || 'Latest system events' }}
+                </CardDescription>
+            </div>
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-xs font-medium uppercase tracking-wider">{{ $t('features.dashboard.widgets.recentActivity.live') }}</span>
+            </div>
+        </CardHeader>
 
-        <div class="flex-1 overflow-y-auto p-0">
-            <div v-if="loading && activities.length === 0" class="p-6 text-center text-muted-foreground">
-                {{ $t('features.dashboard.widgets.recentActivity.loading') }}
+        <CardContent class="flex-1 overflow-y-auto p-0 border-t border-border/40">
+            <div v-if="loading && activities.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-3">
+                <Loader2 class="w-8 h-8 animate-spin opacity-50" />
+                <p>{{ $t('features.dashboard.widgets.recentActivity.loading') }}</p>
             </div>
             
-            <div v-else-if="activities.length === 0" class="p-6 text-center text-muted-foreground">
-                {{ $t('features.dashboard.widgets.recentActivity.empty') }}
+            <div v-else-if="activities.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-3">
+                <div class="p-4 rounded-full bg-muted/30">
+                    <ZapOff class="w-8 h-8 opacity-20" />
+                </div>
+                <p>{{ $t('features.dashboard.widgets.recentActivity.empty') }}</p>
             </div>
 
-            <div v-else class="divide-y divide-gray-100 dark:divide-gray-700">
-                <div v-for="activity in activities" :key="activity.id" class="p-4 hover:bg-muted dark:hover:bg-gray-750 transition-colors">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0 mt-1">
-                            <span 
-                                class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-white dark:ring-gray-800"
-                                :class="getUserAvatarClass(activity)"
-                            >
-                                {{ getUserInitials(activity.user?.name) }}
-                            </span>
+            <div v-else class="divide-y divide-border/40">
+                <div v-for="activity in activities" :key="activity.id" class="p-4 hover:bg-muted/30 transition-colors group">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <Avatar class="h-10 w-10 ring-2 ring-background group-hover:ring-muted transition-all">
+                                <AvatarFallback :class="getUserAvatarClass(activity)" class="font-bold text-xs">
+                                    {{ getUserInitials(activity.user?.name) }}
+                                </AvatarFallback>
+                            </Avatar>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-foreground truncate">
-                                {{ activity.user?.name || 'System' }}
-                            </p>
-                            <p class="text-sm text-muted-foreground">
-                                <span 
-                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium mr-1"
+                        <div class="flex-1 min-w-0 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-semibold text-foreground truncate">
+                                    {{ activity.user?.name || 'System' }}
+                                </p>
+                                <span class="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    <Clock class="w-3 h-3" />
+                                    {{ formatTime(activity.created_at) }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-muted-foreground flex items-center flex-wrap gap-2">
+                                <Badge 
+                                    variant="outline"
+                                    class="h-5 px-1.5 text-[10px] font-bold uppercase tracking-wider border-none"
                                     :class="getActionBadgeClass(activity.action || activity.type)"
                                 >
                                     {{ activity.action || activity.type || 'unknown' }}
-                                </span>
-                                {{ activity.description }}
-                            </p>
-                             <p class="text-xs text-muted-foreground mt-1 flex items-center">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ formatTime(activity.created_at) }}
+                                </Badge>
+                                <span class="line-clamp-1">{{ activity.description }}</span>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </CardContent>
         
-        <div class="p-3 border-t border-border bg-muted/50 rounded-b-lg">
-            <router-link :to="{ name: 'activity-logs' }" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium flex items-center justify-center">
-                {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-            </router-link>
+        <div class="p-3 bg-muted/10 border-t border-border/40">
+            <Button variant="ghost" size="sm" class="w-full text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/5 group" asChild>
+                <router-link :to="{ name: 'activity-logs' }" class="flex items-center justify-center">
+                    {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
+                    <ArrowRight class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </router-link>
+            </Button>
         </div>
-    </div>
+    </Card>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
+import { parseResponse } from '@/utils/responseParser';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardTitle from '@/components/ui/card-title.vue';
+import CardDescription from '@/components/ui/card-description.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import Button from '@/components/ui/button.vue';
+import Badge from '@/components/ui/badge.vue';
+import Avatar from '@/components/ui/avatar.vue';
+import AvatarFallback from '@/components/ui/avatar-fallback.vue';
+import { History, Clock, ArrowRight, Loader2, ZapOff } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -81,22 +99,19 @@ const loading = ref(false);
 let refreshInterval = null;
 
 const fetchActivities = async () => {
-    // Stop all activity if session is terminated
     if (window.__isSessionTerminated) {
         if (refreshInterval) clearInterval(refreshInterval);
         return;
     }
 
-    // Only set loading on first load
     if (activities.value.length === 0) {
         loading.value = true;
     }
     
     try {
-        // Fetch last 10 activities
-        const response = await api.get('/admin/cms/activity-logs', { params: { per_page: 10 } });
-        const data = response.data?.data || response.data || [];
-        activities.value = Array.isArray(data) ? data : [];
+        const response = await api.get('/admin/cms/activity-logs', { params: { per_page: 6 } });
+        const { data } = parseResponse(response);
+        activities.value = data || [];
     } catch (error) {
         console.error('Failed to fetch recent activities:', error);
     } finally {
@@ -108,7 +123,7 @@ const formatTime = (date) => {
     if (!date) return '';
     const d = new Date(date);
     const now = new Date();
-    const diff = Math.floor((now - d) / 1000); // seconds
+    const diff = Math.floor((now - d) / 1000);
 
     if (diff < 60) return t('features.dashboard.widgets.recentActivity.time.justNow');
     if (diff < 3600) return t('features.dashboard.widgets.recentActivity.time.ago', { time: `${Math.floor(diff / 60)}m` });
@@ -128,32 +143,31 @@ const getUserInitials = (name) => {
 };
 
 const getUserAvatarClass = (activity) => {
-    // Generate consistent color based on user ID or name char code
     const id = activity.user_id || 0;
     const colors = [
-        'bg-indigo-100 text-indigo-800',
-        'bg-green-500/20 text-green-400',
-        'bg-blue-500/20 text-blue-400',
-        'bg-yellow-500/20 text-yellow-400',
-        'bg-purple-100 text-purple-800',
-        'bg-pink-100 text-pink-800',
-        'bg-red-500/20 text-red-400',
+        'bg-indigo-500/10 text-indigo-500',
+        'bg-emerald-500/10 text-emerald-500',
+        'bg-blue-500/10 text-blue-500',
+        'bg-amber-500/10 text-amber-500',
+        'bg-purple-500/10 text-purple-500',
+        'bg-rose-500/10 text-rose-500',
+        'bg-cyan-500/10 text-cyan-500',
     ];
     return colors[id % colors.length];
 };
 
 const getActionBadgeClass = (action) => {
     const a = (action || '').toLowerCase();
-    if (a.includes('create')) return 'bg-green-500/20 text-green-400 dark:bg-green-900/30 dark:text-green-400';
-    if (a.includes('update')) return 'bg-blue-500/20 text-blue-400 dark:bg-blue-900/30 dark:text-blue-400';
-    if (a.includes('delete')) return 'bg-red-500/20 text-red-400 dark:bg-red-900/30 dark:text-red-400';
-    if (a.includes('login') || a.includes('logout')) return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-    return 'bg-secondary text-secondary-foreground';
+    if (a.includes('create')) return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+    if (a.includes('update')) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+    if (a.includes('delete')) return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+    if (a.includes('login') || a.includes('logout')) return 'bg-purple-500/10 text-purple-600 dark:text-purple-400';
+    return 'bg-muted text-muted-foreground';
 };
 
 onMounted(() => {
     fetchActivities();
-    refreshInterval = setInterval(fetchActivities, 30000); // 30s refresh
+    refreshInterval = setInterval(fetchActivities, 30000);
 });
 
 onUnmounted(() => {

@@ -23,10 +23,9 @@
                                 <label class="block text-sm font-medium text-foreground mb-2">
                                     {{ $t('features.profile.form.name') }}
                                 </label>
-                                <input
+                                <Input
                                     v-model="profileForm.name"
                                     type="text"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                             </div>
 
@@ -34,10 +33,9 @@
                                 <label class="block text-sm font-medium text-foreground mb-2">
                                     {{ $t('features.profile.form.email') }}
                                 </label>
-                                <input
+                                <Input
                                     v-model="profileForm.email"
                                     type="email"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                             </div>
 
@@ -45,10 +43,9 @@
                                 <label class="block text-sm font-medium text-foreground mb-2">
                                     {{ $t('features.profile.form.phone') }}
                                 </label>
-                                <input
+                                <Input
                                     v-model="profileForm.phone"
                                     type="text"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                             </div>
 
@@ -56,10 +53,9 @@
                                 <label class="block text-sm font-medium text-foreground mb-2">
                                     {{ $t('features.profile.form.location') }}
                                 </label>
-                                <input
+                                <Input
                                     v-model="profileForm.location"
                                     type="text"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                             </div>
                         </div>
@@ -68,20 +64,18 @@
                             <label class="block text-sm font-medium text-foreground mb-2">
                                 {{ $t('features.profile.form.bio') }}
                             </label>
-                            <textarea
+                            <Textarea
                                 v-model="profileForm.bio"
                                 rows="4"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
 
                         <div class="flex justify-end">
-                            <button
+                            <Button
                                 :disabled="saving"
-                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                             >
                                 {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>
@@ -95,10 +89,9 @@
                             <label class="block text-sm font-medium text-foreground mb-2">
                                 {{ $t('features.profile.form.currentPassword') }}
                             </label>
-                            <input
+                            <Input
                                 v-model="passwordForm.current_password"
                                 type="password"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
 
@@ -106,10 +99,9 @@
                             <label class="block text-sm font-medium text-foreground mb-2">
                                 {{ $t('features.profile.form.newPassword') }}
                             </label>
-                            <input
+                            <Input
                                 v-model="passwordForm.password"
                                 type="password"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                             <p class="mt-1 text-xs text-muted-foreground">
                                 {{ $t('features.profile.form.passwordHelp') }}
@@ -120,19 +112,18 @@
                             <label class="block text-sm font-medium text-foreground mb-2">
                                 {{ $t('features.profile.form.confirmPassword') }}
                             </label>
-                            <input
+                            <Input
                                 v-model="passwordForm.password_confirmation"
                                 type="password"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
 
                         <div class="flex justify-end">
-                            <button
-                                class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
+                            <Button
+                                :disabled="changingPassword"
                             >
                                 {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>
@@ -161,6 +152,9 @@ import Tabs from '../../components/ui/tabs.vue';
 import TabsList from '../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../components/ui/tabs-trigger.vue';
 import TabsContent from '../../components/ui/tabs-content.vue';
+import Input from '../../components/ui/input.vue';
+import Button from '../../components/ui/button.vue';
+import Textarea from '../../components/ui/textarea.vue';
 
 const { t } = useI18n();
 

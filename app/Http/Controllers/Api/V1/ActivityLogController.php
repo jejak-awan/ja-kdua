@@ -60,7 +60,7 @@ class ActivityLogController extends BaseApiController
             }
 
             // Pagination with customizable per_page
-            $perPage = min(max((int) $request->input('per_page', 50), 10), 500);
+            $perPage = min(max((int) $request->input('per_page', 50), 1), 500);
             $logs = $query->paginate($perPage);
 
             return $this->paginated($logs, 'Activity logs retrieved successfully');

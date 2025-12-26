@@ -1,63 +1,51 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ t('features.menus.form.createTitle') }}</h3>
-                    <button
-                        @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>{{ t('features.menus.form.createTitle') }}</DialogTitle>
+            </DialogHeader>
 
-                <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.menus.form.name') }} <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="t('features.menus.form.placeholders.name')"
-                        >
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.menus.form.location') }}
-                        </label>
-                        <input
-                            v-model="form.location"
-                            type="text"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            :placeholder="t('features.menus.form.placeholders.location')"
-                        >
-                    </div>
-                </form>
-
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
-                        @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                    >
-                        {{ t('features.menus.actions.cancel') }}
-                    </button>
-                    <button
-                        @click="handleSubmit"
-                        :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                    >
-                        {{ saving ? t('features.menus.actions.creating') : t('features.menus.actions.createAction') }}
-                    </button>
+            <form @submit.prevent="handleSubmit" class="space-y-4 py-4">
+                <div class="space-y-2">
+                    <Label>
+                        {{ t('features.menus.form.name') }} <span class="text-red-500">*</span>
+                    </Label>
+                    <Input
+                        v-model="form.name"
+                        type="text"
+                        required
+                        :placeholder="t('features.menus.form.placeholders.name')"
+                    />
                 </div>
-            </div>
-        </div>
-    </div>
+                <div class="space-y-2">
+                    <Label>
+                        {{ t('features.menus.form.location') }}
+                    </Label>
+                    <Input
+                        v-model="form.location"
+                        type="text"
+                        :placeholder="t('features.menus.form.placeholders.location')"
+                    />
+                </div>
+            </form>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                >
+                    {{ t('features.menus.actions.cancel') }}
+                </Button>
+                <Button
+                    @click="handleSubmit"
+                    :disabled="saving"
+                >
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ saving ? t('features.menus.actions.creating') : t('features.menus.actions.createAction') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
@@ -65,6 +53,15 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Label from '../ui/label.vue';
+import { Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

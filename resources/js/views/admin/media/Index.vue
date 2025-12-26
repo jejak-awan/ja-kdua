@@ -5,40 +5,43 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.media.title') }}</h1>
             <div class="flex items-center space-x-3">
                 <!-- View Toggle -->
-                <div class="flex border border-input bg-card text-foreground rounded-md">
-                    <button
+                <div class="flex items-center border border-input bg-card rounded-md p-1">
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         @click="viewMode = 'grid'"
                         :class="[
-                            'px-3 py-2',
-                            viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
+                            'h-8 w-8 p-0',
+                            viewMode === 'grid' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
                         ]"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                         </svg>
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         @click="viewMode = 'list'"
                         :class="[
-                            'px-3 py-2',
-                            viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
+                            'h-8 w-8 p-0',
+                            viewMode === 'list' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
                         ]"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
-                    </button>
+                    </Button>
                 </div>
                 <!-- Upload Button -->
-                <button
+                <Button
                     @click="showUploadModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
                 >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     {{ $t('features.media.upload') }}
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -47,33 +50,42 @@
             <div class="w-64 bg-card border border-border rounded-lg p-4">
                 <h2 class="text-sm font-semibold text-foreground mb-3">{{ $t('features.media.folders') }}</h2>
                 <div class="space-y-1">
-                    <button
+                    <Button
+                        variant="ghost"
                         @click="selectedFolder = null"
                         :class="[
-                            'w-full text-left px-3 py-2 rounded-md text-sm',
-                            selectedFolder === null ? 'bg-indigo-100 text-indigo-700' : 'text-foreground hover:bg-muted'
+                            'w-full justify-start text-sm px-3 py-2',
+                            selectedFolder === null ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground hover:bg-accent'
                         ]"
                     >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
                         {{ $t('features.media.allMedia') }}
-                    </button>
+                    </Button>
                     <div v-for="folder in folders" :key="folder.id" class="pl-4">
-                        <button
+                        <Button
+                            variant="ghost"
                             @click="selectedFolder = folder.id"
                             :class="[
-                                'w-full text-left px-3 py-2 rounded-md text-sm',
-                                selectedFolder === folder.id ? 'bg-indigo-100 text-indigo-700' : 'text-foreground hover:bg-muted'
+                                'w-full justify-start text-sm px-3 py-2',
+                                selectedFolder === folder.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground hover:bg-accent'
                             ]"
                         >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
                             {{ folder.name }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
-                <button
+                <Button
+                    variant="outline"
                     @click="showFolderModal = true"
-                    class="mt-4 w-full px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 border border-indigo-300 rounded-md hover:bg-indigo-50"
+                    class="mt-4 w-full"
                 >
                     + {{ $t('features.media.newFolder') }}
-                </button>
+                </Button>
             </div>
 
             <!-- Main Content -->
@@ -82,47 +94,47 @@
                 <div class="bg-card border border-border rounded-lg p-4 mb-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <input
+                            <Input
                                 v-model="search"
                                 type="text"
                                 :placeholder="$t('features.media.search')"
-                                class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <select
-                                v-model="mimeFilter"
-                                class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            >
-                                <option value="">{{ $t('features.media.filter.allTypes') }}</option>
-                                <option value="image">{{ $t('features.media.filter.images') }}</option>
-                                <option value="video">{{ $t('features.media.filter.videos') }}</option>
-                                <option value="application">{{ $t('features.media.filter.documents') }}</option>
-                            </select>
-                            <select
-                                v-model="usageFilter"
-                                class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            >
-                                <option value="">{{ $t('features.media.filter.allStatus') }}</option>
-                                <option value="used">{{ $t('features.media.filter.used') }}</option>
-                                <option value="unused">{{ $t('features.media.filter.unused') }}</option>
-                            </select>
+                                class="flex-1"
+                            />
+                            <Select v-model="mimeFilter">
+                                <SelectTrigger class="w-[180px]">
+                                    <SelectValue :placeholder="$t('features.media.filter.allTypes')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">{{ $t('features.media.filter.allTypes') }}</SelectItem>
+                                    <SelectItem value="image">{{ $t('features.media.filter.images') }}</SelectItem>
+                                    <SelectItem value="video">{{ $t('features.media.filter.videos') }}</SelectItem>
+                                    <SelectItem value="application">{{ $t('features.media.filter.documents') }}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select v-model="usageFilter">
+                                <SelectTrigger class="w-[180px]">
+                                    <SelectValue :placeholder="$t('features.media.filter.allStatus')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">{{ $t('features.media.filter.allStatus') }}</SelectItem>
+                                    <SelectItem value="used">{{ $t('features.media.filter.used') }}</SelectItem>
+                                    <SelectItem value="unused">{{ $t('features.media.filter.unused') }}</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div v-if="selectedMedia.length > 0" class="flex items-center space-x-2 ml-4">
-                            <span class="text-sm text-foreground">{{ t('features.media.selected', { count: selectedMedia.length }) }}</span>
-                            <div class="relative">
-                                <select
-                                    v-model="bulkAction"
-                                    @change="handleBulkAction"
-                                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option value="">{{ $t('features.media.actions.bulk') }}</option>
-                                    <option value="delete">{{ $t('features.media.actions.delete') }}</option>
-                                    <option value="move">{{ $t('features.media.actions.move') }}</option>
-                                    <option value="update_alt">{{ $t('features.media.actions.updateAlt') }}</option>
-                                    <option value="download">{{ $t('features.media.actions.downloadZip') }}</option>
-                                </select>
-                            </div>
+                        <div v-if="selectedMedia.length > 0" class="flex items-center space-x-3 ml-4">
+                            <span class="text-sm font-medium text-muted-foreground">{{ t('features.media.selected', { count: selectedMedia.length }) }}</span>
+                            <Select v-model="bulkAction" @update:modelValue="handleBulkAction">
+                                <SelectTrigger class="w-[180px]">
+                                    <SelectValue :placeholder="$t('features.media.actions.bulk')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="delete">{{ $t('features.media.actions.delete') }}</SelectItem>
+                                    <SelectItem value="move">{{ $t('features.media.actions.move') }}</SelectItem>
+                                    <SelectItem value="update_alt">{{ $t('features.media.actions.updateAlt') }}</SelectItem>
+                                    <SelectItem value="download">{{ $t('features.media.actions.downloadZip') }}</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>
@@ -150,12 +162,10 @@
                     >
                         <!-- Checkbox -->
                         <div class="absolute top-2 left-2 z-10">
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 :checked="isMediaSelected(media.id)"
-                                @click.stop="toggleMediaSelection(media)"
-                                class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                            >
+                                @update:checked="toggleMediaSelection(media)"
+                            />
                         </div>
                         <div class="aspect-square bg-secondary flex items-center justify-center relative group" :data-media-id="media.id">
                             <LazyImage
@@ -171,37 +181,38 @@
                                 </svg>
                             </div>
                             <!-- Quick Actions Overlay -->
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <div class="flex space-x-2">
-                                    <button
-                                        @click.stop="viewMedia(media)"
-                                        class="p-2 bg-card rounded-md text-foreground hover:bg-accent"
-                                        :title="$t('features.media.actions.view')"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click.stop="editMedia(media)"
-                                        class="p-2 bg-card rounded-md text-foreground hover:bg-accent"
-                                        :title="$t('features.media.actions.edit')"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click.stop="deleteMedia(media)"
-                                        class="p-2 bg-card rounded-md text-red-600 hover:bg-red-50"
-                                        :title="$t('features.media.actions.delete')"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
+                            <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                                <Button
+                                    variant="secondary"
+                                    size="icon"
+                                    @click.stop="viewMedia(media)"
+                                    :title="$t('features.media.actions.view')"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    size="icon"
+                                    @click.stop="editMedia(media)"
+                                    :title="$t('features.media.actions.edit')"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    @click.stop="deleteMedia(media)"
+                                    :title="$t('features.media.actions.delete')"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </Button>
                             </div>
                         </div>
                         <div class="p-3">
@@ -217,12 +228,10 @@
                         <thead class="bg-muted">
                             <tr>
                                 <th class="px-6 py-3 text-left">
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         :checked="allMediaSelected"
-                                        @change="toggleSelectAll"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                                    >
+                                        @update:checked="toggleSelectAll"
+                                    />
                                 </th>
 
                                 <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
@@ -248,12 +257,10 @@
                         <tbody class="bg-card divide-y divide-border">
                             <tr v-for="media in mediaList" :key="media.id" class="hover:bg-muted">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <input
-                                        type="checkbox"
-                                        :value="media.id"
-                                        v-model="selectedMedia"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                                    >
+                                    <Checkbox
+                                        :checked="isMediaSelected(media.id)"
+                                        @update:checked="toggleMediaSelection(media)"
+                                    />
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="w-16 h-16 bg-secondary rounded flex items-center justify-center" :data-media-id="media.id">
@@ -274,9 +281,9 @@
                                     <div v-if="media.alt" class="text-sm text-muted-foreground">{{ media.alt }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-secondary text-secondary-foreground">
+                                    <Badge variant="secondary">
                                         {{ media.mime_type }}
-                                    </span>
+                                    </Badge>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                     {{ formatFileSize(media.size) }}
@@ -286,24 +293,30 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <button
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             @click="viewMedia(media)"
                                             class="text-indigo-600 hover:text-indigo-900"
                                         >
                                             {{ $t('features.media.actions.view') }}
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             @click="editMedia(media)"
                                             class="text-indigo-600 hover:text-indigo-900"
                                         >
                                             {{ $t('features.media.actions.edit') }}
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             @click="deleteMedia(media)"
-                                            class="text-red-600 hover:text-red-900"
+                                            class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                         >
                                             {{ $t('features.media.actions.delete') }}
-                                        </button>
+                                        </Button>
                                     </div>
                                 </td>
                             </tr>
@@ -317,20 +330,22 @@
                         {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
                     </div>
                     <div class="flex space-x-2">
-                        <button
+                        <Button
+                            variant="outline"
+                            size="sm"
                             @click="changePage(pagination.current_page - 1)"
                             :disabled="pagination.current_page === 1"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                         >
                             {{ $t('common.pagination.previous') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
                             @click="changePage(pagination.current_page + 1)"
                             :disabled="pagination.current_page === pagination.last_page"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                         >
                             {{ $t('common.pagination.next') }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -390,27 +405,25 @@
                         <label class="block text-sm font-medium text-foreground mb-2">
                             {{ t('features.media.modals.updateAlt.label') }}
                         </label>
-                        <input
+                        <Input
                             v-model="bulkAltText"
                             type="text"
                             :placeholder="t('features.media.modals.updateAlt.placeholder')"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
                     <div class="flex justify-end space-x-3">
-                        <button
+                        <Button
+                            variant="outline"
                             @click="showUpdateAltModal = false; bulkAltText = ''"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                         >
                             {{ t('features.media.modals.updateAlt.cancel') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="handleUpdateAltText"
                             :disabled="bulkProcessing"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                         >
                             {{ bulkProcessing ? t('features.media.modals.updateAlt.updating') : t('features.media.modals.updateAlt.update') }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -446,6 +459,15 @@ import FolderModal from '../../../components/media/FolderModal.vue';
 import MoveToFolderModal from '../../../components/media/MoveToFolderModal.vue';
 import LazyImage from '../../../components/LazyImage.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import Badge from '../../../components/ui/badge.vue';
 
 const { t } = useI18n();
 const viewMode = ref('grid');

@@ -1,114 +1,125 @@
 <template>
     <div>
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-foreground">Cache Management</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">Cache Management</h1>
+            <p class="text-sm text-muted-foreground mt-1">Manage and monitor system cache performance</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                        </svg>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-indigo-500/10 rounded-xl">
+                            <Activity class="h-6 w-6 text-indigo-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Cache Status</p>
+                            <Badge :variant="cacheStats.status === 'Active' ? 'success' : 'secondary'">
+                                {{ cacheStats.status || 'Active' }}
+                            </Badge>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">Cache Status</p>
-                        <p class="text-2xl font-semibold text-foreground">
-                            {{ cacheStats.status || 'Active' }}
-                        </p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-emerald-500/10 rounded-xl">
+                            <Target class="h-6 w-6 text-emerald-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Cache Hits</p>
+                            <p class="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                                {{ cacheStats.hits || 0 }}
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-rose-500/10 rounded-xl">
+                            <XCircle class="h-6 w-6 text-rose-500" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Cache Misses</p>
+                            <p class="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                                {{ cacheStats.misses || 0 }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">Cache Hits</p>
-                        <p class="text-2xl font-semibold text-foreground">
-                            {{ cacheStats.hits || 0 }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-muted-foreground">Cache Misses</p>
-                        <p class="text-2xl font-semibold text-foreground">
-                            {{ cacheStats.misses || 0 }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
 
-        <div class="bg-card border border-border rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Cache Actions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button
-                    @click="clearAllCache"
-                    :disabled="clearing"
-                    class="px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 text-left"
-                >
-                    <div class="font-medium">Clear All Cache</div>
-                    <div class="text-sm opacity-90">Remove all cached data</div>
-                </button>
-                <button
-                    @click="clearContentCache"
-                    :disabled="clearing"
-                    class="px-4 py-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 text-left"
-                >
-                    <div class="font-medium">Clear Content Cache</div>
-                    <div class="text-sm opacity-90">Remove content-related cache</div>
-                </button>
-                <button
-                    @click="warmUpCache"
-                    :disabled="warming"
-                    class="px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-left"
-                >
-                    <div class="font-medium">Warm Up Cache</div>
-                    <div class="text-sm opacity-90">Preload frequently used data</div>
-                </button>
-            </div>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle class="text-lg font-semibold">Cache Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Button
+                        variant="destructive"
+                        @click="clearAllCache"
+                        :disabled="clearing"
+                        class="h-auto py-4 px-6 flex flex-col items-start gap-1 justify-start text-left"
+                    >
+                        <div class="flex items-center gap-2">
+                             <Trash2 class="w-4 h-4" />
+                             <span class="font-bold">Clear All Cache</span>
+                        </div>
+                        <span class="text-xs opacity-80 font-normal">Remove all cached data from the system</span>
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        @click="clearContentCache"
+                        :disabled="clearing"
+                        class="h-auto py-4 px-6 flex flex-col items-start gap-1 justify-start text-left bg-amber-500 hover:bg-amber-600 text-white border-0"
+                    >
+                        <div class="flex items-center gap-2">
+                             <FileText class="w-4 h-4" />
+                             <span class="font-bold">Clear Content Cache</span>
+                        </div>
+                        <span class="text-xs opacity-80 font-normal">Remove content-related cache only</span>
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        @click="warmUpCache"
+                        :disabled="warming"
+                        class="h-auto py-4 px-6 flex flex-col items-start gap-1 justify-start text-left bg-emerald-500 hover:bg-emerald-600 text-white border-0"
+                    >
+                        <div class="flex items-center gap-2">
+                             <Zap class="w-4 h-4" />
+                             <span class="font-bold">Warm Up Cache</span>
+                        </div>
+                        <span class="text-xs opacity-80 font-normal">Preload frequently used data into cache</span>
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
 
-        <div v-if="cacheStats.details" class="mt-6 bg-card border border-border rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Cache Statistics</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-border">
-                    <thead class="bg-muted">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                Key
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                Value
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-card divide-y divide-border">
-                        <tr v-for="(value, key) in cacheStats.details" :key="key">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                                {{ key }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                {{ value }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <Card v-if="cacheStats.details" class="mt-6">
+            <CardHeader>
+                <CardTitle class="text-lg font-semibold">Detailed Statistics</CardTitle>
+            </CardHeader>
+            <CardContent class="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Key</TableHead>
+                            <TableHead>Value</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="(value, key) in cacheStats.details" :key="key">
+                            <TableCell class="font-mono text-xs">{{ key }}</TableCell>
+                            <TableCell class="font-medium tabular-nums">{{ value }}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
@@ -116,6 +127,26 @@
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import Badge from '../../../components/ui/badge.vue';
+import { 
+    Activity, 
+    Target, 
+    XCircle, 
+    Trash2, 
+    FileText, 
+    Zap 
+} from 'lucide-vue-next';
 
 const cacheStats = ref({
     status: 'Active',

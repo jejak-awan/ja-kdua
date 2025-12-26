@@ -1,120 +1,119 @@
 <template>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ t('features.content_templates.form.editTitle') }}</h1>
-            <router-link
-                :to="{ name: 'content-templates' }"
-                class="text-muted-foreground hover:text-foreground"
-            >
-                ← {{ t('features.content_templates.form.back') }}
-            </router-link>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.editTitle') }}</h1>
+            <Button variant="ghost" as-child>
+                <router-link :to="{ name: 'content-templates' }">
+                    <ChevronLeft class="w-4 h-4 mr-2" />
+                    {{ t('features.content_templates.form.back') }}
+                </router-link>
+            </Button>
         </div>
 
-        <div v-if="loading && !form.name" class="text-center py-8">
+        <div v-if="loading && !form.name" class="text-center py-12">
+            <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
             <p class="text-muted-foreground">{{ t('features.content_templates.loading') }}</p>
         </div>
 
         <form v-else @submit.prevent="handleSubmit" class="space-y-6">
-            <div class="bg-card border border-border rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.content_templates.form.details') }}</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.content_templates.form.name') }} <span class="text-red-500">*</span>
-                        </label>
-                        <input
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.details') }}</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="name">
+                            {{ t('features.content_templates.form.name') }} <span class="text-destructive">*</span>
+                        </Label>
+                        <Input
+                            id="name"
                             v-model="form.name"
-                            type="text"
                             required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             :placeholder="t('features.content_templates.form.namePlaceholder')"
-                        >
+                        />
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <Label for="description">
                             {{ t('features.content_templates.form.description') }}
-                        </label>
-                        <textarea
+                        </Label>
+                        <Textarea
+                            id="description"
                             v-model="form.description"
                             rows="2"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             :placeholder="t('features.content_templates.form.descriptionPlaceholder')"
                         />
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            {{ t('features.content_templates.form.type') }} <span class="text-red-500">*</span>
-                        </label>
-                        <select
-                            v-model="form.type"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="post">Post</option>
-                            <option value="page">Page</option>
-                            <option value="custom">Custom</option>
-                        </select>
+                    <div class="space-y-2">
+                        <Label for="type">
+                            {{ t('features.content_templates.form.type') }} <span class="text-destructive">*</span>
+                        </Label>
+                        <Select v-model="form.type" required>
+                            <SelectTrigger id="type">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="post">Post</SelectItem>
+                                <SelectItem value="page">Page</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
-            <div class="bg-card border border-border rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.content_templates.form.content') }}</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.content') }}</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="title">
                             {{ t('features.content_templates.form.titleLabel') }}
-                        </label>
-                        <input
+                        </Label>
+                        <Input
+                            id="title"
                             v-model="form.title"
-                            type="text"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             :placeholder="t('features.content_templates.form.titlePlaceholder')"
-                        >
+                        />
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <Label>
                             {{ t('features.content_templates.form.body') }}
-                        </label>
+                        </Label>
                         <RichTextEditor
                             v-model="form.body"
                             :placeholder="t('features.content_templates.form.bodyPlaceholder')"
                         />
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <Label for="excerpt">
                             {{ t('features.content_templates.form.excerpt') }}
-                        </label>
-                        <textarea
+                        </Label>
+                        <Textarea
+                            id="excerpt"
                             v-model="form.excerpt"
                             rows="3"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             :placeholder="t('features.content_templates.form.excerptPlaceholder')"
                         />
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             <div class="flex justify-end space-x-3">
-                <router-link
-                    :to="{ name: 'content-templates' }"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                >
-                    {{ t('features.content_templates.form.cancel') }}
-                </router-link>
-                <button
-                    type="submit"
-                    :disabled="saving"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                >
+                <Button variant="outline" as-child>
+                    <router-link :to="{ name: 'content-templates' }">
+                        {{ t('features.content_templates.form.cancel') }}
+                    </router-link>
+                </Button>
+                <Button type="submit" :disabled="saving">
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                    <Save v-else class="w-4 h-4 mr-2" />
                     {{ saving ? t('features.content_templates.form.updating') : t('features.content_templates.form.update') }}
-                </button>
+                </Button>
             </div>
         </form>
     </div>
@@ -126,7 +125,25 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Label from '../../../components/ui/label.vue';
+import Textarea from '../../../components/ui/textarea.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
+import { 
+    ChevronLeft, 
+    Save, 
+    Loader2 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 const route = useRoute();

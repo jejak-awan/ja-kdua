@@ -1,23 +1,22 @@
 <template>
-    <div class="max-w-7xl mx-auto">
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ $t('features.content.list.createNew') }}</h1>
+    <div class="max-w-5xl mx-auto pb-20">
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.createNew') }}</h1>
                 <AutoSaveIndicator
                     :status="autoSaveStatus"
                     :last-saved="lastSaved"
-                    class="mt-2"
                 />
             </div>
-            <router-link
-                :to="{ name: 'contents' }"
-                class="text-muted-foreground hover:text-foreground"
-            >
-                ← {{ $t('features.content.form.back') }}
-            </router-link>
+            <Button variant="ghost" asChild class="w-fit">
+                <router-link :to="{ name: 'contents' }">
+                    <ArrowLeft class="w-4 h-4 mr-2" />
+                    {{ $t('features.content.form.back') }}
+                </router-link>
+            </Button>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="space-y-6">
+        <form @submit.prevent="handleSubmit" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <!-- Main Content Section -->
             <ContentDetails
                 v-model="form"
@@ -26,28 +25,38 @@
                 :tags="tags"
             />
 
-            <!-- Featured Image Section -->
-            <FeaturedImage v-model="form.featured_image" />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Featured Image Section -->
+                <FeaturedImage v-model="form.featured_image" />
 
-            <!-- SEO Section -->
-            <SeoSettings v-model="form" />
+                <!-- SEO Section -->
+                <SeoSettings v-model="form" />
+            </div>
 
             <!-- Actions -->
-            <div class="flex justify-end space-x-4">
-                <router-link
-                    :to="{ name: 'contents' }"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                >
-                    {{ $t('features.content.form.cancel') }}
-                </router-link>
-                <button
-                    type="submit"
-                    :disabled="loading"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                >
-                    {{ loading ? $t('features.content.form.creating') : $t('features.content.form.create') }}
-                </button>
-            </div>
+            <Card class="border-none shadow-lg bg-card/80 backdrop-blur-sm sticky bottom-6 z-10">
+                <CardContent class="p-4 flex justify-end items-center gap-4">
+                    <Button variant="ghost" asChild>
+                        <router-link :to="{ name: 'contents' }">
+                            {{ $t('features.content.form.cancel') }}
+                        </router-link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        :disabled="loading"
+                        class="min-w-[140px] shadow-primary/20 shadow-lg"
+                    >
+                        <template v-if="loading">
+                            <Loader2 class="w-4 h-4 mr-2 animate-spin" />
+                            {{ $t('features.content.form.creating') }}
+                        </template>
+                        <template v-else>
+                            <Save class="w-4 h-4 mr-2" />
+                            {{ $t('features.content.form.create') }}
+                        </template>
+                    </Button>
+                </CardContent>
+            </Card>
         </form>
     </div>
 </template>
@@ -57,6 +66,14 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '@/components/ui/button.vue';
+import Card from '@/components/ui/card.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import { 
+    ArrowLeft, 
+    Save, 
+    Loader2 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 const router = useRouter();

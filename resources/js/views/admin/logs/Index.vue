@@ -2,21 +2,29 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <router-link to="/admin/logs-dashboard" class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                </router-link>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    as-child
+                    class="h-9 w-9"
+                >
+                    <router-link to="/admin/logs-dashboard">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </router-link>
+                </Button>
                 <h1 class="text-2xl font-bold text-foreground">{{ t('features.system.logs.title') }}</h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button
+                <Button
                     @click="clearLogs"
                     :disabled="clearing"
-                    class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20 disabled:opacity-50"
+                    variant="destructive"
+                    variant-type="outline"
                 >
                     {{ clearing ? t('features.system.logs.clearing') : t('features.system.logs.clear') }}
-                </button>
+                </Button>
             </div>
         </div>
 
@@ -28,30 +36,33 @@
                         <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.logs.files') }}</h2>
                     </div>
                     <div class="divide-y divide-border">
-                        <button
+                        <Button
                             v-for="logFile in logFiles"
                             :key="logFile.name"
-                            @click="selectLogFile(logFile)"
+                            variant="ghost"
+                            class="w-full justify-start h-auto px-6 py-4 rounded-none border-b border-border last:border-0 hover:bg-muted transition-colors"
                             :class="[
-                                'w-full px-6 py-4 text-left hover:bg-muted transition-colors',
-                                selectedLogFile?.name === logFile.name ? 'bg-indigo-500/20 border-l-4 border-indigo-600' : ''
+                                selectedLogFile?.name === logFile.name ? 'bg-muted border-l-4 border-l-primary' : ''
                             ]"
+                            @click="selectLogFile(logFile)"
                         >
-                            <div class="flex items-center justify-between">
-                                <div>
+                            <div class="flex items-center justify-between w-full">
+                                <div class="text-left">
                                     <p class="text-sm font-medium text-foreground">{{ logFile.name }}</p>
                                     <p class="text-xs text-muted-foreground mt-1">{{ formatFileSize(logFile.size) }}</p>
                                 </div>
-                                <button
+                                <Button
                                     @click.stop="downloadLog(logFile)"
-                                    class="text-indigo-600 hover:text-indigo-800"
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-8 w-8 text-primary hover:text-primary/80"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
-                                </button>
+                                </Button>
                             </div>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -64,18 +75,19 @@
                             {{ selectedLogFile ? selectedLogFile.name : t('features.system.logs.select') }}
                         </h2>
                         <div v-if="selectedLogFile" class="flex items-center space-x-2">
-                            <input
+                            <Input
                                 v-model="logSearch"
                                 type="text"
                                 :placeholder="t('features.system.logs.search')"
-                                class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <button
+                                class="h-8 w-48"
+                            />
+                            <Button
                                 @click="refreshLog"
-                                class="px-3 py-1 border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
+                                variant="outline"
+                                size="sm"
                             >
                                 {{ t('features.system.logs.refresh') }}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                     <div class="p-6">
@@ -89,7 +101,7 @@
                             <p class="text-muted-foreground">{{ t('features.system.logs.loading') }}</p>
                         </div>
                         <div v-else class="bg-background rounded-lg p-4 overflow-x-auto max-h-[600px] overflow-y-auto">
-                            <pre class="text-xs font-mono text-green-400" v-html="highlightedLogContent" />
+                            <pre class="text-xs font-mono text-muted-foreground" v-html="highlightedLogContent" />
                         </div>
                     </div>
                 </div>
@@ -103,6 +115,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
 const logFiles = ref([]);
@@ -118,7 +132,7 @@ const highlightedLogContent = computed(() => {
     let content = logContent.value;
     
     // Highlight error lines
-    content = content.replace(/\[ERROR\]/g, '<span class="text-red-400 font-bold">[ERROR]</span>');
+    content = content.replace(/\[ERROR\]/g, '<span class="text-destructive font-bold">[ERROR]</span>');
     content = content.replace(/\[WARNING\]/g, '<span class="text-yellow-400 font-bold">[WARNING]</span>');
     content = content.replace(/\[INFO\]/g, '<span class="text-blue-400 font-bold">[INFO]</span>');
     

@@ -2,190 +2,220 @@
     <div>
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.languages.title') }}</h1>
-            <div class="flex items-center space-x-3">
-                <button @click="showImportModal = true" class="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-foreground bg-card hover:bg-muted">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
+            <div class="flex items-center gap-2">
+                <Button 
+                    variant="outline" 
+                    @click="showImportModal = true"
+                >
+                    <Upload class="w-4 h-4 mr-2" />
                     {{ $t('features.languages.importPack') }}
-                </button>
-                <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+                </Button>
+                <Button @click="showCreateModal = true">
+                    <Plus class="w-4 h-4 mr-2" />
                     {{ $t('features.languages.add') }}
-                </button>
+                </Button>
             </div>
         </div>
 
         <!-- UI Languages Info Card -->
-        <div class="mb-6 bg-card border border-border rounded-lg p-6">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.languages.uiLanguages.title') }}</h2>
-                    <p class="text-sm text-muted-foreground mb-4">{{ $t('features.languages.uiLanguages.description') }}</p>
-                    <div class="flex flex-wrap gap-2">
-                        <span 
-                            v-for="locale in availableUiLocales" 
-                            :key="locale.code"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                            :class="currentLocale === locale.code ? 'bg-indigo-500/20 text-indigo-500 border border-indigo-500/30' : 'bg-muted text-muted-foreground'"
-                        >
-                            <span class="mr-1.5">{{ locale.flag }}</span>
-                            {{ locale.name }}
-                            <span v-if="currentLocale === locale.code" class="ml-1.5 text-xs">({{ $t('features.languages.uiLanguages.active') }})</span>
-                        </span>
+        <Card class="mb-6">
+            <CardContent class="pt-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-foreground mb-2">{{ $t('features.languages.uiLanguages.title') }}</h2>
+                        <p class="text-sm text-muted-foreground mb-4">{{ $t('features.languages.uiLanguages.description') }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <Badge 
+                                v-for="locale in availableUiLocales" 
+                                :key="locale.code"
+                                :variant="currentLocale === locale.code ? 'default' : 'secondary'"
+                                class="px-3 py-1 font-medium"
+                            >
+                                <span class="mr-1.5">{{ locale.flag }}</span>
+                                {{ locale.name }}
+                                <span v-if="currentLocale === locale.code" class="ml-1.5 text-[10px] opacity-70">({{ $t('features.languages.uiLanguages.active') }})</span>
+                            </Badge>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 font-bold">{{ $t('features.languages.uiLanguages.browserDetected') }}</p>
+                        <Badge variant="outline" class="font-mono">{{ browserLocale || '-' }}</Badge>
                     </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xs text-muted-foreground mb-1">{{ $t('features.languages.uiLanguages.browserDetected') }}</p>
-                    <span class="text-sm font-medium text-foreground">{{ browserLocale || '-' }}</span>
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
 
         <!-- Languages Table -->
-        <div class="bg-card border border-border rounded-lg">
-            <div class="px-6 py-4 border-b border-border">
-                <h2 class="text-lg font-semibold text-foreground">{{ $t('features.languages.list.title') }}</h2>
-                <p class="text-sm text-muted-foreground">{{ $t('features.languages.list.description') }}</p>
+        <Card>
+            <CardHeader>
+                <CardTitle>{{ $t('features.languages.list.title') }}</CardTitle>
+                <CardDescription>{{ $t('features.languages.list.description') }}</CardDescription>
+            </CardHeader>
+            <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+                <Loader2 class="w-8 h-8 animate-spin text-muted-foreground mb-2" />
+                <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
             </div>
-            <div v-if="loading" class="p-6 text-center"><p class="text-muted-foreground">{{ $t('common.loading.default') }}</p></div>
-            <div v-else-if="languages.length === 0" class="p-6 text-center"><p class="text-muted-foreground">{{ $t('features.languages.list.empty') }}</p></div>
-            <table v-else class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.name') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.code') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.default') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.languages.uiLanguages.translationKeys') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.languages.list.headers.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="lang in languages" :key="lang.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <span class="text-lg mr-2">{{ getLanguageFlag(lang.code) }}</span>
-                                <span class="text-sm font-medium text-foreground">{{ lang.name }}</span>
+            <div v-else-if="languages.length === 0" class="flex flex-col items-center justify-center py-12">
+                <LanguagesIcon class="w-12 h-12 text-muted-foreground/20 mb-4" />
+                <p class="text-muted-foreground">{{ $t('features.languages.list.empty') }}</p>
+            </div>
+            <Table v-else>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>{{ $t('features.languages.list.headers.name') }}</TableHead>
+                        <TableHead>{{ $t('features.languages.list.headers.code') }}</TableHead>
+                        <TableHead>{{ $t('features.languages.list.headers.default') }}</TableHead>
+                        <TableHead>{{ $t('features.languages.uiLanguages.translationKeys') }}</TableHead>
+                        <TableHead class="text-right">{{ $t('features.languages.list.headers.actions') }}</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow v-for="lang in languages" :key="lang.id">
+                        <TableCell>
+                            <div class="flex items-center font-medium">
+                                <span class="text-lg mr-3">{{ getLanguageFlag(lang.code) }}</span>
+                                <span class="text-sm">{{ lang.name }}</span>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ lang.code }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span v-if="lang.is_default" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-500/20 text-green-500 border border-green-500/30">
+                        </TableCell>
+                        <TableCell>
+                            <code class="text-xs bg-muted px-1.5 py-0.5 rounded border border-border">
+                                {{ lang.code }}
+                            </code>
+                        </TableCell>
+                        <TableCell>
+                            <Badge v-if="lang.is_default" variant="default" class="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">
                                 {{ $t('features.languages.list.default') }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span v-if="lang.has_ui_translations" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/20 text-blue-500 border border-blue-500/30">
+                            </Badge>
+                        </TableCell>
+                        <TableCell>
+                            <Badge v-if="lang.has_ui_translations" variant="outline" class="font-normal">
                                 {{ lang.translation_keys }} {{ $t('features.languages.uiLanguages.keys') }}
-                            </span>
-                            <span v-else class="text-xs text-muted-foreground">-</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-3">
-                                <button 
+                            </Badge>
+                            <span v-else class="text-muted-foreground text-xs">-</span>
+                        </TableCell>
+                        <TableCell class="text-right">
+                            <div class="flex justify-end gap-2">
+                                <Button 
                                     v-if="lang.has_ui_translations" 
+                                    variant="ghost"
+                                    size="sm"
                                     @click="exportPack(lang)" 
-                                    class="text-indigo-600 hover:text-indigo-900"
                                     :disabled="exporting === lang.id"
                                 >
-                                    <span v-if="exporting === lang.id">...</span>
-                                    <span v-else>{{ $t('features.languages.actions.export') }}</span>
-                                </button>
-                                <button @click="setDefault(lang)" v-if="!lang.is_default" class="text-green-600 hover:text-green-900">{{ $t('features.languages.actions.setDefault') }}</button>
-                                <button @click="deleteLanguage(lang)" v-if="!lang.is_default" class="text-red-600 hover:text-red-900">{{ $t('features.languages.actions.delete') }}</button>
+                                    <Loader2 v-if="exporting === lang.id" class="w-4 h-4 mr-2 animate-spin" />
+                                    <Download v-else class="w-4 h-4 mr-2" />
+                                    {{ $t('features.languages.actions.export') }}
+                                </Button>
+                                <Button 
+                                    v-if="!lang.is_default"
+                                    variant="ghost"
+                                    size="sm"
+                                    @click="setDefault(lang)"
+                                    class="text-green-500 hover:text-green-500 hover:bg-green-500/10"
+                                >
+                                    <CheckCircle2 class="w-4 h-4 mr-2" />
+                                    {{ $t('features.languages.actions.setDefault') }}
+                                </Button>
+                                <Button 
+                                    v-if="!lang.is_default"
+                                    variant="ghost"
+                                    size="sm"
+                                    @click="deleteLanguage(lang)"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                    <Trash2 class="w-4 h-4 mr-2" />
+                                    {{ $t('features.languages.actions.delete') }}
+                                </Button>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </Card>
 
         <!-- Import Modal -->
-        <div v-if="showImportModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" @click.self="showImportModal = false">
-            <div class="bg-card rounded-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.languages.import.title') }}</h3>
-                <p class="text-sm text-muted-foreground mb-4">{{ $t('features.languages.import.description') }}</p>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-foreground mb-2">{{ $t('features.languages.import.file') }}</label>
-                    <input 
-                        type="file" 
-                        @change="handleFileSelect"
-                        accept=".zip"
-                        class="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
-                    />
+        <Dialog :open="showImportModal" @update:open="showImportModal = $event">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('features.languages.import.title') }}</DialogTitle>
+                    <DialogDescription>{{ $t('features.languages.import.description') }}</DialogDescription>
+                </DialogHeader>
+
+                <div class="space-y-4 py-4">
+                    <div class="space-y-2">
+                        <Label>{{ $t('features.languages.import.file') }}</Label>
+                        <Input 
+                            type="file" 
+                            @change="handleFileSelect"
+                            accept=".zip"
+                            class="cursor-pointer"
+                        />
+                    </div>
                 </div>
 
-                <div class="flex justify-end space-x-3">
-                    <button @click="showImportModal = false" class="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                <DialogFooter>
+                    <Button variant="outline" @click="showImportModal = false">
                         {{ $t('common.actions.cancel') }}
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
                         @click="importPack" 
                         :disabled="!selectedFile || importing"
-                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span v-if="importing">{{ $t('common.loading.default') }}</span>
-                        <span v-else>{{ $t('features.languages.import.button') }}</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <Loader2 v-if="importing" class="w-4 h-4 mr-2 animate-spin" />
+                        {{ importing ? $t('common.loading.default') : $t('features.languages.import.button') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
 
         <!-- Create Modal -->
-        <div v-if="showCreateModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" @click.self="showCreateModal = false">
-            <div class="bg-card rounded-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-semibold text-foreground mb-4">{{ $t('features.languages.create.title') }}</h3>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-foreground mb-2">{{ $t('features.languages.create.code') }}</label>
-                    <input 
-                        v-model="newLanguage.code"
-                        type="text" 
-                        placeholder="fr, de, es..."
-                        class="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+        <Dialog :open="showCreateModal" @update:open="showCreateModal = $event">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{{ $t('features.languages.create.title') }}</DialogTitle>
+                </DialogHeader>
+
+                <div class="space-y-4 py-4">
+                    <div class="space-y-2">
+                        <Label>{{ $t('features.languages.create.code') }}</Label>
+                        <Input 
+                            v-model="newLanguage.code"
+                            type="text" 
+                            placeholder="fr, de, es..."
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label>{{ $t('features.languages.create.name') }}</Label>
+                        <Input 
+                            v-model="newLanguage.name"
+                            type="text" 
+                            placeholder="French, German..."
+                        />
+                    </div>
+
+                    <div class="flex items-center space-x-2 pt-2">
+                        <Checkbox id="createFromTemplate" v-model:checked="newLanguage.createFromTemplate" />
+                        <Label for="createFromTemplate" class="text-sm font-normal cursor-pointer">
+                            {{ $t('features.languages.create.fromTemplate') }}
+                        </Label>
+                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-foreground mb-2">{{ $t('features.languages.create.name') }}</label>
-                    <input 
-                        v-model="newLanguage.name"
-                        type="text" 
-                        placeholder="French, German..."
-                        class="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                </div>
-
-                <div class="mb-4 flex items-center">
-                    <input 
-                        v-model="newLanguage.createFromTemplate"
-                        type="checkbox" 
-                        id="createFromTemplate"
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                    />
-                    <label for="createFromTemplate" class="ml-2 block text-sm text-foreground">
-                        {{ $t('features.languages.create.fromTemplate') }}
-                    </label>
-                </div>
-
-                <div class="flex justify-end space-x-3">
-                    <button @click="showCreateModal = false" class="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                <DialogFooter>
+                    <Button variant="outline" @click="showCreateModal = false">
                         {{ $t('common.actions.cancel') }}
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
                         @click="createLanguage" 
                         :disabled="!newLanguage.code || !newLanguage.name || creating"
-                        class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span v-if="creating">{{ $t('common.loading.default') }}</span>
-                        <span v-else>{{ $t('common.actions.create') }}</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
+                        {{ creating ? $t('common.loading.default') : $t('common.actions.create') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -193,6 +223,33 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardDescription from '../../../components/ui/card-description.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Label from '../../../components/ui/label.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import Dialog from '../../../components/ui/dialog.vue';
+import DialogContent from '../../../components/ui/dialog-content.vue';
+import DialogHeader from '../../../components/ui/dialog-header.vue';
+import DialogTitle from '../../../components/ui/dialog-title.vue';
+import DialogDescription from '../../../components/ui/dialog-description.vue';
+import DialogFooter from '../../../components/ui/dialog-footer.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import { 
+    Plus, Upload, Download, 
+    Trash2, CheckCircle2, 
+    Loader2, Languages as LanguagesIcon 
+} from 'lucide-vue-next';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { getLocale, getAvailableLocales, getBrowserLocale } from '../../../i18n';
 

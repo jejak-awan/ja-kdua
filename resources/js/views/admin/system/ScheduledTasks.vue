@@ -13,108 +13,116 @@
     </div>
 
     <!-- Tasks Table -->
-    <div class="bg-card border border-border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{{ $t('features.scheduled_tasks.table.name') }}</TableHead>
-            <TableHead>{{ $t('features.scheduled_tasks.table.command') }}</TableHead>
-            <TableHead>{{ $t('features.scheduled_tasks.table.schedule') }}</TableHead>
-            <TableHead>{{ $t('features.scheduled_tasks.table.last_run') }}</TableHead>
-            <TableHead>{{ $t('features.scheduled_tasks.table.status') }}</TableHead>
-            <TableHead>{{ $t('features.scheduled_tasks.table.active') }}</TableHead>
-            <TableHead class="text-right">{{ $t('features.scheduled_tasks.table.actions') }}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-if="loading">
-            <TableCell colspan="7" class="text-center py-8">
-              <Loader2 class="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-            </TableCell>
-          </TableRow>
-          <TableRow v-else-if="tasks.length === 0">
-            <TableCell colspan="7" class="text-center py-8 text-muted-foreground">
-              {{ $t('features.scheduled_tasks.no_tasks') }}
-            </TableCell>
-          </TableRow>
-          <template v-else>
-            <TableRow v-for="task in tasks" :key="task.id" class="hover:bg-muted/50">
-              <TableCell class="font-medium">{{ task.name }}</TableCell>
-              <TableCell>
-                <code class="text-xs bg-muted px-2 py-1 rounded border border-border">{{ task.command }}</code>
-              </TableCell>
-              <TableCell>
-                <code class="text-xs font-mono">{{ task.schedule }}</code>
-              </TableCell>
-              <TableCell>
-                <span v-if="task.last_run_at" class="text-sm">
-                  {{ formatDate(task.last_run_at) }}
-                </span>
-                <span v-else class="text-muted-foreground text-sm">Never</span>
-              </TableCell>
-              <TableCell>
-                <Badge 
-                  :variant="getStatusVariant(task.status)"
-                  class="capitalize"
-                >
-                  {{ task.status || 'pending' }}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button 
-                  size="sm" 
-                  :variant="task.is_active ? 'default' : 'outline'"
-                  @click="toggleActive(task)"
-                  class="w-20"
-                >
-                  {{ task.is_active ? 'Active' : 'Inactive' }}
-                </Button>
-              </TableCell>
-              <TableCell class="text-right">
-                <div class="flex justify-end gap-2">
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="runTask(task)"
-                    :disabled="running === task.id"
-                    :title="$t('common.actions.run')"
-                  >
-                    <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
-                    <Play v-else class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="viewOutput(task)"
-                    v-if="task.output"
-                    :title="$t('features.scheduled_tasks.output.title')"
-                  >
-                    <FileText class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    @click="editTask(task)"
-                    :title="$t('common.actions.edit')"
-                  >
-                    <Pencil class="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    class="text-destructive hover:text-destructive"
-                    @click="deleteTask(task)"
-                    :title="$t('common.actions.delete')"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
-                </div>
+    <Card>
+      <CardContent class="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{{ $t('features.scheduled_tasks.table.name') }}</TableHead>
+              <TableHead>{{ $t('features.scheduled_tasks.table.command') }}</TableHead>
+              <TableHead>{{ $t('features.scheduled_tasks.table.schedule') }}</TableHead>
+              <TableHead>{{ $t('features.scheduled_tasks.table.last_run') }}</TableHead>
+              <TableHead>{{ $t('features.scheduled_tasks.table.status') }}</TableHead>
+              <TableHead>{{ $t('features.scheduled_tasks.table.active') }}</TableHead>
+              <TableHead class="text-right">{{ $t('features.scheduled_tasks.table.actions') }}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-if="loading">
+              <TableCell colspan="7" class="text-center py-12">
+                <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+                <p class="text-sm text-muted-foreground mt-2">Loading tasks...</p>
               </TableCell>
             </TableRow>
-          </template>
-        </TableBody>
-      </Table>
-    </div>
+            <TableRow v-else-if="tasks.length === 0">
+              <TableCell colspan="7" class="text-center py-12">
+                 <Calendar class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+                 <p class="text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.no_tasks') }}</p>
+              </TableCell>
+            </TableRow>
+            <template v-else>
+              <TableRow v-for="task in tasks" :key="task.id" class="hover:bg-muted/50 group transition-colors">
+                <TableCell class="font-semibold">{{ task.name }}</TableCell>
+                <TableCell>
+                  <code class="text-[11px] bg-muted px-2 py-0.5 rounded border border-border group-hover:bg-background transition-colors">{{ task.command }}</code>
+                </TableCell>
+                <TableCell>
+                  <code class="text-[11px] font-mono font-bold text-primary">{{ task.schedule }}</code>
+                </TableCell>
+                <TableCell>
+                  <div v-if="task.last_run_at" class="flex flex-col">
+                    <span class="text-sm font-medium">{{ formatDate(task.last_run_at) }}</span>
+                    <span class="text-[10px] text-muted-foreground tabular-nums">{{ task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '' }}</span>
+                  </div>
+                  <span v-else class="text-muted-foreground text-sm italic">Never</span>
+                </TableCell>
+                <TableCell>
+                  <Badge 
+                    :variant="getStatusVariant(task.status)"
+                    class="capitalize text-[10px] px-2 py-0"
+                  >
+                    {{ task.status || 'pending' }}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Button 
+                    size="sm" 
+                    :variant="task.is_active ? 'default' : 'secondary'"
+                    @click="toggleActive(task)"
+                    class="h-7 text-[10px] font-bold uppercase tracking-wider px-3"
+                  >
+                    {{ task.is_active ? 'Active' : 'Inactive' }}
+                  </Button>
+                </TableCell>
+                <TableCell class="text-right">
+                  <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      @click="runTask(task)"
+                      :disabled="running === task.id"
+                      :title="$t('common.actions.run')"
+                      class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                    >
+                      <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
+                      <Play v-else class="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      @click="viewOutput(task)"
+                      v-if="task.output"
+                      :title="$t('features.scheduled_tasks.output.title')"
+                      class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    >
+                      <FileText class="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      @click="editTask(task)"
+                      :title="$t('common.actions.edit')"
+                      class="h-8 w-8 hover:bg-muted"
+                    >
+                      <Pencil class="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      @click="confirmDelete(task)"
+                      :title="$t('common.actions.delete')"
+                      class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 class="w-4 h-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </template>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
 
     <!-- Create/Edit Dialog -->
     <Dialog v-model:open="dialogOpen">

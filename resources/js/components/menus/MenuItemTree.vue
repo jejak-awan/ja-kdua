@@ -11,36 +11,40 @@
         <template #item="{ element }">
             <div class="border border-border rounded-lg bg-card relative">
                 <!-- Item Content -->
-                <div class="flex items-center justify-between p-3 bg-card rounded-lg hover:bg-muted">
+                <div class="flex items-center justify-between p-3 bg-card rounded-lg hover:bg-muted/50 transition-colors">
                     <div class="flex items-center space-x-3 flex-1">
-                        <div class="drag-handle cursor-move text-muted-foreground hover:text-muted-foreground p-1">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                            </svg>
+                        <div class="drag-handle cursor-move text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors">
+                            <GripVertical class="w-4 h-4" />
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-foreground">{{ element.title || element.label }}</span>
-                            <span class="ml-2 text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full capitalize">
+                            <Badge variant="secondary" class="text-[10px] px-1.5 py-0 h-4 capitalize">
                                 {{ element.type }}
-                            </span>
-                            <span v-if="!element.is_active" class="ml-2 text-xs text-red-500 bg-red-500/20 px-2 py-0.5 rounded-full">
+                            </Badge>
+                            <Badge v-if="!element.is_active" variant="destructive" class="text-[10px] px-1.5 py-0 h-4">
                                 Inactive
-                            </span>
+                            </Badge>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button
+                    <div class="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             @click="$emit('edit', element)"
-                            class="text-indigo-600 hover:text-indigo-900 text-sm px-2 py-1"
+                            class="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10"
                         >
-                            Edit
-                        </button>
-                        <button
+                            <Pencil class="w-3.5 h-3.5 mr-1.5" />
+                            {{ t('common.actions.edit') }}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             @click="$emit('delete', element)"
-                            class="text-red-600 hover:text-red-900 text-sm px-2 py-1"
+                            class="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
-                            Delete
-                        </button>
+                            <Trash2 class="w-3.5 h-3.5 mr-1.5" />
+                            {{ t('common.actions.delete') }}
+                        </Button>
                     </div>
                 </div>
 
@@ -60,7 +64,13 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
+import Button from '../ui/button.vue';
+import Badge from '../ui/badge.vue';
+import { GripVertical, Pencil, Trash2 } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
     items: {

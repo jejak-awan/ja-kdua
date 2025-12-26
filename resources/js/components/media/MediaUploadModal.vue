@@ -4,14 +4,15 @@
             <div class="bg-card rounded-lg max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.upload.title') }}</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Content -->
@@ -37,12 +38,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                         <p class="mt-4 text-sm text-muted-foreground">
-                            <button
+                            <Button
+                                variant="link"
                                 @click="$refs.fileInput.click()"
-                                class="text-indigo-600 hover:text-indigo-700 font-medium"
+                                class="h-auto p-0 text-primary font-medium"
                             >
                                 {{ $t('features.media.modals.upload.clickToUpload') }}
-                            </button>
+                            </Button>
                             {{ $t('features.media.modals.upload.dragAndDrop') }}
                         </p>
                         <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.media.modals.upload.formats') }}</p>
@@ -56,14 +58,16 @@
                                 <p class="text-sm font-medium text-foreground">{{ file.name }}</p>
                                 <p class="text-xs text-muted-foreground">{{ formatFileSize(file.size) }}</p>
                             </div>
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="sm"
                                 @click="removeFile(index)"
-                                class="text-red-600 hover:text-red-700"
+                                class="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                            </button>
+                            </Button>
                         </div>
                     </div>
 
@@ -84,19 +88,18 @@
 
                 <!-- Footer -->
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.media.actions.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleUpload"
                         :disabled="selectedFiles.length === 0 || uploading"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.uploadAction', { count: selectedFiles.length }) }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -107,6 +110,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
 
 const { t } = useI18n();
 

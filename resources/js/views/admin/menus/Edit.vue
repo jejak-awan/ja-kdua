@@ -1,80 +1,96 @@
 <template>
     <div>
         <div class="mb-6 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.form.editTitle') }}</h1>
-                <p v-if="menu" class="text-sm text-muted-foreground mt-1">{{ menu.name }}</p>
+            <div class="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    @click="router.push({ name: 'menus.index' })"
+                >
+                    <ChevronLeft class="w-5 h-5" />
+                </Button>
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.form.editTitle') }}</h1>
+                    <p v-if="menu" class="text-sm text-muted-foreground">{{ menu.name }}</p>
+                </div>
             </div>
-            <button
+            <Button
                 @click="addMenuItem"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
+                <Plus class="w-4 h-4 mr-2" />
                 {{ t('features.menus.actions.createItem') }}
-            </button>
+            </Button>
         </div>
 
-        <div v-if="loading" class="text-center py-12">
+        <div v-if="loading" class="flex flex-col items-center justify-center py-24">
+            <Loader2 class="w-10 h-10 animate-spin text-muted-foreground mb-4" />
             <p class="text-muted-foreground">{{ t('features.menus.messages.loading') }}</p>
         </div>
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Menu Items Tree -->
             <div class="lg:col-span-2">
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.items') }}</h2>
-                    <div v-if="menuItems.length === 0" class="text-center py-8">
-                        <p class="text-muted-foreground">{{ t('features.menus.messages.emptyItems') }}</p>
-                    </div>
-                    <div v-else>
-                        <MenuItemTree
-                            :items="nestedItems"
-                            @edit="editMenuItem"
-                            @delete="deleteMenuItem"
-                            @change="handleTreeChange"
-                        />
-                    </div>
-                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ t('features.menus.form.items') }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div v-if="nestedItems.length === 0" class="text-center py-12">
+                            <MenuSquare class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+                            <p class="text-muted-foreground">{{ t('features.menus.messages.emptyItems') }}</p>
+                        </div>
+                        <div v-else>
+                            <MenuItemTree
+                                :items="nestedItems"
+                                @edit="editMenuItem"
+                                @delete="deleteMenuItem"
+                                @change="handleTreeChange"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- Menu Settings -->
             <div class="lg:col-span-1">
-                <div class="bg-card border border-border rounded-lg p-6">
-                    <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.menus.form.settings') }}</h2>
-                    <form @submit.prevent="saveMenu" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ t('features.menus.form.name') }} <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                v-model="menuForm.name"
-                                type="text"
-                                required
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ t('features.menus.form.settings') }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form @submit.prevent="saveMenu" class="space-y-4">
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ t('features.menus.form.name') }} <span class="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    v-model="menuForm.name"
+                                    type="text"
+                                    required
+                                />
+                            </div>
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ t('features.menus.form.location') }}
+                                </Label>
+                                <Input
+                                    v-model="menuForm.location"
+                                    type="text"
+                                    :placeholder="t('features.menus.form.placeholders.location')"
+                                />
+                            </div>
+                            <Button
+                                type="submit"
+                                :disabled="saving"
+                                class="w-full mt-4"
                             >
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ t('features.menus.form.location') }}
-                            </label>
-                            <input
-                                v-model="menuForm.location"
-                                type="text"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                :placeholder="t('features.menus.form.placeholders.location')"
-                            >
-                        </div>
-                        <button
-                            type="submit"
-                            :disabled="saving"
-                            class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                        >
-                            {{ saving ? t('features.menus.actions.saving') : t('features.menus.actions.save') }}
-                        </button>
-                    </form>
-                </div>
+                                <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                                <Save v-else class="w-4 h-4 mr-2" />
+                                {{ saving ? t('features.menus.actions.saving') : t('features.menus.actions.save') }}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </div>
 
@@ -94,6 +110,17 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Label from '../../../components/ui/label.vue';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import { 
+    ChevronLeft, Plus, Save, 
+    Loader2, MenuSquare 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';

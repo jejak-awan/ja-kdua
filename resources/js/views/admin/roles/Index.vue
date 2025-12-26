@@ -7,7 +7,7 @@
             </div>
             <router-link
                 :to="{ name: 'roles.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/80"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -30,7 +30,7 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-foreground capitalize">{{ role.name }}</h3>
-                        <span class="px-2 py-1 text-xs bg-indigo-500/20 text-indigo-400 rounded-full">
+                        <span class="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
                             {{ $t('features.roles.list.permissionsCount', { count: role.permissions?.length || 0 }) }}
                         </span>
                     </div>
@@ -52,27 +52,31 @@
                 </div>
                 <div class="bg-muted px-6 py-3 flex justify-between items-center">
                     <div class="flex space-x-2">
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             @click="editRole(role)"
-                            class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
                             :disabled="isProtectedRole(role.name)"
                         >
                             {{ $t('common.actions.edit') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             @click="duplicateRole(role)"
-                            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
                             {{ $t('common.actions.duplicate') }}
-                        </button>
+                        </Button>
                     </div>
-                    <button
+                    <Button
                         v-if="!isProtectedRole(role.name)"
+                        variant="ghost"
+                        size="sm"
                         @click="deleteRole(role)"
-                        class="text-red-600 hover:text-red-800 text-sm font-medium"
+                        class="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                         {{ $t('common.actions.delete') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -84,6 +88,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
 
 const { t } = useI18n();
 const router = useRouter();

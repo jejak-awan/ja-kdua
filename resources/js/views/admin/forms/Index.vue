@@ -5,32 +5,37 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.forms.title') }}</h1>
             <router-link
                 :to="{ name: 'forms.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ $t('features.forms.actions.create') }}
+                <Button>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ $t('features.forms.actions.create') }}
+                </Button>
             </router-link>
         </div>
 
         <!-- Filters -->
         <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
-                <input
+                <Input
                     v-model="search"
                     type="text"
                     :placeholder="$t('features.forms.filters.search')"
-                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                <select
+                    class="flex-1"
+                />
+                <Select
                     v-model="statusFilter"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                    <option value="">{{ $t('features.forms.filters.status') }}</option>
-                    <option value="active">{{ $t('features.forms.filters.active') }}</option>
-                    <option value="inactive">{{ $t('features.forms.filters.inactive') }}</option>
-                </select>
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('features.forms.filters.status')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.forms.filters.status') }}</SelectItem>
+                        <SelectItem value="active">{{ $t('features.forms.filters.active') }}</SelectItem>
+                        <SelectItem value="inactive">{{ $t('features.forms.filters.inactive') }}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </div>
 
@@ -46,9 +51,10 @@
             <p class="mt-4 text-muted-foreground">{{ $t('features.forms.messages.empty') }}</p>
             <router-link
                 :to="{ name: 'forms.create' }"
-                class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
             >
-                {{ $t('features.forms.actions.createFirst') }}
+                <Button class="mt-4">
+                    {{ $t('features.forms.actions.createFirst') }}
+                </Button>
             </router-link>
         </div>
 
@@ -64,16 +70,11 @@
                             <h3 class="text-lg font-semibold text-foreground">{{ form.name }}</h3>
                             <p class="text-sm text-muted-foreground mt-1">{{ form.slug }}</p>
                         </div>
-                        <span
-                            :class="[
-                                'px-2 py-1 text-xs font-medium rounded-full border',
-                                form.is_active 
-                                    ? 'bg-green-500/20 text-green-500 border-green-500/30' 
-                                    : 'bg-secondary text-secondary-foreground border-secondary'
-                            ]"
+                        <Badge
+                                :variant="form.is_active ? 'success' : 'secondary'"
                         >
                             {{ form.is_active ? $t('features.forms.filters.active') : $t('features.forms.filters.inactive') }}
-                        </span>
+                        </Badge>
                     </div>
 
                     <p v-if="form.description" class="text-sm text-muted-foreground mb-4 line-clamp-2">
@@ -96,36 +97,42 @@
                     </div>
 
                     <div class="flex items-center space-x-2 pt-4 border-t border-border">
-                        <button
+                        <Button
                             @click="editForm(form)"
-                            class="flex-1 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"
+                            variant="primary"
+                            size="sm"
+                            class="flex-1"
                         >
                             {{ $t('features.forms.actions.edit') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="viewSubmissions(form)"
-                            class="flex-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                            variant="secondary"
+                            size="sm"
+                            class="flex-1"
                         >
                             {{ $t('features.forms.actions.submissions') }}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="toggleFormStatus(form)"
-                            class="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                            variant="ghost"
+                            size="icon"
                             :title="form.is_active ? 'Deactivate' : 'Activate'"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path v-if="form.is_active" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                 <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="deleteForm(form)"
-                            class="px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                            variant="destructive"
+                            size="icon"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -147,6 +154,14 @@ import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Submissions from './Submissions.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -168,7 +183,7 @@ const filteredForms = computed(() => {
         );
     }
 
-    if (statusFilter.value) {
+    if (statusFilter.value && statusFilter.value !== 'all') {
         const isActive = statusFilter.value === 'active';
         result = result.filter(form => form.is_active === isActive);
     }

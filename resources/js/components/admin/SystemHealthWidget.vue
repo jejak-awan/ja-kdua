@@ -1,153 +1,142 @@
 <template>
-  <div class="system-health-widget bg-card rounded-lg border border-border p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-foreground flex items-center">
-        <svg class="w-5 h-5 mr-2" :class="overallStatusClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+  <Card class="system-health-widget border-none shadow-sm h-full flex flex-col overflow-hidden">
+    <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
+      <CardTitle class="text-xl font-bold flex items-center gap-2">
+        <Activity class="w-5 h-5" :class="overallStatusClass" />
         {{ $t('features.dashboard.widgets.systemHealth.title') }}
-      </h3>
-      <button
+      </CardTitle>
+      <Button
+        variant="ghost"
+        size="icon"
         @click="refresh"
         :disabled="loading"
-        class="text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors"
+        class="h-8 w-8 text-muted-foreground hover:text-foreground"
         title="Refresh"
       >
-        <svg class="w-5 h-5" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
-    </div>
+        <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
+      </Button>
+    </CardHeader>
 
-    <!-- Overall Status -->
-    <div class="mb-6">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium text-foreground">{{ $t('features.dashboard.widgets.systemHealth.overallStatus') }}</span>
-        <span :class="overallStatusBadgeClass" class="px-3 py-1 rounded-full text-xs font-semibold">
+    <CardContent class="flex-1 space-y-6 pt-2">
+      <!-- Overall Status -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/40">
+        <span class="text-sm font-semibold text-foreground">{{ $t('features.dashboard.widgets.systemHealth.overallStatus') }}</span>
+        <Badge :class="overallStatusBadgeClass" variant="outline" class="border-none font-bold uppercase tracking-wider text-[10px]">
           {{ overallStatusText }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Health Metrics -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <!-- CPU -->
-      <div class="health-metric">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-            </svg>
-            {{ $t('features.dashboard.widgets.systemHealth.cpu') }}
-          </span>
-          <span :class="getStatusClass(health.cpu?.status)" class="text-xs font-semibold">
-            {{ health.cpu?.percent || 0 }}%
-          </span>
-        </div>
-        <div class="progress-bar">
-          <div
-            :class="getProgressBarClass(health.cpu?.status)"
-            :style="{ width: `${health.cpu?.percent || 0}%` }"
-            class="progress-fill"
-          ></div>
-        </div>
-        <div v-if="health.cpu?.load" class="text-xs text-muted-foreground mt-1 truncate">
-          Load: {{ health.cpu.load }}
-        </div>
+        </Badge>
       </div>
 
-      <!-- Memory -->
-      <div class="health-metric">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-            </svg>
-            {{ $t('features.dashboard.widgets.systemHealth.memory') }}
-          </span>
-          <span :class="getStatusClass(health.memory?.status)" class="text-xs font-semibold">
-            {{ health.memory?.percent || 0 }}%
-          </span>
+      <!-- Health Metrics -->
+      <div class="space-y-4">
+        <!-- CPU -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
+              <Cpu class="w-3.5 h-3.5" />
+              {{ $t('features.dashboard.widgets.systemHealth.cpu') }}
+            </span>
+            <span :class="getStatusClass(health.cpu?.status)" class="text-xs font-bold tabular-nums">
+              {{ health.cpu?.percent || 0 }}%
+            </span>
+          </div>
+          <div class="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div
+              :class="getProgressBarClass(health.cpu?.status)"
+              :style="{ width: `${health.cpu?.percent || 0}%` }"
+              class="h-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+            ></div>
+          </div>
+          <p v-if="health.cpu?.load" class="text-[10px] text-muted-foreground line-clamp-1 italic">
+            Load: {{ health.cpu.load }}
+          </p>
         </div>
-        <div class="progress-bar">
-          <div
-            :class="getProgressBarClass(health.memory?.status)"
-            :style="{ width: `${health.memory?.percent || 0}%` }"
-            class="progress-fill"
-          ></div>
+
+        <!-- Memory -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
+              <Layers class="w-3.5 h-3.5" />
+              {{ $t('features.dashboard.widgets.systemHealth.memory') }}
+            </span>
+            <span :class="getStatusClass(health.memory?.status)" class="text-xs font-bold tabular-nums">
+              {{ health.memory?.percent || 0 }}%
+            </span>
+          </div>
+          <div class="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div
+              :class="getProgressBarClass(health.memory?.status)"
+              :style="{ width: `${health.memory?.percent || 0}%` }"
+              class="h-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+            ></div>
+          </div>
+          <p class="text-[10px] text-muted-foreground line-clamp-1 italic">
+            {{ health.memory?.used || '0 B' }} / {{ health.memory?.total || '0 B' }}
+          </p>
         </div>
-        <div class="text-xs text-muted-foreground mt-1 truncate">
-          {{ health.memory?.used || '0 B' }} / {{ health.memory?.total || '0 B' }}
+
+        <!-- System Components Row -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+             <!-- Disk -->
+            <div class="p-3 rounded-xl bg-muted/20 border border-border/40 space-y-2">
+                <div class="flex items-center justify-between">
+                    <HardDrive class="w-4 h-4 text-muted-foreground" />
+                    <span :class="getStatusClass(health.disk?.status)" class="text-[10px] font-bold">
+                        {{ health.disk?.percent || 0 }}%
+                    </span>
+                </div>
+                <p class="text-[10px] font-bold text-foreground truncate uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.disk') }}</p>
+                <div class="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                        :class="getProgressBarClass(health.disk?.status)"
+                        :style="{ width: `${health.disk?.percent || 0}%` }"
+                        class="h-full transition-all duration-500"
+                    ></div>
+                </div>
+            </div>
+
+            <!-- Database -->
+            <div class="p-3 rounded-xl bg-muted/20 border border-border/40 space-y-2">
+                <div class="flex items-center justify-between">
+                    <Database class="w-4 h-4 text-muted-foreground" />
+                    <Badge variant="outline" class="border-none p-0 h-auto" :class="getStatusClass(health.database?.status)">
+                        <CheckCircle2 v-if="health.database?.status === 'ok'" class="w-3.5 h-3.5" />
+                        <AlertCircle v-else class="w-3.5 h-3.5" />
+                    </Badge>
+                </div>
+                <p class="text-[10px] font-bold text-foreground truncate uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.database') }}</p>
+                <p class="text-[10px] text-muted-foreground truncate italic">
+                    {{ health.database?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : $t('features.dashboard.widgets.systemHealth.status.error') }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Redis -->
+        <div class="p-3 rounded-xl bg-muted/20 border border-border/40 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+                    <Zap class="w-4 h-4" />
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-foreground uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.redis') }}</p>
+                    <p class="text-[10px] text-muted-foreground truncate italic max-w-[120px]">
+                        {{ health.redis?.message || $t('features.dashboard.widgets.systemHealth.status.unknown') }}
+                    </p>
+                </div>
+            </div>
+            <Badge :class="getStatusClass(health.redis?.status)" variant="outline" class="border-none font-bold uppercase tracking-wider text-[10px]">
+                {{ health.redis?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : health.redis?.status === 'disabled' ? $t('features.dashboard.widgets.systemHealth.status.disabled') : $t('features.dashboard.widgets.systemHealth.status.error') }}
+            </Badge>
         </div>
       </div>
+    </CardContent>
 
-      <!-- Disk -->
-      <div class="health-metric">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-            </svg>
-            {{ $t('features.dashboard.widgets.systemHealth.disk') }}
-          </span>
-          <span :class="getStatusClass(health.disk?.status)" class="text-xs font-semibold">
-            {{ health.disk?.percent || 0 }}%
-          </span>
-        </div>
-        <div class="progress-bar">
-          <div
-            :class="getProgressBarClass(health.disk?.status)"
-            :style="{ width: `${health.disk?.percent || 0}%` }"
-            class="progress-fill"
-          ></div>
-        </div>
-        <div class="text-xs text-muted-foreground mt-1 truncate">
-          {{ health.disk?.used || '0 B' }} / {{ health.disk?.total || '0 B' }}
-        </div>
+    <CardFooter v-if="lastUpdated" class="pb-4 pt-0 justify-center">
+      <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-60">
+        <Clock class="w-3 h-3" />
+        {{ $t('features.dashboard.widgets.systemHealth.lastUpdated', { time: formatTime(lastUpdated) }) }}
       </div>
-
-      <!-- Database -->
-      <div class="health-metric">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-            </svg>
-            {{ $t('features.dashboard.widgets.systemHealth.database') }}
-          </span>
-          <span :class="getStatusClass(health.database?.status)" class="text-xs font-semibold">
-            {{ health.database?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : $t('features.dashboard.widgets.systemHealth.status.error') }}
-          </span>
-        </div>
-        <div class="text-xs text-muted-foreground truncate">
-          {{ health.database?.message || $t('features.dashboard.widgets.systemHealth.status.unknown') }}
-        </div>
-      </div>
-
-      <!-- Redis -->
-      <div class="health-metric">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium text-foreground flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            {{ $t('features.dashboard.widgets.systemHealth.redis') }}
-          </span>
-          <span :class="getStatusClass(health.redis?.status)" class="text-xs font-semibold">
-            {{ health.redis?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : health.redis?.status === 'disabled' ? $t('features.dashboard.widgets.systemHealth.status.disabled') : $t('features.dashboard.widgets.systemHealth.status.error') }}
-          </span>
-        </div>
-        <div class="text-xs text-muted-foreground truncate">
-          {{ health.redis?.message || $t('features.dashboard.widgets.systemHealth.status.unknown') }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Last Updated -->
-    <div v-if="lastUpdated" class="mt-4 text-xs text-muted-foreground text-center">
-      {{ $t('features.dashboard.widgets.systemHealth.lastUpdated', { time: formatTime(lastUpdated) }) }}
-    </div>
-  </div>
+    </CardFooter>
+  </Card>
 </template>
 
 <script setup>
@@ -155,6 +144,25 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import { parseSingleResponse } from '@/utils/responseParser';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardTitle from '@/components/ui/card-title.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import CardFooter from '@/components/ui/card-footer.vue';
+import Button from '@/components/ui/button.vue';
+import Badge from '@/components/ui/badge.vue';
+import { 
+    Activity, 
+    RefreshCw, 
+    Cpu, 
+    Layers, 
+    HardDrive, 
+    Database, 
+    Zap, 
+    Clock, 
+    CheckCircle2, 
+    AlertCircle 
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -180,36 +188,35 @@ const overallStatusText = computed(() => {
 
 const overallStatusClass = computed(() => {
   const status = overallStatus.value;
-  if (status === 'healthy') return 'text-green-600 dark:text-green-400';
-  if (status === 'warning') return 'text-yellow-600 dark:text-yellow-400';
-  if (status === 'critical') return 'text-red-600 dark:text-red-400';
+  if (status === 'healthy') return 'text-emerald-500';
+  if (status === 'warning') return 'text-amber-500';
+  if (status === 'critical') return 'text-rose-500';
   return 'text-muted-foreground';
 });
 
 const overallStatusBadgeClass = computed(() => {
   const status = overallStatus.value;
-  if (status === 'healthy') return 'bg-green-500/20 text-green-400 dark:bg-green-900/30 dark:text-green-400';
-  if (status === 'warning') return 'bg-yellow-500/20 text-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-400';
-  if (status === 'critical') return 'bg-red-500/20 text-red-400 dark:bg-red-900/30 dark:text-red-400';
-  return 'bg-secondary text-secondary-foreground';
+  if (status === 'healthy') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+  if (status === 'warning') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+  if (status === 'critical') return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+  return 'bg-muted text-muted-foreground';
 });
 
 const getStatusClass = (status) => {
-  if (status === 'ok') return 'text-green-600 dark:text-green-400';
-  if (status === 'warning') return 'text-yellow-600 dark:text-yellow-400';
-  if (status === 'critical' || status === 'error') return 'text-red-600 dark:text-red-400';
+  if (status === 'ok') return 'text-emerald-600 dark:text-emerald-400';
+  if (status === 'warning') return 'text-amber-600 dark:text-amber-400';
+  if (status === 'critical' || status === 'error') return 'text-rose-600 dark:text-rose-400';
   return 'text-muted-foreground';
 };
 
 const getProgressBarClass = (status) => {
-  if (status === 'ok') return 'bg-green-500';
-  if (status === 'warning') return 'bg-yellow-500';
-  if (status === 'critical' || status === 'error') return 'bg-red-500';
-  return 'bg-gray-400';
+  if (status === 'ok') return 'bg-emerald-500';
+  if (status === 'warning') return 'bg-amber-500';
+  if (status === 'critical' || status === 'error') return 'bg-rose-500';
+  return 'bg-muted-foreground/30';
 };
 
 const fetchHealth = async () => {
-  // Stop all activity if session is terminated
   if (window.__isSessionTerminated) {
     if (refreshInterval) clearInterval(refreshInterval);
     return;
@@ -245,7 +252,6 @@ const formatTime = (date) => {
 
 onMounted(() => {
   fetchHealth();
-  // Auto-refresh every 30 seconds
   refreshInterval = setInterval(fetchHealth, 30000);
 });
 
@@ -257,26 +263,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.health-metric {
-  padding: 0.75rem;
-  background-color: hsl(var(--muted) / 0.3);
-  border-radius: 0.5rem;
-  border: 1px solid hsl(var(--border));
-  overflow: hidden;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 0.5rem;
-  background-color: hsl(var(--muted));
-  border-radius: 0.25rem;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 0.25rem;
-}
+/* Scoped styles removed as we are using Tailwind utilities and Shadcn-aligned structure */
 </style>
 

@@ -9,12 +9,13 @@
                 </router-link>
                 <h1 class="text-2xl font-bold text-foreground">{{ t('features.activityLogs.title') }}</h1>
             </div>
-            <button
+            <Button
+                variant="destructive"
+                variant-type="outline"
                 @click="clearLogs"
-                class="px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-card hover:bg-red-500/20"
             >
                 {{ t('features.system.logs.clear') }}
-            </button>
+            </Button>
         </div>
 
         <!-- Statistics -->
@@ -78,50 +79,53 @@
                 <!-- Row 1: Search, Filters, Export -->
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                     <div class="flex flex-wrap items-center gap-3">
-                        <input
+                        <Input
                             v-model="search"
                             type="text"
                             :placeholder="t('features.activityLogs.filters.search')"
-                            class="w-48 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                        >
-                        <select
-                            v-model="typeFilter"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                        >
-                            <option value="">{{ t('features.activityLogs.filters.allTypes') }}</option>
-                            <option value="created">{{ t('features.activityLogs.filters.types.created') }}</option>
-                            <option value="updated">{{ t('features.activityLogs.filters.types.updated') }}</option>
-                            <option value="deleted">{{ t('features.activityLogs.filters.types.deleted') }}</option>
-                            <option value="login">{{ t('features.activityLogs.filters.types.login') }}</option>
-                            <option value="logout">{{ t('features.activityLogs.filters.types.logout') }}</option>
-                            <option value="viewed">{{ t('features.activityLogs.filters.types.viewed') }}</option>
-                            <option value="published">{{ t('features.activityLogs.filters.types.published') }}</option>
-                            <option value="unpublished">{{ t('features.activityLogs.filters.types.unpublished') }}</option>
-                        </select>
-                        <select
-                            v-model="userFilter"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                        >
-                            <option value="">{{ t('features.activityLogs.filters.allUsers') }}</option>
-                            <option
-                                v-for="user in users"
-                                :key="user.id"
-                                :value="user.id"
-                            >
-                                {{ user.name }}
-                            </option>
-                        </select>
+                            class="w-48"
+                        />
+                        <Select v-model="typeFilter">
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue :placeholder="t('features.activityLogs.filters.allTypes')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ t('features.activityLogs.filters.allTypes') }}</SelectItem>
+                                <SelectItem value="created">{{ t('features.activityLogs.filters.types.created') }}</SelectItem>
+                                <SelectItem value="updated">{{ t('features.activityLogs.filters.types.updated') }}</SelectItem>
+                                <SelectItem value="deleted">{{ t('features.activityLogs.filters.types.deleted') }}</SelectItem>
+                                <SelectItem value="login">{{ t('features.activityLogs.filters.types.login') }}</SelectItem>
+                                <SelectItem value="logout">{{ t('features.activityLogs.filters.types.logout') }}</SelectItem>
+                                <SelectItem value="viewed">{{ t('features.activityLogs.filters.types.viewed') }}</SelectItem>
+                                <SelectItem value="published">{{ t('features.activityLogs.filters.types.published') }}</SelectItem>
+                                <SelectItem value="unpublished">{{ t('features.activityLogs.filters.types.unpublished') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select v-model="userFilter">
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue :placeholder="t('features.activityLogs.filters.allUsers')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ t('features.activityLogs.filters.allUsers') }}</SelectItem>
+                                <SelectItem
+                                    v-for="user in users"
+                                    :key="user.id"
+                                    :value="String(user.id)"
+                                >
+                                    {{ user.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <button
+                    <Button
                         @click="exportLogs"
                         :disabled="exporting"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         {{ exporting ? 'Exporting...' : 'Export CSV' }}
-                    </button>
+                    </Button>
                 </div>
                 
                 <!-- Row 2: Date Range & Per Page -->
@@ -129,19 +133,19 @@
                     <div class="flex items-center gap-3">
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-muted-foreground">{{ t('features.activityLogs.filters.dateFrom') || 'Dari' }}:</label>
-                            <input
+                            <Input
                                 v-model="dateFrom"
                                 type="date"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                            >
+                                class="w-36"
+                            />
                         </div>
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-muted-foreground">{{ t('features.activityLogs.filters.dateTo') || 'Sampai' }}:</label>
-                            <input
+                            <Input
                                 v-model="dateTo"
                                 type="date"
-                                class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
-                            >
+                                class="w-36"
+                            />
                         </div>
                         <button
                             v-if="dateFrom || dateTo"
@@ -153,16 +157,20 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-muted-foreground">Per halaman:</label>
-                        <select
-                            v-model="perPage"
-                            @change="fetchLogs"
-                            class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        <Select
+                            :model-value="String(perPage)"
+                            @update:model-value="perPage = Number($event); fetchLogs()"
                         >
-                            <option :value="25">25</option>
-                            <option :value="50">50</option>
-                            <option :value="100">100</option>
-                            <option :value="200">200</option>
-                        </select>
+                            <SelectTrigger class="w-[80px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                                <SelectItem value="200">200</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
             </div>
@@ -184,17 +192,15 @@
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center space-x-2">
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                <Badge
+                                    :variant="(log.action || log.type) === 'deleted' ? 'destructive' : 'default'"
                                     :class="{
-                                        'bg-green-500/20 text-green-400': (log.action || log.type) === 'created',
-                                        'bg-blue-500/20 text-blue-400': (log.action || log.type) === 'updated',
-                                        'bg-red-500/20 text-red-400': (log.action || log.type) === 'deleted',
-                                        'bg-purple-100 text-purple-800': (log.action || log.type) === 'login' || (log.action || log.type) === 'logout',
+                                        'bg-green-500 hover:bg-green-600': (log.action || log.type) === 'created',
+                                        'bg-blue-500 hover:bg-blue-600': (log.action || log.type) === 'updated',
                                     }"
                                 >
                                     {{ t(`features.activityLogs.filters.types.${log.action || log.type}`) || (log.action || log.type || t('features.activityLogs.messages.unknown')) }}
-                                </span>
+                                </Badge>
                                 <span class="text-sm font-medium text-foreground">{{ log.description }}</span>
                             </div>
                             <div class="mt-1 flex items-center space-x-4 text-sm text-muted-foreground">
@@ -217,9 +223,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 
@@ -265,8 +279,8 @@ const fetchLogs = async () => {
         const params = new URLSearchParams();
         params.append('per_page', perPage.value);
         
-        if (typeFilter.value) params.append('action', typeFilter.value);
-        if (userFilter.value) params.append('user_id', userFilter.value);
+        if (typeFilter.value && typeFilter.value !== 'all') params.append('action', typeFilter.value);
+        if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
         
@@ -334,8 +348,8 @@ const exportLogs = async () => {
     exporting.value = true;
     try {
         const params = new URLSearchParams();
-        if (typeFilter.value) params.append('action', typeFilter.value);
-        if (userFilter.value) params.append('user_id', userFilter.value);
+        if (typeFilter.value && typeFilter.value !== 'all') params.append('action', typeFilter.value);
+        if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
         
@@ -377,7 +391,6 @@ const formatDate = (date) => {
 };
 
 // Watch filters for auto-refresh
-import { watch } from 'vue';
 
 watch([typeFilter, userFilter, dateFrom, dateTo], () => {
     fetchLogs();

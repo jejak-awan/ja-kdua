@@ -4,14 +4,15 @@
             <div class="bg-card rounded-lg max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.file_manager.modals.upload.title') }}</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <div class="p-6">
@@ -27,12 +28,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                         <p class="mt-4 text-sm text-muted-foreground">
-                            <button
+                            <Button
+                                variant="link"
                                 @click="$refs.fileInput.click()"
-                                class="text-indigo-600 hover:text-indigo-800"
+                                class="h-auto p-0 font-medium text-primary"
                             >
                                 {{ $t('features.file_manager.labels.clickToUpload') }}
-                            </button>
+                            </Button>
                             {{ $t('features.file_manager.labels.dragAndDrop') }}
                         </p>
                         <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.file_manager.labels.multipleSupported') }}</p>
@@ -47,31 +49,32 @@
                                 class="text-sm text-muted-foreground flex items-center justify-between"
                             >
                                 <span>{{ file.name }}</span>
-                                <button
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     @click="removeFile(index)"
-                                    class="text-red-600 hover:text-red-800"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                     {{ $t('features.file_manager.actions.remove') }}
-                                </button>
+                                </Button>
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.file_manager.actions.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleUpload"
                         :disabled="uploading || selectedFiles.length === 0"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ uploading ? $t('features.file_manager.actions.uploading') : $t('features.file_manager.actions.upload') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -82,6 +85,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
 
 const { t } = useI18n();
 

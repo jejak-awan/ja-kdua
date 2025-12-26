@@ -4,14 +4,15 @@
             <div class="bg-card rounded-lg max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.folder.title') }}</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Content -->
@@ -21,51 +22,51 @@
                             <label class="block text-sm font-medium text-foreground mb-1">
                                 {{ $t('features.media.modals.folder.name') }} <span class="text-red-500">*</span>
                             </label>
-                            <input
+                            <Input
                                 v-model="form.name"
                                 type="text"
                                 required
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 :placeholder="$t('features.media.modals.folder.placeholder')"
-                            >
+                            />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-1">
                                 {{ $t('features.media.modals.folder.parent') }}
                             </label>
-                            <select
-                                v-model="form.parent_id"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option :value="null">{{ $t('features.media.modals.folder.noParent') }}</option>
-                                <option
-                                    v-for="folder in folders"
-                                    :key="folder.id"
-                                    :value="folder.id"
-                                >
-                                    {{ folder.name }}
-                                </option>
-                            </select>
+                            <Select v-model="form.parent_id">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue :placeholder="$t('features.media.modals.folder.noParent')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="null">{{ $t('features.media.modals.folder.noParent') }}</SelectItem>
+                                    <SelectItem
+                                        v-for="folder in folders"
+                                        :key="folder.id"
+                                        :value="folder.id"
+                                    >
+                                        {{ folder.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </form>
                 </div>
 
                 <!-- Footer -->
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.media.actions.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleSubmit"
                         :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? $t('features.media.modals.folder.creating') : $t('features.media.modals.folder.create') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -76,6 +77,13 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Select from '../ui/select.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
 
 const { t } = useI18n();
 

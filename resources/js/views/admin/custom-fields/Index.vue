@@ -1,179 +1,148 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ t('features.developer.custom_fields.title') }}</h1>
-            <div class="space-x-2">
-                <button
-                    @click="showCreateGroupModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md hover:bg-muted"
-                >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.developer.custom_fields.title') }}</h1>
+                <p class="text-sm text-muted-foreground mt-1">Manage reusable field groups and custom fields for your content models</p>
+            </div>
+            <div class="flex gap-2">
+                <Button variant="outline" @click="showCreateGroupModal = true">
+                    <Layout class="w-4 h-4 mr-2" />
                     {{ t('features.developer.custom_fields.create_group') }}
-                </button>
-                <button
-                    @click="showCreateFieldModal = true"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
-                >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+                </Button>
+                <Button @click="showCreateFieldModal = true">
+                    <Plus class="w-4 h-4 mr-2" />
                     {{ t('features.developer.custom_fields.create_field') }}
-                </button>
+                </Button>
             </div>
         </div>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div class="border-b border-border">
-                <nav class="-mb-px flex px-6" aria-label="Tabs">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.name"
-                        @click="currentTab = tab.name"
-                        :class="[
-                            currentTab === tab.name
-                                ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-input',
-                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm mr-8'
-                        ]"
-                    >
-                        {{ tab.label }}
-                    </button>
-                </nav>
-            </div>
+        <Tabs v-model="currentTab" class="space-y-6">
+            <TabsList>
+                <TabsTrigger v-for="tab in tabs" :key="tab.name" :value="tab.name">
+                    {{ tab.label }}
+                </TabsTrigger>
+            </TabsList>
 
-            <!-- Field Groups Tab -->
-            <div v-if="currentTab === 'groups'" class="p-6">
-                <div v-if="loadingGroups" class="text-center">
-                    <p class="text-muted-foreground">{{ t('features.developer.webhooks.loading') }}</p>
-                </div>
-                <div v-else-if="fieldGroups.length === 0" class="text-center">
-                    <p class="text-muted-foreground">{{ t('features.developer.custom_fields.groups.empty') }}</p>
-                </div>
-                <table v-else class="min-w-full divide-y divide-border">
-                    <thead class="bg-muted">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.groups.table.name') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.groups.table.fields') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.groups.table.attached_to') }}
-                            </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.groups.table.actions') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-card divide-y divide-border">
-                        <tr v-for="group in fieldGroups" :key="group.id" class="hover:bg-muted">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-foreground">{{ group.name }}</div>
-                                <div class="text-sm text-muted-foreground">{{ group.description }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                {{ group.fields_count || 0 }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                {{ group.attachable_type ? group.attachable_type.split('\\').pop() : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end space-x-2">
-                                    <button
-                                        @click="editGroup(group)"
-                                        class="text-indigo-600 hover:text-indigo-900"
-                                    >
-                                        {{ t('features.developer.custom_fields.groups.actions.edit') }}
-                                    </button>
-                                    <button
-                                        @click="deleteGroup(group)"
-                                        class="text-red-600 hover:text-red-900"
-                                    >
-                                        {{ t('features.developer.custom_fields.groups.actions.delete') }}
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <TabsContent value="groups">
+                <Card>
+                    <CardContent class="p-0">
+                        <div v-if="loadingGroups" class="p-12 text-center">
+                            <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.webhooks.loading') }}</p>
+                        </div>
+                        <div v-else-if="fieldGroups.length === 0" class="p-12 text-center">
+                            <Layout class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.custom_fields.groups.empty') }}</p>
+                        </div>
+                        <Table v-else>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{{ t('features.developer.custom_fields.groups.table.name') }}</TableHead>
+                                    <TableHead>{{ t('features.developer.custom_fields.groups.table.fields') }}</TableHead>
+                                    <TableHead>{{ t('features.developer.custom_fields.groups.table.attached_to') }}</TableHead>
+                                    <TableHead class="text-right">{{ t('features.developer.custom_fields.groups.table.actions') }}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="group in fieldGroups" :key="group.id" class="hover:bg-muted/50 transition-colors group">
+                                    <TableCell>
+                                        <div class="text-sm font-semibold text-foreground">{{ group.name }}</div>
+                                        <div class="text-xs text-muted-foreground">{{ group.description }}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" class="font-mono">
+                                            {{ group.fields_count || 0 }}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary">
+                                            {{ group.attachable_type ? group.attachable_type.split('\\').pop() : '-' }}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" @click="editGroup(group)" class="h-8 w-8">
+                                                <Pencil class="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" @click="deleteGroup(group)" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                <Trash2 class="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </TabsContent>
 
-            <!-- Custom Fields Tab -->
-            <div v-else class="p-6">
-                <!-- Filters -->
-                <div class="mb-4">
-                    <input
-                        v-model="fieldSearch"
-                        type="text"
-                        :placeholder="t('features.developer.custom_fields.fields.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full md:w-64"
-                    >
-                </div>
-
-                <div v-if="loadingFields" class="text-center">
-                    <p class="text-muted-foreground">{{ t('features.developer.webhooks.loading') }}</p>
-                </div>
-                <div v-else-if="filteredFields.length === 0" class="text-center">
-                    <p class="text-muted-foreground">{{ t('features.developer.custom_fields.fields.empty') }}</p>
-                </div>
-                <table v-else class="min-w-full divide-y divide-border">
-                    <thead class="bg-muted">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.fields.table.label') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.fields.table.name') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.fields.table.type') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.fields.table.group') }}
-                            </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                                {{ t('features.developer.custom_fields.fields.table.actions') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-card divide-y divide-border">
-                        <tr v-for="field in filteredFields" :key="field.id" class="hover:bg-muted">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                                {{ field.label }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-muted-foreground">
-                                {{ field.name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
-                                {{ field.type }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                {{ field.field_group?.name || '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end space-x-2">
-                                    <button
-                                        @click="editField(field)"
-                                        class="text-indigo-600 hover:text-indigo-900"
-                                    >
-                                        {{ t('features.developer.custom_fields.fields.actions.edit') }}
-                                    </button>
-                                    <button
-                                        @click="deleteField(field)"
-                                        class="text-red-600 hover:text-red-900"
-                                    >
-                                        {{ t('features.developer.custom_fields.fields.actions.delete') }}
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <TabsContent value="fields">
+                <Card>
+                    <CardHeader class="pb-0 border-b-0 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="relative flex-1 max-w-sm">
+                                <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    v-model="fieldSearch"
+                                    :placeholder="t('features.developer.custom_fields.fields.search')"
+                                    class="pl-9"
+                                />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <div v-if="loadingFields" class="p-12 text-center">
+                            <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.webhooks.loading') }}</p>
+                        </div>
+                        <div v-else-if="filteredFields.length === 0" class="p-12 text-center">
+                            <FileCode class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+                            <p class="text-muted-foreground font-medium">{{ t('features.developer.custom_fields.fields.empty') }}</p>
+                        </div>
+                        <Table v-else>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{{ t('features.developer.custom_fields.fields.table.label') }}</TableHead>
+                                    <TableHead>{{ t('features.developer.custom_fields.fields.table.name') }}</TableHead>
+                                    <TableHead>{{ t('features.developer.custom_fields.fields.table.type') }}</TableHead>
+                                    <TableHead>{{ t('features.developer.custom_fields.fields.table.group') }}</TableHead>
+                                    <TableHead class="text-right">{{ t('features.developer.custom_fields.fields.table.actions') }}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="field in filteredFields" :key="field.id" class="hover:bg-muted/50 transition-colors group">
+                                    <TableCell class="text-sm font-semibold text-foreground">
+                                        {{ field.label }}
+                                    </TableCell>
+                                    <TableCell>
+                                        <code class="text-[11px] bg-muted px-2 py-0.5 rounded border border-border group-hover:bg-background transition-colors">{{ field.name }}</code>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" class="capitalize">
+                                            {{ field.type }}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell class="text-sm text-muted-foreground">
+                                        {{ field.field_group?.name || '-' }}
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" @click="editField(field)" class="h-8 w-8">
+                                                <Pencil class="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" @click="deleteField(field)" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                <Trash2 class="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
 
         <!-- Modals -->
         <FieldGroupModal
@@ -200,6 +169,32 @@ import api from '../../../services/api';
 import FieldGroupModal from '../../../components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '../../../components/custom-fields/FieldModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Table from '../../../components/ui/table.vue';
+import TableHeader from '../../../components/ui/table-header.vue';
+import TableBody from '../../../components/ui/table-body.vue';
+import TableRow from '../../../components/ui/table-row.vue';
+import TableCell from '../../../components/ui/table-cell.vue';
+import TableHead from '../../../components/ui/table-head.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Tabs from '../../../components/ui/tabs.vue';
+import TabsList from '../../../components/ui/tabs-list.vue';
+import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
+import TabsContent from '../../../components/ui/tabs-content.vue';
+import { 
+    Plus, 
+    Search, 
+    Pencil, 
+    Trash2, 
+    Layout, 
+    FileCode,
+    Loader2
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -323,7 +318,7 @@ const handleFieldSaved = () => {
 
 onMounted(() => {
     fetchFieldGroups();
-    fetchFields();
+    fetchCustomFields();
 });
 </script>
 

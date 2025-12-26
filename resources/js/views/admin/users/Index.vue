@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
             <router-link
                 :to="{ name: 'users.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -17,15 +17,15 @@
         <!-- Filters -->
         <div class="bg-card border border-border rounded-lg p-4 mb-4">
             <div class="flex items-center space-x-4">
-                <input
+                <Input
                     v-model="search"
                     type="text"
                     :placeholder="$t('features.users.search')"
-                    class="flex-1 px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
+                    class="max-w-xs"
+                />
                 <select
                     v-model="roleFilter"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 max-w-xs"
                 >
                     <option value="">{{ $t('features.users.allRoles') }}</option>
                     <option
@@ -100,10 +100,10 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-foreground">{{ user.email }}</div>
-                            <div v-if="user.email_verified_at" class="text-xs text-green-600">
+                            <div v-if="user.email_verified_at" class="text-xs text-primary font-medium">
                                 {{ $t('features.users.status.verified') }}
                             </div>
-                            <div v-else class="text-xs text-yellow-600">
+                            <div v-else class="text-xs text-muted-foreground italic">
                                 {{ $t('features.users.status.unverified') }}
                             </div>
                         </td>
@@ -131,25 +131,30 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
-                                <button
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     @click="forceLogoutUser(user)"
-                                    class="text-orange-600 hover:text-orange-900"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                     :title="$t('features.users.actions.forceLogout')"
                                 >
                                     {{ $t('features.users.actions.forceLogout') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     @click="editUser(user)"
-                                    class="text-indigo-600 hover:text-indigo-900"
                                 >
                                     {{ $t('common.actions.edit') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     @click="deleteUser(user)"
-                                    class="text-red-600 hover:text-red-900"
+                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                     {{ $t('common.actions.delete') }}
-                                </button>
+                                </Button>
                             </div>
                         </td>
                     </tr>
@@ -162,20 +167,22 @@
                     {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
                 </div>
                 <div class="flex space-x-2">
-                    <button
+                    <Button
+                        variant="outline"
+                        size="sm"
                         @click="changePage(pagination.current_page - 1)"
                         :disabled="pagination.current_page === 1"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                     >
                         {{ $t('common.pagination.previous') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
                         @click="changePage(pagination.current_page + 1)"
                         :disabled="pagination.current_page === pagination.last_page"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm disabled:opacity-50"
                     >
                         {{ $t('common.pagination.next') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -191,6 +198,8 @@ import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import toast from '../../../services/toast';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
 const router = useRouter();
