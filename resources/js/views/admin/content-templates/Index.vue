@@ -1,12 +1,14 @@
 <template>
     <div>
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.title') }}</h1>
-                <p class="text-sm text-muted-foreground mt-1">Create and manage reuseable templates for your content</p>
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.title') }}</h1>
+                    <p class="text-sm text-muted-foreground mt-1">{{ t('features.content_templates.description') }}</p>
+                </div>
             </div>
-            <Button as-child>
-                <router-link :to="{ name: 'content-templates.create' }">
+            <Button as-child class="shadow-sm">
+                <router-link :to="{ name: 'content-templates.create' }" class="flex items-center">
                     <Plus class="w-4 h-4 mr-2" />
                     {{ t('features.content_templates.create') }}
                 </router-link>
@@ -14,103 +16,200 @@
         </div>
 
         <Card>
-            <CardHeader class="pb-0 border-b-0 space-y-4">
-                <div class="flex items-center gap-4">
-                    <div class="relative flex-1 max-w-sm">
-                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            v-model="search"
-                            :placeholder="t('features.content_templates.search')"
-                            class="pl-9"
-                        />
+            <CardHeader class="pb-10 border-b-0 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="relative w-full md:w-72">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                v-model="search"
+                                :placeholder="t('features.content_templates.search')"
+                                class="pl-9"
+                                @input="handleSearch"
+                            />
+                        </div>
+                        <Select
+                            v-model="typeFilter"
+                            @update:model-value="fetchTemplates"
+                        >
+                            <SelectTrigger class="w-[140px]">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="post">Post</SelectItem>
+                                <SelectItem value="page">Page</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1">
+                        <span class="text-sm font-medium text-primary">
+                            {{ selectedTemplates.length }} selected
+                        </span>
+                        <div class="h-4 w-px bg-primary/20"></div>
+                        <Select
+                            v-model="bulkAction"
+                            @update:model-value="handleBulkAction"
+                        >
+                            <SelectTrigger class="w-[140px] h-8 border-primary/20">
+                                <SelectValue placeholder="Bulk Action" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="delete" class="text-destructive focus:text-destructive">Delete Selected</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
             </CardHeader>
             <CardContent class="p-0">
-                <div v-if="loading" class="p-12 text-center">
+                <div v-if="loading && templates.length === 0" class="p-12 text-center">
                     <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-4" />
                     <p class="text-muted-foreground font-medium">{{ t('features.content_templates.loading') }}</p>
                 </div>
 
-                <div v-else-if="filteredTemplates.length === 0" class="p-12 text-center">
+                <div v-else-if="templates.length === 0" class="p-12 text-center">
                     <FileText class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
                     <p class="text-muted-foreground font-medium">{{ t('features.content_templates.empty') }}</p>
                 </div>
 
-                <Table v-else>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>{{ t('features.content_templates.table.name') }}</TableHead>
-                            <TableHead>{{ t('features.content_templates.table.type') }}</TableHead>
-                            <TableHead>{{ t('features.content_templates.table.description') }}</TableHead>
-                            <TableHead>{{ t('features.content_templates.table.updated') }}</TableHead>
-                            <TableHead class="text-right">{{ t('features.content_templates.table.actions') }}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="template in filteredTemplates" :key="template.id" class="hover:bg-muted/50 transition-colors group">
-                            <TableCell>
-                                <div class="text-sm font-semibold text-foreground">{{ template.name }}</div>
-                            </TableCell>
-                            <TableCell>
-                                <Badge variant="secondary" class="capitalize">
-                                    {{ template.type || 'post' }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <div class="text-sm text-muted-foreground truncate max-w-xs" :title="template.description">
-                                    {{ template.description || '-' }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="text-sm text-muted-foreground">
-                                {{ formatDate(template.updated_at) }}
-                            </TableCell>
-                            <TableCell class="text-right">
-                                <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        @click="createFromTemplate(template)"
-                                        :title="t('features.content_templates.actions.createContent')"
-                                        class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                    >
-                                        <CopyPlus class="w-4 h-4" />
-                                    </Button>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        as-child
-                                        class="h-8 w-8"
-                                    >
-                                        <router-link :to="{ name: 'content-templates.edit', params: { id: template.id } }">
-                                            <Pencil class="w-4 h-4" />
-                                        </router-link>
-                                    </Button>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        @click="handleDelete(template)"
-                                        :title="t('features.content_templates.actions.delete')"
-                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    >
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                <div v-else class="relative overflow-x-auto">
+                    <Table>
+                        <TableHeader class="[&_tr]:border-b-0">
+                            <TableRow class="bg-muted/50 hover:bg-muted/50 border-b-0 !border-b-0 [&>th]:border-b-0">
+                                <TableHead class="w-12 px-6">
+                                    <Checkbox
+                                        :checked="allSelected"
+                                        @update:checked="toggleSelectAll"
+                                    />
+                                </TableHead>
+                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.name') }}</TableHead>
+                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.type') }}</TableHead>
+                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.description') }}</TableHead>
+                                <TableHead class="font-semibold text-foreground">{{ t('features.content_templates.table.updated') }}</TableHead>
+                                <TableHead class="text-center font-semibold text-foreground">{{ t('features.content_templates.table.actions') }}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="template in templates" :key="template.id" class="hover:bg-muted/50 transition-colors group border-b-0 [&>td]:border-b-0 text-muted-foreground">
+                                <TableCell class="px-6">
+                                    <Checkbox
+                                        :checked="selectedTemplates.includes(template.id)"
+                                        @update:checked="(checked) => toggleSelection(template.id, checked)"
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <div class="text-sm font-medium text-foreground">{{ template.name }}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="secondary" class="capitalize">
+                                        {{ template.type || 'post' }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <div class="text-sm truncate max-w-xs" :title="template.description">
+                                        {{ template.description || '-' }}
+                                    </div>
+                                </TableCell>
+                                <TableCell class="text-sm">
+                                    {{ formatDate(template.updated_at) }}
+                                </TableCell>
+                                <TableCell class="text-center">
+                                    <div class="flex justify-center gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            @click="createFromTemplate(template)"
+                                            :title="t('features.content_templates.actions.createContent')"
+                                            class="h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                                        >
+                                            <CopyPlus class="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            as-child
+                                            class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
+                                        >
+                                            <router-link :to="{ name: 'content-templates.edit', params: { id: template.id } }">
+                                                <Pencil class="w-4 h-4" />
+                                            </router-link>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            @click="handleDelete(template)"
+                                            :title="t('features.content_templates.actions.delete')"
+                                            class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        >
+                                            <Trash2 class="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <!-- Pagination -->
+                <div v-if="pagination && pagination.total > 0" class="px-6 py-4 border-t-0 bg-transparent flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                        <p>
+                            {{ t('common.pagination.showing') }} {{ (pagination.current_page - 1) * pagination.per_page + 1 }} - {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} {{ t('common.pagination.of') }} {{ pagination.total }}
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <span>{{ t('common.pagination.rowsPerPage') }}</span>
+                            <Select
+                                v-model="perPage"
+                                @update:model-value="fetchTemplates(1)"
+                            >
+                                <SelectTrigger class="w-[70px] h-8 text-xs bg-muted/50 border-0">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="5">5</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="20">20</SelectItem>
+                                    <SelectItem value="50">50</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            :disabled="pagination.current_page === 1"
+                            @click="fetchTemplates(pagination.current_page - 1)"
+                            class="hover:bg-muted/50"
+                        >
+                            {{ t('common.pagination.previous') }}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            :disabled="pagination.current_page === pagination.last_page"
+                            @click="fetchTemplates(pagination.current_page + 1)"
+                            class="hover:bg-muted/50"
+                        >
+                            {{ t('common.pagination.next') }}
+                        </Button>
+                    </div>
+                </div>
             </CardContent>
         </Card>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import { debounce } from 'lodash';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardContent from '../../../components/ui/card-content.vue';
@@ -123,12 +222,18 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import Badge from '../../../components/ui/badge.vue';
-import { 
-    Plus, 
-    Search, 
-    FileText, 
-    Pencil, 
-    Trash2, 
+import Checkbox from '../../../components/ui/checkbox.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import {
+    Plus,
+    Search,
+    FileText,
+    Pencil,
+    Trash2,
     CopyPlus,
     Loader2
 } from 'lucide-vue-next';
@@ -138,23 +243,35 @@ const router = useRouter();
 const templates = ref([]);
 const loading = ref(false);
 const search = ref('');
+const typeFilter = ref('all');
+const pagination = ref(null);
+const perPage = ref('10');
+const selectedTemplates = ref([]);
+const bulkAction = ref('');
 
-const filteredTemplates = computed(() => {
-    if (!search.value) return templates.value;
-    
-    const searchLower = search.value.toLowerCase();
-    return templates.value.filter(template => 
-        template.name.toLowerCase().includes(searchLower) ||
-        (template.description && template.description.toLowerCase().includes(searchLower))
-    );
+const allSelected = computed(() => {
+    return templates.value.length > 0 && selectedTemplates.value.length === templates.value.length;
 });
 
-const fetchTemplates = async () => {
+const handleSearch = debounce(() => {
+    fetchTemplates(1);
+}, 300);
+
+const fetchTemplates = async (page = 1) => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/content-templates');
-        const { data } = parseResponse(response);
+        const params = {
+            page,
+            per_page: perPage.value,
+            type: typeFilter.value !== 'all' ? typeFilter.value : undefined,
+            search: search.value
+        };
+
+        const response = await api.get('/admin/cms/content-templates', { params });
+        const { data, pagination: pag } = parseResponse(response);
         templates.value = ensureArray(data);
+        pagination.value = pag;
+        selectedTemplates.value = []; // Reset selection on page change
     } catch (error) {
         console.error('Failed to fetch templates:', error);
         templates.value = [];
@@ -183,10 +300,49 @@ const handleDelete = async (template) => {
 
     try {
         await api.delete(`/admin/cms/content-templates/${template.id}`);
-        await fetchTemplates();
+        await fetchTemplates(pagination.value?.current_page || 1);
     } catch (error) {
         console.error('Failed to delete template:', error);
         alert(t('features.content_templates.messages.deleteError'));
+    }
+};
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedTemplates.value = templates.value.map(t => t.id);
+    } else {
+        selectedTemplates.value = [];
+    }
+};
+
+const toggleSelection = (id, checked) => {
+    if (checked) {
+        selectedTemplates.value.push(id);
+    } else {
+        selectedTemplates.value = selectedTemplates.value.filter(tId => tId !== id);
+    }
+};
+
+const handleBulkAction = async () => {
+    if (!bulkAction.value || selectedTemplates.value.length === 0) return;
+
+    if (bulkAction.value === 'delete') {
+        if (!confirm(`Are you sure you want to delete ${selectedTemplates.value.length} templates?`)) {
+            bulkAction.value = '';
+            return;
+        }
+
+        try {
+            await api.post('/admin/cms/content-templates/bulk-action', {
+                action: 'delete',
+                ids: selectedTemplates.value
+            });
+            await fetchTemplates(pagination.value?.current_page || 1);
+            bulkAction.value = '';
+        } catch (error) {
+            console.error('Bulk action failed:', error);
+            alert('Failed to perform bulk action');
+        }
     }
 };
 

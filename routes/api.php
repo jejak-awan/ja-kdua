@@ -388,6 +388,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('notifications/{notification}', [App\Http\Controllers\Api\V1\NotificationController::class, 'destroy']);
 
         // Content Templates
+        Route::post('content-templates/bulk-action', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'bulkAction'])->middleware('permission:manage content');
         Route::apiResource('content-templates', App\Http\Controllers\Api\V1\ContentTemplateController::class)->middleware('permission:manage content');
         Route::post('content-templates/{contentTemplate}/create-content', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'createContent'])->middleware('permission:create content');
 

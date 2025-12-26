@@ -11,17 +11,45 @@ class ContentTemplateController extends BaseApiController
     {
         $query = ContentTemplate::with('category');
 
-        if ($request->has('type')) {
+        if ($request->has('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
+        }
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $templates = $query->latest()->get();
+        $perPage = $request->input('per_page', 10);
+        $templates = $query->latest()->paginate($perPage);
 
         return $this->success($templates, 'Content templates retrieved successfully');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:delete',
+            'ids' => 'required|array',
+            'ids.*' => 'exists:content_templates,id',
+        ]);
+
+        $action = $request->input('action');
+        $ids = $request->input('ids');
+        $count = 0;
+
+        if ($action === 'delete') {
+            $count = ContentTemplate::whereIn('id', $ids)->delete();
+        }
+
+        return $this->success(null, "Bulk action {$action} completed for {$count} templates");
     }
 
     public function store(Request $request)

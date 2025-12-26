@@ -41,7 +41,8 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Optionally seed sample data in development
-            // $this->call(SampleDataSeeder::class);
+            $this->call(SampleDataSeeder::class);
+            $this->call(ContentTemplateSeeder::class);
         }
 
         $this->command->info('Database seeded successfully!');

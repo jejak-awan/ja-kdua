@@ -2,11 +2,9 @@
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.editTitle') }}</h1>
-            <Button variant="ghost" as-child>
-                <router-link :to="{ name: 'content-templates' }">
-                    <ChevronLeft class="w-4 h-4 mr-2" />
-                    {{ t('features.content_templates.form.back') }}
-                </router-link>
+            <Button variant="ghost" @click="router.push({ name: 'content-templates' })">
+                <ChevronLeft class="w-4 h-4 mr-2" />
+                {{ t('features.content_templates.form.back') }}
             </Button>
         </div>
 

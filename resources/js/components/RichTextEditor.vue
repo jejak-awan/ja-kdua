@@ -1,26 +1,28 @@
 <template>
-    <div class="rich-text-editor">
+    <div class="rich-text-editor space-y-2">
         <!-- Editor Mode Toggle -->
-        <div class="flex items-center justify-end mb-2">
-            <div class="flex items-center space-x-2 border border-input rounded-md p-1 bg-card">
+        <div class="flex items-center justify-end">
+            <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
                 <button
                     @click="editorMode = 'wysiwyg'"
+                    type="button"
                     :class="[
-                        'px-3 py-1 text-sm rounded',
+                        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
                         editorMode === 'wysiwyg'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-foreground hover:bg-accent'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'hover:bg-background/50 hover:text-foreground'
                     ]"
                 >
                     WYSIWYG
                 </button>
                 <button
                     @click="editorMode = 'markdown'"
+                    type="button"
                     :class="[
-                        'px-3 py-1 text-sm rounded',
+                        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
                         editorMode === 'markdown'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-foreground hover:bg-accent'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'hover:bg-background/50 hover:text-foreground'
                     ]"
                 >
                     Markdown
@@ -28,17 +30,21 @@
             </div>
         </div>
 
-        <!-- WYSIWYG Editor -->
-        <div v-if="editorMode === 'wysiwyg'">
-            <div ref="editor" class="editor-container"></div>
-        </div>
+        <!-- Editor Container -->
+        <div class="rounded-md border border-input bg-transparent overflow-hidden ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+            <!-- WYSIWYG Editor -->
+            <div v-show="editorMode === 'wysiwyg'">
+                <div ref="editor" class="editor-container"></div>
+            </div>
 
-        <!-- Markdown Editor -->
-        <MarkdownEditor
-            v-else
-            :model-value="markdownValue"
-            @update:model-value="handleMarkdownUpdate"
-        />
+            <!-- Markdown Editor -->
+            <MarkdownEditor
+                v-show="editorMode === 'markdown'"
+                :model-value="markdownValue"
+                @update:model-value="handleMarkdownUpdate"
+                class="min-h-[300px] p-4 font-mono text-sm outline-none bg-transparent"
+            />
+        </div>
     </div>
 </template>
 
@@ -194,6 +200,67 @@ onBeforeUnmount(() => {
 <style scoped>
 .editor-container {
     min-height: 300px;
+}
+
+/* Deep selector to target Quill internals */
+:deep(.ql-toolbar.ql-snow) {
+    border: none;
+    border-bottom: 1px solid hsl(var(--input));
+    background-color: hsl(var(--muted) / 0.3);
+    font-family: inherit;
+}
+
+:deep(.ql-container.ql-snow) {
+    border: none;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+:deep(.ql-editor) {
+    min-height: 300px;
+    padding: 1rem;
+}
+
+/* Dark mode adjustments for toolbar icons */
+:deep(.ql-snow .ql-stroke) {
+    stroke: hsl(var(--muted-foreground));
+}
+
+:deep(.ql-snow .ql-fill) {
+    fill: hsl(var(--muted-foreground));
+}
+
+:deep(.ql-snow .ql-picker) {
+    color: hsl(var(--muted-foreground));
+}
+
+:deep(.ql-snow .ql-picker-options) {
+    background-color: hsl(var(--popover));
+    border-color: hsl(var(--border));
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+:deep(.ql-snow .ql-picker-item:hover),
+:deep(.ql-snow .ql-picker-label:hover) {
+    color: hsl(var(--primary));
+}
+
+:deep(.ql-snow button:hover .ql-stroke),
+:deep(.ql-snow .ql-picker-label:hover .ql-stroke) {
+    stroke: hsl(var(--primary));
+}
+
+:deep(.ql-snow button:hover .ql-fill),
+:deep(.ql-snow .ql-picker-label:hover .ql-fill) {
+    fill: hsl(var(--primary));
+}
+
+:deep(.ql-snow .ql-active .ql-stroke) {
+    stroke: hsl(var(--primary));
+}
+
+:deep(.ql-snow .ql-active .ql-fill) {
+    fill: hsl(var(--primary));
 }
 </style>
 

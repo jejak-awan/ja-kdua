@@ -12,7 +12,7 @@
                         {{ $t('features.content.list.templates') }}
                     </router-link>
                 </Button>
-                <Button asChild class="shadow-lg shadow-primary/20">
+                <Button asChild class="shadow-sm">
                     <router-link :to="{ name: 'contents.create' }" class="flex items-center gap-2">
                         <Plus class="w-4 h-4" />
                         {{ $t('features.content.list.createNew') }}

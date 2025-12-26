@@ -164,7 +164,7 @@
                     <Button
                         v-if="!viewingRevision.is_current"
                         variant="default"
-                        class="bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20 shadow-lg px-6"
+                        class="bg-emerald-600 hover:bg-emerald-700 shadow-sm px-6"
                         @click="restoreRevision(viewingRevision)"
                     >
                         <RotateCcw class="w-4 h-4 mr-2" />

@@ -1,5 +1,6 @@
 {
     "title": "Content Templates",
+    "description": "Create and manage reuseable templates for your content",
     "create": "New Template",
     "search": "Search templates...",
     "loading": "Loading...",

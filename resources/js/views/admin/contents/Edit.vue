@@ -77,7 +77,7 @@
             </div>
 
             <!-- Actions -->
-            <Card class="border-none shadow-lg bg-card/80 backdrop-blur-sm sticky bottom-6 z-10">
+            <Card class="border-none shadow bg-card/80 backdrop-blur-sm sticky bottom-6 z-10">
                 <CardContent class="p-4 flex justify-end items-center gap-4">
                     <Button variant="ghost" asChild>
                         <router-link :to="{ name: 'contents' }">
@@ -87,7 +87,7 @@
                     <Button
                         type="submit"
                         :disabled="loading"
-                        class="min-w-[140px] shadow-primary/20 shadow-lg"
+                        class="min-w-[140px] shadow-sm"
                     >
                         <template v-if="loading">
                             <Loader2 class="w-4 h-4 mr-2 animate-spin" />

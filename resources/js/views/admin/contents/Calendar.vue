@@ -27,7 +27,7 @@
                     </SelectContent>
                 </Select>
                 
-                <Button asChild class="shadow-lg shadow-primary/20">
+                <Button asChild class="shadow-sm">
                     <router-link :to="{ name: 'contents.create' }">
                         <Plus class="w-4 h-4 mr-2" />
                         {{ $t('features.content.list.createNew') }}
