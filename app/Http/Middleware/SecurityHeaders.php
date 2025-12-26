@@ -149,6 +149,30 @@ class SecurityHeaders
         // Worker sources (for service workers, PDF generation, etc.)
         $directives[] = "worker-src 'self' blob:";
         
+        // Frame sources (for iframes - YouTube, Vimeo, Google Maps, etc.)
+        $frameSrc = [
+            "'self'",
+            'https://www.youtube.com',
+            'https://youtube.com',
+            'https://www.youtube-nocookie.com',
+            'https://player.vimeo.com',
+            'https://vimeo.com',
+            'https://www.google.com',
+            'https://maps.google.com',
+            'https://www.google.com/maps',
+            'https://open.spotify.com',
+            'https://w.soundcloud.com',
+            'https://www.dailymotion.com',
+            'https://codepen.io',
+            'https://jsfiddle.net',
+        ];
+        
+        if ($host) {
+            $frameSrc[] = "https://{$host}";
+        }
+        
+        $directives[] = "frame-src " . implode(' ', $frameSrc);
+        
         return implode('; ', $directives);
     }
 }
