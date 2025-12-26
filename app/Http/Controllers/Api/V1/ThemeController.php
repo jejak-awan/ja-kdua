@@ -23,29 +23,7 @@ class ThemeController extends BaseApiController
         return $this->success($themes, 'Themes retrieved successfully');
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:themes,slug',
-            'type' => 'nullable|string|in:frontend,admin,email',
-            'version' => 'nullable|string',
-            'description' => 'nullable|string',
-            'author' => 'nullable|string',
-            'author_url' => 'nullable|url',
-            'license' => 'nullable|string',
-            'preview_image' => 'nullable|string',
-            'settings' => 'nullable|array',
-            'custom_css' => 'nullable|string',
-            'parent_theme' => 'nullable|string|exists:themes,slug',
-            'dependencies' => 'nullable|array',
-            'supports' => 'nullable|array',
-        ]);
-
-        $theme = Theme::create($validated);
-
-        return $this->success($theme, 'Theme created successfully', 201);
-    }
+    // Store method removed (Themes are code-managed)
 
     public function show(Theme $theme)
     {
@@ -228,23 +206,7 @@ class ThemeController extends BaseApiController
         ], 'Theme validation completed');
     }
 
-    public function getAssets(Theme $theme)
-    {
-        $assets = $this->themeService->loadThemeAssets($theme);
-
-        return $this->success($assets, 'Theme assets retrieved successfully');
-    }
-
-    public function compileAssets(Theme $theme)
-    {
-        try {
-            $this->themeService->compileThemeAssets($theme);
-
-            return $this->success(null, 'Theme assets compiled successfully');
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 500);
-        }
-    }
+    // Legacy Blade methods removed
 
     public function scan()
     {
@@ -277,103 +239,7 @@ class ThemeController extends BaseApiController
         ], 'Theme setting retrieved successfully');
     }
 
-    public function export(Theme $theme)
-    {
-        try {
-            $exportData = [
-                'name' => $theme->name,
-                'slug' => $theme->slug,
-                'version' => $theme->version,
-                'type' => $theme->type,
-                'description' => $theme->description,
-                'author' => $theme->author,
-                'author_url' => $theme->author_url,
-                'license' => $theme->license,
-                'preview_image' => $theme->preview_image,
-                'parent_theme' => $theme->parent_theme,
-                'dependencies' => $theme->dependencies,
-                'supports' => $theme->supports,
-                'settings' => $theme->settings,
-                'custom_css' => $theme->custom_css,
-                'exported_at' => now()->toIso8601String(),
-            ];
-
-            return response()->json($exportData, 200, [
-                'Content-Type' => 'application/json',
-                'Content-Disposition' => 'attachment; filename="' . $theme->slug . '-theme.json"',
-            ]);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 500);
-        }
-    }
-
-    public function import(Request $request)
-    {
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:json',
-            'overwrite' => 'nullable|boolean',
-        ]);
-
-        try {
-            $file = $request->file('file');
-            $content = file_get_contents($file->getRealPath());
-            $data = json_decode($content, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return $this->validationError(
-                    ['file' => ['Invalid JSON file']],
-                    'Invalid JSON file'
-                );
-            }
-
-            // Validate required fields
-            if (!isset($data['name']) || !isset($data['slug'])) {
-                return $this->validationError(
-                    ['file' => ['Missing required fields: name, slug']],
-                    'Missing required fields'
-                );
-            }
-
-            // Check if theme exists
-            $existingTheme = Theme::where('slug', $data['slug'])->first();
-
-            if ($existingTheme && !($validated['overwrite'] ?? false)) {
-                return $this->validationError(
-                    ['theme' => ['Theme already exists. Use overwrite option to replace.']],
-                    'Theme already exists'
-                );
-            }
-
-            // Prepare theme data
-            $themeData = [
-                'name' => $data['name'],
-                'slug' => $data['slug'],
-                'version' => $data['version'] ?? '1.0.0',
-                'type' => $data['type'] ?? 'frontend',
-                'description' => $data['description'] ?? null,
-                'author' => $data['author'] ?? null,
-                'author_url' => $data['author_url'] ?? null,
-                'license' => $data['license'] ?? null,
-                'preview_image' => $data['preview_image'] ?? null,
-                'parent_theme' => $data['parent_theme'] ?? null,
-                'dependencies' => $data['dependencies'] ?? null,
-                'supports' => $data['supports'] ?? null,
-                'settings' => $data['settings'] ?? null,
-                'custom_css' => $data['custom_css'] ?? null,
-            ];
-
-            if ($existingTheme) {
-                $existingTheme->update($themeData);
-                $theme = $existingTheme->fresh();
-            } else {
-                $theme = Theme::create($themeData);
-            }
-
-            return $this->success($theme, 'Theme imported successfully');
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 500);
-        }
-    }
+    // Import/Export methods removed
 
     // =====================================================
     // VUE SPA ENDPOINTS (New methods for Vue themes)

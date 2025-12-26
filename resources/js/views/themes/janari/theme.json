@@ -1,0 +1,15 @@
+{
+    "name": "Janari",
+    "slug": "janari",
+    "version": "2.0.0",
+    "type": "frontend",
+    "description": "A modern, elegant theme for JA-CMS.",
+    "author": "Antigravity",
+    "parent_theme": "default",
+    "settings_schema": {
+        "site_title": {
+            "type": "text",
+            "default": "Janari"
+        }
+    }
+}

@@ -141,19 +141,12 @@ class Theme extends Model
      */
     public function getThemePath(): string
     {
-        if ($this->path) {
-            // If path is relative, make it absolute
-            if (!str_starts_with($this->path, '/')) {
-                return storage_path("app/themes/{$this->path}");
-            }
-            return $this->path;
-        }
-
-        return storage_path("app/themes/{$this->slug}");
+        // Code-First themes are located in resources/js/views/themes
+        return base_path("resources/js/views/themes/{$this->slug}");
     }
 
     /**
-     * Get theme public path
+     * Get theme public path (virtual path for assets)
      */
     public function getPublicPath(): string
     {

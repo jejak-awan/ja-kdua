@@ -1,6 +1,9 @@
 <template>
     <router-view />
     
+    <!-- System Lock Overlay (Maintenance / Crash) -->
+    <SystemOverlay />
+
     <!-- Session Timeout Warning Modal -->
     <SessionTimeoutModal
         :is-visible="isWarningVisible"
@@ -20,6 +23,8 @@ import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
 import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
+import SystemOverlay from './components/SystemOverlay.vue';
+import { SystemMonitor } from './services/SystemMonitor';
 import Toast from './components/ui/toast.vue';
 import { setToastInstance } from './services/toast';
 
@@ -58,31 +63,24 @@ onMounted(async () => {
     const handleChunkError = (e) => {
         // If session is already terminated, don't try to recover, just stop.
         if (window.__isSessionTerminated) {
-            console.error('Chunk fail during session death. Aborting.');
             return;
         }
 
-        if (e.message?.includes('Loading chunk') || e.message?.includes('CSS chunk')) {
-            console.warn('Chunk loading failed, checking for reload guard...', e);
-            
-            // Reload Guard: Prevent infinite reload loops
-            const now = Date.now();
-            const lastReload = parseInt(sessionStorage.getItem('last_chunk_reload') || '0', 10);
-            
-            // Limit to 1 reload every 30 seconds
-            if (now - lastReload > 30000) {
-                sessionStorage.setItem('last_chunk_reload', now.toString());
-                window.location.reload();
-            } else {
-                console.error('Excessive chunk reloads detected. Stopping to prevent browser hang.', e);
-                // If it keeps failing, redirect to login or show an error instead of looping
-                if (!window.location.pathname.includes('/login')) {
-                    window.location.href = '/login?error=asset_mismatch';
-                }
-            }
+        // Mismatched hash or missing chunk usually means new deployment
+        if (e.message?.includes('Loading chunk') || e.message?.includes('CSS chunk') || e.message?.includes('HTML')) {
+            console.warn('Chunk mismatch detected. Triggering System Lockdown.', e);
+            SystemMonitor.triggerLockdown('chunk_error');
         }
     };
+    
+    // Listen for promise rejections too (dynamic imports)
     window.addEventListener('error', handleChunkError, true);
+    window.addEventListener('unhandledrejection', (e) => {
+        if (e.reason && (e.reason.message?.includes('Loading chunk') || e.reason.message?.includes('CSS chunk'))) {
+             console.warn('Unhandled chunk rejection. Triggering Safe Mode.', e.reason);
+             SystemMonitor.triggerLockdown('chunk_error');
+        }
+    });
 
     // Initialize toast instance for global access
     if (toastRef.value) {

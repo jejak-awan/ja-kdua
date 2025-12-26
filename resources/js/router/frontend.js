@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+// Theme Page Resolver
+const ThemePageResolver = () => import('@/components/ThemePageResolver.vue')
+
 // Frontend theme routes
 const frontendRoutes = [
   {
@@ -10,7 +13,8 @@ const frontendRoutes = [
       {
         path: '',
         name: 'home',
-        component: () => import('@/views/frontend/Home.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Home' },
         meta: {
           title: 'Home',
           description: 'JA-CMS - Modern Content Management System',
@@ -19,7 +23,8 @@ const frontendRoutes = [
       {
         path: 'blog',
         name: 'blog',
-        component: () => import('@/views/frontend/Blog.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Blog' },
         meta: {
           title: 'Blog',
           description: 'Latest articles and updates',
@@ -28,7 +33,8 @@ const frontendRoutes = [
       {
         path: 'blog/:slug',
         name: 'post',
-        component: () => import('@/views/frontend/Post.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Post' },
         meta: {
           title: 'Post',
         }
@@ -36,7 +42,8 @@ const frontendRoutes = [
       {
         path: 'about',
         name: 'about',
-        component: () => import('@/views/frontend/About.vue'),
+        component: ThemePageResolver,
+        props: { page: 'About' },
         meta: {
           title: 'About Us',
         }
@@ -44,7 +51,8 @@ const frontendRoutes = [
       {
         path: 'contact',
         name: 'contact',
-        component: () => import('@/views/frontend/Contact.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Contact' },
         meta: {
           title: 'Contact',
         }
@@ -52,7 +60,8 @@ const frontendRoutes = [
       {
         path: 'search',
         name: 'search',
-        component: () => import('@/views/frontend/Search.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Search' },
         meta: {
           title: 'Search',
         }
@@ -61,7 +70,8 @@ const frontendRoutes = [
       {
         path: ':slug',
         name: 'page',
-        component: () => import('@/views/frontend/Post.vue'),
+        component: ThemePageResolver,
+        props: { page: 'Post' }, // Reusing Post component for generic Pages usually
       },
     ]
   },

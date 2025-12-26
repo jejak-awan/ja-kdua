@@ -1,220 +1,212 @@
 <template>
-    <div class="theme-customizer">
-        <div class="flex h-screen">
-            <!-- Settings Panel -->
-            <div class="w-80 bg-card border-r border-border overflow-y-auto">
-                <div class="sticky top-0 bg-card border-b border-border p-4 z-10">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold">Customize Theme</h3>
-                        <button
-                            @click="$emit('close')"
-                            class="text-muted-foreground hover:text-muted-foreground"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+    <div class="fixed inset-0 z-50 flex overflow-hidden bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
+        <!-- Sidebar -->
+        <div class="w-96 flex flex-col bg-card border-r shadow-2xl animate-in slide-in-from-left duration-300">
+            <!-- Header -->
+            <div class="h-16 flex items-center justify-between px-6 border-b shrink-0 bg-muted/30">
+                <div>
+                    <h2 class="font-semibold text-lg tracking-tight">Customize</h2>
+                    <p class="text-xs text-muted-foreground">{{ fullTheme.name }}</p>
                 </div>
-
-                <div class="p-4 space-y-6">
-                    <!-- Settings Sections -->
-                    <div
-                        v-for="section in settingsSections"
-                        :key="section.id"
-                        class="space-y-4 border-b border-border pb-6 last:border-b-0"
-                    >
-                        <h4 class="text-sm font-semibold text-foreground tracking-wider">
-                            {{ section.label }}
-                        </h4>
-
-                        <div class="space-y-4">
-                            <div
-                                v-for="setting in section.settings"
-                                :key="setting.key"
-                                class="space-y-2"
-                            >
-                                <label class="block text-sm font-medium text-foreground">
-                                    {{ setting.label }}
-                                    <span v-if="setting.required" class="text-red-500">*</span>
-                                </label>
-
-                                <!-- Color Picker -->
-                                <div v-if="setting.type === 'color'" class="flex items-center gap-2">
-                                    <input
-                                        v-model="formValues[setting.key]"
-                                        type="color"
-                                        class="h-10 w-20 border border-input rounded cursor-pointer"
-                                        @input="updateSetting(setting.key, $event.target.value)"
-                                    >
-                                    <input
-                                        v-model="formValues[setting.key]"
-                                        type="text"
-                                        pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
-                                        placeholder="#000000"
-                                        class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-mono"
-                                        @input="updateSetting(setting.key, $event.target.value)"
-                                    >
-                                    <div
-                                        class="h-10 w-10 rounded border border-input"
-                                        :style="{ backgroundColor: formValues[setting.key] || setting.default || '#000000' }"
-                                    ></div>
-                                </div>
-
-                                <!-- Text Input -->
-                                <input
-                                    v-else-if="setting.type === 'text' || setting.type === 'email' || setting.type === 'url'"
-                                    v-model="formValues[setting.key]"
-                                    :type="setting.type"
-                                    :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                    @input="updateSetting(setting.key, $event.target.value)"
-                                >
-
-                                <!-- Number Input -->
-                                <input
-                                    v-else-if="setting.type === 'number'"
-                                    v-model.number="formValues[setting.key]"
-                                    type="number"
-                                    :min="setting.min"
-                                    :max="setting.max"
-                                    :step="setting.step || 1"
-                                    :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                    @input="updateSetting(setting.key, parseFloat($event.target.value))"
-                                >
-
-                                <!-- Textarea -->
-                                <textarea
-                                    v-else-if="setting.type === 'textarea'"
-                                    v-model="formValues[setting.key]"
-                                    :rows="setting.rows || 3"
-                                    :placeholder="setting.placeholder || ''"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                    @input="updateSetting(setting.key, $event.target.value)"
-                                />
-
-                                <!-- Select -->
-                                <select
-                                    v-else-if="setting.type === 'select'"
-                                    v-model="formValues[setting.key]"
-                                    class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                    @change="updateSetting(setting.key, $event.target.value)"
-                                >
-                                    <option value="">{{ setting.placeholder || 'Select...' }}</option>
-                                    <option
-                                        v-for="option in setting.options"
-                                        :key="option.value"
-                                        :value="option.value"
-                                    >
-                                        {{ option.label }}
-                                    </option>
-                                </select>
-
-                                <!-- Radio -->
-                                <div v-else-if="setting.type === 'radio'" class="space-y-2">
-                                    <label
-                                        v-for="option in setting.options"
-                                        :key="option.value"
-                                        class="flex items-center"
-                                    >
-                                        <input
-                                            v-model="formValues[setting.key]"
-                                            type="radio"
-                                            :value="option.value"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input"
-                                            @change="updateSetting(setting.key, option.value)"
-                                        >
-                                        <span class="ml-2 text-sm text-foreground">{{ option.label }}</span>
-                                    </label>
-                                </div>
-
-                                <!-- Checkbox -->
-                                <div v-else-if="setting.type === 'checkbox'" class="flex items-start">
-                                    <input
-                                        v-model="formValues[setting.key]"
-                                        type="checkbox"
-                                        class="h-4 w-4 mt-1 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                                        @change="updateSetting(setting.key, $event.target.checked)"
-                                    >
-                                    <div class="ml-3">
-                                        <span class="text-sm text-foreground">{{ setting.description || setting.label }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Range/Slider -->
-                                <div v-else-if="setting.type === 'range'" class="space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm text-muted-foreground">{{ formValues[setting.key] || setting.default || setting.min || 0 }}</span>
-                                        <span class="text-sm text-muted-foreground">{{ setting.max || 100 }}</span>
-                                    </div>
-                                    <input
-                                        v-model.number="formValues[setting.key]"
-                                        type="range"
-                                        :min="setting.min || 0"
-                                        :max="setting.max || 100"
-                                        :step="setting.step || 1"
-                                        class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
-                                        @input="updateSetting(setting.key, parseFloat($event.target.value))"
-                                    >
-                                </div>
-
-                                <!-- Description -->
-                                <p v-if="setting.description && setting.type !== 'checkbox'" class="text-xs text-muted-foreground">
-                                    {{ setting.description }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Custom CSS -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-semibold text-foreground tracking-wider">
-                                Custom CSS
-                            </h4>
-                            <button
-                                @click="showCustomCss = !showCustomCss"
-                                class="text-xs text-indigo-600 hover:text-indigo-800"
-                            >
-                                {{ showCustomCss ? 'Hide' : 'Show' }}
-                            </button>
-                        </div>
-                        <textarea
-                            v-if="showCustomCss"
-                            v-model="customCss"
-                            rows="6"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-mono"
-                            placeholder="/* Custom CSS */"
-                            @input="updateCustomCss"
-                        />
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="sticky bottom-0 bg-card border-t border-border p-4 space-y-2">
-                    <button
-                        @click="saveSettings"
-                        :disabled="saving"
-                        class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                    >
-                        {{ saving ? 'Saving...' : 'Save Changes' }}
-                    </button>
-                    <button
+                <div class="flex items-center gap-2">
+                    <button 
                         @click="resetSettings"
-                        class="w-full px-4 py-2 border border-input text-foreground rounded-md hover:bg-muted"
+                        class="p-2 text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-muted"
+                        title="Reset Default"
                     >
-                        Reset to Defaults
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                    <button 
+                        @click="$emit('close')"
+                        class="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-full hover:bg-muted"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
 
-            <!-- Preview Panel -->
-            <div class="flex-1 bg-secondary">
-                <ThemePreview
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+                
+                <!-- Loading State -->
+                <div v-if="loading" class="flex items-center justify-center py-12">
+                    <svg class="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+
+                <!-- Settings Sections -->
+                <div v-else class="space-y-6">
+                     <div v-for="section in settingsSections" :key="section.id" class="space-y-3">
+                        <button 
+                            @click="toggleSection(section.id)"
+                            class="w-full flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors border-b"
+                        >
+                            <span>{{ section.label }}</span>
+                            <svg 
+                                class="w-4 h-4 transition-transform duration-200"
+                                :class="{ 'rotate-180': expandedSections.includes(section.id) }"
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div 
+                            v-show="expandedSections.includes(section.id)" 
+                            class="space-y-5 pl-2 animate-in slide-in-from-top-2 duration-200"
+                        >
+                            <div v-for="setting in section.settings" :key="setting.key" class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-medium text-foreground tracking-wide">
+                                        {{ setting.label }}
+                                    </label>
+                                    <span v-if="setting.required" class="text-[10px] text-destructive">*</span>
+                                </div>
+
+                                <!-- Color Picker -->
+                                <div v-if="setting.type === 'color'" class="flex gap-2">
+                                    <div class="relative w-10 h-10 rounded-lg overflow-hidden border shadow-sm shrink-0 group cursor-pointer">
+                                        <input
+                                            type="color"
+                                            :value="formValues[setting.key]"
+                                            class="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] p-0 m-0 opacity-0 cursor-pointer"
+                                            @input="updateSetting(setting.key, $event.target.value)"
+                                        >
+                                        <div 
+                                            class="w-full h-full"
+                                            :style="{ backgroundColor: formValues[setting.key] }"
+                                        ></div>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        :value="formValues[setting.key]"
+                                        @input="updateSetting(setting.key, $event.target.value)"
+                                        class="flex-1 h-10 px-3 py-2 bg-background border rounded-lg text-sm font-mono uppercase focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    >
+                                </div>
+
+                                <!-- Select -->
+                                <div v-else-if="setting.type === 'select'" class="relative">
+                                    <select
+                                        :value="formValues[setting.key]"
+                                        @change="updateSetting(setting.key, $event.target.value)"
+                                        class="w-full h-9 pl-3 pr-8 bg-background border rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
+                                    >
+                                        <option v-for="opt in setting.options" :key="opt.value" :value="opt.value">
+                                            {{ opt.label }}
+                                        </option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                                    </div>
+                                </div>
+                                
+                                <!-- Range Slider -->
+                                <div v-else-if="setting.type === 'range'" class="flex items-center gap-3">
+                                    <input 
+                                        type="range"
+                                        :min="setting.min || 0"
+                                        :max="setting.max || 100"
+                                        :step="setting.step || 1"
+                                        :value="formValues[setting.key]"
+                                        @input="updateSetting(setting.key, $event.target.value)"
+                                        class="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                                    >
+                                    <span class="text-xs font-mono bg-muted px-2 py-1 rounded text-muted-foreground min-w-[3ch] text-center">
+                                        {{ formValues[setting.key] }}
+                                    </span>
+                                </div>
+
+                                <!-- Textarea -->
+                                <textarea 
+                                    v-else-if="setting.type === 'textarea'"
+                                    :value="formValues[setting.key]"
+                                    @input="updateSetting(setting.key, $event.target.value)"
+                                    rows="3"
+                                    class="w-full p-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-y min-h-[80px]"
+                                ></textarea>
+
+                                <!-- Toggle Switch -->
+                                <label v-else-if="setting.type === 'checkbox'" class="flex items-center cursor-pointer gap-3 p-2 border rounded-lg bg-background/50 hover:bg-background transition-colors">
+                                    <div class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2" :class="formValues[setting.key] ? 'bg-primary' : 'bg-muted'">
+                                        <input 
+                                            type="checkbox" 
+                                            class="sr-only" 
+                                            :checked="formValues[setting.key]"
+                                            @change="updateSetting(setting.key, $event.target.checked)"
+                                        >
+                                        <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-white transition-transform" :class="formValues[setting.key] ? 'translate-x-5' : 'translate-x-1'"></span>
+                                    </div>
+                                    <span class="text-sm font-medium text-foreground select-none">{{ formValues[setting.key] ? 'Enabled' : 'Disabled' }}</span>
+                                </label>
+
+                                <!-- Default Input (Text/URL/etc) -->
+                                <input
+                                    v-else
+                                    :type="setting.type || 'text'"
+                                    :value="formValues[setting.key]"
+                                    @input="updateSetting(setting.key, $event.target.value)"
+                                    :placeholder="setting.placeholder"
+                                    class="w-full h-9 px-3 bg-background border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                >
+                                
+                                <p v-if="setting.description" class="text-[10px] text-muted-foreground leading-snug">
+                                    {{ setting.description }}
+                                </p>
+                            </div>
+                        </div>
+                     </div>
+
+                     <!-- Custom CSS Section -->
+                     <div class="space-y-3 pt-6 border-t">
+                        <button 
+                            @click="showCustomCss = !showCustomCss"
+                            class="w-full flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
+                        >
+                            <span>Custom CSS</span>
+                            <span class="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono">&lt;/&gt;</span>
+                        </button>
+                        
+                        <div v-show="showCustomCss" class="animate-in slide-in-from-top-2">
+                            <textarea
+                                v-model="customCss"
+                                rows="8"
+                                class="w-full p-3 bg-background border rounded-lg text-xs font-mono custom-scrollbar focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all leading-relaxed"
+                                placeholder="/* Enter custom CSS here... */"
+                                @input="updateCustomCss"
+                                spellcheck="false"
+                            ></textarea>
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-4 border-t bg-muted/30 shrink-0">
+                <button
+                    @click="saveSettings"
+                    :disabled="saving"
+                    class="w-full h-10 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ saving ? 'Saving Changes...' : 'Save Configuration' }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Area -->
+        <div class="flex-1 bg-muted/50 p-8 h-full overflow-hidden flex flex-col">
+            <div class="flex-1 rounded-xl shadow-2xl overflow-hidden bg-background ring-1 ring-border/50">
+                 <ThemePreview
                     :theme="previewTheme"
                     :preview-url="previewUrl"
-                    @close="$emit('close')"
                 />
             </div>
         </div>
@@ -225,213 +217,163 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import api from '../../services/api';
 import ThemePreview from './ThemePreview.vue';
+import { toast } from '../../services/toast';
 
 const props = defineProps({
-    theme: {
-        type: Object,
-        required: true,
-    },
-    previewUrl: {
-        type: String,
-        default: '/',
-    },
+    theme: { type: Object, required: true },
+    previewUrl: { type: String, default: '/' },
 });
 
 const emit = defineEmits(['close', 'saved']);
 
+const fullTheme = ref({ ...props.theme });
 const formValues = ref({});
 const customCss = ref('');
 const showCustomCss = ref(false);
 const saving = ref(false);
+const loading = ref(true);
 const previewTheme = ref({});
+const expandedSections = ref(['General']); // Default open
+
+// Fetch full theme details including manifest
+const fetchThemeDetails = async () => {
+    loading.value = true;
+    try {
+        const response = await api.get(`/admin/cms/themes/${props.theme.id}`);
+        // Handle both wrapped and unwrapped responses typically from Laravel resources
+        const data = response.data.data || response.data;
+        fullTheme.value = data;
+        loadSettings();
+    } catch (error) {
+        console.error('Failed to fetch theme details:', error);
+        toast.error('Error', 'Failed to load theme configuration.');
+    } finally {
+        loading.value = false;
+    }
+};
 
 // Organize settings into sections by category
 const settingsSections = computed(() => {
-    if (!props.theme.manifest?.settings_schema) {
-        return [];
-    }
+    if (!fullTheme.value.manifest?.settings_schema) return [];
 
-    const schema = props.theme.manifest.settings_schema;
+    const schema = fullTheme.value.manifest.settings_schema;
     const sectionsMap = {};
 
-    // Group settings by category
     Object.keys(schema).forEach(key => {
         const setting = schema[key];
         const category = setting.category || 'General';
         
         if (!sectionsMap[category]) {
             sectionsMap[category] = {
-                id: category.toLowerCase().replace(/\s+/g, '-'),
+                id: category,
                 label: category,
                 settings: [],
             };
         }
         
-        sectionsMap[category].settings.push({
-            key,
-            ...setting,
-        });
+        sectionsMap[category].settings.push({ key, ...setting });
     });
 
-    // Convert to array and sort by predefined order
-    const categoryOrder = [
-        'General',
-        'Colors',
-        'Typography',
-        'Layout',
-        'Footer',
-        'Content',
-        'Performance',
-    ];
-
-    const sections = Object.values(sectionsMap);
-    
-    // Sort sections by predefined order
-    sections.sort((a, b) => {
-        const aIndex = categoryOrder.indexOf(a.label);
-        const bIndex = categoryOrder.indexOf(b.label);
-        
-        if (aIndex === -1 && bIndex === -1) return 0;
-        if (aIndex === -1) return 1;
-        if (bIndex === -1) return -1;
-        
-        return aIndex - bIndex;
+    const categoryOrder = ['General', 'Colors', 'Typography', 'Layout', 'Hero Section', 'Footer', 'Social Media'];
+    return Object.values(sectionsMap).sort((a, b) => {
+        const idxA = categoryOrder.indexOf(a.label);
+        const idxB = categoryOrder.indexOf(b.label);
+        return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
     });
-
-    return sections;
 });
 
-// Load current settings
-const loadSettings = () => {
-    if (props.theme.settings) {
-        formValues.value = { ...props.theme.settings };
+const toggleSection = (id) => {
+    if (expandedSections.value.includes(id)) {
+        expandedSections.value = expandedSections.value.filter(s => s !== id);
+    } else {
+        expandedSections.value.push(id);
     }
+};
 
-    // Load defaults from manifest
-    if (props.theme.manifest?.settings_schema) {
-        Object.keys(props.theme.manifest.settings_schema).forEach(key => {
-            if (formValues.value[key] === undefined) {
-                const setting = props.theme.manifest.settings_schema[key];
-                formValues.value[key] = setting.default ?? null;
-            }
+const loadSettings = () => {
+    // 1. Start with defaults
+    const defaults = {};
+    if (fullTheme.value.manifest?.settings_schema) {
+        Object.keys(fullTheme.value.manifest.settings_schema).forEach(key => {
+            defaults[key] = fullTheme.value.manifest.settings_schema[key].default ?? '';
         });
     }
 
-    customCss.value = props.theme.custom_css || '';
-    
-    // Update preview theme
+    // 2. Override with saved settings
+    formValues.value = { ...defaults, ...(fullTheme.value.settings || {}) };
+    customCss.value = fullTheme.value.custom_css || '';
     updatePreviewTheme();
 };
 
-// Update setting and preview
 const updateSetting = (key, value) => {
     formValues.value[key] = value;
     updatePreviewTheme();
 };
 
-// Update custom CSS and preview
 const updateCustomCss = () => {
     updatePreviewTheme();
 };
 
-// Update preview theme object and apply CSS variables
 const updatePreviewTheme = () => {
     previewTheme.value = {
-        ...props.theme,
+        ...fullTheme.value,
         settings: { ...formValues.value },
         custom_css: customCss.value,
     };
-
-    // Apply CSS variables to preview iframe
-    applyCssVariablesToPreview();
 };
 
-// Apply CSS variables to preview iframe for live preview
-const applyCssVariablesToPreview = () => {
-    // This will be handled by ThemePreview component
-    // We emit the CSS variables as part of the theme object
-    const variables = [];
-    const schema = props.theme.manifest?.settings_schema || {};
-
-    Object.keys(schema).forEach(key => {
-        const setting = schema[key];
-        if (setting.type === 'color' && formValues.value[key]) {
-            const cssKey = '--theme-' + key.replace(/_/g, '-');
-            variables.push(`${cssKey}: ${formValues.value[key]};`);
-        }
-    });
-
-    // Add typography variables
-    if (formValues.value.heading_font) {
-        variables.push(`--theme-heading-font: ${formValues.value.heading_font};`);
-    }
-    if (formValues.value.body_font) {
-        variables.push(`--theme-body-font: ${formValues.value.body_font};`);
-    }
-    if (formValues.value.font_size_base) {
-        variables.push(`--theme-font-size-base: ${formValues.value.font_size_base}px;`);
-    }
-
-    // Add layout variables
-    if (formValues.value.container_width) {
-        variables.push(`--theme-container-width: ${formValues.value.container_width};`);
-    }
-
-    if (variables.length > 0) {
-        previewTheme.value.css_variables = `:root {\n  ${variables.join('\n  ')}\n}`;
+const resetSettings = () => {
+    if (confirm('Are you sure you want to reset all theme settings to defaults? This action cannot be undone.')) {
+        formValues.value = {};
+        customCss.value = '';
+        loadSettings();
+        toast.info('Settings Reset', 'All settings have been restored to defaults.');
+        updatePreviewTheme(); // Force update immediately
     }
 };
 
-// Save settings
 const saveSettings = async () => {
     saving.value = true;
     try {
-        // Save settings
-        await api.put(`/admin/cms/themes/${props.theme.id}/settings`, {
-            settings: formValues.value,
-        });
-
-        // Save custom CSS
-        if (customCss.value !== props.theme.custom_css) {
-            await api.put(`/admin/cms/themes/${props.theme.id}/custom-css`, {
-                custom_css: customCss.value,
-            });
+        await api.put(`/admin/cms/themes/${props.theme.id}/settings`, { settings: formValues.value });
+        if (customCss.value !== fullTheme.value.custom_css) {
+            await api.put(`/admin/cms/themes/${props.theme.id}/custom-css`, { custom_css: customCss.value });
         }
-
+        toast.success('Success', 'Theme settings saved successfully.');
         emit('saved');
     } catch (error) {
         console.error('Failed to save settings:', error);
-        alert('Failed to save settings');
+        toast.error('Error', 'Failed to save settings. Please try again.');
     } finally {
         saving.value = false;
     }
 };
 
-// Reset to defaults
-const resetSettings = () => {
-    if (confirm('Reset all settings to defaults?')) {
-        formValues.value = {};
-        customCss.value = '';
-        loadSettings();
+watch(() => props.theme, (newTheme) => {
+    // Determine if we actually need to refetch (e.g., if ID changed)
+    if (newTheme.id !== fullTheme.value.id) {
+        fetchThemeDetails();
     }
-};
-
-// Watch for theme changes
-watch(() => props.theme, () => {
-    loadSettings();
-}, { deep: true, immediate: true });
+}, { deep: true });
 
 onMounted(() => {
-    loadSettings();
+    fetchThemeDetails();
 });
 </script>
 
 <style scoped>
-.theme-customizer {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    background-color: white;
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
 }
 </style>
 

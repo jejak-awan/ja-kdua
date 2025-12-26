@@ -1,0 +1,132 @@
+{
+    "name": "Default Theme",
+    "slug": "default",
+    "version": "2.0.0",
+    "type": "frontend",
+    "description": "JA-CMS Default Theme - A clean, modern, and professional Vue-based theme with extensive features.",
+    "author": "Jejakawan",
+    "settings_schema": {
+        "brand_logo": {
+            "label": "Logo URL",
+            "type": "text",
+            "placeholder": "/images/logo.png",
+            "category": "General"
+        },
+        "brand_favicon": {
+            "label": "Favicon URL",
+            "type": "text",
+            "placeholder": "/favicon.ico",
+            "category": "General"
+        },
+        "color_primary": {
+            "label": "Primary Color",
+            "type": "color",
+            "default": "#4f46e5",
+            "category": "Colors"
+        },
+        "color_background": {
+            "label": "Background Color",
+            "type": "color",
+            "default": "#f9fafb",
+            "category": "Colors"
+        },
+        "font_heading": {
+            "label": "Heading Font",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Inter",
+                    "value": "Inter"
+                },
+                {
+                    "label": "Roboto",
+                    "value": "Roboto"
+                },
+                {
+                    "label": "Poppins",
+                    "value": "Poppins"
+                },
+                {
+                    "label": "Merriweather",
+                    "value": "Merriweather"
+                }
+            ],
+            "default": "Inter",
+            "category": "Typography"
+        },
+        "header_sticky": {
+            "label": "Sticky Header",
+            "type": "checkbox",
+            "default": true,
+            "category": "Layout"
+        },
+        "header_style": {
+            "label": "Header Style",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Glassmorphism",
+                    "value": "glass"
+                },
+                {
+                    "label": "Solid White",
+                    "value": "solid"
+                },
+                {
+                    "label": "Transparent",
+                    "value": "transparent"
+                }
+            ],
+            "default": "glass",
+            "category": "Layout"
+        },
+        "hero_title": {
+            "label": "Hero Title",
+            "type": "text",
+            "default": "JA-CMS",
+            "category": "Hero Section"
+        },
+        "hero_subtitle": {
+            "label": "Hero Subtitle",
+            "type": "textarea",
+            "default": "Modern Content Management System",
+            "category": "Hero Section"
+        },
+        "hero_bg": {
+            "label": "Hero Background Gradient",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Blue Purple",
+                    "value": "bg-gradient-to-r from-blue-600 to-indigo-700"
+                },
+                {
+                    "label": "Midnight",
+                    "value": "bg-gradient-to-r from-gray-900 to-black"
+                },
+                {
+                    "label": "Sunset",
+                    "value": "bg-gradient-to-r from-orange-500 to-pink-500"
+                }
+            ],
+            "default": "bg-gradient-to-r from-blue-600 to-indigo-700",
+            "category": "Hero Section"
+        },
+        "footer_text": {
+            "label": "Copyright Text",
+            "type": "text",
+            "default": "© 2025 JA-CMS. All rights reserved.",
+            "category": "Footer"
+        },
+        "social_twitter": {
+            "label": "Twitter URL",
+            "type": "url",
+            "category": "Social Media"
+        },
+        "social_github": {
+            "label": "GitHub URL",
+            "type": "url",
+            "category": "Social Media"
+        }
+    }
+}

@@ -224,28 +224,7 @@ class ThemeService
     /**
      * Compile theme assets
      */
-    public function compileThemeAssets(Theme $theme): bool
-    {
-        $themePath = $theme->getThemePath();
-        
-        // TODO: Implement asset compilation (minify, combine, etc.)
-        // For now, just copy assets to public directory
-        
-        $publicThemePath = public_path("themes/{$theme->slug}");
-        
-        if (!is_dir($publicThemePath)) {
-            File::makeDirectory($publicThemePath, 0755, true);
-        }
-
-        $assetsPath = "{$themePath}/assets";
-        if (is_dir($assetsPath)) {
-            File::copyDirectory($assetsPath, "{$publicThemePath}/assets");
-        }
-
-        $this->clearThemeCache($theme);
-        
-        return true;
-    }
+    // Asset compilation removed (Handled by Vite)
 
     /**
      * Validate theme structure
@@ -344,7 +323,7 @@ class ThemeService
      */
     public function getThemeDirectory(): string
     {
-        return storage_path('app/themes');
+        return base_path('resources/js/views/themes');
     }
 
     /**

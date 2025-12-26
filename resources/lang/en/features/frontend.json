@@ -7,7 +7,8 @@
             "getStarted": "Get Started",
             "startReading": "Start Reading",
             "contactUs": "Contact Us",
-            "viewAll": "View All Posts"
+            "viewAll": "View All Posts",
+            "dashboard": "Dashboard"
         },
         "stats": {
             "content": "Published Content",

@@ -24,7 +24,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
-import PostCard from '@/components/theme/PostCard.vue'
+import PostCard from './components/PostCard.vue'
 import { useAnalytics } from '@/composables/useAnalytics'
 
 const { t } = useI18n()

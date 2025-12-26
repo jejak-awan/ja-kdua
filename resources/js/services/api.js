@@ -1,4 +1,5 @@
 import router from '../router';
+import { SystemMonitor } from './SystemMonitor';
 
 let isRedirecting = false;
 // Global flag to prevent multiple toasts and parallel redirect attempts
@@ -27,6 +28,13 @@ export const getCsrfCookie = async () => {
 // Request interceptor - Add auth token
 api.interceptors.request.use(
     (config) => {
+        // BREAK CIRCUIT: If system is down, block all non-critical requests
+        // But allow 'health' check (which we likely won't call via this instance, but just in case)
+        if (SystemMonitor.isRequestBlocked && !config.url?.includes('system/health')) {
+            console.debug('Request blocked by Circuit Breaker:', config.url);
+            return Promise.reject(new axios.Cancel('System is undergoing maintenance'));
+        }
+
         // Whitelist auth-related endpoints so they are NOT blocked even if session is marked as dead
         const authEndpoints = ['/login', '/register', '/forgot-password', '/reset-password', '/sanctum/csrf-cookie'];
         const isAuthRequest = authEndpoints.some(endpoint => config.url?.includes(endpoint));
@@ -55,6 +63,12 @@ api.interceptors.response.use(
 
         // Skip global redirect if requested by the caller
         if (originalRequest?._skipManualRedirect) {
+            return Promise.reject(error);
+        }
+
+        // HANDLE 503 SERVICE UNAVAILABLE (Maintenance Mode / Deployment)
+        if (error.response?.status === 503) {
+            SystemMonitor.triggerLockdown('maintenance');
             return Promise.reject(error);
         }
 
