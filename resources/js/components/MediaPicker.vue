@@ -1,13 +1,15 @@
 <template>
     <div class="media-picker">
         <slot name="trigger" :open="() => showModal = true">
-            <button
+            <Button
                 type="button"
+                variant="outline"
                 @click="showModal = true"
-                class="w-full px-4 py-2 border-2 border-dashed border-input rounded-lg text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+                class="w-full h-12 border-2 border-dashed flex items-center justify-center gap-2"
             >
+                <ImageIcon class="w-4 h-4" />
                 {{ label || $t('features.media.modals.picker.select') }}
-            </button>
+            </Button>
         </slot>
 
         <!-- Media Picker Modal -->
@@ -17,17 +19,16 @@
             @click.self="handleBackdropClick"
         >
             <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
-                    <div class="flex items-center justify-between p-4">
+                <div class="bg-card border border-border shadow-2xl rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+                    <div class="flex items-center justify-between p-4 border-b border-border">
                         <h3 class="text-lg font-semibold">{{ $t('features.media.modals.picker.title') }}</h3>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             @click="showModal = false"
-                            class="text-muted-foreground hover:text-muted-foreground"
                         >
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                            <X class="w-5 h-5" />
+                        </Button>
                     </div>
 
                     <!-- Content -->
@@ -249,6 +250,7 @@ import MediaUpload from './MediaUpload.vue';
 import { 
     Folder, 
     Image as ImageIcon, 
+    X,
     File, 
     Grid, 
     List as ListIcon, 

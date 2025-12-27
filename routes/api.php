@@ -127,11 +127,13 @@ Route::prefix('v1')->group(function () {
         Route::post('categories/{category}/move', [App\Http\Controllers\Api\V1\CategoryController::class, 'move'])->middleware('permission:manage categories');
 
         // Tags
-        // Statistics route must be defined before apiResource to avoid route conflict
+        // Statistics and bulk-delete routes must be defined before apiResource to avoid route conflict
         Route::get('tags/statistics', [App\Http\Controllers\Api\V1\TagController::class, 'statistics'])->middleware('permission:manage tags');
+        Route::post('tags/bulk-delete', [App\Http\Controllers\Api\V1\TagController::class, 'bulkDelete'])->middleware('permission:manage tags');
         Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:manage tags');
 
         // Media (with rate limiting for uploads - increased for better UX)
+        Route::get('media/statistics', [App\Http\Controllers\Api\V1\MediaController::class, 'statistics'])->middleware('permission:manage media');
         Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload'])
             ->middleware('throttle:30,1'); // 30 uploads per minute (increased from 10)
         Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple'])

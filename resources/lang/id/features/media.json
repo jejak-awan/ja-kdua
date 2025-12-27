@@ -1,10 +1,19 @@
 {
     "title": "Pustaka Media",
+    "description": "Kelola dan atur semua file media Anda",
     "upload": "Unggah Media",
     "search": "Cari media...",
     "folders": "Folder",
     "newFolder": "Folder Baru",
     "allMedia": "Semua Media",
+    "stats": {
+        "total": "Total File",
+        "storage": "Penyimpanan",
+        "images": "Gambar",
+        "videos": "Video",
+        "documents": "Dokumen",
+        "other": "Lainnya"
+    },
     "filter": {
         "allTypes": "Semua Tipe",
         "images": "Gambar",
@@ -108,6 +117,45 @@
         "picker": {
             "title": "Pilih Media",
             "select": "Pilih"
+        },
+        "view": {
+            "title": "Detail Media",
+            "preview": "Pratinjau",
+            "contain": "Fit",
+            "stretch": "Isi",
+            "actual": "1:1",
+            "dragToPan": "Geser untuk melihat",
+            "details": "Detail",
+            "name": "Nama",
+            "type": "Tipe",
+            "size": "Ukuran",
+            "folder": "Folder",
+            "altText": "Teks Alt",
+            "url": "URL",
+            "usage": "Penggunaan",
+            "loadingUsage": "Memuat data...",
+            "notUsed": "Tidak digunakan dimanapun",
+            "copyUrl": "Salin URL",
+            "urlCopied": "URL berhasil disalin!",
+            "edit": "Ubah",
+            "resize": "Ubah Ukuran",
+            "thumbnail": "Thumbnail",
+            "generating": "Memproses...",
+            "thumbnailSuccess": "Thumbnail berhasil dibuat",
+            "thumbnailFailed": "Gagal membuat thumbnail",
+            "close": "Tutup"
+        },
+        "resize": {
+            "title": "Ubah Ukuran Media",
+            "width": "Lebar (px)",
+            "height": "Tinggi (px)",
+            "maintainAspectRatio": "Pertahankan Rasio Aspek",
+            "preview": "Pratinjau",
+            "resize": "Ubah Ukuran",
+            "resizing": "Memproses...",
+            "cancel": "Batal",
+            "success": "Media berhasil diubah ukurannya",
+            "failed": "Gagal mengubah ukuran media"
         }
     }
 }

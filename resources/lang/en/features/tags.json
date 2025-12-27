@@ -11,6 +11,12 @@
     },
     "loading": "Loading tags...",
     "empty": "No tags found",
+    "filters": {
+        "usage": "Usage",
+        "all": "All",
+        "used": "Used Only",
+        "unused": "Unused Only"
+    },
     "table": {
         "name": "Name",
         "slug": "Slug",

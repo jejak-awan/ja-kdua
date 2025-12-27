@@ -1,18 +1,17 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
+            <div class="bg-card border border-border shadow-lg rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">Edit Image: {{ media.name }}</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                        <X class="w-5 h-5" />
+                    </Button>
                 </div>
 
                 <!-- Content -->
@@ -35,71 +34,61 @@
                             <!-- Crop Presets -->
                             <div v-if="showCrop" class="mt-4">
                                 <label class="block text-sm font-medium text-foreground mb-2">Aspect Ratio</label>
-                                <div class="flex flex-wrap gap-2">
-                                    <button
+                                    <Button
                                         v-for="preset in cropPresets"
                                         :key="preset.value"
+                                        variant="outline"
+                                        size="sm"
                                         @click="setAspectRatio(preset.value)"
                                         :class="[
-                                            'px-3 py-1 text-sm rounded-md border',
-                                            currentAspectRatio === preset.value
-                                                ? 'bg-primary text-primary-foreground border-indigo-600'
-                                                : 'bg-card text-foreground border-input hover:bg-muted'
+                                            currentAspectRatio === preset.value ? 'bg-primary text-primary-foreground' : ''
                                         ]"
                                     >
                                         {{ preset.label }}
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
                                         @click="setAspectRatio(null)"
                                         :class="[
-                                            'px-3 py-1 text-sm rounded-md border',
-                                            currentAspectRatio === null
-                                                ? 'bg-primary text-primary-foreground border-indigo-600'
-                                                : 'bg-card text-foreground border-input hover:bg-muted'
+                                            currentAspectRatio === null ? 'bg-primary text-primary-foreground' : ''
                                         ]"
                                     >
                                         Free
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
 
                         <!-- Tools Sidebar -->
                         <div class="space-y-6">
                             <!-- Transform Tools -->
                             <div>
                                 <h4 class="text-sm font-medium text-foreground mb-3">Transform</h4>
-                                <div class="space-y-2">
-                                    <button
+                                <div class="grid grid-cols-1 gap-2">
+                                    <Button
+                                        variant="outline"
                                         @click="rotate(90)"
-                                        class="w-full px-4 py-2 bg-card border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
+                                        class="justify-start h-9"
                                     >
+                                        <RotateCw class="w-4 h-4 mr-2" />
                                         Rotate 90°
-                                    </button>
-                                    <button
-                                        @click="rotate(180)"
-                                        class="w-full px-4 py-2 bg-card border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
-                                    >
-                                        Rotate 180°
-                                    </button>
-                                    <button
-                                        @click="rotate(270)"
-                                        class="w-full px-4 py-2 bg-card border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
-                                    >
-                                        Rotate 270°
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                        variant="outline"
                                         @click="flip('horizontal')"
-                                        class="w-full px-4 py-2 bg-card border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
+                                        class="justify-start h-9"
                                     >
+                                        <FlipHorizontal class="w-4 h-4 mr-2" />
                                         Flip Horizontal
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                        variant="outline"
                                         @click="flip('vertical')"
-                                        class="w-full px-4 py-2 bg-card border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
+                                        class="justify-start h-9"
                                     >
+                                        <FlipVertical class="w-4 h-4 mr-2" />
                                         Flip Vertical
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
 
@@ -146,12 +135,14 @@
                                         />
                                         <div class="text-xs text-muted-foreground text-center">{{ filters.saturation }}%</div>
                                     </div>
-                                    <button
+                                    <Button
+                                        variant="secondary"
                                         @click="resetFilters"
-                                        class="w-full px-4 py-2 bg-secondary border border-input bg-card text-foreground rounded-md text-sm text-foreground hover:bg-muted"
+                                        class="w-full h-9"
                                     >
+                                        <RefreshCw class="w-4 h-4 mr-2" />
                                         Reset Filters
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
 
@@ -183,12 +174,12 @@
                                         />
                                         <label for="maintain-ratio" class="text-xs text-muted-foreground">Maintain Aspect Ratio</label>
                                     </div>
-                                    <button
+                                    <Button
                                         @click="applyResize"
-                                        class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/80"
+                                        class="w-full h-9"
                                     >
                                         Apply Resize
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -207,25 +198,26 @@
                         <label for="save-as-new" class="text-sm text-foreground">Save as new version</label>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <button
+                        <Button
+                            variant="ghost"
                             @click="resetAll"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted text-sm"
                         >
+                            <Undo2 class="w-4 h-4 mr-2" />
                             Reset All
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="outline"
                             @click="$emit('close')"
-                            class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted text-sm"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             @click="saveImage"
                             :disabled="saving"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 text-sm"
                         >
+                            <Save class="w-4 h-4 mr-2" />
                             {{ saving ? 'Saving...' : 'Save Image' }}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -235,8 +227,18 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { 
+    X, 
+    RotateCw, 
+    FlipHorizontal, 
+    FlipVertical, 
+    RefreshCw, 
+    Save, 
+    Undo2 
+} from 'lucide-vue-next';
 import Cropper from 'cropperjs';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
 
 const props = defineProps({
     media: {
@@ -502,7 +504,8 @@ const saveImage = async () => {
         // Convert data URL to blob
         const response = await fetch(imageData);
         const blob = await response.blob();
-        const file = new File([blob], props.media.file_name, { type: props.media.mime_type });
+        const fileName = props.media.file_name || props.media.name || 'edited_image.png';
+        const file = new File([blob], fileName, { type: props.media.mime_type || 'image/png' });
 
         // Create FormData
         const formData = new FormData();

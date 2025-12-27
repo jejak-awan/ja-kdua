@@ -11,6 +11,12 @@
     },
     "loading": "Memuat tag...",
     "empty": "Tidak ada tag ditemukan",
+    "filters": {
+        "usage": "Penggunaan",
+        "all": "Semua",
+        "used": "Hanya Digunakan",
+        "unused": "Tidak Digunakan"
+    },
     "table": {
         "name": "Nama",
         "slug": "Slug",

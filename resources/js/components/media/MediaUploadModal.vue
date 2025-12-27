@@ -1,7 +1,7 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
+            <div class="bg-card border border-border shadow-lg rounded-lg max-w-2xl w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.upload.title') }}</h3>
                     <Button
@@ -9,9 +9,7 @@
                         size="icon"
                         @click="$emit('close')"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X class="w-5 h-5" />
                     </Button>
                 </div>
 
@@ -34,9 +32,7 @@
                             @change="handleFileSelect"
                             class="hidden"
                         >
-                        <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
+                        <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                         <p class="mt-4 text-sm text-muted-foreground">
                             <Button
                                 variant="link"
@@ -62,11 +58,9 @@
                                 variant="ghost"
                                 size="sm"
                                 @click="removeFile(index)"
-                                class="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                class="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <Trash2 class="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
@@ -109,6 +103,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { X, CloudUpload, Trash2 } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
 

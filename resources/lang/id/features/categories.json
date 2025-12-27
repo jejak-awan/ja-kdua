@@ -29,7 +29,10 @@
     },
     "form": {
         "createTitle": "Buat Kategori",
+        "createDescription": "Tambahkan kategori baru ke struktur konten Anda.",
         "editTitle": "Edit Kategori",
+        "editDescription": "Perbarui informasi dan pengaturan kategori.",
+        "details": "Detail Kategori",
         "name": "Nama",
         "namePlaceholder": "Nama kategori",
         "slug": "Slug",

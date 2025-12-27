@@ -1,10 +1,19 @@
 {
     "title": "Media Library",
+    "description": "Manage and organize all your media files",
     "upload": "Upload Media",
     "search": "Search media...",
     "folders": "Folders",
     "newFolder": "New Folder",
     "allMedia": "All Media",
+    "stats": {
+        "total": "Total Files",
+        "storage": "Storage",
+        "images": "Images",
+        "videos": "Videos",
+        "documents": "Documents",
+        "other": "Other"
+    },
     "filter": {
         "allTypes": "All Types",
         "images": "Images",
@@ -108,6 +117,45 @@
         "picker": {
             "title": "Select Media",
             "select": "Select"
+        },
+        "view": {
+            "title": "Media Details",
+            "preview": "Preview",
+            "contain": "Fit",
+            "stretch": "Fill",
+            "actual": "1:1",
+            "dragToPan": "Drag to pan",
+            "details": "Details",
+            "name": "Name",
+            "type": "Type",
+            "size": "Size",
+            "folder": "Folder",
+            "altText": "Alt Text",
+            "url": "URL",
+            "usage": "Usage",
+            "loadingUsage": "Loading usage...",
+            "notUsed": "Not used anywhere",
+            "copyUrl": "Copy URL",
+            "urlCopied": "URL copied to clipboard!",
+            "edit": "Edit",
+            "resize": "Resize",
+            "thumbnail": "Thumbnail",
+            "generating": "Generating...",
+            "thumbnailSuccess": "Thumbnail generated successfully",
+            "thumbnailFailed": "Failed to generate thumbnail",
+            "close": "Close"
+        },
+        "resize": {
+            "title": "Resize Media",
+            "width": "Width (px)",
+            "height": "Height (px)",
+            "maintainAspectRatio": "Maintain Aspect Ratio",
+            "preview": "Preview",
+            "resize": "Resize",
+            "resizing": "Resizing...",
+            "cancel": "Cancel",
+            "success": "Media resized successfully",
+            "failed": "Failed to resize media"
         }
     }
 }

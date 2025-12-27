@@ -1,17 +1,16 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
+            <div class="bg-card border border-border shadow-lg rounded-lg max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">Move to Folder</h3>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                        <X class="w-5 h-5" />
+                    </Button>
                 </div>
 
                 <div class="p-6">
@@ -34,18 +33,17 @@
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleMove"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
                     >
                         Move
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -54,6 +52,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import { X } from 'lucide-vue-next';
+import Button from '../ui/button.vue';
 
 const props = defineProps({
     folders: {

@@ -3,8 +3,8 @@
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('common.actions.create') }} {{ $t('features.categories.title_singular') }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.categories.description') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.categories.form.createTitle') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.categories.form.createDescription') }}</p>
             </div>
             <div class="flex space-x-3">
                 <Button variant="outline" @click="router.push({ name: 'categories' })">
@@ -17,8 +17,8 @@
         <Card>
             <form @submit.prevent="handleSubmit">
                 <CardHeader>
-                    <CardTitle>Category Details</CardTitle>
-                    <CardDescription>Fill in the details for the new category.</CardDescription>
+                    <CardTitle>{{ $t('features.categories.form.details') }}</CardTitle>
+                    <CardDescription>{{ $t('features.categories.form.createDescription') }}</CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -76,11 +76,11 @@
                                         {{ $t('features.categories.form.noParent') }}
                                     </SelectItem>
                                     <SelectItem
-                                        v-for="cat in categories"
+                                        v-for="cat in flattenedCategories"
                                         :key="cat.id"
-                                        :value="cat.id?.toString()"
+                                        :value="cat.id.toString()"
                                     >
-                                        {{ cat.name }}
+                                        {{ cat.label }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -156,7 +156,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
@@ -185,6 +185,28 @@ const router = useRouter();
 
 const saving = ref(false);
 const categories = ref([]);
+
+const flattenedCategories = computed(() => {
+    return flattenTree(categories.value);
+});
+
+const flattenTree = (nodes, depth = 0) => {
+    if (!nodes) return [];
+    let result = [];
+    nodes.forEach(node => {
+        result.push({
+            id: node.id,
+            label: '— '.repeat(depth) + node.name,
+            raw: node
+        });
+        
+        const children = node.all_children || node.children; // Handle recursive children
+        if (children && children.length > 0) {
+            result = result.concat(flattenTree(children, depth + 1));
+        }
+    });
+    return result;
+};
 
 const form = ref({
     name: '',
@@ -216,7 +238,7 @@ const slugify = (text) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories'); // Fetch flat list directly
+        const response = await api.get('/admin/cms/categories', { params: { tree: true } });
         categories.value = response.data?.data || response.data || [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);

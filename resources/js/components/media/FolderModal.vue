@@ -1,7 +1,7 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
+            <div class="bg-card border border-border shadow-lg rounded-lg max-w-md w-full">
                 <div class="flex items-center justify-between p-6 border-b">
                     <h3 class="text-lg font-semibold">{{ $t('features.media.modals.folder.title') }}</h3>
                     <Button
@@ -9,9 +9,7 @@
                         size="icon"
                         @click="$emit('close')"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X class="w-5 h-5" />
                     </Button>
                 </div>
 
@@ -76,6 +74,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { X } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
 import Input from '../ui/input.vue';

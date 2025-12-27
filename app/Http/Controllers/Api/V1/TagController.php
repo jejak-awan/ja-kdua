@@ -9,10 +9,35 @@ use Illuminate\Support\Facades\Cache;
 
 class TagController extends BaseApiController
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tags = Cache::remember('tags_all', now()->addHours(6), function () {
-            return Tag::orderBy('name')->get();
+        $query = Tag::orderBy('name');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('usage') && in_array($request->usage, ['used', 'unused'])) {
+            if ($request->usage === 'used') {
+                $query->has('contents');
+            } else {
+                $query->doesntHave('contents');
+            }
+        }
+
+        if ($request->has('per_page')) {
+            $perPage = (int) $request->get('per_page', 20);
+            $tags = $query->withCount('contents')->paginate($perPage);
+            return $this->success($tags, 'Tags retrieved successfully');
+        }
+
+        $tags = Cache::remember('tags_all', now()->addHours(6), function () use ($query) {
+            return $query->get();
         });
 
         return $this->success($tags, 'Tags retrieved successfully');
@@ -60,6 +85,20 @@ class TagController extends BaseApiController
         $this->clearTagCaches();
 
         return $this->success(null, 'Tag deleted successfully');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:tags,id',
+        ]);
+
+        Tag::whereIn('id', $validated['ids'])->delete();
+
+        $this->clearTagCaches();
+
+        return $this->success(null, 'Tags deleted successfully');
     }
 
     public function statistics()

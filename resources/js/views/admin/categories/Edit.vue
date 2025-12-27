@@ -3,8 +3,8 @@
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('common.actions.edit') }} {{ $t('features.categories.title_singular') }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.categories.description') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.categories.form.editTitle') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.categories.form.editDescription') }}</p>
             </div>
             <div class="flex space-x-3">
                 <Button variant="outline" @click="router.push({ name: 'categories' })">
@@ -21,8 +21,8 @@
         <Card v-else>
             <form @submit.prevent="handleSubmit">
                 <CardHeader>
-                    <CardTitle>Category Details</CardTitle>
-                    <CardDescription>Update the category information.</CardDescription>
+                    <CardTitle>{{ $t('features.categories.form.details') }}</CardTitle>
+                    <CardDescription>{{ $t('features.categories.form.editDescription') }}</CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -77,11 +77,11 @@
                                         {{ $t('features.categories.form.noParent') }}
                                     </SelectItem>
                                     <SelectItem
-                                        v-for="cat in availableParents"
+                                        v-for="cat in flattenedCategories"
                                         :key="cat.id"
-                                        :value="cat.id?.toString()"
+                                        :value="cat.id.toString()"
                                     >
-                                        {{ cat.name }}
+                                        {{ cat.label }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -199,17 +199,32 @@ const form = ref({
     is_active: true,
 });
 
-const availableParents = computed(() => {
-    if (!currentCategory.value) return categories.value;
-    // Exclude self and descendants from parent options
-    return categories.value.filter(cat => {
-        if (cat.id === currentCategory.value.id) return false;
-        // Basic check: if server was smart, it wouldn't return descendants for flat list, 
-        // but simple filter: excludes itself.
-        // Deep loop check can be expensive if not needed, relying on backend validation mainly
-        return true; 
-    });
+const flattenedCategories = computed(() => {
+    return flattenTree(categories.value);
 });
+
+const flattenTree = (nodes, depth = 0) => {
+    if (!nodes) return [];
+    let result = [];
+    nodes.forEach(node => {
+        // Exclude current category and its children from parent options (to prevent cycles)
+        if (currentCategory.value && node.id === currentCategory.value.id) {
+            return;
+        }
+
+        result.push({
+            id: node.id,
+            label: '— '.repeat(depth) + node.name,
+            raw: node
+        });
+        
+        const children = node.all_children || node.children;
+        if (children && children.length > 0) {
+            result = result.concat(flattenTree(children, depth + 1));
+        }
+    });
+    return result;
+};
 
 const generateSlug = () => {
     if (!form.value.slug || form.value.slug === slugify(form.value.name)) {
@@ -231,7 +246,7 @@ const slugify = (text) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories');
+        const response = await api.get('/admin/cms/categories', { params: { tree: true } });
         categories.value = response.data?.data || response.data || [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);

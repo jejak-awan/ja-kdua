@@ -56,6 +56,30 @@ class MediaController extends BaseApiController
         return $this->paginated($media, 'Media retrieved successfully');
     }
 
+    public function statistics()
+    {
+        $totalMedia = Media::count();
+        $totalSize = Media::sum('size');
+        
+        $typeBreakdown = Media::selectRaw('
+            CASE 
+                WHEN mime_type LIKE "image/%" THEN "image"
+                WHEN mime_type LIKE "video/%" THEN "video"
+                WHEN mime_type LIKE "application/%" THEN "document"
+                ELSE "other"
+            END as type,
+            COUNT(*) as count
+        ')
+        ->groupBy('type')
+        ->get();
+
+        return $this->success([
+            'total_count' => $totalMedia,
+            'total_size' => $totalSize,
+            'types' => $typeBreakdown
+        ], 'Media statistics retrieved successfully');
+    }
+
     public function upload(Request $request)
     {
         if (!$request->user()->hasRole('admin') && !$request->user()->can('manage media')) {

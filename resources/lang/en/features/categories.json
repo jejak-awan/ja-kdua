@@ -29,7 +29,10 @@
     },
     "form": {
         "createTitle": "Create Category",
+        "createDescription": "Add a new category to your content structure.",
         "editTitle": "Edit Category",
+        "editDescription": "Update category information and settings.",
+        "details": "Category Details",
         "name": "Name",
         "namePlaceholder": "Category name",
         "slug": "Slug",

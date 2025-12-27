@@ -1,118 +1,127 @@
 <template>
     <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.edit.title') }}</h3>
-                    <button
+            <div class="bg-card border border-border shadow-lg rounded-lg max-w-4xl w-full">
+                <div class="flex items-center justify-between px-5 py-3 border-b">
+                    <h3 class="text-base font-semibold">{{ $t('features.media.modals.edit.title') }}</h3>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         @click="$emit('close')"
-                        class="text-muted-foreground hover:text-muted-foreground"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                        <X class="w-5 h-5" />
+                    </Button>
                 </div>
 
                 <!-- Content -->
-                <div class="p-6">
+                <div class="px-5 py-4">
                     <div v-if="loading" class="text-center py-8">
                         <p class="text-muted-foreground">{{ $t('features.media.loading') }}</p>
                     </div>
 
-                    <form v-else @submit.prevent="handleSubmit" class="space-y-4">
-                        <!-- Preview -->
-                        <div v-if="form.url && form.mime_type?.startsWith('image/')" class="mb-4">
-                            <img :src="form.url" :alt="form.alt" class="w-full h-64 object-contain bg-secondary rounded-lg">
-                        </div>
+                    <form v-else @submit.prevent="handleSubmit">
+                        <!-- Grid Layout: Image Left, Fields Right -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Left: Image Preview -->
+                            <div class="flex flex-col">
+                                <div v-if="form.url && form.mime_type?.startsWith('image/')" class="bg-secondary rounded-lg overflow-hidden flex items-center justify-center h-64 md:h-full">
+                                    <img :src="form.url" :alt="form.alt" class="w-full h-full object-contain">
+                                </div>
+                                <div v-else class="bg-secondary rounded-lg flex items-center justify-center h-64 md:h-full">
+                                    <FileIcon class="w-16 h-16 text-muted-foreground opacity-50" />
+                                </div>
 
-                        <!-- Name -->
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.edit.name') }}
-                            </label>
-                            <input
-                                v-model="form.name"
-                                type="text"
-                                required
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                        </div>
-
-                        <!-- Alt Text -->
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.edit.altText') }}
-                            </label>
-                            <input
-                                v-model="form.alt"
-                                type="text"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                :placeholder="$t('features.media.modals.edit.altPlaceholder')"
-                            >
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.edit.description') }}
-                            </label>
-                            <textarea
-                                v-model="form.description"
-                                rows="3"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                        </div>
-
-                        <!-- Folder -->
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-1">
-                                {{ $t('features.media.modals.edit.folder') }}
-                            </label>
-                            <select
-                                v-model="form.folder_id"
-                                class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option :value="null">{{ $t('features.media.modals.edit.noFolder') }}</option>
-                                <option
-                                    v-for="folder in folders"
-                                    :key="folder.id"
-                                    :value="folder.id"
-                                >
-                                    {{ folder.name }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Media Info -->
-                        <div class="grid grid-cols-2 gap-4 pt-4 border-t">
-                            <div>
-                                <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.type') }}</p>
-                                <p class="text-sm text-foreground">{{ form.mime_type }}</p>
+                                <!-- Media Info (below image on desktop) -->
+                                <div class="grid grid-cols-2 gap-3 mt-3 p-2.5 bg-muted/50 rounded-lg">
+                                    <div>
+                                        <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.type') }}</p>
+                                        <p class="text-sm text-foreground font-medium">{{ form.mime_type }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.size') }}</p>
+                                        <p class="text-sm text-foreground font-medium">{{ formatFileSize(form.size) }}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-xs text-muted-foreground">{{ $t('features.media.modals.edit.size') }}</p>
-                                <p class="text-sm text-foreground">{{ formatFileSize(form.size) }}</p>
+
+                            <!-- Right: Form Fields -->
+                            <div class="space-y-3">
+                                <!-- Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-1.5">
+                                        {{ $t('features.media.modals.edit.name') }}
+                                    </label>
+                                    <Input
+                                        v-model="form.name"
+                                        type="text"
+                                        required
+                                    />
+                                </div>
+
+                                <!-- Alt Text -->
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-1.5">
+                                        {{ $t('features.media.modals.edit.altText') }}
+                                    </label>
+                                    <Input
+                                        v-model="form.alt"
+                                        type="text"
+                                        :placeholder="$t('features.media.modals.edit.altPlaceholder')"
+                                    />
+                                </div>
+
+                                <!-- Description -->
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-1.5">
+                                        {{ $t('features.media.modals.edit.description') }}
+                                    </label>
+                                    <textarea
+                                        v-model="form.description"
+                                        rows="3"
+                                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                                    />
+                                </div>
+
+                                <!-- Folder -->
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-1.5">
+                                        {{ $t('features.media.modals.edit.folder') }}
+                                    </label>
+                                    <Select v-model="form.folder_id">
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue :placeholder="$t('features.media.modals.edit.noFolder')" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem :value="null">{{ $t('features.media.modals.edit.noFolder') }}</SelectItem>
+                                            <SelectItem
+                                                v-for="folder in folders"
+                                                :key="folder.id"
+                                                :value="folder.id"
+                                            >
+                                                {{ folder.name }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <button
+                <div class="flex items-center justify-end space-x-3 px-5 py-3 border-t">
+                    <Button
+                        variant="outline"
                         @click="$emit('close')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
                     >
                         {{ $t('features.media.actions.cancel') }}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         @click="handleSubmit"
                         :disabled="saving"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? $t('features.media.modals.edit.saving') : $t('features.media.actions.save') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -122,7 +131,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { X, FileText as FileIcon } from 'lucide-vue-next';
 import api from '../../services/api';
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Select from '../ui/select.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
 
 const { t } = useI18n();
 
@@ -158,25 +175,18 @@ const fetchFolders = async () => {
     }
 };
 
-const loadMedia = async () => {
-    loading.value = true;
-    try {
-        const response = await api.get(`/admin/cms/media/${props.media.id}`);
-        const media = response.data;
-        
+const loadMedia = () => {
+    // Use props.media directly since data is already passed from parent
+    if (props.media) {
         form.value = {
-            name: media.name || '',
-            alt: media.alt || '',
-            description: media.description || '',
-            folder_id: media.folder_id || null,
-            url: media.url || '',
-            mime_type: media.mime_type || '',
-            size: media.size || 0,
+            name: props.media.name || '',
+            alt: props.media.alt || '',
+            description: props.media.description || '',
+            folder_id: props.media.folder_id || null,
+            url: props.media.url || '',
+            mime_type: props.media.mime_type || '',
+            size: props.media.size || 0,
         };
-    } catch (error) {
-        console.error('Failed to load media:', error);
-    } finally {
-        loading.value = false;
     }
 };
 
@@ -212,4 +222,3 @@ onMounted(() => {
     fetchFolders();
 });
 </script>
-
