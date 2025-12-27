@@ -1,5 +1,5 @@
 <template>
-    <Card class="flex flex-col h-full overflow-hidden border-none shadow-sm">
+    <Card class="flex flex-col h-full overflow-hidden hover:shadow-md transition-all duration-300">
         <CardHeader class="flex flex-row items-center justify-between pb-4 space-y-0">
             <div class="space-y-1">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
@@ -30,7 +30,7 @@
             </div>
 
             <div v-else class="divide-y divide-border/40">
-                <div v-for="activity in activities" :key="activity.id" class="p-4 hover:bg-muted/30 transition-colors group">
+                <div v-for="activity in activities.slice(0, 5)" :key="activity.id" class="p-4 hover:bg-muted/30 transition-colors group">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0">
                             <Avatar class="h-10 w-10 ring-2 ring-background group-hover:ring-muted transition-all">
@@ -47,7 +47,7 @@
                                 <span class="text-[10px] text-muted-foreground flex items-center gap-1">
                                     <Clock class="w-3 h-3" />
                                     {{ formatTime(activity.created_at) }}
-                                </span>
+                                </span >
                             </div>
                             <p class="text-sm text-muted-foreground flex items-center flex-wrap gap-2">
                                 <Badge 
@@ -173,4 +173,6 @@ onMounted(() => {
 onUnmounted(() => {
     if (refreshInterval) clearInterval(refreshInterval);
 });
+
+defineExpose({ fetchActivities });
 </script>

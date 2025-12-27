@@ -12,9 +12,15 @@
     },
     "traffic": {
         "title": "Ringkasan Trafik",
+        "overview": "Ringkasan statistik trafik",
         "last7Days": "7 Hari Terakhir",
         "noData": "Tidak ada data trafik",
-        "visits": "Kunjungan"
+        "visits": "Kunjungan",
+        "filters": {
+            "last7Days": "7 Hari Terakhir",
+            "last30Days": "30 Hari Terakhir",
+            "last90Days": "3 Bulan Terakhir"
+        }
     },
     "widgets": {
         "quickActions": {

@@ -1,6 +1,6 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-16 px-4">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="min-h-screen bg-background py-16 px-4">
+        <div class="max-w-4xl mx-auto bg-card rounded-xl shadow-lg overflow-hidden border border-border">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 bg-indigo-900 text-white">
                     <h1 class="text-3xl font-bold mb-4">Get in Touch</h1>

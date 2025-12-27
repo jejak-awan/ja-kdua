@@ -1,10 +1,10 @@
 <template>
   <article 
-    class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col h-full border border-gray-100 group"
+    class="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col h-full border border-border group"
     @click="navigateToPost"
   >
     <!-- Featured Image -->
-    <div class="relative h-48 overflow-hidden bg-gray-100">
+    <div class="relative h-48 overflow-hidden bg-muted">
       <img 
         v-if="post.featured_image"
         v-lazy="post.featured_image" 
@@ -12,7 +12,7 @@
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       >
       <div v-if="post.category" class="absolute top-4 left-4">
-         <span class="px-3 py-1 bg-white/90 backdrop-blur-sm text-indigo-600 text-xs font-bold rounded-lg shadow-sm">
+         <span class="px-3 py-1 bg-background/90 backdrop-blur-sm text-primary text-xs font-bold rounded-lg shadow-sm">
             {{ post.category.name }}
          </span>
       </div>

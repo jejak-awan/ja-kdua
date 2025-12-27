@@ -6,7 +6,7 @@
     />
     
     <!-- Featured Content -->
-    <section v-if="featuredPosts.length > 0" class="py-20 bg-white">
+    <section v-if="featuredPosts.length > 0" class="py-20 bg-background">
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Stories</h2>
@@ -24,7 +24,7 @@
     </section>
     
     <!-- Recent Posts -->
-    <section v-if="recentPosts.length > 0" class="py-20 bg-gray-50">
+    <section v-if="recentPosts.length > 0" class="py-20 bg-muted">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-end mb-12">
           <div>
@@ -54,7 +54,7 @@
     </section>
     
     <!-- Newsletter Section -->
-    <section class="py-20 bg-white border-t border-gray-100">
+    <section class="py-20 bg-background border-t border-border">
       <div class="container mx-auto px-4">
         <NewsletterWidget
           variant="default"

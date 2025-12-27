@@ -1,14 +1,14 @@
 <template>
-    <div class="min-h-screen bg-white">
+    <div class="min-h-screen bg-background">
         <!-- Loading State -->
         <div v-if="loading" class="container mx-auto px-4 py-12">
             <div class="animate-pulse space-y-8 max-w-3xl mx-auto">
-                <div class="h-8 bg-gray-200 rounded w-3/4"></div>
-                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div class="h-96 bg-gray-200 rounded-xl"></div>
+                <div class="h-8 bg-muted rounded w-3/4"></div>
+                <div class="h-4 bg-muted rounded w-1/2"></div>
+                <div class="h-96 bg-muted rounded-xl"></div>
                 <div class="space-y-4">
-                    <div class="h-4 bg-gray-200 rounded"></div>
-                    <div class="h-4 bg-gray-200 rounded"></div>
+                    <div class="h-4 bg-muted rounded"></div>
+                    <div class="h-4 bg-muted rounded"></div>
                 </div>
             </div>
         </div>
@@ -16,10 +16,10 @@
         <!-- Post Content -->
         <article v-else-if="post" class="pb-20">
             <!-- Header -->
-            <header class="py-16 md:py-24 bg-gray-50 mb-12">
+            <header class="py-16 md:py-24 bg-muted mb-12">
                 <div class="container mx-auto px-4 text-center max-w-4xl">
                     <div class="flex items-center justify-center gap-2 mb-6">
-                        <span v-if="post.category" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+                        <span v-if="post.category" class="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-medium">
                             {{ post.category.name }}
                         </span>
                         <span class="text-gray-500 text-sm">
@@ -30,7 +30,7 @@
                         {{ post.title }}
                     </h1>
                     <div class="flex items-center justify-center gap-3">
-                        <div class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="w-10 h-10 bg-muted rounded-full overflow-hidden">
                              <!-- Author Avatar placeholder -->
                              <svg class="w-full h-full text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                         </div>
@@ -54,7 +54,7 @@
                 <!-- Tags -->
                 <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-gray-100">
                     <div class="flex flex-wrap gap-2">
-                        <span v-for="tag in post.tags" :key="tag.id" class="text-sm text-gray-500 px-3 py-1 bg-gray-100 rounded-lg">
+                        <span v-for="tag in post.tags" :key="tag.id" class="text-sm text-muted-foreground px-3 py-1 bg-muted rounded-lg">
                             #{{ tag.name }}
                         </span>
                     </div>

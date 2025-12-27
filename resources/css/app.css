@@ -33,13 +33,23 @@
 
 /* Shadcn UI Design Tokens - Premium Enterprise Grade */
 @layer base {
+    * {
+        @apply border-border;
+        transition-property: background-color, border-color, color, shadow;
+        transition-duration: 300ms;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+
     :root {
-        /* Light mode - Clean, minimal like Notion */
-        /* Layer 1: Main background - subtle warm gray (not pure white) */
-        --background: 240 5% 96%;
+        /* Light mode - Shadcn Zinc */
+        --background: 0 0% 100%;
         --foreground: 240 10% 3.9%;
 
-        /* Layer 2: Cards - pure white (elevated above background) */
         --card: 0 0% 100%;
         --card-foreground: 240 10% 3.9%;
 
@@ -63,24 +73,22 @@
 
         --border: 240 5.9% 90%;
         --input: 240 5.9% 90%;
-        --ring: 240 5.9% 10%;
+        --ring: 240 10% 3.9%;
 
         --radius: 0.5rem;
 
-        /* Sidebar specific - subtle gray for light mode */
+        /* Sidebar - Muted background for contrast */
         --sidebar: 240 4.8% 95.9%;
         --sidebar-foreground: 240 5.9% 10%;
-        --sidebar-accent: 240 4.8% 91%;
+        --sidebar-accent: 240 4.8% 90%;
     }
 
     .dark {
-        /* Dark mode - Deep charcoal like Cursor AI/Notion dark */
-        /* Layer 1: Main background - base dark */
-        --background: 240 10% 6%;
+        /* Dark mode - Shadcn Zinc */
+        --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
 
-        /* Layer 2: Cards - elevated (slightly lighter than background) */
-        --card: 240 6% 10%;
+        --card: 240 10% 3.9%;
         --card-foreground: 0 0% 98%;
 
         --popover: 240 10% 3.9%;
@@ -105,10 +113,10 @@
         --input: 240 3.7% 15.9%;
         --ring: 240 4.9% 83.9%;
 
-        /* Sidebar specific - darker than background for depth */
-        --sidebar: 240 10% 4%;
-        --sidebar-foreground: 0 0% 98%;
-        --sidebar-accent: 240 4% 16%;
+        /* Sidebar - Darker than background */
+        --sidebar: 240 5.9% 10%;
+        --sidebar-foreground: 240 4.8% 95.9%;
+        --sidebar-accent: 240 3.7% 15.9%;
     }
 }
 

@@ -12,9 +12,15 @@
     },
     "traffic": {
         "title": "Traffic Overview",
+        "overview": "Traffic statistics overview",
         "last7Days": "Last 7 Days",
         "noData": "No traffic data available",
-        "visits": "Visits"
+        "visits": "Visits",
+        "filters": {
+            "last7Days": "Last 7 Days",
+            "last30Days": "Last 30 Days",
+            "last90Days": "Last 3 Months"
+        }
     },
     "widgets": {
         "quickActions": {

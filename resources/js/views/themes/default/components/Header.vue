@@ -1,5 +1,5 @@
 <template>
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
@@ -45,7 +45,7 @@
                 <!-- Mobile Menu Button -->
                 <button 
                     @click="isOpen = !isOpen"
-                    class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    class="md:hidden p-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
                 >
                     <svg v-if="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -66,7 +66,7 @@
             leave-from-class="transform translate-y-0 opacity-100"
             leave-to-class="transform -translate-y-4 opacity-0"
         >
-            <div v-if="isOpen" class="md:hidden bg-white border-b border-gray-100 absolute w-full left-0 top-16 shadow-xl">
+            <div v-if="isOpen" class="md:hidden bg-background border-b border-border absolute w-full left-0 top-16 shadow-xl">
                 <div class="container mx-auto px-4 py-4 space-y-2">
                     <router-link 
                         v-for="item in navItems" 
@@ -78,7 +78,7 @@
                     >
                         {{ item.label }}
                     </router-link>
-                    <div class="h-px bg-gray-100 my-4"></div>
+                    <div class="h-px bg-border my-4"></div>
                     <div class="flex flex-col gap-2">
                         <router-link 
                             to="/login"
