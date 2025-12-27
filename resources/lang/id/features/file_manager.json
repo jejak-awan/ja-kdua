@@ -10,7 +10,8 @@
         "upload": "Unggah",
         "uploading": "Mengunggah...",
         "creating": "Membuat...",
-        "close": "Tutup"
+        "close": "Tutup",
+        "search": "Cari..."
     },
     "nav": {
         "root": "Root"
@@ -58,7 +59,8 @@
         "documents": "Dokumen",
         "videos": "Video",
         "audio": "Audio",
-        "archives": "Arsip"
+        "archives": "Arsip",
+        "other": "Lainnya"
     },
     "sort": {
         "label": "Urutkan berdasarkan",
@@ -70,9 +72,12 @@
     },
     "bulk": {
         "selected": "{count} item dipilih | {count} item dipilih",
+        "label": "{count} Dipilih",
         "selectAll": "Pilih Semua",
         "clearSelection": "Hapus Pilihan",
+        "cancel": "Batal",
         "deleteSelected": "Hapus yang Dipilih",
+        "delete": "Hapus",
         "downloadSelected": "Unduh yang Dipilih",
         "confirmDelete": "Apakah Anda yakin ingin menghapus {count} item? | Apakah Anda yakin ingin menghapus {count} item?"
     },

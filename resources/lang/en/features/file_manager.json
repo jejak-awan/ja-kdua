@@ -10,7 +10,8 @@
         "upload": "Upload",
         "uploading": "Uploading...",
         "creating": "Creating...",
-        "close": "Close"
+        "close": "Close",
+        "search": "Search..."
     },
     "nav": {
         "root": "Root"
@@ -58,7 +59,8 @@
         "documents": "Documents",
         "videos": "Videos",
         "audio": "Audio",
-        "archives": "Archives"
+        "archives": "Archives",
+        "other": "Other"
     },
     "sort": {
         "label": "Sort by",
@@ -70,9 +72,12 @@
     },
     "bulk": {
         "selected": "{count} item selected | {count} items selected",
+        "label": "{count} Selected",
         "selectAll": "Select All",
         "clearSelection": "Clear Selection",
+        "cancel": "Cancel",
         "deleteSelected": "Delete Selected",
+        "delete": "Delete",
         "downloadSelected": "Download Selected",
         "confirmDelete": "Are you sure you want to delete {count} item? | Are you sure you want to delete {count} items?"
     },

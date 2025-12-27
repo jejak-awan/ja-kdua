@@ -131,20 +131,22 @@
                 </div>
 
                 <!-- Filters -->
-                <div class="bg-card border border-border rounded-lg p-4 mb-4">
+                <div class="mb-6 space-y-4">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="flex flex-1 items-center gap-2 max-w-2xl">
-                            <div class="relative flex-1">
+                        <!-- Search & Filter Group -->
+                        <div class="flex flex-1 items-center gap-2 max-w-3xl">
+                            <div class="relative flex-1 min-w-[200px]">
                                 <SearchIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     v-model="search"
                                     type="text"
                                     :placeholder="$t('features.media.search')"
-                                    class="pl-8"
+                                    class="pl-8 bg-background"
                                 />
                             </div>
+                            
                             <Select v-model="mimeFilter">
-                                <SelectTrigger class="w-[140px]">
+                                <SelectTrigger class="w-[140px] bg-background">
                                     <SelectValue :placeholder="$t('features.media.filter.allTypes')" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -154,8 +156,9 @@
                                     <SelectItem value="application">{{ $t('features.media.filter.documents') }}</SelectItem>
                                 </SelectContent>
                             </Select>
+
                             <Select v-model="usageFilter">
-                                <SelectTrigger class="w-[140px]">
+                                <SelectTrigger class="w-[140px] bg-background">
                                     <SelectValue :placeholder="$t('features.media.filter.allStatus')" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -164,15 +167,16 @@
                                     <SelectItem value="unused">{{ $t('features.media.filter.unused') }}</SelectItem>
                                 </SelectContent>
                             </Select>
+
                             <!-- View Toggle -->
-                            <div class="flex items-center border border-input bg-card rounded-md p-1">
+                            <div class="flex items-center border border-input rounded-md bg-background p-1 shadow-sm">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     @click="viewMode = 'grid'"
                                     :class="[
-                                        'h-8 w-8 p-0',
-                                        viewMode === 'grid' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
+                                        'h-8 w-8 p-0 rounded-sm transition-all',
+                                        viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
                                     ]"
                                 >
                                     <LayoutGrid class="w-4 h-4" />
@@ -182,29 +186,25 @@
                                     size="sm"
                                     @click="viewMode = 'list'"
                                     :class="[
-                                        'h-8 w-8 p-0',
-                                        viewMode === 'list' ? 'bg-primary text-primary-foreground hover:bg-primary' : 'text-muted-foreground'
+                                        'h-8 w-8 p-0 rounded-sm transition-all',
+                                        viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
                                     ]"
                                 >
                                     <List class="w-4 h-4" />
                                 </Button>
                             </div>
                         </div>
-                        <div v-if="selectedMedia.length > 0" class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-muted-foreground hidden lg:inline-block">
+
+                        <!-- Bulk Actions -->
+                        <div v-if="selectedMedia.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
+                            <div class="flex items-center px-3 py-1.5 bg-secondary rounded-md text-sm font-medium text-secondary-foreground">
                                 {{ t('features.media.selected', { count: selectedMedia.length }) }}
-                            </span>
+                            </div>
                             <Select v-model="bulkAction" @update:modelValue="handleBulkAction">
-                                <SelectTrigger class="w-[160px]">
+                                <SelectTrigger class="w-[150px] bg-background">
                                     <SelectValue :placeholder="$t('features.media.actions.bulk')" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="delete">
-                                        <div class="flex items-center">
-                                            <Trash2 class="w-4 h-4 mr-2 text-destructive" />
-                                            {{ $t('features.media.actions.delete') }}
-                                        </div>
-                                    </SelectItem>
                                     <SelectItem value="move">
                                         <div class="flex items-center">
                                             <Move class="w-4 h-4 mr-2" />
@@ -221,6 +221,12 @@
                                         <div class="flex items-center">
                                             <Download class="w-4 h-4 mr-2" />
                                             {{ $t('features.media.actions.downloadZip') }}
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="delete" class="text-destructive focus:text-destructive">
+                                        <div class="flex items-center">
+                                            <Trash2 class="w-4 h-4 mr-2" />
+                                            {{ $t('features.media.actions.delete') }}
                                         </div>
                                     </SelectItem>
                                 </SelectContent>

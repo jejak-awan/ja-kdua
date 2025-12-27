@@ -1,84 +1,73 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card rounded-lg max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ $t('features.file_manager.modals.upload.title') }}</h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>{{ $t('features.file_manager.modals.upload.title') }}</DialogTitle>
+            </DialogHeader>
+
+            <div class="grid gap-4 py-4">
+                <div 
+                    class="border-2 border-dashed border-input rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    @click="$refs.fileInput.click()"
+                    @dragover.prevent
+                    @drop.prevent="handleDrop"
+                >
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        multiple
+                        @change="handleFileSelect"
+                        class="hidden"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </Button>
+                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground" />
+                    <p class="mt-4 text-sm text-muted-foreground">
+                        <span class="font-semibold text-primary hover:underline">
+                            {{ $t('features.file_manager.labels.clickToUpload') }}
+                        </span>
+                        {{ $t('features.file_manager.labels.dragAndDrop') }}
+                    </p>
+                    <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.file_manager.labels.multipleSupported') }}</p>
                 </div>
 
-                <div class="p-6">
-                    <div class="border-2 border-dashed border-input rounded-lg p-8 text-center">
-                        <input
-                            ref="fileInput"
-                            type="file"
-                            multiple
-                            @change="handleFileSelect"
-                            class="hidden"
+                <div v-if="selectedFiles.length > 0" class="space-y-2 max-h-[200px] overflow-y-auto pr-2">
+                    <h4 class="text-sm font-medium text-foreground sticky top-0 bg-background pb-2">{{ $t('features.file_manager.labels.selectedFiles') }}</h4>
+                    <div
+                        v-for="(file, index) in selectedFiles"
+                        :key="index"
+                        class="flex items-center justify-between p-2 bg-muted rounded-md group"
+                    >
+                        <span class="text-sm truncate max-w-[250px]" :title="file.name">{{ file.name }}</span>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            @click="removeFile(index)"
+                            class="h-6 w-6 text-muted-foreground hover:text-destructive"
                         >
-                        <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p class="mt-4 text-sm text-muted-foreground">
-                            <Button
-                                variant="link"
-                                @click="$refs.fileInput.click()"
-                                class="h-auto p-0 font-medium text-primary"
-                            >
-                                {{ $t('features.file_manager.labels.clickToUpload') }}
-                            </Button>
-                            {{ $t('features.file_manager.labels.dragAndDrop') }}
-                        </p>
-                        <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.file_manager.labels.multipleSupported') }}</p>
+                            <X class="w-4 h-4" />
+                        </Button>
                     </div>
-
-                    <div v-if="selectedFiles.length > 0" class="mt-4">
-                        <h4 class="text-sm font-medium text-foreground mb-2">{{ $t('features.file_manager.labels.selectedFiles') }}</h4>
-                        <ul class="space-y-1">
-                            <li
-                                v-for="(file, index) in selectedFiles"
-                                :key="index"
-                                class="text-sm text-muted-foreground flex items-center justify-between"
-                            >
-                                <span>{{ file.name }}</span>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    @click="removeFile(index)"
-                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                >
-                                    {{ $t('features.file_manager.actions.remove') }}
-                                </Button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <Button
-                        variant="outline"
-                        @click="$emit('close')"
-                    >
-                        {{ $t('features.file_manager.actions.cancel') }}
-                    </Button>
-                    <Button
-                        @click="handleUpload"
-                        :disabled="uploading || selectedFiles.length === 0"
-                    >
-                        {{ uploading ? $t('features.file_manager.actions.uploading') : $t('features.file_manager.actions.upload') }}
-                    </Button>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                    type="button"
+                >
+                    {{ $t('features.file_manager.actions.cancel') }}
+                </Button>
+                <Button
+                    @click="handleUpload"
+                    :disabled="uploading || selectedFiles.length === 0"
+                    type="submit"
+                >
+                    <Loader2 v-if="uploading" class="mr-2 h-4 w-4 animate-spin" />
+                    {{ uploading ? $t('features.file_manager.actions.uploading') : $t('features.file_manager.actions.upload') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
@@ -86,6 +75,12 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import { CloudUpload, X, Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -103,7 +98,15 @@ const selectedFiles = ref([]);
 const uploading = ref(false);
 
 const handleFileSelect = (event) => {
-    selectedFiles.value = Array.from(event.target.files);
+    if (event.target.files) {
+        selectedFiles.value = [...selectedFiles.value, ...Array.from(event.target.files)];
+    }
+};
+
+const handleDrop = (event) => {
+    if (event.dataTransfer.files) {
+        selectedFiles.value = [...selectedFiles.value, ...Array.from(event.dataTransfer.files)];
+    }
 };
 
 const removeFile = (index) => {
@@ -128,6 +131,7 @@ const handleUpload = async () => {
         });
         
         emit('uploaded');
+        emit('close');
     } catch (error) {
         console.error('Failed to upload files:', error);
         alert(t('features.file_manager.messages.uploadFailed'));

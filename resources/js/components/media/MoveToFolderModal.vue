@@ -1,59 +1,58 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-md w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Move to Folder</h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
-                    >
-                        <X class="w-5 h-5" />
-                    </Button>
-                </div>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Move to Folder</DialogTitle>
+                <DialogDescription>
+                    Select the destination folder for the selected items.
+                </DialogDescription>
+            </DialogHeader>
 
-                <div class="p-6">
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        Select Folder
-                    </label>
-                    <select
-                        v-model="selectedFolderId"
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option :value="null">No Folder (Root)</option>
-                        <option
+            <div class="py-4">
+                <label class="text-sm font-medium mb-2 block">Select Folder</label>
+                <Select v-model="selectedFolderId">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a folder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="root">No Folder (Root)</SelectItem>
+                        <SelectItem
                             v-for="folder in folders"
                             :key="folder.id"
-                            :value="folder.id"
+                            :value="String(folder.id)"
                         >
                             {{ folder.name }}
-                        </option>
-                    </select>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <Button
-                        variant="outline"
-                        @click="$emit('close')"
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        @click="handleMove"
-                    >
-                        Move
-                    </Button>
-                </div>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
-        </div>
-    </div>
+
+            <DialogFooter>
+                <Button variant="outline" @click="$emit('close')">
+                    Cancel
+                </Button>
+                <Button @click="handleMove">
+                    Move
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { X } from 'lucide-vue-next';
 import Button from '../ui/button.vue';
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogDescription from '@/components/ui/dialog-description.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
+import Select from '@/components/ui/select.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
 
 const props = defineProps({
     folders: {
@@ -64,10 +63,12 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'moved']);
 
-const selectedFolderId = ref(null);
+const selectedFolderId = ref('root');
 
 const handleMove = () => {
-    emit('moved', selectedFolderId.value);
+    // Convert 'root' back to null for API
+    const folderId = selectedFolderId.value === 'root' ? null : selectedFolderId.value;
+    emit('moved', folderId);
 };
 </script>
 

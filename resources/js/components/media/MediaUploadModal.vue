@@ -1,111 +1,113 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-2xl w-full">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">{{ $t('features.media.modals.upload.title') }}</h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
-                    >
-                        <X class="w-5 h-5" />
-                    </Button>
-                </div>
+    <Dialog :open="true" @update:open="$emit('close')">
+        <DialogContent class="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>{{ $t('features.media.modals.upload.title') }}</DialogTitle>
+                <DialogDescription>
+                    Drag and drop files here or click to select files to upload.
+                </DialogDescription>
+            </DialogHeader>
 
-                <!-- Content -->
-                <div class="p-6">
-                    <!-- Drag & Drop Area -->
-                    <div
-                        @drop="handleDrop"
-                        @dragover.prevent
-                        @dragenter.prevent
-                        :class="[
-                            'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
-                            isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-input'
-                        ]"
+            <div class="py-4">
+                <!-- Drag & Drop Area -->
+                <div
+                    @drop="handleDrop"
+                    @dragover.prevent
+                    @dragenter.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    :class="[
+                        'border-2 border-dashed rounded-lg p-12 text-center transition-colors',
+                        isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25 hover:border-primary/50'
+                    ]"
+                >
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        multiple
+                        @change="handleFileSelect"
+                        class="hidden"
                     >
-                        <input
-                            ref="fileInput"
-                            type="file"
-                            multiple
-                            @change="handleFileSelect"
-                            class="hidden"
+                    <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+                    <div class="text-sm text-muted-foreground">
+                        <Button
+                            variant="link"
+                            @click="$refs.fileInput.click()"
+                            class="h-auto p-0 text-primary font-medium"
                         >
-                        <CloudUpload class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                        <p class="mt-4 text-sm text-muted-foreground">
-                            <Button
-                                variant="link"
-                                @click="$refs.fileInput.click()"
-                                class="h-auto p-0 text-primary font-medium"
-                            >
-                                {{ $t('features.media.modals.upload.clickToUpload') }}
-                            </Button>
-                            {{ $t('features.media.modals.upload.dragAndDrop') }}
-                        </p>
-                        <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.media.modals.upload.formats') }}</p>
+                            {{ $t('features.media.modals.upload.clickToUpload') }}
+                        </Button>
+                        {{ $t('features.media.modals.upload.dragAndDrop') }}
                     </div>
+                    <p class="mt-2 text-xs text-muted-foreground">{{ $t('features.media.modals.upload.formats') }}</p>
+                </div>
 
-                    <!-- Selected Files -->
-                    <div v-if="selectedFiles.length > 0" class="mt-6 space-y-2">
-                        <h4 class="text-sm font-medium text-foreground">{{ $t('features.media.modals.upload.selectedFiles') }}</h4>
-                        <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-muted rounded-lg">
-                            <div class="flex-1">
-                                <p class="text-sm font-medium text-foreground">{{ file.name }}</p>
-                                <p class="text-xs text-muted-foreground">{{ formatFileSize(file.size) }}</p>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                @click="removeFile(index)"
-                                class="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
-                            >
-                                <Trash2 class="w-4 h-4" />
-                            </Button>
+                <!-- Selected Files -->
+                <div v-if="selectedFiles.length > 0" class="mt-6 space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                        {{ $t('features.media.modals.upload.selectedFiles') }}
+                    </h4>
+                    <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
+                        <div class="flex-1 min-w-0 mr-4">
+                            <p class="text-sm font-medium text-foreground truncate">{{ file.name }}</p>
+                            <p class="text-xs text-muted-foreground">{{ formatFileSize(file.size) }}</p>
                         </div>
-                    </div>
-
-                    <!-- Upload Progress -->
-                    <div v-if="uploading" class="mt-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm text-foreground">{{ $t('features.media.modals.upload.uploading') }}</span>
-                            <span class="text-sm text-muted-foreground">{{ uploadProgress }}%</span>
-                        </div>
-                        <div class="w-full bg-muted rounded-full h-2">
-                            <div
-                                class="bg-indigo-600 h-2 rounded-full transition-all"
-                                :style="{ width: uploadProgress + '%' }"
-                            />
-                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            @click="removeFile(index)"
+                            class="text-muted-foreground hover:text-destructive h-8 w-8"
+                        >
+                            <Trash2 class="w-4 h-4" />
+                        </Button>
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <div class="flex items-center justify-end space-x-3 p-6 border-t">
-                    <Button
-                        variant="outline"
-                        @click="$emit('close')"
-                    >
-                        {{ $t('features.media.actions.cancel') }}
-                    </Button>
-                    <Button
-                        @click="handleUpload"
-                        :disabled="selectedFiles.length === 0 || uploading"
-                    >
-                        {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.uploadAction', { count: selectedFiles.length }) }}
-                    </Button>
+                <!-- Upload Progress -->
+                <div v-if="uploading" class="mt-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-foreground">{{ $t('features.media.modals.upload.uploading') }}</span>
+                        <span class="text-sm text-muted-foreground">{{ uploadProgress }}%</span>
+                    </div>
+                    <div class="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                        <div
+                            class="bg-primary h-full transition-all duration-300 ease-out"
+                            :style="{ width: uploadProgress + '%' }"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    @click="$emit('close')"
+                >
+                    {{ $t('features.media.actions.cancel') }}
+                </Button>
+                <Button
+                    @click="handleUpload"
+                    :disabled="selectedFiles.length === 0 || uploading"
+                >
+                    <Loader2 v-if="uploading" class="mr-2 h-4 w-4 animate-spin" />
+                    {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.uploadAction', { count: selectedFiles.length }) }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { X, CloudUpload, Trash2 } from 'lucide-vue-next';
+import { CloudUpload, Trash2, Loader2 } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogDescription from '@/components/ui/dialog-description.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
 
 const { t } = useI18n();
 
