@@ -408,6 +408,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage media');
         Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage media');
         Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage media');
+        Route::post('file-manager/move', [App\Http\Controllers\Api\V1\FileManagerController::class, 'move'])->middleware('permission:manage media');
+        Route::post('file-manager/rename', [App\Http\Controllers\Api\V1\FileManagerController::class, 'rename'])->middleware('permission:manage media');
+        Route::get('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'trash'])->middleware('permission:manage media');
+        Route::post('file-manager/restore', [App\Http\Controllers\Api\V1\FileManagerController::class, 'restore'])->middleware('permission:manage media');
+        Route::delete('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage media');
+        Route::delete('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage media');
 
         // Log Viewer
         Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');

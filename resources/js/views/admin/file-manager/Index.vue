@@ -13,6 +13,15 @@
                 >
                     <CircleHelp class="w-5 h-5" />
                 </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    @click="showTrashView = !showTrashView"
+                    :class="showTrashView ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-foreground'"
+                    title="Recycle Bin"
+                >
+                    <Trash2 class="w-5 h-5" />
+                </Button>
             </div>
             <div class="flex items-center space-x-3">
                 <Button 
@@ -160,39 +169,239 @@
             </div>
         </div>
 
-        <div class="flex gap-6">
-            <!-- Sidebar: Folders -->
-            <div class="w-64 bg-card border border-border rounded-lg p-4 h-fit">
-                <h2 class="text-sm font-semibold text-foreground mb-3 flex items-center">
-                    <Folder class="w-4 h-4 mr-2" />
-                    {{ $t('features.file_manager.labels.folders') }}
-                </h2>
-                <div class="space-y-1 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+        <!-- Trash View -->
+        <div v-if="showTrashView" class="bg-card border border-border rounded-lg p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <Trash2 class="w-6 h-6 text-destructive" />
+                    <h2 class="text-xl font-semibold">Recycle Bin</h2>
+                    <span class="text-sm text-muted-foreground">({{ trashItems.length }} items)</span>
+                </div>
+                <div class="flex items-center gap-2">
                     <Button
-                        variant="ghost"
-                        @click="navigateToPath('/')"
-                        :class="[
-                            'w-full justify-start text-sm h-9 px-2',
-                            currentPath === '/' ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground hover:bg-accent'
-                        ]"
+                        variant="outline"
+                        size="sm"
+                        @click="fetchTrash"
+                        :disabled="trashLoading"
                     >
-                        <Folder class="w-4 h-4 mr-2" />
-                        {{ $t('features.file_manager.nav.root') }}
+                        <RotateCcw class="w-4 h-4 mr-1" :class="{ 'animate-spin': trashLoading }" />
+                        Refresh
                     </Button>
-                    <div v-for="folder in allFolders" :key="folder.path" class="pl-2">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        @click="emptyTrash"
+                        :disabled="trashItems.length === 0"
+                    >
+                        Empty Trash
+                    </Button>
+                </div>
+            </div>
+            
+            <div v-if="trashLoading" class="flex items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+            
+            <div v-else-if="trashItems.length === 0" class="text-center py-12 text-muted-foreground">
+                <Trash2 class="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p class="text-lg font-medium">Recycle Bin is empty</p>
+                <p class="text-sm">Deleted files and folders will appear here</p>
+            </div>
+            
+            <div v-else class="space-y-2">
+                <div 
+                    v-for="item in trashItems" 
+                    :key="item.id"
+                    class="flex items-center justify-between p-4 bg-background rounded-lg border border-border hover:border-primary/30 transition-colors"
+                >
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded flex items-center justify-center bg-muted">
+                            <Folder v-if="item.type === 'folder'" class="w-5 h-5 text-primary" />
+                            <FileText v-else class="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                            <p class="font-medium">{{ item.name }}</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ item.original_path }} • 
+                                {{ item.formatted_size || '-' }} • 
+                                Deleted {{ new Date(item.deleted_at).toLocaleDateString() }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
                         <Button
-                            variant="ghost"
-                            @click="navigateToFolder(folder.path)"
-                            :class="[
-                                'w-full justify-start text-sm h-9 px-2 truncate',
-                                currentPath === folder.path ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground hover:bg-accent'
-                            ]"
-                            :title="folder.name"
+                            variant="outline"
+                            size="sm"
+                            @click="restoreItem(item)"
+                            title="Restore"
                         >
-                            <Folder class="w-4 h-4 mr-2 flex-shrink-0" />
-                            <span class="truncate">{{ folder.name }}</span>
+                            <RotateCcw class="w-4 h-4 mr-1" />
+                            Restore
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            @click="deleteFromTrash(item)"
+                            title="Delete Permanently"
+                        >
+                            <Trash2 class="w-4 h-4" />
                         </Button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="flex gap-6">
+            <!-- Sidebar: Folders (Collapsible) -->
+            <div 
+                :class="[
+                    'bg-card border border-border rounded-lg h-fit transition-all duration-300',
+                    sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
+                ]"
+            >
+                <div class="flex items-center justify-between mb-3">
+                    <h2 v-if="!sidebarCollapsed" class="text-sm font-semibold text-foreground flex items-center">
+                        <Folder class="w-4 h-4 mr-2" />
+                        {{ $t('features.file_manager.labels.folders') }}
+                    </h2>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        @click="toggleSidebar"
+                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        :title="sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
+                    >
+                        <PanelLeft v-if="sidebarCollapsed" class="w-4 h-4" />
+                        <PanelLeftClose v-else class="w-4 h-4" />
+                    </Button>
+                </div>
+                <div v-if="!sidebarCollapsed" class="space-y-0.5 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                    <!-- Root folder -->
+                    <div 
+                        @dragover.prevent="(e) => onDragOver(e, { path: '/' })"
+                        @dragleave="onDragLeave"
+                        @drop="(e) => onDrop(e, { path: '/' })"
+                    >
+                        <button
+                            @click="navigateToPath('/')"
+                            :class="[
+                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                currentPath === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                dropTarget === '/' ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                            ]"
+                        >
+                            <ChevronDown 
+                                v-if="folderTree.length > 0" 
+                                class="w-4 h-4 flex-shrink-0" 
+                            />
+                            <span v-else class="w-4"></span>
+                            <FolderOpen v-if="currentPath === '/'" class="w-4 h-4 flex-shrink-0 text-primary" />
+                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                            <span class="truncate font-medium">{{ $t('features.file_manager.nav.root') }}</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Tree level 1 -->
+                    <template v-for="folder in folderTree" :key="folder.path">
+                        <div 
+                            class="ml-2"
+                            @dragover.prevent="(e) => onDragOver(e, folder)"
+                            @dragleave="onDragLeave"
+                            @drop="(e) => onDrop(e, folder)"
+                        >
+                            <button
+                                @click="navigateToFolder(folder.path)"
+                                @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
+                                :class="[
+                                    'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                    currentPath === folder.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                    dropTarget === folder.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                ]"
+                                :title="folder.name"
+                            >
+                                <ChevronDown 
+                                    v-if="folder.children?.length > 0 && isFolderExpanded(folder.path)" 
+                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                    @click.stop="toggleFolderExpanded(folder.path)"
+                                />
+                                <ChevronRight 
+                                    v-else-if="folder.children?.length > 0" 
+                                    class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                    @click.stop="toggleFolderExpanded(folder.path)"
+                                />
+                                <span v-else class="w-4"></span>
+                                <FolderOpen v-if="currentPath === folder.path || currentPath.startsWith(folder.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                <span class="truncate">{{ folder.name }}</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Tree level 2 (children) -->
+                        <template v-if="folder.children?.length > 0 && isFolderExpanded(folder.path)">
+                            <template v-for="child in folder.children" :key="child.path">
+                                <div 
+                                    class="ml-6"
+                                    @dragover.prevent="(e) => onDragOver(e, child)"
+                                    @dragleave="onDragLeave"
+                                    @drop="(e) => onDrop(e, child)"
+                                >
+                                    <button
+                                        @click="navigateToFolder(child.path)"
+                                        @contextmenu.prevent="(e) => showContextMenu(e, child, 'folder')"
+                                        :class="[
+                                            'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                            currentPath === child.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                            dropTarget === child.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                        ]"
+                                        :title="child.name"
+                                    >
+                                        <ChevronDown 
+                                            v-if="child.children?.length > 0 && isFolderExpanded(child.path)" 
+                                            class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                            @click.stop="toggleFolderExpanded(child.path)"
+                                        />
+                                        <ChevronRight 
+                                            v-else-if="child.children?.length > 0" 
+                                            class="w-4 h-4 flex-shrink-0 cursor-pointer" 
+                                            @click.stop="toggleFolderExpanded(child.path)"
+                                        />
+                                        <span v-else class="w-4"></span>
+                                        <FolderOpen v-if="currentPath === child.path || currentPath.startsWith(child.path + '/')" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                        <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                        <span class="truncate">{{ child.name }}</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Tree level 3 (grandchildren) -->
+                                <template v-if="child.children?.length > 0 && isFolderExpanded(child.path)">
+                                    <div 
+                                        v-for="grandChild in child.children" 
+                                        :key="grandChild.path"
+                                        class="ml-10"
+                                        @dragover.prevent="(e) => onDragOver(e, grandChild)"
+                                        @dragleave="onDragLeave"
+                                        @drop="(e) => onDrop(e, grandChild)"
+                                    >
+                                        <button
+                                            @click="navigateToFolder(grandChild.path)"
+                                            @contextmenu.prevent="(e) => showContextMenu(e, grandChild, 'folder')"
+                                            :class="[
+                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                                currentPath === grandChild.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
+                                                dropTarget === grandChild.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
+                                            ]"
+                                            :title="grandChild.name"
+                                        >
+                                            <span class="w-4"></span>
+                                            <FolderOpen v-if="currentPath === grandChild.path" class="w-4 h-4 flex-shrink-0 text-primary" />
+                                            <Folder v-else class="w-4 h-4 flex-shrink-0" />
+                                            <span class="truncate">{{ grandChild.name }}</span>
+                                        </button>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </template>
                 </div>
             </div>
 
@@ -242,8 +451,18 @@
                                 v-for="folder in paginatedFolders"
                                 :key="folder.path"
                                 class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-all cursor-pointer overflow-hidden"
-                                :class="{ 'ring-2 ring-primary border-primary': isSelected(folder.path) }"
+                                :class="{ 
+                                    'ring-2 ring-primary border-primary': isSelected(folder.path),
+                                    'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path
+                                }"
+                                draggable="true"
                                 @click="navigateToFolder(folder.path)"
+                                @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
+                                @dragstart="(e) => onDragStart(e, folder, 'folder')"
+                                @dragend="onDragEnd"
+                                @dragover.prevent="(e) => onDragOver(e, folder)"
+                                @dragleave="onDragLeave"
+                                @drop="(e) => onDrop(e, folder)"
                             >
                                 <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(folder.path) }">
                                     <Checkbox
@@ -267,7 +486,11 @@
                                 :key="file.path"
                                 class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-all cursor-pointer overflow-hidden"
                                 :class="{ 'ring-2 ring-primary border-primary': isSelected(file.path) }"
+                                draggable="true"
                                 @click="viewFile(file)"
+                                @contextmenu.prevent="(e) => showContextMenu(e, file, 'file')"
+                                @dragstart="(e) => onDragStart(e, file, 'file')"
+                                @dragend="onDragEnd"
                             >
                                 <div class="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" :class="{ 'opacity-100': isSelected(file.path) }">
                                     <Checkbox
@@ -321,6 +544,7 @@
                                         class="hover:bg-muted/30 cursor-pointer group"
                                         :class="{ 'bg-primary/5': isSelected(folder.path) }"
                                         @click="navigateToFolder(folder.path)"
+                                        @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
                                     >
                                         <td class="px-4 py-3" @click.stop>
                                             <Checkbox
@@ -346,6 +570,7 @@
                                         class="hover:bg-muted/30 cursor-pointer group"
                                         :class="{ 'bg-primary/5': isSelected(file.path) }"
                                         @click="viewFile(file)"
+                                        @contextmenu.prevent="(e) => showContextMenu(e, file, 'file')"
                                     >
                                         <td class="px-4 py-3" @click.stop>
                                             <Checkbox
@@ -425,6 +650,72 @@
             @created="handleFolderCreated"
             :path="currentPath"
         />
+
+        <!-- Context Menu -->
+        <Teleport to="body">
+            <div
+                v-if="contextMenu.show"
+                class="fixed z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95"
+                :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+                @click.stop
+            >
+                <!-- File-specific options -->
+                <template v-if="contextMenu.type === 'file'">
+                    <button
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('open')"
+                    >
+                        <Eye class="w-4 h-4" />
+                        Open / Preview
+                    </button>
+                    <button
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('download')"
+                    >
+                        <Download class="w-4 h-4" />
+                        Download
+                    </button>
+                    <div class="h-px bg-border my-1"></div>
+                </template>
+
+                <!-- Folder-specific options -->
+                <template v-if="contextMenu.type === 'folder'">
+                    <button
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('openFolder')"
+                    >
+                        <Folder class="w-4 h-4" />
+                        Open Folder
+                    </button>
+                    <div class="h-px bg-border my-1"></div>
+                </template>
+
+                <!-- Common options -->
+                <button
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('copyPath')"
+                >
+                    <Link class="w-4 h-4" />
+                    Copy Path
+                </button>
+                <button
+                    v-if="contextMenu.type === 'file'"
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('copyUrl')"
+                >
+                    <Copy class="w-4 h-4" />
+                    Copy URL
+                </button>
+                <div class="h-px bg-border my-1"></div>
+                <button
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
+                    @click="contextMenuAction('delete')"
+                >
+                    <Trash2 class="w-4 h-4" />
+                    Delete
+                </button>
+            </div>
+        </Teleport>
     </div>
 </template>
 
@@ -449,7 +740,20 @@ import {
     X,
     File,
     Image as ImageIcon,
-    File as FileIcon
+    File as FileIcon,
+    PanelLeft,
+    PanelLeftClose,
+    Copy,
+    ExternalLink,
+    Pencil,
+    ArrowRightLeft,
+    Eye,
+    Link,
+    ChevronRight,
+    ChevronDown,
+    FolderOpen,
+    RotateCcw,
+    AlertTriangle
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -483,13 +787,24 @@ const showCreateFolderModal = ref(false);
 const showImagePreview = ref(false);
 const previewImage = ref(null);
 const viewMode = ref('grid');
+
+// Trash/Recycle Bin state
+const showTrashView = ref(false);
+const trashItems = ref([]);
+const trashLoading = ref(false);
+const sidebarCollapsed = ref(localStorage.getItem('fileManagerSidebarCollapsed') === 'true');
 const contextMenu = ref({
     show: false,
     x: 0,
     y: 0,
     item: null,
-    type: null
+    type: null // 'file' or 'folder'
 });
+
+// Drag & Drop state
+const draggedItem = ref(null);
+const draggedType = ref(null);
+const dropTarget = ref(null);
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -523,6 +838,62 @@ const handlePerPageChange = (value) => {
 
 // Help
 const showHelp = ref(false);
+
+// Folder tree expanded state
+const expandedFolders = ref(new Set(['/'])); // Root is expanded by default
+
+// Build hierarchical folder tree from flat list
+const folderTree = computed(() => {
+    const tree = [];
+    const folderMap = new Map();
+    
+    // First, create a map of all folders
+    allFolders.value.forEach(folder => {
+        folderMap.set(folder.path, { ...folder, children: [] });
+    });
+    
+    // Then, build the tree structure
+    allFolders.value.forEach(folder => {
+        const parentPath = folder.path.substring(0, folder.path.lastIndexOf('/')) || '/';
+        const node = folderMap.get(folder.path);
+        
+        if (parentPath === '/') {
+            // Top level folder
+            tree.push(node);
+        } else {
+            // Child folder - add to parent's children
+            const parent = folderMap.get(parentPath);
+            if (parent) {
+                parent.children.push(node);
+            } else {
+                // Parent not in list yet, add to root
+                tree.push(node);
+            }
+        }
+    });
+    
+    // Sort folders alphabetically at each level
+    const sortFolders = (folders) => {
+        folders.sort((a, b) => a.name.localeCompare(b.name));
+        folders.forEach(f => sortFolders(f.children));
+    };
+    sortFolders(tree);
+    
+    return tree;
+});
+
+// Toggle folder expand/collapse
+const toggleFolderExpanded = (path) => {
+    if (expandedFolders.value.has(path)) {
+        expandedFolders.value.delete(path);
+    } else {
+        expandedFolders.value.add(path);
+    }
+    expandedFolders.value = new Set(expandedFolders.value); // Trigger reactivity
+};
+
+// Check if folder is expanded
+const isFolderExpanded = (path) => expandedFolders.value.has(path);
 
 const pathParts = computed(() => {
     if (currentPath.value === '/') return [];
@@ -799,10 +1170,65 @@ const closeContextMenu = () => {
     contextMenu.value.show = false;
 };
 
-const handleContextMenuAction = (action) => {
+// Toggle sidebar collapse state
+const toggleSidebar = () => {
+    sidebarCollapsed.value = !sidebarCollapsed.value;
+    localStorage.setItem('fileManagerSidebarCollapsed', sidebarCollapsed.value.toString());
+};
+
+// Show context menu at position
+const showContextMenu = (event, item, type) => {
+    event.preventDefault();
+    contextMenu.value = {
+        show: true,
+        x: event.clientX,
+        y: event.clientY,
+        item: item,
+        type: type
+    };
+};
+
+// Handle context menu action
+const contextMenuAction = async (action) => {
     const { item, type } = contextMenu.value;
     
     switch (action) {
+        case 'open':
+            if (type === 'file') {
+                viewFile(item);
+            }
+            break;
+        case 'openFolder':
+            if (type === 'folder') {
+                navigateToFolder(item.path);
+            }
+            break;
+        case 'download':
+            if (type === 'file' && item.url) {
+                const link = document.createElement('a');
+                link.href = item.url;
+                link.download = item.name;
+                link.target = '_blank';
+                link.click();
+            }
+            break;
+        case 'copyPath':
+            try {
+                await navigator.clipboard.writeText(item.path);
+                // Could show a toast notification here
+            } catch (err) {
+                console.error('Failed to copy path:', err);
+            }
+            break;
+        case 'copyUrl':
+            if (type === 'file' && item.url) {
+                try {
+                    await navigator.clipboard.writeText(item.url);
+                } catch (err) {
+                    console.error('Failed to copy URL:', err);
+                }
+            }
+            break;
         case 'delete':
             if (type === 'folder') {
                 deleteFolderAction(item);
@@ -810,18 +1236,94 @@ const handleContextMenuAction = (action) => {
                 deleteFileAction(item);
             }
             break;
-        case 'download':
-            if (type === 'file' && item.url) {
-                window.open(item.url, '_blank');
-            }
-            break;
-        case 'rename':
-            // TODO: Implement rename modal
-            alert('Rename functionality coming soon');
-            break;
     }
     
     closeContextMenu();
+};
+
+// Legacy handler (keeping for compatibility)
+const handleContextMenuAction = (action) => {
+    contextMenuAction(action);
+};
+
+// Drag & Drop handlers
+const onDragStart = (event, item, type) => {
+    draggedItem.value = item;
+    draggedType.value = type;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', JSON.stringify({ path: item.path, type }));
+    // Add dragging class
+    event.target.classList.add('opacity-50');
+};
+
+const onDragEnd = (event) => {
+    draggedItem.value = null;
+    draggedType.value = null;
+    dropTarget.value = null;
+    event.target.classList.remove('opacity-50');
+};
+
+const onDragOver = (event, folder) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    dropTarget.value = folder?.path || '/';
+};
+
+const onDragLeave = () => {
+    dropTarget.value = null;
+};
+
+const onDrop = async (event, targetFolder) => {
+    event.preventDefault();
+    dropTarget.value = null;
+    
+    if (!draggedItem.value) return;
+    
+    const source = draggedItem.value;
+    const sourceType = draggedType.value;
+    const destinationPath = targetFolder?.path || '/';
+    
+    // Don't drop on itself or its children
+    if (source.path === destinationPath || destinationPath.startsWith(source.path + '/')) {
+        return;
+    }
+    
+    // Don't move to the same parent folder
+    const sourceParent = source.path.substring(0, source.path.lastIndexOf('/')) || '/';
+    if (sourceParent === destinationPath) {
+        return;
+    }
+    
+    try {
+        await moveItem(source.path, destinationPath, sourceType);
+    } catch (error) {
+        console.error('Failed to move item:', error);
+        alert(t('features.file_manager.messages.moveFailed') || 'Failed to move item');
+    }
+    
+    draggedItem.value = null;
+    draggedType.value = null;
+};
+
+const moveItem = async (sourcePath, destinationPath, type) => {
+    try {
+        await api.post('/admin/cms/file-manager/move', {
+            source: sourcePath.replace(/^\//, ''),
+            destination: destinationPath === '/' ? '' : destinationPath.replace(/^\//, ''),
+            type: type
+        });
+        
+        // Clear cache to force fresh data
+        filesCache.value.clear();
+        allFolders.value = [];
+        
+        // Refresh the file list and current view
+        await fetchFiles();
+        await fetchCurrentPath();
+        
+    } catch (error) {
+        throw error;
+    }
 };
 
 const deleteFolderAction = async (folder) => {
@@ -977,6 +1479,74 @@ const formatFileSize = (bytes) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
+
+// ==================== TRASH / RECYCLE BIN FUNCTIONS ====================
+
+// Fetch trash items
+const fetchTrash = async () => {
+    trashLoading.value = true;
+    try {
+        const response = await api.get('/admin/cms/file-manager/trash');
+        const data = parseSingleResponse(response.data);
+        trashItems.value = data.items || [];
+    } catch (error) {
+        console.error('Failed to fetch trash:', error);
+        trashItems.value = [];
+    } finally {
+        trashLoading.value = false;
+    }
+};
+
+// Restore item from trash
+const restoreItem = async (item) => {
+    try {
+        await api.post('/admin/cms/file-manager/restore', { id: item.id });
+        // Refresh trash and files
+        await fetchTrash();
+        filesCache.value.clear();
+        allFolders.value = [];
+        await fetchFiles();
+        await fetchCurrentPath();
+    } catch (error) {
+        console.error('Failed to restore item:', error);
+        alert('Failed to restore item');
+    }
+};
+
+// Empty entire trash
+const emptyTrash = async () => {
+    if (!confirm('Are you sure you want to permanently delete all items in trash? This action cannot be undone.')) {
+        return;
+    }
+    try {
+        await api.delete('/admin/cms/file-manager/trash');
+        trashItems.value = [];
+    } catch (error) {
+        console.error('Failed to empty trash:', error);
+        alert('Failed to empty trash');
+    }
+};
+
+// Permanently delete item from trash
+const deleteFromTrash = async (item) => {
+    if (!confirm(`Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`)) {
+        return;
+    }
+    try {
+        await api.delete('/admin/cms/file-manager/trash/permanent', { data: { id: item.id } });
+        await fetchTrash();
+    } catch (error) {
+        console.error('Failed to delete item:', error);
+        alert('Failed to delete item');
+    }
+};
+
+// Watch for trash view toggle
+watch(showTrashView, (newVal) => {
+    if (newVal) {
+        fetchTrash();
+    }
+});
 
 // Close context menu when clicking outside
 const handleClickOutside = () => {
