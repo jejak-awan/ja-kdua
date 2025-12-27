@@ -156,26 +156,15 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="history.length > 0" class="px-6 py-4 border-t border-border flex items-center justify-between">
-                <p class="text-sm text-muted-foreground">
-                    {{ t('features.login_history.pagination.showing', { count: history.length, total: totalRecords }) }}
-                </p>
-                <div class="flex items-center gap-2">
-                    <Select
-                        :model-value="String(perPage)"
-                        @update:model-value="perPage = Number($event); fetchHistory()"
-                    >
-                        <SelectTrigger class="w-[80px]">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="25">25</SelectItem>
-                            <SelectItem value="50">50</SelectItem>
-                            <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+            <Pagination
+                v-if="totalRecords > 0"
+                :current-page="currentPage"
+                :total-items="totalRecords"
+                :per-page="perPage"
+                @page-change="fetchHistory"
+                @update:per-page="(val) => { perPage = val; fetchHistory(1); }"
+                class="border-none shadow-none"
+            />
         </div>
     </div>
 </template>
@@ -185,6 +174,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import Button from '../../../components/ui/button.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
 import Select from '../../../components/ui/select.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
@@ -204,12 +194,15 @@ const statusFilter = ref('');
 const dateFrom = ref('');
 const dateTo = ref('');
 const perPage = ref(25);
+const currentPage = ref(1);
 const totalRecords = ref(0);
 
-const fetchHistory = async () => {
+const fetchHistory = async (page = 1) => {
+    currentPage.value = page;
     loading.value = true;
     try {
         const params = new URLSearchParams();
+        params.append('page', page);
         params.append('per_page', perPage.value);
         if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
         if (statusFilter.value && statusFilter.value !== 'all') params.append('status', statusFilter.value);

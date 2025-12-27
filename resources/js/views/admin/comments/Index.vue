@@ -300,31 +300,15 @@
             </Card>
 
             <!-- Pagination -->
-            <Card v-if="pagination && pagination.last_page > 1" class="p-4 flex items-center justify-between">
-                <div class="text-xs text-muted-foreground">
-                    {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
-                </div>
-                <div class="flex space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="changePage(pagination.current_page - 1)"
-                        :disabled="pagination.current_page === 1"
-                    >
-                        <ChevronLeft class="w-4 h-4 mr-1" />
-                        {{ $t('common.pagination.previous') }}
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="changePage(pagination.current_page + 1)"
-                        :disabled="pagination.current_page === pagination.last_page"
-                    >
-                        {{ $t('common.pagination.next') }}
-                        <ChevronRight class="w-4 h-4 ml-1" />
-                    </Button>
-                </div>
-            </Card>
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page || 10)"
+                @page-change="changePage"
+                @update:per-page="(val) => { if(pagination) { pagination.per_page = val; pagination.current_page = 1; fetchComments(); } }"
+                class="border-none shadow-none mt-4"
+            />
         </div>
     </div>
 </template>
@@ -335,6 +319,7 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Select from '../../../components/ui/select.vue';
@@ -411,6 +396,7 @@ const fetchComments = async () => {
     try {
         const params = {
             page: pagination.value?.current_page || 1,
+            per_page: pagination.value?.per_page || 10,
         };
 
         if (statusFilter.value) {

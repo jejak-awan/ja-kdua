@@ -162,29 +162,15 @@
             </table>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.last_page > 1" class="px-6 py-4 border-t border-border flex items-center justify-between">
-                <div class="text-sm text-foreground">
-                    {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
-                </div>
-                <div class="flex space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="changePage(pagination.current_page - 1)"
-                        :disabled="pagination.current_page === 1"
-                    >
-                        {{ $t('common.pagination.previous') }}
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="changePage(pagination.current_page + 1)"
-                        :disabled="pagination.current_page === pagination.last_page"
-                    >
-                        {{ $t('common.pagination.next') }}
-                    </Button>
-                </div>
-            </div>
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page || 10)"
+                @page-change="changePage"
+                @update:per-page="(val) => { if(pagination) { pagination.per_page = val; pagination.current_page = 1; fetchUsers(); } }"
+                class="border-none shadow-none mt-4"
+            />
         </div>
 
         <!-- Create/Edit Modal Removed -->
@@ -199,6 +185,7 @@ import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import toast from '../../../services/toast';
 import Button from '../../../components/ui/button.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
@@ -215,6 +202,7 @@ const fetchUsers = async () => {
     try {
         const params = {
             page: pagination.value?.current_page || 1,
+            per_page: pagination.value?.per_page || 10,
         };
 
         if (search.value) {

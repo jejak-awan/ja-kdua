@@ -246,55 +246,14 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.total > 0" class="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4 text-xs text-muted-foreground">
-                     <p>
-                        {{ $t('common.pagination.showing', { 
-                            from: (pagination.current_page - 1) * pagination.per_page + 1,
-                            to: Math.min(pagination.current_page * pagination.per_page, pagination.total),
-                            total: pagination.total 
-                        }) }}
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <span>{{ $t('common.pagination.rowsPerPage') }}</span>
-                        <Select
-                            v-model="perPage"
-                            @update:model-value="fetchContents(1)"
-                        >
-                            <SelectTrigger class="w-[70px] h-8 text-xs">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="5">5</SelectItem>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="15">15</SelectItem>
-                                <SelectItem value="20">20</SelectItem>
-                                <SelectItem value="50">50</SelectItem>
-                                <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === 1"
-                        @click="fetchContents(pagination.current_page - 1)"
-                    >
-                        {{ $t('common.pagination.previous') }}
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === pagination.last_page"
-                        @click="fetchContents(pagination.current_page + 1)"
-                    >
-                        {{ $t('common.pagination.next') }}
-                    </Button>
-                </div>
-            </div>
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(perPage)"
+                @page-change="fetchContents"
+                @update:per-page="(val) => { perPage = String(val); fetchContents(1); }"
+            />
         </Card>
     </div>
 </template>
@@ -323,6 +282,7 @@ import TableCell from '@/components/ui/table-cell.vue';
 import TableHead from '@/components/ui/table-head.vue';
 import TableHeader from '@/components/ui/table-header.vue';
 import TableRow from '@/components/ui/table-row.vue';
+import Pagination from '@/components/ui/pagination.vue';
 import { 
     Plus, 
     LayoutTemplate, 

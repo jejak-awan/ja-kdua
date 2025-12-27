@@ -153,27 +153,15 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.last_page > 1" class="mt-6 flex justify-center">
-                <div class="flex space-x-2">
-                    <button
-                        @click="loadPage(pagination.current_page - 1)"
-                        :disabled="!pagination.prev_page_url"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {{ t('common.actions.prev') }}
-                    </button>
-                    <span class="px-3 py-2 text-sm text-foreground">
-                        Page {{ pagination.current_page }} of {{ pagination.last_page }}
-                    </span>
-                    <button
-                        @click="loadPage(pagination.current_page + 1)"
-                        :disabled="!pagination.next_page_url"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {{ t('common.actions.next') }}
-                    </button>
-                </div>
-            </div>
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page || 15)"
+                @page-change="loadPage"
+                @update:per-page="(val) => { if(pagination) { pagination.per_page = val; loadPage(1); } }"
+                class="border-none shadow-none mt-6"
+            />
 
             <!-- Submission Detail Modal -->
             <div
@@ -234,6 +222,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import Pagination from '../../../components/ui/pagination.vue';
 
 const { t } = useI18n();
 
@@ -261,6 +250,7 @@ const fetchSubmissions = async (page = 1) => {
         loading.value = true;
         const params = {
             page,
+            per_page: pagination.value?.per_page || 15,
             ...(statusFilter.value && { status: statusFilter.value }),
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })

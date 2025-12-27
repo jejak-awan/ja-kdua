@@ -146,48 +146,16 @@
                     </Table>
                 </div>
             </CardContent>
-             <CardFooter class="flex flex-col sm:flex-row items-center justify-between border-t border-border py-4 gap-4">
-                <div class="flex items-center gap-2 text-sm text-muted-foreground order-2 sm:order-1">
-                    <span>{{ $t('common.pagination.show') }}</span>
-                    <Select 
-                        :model-value="pagination.per_page ? pagination.per_page.toString() : '10'" 
-                        @update:model-value="(val) => changePerPage(val)"
-                    >
-                        <SelectTrigger class="h-8 w-[70px]">
-                            <SelectValue :placeholder="pagination.per_page" />
-                        </SelectTrigger>
-                        <SelectContent side="top">
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="25">25</SelectItem>
-                            <SelectItem value="50">50</SelectItem>
-                            <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <span>{{ $t('common.pagination.entries') }}</span>
-                </div>
-                
-                <div class="flex items-center gap-2 order-1 sm:order-2">
-                    <div class="text-xs text-muted-foreground mr-2">
-                        {{ pagination.from }} - {{ pagination.to }} {{ $t('common.pagination.of') }} {{ pagination.total }}
-                    </div>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === 1 || loading"
-                        @click="changePage(pagination.current_page - 1)"
-                    >
-                        {{ $t('common.pagination.previous') }}
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === pagination.last_page || loading"
-                        @click="changePage(pagination.current_page + 1)"
-                    >
-                        {{ $t('common.pagination.next') }}
-                    </Button>
-                </div>
-            </CardFooter>
+            <Pagination
+                v-if="pagination"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page)"
+                :show-page-numbers="true"
+                @page-change="changePage"
+                @update:per-page="changePerPage"
+                class="border-none shadow-none mt-4"
+            />
         </Card>
     </div>
 </template>
@@ -216,7 +184,7 @@ import Checkbox from '@/components/ui/checkbox.vue';
 import Card from '@/components/ui/card.vue';
 import CardHeader from '@/components/ui/card-header.vue';
 import CardContent from '@/components/ui/card-content.vue';
-import CardFooter from '@/components/ui/card-footer.vue';
+import Pagination from '@/components/ui/pagination.vue';
 import Table from '@/components/ui/table.vue';
 import TableBody from '@/components/ui/table-body.vue';
 import TableCell from '@/components/ui/table-cell.vue';
@@ -238,10 +206,11 @@ const search = ref('');
 const statusFilter = ref('all');
 const selectedIds = ref([]);
 const expandedIds = ref([]); // Track expanded nodes
+const perPage = ref(5);
 const pagination = ref({
     current_page: 1,
     last_page: 1,
-    per_page: 10,
+    per_page: 5,
     total: 0,
     from: 0,
     to: 0
@@ -345,8 +314,8 @@ const fetchCategories = async (page = 1) => {
              pagination.value = {
                  current_page: meta.current_page || 1,
                  last_page: meta.last_page || 1,
-                 per_page: meta.per_page || 10,
-                 total: meta.total || 0,
+                 per_page: meta.per_page || 5,
+                 total: meta.total || categories.value.length || 0,
                  from: meta.from || 0,
                  to: meta.to || 0
              };

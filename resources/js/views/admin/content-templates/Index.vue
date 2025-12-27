@@ -153,51 +153,15 @@
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="pagination && pagination.total > 0" class="px-6 py-4 border-t-0 bg-transparent flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-4 text-xs text-muted-foreground">
-                        <p>
-                            {{ t('common.pagination.showing') }} {{ (pagination.current_page - 1) * pagination.per_page + 1 }} - {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} {{ t('common.pagination.of') }} {{ pagination.total }}
-                        </p>
-                        <div class="flex items-center gap-2">
-                            <span>{{ t('common.pagination.rowsPerPage') }}</span>
-                            <Select
-                                v-model="perPage"
-                                @update:model-value="fetchTemplates(1)"
-                            >
-                                <SelectTrigger class="w-[70px] h-8 text-xs bg-muted/50 border-0">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="5">5</SelectItem>
-                                    <SelectItem value="10">10</SelectItem>
-                                    <SelectItem value="20">20</SelectItem>
-                                    <SelectItem value="50">50</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            :disabled="pagination.current_page === 1"
-                            @click="fetchTemplates(pagination.current_page - 1)"
-                            class="hover:bg-muted/50"
-                        >
-                            {{ t('common.pagination.previous') }}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            :disabled="pagination.current_page === pagination.last_page"
-                            @click="fetchTemplates(pagination.current_page + 1)"
-                            class="hover:bg-muted/50"
-                        >
-                            {{ t('common.pagination.next') }}
-                        </Button>
-                    </div>
-                </div>
+                <Pagination
+                    v-if="pagination && pagination.total > 0"
+                    :current-page="pagination.current_page"
+                    :total-items="pagination.total"
+                    :per-page="Number(perPage)"
+                    @page-change="fetchTemplates"
+                    @update:per-page="(val) => { perPage = String(val); fetchTemplates(1); }"
+                    class="border-none shadow-none mt-4 px-6 py-4"
+                />
             </CardContent>
         </Card>
     </div>
@@ -213,6 +177,7 @@ import { debounce } from 'lodash';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardContent from '../../../components/ui/card-content.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Table from '../../../components/ui/table.vue';

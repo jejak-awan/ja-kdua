@@ -266,32 +266,15 @@
                     </div>
                 </CardContent>
                 <!-- Pagination -->
-                <div class="px-6 py-4 border-t flex items-center justify-between">
-                    <div class="text-sm text-muted-foreground">
-                        {{ $t('common.pagination.showing') }} {{ logsStartIndex + 1 }} - {{ logsEndIndex }} {{ $t('common.pagination.of') }} {{ filteredLogs.length }}
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            :disabled="logsCurrentPage === 1"
-                            @click="logsCurrentPage--"
-                        >
-                            {{ $t('common.actions.previous') }}
-                        </Button>
-                        <Badge variant="secondary" class="h-8">
-                            {{ logsCurrentPage }} / {{ logsTotalPages }}
-                        </Badge>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            :disabled="logsCurrentPage >= logsTotalPages"
-                            @click="logsCurrentPage++"
-                        >
-                            {{ $t('common.actions.next') }}
-                        </Button>
-                    </div>
-                </div>
+                <Pagination
+                    v-if="filteredLogs.length > 0"
+                    :current-page="logsCurrentPage"
+                    :total-items="filteredLogs.length"
+                    :per-page="Number(logsPerPage)"
+                    @page-change="(val) => logsCurrentPage = val"
+                    @update:per-page="(val) => { logsPerPage = val; logsCurrentPage = 1; }"
+                    class="border-none shadow-none px-6 py-4"
+                />
             </Card>
             </TabsContent>
 
@@ -393,32 +376,15 @@
                         </div>
                     </CardContent>
                     <!-- Pagination -->
-                    <div class="px-6 py-4 border-t flex items-center justify-between">
-                        <div class="text-sm text-muted-foreground">
-                            {{ $t('common.pagination.showing') }} {{ blocklistStartIndex + 1 }} - {{ blocklistEndIndex }} {{ $t('common.pagination.of') }} {{ blocklist.length }}
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                :disabled="blocklistCurrentPage === 1"
-                                @click="blocklistCurrentPage--"
-                            >
-                                {{ $t('common.actions.previous') }}
-                            </Button>
-                            <Badge variant="secondary" class="h-8">
-                                {{ blocklistCurrentPage }} / {{ blocklistTotalPages }}
-                            </Badge>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                :disabled="blocklistCurrentPage >= blocklistTotalPages"
-                                @click="blocklistCurrentPage++"
-                            >
-                                {{ $t('common.actions.next') }}
-                            </Button>
-                        </div>
-                    </div>
+                    <Pagination
+                        v-if="blocklist.length > 0"
+                        :current-page="blocklistCurrentPage"
+                        :total-items="blocklist.length"
+                        :per-page="Number(blocklistPerPage)"
+                        @page-change="(val) => blocklistCurrentPage = val"
+                        @update:per-page="(val) => { blocklistPerPage = val; blocklistCurrentPage = 1; }"
+                        class="border-none shadow-none px-6 py-4"
+                    />
                 </Card>
             </TabsContent>
 
@@ -528,32 +494,15 @@
                         </div>
                     </CardContent>
                     <!-- Pagination -->
-                    <div class="px-6 py-4 border-t flex items-center justify-between">
-                        <div class="text-sm text-muted-foreground">
-                            {{ $t('common.pagination.showing') }} {{ whitelistStartIndex + 1 }} - {{ whitelistEndIndex }} {{ $t('common.pagination.of') }} {{ whitelist.length }}
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                :disabled="whitelistCurrentPage === 1"
-                                @click="whitelistCurrentPage--"
-                            >
-                                {{ $t('common.actions.previous') }}
-                            </Button>
-                            <Badge variant="secondary" class="h-8">
-                                {{ whitelistCurrentPage }} / {{ whitelistTotalPages }}
-                            </Badge>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                :disabled="whitelistCurrentPage >= whitelistTotalPages"
-                                @click="whitelistCurrentPage++"
-                            >
-                                {{ $t('common.actions.next') }}
-                            </Button>
-                        </div>
-                    </div>
+                    <Pagination
+                        v-if="whitelist.length > 0"
+                        :current-page="whitelistCurrentPage"
+                        :total-items="whitelist.length"
+                        :per-page="Number(whitelistPerPage)"
+                        @page-change="(val) => whitelistCurrentPage = val"
+                        @update:per-page="(val) => { whitelistPerPage = val; whitelistCurrentPage = 1; }"
+                        class="border-none shadow-none px-6 py-4"
+                    />
                 </Card>
             </TabsContent>
         </Tabs>
@@ -574,6 +523,7 @@ import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
 import CardDescription from '../../../components/ui/card-description.vue';
 import CardContent from '../../../components/ui/card-content.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Label from '../../../components/ui/label.vue';

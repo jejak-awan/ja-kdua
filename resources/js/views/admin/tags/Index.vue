@@ -161,48 +161,15 @@
             </CardContent>
             
             <!-- Pagination -->
-            <CardFooter class="flex flex-col sm:flex-row items-center justify-between border-t border-border py-4 gap-4">
-                <div class="flex items-center gap-2 text-sm text-muted-foreground order-2 sm:order-1">
-                    <span>{{ $t('common.pagination.show') }}</span>
-                    <Select 
-                        :model-value="pagination.per_page ? pagination.per_page.toString() : '20'" 
-                        @update:model-value="(val) => changePerPage(val)"
-                    >
-                        <SelectTrigger class="h-8 w-[70px]">
-                            <SelectValue :placeholder="pagination.per_page" />
-                        </SelectTrigger>
-                        <SelectContent side="top">
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="20">20</SelectItem>
-                            <SelectItem value="50">50</SelectItem>
-                            <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <span>{{ $t('common.pagination.entries') }}</span>
-                </div>
-                
-                <div class="flex items-center space-x-2 order-1 sm:order-2">
-                    <div class="text-xs text-muted-foreground mr-2">
-                        {{ pagination.from }} - {{ pagination.to }} {{ $t('common.pagination.of') }} {{ pagination.total }}
-                    </div>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === 1 || loading"
-                        @click="changePage(pagination.current_page - 1)"
-                    >
-                        {{ $t('common.pagination.previous') }}
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        :disabled="pagination.current_page === pagination.last_page || loading"
-                        @click="changePage(pagination.last_page || pagination.current_page + 1)"
-                    >
-                        {{ $t('common.pagination.next') }}
-                    </Button>
-                </div>
-            </CardFooter>
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(pagination.per_page)"
+                @page-change="changePage"
+                @update:per-page="changePerPage"
+                class="border-none shadow-none"
+            />
         </Card>
     </div>
 </template>
@@ -233,7 +200,7 @@ import Checkbox from '@/components/ui/checkbox.vue';
 import Card from '@/components/ui/card.vue';
 import CardHeader from '@/components/ui/card-header.vue';
 import CardContent from '@/components/ui/card-content.vue';
-import CardFooter from '@/components/ui/card-footer.vue';
+import Pagination from '@/components/ui/pagination.vue';
 import Table from '@/components/ui/table.vue';
 import TableBody from '@/components/ui/table-body.vue';
 import TableCell from '@/components/ui/table-cell.vue';

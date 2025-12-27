@@ -183,7 +183,7 @@
                 <p class="text-muted-foreground">{{ t('features.activityLogs.messages.empty') }}</p>
             </div>
 
-            <div v-else class="divide-y divide-border">
+            <div v-if="filteredLogs.length > 0" class="divide-y divide-border">
                 <div
                     v-for="log in filteredLogs"
                     :key="log.id"
@@ -218,6 +218,17 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pagination -->
+            <Pagination
+                v-if="pagination && pagination.total > 0"
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="Number(perPage)"
+                @page-change="fetchLogs"
+                @update:per-page="(val) => { perPage = val; fetchLogs(1); }"
+                class="border-none shadow-none mt-4 px-6 py-4"
+            />
         </div>
     </div>
 </template>
@@ -226,7 +237,9 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Button from '../../../components/ui/button.vue';
+import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
 import Badge from '../../../components/ui/badge.vue';
 import Select from '../../../components/ui/select.vue';
@@ -248,6 +261,7 @@ const dateFrom = ref('');
 const dateTo = ref('');
 const ipFilter = ref('');
 const perPage = ref(25);
+const pagination = ref(null);
 const sortField = ref('created_at');
 const sortOrder = ref('desc');
 const exporting = ref(false);
@@ -272,50 +286,39 @@ const filteredLogs = computed(() => {
     return filtered;
 });
 
-const fetchLogs = async () => {
+const fetchLogs = async (page = 1) => {
     loading.value = true;
     try {
         // Build query params for server-side filtering
-        const params = new URLSearchParams();
-        params.append('per_page', perPage.value);
+        const params = {
+            page,
+            per_page: perPage.value
+        };
         
-        if (typeFilter.value && typeFilter.value !== 'all') params.append('action', typeFilter.value);
-        if (userFilter.value && userFilter.value !== 'all') params.append('user_id', userFilter.value);
-        if (dateFrom.value) params.append('date_from', dateFrom.value);
-        if (dateTo.value) params.append('date_to', dateTo.value);
+        if (typeFilter.value && typeFilter.value !== 'all') params.action = typeFilter.value;
+        if (userFilter.value && userFilter.value !== 'all') params.user_id = userFilter.value;
+        if (dateFrom.value) params.date_from = dateFrom.value;
+        if (dateTo.value) params.date_to = dateTo.value;
+        if (search.value) params.search = search.value;
         
-        const response = await api.get(`/admin/cms/activity-logs?${params.toString()}`);
+        const response = await api.get('/admin/cms/activity-logs', { params });
+        const { data, pagination: pag } = parseResponse(response);
         
-        // API response structure: { success: true, data: { data: [...items], current_page, ... } }
-        let data = [];
-        if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-            data = response.data.data.data;
-        } else if (response.data?.data && Array.isArray(response.data.data)) {
-            data = response.data.data;
-        } else if (Array.isArray(response.data)) {
-            data = response.data;
-        }
-        logs.value = data;
+        logs.value = ensureArray(data);
+        pagination.value = pag;
         
-        // Fetch statistics
+        // Fetch statistics (only on first load or if needed)
         try {
             const statsResponse = await api.get('/admin/cms/activity-logs/statistics');
             statistics.value = statsResponse.data?.data || statsResponse.data;
         } catch (error) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            
-            if (Array.isArray(logs.value)) {
-                statistics.value = {
-                    total: logs.value.length,
-                    today: logs.value.filter(l => l?.created_at && new Date(l.created_at) >= today).length,
-                    this_week: logs.value.filter(l => l?.created_at && new Date(l.created_at) >= weekAgo).length,
-                    active_users: new Set(logs.value.map(l => l?.user_id).filter(Boolean)).size,
-                };
-            } else {
-                statistics.value = { total: 0, today: 0, this_week: 0, active_users: 0 };
-            }
+            // Fallback stats if endpoint fails
+            statistics.value = {
+                total: pagination.value?.total || logs.value.length,
+                today: 0,
+                this_week: 0,
+                active_users: 0
+            };
         }
     } catch (error) {
         console.error('Failed to fetch activity logs:', error);
