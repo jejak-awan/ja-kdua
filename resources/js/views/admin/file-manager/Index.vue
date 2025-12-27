@@ -438,14 +438,14 @@
                         <p>{{ $t('features.file_manager.messages.loading') }}</p>
                     </div>
 
-                    <div v-else-if="filteredFolders.length === 0 && filteredFiles.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full">
+                    <div v-else-if="filteredFolders.length === 0 && filteredFiles.length === 0" class="flex flex-col items-center justify-center p-12 text-muted-foreground h-full" @contextmenu.prevent="showBackgroundContextMenu">
                         <FolderPlus class="w-12 h-12 mb-4 opacity-20" />
                         <p>{{ $t('features.file_manager.messages.noFiles') }}</p>
                     </div>
 
                     <div v-else>
                         <!-- Grid View -->
-                        <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+                        <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4" @contextmenu.prevent="showBackgroundContextMenu">
                             <!-- Folders -->
                             <div
                                 v-for="folder in paginatedFolders"
@@ -457,7 +457,7 @@
                                 }"
                                 draggable="true"
                                 @click="navigateToFolder(folder.path)"
-                                @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
+                                @contextmenu.prevent.stop="(e) => showContextMenu(e, folder, 'folder')"
                                 @dragstart="(e) => onDragStart(e, folder, 'folder')"
                                 @dragend="onDragEnd"
                                 @dragover.prevent="(e) => onDragOver(e, folder)"
@@ -488,7 +488,7 @@
                                 :class="{ 'ring-2 ring-primary border-primary': isSelected(file.path) }"
                                 draggable="true"
                                 @click="viewFile(file)"
-                                @contextmenu.prevent="(e) => showContextMenu(e, file, 'file')"
+                                @contextmenu.prevent.stop="(e) => showContextMenu(e, file, 'file')"
                                 @dragstart="(e) => onDragStart(e, file, 'file')"
                                 @dragend="onDragEnd"
                             >
@@ -520,7 +520,7 @@
                         </div>
 
                         <!-- List View -->
-                        <div v-else class="min-w-full">
+                        <div v-else class="min-w-full" @contextmenu.prevent="showBackgroundContextMenu">
                             <table class="w-full text-sm item-center">
                                 <thead class="bg-muted/50 text-muted-foreground font-medium border-b border-border">
                                     <tr>
@@ -544,7 +544,7 @@
                                         class="hover:bg-muted/30 cursor-pointer group"
                                         :class="{ 'bg-primary/5': isSelected(folder.path) }"
                                         @click="navigateToFolder(folder.path)"
-                                        @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
+                                        @contextmenu.prevent.stop="(e) => showContextMenu(e, folder, 'folder')"
                                     >
                                         <td class="px-4 py-3" @click.stop>
                                             <Checkbox
@@ -570,7 +570,7 @@
                                         class="hover:bg-muted/30 cursor-pointer group"
                                         :class="{ 'bg-primary/5': isSelected(file.path) }"
                                         @click="viewFile(file)"
-                                        @contextmenu.prevent="(e) => showContextMenu(e, file, 'file')"
+                                        @contextmenu.prevent.stop="(e) => showContextMenu(e, file, 'file')"
                                     >
                                         <td class="px-4 py-3" @click.stop>
                                             <Checkbox
@@ -655,7 +655,9 @@
         <Teleport to="body">
             <div
                 v-if="contextMenu.show"
-                class="fixed z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95"
+                ref="contextMenuRef"
+                class="fixed z-50 min-w-[180px] bg-popover border border-border rounded-lg shadow-lg py-1 animate-in fade-in zoom-in-95 max-h-[calc(100vh-20px)] overflow-y-auto"
+                :class="{ 'invisible': contextMenu.invisible }"
                 :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
                 @click.stop
             >
@@ -706,8 +708,52 @@
                     <Copy class="w-4 h-4" />
                     Copy URL
                 </button>
+                
+                <!-- Extract option for archive files -->
+                <button
+                    v-if="contextMenu.type === 'file' && isArchive(contextMenu.item)"
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('extract')"
+                >
+                    <PackageOpen class="w-4 h-4" />
+                    Extract Here
+                </button>
+                
+                <!-- Compress option for files and folders -->
+                <button
+                    v-if="contextMenu.type !== 'background'"
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('compress')"
+                >
+                    <Archive class="w-4 h-4" />
+                    Compress to ZIP
+                </button>
+                
+                <div class="h-px bg-border my-1"></div>
+
+                <!-- Copy option -->
+                <button
+                    v-if="contextMenu.type !== 'background'"
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('copy')"
+                >
+                    <Clipboard class="w-4 h-4" />
+                    Copy
+                </button>
+
+                <!-- Paste option (only for folders or background) -->
+                <button
+                    v-if="(contextMenu.type === 'folder' || contextMenu.type === 'background') && clipboardCount > 0"
+                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                    @click="contextMenuAction('paste')"
+                >
+                    <ClipboardPaste class="w-4 h-4" />
+                    Paste ({{ clipboardCount }})
+                </button>
+
                 <div class="h-px bg-border my-1"></div>
                 <button
+                    v-if="contextMenu.type !== 'background'"
                     class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
                     @click="contextMenuAction('delete')"
                 >
@@ -720,7 +766,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseSingleResponse } from '../../../utils/responseParser';
@@ -753,7 +799,11 @@ import {
     ChevronDown,
     FolderOpen,
     RotateCcw,
-    AlertTriangle
+    AlertTriangle,
+    Archive,
+    PackageOpen,
+    Clipboard,
+    ClipboardPaste
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -792,6 +842,13 @@ const viewMode = ref('grid');
 const showTrashView = ref(false);
 const trashItems = ref([]);
 const trashLoading = ref(false);
+
+// Clipboard state (for copy/paste)
+const clipboard = ref({
+    items: [], // array of { path, type }
+    action: 'copy' // 'copy' or 'move'
+});
+const clipboardCount = computed(() => clipboard.value.items.length);
 const sidebarCollapsed = ref(localStorage.getItem('fileManagerSidebarCollapsed') === 'true');
 const contextMenu = ref({
     show: false,
@@ -894,6 +951,13 @@ const toggleFolderExpanded = (path) => {
 
 // Check if folder is expanded
 const isFolderExpanded = (path) => expandedFolders.value.has(path);
+
+// Check if file is an archive (zip, tar, tar.gz, tgz)
+const isArchive = (file) => {
+    if (!file || !file.extension) return false;
+    const ext = file.extension.toLowerCase();
+    return ['zip', 'tar', 'gz', 'tgz'].includes(ext);
+};
 
 const pathParts = computed(() => {
     if (currentPath.value === '/') return [];
@@ -1144,26 +1208,62 @@ const closeImagePreview = () => {
     previewImage.value = null;
 };
 
-const showFolderContextMenu = (event, folder) => {
+const contextMenuRef = ref(null);
+
+const setContextMenuPosition = async (event, item, type) => {
     event.preventDefault();
+    event.stopPropagation();
+    
+    // Initial position (hidden for measurement)
     contextMenu.value = {
         show: true,
         x: event.clientX,
         y: event.clientY,
-        item: folder,
-        type: 'folder',
+        item: item,
+        type: type,
+        invisible: true // Add this flag
     };
+
+    await nextTick();
+
+    if (contextMenuRef.value) {
+        const menuEl = contextMenuRef.value;
+        const rect = menuEl.getBoundingClientRect();
+        const winWidth = document.documentElement.clientWidth;
+        const winHeight = document.documentElement.clientHeight;
+        const buffer = 10;
+
+        let x = event.clientX;
+        let y = event.clientY;
+
+        // Check right edge
+        if (x + rect.width + buffer > winWidth) {
+            // Flip to left of cursor
+            x -= rect.width;
+        }
+
+        // Check bottom edge
+        if (y + rect.height + buffer > winHeight) {
+            // Flip to above cursor
+            y -= rect.height;
+        }
+
+        // Ensure not going off top-left
+        if (x < buffer) x = buffer;
+        if (y < buffer) y = buffer;
+
+        contextMenu.value.x = x;
+        contextMenu.value.y = y;
+        contextMenu.value.invisible = false;
+    }
+};
+
+const showFolderContextMenu = (event, folder) => {
+    setContextMenuPosition(event, folder, 'folder');
 };
 
 const showFileContextMenu = (event, file) => {
-    event.preventDefault();
-    contextMenu.value = {
-        show: true,
-        x: event.clientX,
-        y: event.clientY,
-        item: file,
-        type: 'file',
-    };
+    setContextMenuPosition(event, file, 'file');
 };
 
 const closeContextMenu = () => {
@@ -1178,14 +1278,7 @@ const toggleSidebar = () => {
 
 // Show context menu at position
 const showContextMenu = (event, item, type) => {
-    event.preventDefault();
-    contextMenu.value = {
-        show: true,
-        x: event.clientX,
-        y: event.clientY,
-        item: item,
-        type: type
-    };
+    setContextMenuPosition(event, item, type);
 };
 
 // Handle context menu action
@@ -1229,6 +1322,25 @@ const contextMenuAction = async (action) => {
                 }
             }
             break;
+        case 'extract':
+            if (type === 'file') {
+                await extractFile(item);
+            }
+            break;
+        case 'compress':
+            await compressItems([item.path]);
+            break;
+        case 'copy':
+            copyToClipboard([item], 'copy');
+            break;
+        case 'paste':
+            // Paste into the target folder
+            if (type === 'folder') {
+                await pasteFromClipboard(item.path);
+            } else if (type === 'background') {
+                await pasteFromClipboard(currentPath.value);
+            }
+            break;
         case 'delete':
             if (type === 'folder') {
                 deleteFolderAction(item);
@@ -1239,6 +1351,99 @@ const contextMenuAction = async (action) => {
     }
     
     closeContextMenu();
+};
+
+const showBackgroundContextMenu = (event) => {
+    setContextMenuPosition(event, null, 'background');
+};
+
+const extractFile = async (file) => {
+    loading.value = true;
+    try {
+        await api.post('/admin/cms/file-manager/extract', {
+            path: file.path
+        });
+        
+        // Refresh to show extracted contents
+        filesCache.value.clear();
+        allFolders.value = [];
+        await fetchFiles();
+        await fetchCurrentPath();
+        
+        // Optional: show success message
+    } catch (error) {
+        console.error('Failed to extract file:', error);
+        alert('Failed to extract archive');
+    } finally {
+        loading.value = false;
+    }
+};
+
+const compressItems = async (paths) => {
+    loading.value = true;
+    try {
+        await api.post('/admin/cms/file-manager/compress', {
+            paths: paths
+        });
+        
+        // Refresh to show new archive
+        filesCache.value.clear();
+        await fetchFiles();
+        await fetchCurrentPath();
+        
+    } catch (error) {
+        console.error('Failed to compress items:', error);
+        alert('Failed to compress items');
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Copy to clipboard
+const copyToClipboard = (items, action = 'copy') => {
+    clipboard.value = {
+        items: items.map(item => ({ path: item.path, type: item.type })),
+        action: action
+    };
+    // Optional: Toast notification
+};
+
+// Paste from clipboard to destination
+const pasteFromClipboard = async (destinationPath) => {
+    if (clipboard.value.items.length === 0) return;
+
+    loading.value = true;
+    try {
+        const promises = clipboard.value.items.map(async (item) => {
+            const endpoint = clipboard.value.action === 'move' ? '/admin/cms/file-manager/move' : '/admin/cms/file-manager/copy';
+            
+            // For move/copy ops
+            return api.post(endpoint, {
+                source: item.path,
+                destination: destinationPath,
+                type: item.type
+            });
+        });
+
+        await Promise.all(promises);
+
+        // Clear clipboard if move action
+        if (clipboard.value.action === 'move') {
+            clipboard.value.items = [];
+        }
+
+        // Refresh
+        filesCache.value.clear();
+        allFolders.value = [];
+        await fetchFiles();
+        await fetchCurrentPath();
+
+    } catch (error) {
+        console.error('Failed to paste items:', error);
+        alert('Failed to paste items');
+    } finally {
+        loading.value = false;
+    }
 };
 
 // Legacy handler (keeping for compatibility)

@@ -414,6 +414,9 @@ Route::prefix('v1')->group(function () {
         Route::post('file-manager/restore', [App\Http\Controllers\Api\V1\FileManagerController::class, 'restore'])->middleware('permission:manage media');
         Route::delete('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage media');
         Route::delete('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage media');
+        Route::post('file-manager/extract', [App\Http\Controllers\Api\V1\FileManagerController::class, 'extract'])->middleware('permission:manage media');
+        Route::post('file-manager/compress', [App\Http\Controllers\Api\V1\FileManagerController::class, 'compress'])->middleware('permission:manage media');
+        Route::post('file-manager/copy', [App\Http\Controllers\Api\V1\FileManagerController::class, 'copy'])->middleware('permission:manage media');
 
         // Log Viewer
         Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');

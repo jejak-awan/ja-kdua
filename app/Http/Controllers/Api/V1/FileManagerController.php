@@ -38,7 +38,7 @@ class FileManagerController extends BaseApiController
                         $folders[] = [
                             'name' => $item,
                             'path' => '/'.$itemPath,
-                            'type' => 'directory',
+                            'type' => 'folder',
                         ];
                     } else {
                         $files[] = [
@@ -93,12 +93,16 @@ class FileManagerController extends BaseApiController
                 'path' => '/'.$filePath,
                 'url' => Storage::disk($disk)->url($filePath),
                 'name' => $fileName,
+                'type' => 'file',
+                'size' => $file->getSize(),
+                'extension' => $file->getClientOriginalExtension(),
+                'updated_at' => now(),
             ];
         }
 
         return $this->success([
             'files' => $uploadedFiles,
-        ], count($uploadedFiles) > 1 ? 'Files uploaded successfully' : 'File uploaded successfully', 201);
+        ], 'Files uploaded successfully', 201);
     }
 
     /**
@@ -227,7 +231,9 @@ class FileManagerController extends BaseApiController
         Storage::disk($disk)->makeDirectory($folderPath);
 
         return $this->success([
+            'name' => $name,
             'path' => '/'.$folderPath,
+            'type' => 'folder',
         ], 'Folder created successfully', 201);
     }
 
@@ -252,6 +258,9 @@ class FileManagerController extends BaseApiController
             // Get the filename/foldername from source
             $name = basename($source);
             $newPath = $destination ? $destination.'/'.$name : $name;
+
+            // Handle duplicate names
+            $newPath = $this->getUniquePath($disk, $newPath);
 
             if ($type === 'folder') {
                 $sourcePath = Storage::disk($disk)->path($source);
@@ -278,6 +287,78 @@ class FileManagerController extends BaseApiController
         } catch (\Exception $e) {
             return $this->error('Failed to move: '.$e->getMessage(), 500, [], 'MOVE_ERROR');
         }
+    }
+
+    /**
+     * Copy a file or folder
+     */
+    public function copy(Request $request)
+    {
+        $request->validate([
+            'source' => 'required|string',
+            'destination' => 'nullable|string',
+            'type' => 'required|in:file,folder',
+            'disk' => 'nullable|string',
+        ]);
+
+        $source = trim($request->input('source'), '/');
+        $destination = trim($request->input('destination', ''), '/');
+        $type = $request->input('type');
+        $disk = $request->input('disk', 'public');
+
+        try {
+            $name = basename($source);
+            $newPath = $destination ? $destination.'/'.$name : $name;
+
+            // Handle duplicate names
+            $newPath = $this->getUniquePath($disk, $newPath);
+
+            if ($type === 'folder') {
+                $sourcePath = Storage::disk($disk)->path($source);
+                $destPath = Storage::disk($disk)->path($newPath);
+
+                if (!is_dir($sourcePath)) {
+                    return $this->notFound('Source folder');
+                }
+
+                File::copyDirectory($sourcePath, $destPath);
+            } else {
+                if (!Storage::disk($disk)->exists($source)) {
+                    return $this->notFound('Source file');
+                }
+
+                Storage::disk($disk)->copy($source, $newPath);
+            }
+
+            return $this->success([
+                'newPath' => '/'.$newPath,
+            ], ($type === 'folder' ? 'Folder' : 'File').' copied successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to copy: '.$e->getMessage(), 500, [], 'COPY_ERROR');
+        }
+    }
+
+    /**
+     * Helper: Get unique path if file/folder exists
+     */
+    private function getUniquePath($disk, $path)
+    {
+        if (!Storage::disk($disk)->exists($path)) {
+            return $path;
+        }
+
+        $dir = dirname($path);
+        $dir = $dir === '.' ? '' : $dir . '/';
+        $filename = pathinfo($path, PATHINFO_FILENAME);
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $extString = $extension ? '.' . $extension : '';
+
+        $counter = 1;
+        while (Storage::disk($disk)->exists($dir . $filename . ' (' . $counter . ')' . $extString)) {
+            $counter++;
+        }
+
+        return $dir . $filename . ' (' . $counter . ')' . $extString;
     }
 
     /**
@@ -475,5 +556,178 @@ class FileManagerController extends BaseApiController
         $deletedFile->delete();
 
         return $this->success(null, 'Item permanently deleted');
+    }
+
+    /**
+     * Extract archive (zip, tar.gz, tar)
+     */
+    public function extract(Request $request)
+    {
+        $request->validate([
+            'path' => 'required|string',
+            'disk' => 'nullable|string',
+        ]);
+
+        $path = trim($request->input('path'), '/');
+        $disk = $request->input('disk', 'public');
+        $fullPath = Storage::disk($disk)->path($path);
+
+        if (!file_exists($fullPath)) {
+            return $this->notFound('Archive file');
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $fileName = pathinfo($path, PATHINFO_FILENAME);
+        $parentDir = dirname($path);
+        $parentDir = $parentDir === '.' ? '' : $parentDir;
+        
+        // Create extraction directory
+        $extractDir = $parentDir ? $parentDir . '/' . $fileName : $fileName;
+        $extractPath = Storage::disk($disk)->path($extractDir);
+
+        // Handle if directory already exists
+        if (is_dir($extractPath)) {
+            $extractDir = $extractDir . '_' . time();
+            $extractPath = Storage::disk($disk)->path($extractDir);
+        }
+
+        Storage::disk($disk)->makeDirectory($extractDir);
+
+        try {
+            if ($extension === 'zip') {
+                $zip = new \ZipArchive();
+                if ($zip->open($fullPath) === true) {
+                    $zip->extractTo($extractPath);
+                    $zip->close();
+                } else {
+                    return $this->error('Failed to open ZIP file', 500, [], 'EXTRACT_ERROR');
+                }
+            } elseif (in_array($extension, ['gz', 'tgz'])) {
+                // Handle tar.gz and tgz
+                $phar = new \PharData($fullPath);
+                if ($extension === 'gz' || str_ends_with($path, '.tar.gz')) {
+                    $phar->decompress();
+                    $tarPath = str_replace(['.tar.gz', '.tgz'], '.tar', $fullPath);
+                    $phar = new \PharData($tarPath);
+                }
+                $phar->extractTo($extractPath);
+            } elseif ($extension === 'tar') {
+                $phar = new \PharData($fullPath);
+                $phar->extractTo($extractPath);
+            } else {
+                return $this->error('Unsupported archive format. Supported: zip, tar, tar.gz, tgz', 400, [], 'UNSUPPORTED_FORMAT');
+            }
+
+            return $this->success([
+                'extracted_to' => '/' . $extractDir,
+            ], 'Archive extracted successfully');
+        } catch (\Exception $e) {
+            // Clean up on failure
+            if (is_dir($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+            return $this->error('Failed to extract: ' . $e->getMessage(), 500, [], 'EXTRACT_ERROR');
+        }
+    }
+
+    /**
+     * Compress files/folders to ZIP archive
+     */
+    public function compress(Request $request)
+    {
+        $request->validate([
+            'paths' => 'required|array|min:1',
+            'paths.*' => 'string',
+            'name' => 'nullable|string',
+            'disk' => 'nullable|string',
+        ]);
+
+        $paths = $request->input('paths');
+        $disk = $request->input('disk', 'public');
+        $archiveName = $request->input('name');
+
+        // Determine archive name
+        if (!$archiveName) {
+            if (count($paths) === 1) {
+                $archiveName = pathinfo(trim($paths[0], '/'), PATHINFO_FILENAME) . '.zip';
+            } else {
+                $archiveName = 'archive_' . date('Y-m-d_His') . '.zip';
+            }
+        }
+
+        // Ensure .zip extension
+        if (!str_ends_with(strtolower($archiveName), '.zip')) {
+            $archiveName .= '.zip';
+        }
+
+        // Determine output directory (same as first item's parent)
+        $firstPath = trim($paths[0], '/');
+        $parentDir = dirname($firstPath);
+        $parentDir = $parentDir === '.' ? '' : $parentDir;
+        $archivePath = $parentDir ? $parentDir . '/' . $archiveName : $archiveName;
+        $fullArchivePath = Storage::disk($disk)->path($archivePath);
+
+        // Handle if archive already exists
+        if (file_exists($fullArchivePath)) {
+            $baseName = pathinfo($archiveName, PATHINFO_FILENAME);
+            $archiveName = $baseName . '_' . time() . '.zip';
+            $archivePath = $parentDir ? $parentDir . '/' . $archiveName : $archiveName;
+            $fullArchivePath = Storage::disk($disk)->path($archivePath);
+        }
+
+        try {
+            $zip = new \ZipArchive();
+            if ($zip->open($fullArchivePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                return $this->error('Failed to create ZIP archive', 500, [], 'COMPRESS_ERROR');
+            }
+
+            foreach ($paths as $path) {
+                $path = trim($path, '/');
+                $fullPath = Storage::disk($disk)->path($path);
+                $itemName = basename($path);
+
+                if (is_dir($fullPath)) {
+                    // Add directory recursively
+                    $this->addDirectoryToZip($zip, $fullPath, $itemName);
+                } elseif (file_exists($fullPath)) {
+                    // Add file
+                    $zip->addFile($fullPath, $itemName);
+                }
+            }
+
+            $zip->close();
+
+            return $this->success([
+                'archive_path' => '/' . $archivePath,
+                'archive_name' => $archiveName,
+            ], 'Files compressed successfully');
+        } catch (\Exception $e) {
+            if (file_exists($fullArchivePath)) {
+                unlink($fullArchivePath);
+            }
+            return $this->error('Failed to compress: ' . $e->getMessage(), 500, [], 'COMPRESS_ERROR');
+        }
+    }
+
+    /**
+     * Helper: Add directory contents to ZIP recursively
+     */
+    private function addDirectoryToZip(\ZipArchive $zip, string $path, string $relativePath)
+    {
+        $zip->addEmptyDir($relativePath);
+        $files = scandir($path);
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+
+            $fullPath = $path . DIRECTORY_SEPARATOR . $file;
+            $localPath = $relativePath . '/' . $file;
+
+            if (is_dir($fullPath)) {
+                $this->addDirectoryToZip($zip, $fullPath, $localPath);
+            } else {
+                $zip->addFile($fullPath, $localPath);
+            }
+        }
     }
 }
