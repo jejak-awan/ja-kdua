@@ -156,6 +156,32 @@
             "cancel": "Cancel",
             "success": "Media resized successfully",
             "failed": "Failed to resize media"
+        },
+        "editor": {
+            "title": "Edit Image",
+            "transform": "Transform",
+            "rotate": "Rotate 90°",
+            "flipHorizontal": "Flip Horizontal",
+            "flipVertical": "Flip Vertical",
+            "filters": "Filters",
+            "brightness": "Brightness",
+            "contrast": "Contrast",
+            "saturation": "Saturation",
+            "resetFilters": "Reset Filters",
+            "resize": "Resize",
+            "width": "Width",
+            "height": "Height",
+            "maintainAspectRatio": "Maintain Aspect Ratio",
+            "applyResize": "Apply Resize",
+            "crop": "Aspect Ratio",
+            "free": "Free",
+            "saveAsNew": "Save as new version",
+            "resetAll": "Reset All",
+            "cancel": "Cancel",
+            "save": "Save Image",
+            "saving": "Saving...",
+            "success": "Image resized successfully!",
+            "failed": "Failed to save image"
         }
     }
 }

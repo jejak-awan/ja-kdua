@@ -469,6 +469,7 @@ class MediaController extends BaseApiController
             $validated = $request->validate([
                 'image' => 'required|image|max:10240', // 10MB max
                 'save_as_new' => 'nullable|boolean',
+                'custom_filename' => 'nullable|string|max:255',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -476,6 +477,7 @@ class MediaController extends BaseApiController
 
         try {
             $saveAsNew = $request->boolean('save_as_new', false);
+            $customFilename = $request->input('custom_filename');
             $imageFile = $request->file('image');
 
             // Use Intervention Image v3 API
@@ -495,8 +497,23 @@ class MediaController extends BaseApiController
                         // Save as new version
                         $originalPath = $media->path;
                         $pathInfo = pathinfo($originalPath);
-                        $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
+                        
+                        if ($customFilename) {
+                            // Sanitize filename to be safe
+                            $customFilename = \Illuminate\Support\Str::slug(pathinfo($customFilename, PATHINFO_FILENAME));
+                            $newFileName = $customFilename . '.' . $pathInfo['extension'];
+                        } else {
+                            $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
+                        }
+                        
                         $newPath = $pathInfo['dirname'].'/'.$newFileName;
+
+                        // Check if file exists, if so maybe error? Or append unique?
+                        // Let's append unique if custom name exists to avoid silent overwrite of unrelated file
+                        if ($customFilename && Storage::disk($media->disk)->exists($newPath)) {
+                             $newFileName = $customFilename . '_' . time() . '.' . $pathInfo['extension'];
+                             $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                        }
 
                         // Save to same disk
                         $fullPath = Storage::disk($media->disk)->path($newPath);
@@ -509,7 +526,7 @@ class MediaController extends BaseApiController
 
                         // Create new media record
                         $newMedia = Media::create([
-                            'name' => $pathInfo['filename'].'_edited',
+                            'name' => pathinfo($newFileName, PATHINFO_FILENAME),
                             'file_name' => $newFileName,
                             'path' => $newPath,
                             'mime_type' => $media->mime_type,
@@ -553,7 +570,7 @@ class MediaController extends BaseApiController
                         }
 
                         // Invalidate cache
-                        CacheService::invalidateByPattern("media:{$media->id}:*");
+                        app(CacheService::class)->invalidateByPattern("media:{$media->id}:*");
 
                         return $this->success($media->fresh()->load(['folder', 'usages']), 'Image updated successfully');
                     }

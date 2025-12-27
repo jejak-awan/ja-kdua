@@ -156,6 +156,32 @@
             "cancel": "Batal",
             "success": "Media berhasil diubah ukurannya",
             "failed": "Gagal mengubah ukuran media"
+        },
+        "editor": {
+            "title": "Edit Gambar",
+            "transform": "Transformasi",
+            "rotate": "Putar 90°",
+            "flipHorizontal": "Balik Horizontal",
+            "flipVertical": "Balik Vertikal",
+            "filters": "Filter",
+            "brightness": "Kecerahan",
+            "contrast": "Kontras",
+            "saturation": "Saturasi",
+            "resetFilters": "Reset Filter",
+            "resize": "Ubah Ukuran",
+            "width": "Lebar",
+            "height": "Tinggi",
+            "maintainAspectRatio": "Pertahankan Rasio",
+            "applyResize": "Terapkan Ukuran",
+            "crop": "Rasio Aspek",
+            "free": "Bebas",
+            "saveAsNew": "Simpan sebagai versi baru",
+            "resetAll": "Reset Semua",
+            "cancel": "Batal",
+            "save": "Simpan Gambar",
+            "saving": "Menyimpan...",
+            "success": "Berhasil mengubah ukuran gambar!",
+            "failed": "Gagal menyimpan gambar"
         }
     }
 }

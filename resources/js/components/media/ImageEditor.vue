@@ -1,550 +1,627 @@
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75" @click.self="$emit('close')">
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="bg-card border border-border shadow-lg rounded-lg max-w-6xl w-full max-h-[90vh] flex flex-col">
-                <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Edit Image: {{ media.name }}</h3>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="$emit('close')"
-                    >
-                        <X class="w-5 h-5" />
+    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm" @click.self="$emit('close')">
+        <!-- Main Container -->
+        <div class="relative flex flex-col w-full h-full max-w-5xl max-h-[90vh] bg-zinc-950 md:rounded-xl overflow-hidden shadow-2xl border border-white/10"
+             @keydown.enter="handleEnterKey" tabindex="0" autofocus>
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-zinc-950/50 backdrop-blur-md z-10">
+                <div class="text-sm font-medium text-white/80">
+                    {{ t('features.media.modals.editor.title') }}
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 mr-2">
+                         <input type="checkbox" id="saveAsNew" v-model="saveAsNew" class="rounded border-white/20 bg-white/5 text-primary focus:ring-primary/50" />
+                         <label for="saveAsNew" class="text-xs text-white/60 cursor-pointer select-none">Save copy</label>
+                    </div>
+                    
+                    <div v-if="saveAsNew" class="animate-in fade-in slide-in-from-right-2 duration-300">
+                        <input 
+                            type="text" 
+                            v-model="customFilename" 
+                            class="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white w-32 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-colors placeholder-white/20"
+                            placeholder="File name"
+                        />
+                    </div>
+
+                    <Button variant="ghost" size="sm" @click="$emit('close')" class="text-white/60 hover:text-white hover:bg-white/10">
+                        <X class="w-4 h-4 mr-2" />
+                        {{ t('common.actions.cancel') }}
+                    </Button>
+                    <Button size="sm" @click="saveImage" :disabled="saving" class="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]">
+                        <Save class="w-4 h-4 mr-2" v-if="!saving" />
+                        <span v-else class="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                        {{ t('common.actions.save') }}
                     </Button>
                 </div>
+            </div>
 
-                <!-- Content -->
-                <div class="flex-1 overflow-y-auto p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Editor Canvas -->
-                        <div class="lg:col-span-2">
-                            <div class="bg-secondary rounded-lg p-4 min-h-[400px] flex items-center justify-center">
-                                <div class="w-full max-w-full">
-                                    <img
-                                        ref="imageElement"
-                                        :src="imageSrc"
-                                        alt="Image to edit"
-                                        class="max-w-full max-h-[500px] mx-auto"
-                                        @load="initCropper"
-                                    />
-                                </div>
-                            </div>
+            <!-- Canvas Area -->
+            <div class="flex-1 relative flex items-center justify-center bg-[#0a0a0a] overflow-hidden p-8 user-select-none">
+                <div v-if="!imageLoaded" class="absolute inset-0 flex items-center justify-center text-white/40">
+                    <span class="animate-pulse">Loading image...</span>
+                </div>
+                
+                <!-- Main Image Display -->
+                <div class="relative max-w-full max-h-full transition-all duration-300">
+                    <img 
+                        ref="imageElement"
+                        :src="currentImageSrc" 
+                        class="max-w-full max-h-[calc(80vh-180px)] object-contain shadow-2xl transition-all duration-300"
+                        :style="activeMode === 'adjust' ? filterStyle : ''"
+                        @load="onImageLoad"
+                        crossorigin="anonymous"
+                    />
+                </div>
+            </div>
 
-                            <!-- Crop Presets -->
-                            <div v-if="showCrop" class="mt-4">
-                                <label class="block text-sm font-medium text-foreground mb-2">Aspect Ratio</label>
-                                    <Button
-                                        v-for="preset in cropPresets"
-                                        :key="preset.value"
-                                        variant="outline"
-                                        size="sm"
-                                        @click="setAspectRatio(preset.value)"
-                                        :class="[
-                                            currentAspectRatio === preset.value ? 'bg-primary text-primary-foreground' : ''
-                                        ]"
-                                    >
-                                        {{ preset.label }}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        @click="setAspectRatio(null)"
-                                        :class="[
-                                            currentAspectRatio === null ? 'bg-primary text-primary-foreground' : ''
-                                        ]"
-                                    >
-                                        Free
-                                    </Button>
-                                </div>
-                            </div>
+            <!-- Sub Toolbar (Active Mode Tools) -->
+            <div class="h-24 border-t border-white/10 bg-zinc-900/90 backdrop-blur-md flex items-center justify-center px-6 transition-all relative z-10">
+                
+                <!-- Crop Tools -->
+                <div v-if="activeMode === 'crop'" class="flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div class="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                        <Button 
+                            v-for="preset in cropPresets" 
+                            :key="preset.label"
+                            variant="ghost" 
+                            size="sm"
+                            class="text-xs h-7 px-3"
+                            :class="currentAspectRatio === preset.value ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white hover:bg-white/10'"
+                            @click="setAspectRatio(preset.value)"
+                        >
+                            {{ preset.label }}
+                        </Button>
+                    </div>
+                    
+                    <div class="w-px h-8 bg-white/10"></div>
+                    
+                    <div class="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="rotate(90)" title="Rotate">
+                            <RotateCw class="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="flip('horizontal')" title="Flip Horizontal">
+                            <FlipHorizontal class="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10" @click="flip('vertical')" title="Flip Vertical">
+                            <FlipVertical class="w-4 h-4" />
+                        </Button>
+                    </div>
 
-                        <!-- Tools Sidebar -->
-                        <div class="space-y-6">
-                            <!-- Transform Tools -->
-                            <div>
-                                <h4 class="text-sm font-medium text-foreground mb-3">Transform</h4>
-                                <div class="grid grid-cols-1 gap-2">
-                                    <Button
-                                        variant="outline"
-                                        @click="rotate(90)"
-                                        class="justify-start h-9"
-                                    >
-                                        <RotateCw class="w-4 h-4 mr-2" />
-                                        Rotate 90°
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        @click="flip('horizontal')"
-                                        class="justify-start h-9"
-                                    >
-                                        <FlipHorizontal class="w-4 h-4 mr-2" />
-                                        Flip Horizontal
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        @click="flip('vertical')"
-                                        class="justify-start h-9"
-                                    >
-                                        <FlipVertical class="w-4 h-4 mr-2" />
-                                        Flip Vertical
-                                    </Button>
-                                </div>
-                            </div>
+                    <div class="w-px h-8 bg-white/10"></div>
 
-                            <!-- Filters -->
-                            <div>
-                                <h4 class="text-sm font-medium text-foreground mb-3">Filters</h4>
-                                <div class="space-y-3">
-                                    <div>
-                                        <label class="block text-xs text-muted-foreground mb-1">Brightness</label>
-                                        <input
-                                            v-model.number="filters.brightness"
-                                            type="range"
-                                            min="0"
-                                            max="200"
-                                            step="1"
-                                            @input="applyFilters"
-                                            class="w-full"
-                                        />
-                                        <div class="text-xs text-muted-foreground text-center">{{ filters.brightness }}%</div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-muted-foreground mb-1">Contrast</label>
-                                        <input
-                                            v-model.number="filters.contrast"
-                                            type="range"
-                                            min="0"
-                                            max="200"
-                                            step="1"
-                                            @input="applyFilters"
-                                            class="w-full"
-                                        />
-                                        <div class="text-xs text-muted-foreground text-center">{{ filters.contrast }}%</div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-muted-foreground mb-1">Saturation</label>
-                                        <input
-                                            v-model.number="filters.saturation"
-                                            type="range"
-                                            min="0"
-                                            max="200"
-                                            step="1"
-                                            @input="applyFilters"
-                                            class="w-full"
-                                        />
-                                        <div class="text-xs text-muted-foreground text-center">{{ filters.saturation }}%</div>
-                                    </div>
-                                    <Button
-                                        variant="secondary"
-                                        @click="resetFilters"
-                                        class="w-full h-9"
-                                    >
-                                        <RefreshCw class="w-4 h-4 mr-2" />
-                                        Reset Filters
-                                    </Button>
-                                </div>
-                            </div>
+                    <div class="flex gap-2">
+                        <Button size="sm" variant="ghost" class="text-white/60 hover:text-white hover:bg-white/10" @click="cancelCrop">Cancel</Button>
+                        <Button size="sm" @click="applyCrop" class="bg-white text-black hover:bg-white/90">Apply Crop</Button>
+                    </div>
+                </div>
 
-                            <!-- Resize -->
-                            <div>
-                                <h4 class="text-sm font-medium text-foreground mb-3">Resize</h4>
-                                <div class="space-y-2">
-                                    <div class="flex items-center space-x-2">
-                                        <input
-                                            v-model.number="resizeWidth"
-                                            type="number"
-                                            placeholder="Width"
-                                            class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                        />
-                                        <span class="text-muted-foreground">×</span>
-                                        <input
-                                            v-model.number="resizeHeight"
-                                            type="number"
-                                            placeholder="Height"
-                                            class="flex-1 px-3 py-2 border border-input bg-card text-foreground rounded-md text-sm"
-                                        />
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input
-                                            v-model="maintainAspectRatio"
-                                            type="checkbox"
-                                            id="maintain-ratio"
-                                            class="mr-2"
-                                        />
-                                        <label for="maintain-ratio" class="text-xs text-muted-foreground">Maintain Aspect Ratio</label>
-                                    </div>
-                                    <Button
-                                        @click="applyResize"
-                                        class="w-full h-9"
-                                    >
-                                        Apply Resize
-                                    </Button>
-                                </div>
+                <!-- Adjust Tools -->
+                <div v-if="activeMode === 'adjust'" class="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                     <!-- Presets -->
+                    <div class="flex items-center gap-2 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar pr-4 border-r border-white/10 mr-2">
+                        <button 
+                            v-for="preset in filterPresets" 
+                            :key="preset.name"
+                            @click="applyPreset(preset)"
+                            class="flex flex-col items-center justify-center min-w-[60px] gap-1 group"
+                        >
+                            <div class="w-10 h-10 rounded-full border border-white/10 bg-black/40 group-hover:bg-white/10 flex items-center justify-center transition-colors">
+                                <component :is="preset.icon" class="w-4 h-4 text-white/60 group-hover:text-white" />
                             </div>
+                            <span class="text-[10px] text-white/40 group-hover:text-white/80">{{ preset.name }}</span>
+                        </button>
+                    </div>
+
+                    <!-- Sliders -->
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 w-full">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-medium w-20 text-white/60">Brightness</span>
+                            <div class="flex-1 relative h-5 flex items-center">
+                                <input type="range" v-model="filters.brightness" min="0" max="200" 
+                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                            </div>
+                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.brightness }}%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-medium w-20 text-white/60">Contrast</span>
+                            <div class="flex-1 relative h-5 flex items-center">
+                                <input type="range" v-model="filters.contrast" min="0" max="200" 
+                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                            </div>
+                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.contrast }}%</span>
+                        </div>
+                        <!-- Saturation -->
+                         <div class="flex items-center gap-3">
+                            <span class="text-xs font-medium w-20 text-white/60">Saturation</span>
+                            <div class="flex-1 relative h-5 flex items-center">
+                                <input type="range" v-model="filters.saturation" min="0" max="200" 
+                                    class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white hover:accent-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-white" />
+                            </div>
+                            <span class="text-xs w-8 text-right text-white/80 tabular-nums">{{ filters.saturation }}%</span>
                         </div>
                     </div>
+
+                    <div class="pl-4 border-l border-white/10 flex flex-col gap-2">
+                        <Button size="sm" variant="ghost" class="text-white/40 hover:text-white h-7 text-xs" @click="resetFilters">Reset</Button>
+                        <Button size="sm" @click="applyFilters" class="bg-white text-black hover:bg-white/90">Apply</Button>
+                    </div>
                 </div>
 
-                <!-- Footer -->
-                <div class="flex items-center justify-between p-6 border-t">
-                    <div class="flex items-center space-x-2">
-                        <input
-                            v-model="saveAsNew"
-                            type="checkbox"
-                            id="save-as-new"
-                            class="mr-2"
-                        />
-                        <label for="save-as-new" class="text-sm text-foreground">Save as new version</label>
+                <!-- Resize Tools -->
+                <div v-if="activeMode === 'resize'" class="flex items-center gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                     <div class="flex items-center gap-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-white/40 uppercase font-bold tracking-wider px-1">Width</label>
+                            <input 
+                                type="number" 
+                                v-model="resizeConfig.width" 
+                                class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                placeholder="Width"
+                            />
+                        </div>
+                        <span class="text-white/20 mt-5">×</span>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] text-white/40 uppercase font-bold tracking-wider px-1">Height</label>
+                            <input 
+                                type="number" 
+                                v-model="resizeConfig.height" 
+                                class="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white w-28 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all placeholder-white/20"
+                                placeholder="Height"
+                            />
+                        </div>
+                        <div class="flex items-end h-full pb-1 ml-2">
+                            <button 
+                                @click="resizeConfig.maintainAspectRatio = !resizeConfig.maintainAspectRatio"
+                                class="p-2 rounded-lg transition-colors border"
+                                :class="resizeConfig.maintainAspectRatio ? 'bg-primary/20 text-primary border-primary/30' : 'bg-transparent text-white/20 border-transparent hover:text-white/60'"
+                                title="Lock Aspect Ratio"
+                            >
+                                <Lock v-if="resizeConfig.maintainAspectRatio" class="w-4 h-4" />
+                                <Unlock v-else class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <Button
-                            variant="ghost"
-                            @click="resetAll"
-                        >
-                            <Undo2 class="w-4 h-4 mr-2" />
-                            Reset All
-                        </Button>
-                        <Button
-                            variant="outline"
-                            @click="$emit('close')"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            @click="saveImage"
-                            :disabled="saving"
-                        >
-                            <Save class="w-4 h-4 mr-2" />
-                            {{ saving ? 'Saving...' : 'Save Image' }}
-                        </Button>
-                    </div>
+                    <div class="w-px h-10 bg-white/10 mx-2"></div>
+                    <Button @click="applyResize" class="bg-white text-black hover:bg-white/90">Apply Resize</Button>
                 </div>
+                
+                <div v-if="activeMode === 'view'" class="text-sm text-white/40 animate-in fade-in duration-300">
+                    Select a tool below to start editing
+                </div>
+            </div>
+
+            <!-- Main Toolbar (Bottom) -->
+            <div class="h-20 bg-zinc-950 flex items-center justify-center gap-8 md:gap-16 pb-safe border-t border-white/10 z-20">
+                <button 
+                    v-for="mode in modes" 
+                    :key="mode.id"
+                    @click="setMode(mode.id)"
+                    class="flex flex-col items-center gap-1.5 group min-w-[64px] outline-none"
+                    :disabled="!imageLoaded"
+                >
+                    <div 
+                        class="p-2.5 rounded-full transition-all duration-300 relative"
+                        :class="activeMode === mode.id ? 'bg-white text-black scale-110 shadow-lg shadow-white/10' : 'text-zinc-500 group-hover:text-zinc-300 group-hover:bg-white/5'"
+                    >
+                        <component :is="mode.icon" class="w-5 h-5" />
+                        <div v-if="activeMode === mode.id" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white opacity-0"></div>
+                    </div>
+                    <span 
+                        class="text-[10px] font-medium tracking-wide transition-colors duration-300 uppercase"
+                        :class="activeMode === mode.id ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-500'"
+                    >
+                        {{ mode.label }}
+                    </span>
+                </button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, shallowRef, computed, onUnmounted, markRaw, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { 
-    X, 
-    RotateCw, 
-    FlipHorizontal, 
-    FlipVertical, 
-    RefreshCw, 
-    Save, 
-    Undo2 
+    X, Save, Crop, Sliders, Scaling, RotateCw, FlipHorizontal, FlipVertical,
+    Lock, Unlock, Eye, Sparkles, Sun, Moon, Palette
 } from 'lucide-vue-next';
 import Cropper from 'cropperjs';
+import 'cropperjs/dist/cropper.css';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
 
 const props = defineProps({
-    media: {
-        type: Object,
-        required: true,
-    },
+    media: { type: Object, required: true },
 });
 
 const emit = defineEmits(['close', 'updated']);
+const { t } = useI18n();
 
+// --- State ---
+const activeMode = ref('view'); 
 const imageElement = ref(null);
-const imageSrc = ref(props.media.url);
-const cropper = ref(null);
-const showCrop = ref(false);
-const currentAspectRatio = ref(null);
-const saveAsNew = ref(false);
+const currentImageSrc = ref(props.media.url);
+const imageLoaded = ref(false);
 const saving = ref(false);
+const saveAsNew = ref(false);
+const customFilename = ref('');
 
+// Initialize filename from prop
+watch(() => props.media.name, (newName) => {
+    if (newName) customFilename.value = newName + '_edited';
+}, { immediate: true });
+
+const modes = [
+    { id: 'view', label: 'View', icon: Eye },
+    { id: 'crop', label: 'Crop', icon: Crop },
+    { id: 'adjust', label: 'Adjust', icon: Sliders },
+    { id: 'resize', label: 'Resize', icon: Scaling },
+];
+
+// --- Cropper State ---
+const cropper = shallowRef(null);
+const cropperReady = ref(false);
+const currentAspectRatio = ref(NaN);
 const cropPresets = [
+    { label: 'Free', value: NaN },
     { label: '1:1', value: 1 },
-    { label: '4:3', value: 4/3 },
     { label: '16:9', value: 16/9 },
-    { label: '3:2', value: 3/2 },
+    { label: '4:3', value: 4/3 },
     { label: '2:3', value: 2/3 },
 ];
 
+// --- Adjust State ---
 const filters = ref({
     brightness: 100,
     contrast: 100,
     saturation: 100,
 });
 
-const resizeWidth = ref(null);
-const resizeHeight = ref(null);
-const maintainAspectRatio = ref(true);
+const filterPresets = [
+    { name: 'Auto', icon: Sparkles, settings: { brightness: 110, contrast: 110, saturation: 115 } },
+    { name: 'Warm', icon: Sun, settings: { brightness: 105, contrast: 105, saturation: 120 } },
+    { name: 'Mood', icon: Moon, settings: { brightness: 90, contrast: 120, saturation: 80 } },
+    { name: 'B&W', icon: Palette, settings: { brightness: 100, contrast: 120, saturation: 0 } },
+];
 
-const originalImage = ref(null);
-const canvas = ref(null);
-const ctx = ref(null);
+// --- Resize State ---
+const resizeConfig = ref({
+    width: 0,
+    height: 0,
+    maintainAspectRatio: true,
+    originalRatio: 1
+});
 
+// --- Computed ---
+const filterStyle = computed(() => {
+    return {
+        filter: `brightness(${filters.value.brightness}%) contrast(${filters.value.contrast}%) saturate(${filters.value.saturation}%)`
+    };
+});
+
+// --- Methods ---
+
+const onImageLoad = (e) => {
+    imageLoaded.value = true;
+    const img = e.target;
+    if (img.naturalWidth) {
+        resizeConfig.value.width = img.naturalWidth;
+        resizeConfig.value.height = img.naturalHeight;
+        resizeConfig.value.originalRatio = img.naturalWidth / img.naturalHeight;
+    }
+};
+
+const handleEnterKey = () => {
+    // If in crop mode, Apply Crop
+    if (activeMode.value === 'crop') {
+        applyCrop();
+    }
+    // If in adjust mode, Apply Filters
+    else if (activeMode.value === 'adjust') {
+        applyFilters();
+    }
+    // If in resize mode, Apply Resize
+    else if (activeMode.value === 'resize') {
+        applyResize();
+    }
+    // Else if view mode (or generic save), maybe trigger save? 
+    // Usually 'Enter' in modal means save, but here we have distinct 'Apply' vs 'Save' 
+    // Let's stick to mode-specific Apply for safety, or Save for View mode.
+    else if (activeMode.value === 'view') {
+        saveImage();
+    }
+};
+
+const triggerCropUpdate = () => {
+    // Helper to force update crop box if needed
+     if (cropper.value && cropperReady.value) {
+        // Sometimes just setting ratio isn't enough to visually reset the box if it's already drawn
+        // We can reset the crop box to center
+        // cropper.value.reset(); // This might reset everything including rotation
+        // Instead, let's just ensure the box is within bounds
+        cropper.value.clear();
+        cropper.value.crop();
+    }
+};
+
+const setMode = async (mode) => {
+    if (activeMode.value === mode) return;
+
+    if (activeMode.value === 'crop') {
+        destroyCropper();
+    }
+    
+    // If switching FROM Adjust TO Crop, apply the filters first
+    if (activeMode.value === 'adjust' && mode === 'crop') {
+        if (isFilterDirty()) {
+            await applyFilters();
+        }
+    }
+
+    activeMode.value = mode;
+
+    if (mode === 'crop') {
+        await nextTick();
+        initCropper();
+    }
+};
+
+// --- Crop Logic ---
 const initCropper = () => {
     if (!imageElement.value || cropper.value) return;
     
-    // Wait for image to be fully loaded
-    if (!imageElement.value.complete) {
-        imageElement.value.onload = () => {
-            initCropper();
-        };
-        return;
-    }
-
-    cropper.value = new Cropper(imageElement.value, {
-        aspectRatio: currentAspectRatio.value || undefined,
-        viewMode: 1,
-        dragMode: 'move',
+    cropperReady.value = false;
+    
+    const cropperInstance = new Cropper(imageElement.value, {
+        aspectRatio: currentAspectRatio.value,
+        viewMode: 1, 
+        dragMode: 'move', 
         autoCropArea: 0.8,
+        responsive: true,
         restore: false,
         guides: true,
         center: true,
         highlight: false,
+        background: false,
         cropBoxMovable: true,
         cropBoxResizable: true,
         toggleDragModeOnDblclick: false,
+        ready() {
+            cropperReady.value = true;
+        }
     });
+    
+    cropper.value = markRaw(cropperInstance);
+};
 
-    showCrop.value = true;
+const destroyCropper = () => {
+    if (cropper.value) {
+        cropper.value.destroy();
+        cropper.value = null;
+    }
+    cropperReady.value = false;
 };
 
 const setAspectRatio = (ratio) => {
     currentAspectRatio.value = ratio;
-    if (cropper.value) {
-        cropper.value.setAspectRatio(ratio || undefined);
-    }
-};
-
-const rotate = (degrees) => {
-    if (cropper.value) {
-        cropper.value.rotate(degrees);
-    } else {
-        applyTransform({ rotate: degrees });
-    }
-};
-
-const flip = (direction) => {
-    // For flip, we need to apply transform directly
-    applyTransform({ flip: direction });
-};
-
-const applyTransform = async (transform) => {
-    if (!imageElement.value) return;
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imageElement.value.src;
-
-    await new Promise((resolve) => {
-        img.onload = resolve;
-    });
-
-    if (!canvas.value) {
-        canvas.value = document.createElement('canvas');
-        ctx.value = canvas.value.getContext('2d');
-    }
-
-    canvas.value.width = img.width;
-    canvas.value.height = img.height;
-
-    ctx.value.save();
-    ctx.value.translate(canvas.value.width / 2, canvas.value.height / 2);
-
-    if (transform.rotate) {
-        ctx.value.rotate((transform.rotate * Math.PI) / 180);
-    }
-
-    if (transform.flip === 'horizontal') {
-        ctx.value.scale(-1, 1);
-    } else if (transform.flip === 'vertical') {
-        ctx.value.scale(1, -1);
-    }
-
-    ctx.value.drawImage(img, -img.width / 2, -img.height / 2);
-    ctx.value.restore();
-
-    imageSrc.value = canvas.value.toDataURL('image/png');
-    imageElement.value.src = imageSrc.value;
-
-    // Reinitialize cropper
-    if (cropper.value) {
-        cropper.value.destroy();
-        cropper.value = null;
-    }
-    setTimeout(() => {
-        initCropper();
-    }, 100);
-};
-
-const applyFilters = () => {
-    if (!imageElement.value) return;
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = originalImage.value || imageElement.value.src;
-
-    img.onload = () => {
-        if (!canvas.value) {
-            canvas.value = document.createElement('canvas');
-            ctx.value = canvas.value.getContext('2d');
+    if (cropper.value && cropperReady.value) {
+        cropper.value.setAspectRatio(ratio);
+        // Force a re-crop to ensure the box respects the new ratio immediately
+        // Some versions of cropperjs might need a nudge
+        if (!isNaN(ratio)) {
+             cropper.value.setData(cropper.value.getData()); 
         }
+    }
+};
 
-        canvas.value.width = img.width;
-        canvas.value.height = img.height;
+const rotate = (deg) => {
+    if (cropper.value && cropperReady.value) cropper.value.rotate(deg);
+};
 
-        ctx.value.filter = `
-            brightness(${filters.value.brightness}%)
-            contrast(${filters.value.contrast}%)
-            saturate(${filters.value.saturation}%)
-        `;
+const flip = (dir) => {
+    if (!cropper.value || !cropperReady.value) return;
+    
+    const data = cropper.value.getData();
+    if (dir === 'horizontal') cropper.value.scaleX(data.scaleX === -1 ? 1 : -1);
+    if (dir === 'vertical') cropper.value.scaleY(data.scaleY === -1 ? 1 : -1);
+};
 
-        ctx.value.drawImage(img, 0, 0);
-        imageSrc.value = canvas.value.toDataURL('image/png');
-        imageElement.value.src = imageSrc.value;
-    };
+const applyCrop = () => {
+    if (!cropper.value || !cropperReady.value) return;
+    
+    const canvas = cropper.value.getCroppedCanvas();
+    
+    if (canvas) {
+        currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+        
+        resizeConfig.value.width = canvas.width;
+        resizeConfig.value.height = canvas.height;
+        resizeConfig.value.originalRatio = canvas.width / canvas.height;
+        
+        setMode('view'); 
+    } else {
+        console.error("Failed to get cropped canvas");
+    }
+};
+
+const cancelCrop = () => {
+    setMode('view');
+};
+
+// --- Adjust Logic ---
+const applyPreset = (preset) => {
+    filters.value = { ...preset.settings };
+};
+
+const isFilterDirty = () => {
+    return filters.value.brightness !== 100 || 
+           filters.value.contrast !== 100 || 
+           filters.value.saturation !== 100;
 };
 
 const resetFilters = () => {
-    filters.value = {
-        brightness: 100,
-        contrast: 100,
-        saturation: 100,
-    };
-    imageSrc.value = originalImage.value || props.media.url;
-    imageElement.value.src = imageSrc.value;
+    filters.value = { brightness: 100, contrast: 100, saturation: 100 };
 };
+
+const applyFilters = async () => {
+    if (!imageElement.value) return;
+
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = currentImageSrc.value;
+        
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            ctx.filter = `brightness(${filters.value.brightness}%) contrast(${filters.value.contrast}%) saturate(${filters.value.saturation}%)`;
+            ctx.drawImage(img, 0, 0);
+            
+            currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+            resetFilters(); 
+            resolve();
+        };
+    });
+};
+
+// --- Resize Logic ---
+watch(() => resizeConfig.value.width, (newWidth) => {
+    if (!activeMode.value === 'resize' || !resizeConfig.value.maintainAspectRatio) return;
+    resizeConfig.value.height = Math.round(newWidth / resizeConfig.value.originalRatio);
+});
+
+watch(() => resizeConfig.value.height, (newHeight) => {
+    if (!activeMode.value === 'resize' || !resizeConfig.value.maintainAspectRatio) return;
+    resizeConfig.value.width = Math.round(newHeight * resizeConfig.value.originalRatio);
+});
 
 const applyResize = () => {
-    if (!resizeWidth.value && !resizeHeight.value) return;
-
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = imageElement.value.src;
-
+    img.src = currentImageSrc.value;
+    
     img.onload = () => {
-        let width = resizeWidth.value || img.width;
-        let height = resizeHeight.value || img.height;
-
-        if (maintainAspectRatio.value) {
-            const aspectRatio = img.width / img.height;
-            if (resizeWidth.value && !resizeHeight.value) {
-                height = width / aspectRatio;
-            } else if (resizeHeight.value && !resizeWidth.value) {
-                width = height * aspectRatio;
-            } else if (resizeWidth.value && resizeHeight.value) {
-                // Use the smaller dimension to maintain aspect ratio
-                const widthRatio = width / img.width;
-                const heightRatio = height / img.height;
-                const ratio = Math.min(widthRatio, heightRatio);
-                width = img.width * ratio;
-                height = img.height * ratio;
-            }
-        }
-
-        if (!canvas.value) {
-            canvas.value = document.createElement('canvas');
-            ctx.value = canvas.value.getContext('2d');
-        }
-
-        canvas.value.width = width;
-        canvas.value.height = height;
-
-        ctx.value.drawImage(img, 0, 0, width, height);
-        imageSrc.value = canvas.value.toDataURL('image/png');
-        imageElement.value.src = imageSrc.value;
-
-        resizeWidth.value = null;
-        resizeHeight.value = null;
-
-        // Reinitialize cropper
-        if (cropper.value) {
-            cropper.value.destroy();
-            cropper.value = null;
-        }
-        setTimeout(() => {
-            initCropper();
-        }, 100);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = resizeConfig.value.width;
+        canvas.height = resizeConfig.value.height;
+        
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        currentImageSrc.value = canvas.toDataURL(props.media.mime_type || 'image/png');
+        setMode('view');
     };
 };
 
-const resetAll = () => {
-    if (cropper.value) {
-        cropper.value.destroy();
-        cropper.value = null;
+// --- Image Helpers ---
+
+function base64ToBlob(base64) {
+  const parts = base64.split(';base64,');
+  const contentType = parts[0].split(':')[1];
+  const raw = window.atob(parts[1]);
+  const rawLength = raw.length;
+  const uInt8Array = new Uint8Array(rawLength);
+
+  for (let i = 0; i < rawLength; ++i) {
+    uInt8Array[i] = raw.charCodeAt(i);
+  }
+
+  return new Blob([uInt8Array], { type: contentType });
+}
+
+const getSecureBlob = async () => {
+    // If it's already a base64 string, we can convert directly
+    if (currentImageSrc.value.startsWith('data:')) {
+        return base64ToBlob(currentImageSrc.value);
     }
-    imageSrc.value = props.media.url;
-    originalImage.value = null;
-    filters.value = {
-        brightness: 100,
-        contrast: 100,
-        saturation: 100,
-    };
-    resizeWidth.value = null;
-    resizeHeight.value = null;
-    currentAspectRatio.value = null;
-    showCrop.value = false;
-    setTimeout(() => {
-        initCropper();
-    }, 100);
+
+    // Otherwise (HTTP URL), we need to draw it to a canvas to get the data
+    // This requires the image to be loaded and have crossorigin="anonymous"
+    if (!imageElement.value) throw new Error("Image element not found");
+
+    const canvas = document.createElement('canvas');
+    canvas.width = imageElement.value.naturalWidth;
+    canvas.height = imageElement.value.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw the image to the canvas
+    ctx.drawImage(imageElement.value, 0, 0);
+    
+    // Get Data URL
+    const dataLink = canvas.toDataURL(props.media.mime_type || 'image/png');
+    return base64ToBlob(dataLink);
 };
 
+// --- Save Final ---
 const saveImage = async () => {
     saving.value = true;
     try {
-        let imageData = imageSrc.value;
+        if (activeMode.value === 'adjust' && isFilterDirty()) await applyFilters();
+        if (activeMode.value === 'crop') applyCrop();
 
-        // If cropper is active, get cropped image
-        if (cropper.value) {
-            const croppedCanvas = cropper.value.getCroppedCanvas({
-                maxWidth: 4096,
-                maxHeight: 4096,
-            });
-            imageData = croppedCanvas.toDataURL('image/png');
-        }
-
-        // Convert data URL to blob
-        const response = await fetch(imageData);
-        const blob = await response.blob();
-        const fileName = props.media.file_name || props.media.name || 'edited_image.png';
-        const file = new File([blob], fileName, { type: props.media.mime_type || 'image/png' });
-
-        // Create FormData
+        // Get blob securely (whether it's base64 or url)
+        const blob = await getSecureBlob();
+        console.log("Saving Blob size:", blob.size); // Debugging
+        
+        if (blob.size === 0) throw new Error("Generated image is empty");
+        
         const formData = new FormData();
+        const fileName = props.media.file_name || 'edited-image.png';
+        // Use blob.type to ensure it matches the actual data (e.g. image/png)
+        const file = new File([blob], fileName, { type: blob.type });
+        
         formData.append('image', file);
         formData.append('save_as_new', saveAsNew.value ? '1' : '0');
+        if (saveAsNew.value && customFilename.value) {
+            formData.append('custom_filename', customFilename.value);
+        }
 
-        // Send to API
-        const apiResponse = await api.post(`/admin/cms/media/${props.media.id}/edit`, formData, {
+        await api.post(`/admin/cms/media/${props.media.id}/edit`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+                'Content-Type': 'multipart/form-data'
+            }
         });
-
         emit('updated');
         emit('close');
-    } catch (error) {
-        console.error('Failed to save image:', error);
-        alert(error.response?.data?.message || 'Failed to save image');
+    } catch (err) {
+        console.error("Failed to save", err);
+        let msg = t('features.media.modals.editor.failed') || 'Failed to save image';
+        if (err.response && err.response.data) {
+            if (err.response.data.errors) {
+                // Formatting validation errors
+                const errors = err.response.data.errors;
+                const errorMessages = Object.values(errors).flat().join('\n');
+                msg += '\n' + errorMessages;
+            } else if (err.response.data.message) {
+                 msg += ': ' + err.response.data.message;
+            }
+        }
+        alert(msg);
     } finally {
         saving.value = false;
     }
 };
 
-onMounted(() => {
-    originalImage.value = props.media.url;
-});
-
 onUnmounted(() => {
-    if (cropper.value) {
-        cropper.value.destroy();
-    }
+    destroyCropper();
 });
 </script>
 
-<style>
-/* CropperJS styles are loaded via CDN or included in app.css */
-.cropper-container {
-    max-width: 100%;
-    max-height: 500px;
+<style scoped>
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 </style>
-
