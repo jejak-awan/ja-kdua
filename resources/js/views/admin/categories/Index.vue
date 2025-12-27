@@ -1,274 +1,390 @@
 <template>
-    <div>
+    <div class="space-y-6">
         <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.categories.title') }}</h1>
-            <router-link
-                :to="{ name: 'categories.create' }"
-            >
-                <Button>
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ $t('features.categories.createNew') }}
-                </Button>
-            </router-link>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-card border border-border rounded-lg p-4 mb-4">
-            <div class="flex items-center space-x-4">
-                <Input
-                    v-model="search"
-                    type="text"
-                    :placeholder="$t('features.categories.search')"
-                    class="flex-1"
-                />
-                <Select
-                    v-model="viewMode"
-                >
-                    <SelectTrigger class="w-[180px]">
-                        <SelectValue :placeholder="$t('features.categories.viewMode.tree')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="tree">{{ $t('features.categories.viewMode.tree') }}</SelectItem>
-                        <SelectItem value="list">{{ $t('features.categories.viewMode.list') }}</SelectItem>
-                    </SelectContent>
-                </Select>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.categories.title') }}</h1>
+                <p class="text-muted-foreground mt-2">{{ $t('features.categories.description') }}</p>
+            </div>
+            <div class="flex space-x-3">
+                <router-link :to="{ name: 'categories.create' }">
+                    <Button>
+                        <Plus class="w-4 h-4 mr-2" />
+                        {{ $t('features.categories.createNew') }}
+                    </Button>
+                </router-link>
             </div>
         </div>
 
-        <!-- Categories List -->
-        <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">{{ $t('features.categories.loading') }}</p>
-        </div>
+        <!-- content -->
+        <Card>
+            <CardHeader class="pb-3 border-b border-border">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <!-- Actions / Search / Filter -->
+                    <div class="flex items-center gap-2 flex-1 flex-wrap">
+                        <div class="relative w-full sm:w-72">
+                            <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                v-model="search"
+                                :placeholder="$t('features.categories.search')"
+                                class="pl-9"
+                            />
+                        </div>
+                        <!-- Status Filter -->
+                        <Select v-model="statusFilter" @update:model-value="onFilterChange">
+                            <SelectTrigger class="w-[140px]">
+                                <Filter class="w-4 h-4 mr-2 text-muted-foreground" />
+                                <SelectValue :placeholder="$t('common.labels.status')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">{{ $t('common.labels.all') }}</SelectItem>
+                                <SelectItem value="active">{{ $t('features.categories.status.active') }}</SelectItem>
+                                <SelectItem value="inactive">{{ $t('features.categories.status.inactive') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <!-- Bulk Actions -->
+                        <div v-if="selectedIds.length > 0" class="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
+                             <div class="h-6 w-px bg-border mx-2"></div>
+                             <span class="text-sm text-muted-foreground whitespace-nowrap">
+                                {{ selectedIds.length }} {{ $t('common.labels.selected') }}
+                             </span>
+                             <Button variant="destructive" size="sm" @click="confirmBulkDelete">
+                                <Trash2 class="w-4 h-4 mr-2" />
+                                {{ $t('common.actions.delete') }}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent class="p-0">
+                <div class="rounded-md border-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead class="w-[40px] text-center">
+                                    <Checkbox 
+                                        :checked="isAllSelected"
+                                        @update:checked="toggleSelectAll"
+                                    />
+                                </TableHead>
+                                <TableHead>{{ $t('features.categories.table.name') }}</TableHead>
+                                <TableHead>{{ $t('features.categories.table.slug') }}</TableHead>
+                                <TableHead>{{ $t('features.categories.table.status') }}</TableHead>
+                                <TableHead class="text-center">{{ $t('features.categories.table.actions') }}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-if="loading">
+                                <TableCell colspan="5" class="h-24 text-center">
+                                    <Loader2 class="h-6 w-6 animate-spin mx-auto" />
+                                </TableCell>
+                            </TableRow>
+                            
+                            <TableRow v-else-if="flatCategories.length === 0">
+                                <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
+                                    {{ $t('features.categories.empty') }}
+                                </TableCell>
+                            </TableRow>
 
-        <div v-else-if="filteredCategories.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            <p class="mt-4 text-muted-foreground">{{ $t('features.categories.empty') }}</p>
-        </div>
-
-        <!-- Tree View -->
-        <div v-else-if="viewMode === 'tree'" class="bg-card border border-border rounded-lg overflow-hidden">
-            <div class="divide-y divide-border">
-                <CategoryTreeItem
-                    v-for="category in rootCategories"
-                    :key="category.id"
-                    :category="category"
-                    :all-categories="allCategories"
-                    @edit="editCategory"
-                    @delete="deleteCategory"
-                    @move="showMoveModal"
-                />
-            </div>
-        </div>
-
-        <!-- List View -->
-        <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.name') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.slug') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.parent') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.contents') }}
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.status') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            {{ $t('features.categories.table.actions') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="category in filteredCategories" :key="category.id" class="hover:bg-muted">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div
-                                    v-if="category.image"
-                                    class="flex-shrink-0 h-10 w-10 mr-3"
-                                >
-                                    <img
-                                        :src="category.image"
-                                        :alt="category.name"
-                                        class="h-10 w-10 rounded-full object-cover"
-                                    >
-                                </div>
-                                <div>
-                                    <div class="text-sm font-medium text-foreground">{{ category.name }}</div>
-                                    <div v-if="category.description" class="text-sm text-muted-foreground truncate max-w-xs">
-                                        {{ category.description }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-foreground">{{ category.slug }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-foreground">{{ category.parent?.name || '-' }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-foreground">{{ category.contents_count || 0 }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <Badge
-                                :variant="category.is_active ? 'success' : 'secondary'"
+                            <TableRow 
+                                v-for="category in flatCategories" 
+                                :key="category.id"
+                                class="group hover:bg-muted/50"
                             >
-                                {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
-                            </Badge>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <Button
-                                    @click="showMoveModal(category)"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="text-blue-600 hover:text-blue-900 hover:bg-blue-100"
-                                    :title="$t('features.categories.actions.move')"
-                                >
-                                    {{ $t('features.categories.actions.move') }}
-                                </Button>
-                                <Button
-                                    @click="editCategory(category)"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="text-indigo-600 hover:text-indigo-900 hover:bg-indigo-100"
-                                >
-                                    {{ $t('features.categories.actions.edit') }}
-                                </Button>
-                                <Button
-                                    @click="deleteCategory(category)"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                >
-                                    {{ $t('features.categories.actions.delete') }}
-                                </Button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Move Modal (Kept as is) -->
-        <MoveCategoryModal
-            v-if="movingCategory"
-            @close="closeMoveModal"
-            @moved="handleCategoryMoved"
-            :category="movingCategory"
-            :categories="allCategories"
-        />
+                                <TableCell class="text-center">
+                                    <Checkbox 
+                                        :checked="selectedIds.includes(category.id)" 
+                                        @update:checked="(checked) => toggleSelect(checked, category.id)"
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <div :style="{ paddingLeft: `${category._depth * 24}px` }" class="flex items-center">
+                                        <Button 
+                                            v-if="hasChildren(category)"
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-6 w-6 mr-2 shrink-0"
+                                            @click.stop="toggleExpand(category.id)"
+                                        >
+                                            <ChevronRight 
+                                                class="w-4 h-4 transition-transform duration-200"
+                                                :class="{ 'rotate-90': expandedIds.includes(category.id) }"
+                                            />
+                                        </Button>
+                                        <span v-else class="w-6 mr-2 shrink-0"></span>
+                                        <span class="font-medium">{{ category.name }}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell class="text-muted-foreground font-mono text-xs">{{ category.slug }}</TableCell>
+                                <TableCell>
+                                    <Badge :variant="category.is_active ? 'success' : 'secondary'">
+                                        {{ category.is_active ? $t('features.categories.status.active') : $t('features.categories.status.inactive') }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-center">
+                                    <div class="flex justify-center gap-1">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            class="h-8 w-8 text-muted-foreground hover:text-foreground" 
+                                            @click="editCategory(category)"
+                                        >
+                                            <Edit2 class="w-4 h-4" />
+                                        </Button>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            class="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
+                                            @click="deleteCategory(category)"
+                                        >
+                                            <Trash2 class="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+             <CardFooter class="flex flex-col sm:flex-row items-center justify-between border-t border-border py-4 gap-4">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground order-2 sm:order-1">
+                    <span>{{ $t('common.pagination.show') }}</span>
+                    <Select 
+                        :model-value="pagination.per_page ? pagination.per_page.toString() : '10'" 
+                        @update:model-value="(val) => changePerPage(val)"
+                    >
+                        <SelectTrigger class="h-8 w-[70px]">
+                            <SelectValue :placeholder="pagination.per_page" />
+                        </SelectTrigger>
+                        <SelectContent side="top">
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <span>{{ $t('common.pagination.entries') }}</span>
+                </div>
+                
+                <div class="flex items-center gap-2 order-1 sm:order-2">
+                    <div class="text-xs text-muted-foreground mr-2">
+                        {{ pagination.from }} - {{ pagination.to }} {{ $t('common.pagination.of') }} {{ pagination.total }}
+                    </div>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        :disabled="pagination.current_page === 1 || loading"
+                        @click="changePage(pagination.current_page - 1)"
+                    >
+                        {{ $t('common.pagination.previous') }}
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        :disabled="pagination.current_page === pagination.last_page || loading"
+                        @click="changePage(pagination.current_page + 1)"
+                    >
+                        {{ $t('common.pagination.next') }}
+                    </Button>
+                </div>
+            </CardFooter>
+        </Card>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
-import CategoryTreeItem from '../../../components/categories/CategoryTreeItem.vue';
-import MoveCategoryModal from '../../../components/categories/MoveCategoryModal.vue';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import { 
+    Plus, 
+    Search, 
+    Loader2,
+    Trash2,
+    Edit2,
+    ChevronRight,
+    Filter
+} from 'lucide-vue-next';
+import _ from 'lodash';
+
+// Shadcn UI
+import Button from '@/components/ui/button.vue';
+import Input from '@/components/ui/input.vue';
+import Badge from '@/components/ui/badge.vue';
+import Checkbox from '@/components/ui/checkbox.vue';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardContent from '@/components/ui/card-content.vue';
+import CardFooter from '@/components/ui/card-footer.vue';
+import Table from '@/components/ui/table.vue';
+import TableBody from '@/components/ui/table-body.vue';
+import TableCell from '@/components/ui/table-cell.vue';
+import TableHead from '@/components/ui/table-head.vue';
+import TableHeader from '@/components/ui/table-header.vue';
+import TableRow from '@/components/ui/table-row.vue';
+import Select from '@/components/ui/select.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
 
 const { t } = useI18n();
 const router = useRouter();
-const loading = ref(false);
-const categories = ref([]);
-const treeCategories = ref([]);
+
+const loading = ref(true);
+const categories = ref([]); // Raw tree data
 const search = ref('');
-const viewMode = ref('tree');
-const movingCategory = ref(null);
+const statusFilter = ref('all');
+const selectedIds = ref([]);
+const expandedIds = ref([]); // Track expanded nodes
+const pagination = ref({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+    from: 0,
+    to: 0
+});
 
-const allCategories = computed(() => categories.value);
+// Toggle expand/collapse
+const toggleExpand = (id) => {
+    console.log('Toggle expand called for ID:', id, 'Current expandedIds:', expandedIds.value);
+    const index = expandedIds.value.indexOf(id);
+    if (index > -1) {
+        expandedIds.value.splice(index, 1);
+    } else {
+        expandedIds.value.push(id);
+    }
+    expandedIds.value = [...expandedIds.value];
+    console.log('After toggle, expandedIds:', expandedIds.value);
+};
 
-const rootCategories = computed(() => {
-    // For tree view, use tree structure
-    if (viewMode.value === 'tree') {
-        if (!Array.isArray(treeCategories.value)) {
-            return [];
+// Helper to check if category has children
+const hasChildren = (category) => {
+    const children = category.all_children || category.children;
+    return children && Array.isArray(children) && children.length > 0;
+};
+
+// Helper to collect all parent IDs for auto-expansion
+const getAllParentIds = (nodes) => {
+    let ids = [];
+    nodes.forEach(node => {
+        const children = node.all_children || node.children;
+        if (children && children.length > 0) {
+            ids.push(node.id);
+            ids = ids.concat(getAllParentIds(children));
         }
-        return treeCategories.value.filter(cat => cat && !cat.parent_id);
-    }
-    // For list view, use flat list
-    if (!Array.isArray(categories.value)) {
-        return [];
-    }
-    return categories.value.filter(cat => cat && !cat.parent_id);
-});
-
-const filteredCategories = computed(() => {
-    if (!Array.isArray(categories.value)) {
-        return [];
-    }
-    if (!search.value) return categories.value;
-    
-    const searchLower = search.value.toLowerCase();
-    return categories.value.filter(cat => {
-        if (!cat) return false;
-        return cat?.name?.toLowerCase().includes(searchLower) ||
-        cat?.slug?.toLowerCase().includes(searchLower) ||
-        (cat?.description && cat.description.toLowerCase().includes(searchLower));
     });
+    return ids;
+};
+
+// Flatten tree into array for Table display, calculating depth
+const flattenTree = (nodes, depth = 0) => {
+    if (!nodes) return [];
+    let result = [];
+    nodes.forEach(node => {
+        const flatNode = { ...node, _depth: depth };
+        result.push(flatNode);
+        
+        const children = node.all_children || node.children;
+        const hasChildren = children && Array.isArray(children) && children.length > 0;
+        
+        if (hasChildren && (search.value || expandedIds.value.includes(node.id))) {
+            result = result.concat(flattenTree(children, depth + 1));
+        }
+    });
+    return result;
+};
+
+// Computed flat list for display
+const flatCategories = computed(() => {
+    let nodesToFlatten = categories.value;
+    // Dependency on expandedIds.value is inside flattenTree
+    return flattenTree(nodesToFlatten);
 });
 
-const fetchCategories = async () => {
+const fetchCategories = async (page = 1) => {
     loading.value = true;
     try {
-        // Fetch tree structure
-        const treeResponse = await api.get('/admin/cms/categories?tree=true');
-        const { data: treeData } = parseResponse(treeResponse);
-        const treeArray = ensureArray(treeData);
-        
-        // Store tree data for tree view
-        treeCategories.value = treeArray;
-        
-        // Flatten tree structure for list view
-        const flattenTree = (items) => {
-            if (!Array.isArray(items)) {
-                return [];
-            }
-            let result = [];
-            items.forEach(item => {
-                if (!item) return;
-                const flatItem = { ...item };
-                // Remove children for flat list
-                delete flatItem.children;
-                result.push(flatItem);
-                if (item.children && Array.isArray(item.children) && item.children.length > 0) {
-                    result = result.concat(flattenTree(item.children));
-                }
-            });
-            return result;
+        const params = {
+            page: page,
+            per_page: pagination.value.per_page,
+            tree: true 
         };
         
-        categories.value = flattenTree(treeArray);
+        if (search.value) {
+            params.tree = false;
+            params.search = search.value;
+        }
+
+        // Add status filter
+        if (statusFilter.value && statusFilter.value !== 'all') {
+            params.is_active = statusFilter.value === 'active' ? 1 : 0;
+        }
+
+        const response = await api.get('/admin/cms/categories', { params });
+        
+        if (response.data) {
+             const data = response.data;
+             const meta = data.meta || data; 
+             
+             if (data.data) {
+                 categories.value = data.data;
+             } else {
+                 categories.value = Array.isArray(data) ? data : [];
+             }
+
+             // Auto-expand all by default on first load or page change
+             if (!search.value) {
+                 expandedIds.value = getAllParentIds(categories.value);
+             } else {
+                 expandedIds.value = [];
+             }
+
+             pagination.value = {
+                 current_page: meta.current_page || 1,
+                 last_page: meta.last_page || 1,
+                 per_page: meta.per_page || 10,
+                 total: meta.total || 0,
+                 from: meta.from || 0,
+                 to: meta.to || 0
+             };
+        } else {
+            categories.value = [];
+        }
+        
+        selectedIds.value = [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);
-        categories.value = [];
-        treeCategories.value = [];
     } finally {
         loading.value = false;
     }
+};
+
+const debouncedSearch = _.debounce(() => {
+    fetchCategories(1);
+}, 300);
+
+// Watch search input
+watch(search, () => {
+    debouncedSearch();
+});
+
+// Handle filter change
+const onFilterChange = () => {
+    fetchCategories(1);
+};
+
+const changePage = (page) => {
+    if (page >= 1 && page <= pagination.value.last_page) {
+        fetchCategories(page);
+    }
+};
+
+const changePerPage = (perPage) => {
+    pagination.value.per_page = parseInt(perPage);
+    fetchCategories(1);
 };
 
 const editCategory = (category) => {
@@ -276,35 +392,52 @@ const editCategory = (category) => {
 };
 
 const deleteCategory = async (category) => {
-    if (!category || !category.name) {
-        return;
-    }
-    if (!confirm(`Are you sure you want to delete "${category.name}"?`)) {
-        return;
-    }
-
-    try {
-        await api.delete(`/admin/cms/categories/${category.id}`);
-        await fetchCategories();
-    } catch (error) {
-        console.error('Failed to delete category:', error);
-        const message = error.response?.data?.message || 'Failed to delete category';
-        alert(message);
+    if (confirm(t('features.categories.messages.deleteConfirm', { name: category.name }))) {
+        try {
+            await api.delete(`/admin/cms/categories/${category.id}`);
+            fetchCategories(pagination.value.current_page);
+        } catch (error) {
+            console.error('Failed to delete category:', error);
+             alert( error.response?.data?.message || t('features.categories.messages.deleteError'));
+        }
     }
 };
 
-const showMoveModal = (category) => {
-    movingCategory.value = category;
+// Bulk Actions
+const toggleSelect = (checked, id) => {
+    if (checked) {
+        if (!selectedIds.value.includes(id)) selectedIds.value.push(id);
+    } else {
+        selectedIds.value = selectedIds.value.filter(itemId => itemId !== id);
+    }
 };
 
-const closeMoveModal = () => {
-    movingCategory.value = null;
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        // Select all VISIBLE items (flat)
+        selectedIds.value = flatCategories.value.map(c => c.id);
+    } else {
+        selectedIds.value = [];
+    }
 };
 
-const handleCategoryMoved = () => {
-    closeMoveModal();
-    fetchCategories();
-};
+const isAllSelected = computed(() => {
+    return flatCategories.value.length > 0 && 
+           flatCategories.value.every(c => selectedIds.value.includes(c.id));
+});
+
+const confirmBulkDelete = async () => {
+   if (confirm(`Are you sure you want to delete ${selectedIds.value.length} categories?`)) {
+        try {
+            await api.post('/admin/cms/categories/bulk-destroy', { ids: selectedIds.value });
+            selectedIds.value = [];
+            fetchCategories(pagination.value.current_page);
+        } catch (error) {
+           console.error('Bulk delete failed:', error);
+           alert('Failed to delete selected categories');
+        }
+    }
+}
 
 onMounted(() => {
     fetchCategories();

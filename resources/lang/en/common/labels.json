@@ -49,5 +49,6 @@
     "dark": "Dark",
     "system": "System",
     "profile": "Profile",
-    "myProfile": "My Profile"
+    "myProfile": "My Profile",
+    "selected": "selected"
 }

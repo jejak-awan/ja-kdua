@@ -13,106 +13,115 @@
             <p class="text-muted-foreground">{{ t('features.content_templates.loading') }}</p>
         </div>
 
-        <form v-else @submit.prevent="handleSubmit" class="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.details') }}</CardTitle>
-                </CardHeader>
-                <CardContent class="space-y-4">
-                    <div class="space-y-2">
-                        <Label for="name">
-                            {{ t('features.content_templates.form.name') }} <span class="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="name"
-                            v-model="form.name"
-                            required
-                            :placeholder="t('features.content_templates.form.namePlaceholder')"
-                        />
-                    </div>
+        <form v-else @submit.prevent="handleSubmit" class="pb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <!-- Main Content (Left) -->
+                 <div class="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.content') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="title">
+                                    {{ t('features.content_templates.form.titleLabel') }}
+                                </Label>
+                                <Input
+                                    id="title"
+                                    v-model="form.title"
+                                    :placeholder="t('features.content_templates.form.titlePlaceholder')"
+                                />
+                            </div>
 
-                    <div class="space-y-2">
-                        <Label for="description">
-                            {{ t('features.content_templates.form.description') }}
-                        </Label>
-                        <Textarea
-                            id="description"
-                            v-model="form.description"
-                            rows="2"
-                            :placeholder="t('features.content_templates.form.descriptionPlaceholder')"
-                        />
-                    </div>
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ t('features.content_templates.form.body') }}
+                                </Label>
+                                <TiptapEditor
+                                    :model-value="form.body"
+                                    @update:model-value="(val) => form.body = val"
+                                    :placeholder="t('features.content_templates.form.bodyPlaceholder')"
+                                />
+                            </div>
 
-                    <div class="space-y-2">
-                        <Label for="type">
-                            {{ t('features.content_templates.form.type') }} <span class="text-destructive">*</span>
-                        </Label>
-                        <Select v-model="form.type" required>
-                            <SelectTrigger id="type">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="post">Post</SelectItem>
-                                <SelectItem value="page">Page</SelectItem>
-                                <SelectItem value="custom">Custom</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+                            <div class="space-y-2">
+                                <Label for="excerpt">
+                                    {{ t('features.content_templates.form.excerpt') }}
+                                </Label>
+                                <Textarea
+                                    id="excerpt"
+                                    v-model="form.excerpt"
+                                    rows="3"
+                                    :placeholder="t('features.content_templates.form.excerptPlaceholder')"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                 </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.content') }}</CardTitle>
-                </CardHeader>
-                <CardContent class="space-y-4">
-                    <div class="space-y-2">
-                        <Label for="title">
-                            {{ t('features.content_templates.form.titleLabel') }}
-                        </Label>
-                        <Input
-                            id="title"
-                            v-model="form.title"
-                            :placeholder="t('features.content_templates.form.titlePlaceholder')"
-                        />
-                    </div>
+                 <!-- Sidebar (Right) -->
+                 <div class="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.details') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="name">
+                                    {{ t('features.content_templates.form.name') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    v-model="form.name"
+                                    required
+                                    :placeholder="t('features.content_templates.form.namePlaceholder')"
+                                />
+                            </div>
 
-                    <div class="space-y-2">
-                        <Label>
-                            {{ t('features.content_templates.form.body') }}
-                        </Label>
-                        <TiptapEditor
-                            :model-value="form.body"
-                            @update:model-value="(val) => form.body = val"
-                            :placeholder="t('features.content_templates.form.bodyPlaceholder')"
-                        />
-                    </div>
+                            <div class="space-y-2">
+                                <Label for="description">
+                                    {{ t('features.content_templates.form.description') }}
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    v-model="form.description"
+                                    rows="3"
+                                    :placeholder="t('features.content_templates.form.descriptionPlaceholder')"
+                                />
+                            </div>
 
-                    <div class="space-y-2">
-                        <Label for="excerpt">
-                            {{ t('features.content_templates.form.excerpt') }}
-                        </Label>
-                        <Textarea
-                            id="excerpt"
-                            v-model="form.excerpt"
-                            rows="3"
-                            :placeholder="t('features.content_templates.form.excerptPlaceholder')"
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+                            <div class="space-y-2">
+                                <Label for="type">
+                                    {{ t('features.content_templates.form.type') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Select v-model="form.type" required>
+                                    <SelectTrigger id="type">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="post">Post</SelectItem>
+                                        <SelectItem value="page">Page</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-            <div class="flex justify-end space-x-3">
-                <Button variant="outline" as-child>
-                    <router-link :to="{ name: 'content-templates' }">
-                        {{ t('features.content_templates.form.cancel') }}
-                    </router-link>
-                </Button>
-                <Button type="submit" :disabled="saving">
-                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
-                    <Save v-else class="w-4 h-4 mr-2" />
-                    {{ saving ? t('features.content_templates.form.updating') : t('features.content_templates.form.update') }}
-                </Button>
+                    <div class="flex items-center gap-2">
+                         <div class="flex-1"></div>
+                         <Button variant="outline" as-child>
+                            <router-link :to="{ name: 'content-templates' }">
+                                {{ t('features.content_templates.form.cancel') }}
+                            </router-link>
+                        </Button>
+                        <Button type="submit" :disabled="saving">
+                            <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                            <Save v-else class="w-4 h-4 mr-2" />
+                            {{ saving ? t('features.content_templates.form.updating') : t('features.content_templates.form.update') }}
+                        </Button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>

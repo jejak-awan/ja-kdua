@@ -23,7 +23,7 @@
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card class="bg-card/50 border-none shadow-sm hover:bg-card transition-colors">
+            <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -36,7 +36,7 @@
                     </div>
                 </CardContent>
             </Card>
-            <Card class="bg-card/50 border-none shadow-sm hover:bg-card transition-colors">
+            <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -49,7 +49,7 @@
                     </div>
                 </CardContent>
             </Card>
-            <Card class="bg-card/50 border-none shadow-sm hover:bg-card transition-colors">
+            <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -62,7 +62,7 @@
                     </div>
                 </CardContent>
             </Card>
-            <Card class="bg-card/50 border-none shadow-sm hover:bg-card transition-colors">
+            <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -77,8 +77,8 @@
             </Card>
         </div>
 
-        <Card class="border-none shadow-sm overflow-hidden bg-card/50">
-            <div class="px-6 py-4 border-b border-border/40 bg-card/30">
+        <Card class="overflow-hidden">
+            <div class="px-6 py-4 border-b border-border">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="relative w-full md:w-72">
@@ -87,14 +87,14 @@
                                 v-model="search"
                                 type="text"
                                 :placeholder="$t('features.comments.filter.searchPlaceholder')"
-                                class="pl-9 bg-background/50"
+                                class="pl-9"
                             />
                         </div>
                         <Select
                             v-model="statusFilter"
                             @update:model-value="fetchContents"
                         >
-                            <SelectTrigger class="w-[160px] bg-background/50">
+                            <SelectTrigger class="w-[160px]">
                                 <SelectValue :placeholder="$t('features.comments.filter.allStatus')" />
                             </SelectTrigger>
                             <SelectContent>
@@ -115,7 +115,7 @@
                             v-model="bulkAction"
                             @update:model-value="handleBulkAction"
                         >
-                            <SelectTrigger class="w-[160px] h-8 bg-background/50 border-primary/20">
+                            <SelectTrigger class="w-[160px] h-8 border-primary/20">
                                 <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
                             </SelectTrigger>
                             <SelectContent>
@@ -144,35 +144,35 @@
             <div v-else class="relative overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow class="bg-muted/30 hover:bg-muted/30 border-b border-border/40">
+                        <TableRow class="hover:bg-muted/50 border-b border-border">
                             <TableHead class="w-12 px-6">
                                 <Checkbox
                                     :checked="allSelected"
                                     @update:checked="toggleSelectAll"
                                 />
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
                                 {{ $t('features.content.form.title') }}
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
                                 {{ $t('features.comments.detail.author') }}
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
                                 {{ $t('common.labels.status') }}
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
                                 {{ $t('features.content.form.featured') }}
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
                                 {{ $t('features.content.form.publishDate') }}
                             </TableHead>
-                            <TableHead class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            <TableHead class="px-6 py-4 text-center text-xs font-bold text-muted-foreground">
                                 {{ $t('features.languages.list.headers.actions') }}
                             </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="content in filteredContents" :key="content.id" class="group hover:bg-muted/30 transition-colors border-b border-border/40">
+                        <TableRow v-for="content in filteredContents" :key="content.id" class="group hover:bg-muted/50 transition-colors border-b border-border">
                             <TableCell class="px-6">
                                 <Checkbox
                                     :checked="selectedContents.includes(content.id)"
@@ -246,7 +246,7 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="pagination && pagination.total > 0" class="px-6 py-4 border-t border-border/40 bg-card/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div v-if="pagination && pagination.total > 0" class="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-4 text-xs text-muted-foreground">
                      <p>
                         {{ $t('common.pagination.showing', { 

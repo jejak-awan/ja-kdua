@@ -29,15 +29,17 @@
     --color-border: hsl(var(--border));
     --color-input: hsl(var(--input));
     --color-ring: hsl(var(--ring));
+
+    /* Sidebar Tokens */
+    --color-sidebar: hsl(var(--sidebar));
+    --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+    --color-sidebar-accent: hsl(var(--sidebar-accent));
 }
 
 /* Shadcn UI Design Tokens - Premium Enterprise Grade */
 @layer base {
     * {
         @apply border-border;
-        transition-property: background-color, border-color, color, shadow;
-        transition-duration: 300ms;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
@@ -47,10 +49,12 @@
 
     :root {
         /* Light mode - Shadcn Zinc */
-        --background: 0 0% 100%;
+        --background: 240 4.8% 95.9%;
+        /* Zinc-100: Soft Gray Canvas */
         --foreground: 240 10% 3.9%;
 
         --card: 0 0% 100%;
+        /* White Cards */
         --card-foreground: 240 10% 3.9%;
 
         --popover: 0 0% 100%;
@@ -77,10 +81,10 @@
 
         --radius: 0.5rem;
 
-        /* Sidebar - Muted background for contrast */
-        --sidebar: 240 4.8% 95.9%;
+        /* Sidebar - White Shell */
+        --sidebar: 0 0% 100%;
         --sidebar-foreground: 240 5.9% 10%;
-        --sidebar-accent: 240 4.8% 90%;
+        --sidebar-accent: 240 4.8% 95.9%;
     }
 
     .dark {
@@ -113,8 +117,8 @@
         --input: 240 3.7% 15.9%;
         --ring: 240 4.9% 83.9%;
 
-        /* Sidebar - Darker than background */
-        --sidebar: 240 5.9% 10%;
+        /* Sidebar - Matches background */
+        --sidebar: 240 10% 3.9%;
         --sidebar-foreground: 240 4.8% 95.9%;
         --sidebar-accent: 240 3.7% 15.9%;
     }

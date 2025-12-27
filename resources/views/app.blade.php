@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,11 +8,12 @@
     <title>{{ config('app.name', 'JA CMS') }}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-    {{-- Critical CSS - Complete variables for sidebar dark mode --}}
+    {{-- Critical CSS - Must match app.css exactly --}}
     <style>
-        /* CSS Custom Properties - Must match app.css exactly */
+        /* CSS Custom Properties - Synced with app.css */
         :root {
-            --background: 240 5% 96%;
+            /* Light mode - Shadcn Zinc */
+            --background: 240 4.8% 95.9%;
             --foreground: 240 10% 3.9%;
             --card: 0 0% 100%;
             --card-foreground: 240 10% 3.9%;
@@ -21,18 +22,55 @@
             --muted-foreground: 240 3.8% 46.1%;
             --accent: 240 4.8% 95.9%;
             --accent-foreground: 240 5.9% 10%;
+            /* Sidebar - Light mode */
+            --sidebar: 0 0% 100%;
+            --sidebar-foreground: 240 5.9% 10%;
+            --sidebar-accent: 240 4.8% 95.9%;
         }
         .dark {
-            --background: 240 10% 6%;
+            /* Dark mode - Shadcn Zinc */
+            --background: 240 10% 3.9%;
             --foreground: 0 0% 98%;
-            --card: 240 6% 10%;
+            --card: 240 10% 3.9%;
             --card-foreground: 0 0% 98%;
             --border: 240 3.7% 15.9%;
             --muted: 240 3.7% 15.9%;
             --muted-foreground: 240 5% 64.9%;
             --accent: 240 3.7% 15.9%;
             --accent-foreground: 0 0% 98%;
+            /* Sidebar - Dark mode */
+            --sidebar: 240 10% 3.9%;
+            --sidebar-foreground: 240 4.8% 95.9%;
+            --sidebar-accent: 240 3.7% 15.9%;
         }
+        /* Prevent white flash - apply bg immediately */
+        html, body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: background-color 0s, color 0s;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            min-height: 100%;
+        }
+        /* Critical element colors to prevent flash */
+        *, *::before, *::after {
+            border-color: hsl(var(--border));
+        }
+        .bg-background { background-color: hsl(var(--background)); }
+        .bg-card { background-color: hsl(var(--card)); }
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-card-foreground { color: hsl(var(--card-foreground)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .border-border { border-color: hsl(var(--border)); }
+        table { border-color: hsl(var(--border)); }
+        th, td { border-color: hsl(var(--border)); }
+        
+        /* Sidebar Critical CSS */
+        .bg-sidebar { background-color: hsl(var(--sidebar)); }
+        .text-sidebar-foreground { color: hsl(var(--sidebar-foreground)); }
     </style>
 
     {{-- Blocking script - Apply dark mode class immediately --}}
@@ -58,7 +96,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased min-h-full bg-background text-foreground">
     <div id="app"></div>
 </body>
 </html>
+

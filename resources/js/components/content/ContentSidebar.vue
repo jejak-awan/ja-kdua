@@ -6,8 +6,8 @@
         </div>
 
         <!-- Publish Status -->
-        <Card class="border-none shadow-sm bg-card/50">
-            <CardHeader class="px-4 py-3 border-b border-border/40 flex flex-row items-center justify-between">
+        <Card class="shadow-sm">
+            <CardHeader class="px-4 py-3 border-b flex flex-row items-center justify-between">
                 <CardTitle class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</CardTitle>
             </CardHeader>
             <CardContent class="p-4 space-y-4">
@@ -68,7 +68,7 @@
                     </Select>
                 </div>
 
-                <div class="flex items-center justify-between border rounded-md p-3 shadow-sm bg-background/40">
+                <div class="flex items-center justify-between border rounded-md p-3 shadow-sm">
                     <div class="space-y-0.5">
                         <Label class="text-xs font-medium">{{ $t('features.content.form.featured') }}</Label>
                         <p class="text-[10px] text-muted-foreground">{{ $t('features.content.form.featuredDesc') }}</p>
@@ -82,8 +82,8 @@
         </Card>
 
         <!-- Taxonomy -->
-        <Card class="border-none shadow-sm bg-card/50">
-            <CardHeader class="px-4 py-3 border-b border-border/40">
+        <Card class="shadow-sm">
+            <CardHeader class="px-4 py-3 border-b">
                 <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.taxonomy') }}</CardTitle>
             </CardHeader>
             <CardContent class="p-4 space-y-4">
@@ -152,8 +152,8 @@
         </Card>
 
         <!-- Featured Image -->
-        <Card class="border-none shadow-sm bg-card/50">
-             <CardHeader class="px-4 py-3 border-b border-border/40">
+        <Card class="shadow-sm">
+             <CardHeader class="px-4 py-3 border-b">
                 <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.featuredImage') }}</CardTitle>
             </CardHeader>
             <CardContent class="p-4">
@@ -162,8 +162,8 @@
         </Card>
 
         <!-- Excerpt -->
-        <Card class="border-none shadow-sm bg-card/50">
-            <CardHeader class="px-4 py-3 border-b border-border/40">
+        <Card class="shadow-sm">
+            <CardHeader class="px-4 py-3 border-b">
                  <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.excerpt') }}</CardTitle>
             </CardHeader>
              <CardContent class="p-4">
@@ -178,8 +178,8 @@
         </Card>
 
         <!-- SEO Settings (Collapsible) -->
-         <Card class="border-none shadow-sm bg-card/50">
-            <CardHeader class="px-4 py-3 border-b border-border/40">
+         <Card class="shadow-sm">
+            <CardHeader class="px-4 py-3 border-b">
                 <CardTitle class="text-sm font-semibold">SEO</CardTitle>
             </CardHeader>
             <CardContent class="p-4 space-y-4">

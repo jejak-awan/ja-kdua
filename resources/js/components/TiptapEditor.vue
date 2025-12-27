@@ -1,7 +1,7 @@
 <template>
-    <div class="border border-border rounded-md overflow-hidden bg-background">
+    <Card class="overflow-hidden">
         <!-- Toolbar -->
-        <div v-if="editor" class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-border bg-muted/30">
+        <div v-if="editor" class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-border bg-muted/40">
             <!-- Text Style -->
             <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
                 <Select :model-value="getHeaderLevel()" @update:model-value="setHeaderLevel">
@@ -194,14 +194,14 @@
         <editor-content 
             v-show="!showHtmlView"
             :editor="editor" 
-            class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-foreground bg-background" 
+            class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-card-foreground bg-card" 
         />
 
         <!-- HTML Source View -->
         <div v-show="showHtmlView" class="html-view">
             <textarea
                 v-model="htmlContent"
-                class="w-full min-h-[400px] p-4 font-mono text-sm bg-background text-foreground border-none resize-y focus:outline-none focus:ring-0"
+                class="w-full min-h-[400px] p-4 font-mono text-sm bg-card text-card-foreground border-none resize-y focus:outline-none focus:ring-0"
                 placeholder="<p>Your HTML code here...</p>"
                 @blur="applyHtmlChanges"
             ></textarea>
@@ -261,11 +261,12 @@
                 </div>
             </div>
         </div>
-    </div>
+    </Card>
 </template>
 
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
+import Card from '@/components/ui/card.vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { BubbleMenu } from '@tiptap/vue-3/menus'
 import StarterKit from '@tiptap/starter-kit'
@@ -553,8 +554,8 @@ onBeforeUnmount(() => {
 
 /* Ensure text visibility */
 .ProseMirror {
-    color: hsl(var(--foreground));
-    background-color: hsl(var(--background));
+    color: hsl(var(--card-foreground));
+    background-color: hsl(var(--card));
 }
 
 /* Heading Styles */
@@ -722,7 +723,7 @@ onBeforeUnmount(() => {
 
 /* Table Header - Title Row */
 .ProseMirror th {
-    background-color: hsl(var(--primary) / 0.1);
+    background-color: hsl(var(--muted));
     font-weight: 600;
     text-align: left;
     border-bottom: 2px solid hsl(var(--primary) / 0.3);
@@ -732,11 +733,11 @@ onBeforeUnmount(() => {
 /* Darker header for dark mode */
 :root.dark .ProseMirror th,
 .dark .ProseMirror th {
-    background-color: hsl(var(--primary) / 0.15);
+    background-color: hsl(var(--muted));
 }
 
 .ProseMirror td {
-    background-color: hsl(var(--background));
+    background-color: hsl(var(--card));
 }
 
 /* Alternating row colors */

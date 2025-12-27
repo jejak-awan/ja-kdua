@@ -1,7 +1,7 @@
 <template>
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 bg-card text-card-foreground border-r border-border shadow-sm',
+            'fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground border-r border-border shadow-sm',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             sidebarMinimized ? 'w-20' : 'w-64'
         ]"

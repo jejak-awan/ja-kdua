@@ -1,18 +1,20 @@
 <template>
-  <div class="search-page">
-    <div class="container">
-      <h1 class="page-title">{{ t('features.frontend.search.title') }}</h1>
-      <p class="search-query">{{ t('features.frontend.search.query') }} <strong>{{ searchQuery }}</strong></p>
+  <div class="py-12 bg-background min-h-screen">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold text-center mb-4 text-foreground">{{ t('features.frontend.search.title') }}</h1>
+      <p class="text-center text-lg text-muted-foreground mb-12">
+        {{ t('features.frontend.search.query') }} <strong class="text-foreground">{{ searchQuery }}</strong>
+      </p>
       
-      <div v-if="loading" class="loading">{{ t('features.frontend.search.loading') }}</div>
-      <div v-else-if="results.length > 0" class="posts-grid">
+      <div v-if="loading" class="text-center py-16 text-lg text-muted-foreground">{{ t('features.frontend.search.loading') }}</div>
+      <div v-else-if="results.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <PostCard 
           v-for="post in results" 
           :key="post.id" 
           :post="post"
         />
       </div>
-      <div v-else class="no-results">
+      <div v-else class="text-center py-16 text-lg text-muted-foreground">
         <p>{{ t('features.frontend.search.empty', { query: searchQuery }) }}</p>
       </div>
     </div>
@@ -65,48 +67,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.search-page {
-  padding: 3rem 0;
-}
 
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.page-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.search-query {
-  text-align: center;
-  font-size: 1.125rem;
-  color: #6b7280;
-  margin-bottom: 3rem;
-}
-
-.loading,
-.no-results {
-  text-align: center;
-  padding: 4rem 0;
-  font-size: 1.125rem;
-  color: #6b7280;
-}
-
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-@media (max-width: 768px) {
-  .posts-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
