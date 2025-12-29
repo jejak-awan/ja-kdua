@@ -135,11 +135,20 @@ api.interceptors.response.use(
             }
         }
 
-        // Handle 403 Forbidden - use router instead of hard redirect
+        // Handle 403 Forbidden - use circuit breaker to prevent loop
         if (error.response?.status === 403) {
+            // Prevent multiple 403 redirects (circuit breaker)
+            if (window.__is403Blocked) return Promise.reject(error);
+
             const currentPath = window.location.pathname;
             // Only redirect if not already on error page
             if (!currentPath.includes('/403')) {
+                // CIRCUIT BREAKER: Block all future requests
+                window.__is403Blocked = true;
+
+                // Stop pending page loads
+                if (typeof window.stop === 'function') window.stop();
+
                 const responseData = error.response?.data || {};
                 router.push({
                     name: 'forbidden',
@@ -149,7 +158,7 @@ api.interceptors.response.use(
                     }
                 }).catch(() => {
                     // Fallback to hard redirect if router fails
-                    window.location.href = '/403';
+                    window.location.replace('/403');
                 });
             }
         }

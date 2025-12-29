@@ -77,19 +77,20 @@
 
         <!-- Filters & Toolbar -->
         <div class="bg-card border border-border rounded-lg p-4 mb-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex flex-1 items-center gap-2 max-w-2xl">
-                    <!-- Search -->
-                    <div class="relative flex-1">
-                        <SearchIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            v-model="searchQuery"
-                            type="text"
-                            :placeholder="$t('features.file_manager.actions.search')"
-                            class="pl-8 bg-background"
-                        />
-                    </div>
-                    
+            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <!-- Search (Left) -->
+                <div class="relative flex-1 max-w-xs">
+                    <SearchIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        v-model="searchQuery"
+                        type="text"
+                        :placeholder="$t('features.file_manager.actions.search')"
+                        class="pl-8 bg-background"
+                    />
+                </div>
+                
+                <!-- Filters, Sort, View Toggle (Right) -->
+                <div class="flex items-center gap-2 ml-auto flex-wrap">
                     <!-- Type Filter -->
                     <Select v-model="filterType">
                         <SelectTrigger class="w-[140px] bg-background">
@@ -108,7 +109,7 @@
 
                     <!-- Sort -->
                     <Select v-model="sortBy">
-                        <SelectTrigger class="w-[140px] bg-background">
+                        <SelectTrigger class="w-[120px] bg-background">
                             <SelectValue :placeholder="$t('features.file_manager.sort.name')" />
                         </SelectTrigger>
                         <SelectContent>
@@ -255,7 +256,8 @@
             <!-- Sidebar: Folders (Collapsible) -->
             <div 
                 :class="[
-                    'bg-card border border-border rounded-lg h-fit transition-all duration-300',
+                    'bg-card border border-border rounded-lg h-fit',
+                    isReady ? 'transition-all duration-300' : '',
                     sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
                 ]"
             >
@@ -826,7 +828,9 @@ import DialogDescription from '@/components/ui/dialog-description.vue';
 import Pagination from '@/components/ui/pagination.vue';
 
 
+
 const files = ref([]);
+const isReady = ref(false);
 const folders = ref([]);
 const allFolders = ref([]); // Cache all folders
 const filesCache = ref(new Map()); // Cache files per path
@@ -1763,6 +1767,7 @@ const handleClickOutside = () => {
 onMounted(() => {
     fetchFiles(); // Initial load - recursively fetch all
     document.addEventListener('click', handleClickOutside);
+    setTimeout(() => { isReady.value = true; }, 100);
 });
 
 onUnmounted(() => {

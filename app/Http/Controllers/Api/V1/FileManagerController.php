@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DeletedFile;
+use App\Helpers\MediaSettingsHelper;
 
 class FileManagerController extends BaseApiController
 {
@@ -66,10 +67,15 @@ class FileManagerController extends BaseApiController
 
     public function upload(Request $request)
     {
+        // Get settings from MediaSettingsHelper (shared with Media component)
+        $maxSize = MediaSettingsHelper::getMaxUploadSize();
+        $allowedExtensions = MediaSettingsHelper::getAllowedExtensions();
+        $allowedMimes = implode(',', $allowedExtensions);
+        
         $request->validate([
-            'file' => 'required_without:files|file',
+            'file' => "required_without:files|file|max:{$maxSize}|mimes:{$allowedMimes}",
             'files' => 'required_without:file|array',
-            'files.*' => 'file',
+            'files.*' => "file|max:{$maxSize}|mimes:{$allowedMimes}",
             'path' => 'nullable|string',
             'disk' => 'nullable|string',
         ]);
@@ -84,6 +90,14 @@ class FileManagerController extends BaseApiController
             : [$request->file('file')];
 
         foreach ($files as $file) {
+            // Double-check extension is allowed (in case mimes validation is bypassed)
+            $extension = strtolower($file->getClientOriginalExtension());
+            if (!MediaSettingsHelper::isExtensionAllowed($extension)) {
+                return $this->validationError([
+                    'file' => ["File type '{$extension}' is not allowed."]
+                ], 'Invalid file type');
+            }
+            
             $fileName = $file->getClientOriginalName();
             $filePath = $path ? $path.'/'.$fileName : $fileName;
 

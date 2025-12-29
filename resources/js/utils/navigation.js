@@ -12,8 +12,8 @@ export const navigationGroups = {
 
     // Media (2 items)
     media: [
-        { name: 'media', to: '/admin/media', label: 'Media Library' },
-        { name: 'file-manager', to: '/admin/file-manager', label: 'File Manager' },
+        { name: 'media', to: '/admin/media', label: 'Media Library', permission: 'manage media' },
+        { name: 'file-manager', to: '/admin/file-manager', label: 'File Manager', permission: 'manage files' },
     ],
 
     // Engagement (3 items)

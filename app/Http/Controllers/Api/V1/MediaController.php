@@ -21,6 +21,13 @@ class MediaController extends BaseApiController
     {
         $query = Media::with(['folder', 'usages']);
 
+        // Handle trashed items
+        if ($request->input('trashed') === 'only') {
+            $query->onlyTrashed();
+        } elseif ($request->input('trashed') === 'with') {
+            $query->withTrashed();
+        }
+
         if ($request->has('mime_type')) {
             $query->where('mime_type', 'like', $request->mime_type.'%');
         }
@@ -50,7 +57,7 @@ class MediaController extends BaseApiController
             }
         }
 
-        $perPage = $request->input('view', 'grid') === 'list' ? 50 : 24;
+        $perPage = $request->input('per_page', 24);
         $media = $query->latest()->paginate($perPage);
 
         return $this->paginated($media, 'Media retrieved successfully');
@@ -60,6 +67,7 @@ class MediaController extends BaseApiController
     {
         $totalMedia = Media::count();
         $totalSize = Media::sum('size');
+        $trashCount = Media::onlyTrashed()->count();
         
         $typeBreakdown = Media::selectRaw('
             CASE 
@@ -76,6 +84,7 @@ class MediaController extends BaseApiController
         return $this->success([
             'total_count' => $totalMedia,
             'total_size' => $totalSize,
+            'trash_count' => $trashCount,
             'types' => $typeBreakdown
         ], 'Media statistics retrieved successfully');
     }
@@ -156,19 +165,82 @@ class MediaController extends BaseApiController
 
     public function destroy(Request $request, Media $media)
     {
-        $usageCount = $media->usages()->count();
+        $permanent = $request->boolean('permanent', false);
+        
+        if ($permanent) {
+            return $this->forceDelete($request, $media->id); // Pass ID to forceDelete
+        }
 
+        // Check usage before soft delete - return warning but still proceed
+        $usageCount = $media->usages()->count();
+        
+        $this->mediaService->delete($media, false);
+
+        $response = [
+            'message' => 'Media moved to trash',
+            'usage_count' => $usageCount,
+        ];
+        
+        if ($usageCount > 0) {
+            $response['warning'] = "This media is used in {$usageCount} content(s). The references may break.";
+        }
+
+        return $this->success($response, 'Media moved to trash');
+    }
+
+    public function restore(Request $request, $id)
+    {
+        $media = Media::onlyTrashed()->findOrFail($id);
+        $this->mediaService->restore($media->id);
+
+        return $this->success($media->fresh()->load(['folder', 'usages']), 'Media restored successfully');
+    }
+
+    public function forceDelete(Request $request, $id)
+    {
+        $media = Media::withTrashed()->findOrFail($id);
+        
+        // Safety check: if not forcing and in use, block
+        $usageCount = $media->usages()->count();
         if ($usageCount > 0 && !$request->input('force', false)) {
             return $this->validationError([
                 'media' => ['Media is currently in use. Use force=true to delete anyway.'],
                 'usage_count' => $usageCount,
-                'usages' => $media->usages()->with('model')->get(),
-            ], 'Media is currently in use. Use force=true to delete anyway.');
+            ], 'Media is currently in use.');
         }
 
-        $this->mediaService->delete($media);
+        $this->mediaService->delete($media, true);
 
-        return $this->success(null, 'Media deleted successfully');
+        return $this->success(null, 'Media permanently deleted');
+    }
+
+    /**
+     * Empty all trash - permanently delete all trashed media and folders
+     */
+    public function emptyTrash(Request $request)
+    {
+        // Get all trashed media
+        $trashedMedia = Media::onlyTrashed()->get();
+        $deletedCount = 0;
+        
+        foreach ($trashedMedia as $media) {
+            $this->mediaService->delete($media, true);
+            $deletedCount++;
+        }
+        
+        // Also delete trashed folders
+        $trashedFolders = \App\Models\MediaFolder::onlyTrashed()->get();
+        $deletedFoldersCount = 0;
+        
+        foreach ($trashedFolders as $folder) {
+            $folder->forceDelete();
+            $deletedFoldersCount++;
+        }
+        
+        return $this->success([
+            'deleted_media' => $deletedCount,
+            'deleted_folders' => $deletedFoldersCount,
+        ], 'Trash emptied successfully');
     }
 
     protected function deleteMediaVariants(Media $media)
@@ -288,7 +360,7 @@ class MediaController extends BaseApiController
             return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
-        $existingIds = Media::whereIn('id', $ids)->pluck('id')->toArray();
+        $existingIds = Media::withTrashed()->whereIn('id', $ids)->pluck('id')->toArray();
         if (count($existingIds) !== count($ids)) {
             return $this->validationError(['ids' => ['Some media IDs do not exist.']], 'The selected action is invalid.');
         }

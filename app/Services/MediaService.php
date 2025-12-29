@@ -182,15 +182,49 @@ class MediaService
     }
 
     /**
-     * Delete media and all its variants
+     * Delete media (soft delete by default, keeps physical files)
      */
-    public function delete(Media $media): void
+    public function delete(Media $media, bool $permanent = false): void
+    {
+        if ($permanent) {
+            $this->forceDelete($media);
+            return;
+        }
+
+        // Soft delete - just mark in DB
+        // We keep physical files and variants for persistence
+        $media->delete();
+        $this->cacheService->clearMediaCaches();
+    }
+
+    /**
+     * Permanently delete media and all its physical files
+     */
+    public function forceDelete(Media $media): void
     {
         $this->deleteVariants($media);
         Storage::disk($media->disk)->delete($media->path);
+        
+        // Delete usages
         $media->usages()->delete();
-        $media->delete();
+        
+        // Force delete the model
+        $media->forceDelete();
         $this->cacheService->clearMediaCaches();
+    }
+
+    /**
+     * Restore a soft-deleted media item
+     */
+    public function restore(int $mediaId): ?Media
+    {
+        $media = Media::onlyTrashed()->find($mediaId);
+        if ($media) {
+            $media->restore();
+            $this->cacheService->clearMediaCaches();
+            return $media;
+        }
+        return null;
     }
 
     /**
@@ -227,12 +261,23 @@ class MediaService
      */
     public function bulkAction(string $action, array $mediaIds, ?int $folderId = null, ?string $altText = null): int
     {
-        $media = Media::whereIn('id', $mediaIds)->get();
+        $query = Media::withTrashed();
+        if ($action === 'restore') {
+            $query->onlyTrashed();
+        }
+        
+        $media = $query->whereIn('id', $mediaIds)->get();
 
         foreach ($media as $item) {
             switch ($action) {
                 case 'delete':
-                    $this->delete($item);
+                    $this->delete($item, false);
+                    break;
+                case 'delete_permanent':
+                    $this->delete($item, true);
+                    break;
+                case 'restore':
+                    $item->restore();
                     break;
                 case 'move_folder':
                 case 'move':
@@ -254,7 +299,7 @@ class MediaService
      */
     public function createZip(array $mediaIds): ?string
     {
-        $media = Media::whereIn('id', $mediaIds)->get();
+        $media = Media::withTrashed()->whereIn('id', $mediaIds)->get();
 
         if ($media->isEmpty()) {
             return null;

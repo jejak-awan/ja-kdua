@@ -138,18 +138,23 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 uploads per minute (increased from 10)
         Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple'])
             ->middleware('throttle:10,1'); // 10 batch uploads per minute (increased from 5)
+        Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:manage media');
+        Route::delete('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:manage media');
+        Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:manage media');
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index']);
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show']);
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:manage media');
         Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy'])->middleware('permission:manage media');
-        Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:manage media');
-        Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:manage media');
+        Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore'])->middleware('permission:manage media');
+        Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete'])->middleware('permission:manage media');
         Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:manage media');
         Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:manage media');
         Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit'])->middleware('permission:manage media');
         Route::get('media/{media}/usage', [App\Http\Controllers\Api\V1\MediaController::class, 'usage'])->middleware('permission:manage media');
 
         // Media Folders
+        Route::post('media-folders/{id}/restore', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'restore'])->middleware('permission:manage media');
+        Route::delete('media-folders/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'forceDelete'])->middleware('permission:manage media');
         Route::apiResource('media-folders', App\Http\Controllers\Api\V1\MediaFolderController::class)->middleware('permission:manage media');
         Route::post('media-folders/{mediaFolder}/move', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'move'])->middleware('permission:manage media');
 
@@ -402,21 +407,21 @@ Route::prefix('v1')->group(function () {
         Route::get('scheduled-tasks/meta/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage settings');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage settings');
 
-        // File Manager
-        Route::get('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'index'])->middleware('permission:manage media');
-        Route::post('file-manager/upload', [App\Http\Controllers\Api\V1\FileManagerController::class, 'upload'])->middleware('permission:manage media');
-        Route::delete('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage media');
-        Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage media');
-        Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage media');
-        Route::post('file-manager/move', [App\Http\Controllers\Api\V1\FileManagerController::class, 'move'])->middleware('permission:manage media');
-        Route::post('file-manager/rename', [App\Http\Controllers\Api\V1\FileManagerController::class, 'rename'])->middleware('permission:manage media');
-        Route::get('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'trash'])->middleware('permission:manage media');
-        Route::post('file-manager/restore', [App\Http\Controllers\Api\V1\FileManagerController::class, 'restore'])->middleware('permission:manage media');
-        Route::delete('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage media');
-        Route::delete('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage media');
-        Route::post('file-manager/extract', [App\Http\Controllers\Api\V1\FileManagerController::class, 'extract'])->middleware('permission:manage media');
-        Route::post('file-manager/compress', [App\Http\Controllers\Api\V1\FileManagerController::class, 'compress'])->middleware('permission:manage media');
-        Route::post('file-manager/copy', [App\Http\Controllers\Api\V1\FileManagerController::class, 'copy'])->middleware('permission:manage media');
+        // File Manager (Admin-level file system access)
+        Route::get('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'index'])->middleware('permission:manage files');
+        Route::post('file-manager/upload', [App\Http\Controllers\Api\V1\FileManagerController::class, 'upload'])->middleware('permission:manage files');
+        Route::delete('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage files');
+        Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage files');
+        Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage files');
+        Route::post('file-manager/move', [App\Http\Controllers\Api\V1\FileManagerController::class, 'move'])->middleware('permission:manage files');
+        Route::post('file-manager/rename', [App\Http\Controllers\Api\V1\FileManagerController::class, 'rename'])->middleware('permission:manage files');
+        Route::get('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'trash'])->middleware('permission:manage files');
+        Route::post('file-manager/restore', [App\Http\Controllers\Api\V1\FileManagerController::class, 'restore'])->middleware('permission:manage files');
+        Route::delete('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage files');
+        Route::delete('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage files');
+        Route::post('file-manager/extract', [App\Http\Controllers\Api\V1\FileManagerController::class, 'extract'])->middleware('permission:manage files');
+        Route::post('file-manager/compress', [App\Http\Controllers\Api\V1\FileManagerController::class, 'compress'])->middleware('permission:manage files');
+        Route::post('file-manager/copy', [App\Http\Controllers\Api\V1\FileManagerController::class, 'copy'])->middleware('permission:manage files');
 
         // Log Viewer
         Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');

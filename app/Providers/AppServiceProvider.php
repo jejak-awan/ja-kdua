@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Models\MediaFolder::observe(\App\Observers\MediaFolderObserver::class);
+        
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
                 // Load Cache Driver

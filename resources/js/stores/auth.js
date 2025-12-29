@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 // Ensure CSRF cookie is fresh before login
                 await getCsrfCookie();
-                
+
                 const response = await api.post('/login', credentials);
                 // Handle different response structures
                 const responseData = response.data?.data || response.data;
@@ -45,12 +45,12 @@ export const useAuthStore = defineStore('auth', {
                 const errors = errorData.errors || {};
                 const status = error.response?.status;
                 const headers = error.response?.headers || {};
-                
+
                 // Handle rate limiting (429)
                 if (status === 429) {
                     // Try to get retry-after from various sources
                     let retryAfter = 60; // Default 60 seconds
-                    
+
                     // Try from response body first
                     if (errorData.retry_after) {
                         retryAfter = parseInt(errorData.retry_after, 10);
@@ -70,10 +70,10 @@ export const useAuthStore = defineStore('auth', {
                     else if (error.response?.headers?.['Retry-After']) {
                         retryAfter = parseInt(error.response.headers['Retry-After'], 10);
                     }
-                    
+
                     const retryAfterSeconds = retryAfter;
                     const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
-                    
+
                     return {
                         success: false,
                         message: `Too many login attempts. Please try again in ${retryAfterMinutes} minute${retryAfterMinutes > 1 ? 's' : ''}.`,
@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
                         retryAfter: retryAfterSeconds,
                     };
                 }
-                
+
                 // Handle different error statuses
                 if (status === 403) {
                     // Email not verified
@@ -93,7 +93,7 @@ export const useAuthStore = defineStore('auth', {
                         requiresVerification: errorData.requires_verification || false,
                     };
                 }
-                
+
                 // Extract first error message if available
                 let errorMessage = errorData.message;
                 if (!errorMessage && errors.email && Array.isArray(errors.email) && errors.email.length > 0) {
@@ -103,7 +103,7 @@ export const useAuthStore = defineStore('auth', {
                 } else if (!errorMessage) {
                     errorMessage = 'Login failed. Please check your credentials.';
                 }
-                
+
                 return {
                     success: false,
                     message: errorMessage,
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 // Ensure CSRF cookie is fresh before register
                 await getCsrfCookie();
-                
+
                 const response = await api.post('/register', userData);
                 this.setAuth(response.data);
                 return { success: true, data: response.data };
@@ -131,11 +131,18 @@ export const useAuthStore = defineStore('auth', {
 
         async logout() {
             try {
-                await api.post('/logout');
+                // Skip 401 handler redirect - logout is intentionally ending session
+                await api.post('/logout', {}, { _skipManualRedirect: true });
             } catch (error) {
-                console.error('Logout error:', error);
+                // Ignore 401 errors - session may already be expired
+                if (error.response?.status !== 401) {
+                    console.error('Logout error:', error);
+                }
             } finally {
                 this.clearAuth();
+                // Reset all circuit breaker flags
+                window.__isSessionTerminated = false;
+                window.__is403Blocked = false;
             }
         },
 
@@ -187,6 +194,9 @@ export const useAuthStore = defineStore('auth', {
             this.isAuthenticated = true;
             localStorage.setItem('auth_token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            // Reset circuit breaker flags on successful auth
+            window.__isSessionTerminated = false;
+            window.__is403Blocked = false;
         },
 
         clearAuth() {

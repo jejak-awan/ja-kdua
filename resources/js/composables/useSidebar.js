@@ -8,11 +8,13 @@ export function useSidebar() {
     const sidebarOpen = ref(false);
 
     // Load sidebar minimized state from localStorage
+    const saved = localStorage.getItem('sidebarMinimized');
+    if (saved !== null) {
+        sidebarMinimized.value = saved === 'true';
+    }
+
     const loadSidebarState = () => {
-        const saved = localStorage.getItem('sidebarMinimized');
-        if (saved !== null) {
-            sidebarMinimized.value = saved === 'true';
-        }
+        // Already loaded initially
     };
 
     // Save sidebar minimized state to localStorage
@@ -36,10 +38,7 @@ export function useSidebar() {
         sidebarOpen.value = false;
     };
 
-    // Load state on mount
-    onMounted(() => {
-        loadSidebarState();
-    });
+    // removed onMounted usage for state loading
 
     return {
         sidebarMinimized,

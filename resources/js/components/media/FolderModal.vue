@@ -34,7 +34,7 @@
                             </label>
                             <Select v-model="form.parent_id">
                                 <SelectTrigger class="w-full">
-                                    <SelectValue :placeholder="$t('features.media.modals.folder.noParent')" />
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem :value="null">{{ $t('features.media.modals.folder.noParent') }}</SelectItem>
@@ -99,7 +99,8 @@ const form = ref({
 const fetchFolders = async () => {
     try {
         const response = await api.get('/admin/cms/media-folders');
-        folders.value = response.data.data || response.data || [];
+        const data = response.data.data || response.data || [];
+        folders.value = data.filter(f => !f.is_trashed);
     } catch (error) {
         console.error('Failed to fetch folders:', error);
     }

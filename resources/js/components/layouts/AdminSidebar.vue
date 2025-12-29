@@ -83,13 +83,13 @@
                 </div>
 
                 <!-- Media -->
-                <div>
+                <div v-if="filteredMediaItems.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.media') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.media"
+                            v-for="item in filteredMediaItems"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -285,6 +285,7 @@ import { useI18n } from 'vue-i18n';
 import { useLayoutMount } from '../../composables/useLayoutMount';
 import { navigationGroups } from '../../utils/navigation';
 import { getIcon } from '../../utils/icons';
+import { useAuthStore } from '../../stores/auth';
 
 const props = defineProps({
     sidebarMinimized: {
@@ -306,9 +307,18 @@ defineEmits(['toggle-minimize', 'close', 'logout']);
 const { t, te } = useI18n();
 const $route = useRoute();
 const avatarError = ref(false);
+const authStore = useAuthStore();
 
 // Use shared mounted state for synchronized transitions
 const { mounted } = useLayoutMount();
+
+// Filter media items based on permissions
+const filteredMediaItems = computed(() => {
+    return navigationGroups.media.filter(item => {
+        if (!item.permission) return true;
+        return authStore.hasPermission(item.permission);
+    });
+});
 
 const getNavigationLabel = (item) => {
     const camelName = item.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());

@@ -21,6 +21,7 @@ class RolePermissionSeeder extends Seeder
             'manage categories',
             'manage tags',
             'manage media',
+            'manage files', // NEW: Admin-level file system access
             'manage comments',
             'manage users',
             'manage forms',

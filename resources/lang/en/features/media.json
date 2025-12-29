@@ -6,13 +6,16 @@
     "folders": "Folders",
     "newFolder": "New Folder",
     "allMedia": "All Media",
+    "trash": "Trash",
+    "emptyTrash": "Empty Trash",
     "stats": {
         "total": "Total Files",
         "storage": "Storage",
         "images": "Images",
         "videos": "Videos",
         "documents": "Documents",
-        "other": "Other"
+        "other": "Other",
+        "trash": "Trash"
     },
     "filter": {
         "allTypes": "All Types",
@@ -26,6 +29,8 @@
     "actions": {
         "bulk": "Bulk Actions",
         "delete": "Delete",
+        "restore": "Restore",
+        "deletePermanent": "Delete Permanently",
         "move": "Move to Folder",
         "updateAlt": "Update Alt Text",
         "downloadZip": "Download as ZIP",
@@ -51,6 +56,11 @@
     "messages": {
         "deleteConfirm": "Are you sure you want to delete {count} media file(s)?",
         "deleteSingleConfirm": "Are you sure you want to delete \"{name}\"?",
+        "deletePermanentConfirm": "Are you sure you want to PERMANENTLY delete {count} media file(s)? This action cannot be undone.",
+        "deletePermanentSingleConfirm": "Are you sure you want to PERMANENTLY delete \"{name}\"? This action cannot be undone.",
+        "emptyTrashConfirm": "Are you sure you want to empty the trash? All files will be permanently deleted.",
+        "restoreSuccess": "Successfully restored {count} media file(s)",
+        "restoreFailed": "Failed to restore media",
         "deleteSuccess": "Successfully deleted {count} media file(s)",
         "deleteFailed": "Failed to delete media",
         "moveSuccess": "Successfully moved {count} media file(s)",

@@ -8,11 +8,30 @@
     <title>{{ config('app.name', 'JA CMS') }}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
+    {{-- Blocking script - Apply dark mode class immediately BEFORE any CSS --}}
+    <script>
+        (function() {
+            const savedMode = localStorage.getItem('admin-dark-mode');
+            const isDark = savedMode === 'dark' || 
+                (!savedMode && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    
+    <script>
+        window.siteConfig = {
+            lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
+        };
+    </script>
+
     {{-- Critical CSS - Must match app.css exactly --}}
     <style>
         /* CSS Custom Properties - Synced with app.css */
         :root {
-            /* Light mode - Shadcn Zinc */
+            /* Light mode - Shadcn Zinc matches app.css */
             --background: 240 4.8% 95.9%;
             --foreground: 240 10% 3.9%;
             --card: 0 0% 100%;
@@ -27,8 +46,9 @@
             --sidebar-foreground: 240 5.9% 10%;
             --sidebar-accent: 240 4.8% 95.9%;
         }
+        
         .dark {
-            /* Dark mode - Shadcn Zinc */
+            /* Dark mode - Shadcn Zinc matches app.css */
             --background: 240 10% 3.9%;
             --foreground: 0 0% 98%;
             --card: 240 10% 3.9%;
@@ -38,57 +58,23 @@
             --muted-foreground: 240 5% 64.9%;
             --accent: 240 3.7% 15.9%;
             --accent-foreground: 0 0% 98%;
-            /* Sidebar - Dark mode */
+            /* Sidebar - Dark mode matches bg */
             --sidebar: 240 10% 3.9%;
             --sidebar-foreground: 240 4.8% 95.9%;
             --sidebar-accent: 240 3.7% 15.9%;
         }
+
         /* Prevent white flash - apply bg immediately */
-        html, body {
+        html, border {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            transition: background-color 0s, color 0s;
         }
-        html {
-            height: 100%;
-        }
-        body {
-            min-height: 100%;
-        }
-        /* Critical element colors to prevent flash */
-        *, *::before, *::after {
-            border-color: hsl(var(--border));
-        }
+
+        /* Critical element colors */
         .bg-background { background-color: hsl(var(--background)); }
         .bg-card { background-color: hsl(var(--card)); }
-        .text-foreground { color: hsl(var(--foreground)); }
-        .text-card-foreground { color: hsl(var(--card-foreground)); }
-        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
-        .border-border { border-color: hsl(var(--border)); }
-        table { border-color: hsl(var(--border)); }
-        th, td { border-color: hsl(var(--border)); }
-        
-        /* Sidebar Critical CSS */
         .bg-sidebar { background-color: hsl(var(--sidebar)); }
-        .text-sidebar-foreground { color: hsl(var(--sidebar-foreground)); }
     </style>
-
-    {{-- Blocking script - Apply dark mode class immediately --}}
-    <script>
-        window.siteConfig = {
-            lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
-        };
-
-        (function() {
-            const savedMode = localStorage.getItem('admin-dark-mode');
-            const isDark = savedMode === 'dark' || 
-                (!savedMode && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            }
-        })();
-    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
