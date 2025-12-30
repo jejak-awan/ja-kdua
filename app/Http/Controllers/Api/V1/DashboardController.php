@@ -37,6 +37,7 @@ class DashboardController extends Controller
     public function creator(Request $request)
     {
         $userId = $request->user()->id;
+        $days = $request->input('days', 30);
 
         return response()->json([
             'stats' => [
@@ -45,7 +46,7 @@ class DashboardController extends Controller
             ],
             'charts' => [
                 'myContentByStatus' => $this->getMyContentByStatus($userId),
-                'contentTraffic' => $this->getMyContentTraffic($userId),
+                'contentTraffic' => $this->getMyContentTraffic($userId, $days),
             ],
         ]);
     }
@@ -145,7 +146,7 @@ class DashboardController extends Controller
             ->get();
     }
 
-    private function getMyContentTraffic($userId)
+    private function getMyContentTraffic($userId, $days = 30)
     {
         $slugs = Content::where('author_id', $userId)->pluck('slug');
         
@@ -158,7 +159,7 @@ class DashboardController extends Controller
                     $query->orWhere('url', 'like', '%' . $slug);
                 }
             })
-            ->where('visited_at', '>=', now()->subDays(30))
+            ->where('visited_at', '>=', now()->subDays($days))
             ->select(DB::raw('DATE(visited_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->orderBy('date')

@@ -94,8 +94,21 @@
 
         <!-- Row 2: Recent Activity (Full Width) -->
         <Card>
-            <CardHeader>
+            <CardHeader class="flex flex-row items-center justify-between pb-2">
                 <CardTitle>{{ $t('features.dashboard.traffic.visits') }}</CardTitle>
+                <!-- Time Range Filter -->
+                <div class="w-[180px]">
+                    <Select v-model="timeRange" @update:modelValue="fetchStats">
+                        <SelectTrigger class="w-full">
+                            <SelectValue :placeholder="$t('features.dashboard.traffic.filters.last7Days')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="7">{{ $t('features.dashboard.traffic.filters.last7Days') }}</SelectItem>
+                            <SelectItem value="30">{{ $t('features.dashboard.traffic.filters.last30Days') }}</SelectItem>
+                            <SelectItem value="90">{{ $t('features.dashboard.traffic.filters.last90Days') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </CardHeader>
                 <CardContent>
                     <div class="h-[250px] w-full">
@@ -158,6 +171,11 @@ import CardContent from '@/components/ui/card-content.vue';
 import Button from '@/components/ui/button.vue';
 import DoughnutChart from '@/components/charts/DoughnutChart.vue';
 import LineChart from '@/components/charts/LineChart.vue';
+import Select from '@/components/ui/select.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
 
 import { 
     FileText, 
@@ -178,6 +196,7 @@ const stats = ref({});
 const statusData = ref([]);
 const activityData = ref([]);
 const loading = ref(false);
+const timeRange = ref('30'); // Default to 30 days
 
 const mapStatusToLabel = (status) => {
     // Map status to translation key
@@ -193,7 +212,9 @@ const mapStatusToLabel = (status) => {
 const fetchStats = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/dashboard/creator');
+        const response = await api.get('/dashboard/creator', {
+            params: { days: timeRange.value }
+        });
         const data = parseSingleResponse(response);
         
         if (data) {
