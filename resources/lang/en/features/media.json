@@ -239,7 +239,6 @@
         "cancel": "Cancel"
     }
 }
-    },
     "apiErrors": {
         "unauthorized": "You are not authorized to perform this action",
         "forbidden": "This action is forbidden",

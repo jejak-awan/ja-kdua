@@ -229,7 +229,6 @@
         "cancel": "Batal"
     }
 }
-    },
     "apiErrors": {
         "unauthorized": "Anda tidak memiliki otorisasi untuk melakukan tindakan ini",
         "forbidden": "Tindakan ini dilarang",
