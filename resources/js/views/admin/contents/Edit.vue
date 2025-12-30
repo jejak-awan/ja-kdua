@@ -66,7 +66,7 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="loading || !!lockStatus?.locked_by"
+                    :disabled="loading || (lockStatus?.locked_by && lockStatus.locked_by.id !== authStore.user?.id)"
                     class="min-w-[120px] shadow-sm"
                 >
                     <template v-if="loading">
@@ -137,6 +137,7 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useAuthStore } from '../../../stores/auth'; // Import Auth Store
 import { parseSingleResponse } from '../../../utils/responseParser';
 import Button from '@/components/ui/button.vue';
 import Badge from '@/components/ui/badge.vue';
@@ -161,6 +162,7 @@ import { useAutoSave } from '../../../composables/useAutoSave';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore(); // Initialize Auth Store
 const isSidebarOpen = ref(true);
 const contentId = route.params.id;
 const { t } = useI18n();
