@@ -47,7 +47,9 @@
         "verifySuccess": "User verified successfully",
         "cannotManageSuperAdmin": "You cannot manage super-admin accounts",
         "cannotDeleteLastSuperAdmin": "Cannot delete the last super-admin account",
-        "hierarchy_restriction": "You can only manage users with a lower rank than yours"
+        "hierarchy_restriction": "You can only manage users with a lower rank than yours",
+        "bulkVerifyConfirm": "Are you sure you want to verify {count} selected users?",
+        "bulkForceLogoutConfirm": "Are you sure you want to force logout {count} selected users?"
     },
     "actions": {
         "forceLogout": "Force Logout",

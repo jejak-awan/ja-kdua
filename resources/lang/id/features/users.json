@@ -47,7 +47,9 @@
         "verifySuccess": "Pengguna berhasil diverifikasi",
         "cannotManageSuperAdmin": "Anda tidak dapat mengelola akun super-admin",
         "cannotDeleteLastSuperAdmin": "Tidak dapat menghapus satu-satunya akun super-admin",
-        "hierarchy_restriction": "Anda hanya dapat mengelola pengguna dengan peringkat lebih rendah dari Anda"
+        "hierarchy_restriction": "Anda hanya dapat mengelola pengguna dengan peringkat lebih rendah dari Anda",
+        "bulkVerifyConfirm": "Apakah Anda yakin ingin memverifikasi {count} pengguna yang dipilih?",
+        "bulkForceLogoutConfirm": "Apakah Anda yakin ingin melogout paksa {count} pengguna yang dipilih?"
     },
     "actions": {
         "forceLogout": "Logout Paksa",
