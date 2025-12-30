@@ -135,32 +135,12 @@ api.interceptors.response.use(
             }
         }
 
-        // Handle 403 Forbidden - use circuit breaker to prevent loop
+        // Handle 403 Forbidden - DON'T auto-redirect, let components handle it
+        // This allows for graceful error handling with toast notifications
         if (error.response?.status === 403) {
-            // Prevent multiple 403 redirects (circuit breaker)
-            if (window.__is403Blocked) return Promise.reject(error);
-
-            const currentPath = window.location.pathname;
-            // Only redirect if not already on error page
-            if (!currentPath.includes('/403')) {
-                // CIRCUIT BREAKER: Block all future requests
-                window.__is403Blocked = true;
-
-                // Stop pending page loads
-                if (typeof window.stop === 'function') window.stop();
-
-                const responseData = error.response?.data || {};
-                router.push({
-                    name: 'forbidden',
-                    state: {
-                        reason: responseData.message,
-                        requiredPermissions: responseData.required_permissions || []
-                    }
-                }).catch(() => {
-                    // Fallback to hard redirect if router fails
-                    window.location.replace('/403');
-                });
-            }
+            // Just log and let the error propagate to the caller
+            console.debug('403 Forbidden:', error.config?.url);
+            // Components should handle 403 with toast.error() and appropriate fallback
         }
 
         // Handle 429 Rate Limit - ensure retry_after is in response data

@@ -429,11 +429,11 @@ router.beforeEach((to, from, next) => {
         return;
     }
 
-    // Check for specific permission requirement on the target route
-    if (to.meta.permission && !authStore.hasPermission(to.meta.permission)) {
-        next({ name: 'forbidden' });
-        return;
-    }
+    // NOTE: Permission checks are now handled by individual components
+    // This prevents race conditions during page refresh where auth state
+    // may not be fully initialized yet. Components should use:
+    // - authStore.hasPermission() for conditional rendering
+    // - API responses (403) for access control validation
 
     // Allow navigation
     next();
