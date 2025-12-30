@@ -56,20 +56,24 @@
                         <List class="w-4 h-4" />
                     </Button>
                 </div>
-            </div>
-            <!-- Bulk Actions -->
-            <div v-if="selectedIds.length > 0" class="mt-4 pt-4 border-t flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
-                </div>
-                <div class="flex items-center gap-2">
-                     <Button variant="destructive" size="sm" @click="bulkAction('delete')">
-                        <Trash2 class="w-4 h-4 mr-2" />
-                        {{ $t('common.actions.delete') }}
-                    </Button>
-                    <Button variant="ghost" size="sm" @click="selectedIds = []">
-                        {{ $t('common.actions.clear') }}
-                    </Button>
+
+                <!-- Bulk Actions -->
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                    <span class="text-sm font-medium text-primary">
+                        {{ selectedIds.length }} selected
+                    </span>
+                    <div class="h-4 w-px bg-primary/20"></div>
+                    <Select
+                        v-model="bulkActionSelection"
+                        @update:model-value="handleBulkAction"
+                    >
+                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
+                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </Card>
@@ -283,6 +287,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Submissions from './Submissions.vue';
 import Card from '../../../components/ui/card.vue';
@@ -361,9 +366,10 @@ const toggleFormStatus = async (form) => {
         if (index !== -1) {
             forms.value[index] = updatedForm;
         }
+        toast.success(t('common.messages.success.updated', { item: 'Form status' }));
     } catch (error) {
         console.error('Error toggling form status:', error);
-        alert(t('features.forms.messages.saveFailed'));
+        toast.error(t('features.forms.messages.saveFailed'));
     }
 };
 
@@ -375,9 +381,10 @@ const deleteForm = async (form) => {
     try {
         await api.delete(`/admin/cms/forms/${form.id}`);
         forms.value = forms.value.filter(f => f.id !== form.id);
+        toast.success(t('common.messages.success.deleted', { item: 'Form' }));
     } catch (error) {
         console.error('Error deleting form:', error);
-        alert(t('common.messages.error.deleteFailed', { item: 'form' }));
+        toast.error(t('common.messages.error.deleteFailed', { item: 'form' }));
     }
 };
 
@@ -404,11 +411,22 @@ const toggleSelectAll = (checked) => {
     }
 };
 
+const bulkActionSelection = ref('');
+
+const handleBulkAction = async (value) => {
+    if (!value) return;
+    await bulkAction(value);
+    bulkActionSelection.value = '';
+};
+
 const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
     if (action === 'delete') {
-         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) return;
+         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) {
+             bulkActionSelection.value = '';
+             return;
+         }
 
          try {
              await api.post('/admin/cms/forms/bulk-action', {
@@ -417,10 +435,10 @@ const bulkAction = async (action) => {
              });
              selectedIds.value = [];
              await fetchForms();
-             alert(t('common.messages.success.deleted'));
+             toast.success(t('common.messages.success.deleted', { item: 'Forms' }));
          } catch (error) {
              console.error('Bulk delete failed:', error);
-             alert(t('common.messages.error.deleteFailed', { item: 'forms' }));
+             toast.error(t('common.messages.error.deleteFailed', { item: 'forms' }));
          }
     }
 };

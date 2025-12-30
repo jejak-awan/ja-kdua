@@ -75,10 +75,30 @@
                         <SelectItem value="spam">{{ $t('features.comments.status.spam') }}</SelectItem>
                     </SelectContent>
                 </Select>
+
+                <!-- Bulk Actions -->
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                    <span class="text-sm font-medium text-primary">
+                        {{ selectedIds.length }} selected
+                    </span>
+                    <div class="h-4 w-px bg-primary/20"></div>
+                    <Select
+                        v-model="bulkActionSelection"
+                        @update:model-value="handleBulkAction"
+                    >
+                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
+                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="approve">{{ $t('features.comments.actions.approveAll') }}</SelectItem>
+                            <SelectItem value="reject">{{ $t('features.comments.actions.rejectAll') }}</SelectItem>
+                            <SelectItem value="spam">{{ $t('features.comments.actions.markSpam') }}</SelectItem>
+                            <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
             
-             
-            <!-- Bulk Actions -->
             <div class="mt-4 pt-4 border-t flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <Checkbox 
@@ -90,29 +110,6 @@
                         {{ $t('common.actions.selectAll') }}
                     </label>
                 </div>
-
-                <div v-if="selectedIds.length > 0" class="flex items-center flex-wrap gap-2">
-                <span class="text-sm text-muted-foreground mr-2">{{ selectedIds.length }} selected:</span>
-                <Button variant="outline" size="sm" @click="bulkAction('approve')" class="text-green-600 hover:text-green-600 hover:bg-green-500/10 border-green-500/20">
-                    <Check class="w-4 h-4 mr-2" />
-                    {{ $t('features.comments.actions.approveAll') }}
-                </Button>
-                <Button variant="outline" size="sm" @click="bulkAction('reject')" class="text-red-600 hover:text-red-600 hover:bg-red-500/10 border-red-500/20">
-                    <X class="w-4 h-4 mr-2" />
-                    {{ $t('features.comments.actions.rejectAll') }}
-                </Button>
-                <Button variant="outline" size="sm" @click="bulkAction('spam')">
-                    <AlertTriangle class="w-4 h-4 mr-2" />
-                    {{ $t('features.comments.actions.markSpam') }}
-                </Button>
-                <Button variant="destructive" size="sm" @click="bulkAction('delete')">
-                    <Trash2 class="w-4 h-4 mr-2" />
-                    {{ $t('common.actions.delete') }}
-                </Button>
-                <Button variant="ghost" size="sm" @click="selectedIds = []">
-                    {{ $t('common.actions.clear') }}
-                </Button>
-            </div>
             </div>
         </Card>
 
@@ -337,6 +334,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import Pagination from '../../../components/ui/pagination.vue';
@@ -374,6 +372,14 @@ const fetchStatistics = async () => {
     }
 };
 
+const bulkActionSelection = ref('');
+
+const handleBulkAction = async (value) => {
+    if (!value) return;
+    await bulkAction(value);
+    bulkActionSelection.value = '';
+};
+
 const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
@@ -382,7 +388,7 @@ const bulkAction = async (action) => {
     
     switch (action) {
         case 'delete':
-            confirmMsg = t('features.comments.messages.bulkDeleteConfirm', { count });
+            confirmMsg = t('common.messages.confirm.bulkDelete', { count });
             break;
         case 'approve':
             confirmMsg = t('features.comments.messages.bulkApproveConfirm', { count });
@@ -395,19 +401,23 @@ const bulkAction = async (action) => {
             break;
     }
     
-    if (!confirm(confirmMsg)) return;
+    if (!confirm(confirmMsg)) {
+        bulkActionSelection.value = '';
+        return;
+    }
     
     try {
-        await api.post('/admin/cms/comments/bulk', {
+        const response = await api.post('/admin/cms/comments/bulk', {
             ids: selectedIds.value,
             action: action
         });
         selectedIds.value = [];
         await fetchComments();
         await fetchStatistics();
+        toast.success(t('common.messages.success.action'), response.data?.message);
     } catch (error) {
         console.error('Bulk action failed:', error);
-        alert(t('features.comments.messages.bulkFailed'));
+        toast.error(t('features.comments.messages.bulkFailed'));
     }
 };
 
@@ -447,9 +457,10 @@ const approveComment = async (comment) => {
     try {
         await api.put(`/admin/cms/comments/${comment.id}/approve`);
         await fetchComments();
+        toast.success(t('common.messages.success.updated', { item: 'Comment' }));
     } catch (error) {
         console.error('Failed to approve comment:', error);
-        alert(t('features.comments.messages.approveFailed'));
+        toast.error(t('features.comments.messages.approveFailed'));
     }
 };
 
@@ -458,9 +469,10 @@ const rejectComment = async (comment) => {
         await api.put(`/admin/cms/comments/${comment.id}/reject`);
         await fetchComments();
         await fetchStatistics();
+        toast.success(t('common.messages.success.updated', { item: 'Comment' }));
     } catch (error) {
         console.error('Failed to reject comment:', error);
-        alert(t('features.comments.messages.rejectFailed'));
+        toast.error(t('features.comments.messages.rejectFailed'));
     }
 };
 
@@ -469,9 +481,10 @@ const markAsSpam = async (comment) => {
         await api.put(`/admin/cms/comments/${comment.id}/spam`);
         await fetchComments();
         await fetchStatistics();
+         toast.success(t('common.messages.success.updated', { item: 'Comment' }));
     } catch (error) {
         console.error('Failed to mark as spam:', error);
-        alert(t('features.comments.messages.spamFailed'));
+        toast.error(t('features.comments.messages.spamFailed'));
     }
 };
 
@@ -492,9 +505,10 @@ const deleteComment = async (comment) => {
     try {
         await api.delete(`/admin/cms/comments/${comment.id}`);
         await fetchComments();
+        toast.success(t('common.messages.success.deleted', { item: 'Comment' }));
     } catch (error) {
         console.error('Failed to delete comment:', error);
-        alert(t('features.comments.messages.deleteFailed'));
+        toast.error(t('features.comments.messages.deleteFailed'));
     }
 };
 

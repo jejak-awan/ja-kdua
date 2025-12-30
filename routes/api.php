@@ -169,6 +169,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('comments/{comment}', [App\Http\Controllers\Api\V1\CommentController::class, 'destroy'])->middleware('permission:manage comments');
 
         // Users Management
+        Route::post('users/bulk-action', [App\Http\Controllers\Api\V1\UserController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::apiResource('users', App\Http\Controllers\Api\V1\UserController::class)->middleware('permission:manage users');
         Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
 

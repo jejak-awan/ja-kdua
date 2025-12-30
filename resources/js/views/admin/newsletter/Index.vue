@@ -18,23 +18,8 @@
 
         <Card>
             <!-- Filters & Search -->
-            <div class="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <Select
-                        v-model="filters.status"
-                        @update:modelValue="fetchSubscribers"
-                    >
-                        <SelectTrigger class="w-[180px]">
-                            <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
-                            <SelectItem value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</SelectItem>
-                            <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div class="relative max-w-xs w-full">
+            <div class="p-4 border-b border-border flex flex-col md:flex-row md:items-center gap-4">
+                <div class="relative flex-1">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         v-model="filters.q"
@@ -43,19 +28,37 @@
                         class="pl-9"
                     />
                 </div>
-            </div>
-            
-            <!-- Bulk Actions -->
-            <div v-if="selectedIds.length > 0" class="px-4 py-2 border-b border-border flex items-center justify-between text-sm bg-muted/20">
-                <span class="text-muted-foreground">{{ selectedIds.length }} selected</span>
-                <div class="flex items-center gap-2">
-                     <Button variant="destructive" size="sm" @click="bulkAction('delete')">
-                        <Trash2 class="w-4 h-4 mr-2" />
-                        {{ $t('common.actions.delete') }}
-                    </Button>
-                    <Button variant="ghost" size="sm" @click="selectedIds = []">
-                        {{ $t('common.actions.clear') }}
-                    </Button>
+                <Select
+                    v-model="filters.status"
+                    @update:modelValue="fetchSubscribers"
+                >
+                    <SelectTrigger class="w-full md:w-[200px]">
+                        <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                        <SelectItem value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</SelectItem>
+                        <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Bulk Actions -->
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                    <span class="text-sm font-medium text-primary">
+                        {{ selectedIds.length }} selected
+                    </span>
+                    <div class="h-4 w-px bg-primary/20"></div>
+                    <Select
+                        v-model="bulkActionSelection"
+                        @update:model-value="handleBulkAction"
+                    >
+                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
+                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
@@ -161,6 +164,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseResponse } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import Button from '../../../components/ui/button.vue';
@@ -238,8 +242,9 @@ const deleteSubscriber = async (subscriber) => {
     try {
         await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}`);
         fetchSubscribers();
+        toast.success(t('common.messages.success.deleted', { item: 'Subscriber' }));
     } catch (error) {
-        alert(t('features.newsletter.messages.deleteFailed'));
+        toast.error(t('features.newsletter.messages.deleteFailed'));
     }
 };
 
@@ -257,8 +262,9 @@ const exportCsv = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
+        toast.success(t('common.messages.success.exported'));
     } catch (error) {
-        alert(t('features.newsletter.messages.exportFailed'));
+        toast.error(t('features.newsletter.messages.exportFailed'));
     }
 };
 
@@ -271,6 +277,14 @@ const formatDate = (dateString) => {
         hour: '2-digit',
         minute: '2-digit',
     });
+};
+
+const bulkActionSelection = ref('');
+
+const handleBulkAction = async (value) => {
+    if (!value) return;
+    await bulkAction(value);
+    bulkActionSelection.value = '';
 };
 
 const selectedIds = ref([]);
@@ -300,7 +314,10 @@ const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
     if (action === 'delete') {
-         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) return;
+         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) {
+             bulkActionSelection.value = '';
+             return;
+         }
 
          try {
              await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
@@ -309,9 +326,9 @@ const bulkAction = async (action) => {
              });
              selectedIds.value = [];
              await fetchSubscribers();
-             alert(t('common.messages.success.deleted'));
+             toast.success(t('common.messages.success.deleted', { item: 'Subscribers' }));
          } catch (error) {
-             alert(t('features.newsletter.messages.deleteFailed'));
+             toast.error(t('features.newsletter.messages.deleteFailed'));
          }
     }
 };

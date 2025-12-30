@@ -172,7 +172,7 @@
                                 <SelectValue :placeholder="$t('features.security.logs.all')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">{{ $t('features.security.logs.all') }}</SelectItem>
+                                <SelectItem value="all">{{ $t('features.security.logs.all') }}</SelectItem>
                                 <SelectItem value="login_failed">{{ $t('features.security.logs.failedLogin') }}</SelectItem>
                                 <SelectItem value="ip_blocked">{{ $t('features.security.logs.blockedIp') }}</SelectItem>
                                 <SelectItem value="suspicious_activity">{{ $t('features.security.logs.suspiciousActivity') }}</SelectItem>
@@ -564,7 +564,7 @@ const loading = ref(false);
 
 // UI State
 const activeTab = ref('overview');
-const logFilter = ref('');
+const logFilter = ref('all');
 const logSearch = ref('');
 const ipToBlock = ref('');
 const ipToCheck = ref('');
@@ -605,7 +605,7 @@ const tabs = computed(() => [
 const filteredLogs = computed(() => {
     let filtered = logs.value;
     
-    if (logFilter.value) {
+    if (logFilter.value && logFilter.value !== 'all') {
         filtered = filtered.filter(log => log.event_type === logFilter.value);
     }
     

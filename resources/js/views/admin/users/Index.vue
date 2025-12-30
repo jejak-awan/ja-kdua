@@ -39,6 +39,28 @@
                     </SelectContent>
                 </Select>
             </div>
+            
+            
+            <!-- Bulk Actions -->
+            <div v-if="selectedIds.length > 0" class="mt-4 pt-4 border-t flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Select
+                        v-model="bulkActionSelection"
+                        @update:model-value="handleBulkAction"
+                    >
+                        <SelectTrigger class="w-[160px] h-8 border-primary/20">
+                            <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="force_logout" class="text-amber-600 focus:text-amber-600">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
+                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
         </Card>
 
         <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
@@ -55,6 +77,12 @@
             <table class="min-w-full divide-y divide-border">
                 <thead class="bg-muted/50">
                     <tr>
+                        <th class="px-6 py-3 w-[50px]">
+                            <Checkbox 
+                                :checked="isAllSelected"
+                                @update:checked="toggleSelectAll"
+                            />
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.user') }}
                         </th>
@@ -74,6 +102,12 @@
                 </thead>
                 <tbody class="bg-card divide-y divide-border">
                     <tr v-for="user in users" :key="user.id" class="hover:bg-muted">
+                        <td class="px-6 py-4">
+                            <Checkbox 
+                                :checked="selectedIds.includes(user.id)"
+                                @update:checked="toggleSelection(user.id)"
+                            />
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
@@ -182,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
@@ -197,6 +231,7 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
 import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -316,6 +351,69 @@ const forceLogoutUser = async (user) => {
         console.error('Failed to force logout user:', error);
         const message = error.response?.data?.message || t('features.users.messages.forceLogoutFailed');
         toast.error(t('features.users.messages.forceLogoutFailed'), message);
+    }
+};
+
+const selectedIds = ref([]);
+
+const isAllSelected = computed(() => {
+    return users.value.length > 0 && selectedIds.value.length === users.value.length;
+});
+
+const toggleSelection = (id) => {
+    const index = selectedIds.value.indexOf(id);
+    if (index === -1) {
+        selectedIds.value.push(id);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedIds.value = users.value.map(u => u.id);
+    } else {
+        selectedIds.value = [];
+    }
+};
+
+const bulkActionSelection = ref('');
+
+const handleBulkAction = async (value) => {
+    if (!value) return;
+    await bulkAction(value);
+    bulkActionSelection.value = '';
+};
+
+const bulkAction = async (action) => {
+    if (selectedIds.value.length === 0) return;
+    
+    let confirmMessage = '';
+    if (action === 'delete') {
+        confirmMessage = t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length });
+    } else if (action === 'force_logout') {
+        confirmMessage = t('features.users.messages.bulkForceLogoutConfirm', { count: selectedIds.value.length }) || `Force logout ${selectedIds.value.length} users?`;
+    }
+
+    if (!confirm(confirmMessage)) {
+        bulkActionSelection.value = '';
+        return;
+    }
+
+    try {
+        const response = await api.post('/admin/cms/users/bulk-action', {
+            ids: selectedIds.value,
+            action: action
+        });
+        const { data } = parseResponse(response);
+
+        selectedIds.value = [];
+        await fetchUsers();
+        
+        toast.success(t('common.messages.success.action'), data.message);
+    } catch (error) {
+        console.error('Bulk action failed:', error);
+        toast.error(t('common.messages.error.action'), error.response?.data?.message || 'Bulk action failed');
     }
 };
 

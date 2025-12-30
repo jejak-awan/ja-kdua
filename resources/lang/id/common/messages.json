@@ -23,6 +23,7 @@
     "confirm": {
         "delete": "Apakah Anda yakin ingin menghapus {item} ini?",
         "deleteMultiple": "Apakah Anda yakin ingin menghapus {count} item?",
+        "bulkDelete": "Apakah Anda yakin ingin menghapus {count} item terpilih?",
         "unsaved": "Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?",
         "action": "Apakah Anda yakin ingin {action} {item} ini?"
     },

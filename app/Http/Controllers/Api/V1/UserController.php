@@ -275,4 +275,49 @@ class UserController extends BaseApiController
             'revoked_sessions' => $tokenCount,
         ], "User logged out from {$tokenCount} device(s) successfully");
     }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+            'action' => 'required|in:delete,force_logout',
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $count = 0;
+
+        if ($action === 'delete') {
+            // Filter out self-deletion
+            $ids = array_filter($ids, function($id) {
+                return $id != auth()->id();
+            });
+
+            // Delete avatars
+            $users = User::whereIn('id', $ids)->get();
+            foreach ($users as $user) {
+                if ($user->avatar) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+            }
+
+            $count = User::whereIn('id', $ids)->delete();
+            $message = "{$count} users deleted successfully";
+        } elseif ($action === 'force_logout') {
+            // Filter out self-logout
+            $ids = array_filter($ids, function($id) {
+                return $id != auth()->id();
+            });
+            
+            $users = User::whereIn('id', $ids)->get();
+            foreach ($users as $user) {
+                $user->tokens()->delete();
+                $count++;
+            }
+            $message = "{$count} users force logged out successfully";
+        }
+
+        return $this->success(['count' => $count], $message);
+    }
 }
