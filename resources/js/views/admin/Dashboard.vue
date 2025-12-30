@@ -226,7 +226,8 @@ const refreshDashboard = async () => {
 
 const fetchStats = async () => {
     // Permission check: manage system required for system statistics
-    if (!authStore.hasPermission('manage system')) return;
+    // Also check if user is loaded to prevent race conditions
+    if (!authStore.user || !authStore.hasPermission('manage system')) return;
 
     try {
         const response = await api.get('/admin/cms/system/statistics');
@@ -254,7 +255,8 @@ const fetchStats = async () => {
 
 const fetchTraffic = async () => {
     // Permission check: view analytics required
-    if (!authStore.hasPermission('view analytics')) return;
+    // Also check if user is loaded to prevent race conditions
+    if (!authStore.user || !authStore.hasPermission('view analytics')) return;
 
     loadingVisits.value = true;
     try {
