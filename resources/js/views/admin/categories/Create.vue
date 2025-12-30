@@ -31,8 +31,12 @@
                                 v-model="form.name"
                                 required
                                 @input="generateSlug"
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                                 :placeholder="$t('features.categories.form.namePlaceholder')"
                             />
+                            <p v-if="errors.name" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                            </p>
                         </div>
 
                         <!-- Slug -->
@@ -43,9 +47,13 @@
                             <Input
                                 v-model="form.slug"
                                 required
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
                                 :placeholder="$t('features.categories.form.slugPlaceholder')"
                             />
                             <p class="text-xs text-muted-foreground">{{ $t('features.categories.form.slugHelp') }}</p>
+                            <p v-if="errors.slug" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
+                            </p>
                         </div>
                     </div>
 
@@ -187,6 +195,7 @@ const toast = useToast();
 
 const saving = ref(false);
 const categories = ref([]);
+const errors = ref({});
 
 const flattenedCategories = computed(() => {
     return flattenTree(categories.value);
@@ -249,6 +258,7 @@ const fetchCategories = async () => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         const payload = { ...form.value };
         // Handle select returning string 'null_value' or numeric string
@@ -256,13 +266,15 @@ const handleSubmit = async () => {
             payload.parent_id = null;
         }
         
-        
         await api.post('/admin/cms/categories', payload);
         toast.success.create('Category');
-        router.push({ name: 'categories.index' });
+        router.push({ name: 'categories' });
     } catch (error) {
-        console.error('Failed to create category:', error);
-        toast.error.create(error, 'Category');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

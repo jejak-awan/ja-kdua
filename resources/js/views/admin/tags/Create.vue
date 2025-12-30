@@ -31,8 +31,12 @@
                                 v-model="form.name"
                                 required
                                 @input="generateSlug"
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                                 :placeholder="$t('features.tags.form.namePlaceholder')"
                             />
+                            <p v-if="errors.name" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                            </p>
                         </div>
 
                         <!-- Slug -->
@@ -43,9 +47,13 @@
                             <Input
                                 v-model="form.slug"
                                 required
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
                                 :placeholder="$t('features.tags.form.slugPlaceholder')"
                             />
                             <p class="text-xs text-muted-foreground">{{ $t('features.tags.form.slugHelp') }}</p>
+                            <p v-if="errors.slug" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
+                            </p>
                         </div>
                     </div>
 
@@ -98,6 +106,7 @@ const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
 const saving = ref(false);
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -125,13 +134,17 @@ const slugify = (text) => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         await api.post('/admin/cms/tags', form.value);
         toast.success.create('Tag');
         router.push({ name: 'tags.index' });
     } catch (error) {
-        console.error('Failed to create tag:', error);
-        toast.error.create(error, 'Tag');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

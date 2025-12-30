@@ -35,7 +35,11 @@
                                 v-model="form.name"
                                 required
                                 @input="generateSlug"
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                             />
+                            <p v-if="errors.name" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                            </p>
                         </div>
 
                         <!-- Slug -->
@@ -46,8 +50,12 @@
                             <Input
                                 v-model="form.slug"
                                 required
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
                             />
                              <p class="text-xs text-muted-foreground">{{ $t('features.categories.form.slugHelp') }}</p>
+                            <p v-if="errors.slug" class="text-sm text-destructive">
+                                {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
+                            </p>
                         </div>
                     </div>
 
@@ -190,6 +198,7 @@ const loading = ref(true);
 const saving = ref(false);
 const categories = ref([]);
 const currentCategory = ref(null);
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -278,6 +287,7 @@ const fetchCategory = async () => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         const payload = { ...form.value };
         if (payload.parent_id === 'null_value' || !payload.parent_id) {
@@ -285,10 +295,13 @@ const handleSubmit = async () => {
         }
         await api.put(`/admin/cms/categories/${route.params.id}`, payload);
         toast.success.update('Category');
-        router.push({ name: 'categories.index' });
+        router.push({ name: 'categories' });
     } catch (error) {
-        console.error('Failed to update category:', error);
-        toast.error.update(error, 'Category');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
