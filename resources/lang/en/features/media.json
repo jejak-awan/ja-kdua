@@ -209,5 +209,4 @@
         "fileTooLarge": "File is too large (max 10MB)",
         "permissionDenied": "You don't have permission to perform this action"
     }
-    }
 }
