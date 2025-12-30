@@ -804,6 +804,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMediaToast } from '@/composables/useMediaToast.js';
+import { useConfirm } from '@/composables/useConfirm.js';
 import { 
     LayoutGrid, 
     List, 
@@ -859,6 +860,7 @@ import CardDescription from '@/components/ui/card-description.vue';
 
 const { t } = useI18n();
 const mediaToast = useMediaToast();
+const { confirm } = useConfirm();
 const viewMode = ref('grid');
 const loading = ref(false);
 const isReady = ref(false);

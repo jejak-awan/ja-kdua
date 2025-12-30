@@ -225,4 +225,17 @@
         "noPermissionManage": "You do not have permission to manage this media",
         "mediaInUse": "Media is currently in use"
     }
+    },
+    "confirm": {
+        "deleteTitle": "Delete Media",
+        "deleteMessage": "Are you sure you want to delete this media?",
+        "deletePermanentTitle": "Permanently Delete",
+        "deletePermanentMessage": "This action cannot be undone. Are you sure?",
+        "emptyTrashTitle": "Empty Trash",
+        "emptyTrashMessage": "This will permanently delete all items in trash. Continue?",
+        "yes": "Yes",
+        "no": "No",
+        "delete": "Delete",
+        "cancel": "Cancel"
+    }
 }
