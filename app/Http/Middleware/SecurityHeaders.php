@@ -59,6 +59,7 @@ class SecurityHeaders
             "'sha256-bYJ5jUrfnAwV0m4aathRglwVNvZrPLkrugff3Hh1b1k='", // Dark mode script (line 12)
             "'sha256-NrYVPfGWcGFTIEFXOF0FJ30yVDzC8vN6pXoAMPaU5RI='", // SiteConfig script (line 24)
             "'sha256-EuHBk5xLTkeNQNYrCUayLQWeV5z2hbGuaMU/F+w38hk='", // New script (likely error page or Vite)
+            "'sha256-2s8oON1aK5LMVmmlBFeRS/prDWzv6u88194WZ9kAlzU='", // Additional inline script
         ]);
         
         // Add same-origin domains
