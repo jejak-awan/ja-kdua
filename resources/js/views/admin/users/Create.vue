@@ -53,40 +53,52 @@
 
                 <!-- Basic Info -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground">
                             {{ $t('features.users.form.name') }} <span class="text-destructive">*</span>
                         </label>
                         <Input
                             v-model="form.name"
                             type="text"
                             required
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                             :placeholder="$t('features.users.form.placeholders.name')"
                         />
+                        <p v-if="errors.name" class="text-sm text-destructive">
+                            {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                        </p>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground">
                             {{ $t('features.users.form.email') }} <span class="text-destructive">*</span>
                         </label>
                         <Input
                             v-model="form.email"
                             type="email"
                             required
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
                             :placeholder="$t('features.users.form.placeholders.email')"
                         />
+                        <p v-if="errors.email" class="text-sm text-destructive">
+                            {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
+                        </p>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground">
                             {{ $t('features.users.form.password') }} <span class="text-destructive">*</span>
                         </label>
                         <Input
                             v-model="form.password"
                             type="password"
                             required
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
                             :placeholder="$t('features.users.form.placeholders.password') + ' (min 8, A-Z, a-z, 0-9)'"
                         />
+                        <p v-if="errors.password" class="text-sm text-destructive">
+                            {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
+                        </p>
                     </div>
 
                     <div>
@@ -222,6 +234,7 @@ const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 const saving = ref(false);
 const loadingRoles = ref(false);
 const availableRoles = ref([]);
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -250,18 +263,23 @@ const fetchRoles = async () => {
 
 const handleSubmit = async () => {
     if (form.value.roles.length === 0) {
-        toast.error.validation(t('features.users.messages.roleRequired'));
+        errors.value = { roles: [t('features.users.messages.roleRequired')] };
         return;
     }
 
     saving.value = true;
+    errors.value = {};
+    
     try {
         await api.post('/admin/cms/users', form.value);
         toast.success.create('User');
         router.push({ name: 'users.index' });
     } catch (error) {
-        console.error('Failed to create user:', error);
-        toast.error.create(error, 'User');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
