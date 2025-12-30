@@ -213,10 +213,12 @@ import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import { useAuthStore } from '../../../stores/auth';
 
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
+const authStore = useAuthStore();
 
 const loading = ref(true);
 const saving = ref(false);
@@ -287,6 +289,12 @@ const handleSubmit = async () => {
         if (!payload.password) delete payload.password;
         
         await api.put(`/admin/cms/users/${route.params.id}`, payload);
+        
+        // Refresh auth user if updating self
+        if (authStore.user?.id === Number(route.params.id)) {
+            await authStore.fetchUser();
+        }
+
         router.push({ name: 'users.index' });
     } catch (error) {
         console.error('Failed to update user:', error);

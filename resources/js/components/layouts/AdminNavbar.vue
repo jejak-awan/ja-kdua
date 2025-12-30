@@ -358,14 +358,22 @@ const recentNotifications = computed(() => {
 
 const userAvatar = computed(() => {
     if (!props.user?.avatar || avatarError.value) return null;
+
+    const formatUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http') || path.startsWith('/storage/')) return path;
+        // Remove leading slash if exists to avoid double slash
+        return `/storage/${path.replace(/^\//, '')}`;
+    };
+
     if (typeof props.user.avatar === 'string') {
-        return props.user.avatar.startsWith('http') ? props.user.avatar : `/storage/${props.user.avatar}`;
+        return formatUrl(props.user.avatar);
     }
     if (props.user.avatar?.url) {
-        return props.user.avatar.url.startsWith('http') ? props.user.avatar.url : `/storage/${props.user.avatar.url}`;
+        return formatUrl(props.user.avatar.url);
     }
     if (props.user.avatar?.path) {
-        return props.user.avatar.path.startsWith('http') ? props.user.avatar.path : `/storage/${props.user.avatar.path}`;
+        return formatUrl(props.user.avatar.path);
     }
     return null;
 });
