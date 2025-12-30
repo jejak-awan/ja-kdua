@@ -980,7 +980,7 @@ const fetchMedia = async () => {
             pagination.value = paginationData;
         }
     } catch (error) {
-        console.error('Failed to fetch media:', error);
+        // console.error('Failed to fetch media:', error);
     } finally {
         loading.value = false;
     }
@@ -991,7 +991,7 @@ const fetchStatistics = async () => {
         const response = await api.get('/admin/cms/media/statistics');
         statistics.value = response.data?.data || response.data;
     } catch (error) {
-        console.error('Failed to fetch media statistics:', error);
+        // console.error('Failed to fetch media statistics:', error);
     }
 };
 
@@ -1021,7 +1021,7 @@ const fetchFolders = async () => {
         };
         folders.value = flatten(treeFolders.value);
     } catch (error) {
-        console.error('Failed to fetch folders:', error);
+        // console.error('Failed to fetch folders:', error);
     }
 };
 
@@ -1031,7 +1031,7 @@ const restoreMedia = async (media) => {
         await fetchMedia();
         fetchStatistics();
     } catch (error) {
-        console.error('Failed to restore media:', error);
+        // console.error('Failed to restore media:', error);
     }
 };
 
@@ -1046,7 +1046,7 @@ const emptyTrash = async () => {
         await fetchFolders();
         fetchStatistics();
     } catch (error) {
-        console.error('Failed to empty trash:', error);
+        // console.error('Failed to empty trash:', error);
         alert(error.response?.data?.message || t('features.media.messages.emptyTrashFailed') || 'Failed to empty trash');
     }
 };
@@ -1111,7 +1111,7 @@ const handleBulkAction = async () => {
             selectedMedia.value = [];
             bulkAction.value = '';
         } catch (error) {
-            console.error('Failed to delete media:', error);
+            // console.error('Failed to delete media:', error);
             alert(error.response?.data?.message || t('features.media.messages.deleteFailed'));
             bulkAction.value = '';
         } finally {
@@ -1129,7 +1129,7 @@ const handleBulkAction = async () => {
             selectedMedia.value = [];
             bulkAction.value = '';
         } catch (error) {
-            console.error('Failed to restore media:', error);
+            // console.error('Failed to restore media:', error);
             alert(error.response?.data?.message || t('features.media.messages.restoreFailed'));
         } finally {
             bulkProcessing.value = false;
@@ -1150,7 +1150,7 @@ const handleBulkAction = async () => {
             selectedMedia.value = [];
             bulkAction.value = '';
         } catch (error) {
-            console.error('Failed to delete permanent:', error);
+            // console.error('Failed to delete permanent:', error);
             alert(error.response?.data?.message);
         } finally {
             bulkProcessing.value = false;
@@ -1186,7 +1186,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
             alert(t('features.media.messages.downloadSuccess', { count }));
         } catch (error) {
-            console.error('Failed to download media:', error);
+            // console.error('Failed to download media:', error);
             alert(error.response?.data?.message || t('features.media.messages.downloadFailed'));
             bulkAction.value = '';
         } finally {
@@ -1213,7 +1213,7 @@ const handleMoveToFolder = async (folderId) => {
         showMoveFolderModal.value = false;
         alert(t('features.media.messages.moveSuccess', { count }));
     } catch (error) {
-        console.error('Failed to move media:', error);
+        // console.error('Failed to move media:', error);
         alert(error.response?.data?.message || t('features.media.messages.moveFailed'));
     } finally {
         bulkProcessing.value = false;
@@ -1242,7 +1242,7 @@ const handleUpdateAltText = async () => {
         showUpdateAltModal.value = false;
         alert(t('features.media.messages.updateAltSuccess'));
     } catch (error) {
-        console.error('Failed to update alt text:', error);
+        // console.error('Failed to update alt text:', error);
         alert(error.response?.data?.message || t('features.media.messages.updateAltFailed'));
     } finally {
         bulkProcessing.value = false;
@@ -1281,7 +1281,7 @@ const deleteMedia = async (media) => {
         await fetchMedia();
         fetchStatistics();
     } catch (error) {
-        console.error('Failed to delete media:', error);
+        // console.error('Failed to delete media:', error);
         alert(t('features.media.messages.deleteFailed'));
     }
 };
@@ -1306,7 +1306,7 @@ const deleteFolder = async (folder) => {
         }
         fetchStatistics();
     } catch (error) {
-        console.error('Failed to delete folder:', error);
+        // console.error('Failed to delete folder:', error);
         alert(error.response?.data?.message || t('features.media.messages.deleteFailed'));
     }
 };

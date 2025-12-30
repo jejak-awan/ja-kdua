@@ -114,7 +114,7 @@ class RolePermissionSeeder extends Seeder
             'view content', 'create content', 'edit content', 'delete content', // Ownership handled by Policy
             'view categories',
             'view tags', 
-            'view media', 'upload media', // Authors need to upload images for posts
+            'view media', 'upload media', 'edit media', // Authors need to upload images for posts
         ]);
 
         // MEMBER - Default user role
