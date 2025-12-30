@@ -352,9 +352,13 @@ const stats = ref({
 const isSuperAdmin = (u) => u.roles?.some(r => r.name === 'super-admin');
 
 const canManage = (targetUser) => {
-    // Cannot manage someone with equal or higher rank
-    // Except if it's yourself (e.g. editing your own profile, though index typically handles others)
+    // Self management is always allowed (for basic edits)
     if (targetUser.id === authStore.user?.id) return true;
+    
+    // Super Admin (Rank 100) can manage anyone
+    if (authStore.getRoleRank() >= 100) return true;
+
+    // Others must strictly be higher rank
     return authStore.isHigherThan(targetUser);
 };
 
@@ -362,8 +366,12 @@ const canDelete = (targetUser) => {
     // Cannot delete self
     if (targetUser.id === authStore.user?.id) return false;
     
-    // Can only delete users with strictly lower rank
-    if (!authStore.isHigherThan(targetUser)) return false;
+    const myRank = authStore.getRoleRank();
+    
+    // Non-Super Admins can only delete users with strictly lower rank
+    if (myRank < 100) {
+        if (!authStore.isHigherThan(targetUser)) return false;
+    }
     
     // Super Admin protection for last one
     if (isSuperAdmin(targetUser)) {
