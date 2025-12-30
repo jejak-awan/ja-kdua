@@ -416,8 +416,9 @@ router.beforeEach((to, from, next) => {
     // Initialize auth for protected routes
     authStore.initAuth();
 
-    // If route requires auth but user is not authenticated
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // Check if any matched route requires auth (handles parent-child meta inheritance)
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    if (requiresAuth && !authStore.isAuthenticated) {
         next({ name: 'login', query: { redirect: to.fullPath } });
         return;
     }
@@ -428,7 +429,7 @@ router.beforeEach((to, from, next) => {
         return;
     }
 
-    // Check for specific permission requirement
+    // Check for specific permission requirement on the target route
     if (to.meta.permission && !authStore.hasPermission(to.meta.permission)) {
         next({ name: 'forbidden' });
         return;
