@@ -619,7 +619,7 @@ const formatDate = (date) => {
     });
 };
 
-watch([search, roleFilter, verificationFilter], () => {
+watch([search, roleFilter, verificationFilter, activeStatFilter], () => {
     if (pagination.value) {
         pagination.value.current_page = 1;
     }
