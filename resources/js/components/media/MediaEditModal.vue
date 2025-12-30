@@ -194,7 +194,7 @@ const fetchFolders = async () => {
         const response = await api.get('/admin/cms/media-folders');
         folders.value = response.data.data || response.data || [];
     } catch (error) {
-        console.error('Failed to fetch folders:', error);
+        // console.error('Failed to fetch folders:', error);
     }
 };
 
@@ -227,7 +227,7 @@ const handleSubmit = async () => {
         
         emit('updated');
     } catch (error) {
-        console.error('Failed to update media:', error);
+        // console.error('Failed to update media:', error);
         alert(t('features.media.messages.updateFailed'));
     } finally {
         saving.value = false;
