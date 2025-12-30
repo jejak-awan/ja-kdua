@@ -25,7 +25,11 @@
         "uploadFailed": "Failed to upload file",
         "deleteFailed": "Failed to delete {item}",
         "loadFailed": "Failed to load data",
-        "action": "Action Failed"
+        "action": "Action Failed",
+        "noPermission": "You do not have permission to {action}",
+        "cannotActionGlobal": "You cannot {action} global {resource}",
+        "canOnlyAction": "You can only {action}",
+        "forbidden": "Access denied"
     },
     "confirm": {
         "title": "Confirm",

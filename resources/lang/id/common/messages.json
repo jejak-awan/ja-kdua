@@ -25,7 +25,11 @@
         "uploadFailed": "Gagal mengunggah file",
         "deleteFailed": "Gagal menghapus {item}",
         "loadFailed": "Gagal memuat data",
-        "action": "Gagal Melakukan Tindakan"
+        "action": "Gagal Melakukan Tindakan",
+        "noPermission": "Anda tidak memiliki izin untuk {action}",
+        "cannotActionGlobal": "Anda tidak dapat {action} {resource} global",
+        "canOnlyAction": "Anda hanya dapat {action}",
+        "forbidden": "Akses ditolak"
     },
     "confirm": {
         "title": "Konfirmasi",

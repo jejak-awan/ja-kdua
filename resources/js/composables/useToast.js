@@ -37,12 +37,40 @@ export function useToast() {
     };
 
     /**
-     * Translates backend messages using the messageMap
+     * Translates backend messages using the messageMap and pattern matching
      */
     const translateMessage = (message) => {
+        // First, try exact match in messageMap
         if (messageMap[message]) {
             return t(messageMap[message]);
         }
+
+        // Pattern 1: "You do not have permission to {action} {resource}"
+        const permissionPattern1 = /^You do not have permission to (.+)$/;
+        const match1 = message.match(permissionPattern1);
+        if (match1) {
+            const action = match1[1];
+            return t('common.messages.error.noPermission', { action });
+        }
+
+        // Pattern 2: "You cannot {action} global {resource}"
+        const globalPattern = /^You cannot (.+) global (.+)$/;
+        const match2 = message.match(globalPattern);
+        if (match2) {
+            const action = match2[1];
+            const resource = match2[2];
+            return t('common.messages.error.cannotActionGlobal', { action, resource });
+        }
+
+        // Pattern 3: "You can only {action}"
+        const onlyPattern = /^You can only (.+)$/;
+        const match3 = message.match(onlyPattern);
+        if (match3) {
+            const action = match3[1];
+            return t('common.messages.error.canOnlyAction', { action });
+        }
+
+        // If no pattern matches, return original message
         return message;
     };
 
