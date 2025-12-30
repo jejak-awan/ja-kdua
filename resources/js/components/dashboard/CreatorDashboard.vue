@@ -2,8 +2,8 @@
     <div class="space-y-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.dashboard.welcome', { name: authStore.user?.name }) }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.dashboard.creatorSubtitle') }}</p>
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.dashboard.title') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.dashboard.welcome', { name: authStore.user?.name }) }}</p>
             </div>
             <div class="flex items-center gap-2">
                 <Button variant="outline" size="sm" @click="refreshDashboard" :disabled="loading">
@@ -98,7 +98,7 @@
                 <CardTitle>{{ $t('features.dashboard.traffic.visits') }}</CardTitle>
             </CardHeader>
                 <CardContent>
-                    <div class="h-[350px] w-full">
+                    <div class="h-[250px] w-full">
                     <LineChart 
                         v-if="activityData.length > 0"
                         :data="activityData" 
@@ -120,7 +120,7 @@
                     <CardTitle>{{ $t('features.dashboard.stats.creator.contentStatus') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <div class="h-[300px] w-full flex items-center justify-center">
+                     <div class="h-[250px] w-full flex items-center justify-center">
                         <DoughnutChart 
                             v-if="statusData.length > 0" 
                             :data="statusData" 

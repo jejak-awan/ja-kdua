@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Content;
 use App\Models\Media;
 use App\Models\User;
+use App\Models\AnalyticsVisit;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
