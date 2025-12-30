@@ -206,8 +206,7 @@
         "thumbnailSuccess": "Thumbnail berhasil dibuat",
         "fileTooLarge": "File terlalu besar (maks 10MB)",
         "permissionDenied": "Anda tidak memiliki izin untuk melakukan aksi ini"
-    }
-}    },
+    },
     "errors": {
         "cannotUpdateGlobal": "Anda tidak dapat memperbarui media global",
         "cannotDeleteGlobal": "Anda tidak dapat menghapus media global",

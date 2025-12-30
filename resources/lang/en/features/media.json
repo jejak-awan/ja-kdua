@@ -216,8 +216,7 @@
         "thumbnailSuccess": "Thumbnail generated successfully",
         "fileTooLarge": "File is too large (max 10MB)",
         "permissionDenied": "You don't have permission to perform this action"
-    }
-}    },
+    },
     "errors": {
         "cannotUpdateGlobal": "You cannot update global media",
         "cannotDeleteGlobal": "You cannot delete global media",
