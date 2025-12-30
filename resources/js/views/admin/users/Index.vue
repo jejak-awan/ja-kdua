@@ -426,8 +426,12 @@ const fetchUsers = async () => {
 const fetchStats = async () => {
     try {
         const response = await api.get('/admin/cms/users/stats');
-        const { data } = parseResponse(response);
-        stats.value = data;
+        // The BaseApiController returns { success: true, data: { ... }, message: ... }
+        // parseResponse returns { data: [...], pagination: ... } which is for lists.
+        // We just need the raw data object here.
+        if (response.data && response.data.data) {
+            stats.value = response.data.data;
+        }
     } catch (error) {
         console.error('Failed to fetch stats:', error);
     }
