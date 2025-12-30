@@ -13,7 +13,9 @@
         "deactivated": "{item} berhasil dinonaktifkan",
         "approved": "{item} berhasil disetujui",
         "rejected": "{item} berhasil ditolak",
-        "marked_spam": "{item} ditandai sebagai spam"
+        "marked_spam": "{item} ditandai sebagai spam",
+        "retrieved": "{item} berhasil diambil",
+        "actionSuccess": "{item} berhasil {action}"
     },
     "error": {
         "generic": "Terjadi kesalahan",

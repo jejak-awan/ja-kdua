@@ -13,7 +13,9 @@
         "deactivated": "{item} deactivated successfully",
         "approved": "{item} approved successfully",
         "rejected": "{item} rejected successfully",
-        "marked_spam": "{item} marked as spam"
+        "marked_spam": "{item} marked as spam",
+        "retrieved": "{item} retrieved successfully",
+        "actionSuccess": "{item} {action} successfully"
     },
     "error": {
         "generic": "Something went wrong",

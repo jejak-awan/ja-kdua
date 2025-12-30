@@ -70,6 +70,49 @@ export function useToast() {
             return t('common.messages.error.canOnlyAction', { action });
         }
 
+        // SUCCESS MESSAGE PATTERNS
+
+        // Pattern 4: "{Resource} created successfully"
+        const createdPattern = /^(.+) created successfully$/;
+        const match4 = message.match(createdPattern);
+        if (match4) {
+            const resource = match4[1];
+            return t('common.messages.success.created', { item: resource });
+        }
+
+        // Pattern 5: "{Resource} updated successfully"
+        const updatedPattern = /^(.+) updated successfully$/;
+        const match5 = message.match(updatedPattern);
+        if (match5) {
+            const resource = match5[1];
+            return t('common.messages.success.updated', { item: resource });
+        }
+
+        // Pattern 6: "{Resource} deleted successfully"
+        const deletedPattern = /^(.+) deleted successfully$/;
+        const match6 = message.match(deletedPattern);
+        if (match6) {
+            const resource = match6[1];
+            return t('common.messages.success.deleted', { item: resource });
+        }
+
+        // Pattern 7: "{Resource} retrieved successfully"
+        const retrievedPattern = /^(.+) retrieved successfully$/;
+        const match7 = message.match(retrievedPattern);
+        if (match7) {
+            const resource = match7[1];
+            return t('common.messages.success.retrieved', { item: resource });
+        }
+
+        // Pattern 8: "{Resource} {action} successfully" (generic)
+        const genericSuccessPattern = /^(.+) (.+) successfully$/;
+        const match8 = message.match(genericSuccessPattern);
+        if (match8) {
+            const resource = match8[1];
+            const action = match8[2];
+            return t('common.messages.success.actionSuccess', { item: resource, action });
+        }
+
         // If no pattern matches, return original message
         return message;
     };
