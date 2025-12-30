@@ -267,8 +267,11 @@ class AuthController extends BaseApiController
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        $user->load('roles');
+        $user->setRelation('permissions', $user->getAllPermissions());
+
         return $this->success([
-            'user' => $user->load('roles', 'permissions'),
+            'user' => $user,
             'token' => $token,
         ], 'Login successful');
     }
@@ -355,7 +358,9 @@ class AuthController extends BaseApiController
 
     public function user(Request $request)
     {
-        return $this->success($request->user()->load('roles', 'permissions'), 'User retrieved successfully');
+        $user = $request->user()->load('roles');
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'User retrieved successfully');
     }
 
     public function resendVerificationEmail(Request $request)
