@@ -8,8 +8,21 @@
         "totalUsers": "Total Users",
         "activeUsers": "Active users",
         "pendingContent": "Pending Content",
-        "requiresReview": "Requires review"
+        "requiresReview": "Requires review",
+        "creator": {
+            "myContent": "My Content",
+            "published": "Published",
+            "pendingReview": "Pending Review",
+            "awaitingApproval": "Awaiting approval",
+            "myMedia": "My Media",
+            "uploadedFiles": "Uploaded files",
+            "drafts": "Drafts",
+            "workInProgress": "Work in progress",
+            "contentStatus": "Content Status Distribution",
+            "recentActivity": "Recent Activity"
+        }
     },
+    "creatorSubtitle": "Here is how your content is performing",
     "traffic": {
         "title": "Traffic Overview",
         "overview": "Traffic statistics overview",

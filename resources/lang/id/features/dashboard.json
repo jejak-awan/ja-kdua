@@ -8,8 +8,21 @@
         "totalUsers": "Total Pengguna",
         "activeUsers": "Pengguna aktif",
         "pendingContent": "Konten Tertunda",
-        "requiresReview": "Butuh tinjauan"
+        "requiresReview": "Butuh tinjauan",
+        "creator": {
+            "myContent": "Konten Saya",
+            "published": "Diterbitkan",
+            "pendingReview": "Menunggu Tinjauan",
+            "awaitingApproval": "Menunggu persetujuan",
+            "myMedia": "Media Saya",
+            "uploadedFiles": "File diunggah",
+            "drafts": "Draf",
+            "workInProgress": "Dalam pengerjaan",
+            "contentStatus": "Distribusi Status Konten",
+            "recentActivity": "Aktivitas Terkini"
+        }
     },
+    "creatorSubtitle": "Berikut performa konten Anda",
     "traffic": {
         "title": "Ringkasan Trafik",
         "overview": "Ringkasan statistik trafik",

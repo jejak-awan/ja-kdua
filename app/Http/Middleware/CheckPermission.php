@@ -10,10 +10,17 @@ class CheckPermission
 {
     public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (! $request->user() || ! $request->user()->can($permission)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (! $request->user()) {
+             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return $next($request);
+        $permissions = explode('|', $permission);
+        foreach ($permissions as $perm) {
+            if ($request->user()->can($perm)) {
+                return $next($request);
+            }
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 }

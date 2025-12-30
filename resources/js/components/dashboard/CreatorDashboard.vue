@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.dashboard.welcome', { name: authStore.user?.name }) }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.dashboard.creatorSubtitle') || 'Here is how your content is performing' }}</p>
+                <p class="text-muted-foreground">{{ $t('features.dashboard.creatorSubtitle') }}</p>
             </div>
             <div class="flex items-center gap-2">
                 <Button variant="outline" size="sm" @click="refreshDashboard" :disabled="loading">
@@ -20,11 +20,11 @@
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">My Content</p>
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.myContent') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.total || 0 }}</p>
                             <div class="flex items-center gap-1.5 text-xs text-indigo-500 font-medium">
                                 <FileText class="w-3 h-3" />
-                                <span>{{ stats.myContents?.published || 0 }} Published</span>
+                                <span>{{ stats.myContents?.published || 0 }} {{ $t('features.dashboard.stats.creator.published') }}</span>
                             </div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500">
@@ -39,11 +39,11 @@
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">Pending Review</p>
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.pendingReview') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.pending || 0 }}</p>
                             <div class="flex items-center gap-1.5 text-xs text-amber-500 font-medium">
                                 <Clock3 class="w-3 h-3" />
-                                <span>Awaiting approval</span>
+                                <span>{{ $t('features.dashboard.stats.creator.awaitingApproval') }}</span>
                             </div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
@@ -58,11 +58,11 @@
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">My Media</p>
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.myMedia') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myMedia?.total || 0 }}</p>
                             <div class="flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
                                 <Image class="w-3 h-3" />
-                                <span>Uploaded files</span>
+                                <span>{{ $t('features.dashboard.stats.creator.uploadedFiles') }}</span>
                             </div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
@@ -77,11 +77,11 @@
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">Drafts</p>
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.creator.drafts') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.myContents?.draft || 0 }}</p>
                             <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                                 <FileText class="w-3 h-3" />
-                                <span>Work in progress</span>
+                                <span>{{ $t('features.dashboard.stats.creator.workInProgress') }}</span>
                             </div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-500/10 text-slate-500">
@@ -96,26 +96,38 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
              <Card class="col-span-1">
                 <CardHeader>
-                    <CardTitle>Content Status Distribution</CardTitle>
+                    <CardTitle>{{ $t('features.dashboard.stats.creator.contentStatus') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <!-- Placeholder for Pie Chart -->
-                     <div class="h-[300px] flex items-center justify-center text-muted-foreground bg-muted/20 rounded-md">
-                        <PieChart class="w-10 h-10 mb-2 opacity-50" />
-                        <span class="ml-2">Content Status Overview</span>
+                     <div class="h-[300px] w-full flex items-center justify-center">
+                        <DoughnutChart 
+                            v-if="statusData.length > 0" 
+                            :data="statusData" 
+                            :labels="statusLabels" 
+                        />
+                        <div v-else class="text-center text-muted-foreground">
+                             <PieChart class="w-10 h-10 mb-2 opacity-50 mx-auto" />
+                             <span class="text-sm">{{ $t('features.dashboard.traffic.noData') }}</span>
+                        </div>
                      </div>
                 </CardContent>
             </Card>
             
             <Card class="col-span-1">
                 <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
+                    <CardTitle>{{ $t('features.dashboard.stats.creator.recentActivity') }}</CardTitle>
                 </CardHeader>
                  <CardContent>
-                     <!-- Placeholder for Activity Chart -->
-                     <div class="h-[300px] flex items-center justify-center text-muted-foreground bg-muted/20 rounded-md">
-                        <Activity class="w-10 h-10 mb-2 opacity-50" />
-                        <span class="ml-2">Activity Timeline</span>
+                     <div class="h-[300px] w-full">
+                        <LineChart 
+                            v-if="activityData.length > 0"
+                            :data="[{ name: 'Activity', data: activityData }]" 
+                            :categories="activityLabels"
+                        />
+                        <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground">
+                            <Activity class="w-10 h-10 mb-2 opacity-50" />
+                            <span class="text-sm">{{ $t('features.dashboard.widgets.recentActivity.empty') }}</span>
+                        </div>
                      </div>
                 </CardContent>
             </Card>
@@ -131,8 +143,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import { parseSingleResponse } from '../../utils/responseParser';
+import { parseSingleResponse, ensureArray } from '../../utils/responseParser';
 
 import QuickActions from '@/components/admin/QuickActions.vue';
 import Card from '@/components/ui/card.vue';
@@ -140,6 +153,9 @@ import CardHeader from '@/components/ui/card-header.vue';
 import CardTitle from '@/components/ui/card-title.vue';
 import CardContent from '@/components/ui/card-content.vue';
 import Button from '@/components/ui/button.vue';
+import DoughnutChart from '@/components/charts/DoughnutChart.vue';
+import LineChart from '@/components/charts/LineChart.vue';
+
 import { 
     FileText, 
     Image, 
@@ -153,8 +169,13 @@ import {
     Activity
 } from 'lucide-vue-next';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const stats = ref({});
+const statusData = ref([]);
+const statusLabels = ref([]);
+const activityData = ref([]);
+const activityLabels = ref([]);
 const loading = ref(false);
 
 const fetchStats = async () => {
@@ -162,8 +183,26 @@ const fetchStats = async () => {
     try {
         const response = await api.get('/dashboard/creator');
         const data = parseSingleResponse(response);
-        if (data && data.stats) {
-            stats.value = data.stats;
+        
+        if (data) {
+            // Stats
+            if (data.stats) {
+                stats.value = data.stats;
+            }
+            
+            // Content Status Chart
+            if (data.charts && data.charts.myContentByStatus) {
+                const statusChart = ensureArray(data.charts.myContentByStatus);
+                statusLabels.value = statusChart.map(item => item.status);
+                statusData.value = statusChart.map(item => item.count);
+            }
+            
+            // Recent Activity Chart
+            if (data.charts && data.charts.recentActivity) {
+                const activityChart = ensureArray(data.charts.recentActivity);
+                activityLabels.value = activityChart.map(item => item.date);
+                activityData.value = activityChart.map(item => item.count);
+            }
         }
     } catch (error) {
         console.error('Failed to fetch creator stats:', error);
