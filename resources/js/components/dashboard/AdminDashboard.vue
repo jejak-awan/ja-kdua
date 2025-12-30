@@ -40,7 +40,7 @@
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.mediaFiles') }}</p>
-                            <p class="text-3xl font-bold text-foreground">{{ stats.media?.total_count || 0 }}</p>
+                            <p class="text-3xl font-bold text-foreground">{{ stats.media?.total || 0 }}</p>
                             <div class="flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
                                 <Image class="w-3 h-3" />
                                 <span>{{ $t('common.status.online') }}</span>
@@ -99,10 +99,10 @@
                     <div class="space-y-1">
                         <CardTitle class="text-lg flex items-center gap-2">
                             <BarChart3 class="w-5 h-5 text-primary" />
-                            {{ $t('features.dashboard.charts.trafficOverview') }}
+                            {{ $t('features.dashboard.traffic.title') }}
                         </CardTitle>
                         <CardDescription>
-                            {{ $t('features.dashboard.charts.trafficDescription') }}
+                            {{ $t('features.dashboard.traffic.overview') }}
                         </CardDescription>
                     </div>
                     <div class="flex items-center gap-2">
@@ -142,11 +142,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
-import { parseSingleResponse, parseResponse, ensureArray } from '../../utils/responseParser';
+import { parseResponse, ensureArray } from '../../utils/responseParser';
 
 const { t } = useI18n();
 import QuickActions from '@/components/admin/QuickActions.vue';
@@ -181,32 +181,44 @@ const visitPeriod = ref('7d');
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/cms/statistics'); 
-        // Note: Using original endpoint for AdminDashboard to preserve exact functionality, 
-        // or we can switch to /dashboard/admin if it returns same structure.
-        // For now, let's keep original logic.
+        // Use the new consolidated admin endpoint
+        const response = await api.get('/dashboard/admin'); 
         const data = parseResponse(response);
-        stats.value = data;
+        
+        // Map the new API structure to match what the template expects
+        if (data.stats) {
+            stats.value = {
+                contents: data.stats.contents || { total: 0, published: 0, pending: 0 },
+                media: data.stats.media || { total: 0 },
+                users: data.stats.users || { total: 0, active: 0 }
+            };
+        }
     } catch (error) {
         console.error('Failed to fetch statistics:', error);
     }
 };
 
 const fetchVisits = async () => {
+    if (!authStore.hasPermission('view analytics')) return;
+    
     loadingVisits.value = true;
     try {
-        const response = await api.get('/analytics/visits', {
+        // Use the original analytics endpoint which supports period filtering
+        const response = await api.get('/admin/cms/analytics/visits', {
             params: { period: visitPeriod.value }
         });
         const data = parseResponse(response);
         
         visitsCategories.value = ensureArray(data.labels);
         visitsData.value = [{
-            name: t('features.dashboard.charts.visitors'),
+            name: t('features.dashboard.traffic.visitors'),
             data: ensureArray(data.values)
         }];
     } catch (error) {
         console.error('Failed to fetch visits:', error);
+        // Fallback or empty state
+        visitsCategories.value = [];
+        visitsData.value = [];
     } finally {
         loadingVisits.value = false;
     }
@@ -217,10 +229,12 @@ const refreshDashboard = () => {
     fetchVisits();
 };
 
+watch(visitPeriod, () => {
+    fetchVisits();
+});
+
 onMounted(() => {
     fetchStats();
-    if (authStore.hasPermission('view analytics')) {
-        fetchVisits();
-    }
+    fetchVisits();
 });
 </script>
