@@ -15,7 +15,13 @@ class Tag extends Model
         'name',
         'slug',
         'description',
+        'author_id',
     ];
+
+    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     public function contents(): BelongsToMany
     {

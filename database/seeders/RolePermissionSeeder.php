@@ -17,7 +17,7 @@ class RolePermissionSeeder extends Seeder
         // 1. Create permissions
         $permissions = [
             // Content
-            'view content', 'create content', 'edit content', 'delete content', 'publish content',
+            'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'view pending content',
             'view content templates', 'create content templates', 'edit content templates', 'delete content templates',
             'view categories', 'create categories', 'edit categories', 'delete categories',
             'view tags', 'create tags', 'edit tags', 'delete tags',
@@ -93,7 +93,7 @@ class RolePermissionSeeder extends Seeder
         $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
         $editorRole->syncPermissions([
             // Content
-            'view content', 'create content', 'edit content', 'delete content', 'publish content',
+            'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'view pending content',
             'view content templates', 'create content templates', 'edit content templates', 'delete content templates',
             'view categories', 'create categories', 'edit categories', 'delete categories',
             'view tags', 'create tags', 'edit tags', 'delete tags',

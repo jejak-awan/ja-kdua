@@ -75,12 +75,26 @@ class ContentController extends BaseApiController
     {
         $query = Content::with(['author', 'category', 'tags']);
 
+        // Multi-tenancy scoping
+        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
+            $query->where('author_id', $request->user()->id);
+        }
+
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('body', 'like', "%{$search}%")
+                  ->orWhere('excerpt', 'like', "%{$search}%");
+            });
         }
 
         // Create a limit for per_page to prevent abuse, e.g., max 100
@@ -105,11 +119,19 @@ class ContentController extends BaseApiController
             return $this->forbidden('Unauthorized to view content statistics');
         }
 
+        $query = Content::query();
+        
+        // Scope stats if not a content manager
+        if (!$request->user()->can('manage content')) {
+            $query->where('author_id', $request->user()->id);
+        }
+
         $stats = [
-            'total' => Content::count(),
-            'published' => Content::where('status', 'published')->count(),
-            'draft' => Content::where('status', 'draft')->count(),
-            'archived' => Content::where('status', 'archived')->count(),
+            'total' => (clone $query)->count(),
+            'published' => (clone $query)->where('status', 'published')->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'draft' => (clone $query)->where('status', 'draft')->count(),
+            'archived' => (clone $query)->where('status', 'archived')->count(),
         ];
 
         return $this->success($stats, 'Content statistics retrieved successfully');
@@ -124,7 +146,7 @@ class ContentController extends BaseApiController
                 'excerpt' => 'nullable|string',
                 'body' => 'required|string',
                 'featured_image' => 'nullable|string',
-                'status' => 'required|in:draft,published,archived',
+                'status' => 'required|in:draft,pending,published,archived',
                 'type' => 'required|in:post,page,custom',
                 'category_id' => 'nullable|exists:categories,id',
                 'tags' => 'nullable|array',
@@ -142,6 +164,13 @@ class ContentController extends BaseApiController
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
+        }
+
+        // Approval Workflow: Authors cannot publish directly
+        if (!$request->user()->can('publish content')) {
+            if ($validated['status'] === 'published') {
+                $validated['status'] = 'pending';
+            }
         }
 
         $createRevision = $request->input('create_revision', false);
@@ -176,7 +205,7 @@ class ContentController extends BaseApiController
                 'excerpt' => 'nullable|string',
                 'body' => 'nullable|string', // Allow null body for drafts
                 'featured_image' => 'nullable|string',
-                'status' => 'sometimes|required|in:draft,published,archived',
+                'status' => 'sometimes|required|in:draft,pending,published,archived',
                 'type' => 'sometimes|required|in:post,page,custom',
                 'category_id' => 'nullable|exists:categories,id',
                 'tags' => 'nullable|array',
@@ -203,6 +232,20 @@ class ContentController extends BaseApiController
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Illuminate\Support\Facades\Log::error('Content update validation failed', ['errors' => $e->errors(), 'input' => $request->all()]);
             return $this->validationError($e->errors());
+        }
+
+        // Ownership check
+        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
+             if ($content->author_id !== $request->user()->id) {
+                 return $this->forbidden('You can only update your own content');
+             }
+        }
+
+        // Approval Workflow: Authors cannot publish directly
+        if (isset($validated['status']) && $validated['status'] === 'published') {
+            if (!$request->user()->can('publish content')) {
+                $validated['status'] = 'pending';
+            }
         }
 
         $createRevision = $request->input('create_revision', false);
@@ -317,11 +360,51 @@ class ContentController extends BaseApiController
         return $this->success($newContent->load(['author', 'category', 'tags']), 'Content duplicated successfully', 201);
     }
 
+    public function approve(Request $request, Content $content)
+    {
+        if (!$request->user()->can('approve content')) {
+            return $this->forbidden('You do not have permission to approve content');
+        }
+
+        if ($content->status !== 'pending') {
+            return $this->error('Only pending content can be approved', 400);
+        }
+
+        $content->update([
+            'status' => 'published',
+            'published_at' => $content->published_at ?? now(),
+        ]);
+
+        // Trigger webhook or notification?
+        // ...
+
+        app(CacheService::class)->clearContentCaches($content->id);
+
+        return $this->success($content->load('author'), 'Content approved and published successfully');
+    }
+
+    public function reject(Request $request, Content $content)
+    {
+        if (!$request->user()->can('approve content')) {
+            return $this->forbidden('You do not have permission to reject content');
+        }
+
+        if ($content->status !== 'pending') {
+            return $this->error('Only pending content can be rejected', 400);
+        }
+
+        $content->update([
+            'status' => 'draft',
+        ]);
+
+        return $this->success($content->load('author'), 'Content rejected and moved back to drafts');
+    }
+
     public function bulkAction(Request $request)
     {
         try {
             $validated = $request->validate([
-                'action' => 'required|in:publish,draft,archive,delete,change_category',
+                'action' => 'required|in:publish,approve,reject,draft,archive,delete,change_category',
                 'content_ids' => 'required|array',
                 'content_ids.*' => 'exists:contents,id',
                 'category_id' => 'required_if:action,change_category|exists:categories,id',
@@ -330,9 +413,22 @@ class ContentController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        // Ownership and permission check for bulk actions
+        $query = Content::whereIn('id', $validated['content_ids']);
+        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
+             $query->where('author_id', $request->user()->id);
+             
+             // If author, they can't 'publish' or 'approve' or 'reject'
+             if (in_array($validated['action'], ['publish', 'approve', 'reject'])) {
+                 return $this->forbidden('You do not have permission to perform this action');
+             }
+        }
+
+        $contentIds = $query->pluck('id')->toArray();
+
         $affected = $this->contentService->bulkAction(
             $validated['action'],
-            $validated['content_ids'],
+            $contentIds,
             $validated['category_id'] ?? null
         );
 
@@ -341,6 +437,7 @@ class ContentController extends BaseApiController
 
     public function lock(Request $request, Content $content)
     {
+        // ... existing lock code ...
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
             $lockedBy = $content->lockedBy;
 

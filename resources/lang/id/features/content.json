@@ -92,7 +92,9 @@
         "saveDraft": "Simpan Draf",
         "unpublish": "Batalkan Terbit",
         "moveToTrash": "Pindahkan ke Sampah",
-        "duplicate": "Duplikat"
+        "duplicate": "Duplikat",
+        "approve": "Setujui",
+        "reject": "Tolak"
     },
     "tabs": {
         "content": "Konten",

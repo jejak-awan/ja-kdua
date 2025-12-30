@@ -357,7 +357,13 @@ class ContentService
         foreach ($contents as $content) {
             switch ($action) {
                 case 'publish':
-                    $content->update(['status' => 'published', 'published_at' => now()]);
+                    $content->update(['status' => 'published', 'published_at' => $content->published_at ?? now()]);
+                    break;
+                case 'approve':
+                    $content->update(['status' => 'published', 'published_at' => $content->published_at ?? now()]);
+                    break;
+                case 'reject':
+                    $content->update(['status' => 'draft']);
                     break;
                 case 'draft':
                     $content->update(['status' => 'draft']);

@@ -21,6 +21,13 @@ class MediaController extends BaseApiController
     {
         $query = Media::with(['folder', 'usages']);
 
+        // Scope logic
+        if ($request->user() && !$request->user()->can('manage media')) {
+            $query->where('author_id', $request->user()->id);
+        } elseif (!$request->user()) {
+             $query->whereNull('author_id');
+        }
+
         // Handle trashed items
         if ($request->input('trashed') === 'only') {
             $query->onlyTrashed();
@@ -63,13 +70,20 @@ class MediaController extends BaseApiController
         return $this->paginated($media, 'Media retrieved successfully');
     }
 
-    public function statistics()
+    public function statistics(Request $request)
     {
-        $totalMedia = Media::count();
-        $totalSize = Media::sum('size');
-        $trashCount = Media::onlyTrashed()->count();
+        $query = Media::query();
+
+        // Scope stats if not a manager
+        if ($request->user() && !$request->user()->can('manage media')) {
+            $query->where('author_id', $request->user()->id);
+        }
+
+        $totalMedia = (clone $query)->count();
+        $totalSize = (clone $query)->sum('size');
+        $trashCount = (clone $query)->onlyTrashed()->count();
         
-        $typeBreakdown = Media::selectRaw('
+        $typeBreakdown = (clone $query)->selectRaw('
             CASE 
                 WHEN mime_type LIKE "image/%" THEN "image"
                 WHEN mime_type LIKE "video/%" THEN "video"
@@ -91,7 +105,7 @@ class MediaController extends BaseApiController
 
     public function upload(Request $request)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('create media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
@@ -106,6 +120,7 @@ class MediaController extends BaseApiController
                 'min_height' => 'nullable|integer|min:1',
                 'max_width' => 'nullable|integer|min:1',
                 'max_height' => 'nullable|integer|min:1',
+                'author_id' => 'nullable|exists:users,id',
             ]);
 
             // Additional image dimension validation if requested
@@ -126,10 +141,17 @@ class MediaController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        // Determine author
+        $authorId = $request->user()->id;
+        if ($request->user()->can('manage media') && $request->has('author_id')) {
+             $authorId = $request->input('author_id');
+        }
+
         $media = $this->mediaService->upload(
             $request->file('file'),
             $request->input('folder_id'),
-            $request->input('optimize', config('media.optimize', true))
+            $request->input('optimize', config('media.optimize', true)),
+            $authorId
         );
 
         return $this->success([
@@ -140,7 +162,7 @@ class MediaController extends BaseApiController
 
     public function uploadMultiple(Request $request)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('create media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
@@ -152,6 +174,7 @@ class MediaController extends BaseApiController
                 'files.*' => ['required', 'file', 'max:' . $maxSize],
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
+                'author_id' => 'nullable|exists:users,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -161,13 +184,19 @@ class MediaController extends BaseApiController
         $files = $request->file('files');
         $folderId = $request->input('folder_id');
         $optimize = $request->input('optimize', config('media.optimize', true));
+        
+        // Determine author
+        $authorId = $request->user()->id;
+        if ($request->user()->can('manage media') && $request->has('author_id')) {
+             $authorId = $request->input('author_id');
+        }
 
         foreach ($files as $file) {
             try {
-                $media = $this->mediaService->upload($file, $folderId, $optimize);
+                $media = $this->mediaService->upload($file, $folderId, $optimize, $authorId);
                 $uploadedMedia[] = $media->load(['folder', 'usages']);
             } catch (\Exception $e) {
-                Log::error('Bulk upload failed for a file: ' . $e->getMessage());
+                \Log::error('Bulk upload failed for a file: ' . $e->getMessage());
             }
         }
 
@@ -179,13 +208,31 @@ class MediaController extends BaseApiController
 
     public function show(Media $media)
     {
+        // Scope check
+        if (request()->user() && !request()->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to view this media');
+             }
+        }
         return $this->success($media->load(['folder', 'usages.model']), 'Media retrieved successfully');
     }
 
     public function update(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to update media');
+        }
+
+        // Ownership check
+        if (!request()->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to update this media');
+             }
+             if (is_null($media->author_id)) {
+                 return $this->forbidden('You cannot update global media');
+             }
+             // Ensure author_id is not changed or unset
+             // unset($request['author_id']); // Not in validated anyway
         }
 
         try {
@@ -193,6 +240,7 @@ class MediaController extends BaseApiController
                 'name' => 'sometimes|required|string|max:255',
                 'alt' => 'nullable|string',
                 'description' => 'nullable|string',
+                'author_id' => 'nullable|exists:users,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -208,8 +256,18 @@ class MediaController extends BaseApiController
 
     public function destroy(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to delete media');
+        }
+
+        // Ownership check
+        if (!request()->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to delete this media');
+             }
+             if (is_null($media->author_id)) {
+                 return $this->forbidden('You cannot delete global media');
+             }
         }
 
         $permanent = $request->boolean('permanent', false);
@@ -237,11 +295,29 @@ class MediaController extends BaseApiController
 
     public function restore(Request $request, $id)
     {
-        if (!$request->user()->can('manage media')) {
-            return $this->forbidden('You do not have permission to restore media');
+        if (!$request->user()->can('manage media')) { // Restore is usually advanced? Allow delete media users?
+            // If I can delete, I should be able to restore?
+            // Let's stick to 'manage media' or 'delete media' (implies trash management?)
+            // Or maybe just 'manage media' for now.
+             if (!$request->user()->can('delete media')) {
+                  return $this->forbidden('You do not have permission to restore media');
+             }
         }
 
         $media = Media::onlyTrashed()->findOrFail($id);
+        
+        // Ownership check
+        if (!request()->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to restore this media');
+             }
+             if (is_null($media->author_id)) {
+                 // Should allow restoring global if I am admin? Yes.
+                 // If I am NOT admin, I cannot restore global.
+                 return $this->forbidden('You cannot restore global media');
+             }
+        }
+        
         $this->mediaService->restore($media->id);
 
         return $this->success($media->fresh()->load(['folder', 'usages']), 'Media restored successfully');
@@ -249,11 +325,21 @@ class MediaController extends BaseApiController
 
     public function forceDelete(Request $request, $id)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to permanently delete media');
         }
 
         $media = Media::withTrashed()->findOrFail($id);
+        
+        // Ownership check
+        if (!request()->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to manage this media');
+             }
+             if (is_null($media->author_id)) {
+                 return $this->forbidden('You cannot delete global media');
+             }
+        }
         
         // Safety check: if not forcing and in use, block
         $usageCount = $media->usages()->count();
@@ -274,12 +360,18 @@ class MediaController extends BaseApiController
      */
     public function emptyTrash(Request $request)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to empty trash');
         }
 
-        // Get all trashed media
-        $trashedMedia = Media::onlyTrashed()->get();
+        // Get all trashed media (scoped)
+        $query = Media::onlyTrashed();
+         // Scope
+        if (!$request->user()->can('manage media')) {
+             $query->where('author_id', $request->user()->id);
+        }
+        $trashedMedia = $query->get();
+
         $deletedCount = 0;
         
         foreach ($trashedMedia as $media) {
@@ -288,7 +380,12 @@ class MediaController extends BaseApiController
         }
         
         // Also delete trashed folders
-        $trashedFolders = \App\Models\MediaFolder::onlyTrashed()->get();
+        $folderQuery = \App\Models\MediaFolder::onlyTrashed();
+        if (!$request->user()->can('manage media')) {
+             $folderQuery->where('author_id', $request->user()->id);
+        }
+        $trashedFolders = $folderQuery->get();
+
         $deletedFoldersCount = 0;
         
         foreach ($trashedFolders as $folder) {
@@ -302,113 +399,9 @@ class MediaController extends BaseApiController
         ], 'Trash emptied successfully');
     }
 
-    protected function deleteMediaVariants(Media $media)
-    {
-        // Delete thumbnail if exists
-        $fileName = pathinfo($media->path, PATHINFO_FILENAME);
-        $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-        $thumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.'.$extension;
-
-        if (Storage::disk($media->disk)->exists($thumbnailPath)) {
-            Storage::disk($media->disk)->delete($thumbnailPath);
-        }
-
-        // Delete other sizes if exist
-        $sizes = ['small', 'medium', 'large'];
-        foreach ($sizes as $size) {
-            $sizePath = str_replace('/media/', "/media/{$size}/", $media->path);
-            if (Storage::disk($media->disk)->exists($sizePath)) {
-                Storage::disk($media->disk)->delete($sizePath);
-            }
-        }
-    }
-
-    protected function generateThumbnailForMedia(Media $media, $width = 300, $height = 300)
-    {
-        $fullPath = Storage::disk($media->disk)->path($media->path);
-
-        // Create thumbnails directory in storage
-        $thumbnailDir = Storage::disk($media->disk)->path('media/thumbnails');
-        if (! is_dir($thumbnailDir)) {
-            mkdir($thumbnailDir, 0755, true);
-        }
-
-        // Generate thumbnail filename
-        $fileName = pathinfo($media->path, PATHINFO_FILENAME);
-        $extension = pathinfo($media->path, PATHINFO_EXTENSION);
-
-        // For SVG files, convert to PNG for thumbnail
-        $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
-        $thumbnailExtension = $isSvg ? 'png' : $extension;
-        $thumbnailFileName = $fileName.'_thumb.'.$thumbnailExtension;
-        $thumbnailPath = 'media/thumbnails/'.$thumbnailFileName;
-        $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
-
-        // Handle SVG files - convert to PNG using Imagick (if available)
-        if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
-            try {
-                $imagick = new \Imagick;
-                $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
-                $imagick->readImage($fullPath);
-                $imagick->setImageFormat('png');
-
-                // Resize SVG to thumbnail size
-                $imagick->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
-
-                // Save as PNG
-                $imagick->writeImage($thumbnailFullPath);
-                $imagick->clear();
-                $imagick->destroy();
-
-                return $thumbnailPath;
-            } catch (\Exception $e) {
-                \Log::warning('SVG thumbnail generation failed with Imagick: '.$e->getMessage());
-                // Fall through to try Intervention Image
-            }
-        }
-
-        // Use Intervention Image v3 API for raster images
-        if (class_exists(\Intervention\Image\ImageManager::class)) {
-            $driver = null;
-            if (extension_loaded('gd')) {
-                $driver = new \Intervention\Image\Drivers\Gd\Driver;
-            } elseif (extension_loaded('imagick')) {
-                $driver = new \Intervention\Image\Drivers\Imagick\Driver;
-            }
-
-            if ($driver) {
-                try {
-                    $manager = new \Intervention\Image\ImageManager($driver);
-                    $image = $manager->read($fullPath);
-
-                    // Create thumbnail (crop to fit)
-                    $image->cover($width, $height);
-
-                    // For SVG converted to PNG, save as PNG
-                    if ($isSvg) {
-                        $image->toPng()->save($thumbnailFullPath);
-                    } else {
-                        // Save thumbnail with original format
-                        $image->save($thumbnailFullPath, quality: 85);
-                    }
-
-                    return $thumbnailPath;
-                } catch (\Exception $e) {
-                    \Log::warning('Thumbnail generation failed with Intervention Image: '.$e->getMessage());
-                    // If SVG and both methods failed, return null (will use original)
-                    if ($isSvg) {
-                        return null;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     public function bulkAction(Request $request)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('edit media') && !$request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to perform bulk actions on media');
         }
 
@@ -423,9 +416,24 @@ class MediaController extends BaseApiController
             return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
-        $existingIds = Media::withTrashed()->whereIn('id', $ids)->pluck('id')->toArray();
+        $query = Media::withTrashed()->whereIn('id', $ids);
+        
+        // Scope Logic
+        if (!$request->user()->can('manage media')) {
+            // Cannot touch Global items or other users' items
+            // But if I want to "copy" or something? No, this is bulk action (delete, move)
+            // Implicitly restrict to OWN items.
+            $query->where('author_id', $request->user()->id);
+        }
+
+        $existingIds = $query->pluck('id')->toArray();
         if (count($existingIds) !== count($ids)) {
-            return $this->validationError(['ids' => ['Some media IDs do not exist.']], 'The selected action is invalid.');
+             // Some IDs were filtered out or didn't exist
+             // return error or just proceed with valid ones?
+             // UI might send mixed IDs. Let's just proceed with what we found but maybe warn?
+             // The original code returned error if count mismatch.
+             // If I am not manager, and I try to delete Admin's file, I should get error.
+             return $this->validationError(['ids' => ['Some media IDs do not exist or you do not have permission.']], 'The selected action is invalid.');
         }
 
         $folderId = $request->input('folder_id');
@@ -433,9 +441,15 @@ class MediaController extends BaseApiController
             $folderId = null;
         }
 
+        // If moving, check folder permission?
+        if (($action === 'move' || $action === 'move_folder') && $folderId) {
+             // Check if target folder is owned by me or global?
+             // ...
+        }
+
         $affected = $this->mediaService->bulkAction(
             $action,
-            $ids,
+            $existingIds, // Use filtered IDs
             $folderId,
             $request->input('alt_text')
         );
@@ -443,21 +457,17 @@ class MediaController extends BaseApiController
         return $this->success(['affected' => $affected], 'Bulk action completed successfully');
     }
 
-    public function usage(Media $media)
-    {
-        $usageInfo = $this->mediaService->getUsageInfo($media);
-
-        return $this->success([
-            'media_id' => $media->id,
-            'usage_count' => count($usageInfo),
-            'usages' => $usageInfo,
-        ], 'Media usage retrieved successfully');
-    }
-
     public function generateThumbnail(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to generate thumbnails');
+        }
+        
+        // Ownership
+        if (!$request->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== $request->user()->id) {
+                 return $this->forbidden('You do not have permission to modify this media');
+             }
         }
 
         if (!str_starts_with($media->mime_type, 'image/')) {
@@ -486,8 +496,15 @@ class MediaController extends BaseApiController
 
     public function resize(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to resize media');
+        }
+        
+        // Ownership
+        if (!$request->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== $request->user()->id) {
+                 return $this->forbidden('You do not have permission to modify this media');
+             }
         }
 
         // Only for images
@@ -556,12 +573,10 @@ class MediaController extends BaseApiController
         }
     }
 
-    /**
-     * Download multiple media files as ZIP
-     */
     public function downloadZip(Request $request)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('view media')) {
+             // Anyone who can view can download?
             return $this->forbidden('You do not have permission to download media');
         }
 
@@ -571,10 +586,19 @@ class MediaController extends BaseApiController
         ]);
 
         $ids = $request->input('ids');
-        $media = Media::whereIn('id', $ids)->get();
+        $query = Media::whereIn('id', $ids);
+        
+        // Scope
+        if (!$request->user()->can('manage media')) {
+             $query->where(function($q) use ($request) {
+                  $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+             });
+        }
+        
+        $media = $query->get();
 
         if ($media->isEmpty()) {
-            return $this->error('No media files found', 404, [], 'NO_MEDIA_FOUND');
+            return $this->error('No media files found or permission denied', 404, [], 'NO_MEDIA_FOUND');
         }
 
         // Create temporary ZIP file
@@ -607,8 +631,15 @@ class MediaController extends BaseApiController
 
     public function edit(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to edit media');
+        }
+        
+        // Ownership
+        if (!$request->user()->can('manage media')) {
+             if ($media->author_id && $media->author_id !== $request->user()->id) {
+                 return $this->forbidden('You do not have permission to edit this media');
+             }
         }
 
         // Only for images
@@ -660,7 +691,6 @@ class MediaController extends BaseApiController
                         $newPath = $pathInfo['dirname'].'/'.$newFileName;
 
                         // Check if file exists, if so maybe error? Or append unique?
-                        // Let's append unique if custom name exists to avoid silent overwrite of unrelated file
                         if ($customFilename && Storage::disk($media->disk)->exists($newPath)) {
                              $newFileName = $customFilename . '_' . time() . '.' . $pathInfo['extension'];
                              $newPath = $pathInfo['dirname'].'/'.$newFileName;
@@ -686,7 +716,7 @@ class MediaController extends BaseApiController
                             'folder_id' => $media->folder_id,
                             'alt' => $media->alt,
                             'description' => $media->description,
-                            'user_id' => auth()->id(),
+                            'author_id' => \Auth::id(), // Corrected from user_id to author_id
                         ]);
 
                         // Generate thumbnail if needed

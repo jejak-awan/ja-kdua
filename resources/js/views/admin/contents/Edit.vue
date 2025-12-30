@@ -80,6 +80,15 @@
                 </Button>
             </div>
         </div>
+ 
+        <!-- Pending Review Notice -->
+        <Alert v-if="form.status === 'pending'" class="mb-6 bg-amber-500/10 border-amber-500/20 text-amber-600">
+            <Clock3 class="w-4 h-4" />
+            <AlertTitle>{{ $t('features.content.status.pending') }}</AlertTitle>
+            <AlertDescription>
+                {{ $t('features.content.messages.pendingNotice') || 'This content is currently pending review and will be published once approved by an editor.' }}
+            </AlertDescription>
+        </Alert>
 
         <div v-if="loading && !form.title" class="flex flex-col items-center justify-center py-20 text-muted-foreground space-y-4">
             <Loader2 class="w-10 h-10 animate-spin opacity-20" />

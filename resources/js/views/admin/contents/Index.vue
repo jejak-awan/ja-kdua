@@ -53,11 +53,24 @@
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
+                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
+                            <p class="text-2xl font-bold">{{ stats.pending || 0 }}</p>
+                        </div>
+                        <div class="p-3 bg-amber-500/10 rounded-xl text-amber-500">
+                            <Clock3 class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card class="hover:shadow-md transition-all duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
                             <p class="text-2xl font-bold">{{ stats.draft }}</p>
                         </div>
-                        <div class="p-3 bg-amber-500/10 rounded-xl text-amber-500">
-                            <Clock class="w-5 h-5" />
+                        <div class="p-3 bg-slate-500/10 rounded-xl text-slate-500">
+                            <FileText class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
@@ -100,6 +113,7 @@
                             <SelectContent>
                                 <SelectItem value="all">{{ $t('features.comments.filter.allStatus') }}</SelectItem>
                                 <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
+                                <SelectItem value="pending">{{ $t('features.content.status.pending') }}</SelectItem>
                                 <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
                                 <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
                             </SelectContent>
@@ -119,10 +133,12 @@
                                 <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="publish">{{ $t('features.content.actions.publishNow') }}</SelectItem>
+                                <SelectItem value="publish" v-if="authStore.hasPermission('publish content')">{{ $t('features.content.actions.publishNow') }}</SelectItem>
+                                <SelectItem value="approve" v-if="authStore.hasPermission('approve content')">{{ $t('features.content.actions.approve') }}</SelectItem>
+                                <SelectItem value="reject" v-if="authStore.hasPermission('approve content')">{{ $t('features.content.actions.reject') }}</SelectItem>
                                 <SelectItem value="draft">{{ $t('features.content.actions.saveDraft') }}</SelectItem>
                                 <SelectItem value="archive">{{ $t('features.content.status.archived') }}</SelectItem>
-                                <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('features.languages.actions.delete') }}</SelectItem>
+                                <SelectItem value="delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">{{ $t('features.languages.actions.delete') }}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -219,6 +235,12 @@
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-1">
+                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10" @click="handleApprove(content)" :title="$t('features.content.actions.approve')">
+                                        <CheckCircle2 class="w-4 h-4" />
+                                    </Button>
+                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" @click="handleReject(content)" :title="$t('features.content.actions.reject')">
+                                        <XCircle class="w-4 h-4" />
+                                    </Button>
                                     <Button variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10" @click="handlePreview(content)" :title="$t('features.content.form.preview')">
                                         <Eye class="w-4 h-4" />
                                     </Button>
@@ -230,12 +252,12 @@
                                             <History class="w-4 h-4" />
                                         </router-link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('edit content')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('edit content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
                                         <router-link :to="{ name: 'contents.edit', params: { id: content.id } }">
                                             <Edit2 class="w-4 h-4" />
                                         </router-link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleDelete(content)" :title="$t('features.languages.actions.delete')" v-if="authStore.hasPermission('delete content')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleDelete(content)" :title="$t('features.languages.actions.delete')" v-if="authStore.hasPermission('delete content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
                                         <Trash2 class="w-4 h-4" />
                                     </Button>
                                 </div>
@@ -298,7 +320,9 @@ import {
     FileText,
     CheckCircle2,
     Clock,
-    Archive
+    Archive,
+    Clock3,
+    XCircle
 } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
 
@@ -315,6 +339,7 @@ const perPage = ref('10');
 const stats = ref({
     total: 0,
     published: 0,
+    pending: 0,
     draft: 0,
     archived: 0
 });
@@ -355,6 +380,7 @@ const fetchStats = async () => {
             stats.value = {
                 total: data.total || 0,
                 published: data.published || 0,
+                pending: data.pending || 0,
                 draft: data.draft || 0,
                 archived: data.archived || 0
             };
@@ -391,7 +417,8 @@ const fetchContents = async (page = 1) => {
 const getStatusBadgeClass = (status) => {
     const s = status?.toLowerCase();
     if (s === 'published') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-    if (s === 'draft') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+    if (s === 'pending') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+    if (s === 'draft') return 'bg-slate-500/10 text-slate-600 dark:text-slate-400';
     if (s === 'archived') return 'bg-muted text-muted-foreground';
     return 'bg-secondary text-secondary-foreground';
 };
@@ -421,6 +448,30 @@ const toggleFeatured = async (content) => {
         // Revert on failure
         content.is_featured = originalState;
         alert('Failed to update featured status');
+    }
+};
+
+const handleApprove = async (content) => {
+    if (!confirm(`Are you sure you want to approve and publish "${content.title}"?`)) return;
+    try {
+        await api.put(`/admin/cms/contents/${content.id}/approve`);
+        await fetchContents();
+        await fetchStats();
+    } catch (error) {
+        console.error('Failed to approve content:', error);
+        alert(error.response?.data?.message || 'Failed to approve content');
+    }
+};
+
+const handleReject = async (content) => {
+    if (!confirm(`Are you sure you want to reject "${content.title}" and move it back to drafts?`)) return;
+    try {
+        await api.put(`/admin/cms/contents/${content.id}/reject`);
+        await fetchContents();
+        await fetchStats();
+    } catch (error) {
+        console.error('Failed to reject content:', error);
+        alert(error.response?.data?.message || 'Failed to reject content');
     }
 };
 

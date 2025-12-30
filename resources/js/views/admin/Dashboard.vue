@@ -14,7 +14,7 @@
         </div>
 
         <!-- Row 1: Statistics Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('manage system')">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('view content')">
             <!-- Contents Card -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
@@ -54,7 +54,7 @@
             </Card>
 
             <!-- Users Card -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-all duration-300" v-if="authStore.hasPermission('manage users')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
@@ -73,7 +73,7 @@
             </Card>
 
             <!-- Pending Card -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-all duration-300" v-if="authStore.hasPermission('approve content')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
@@ -225,28 +225,51 @@ const refreshDashboard = async () => {
 };
 
 const fetchStats = async () => {
-    // Permission check: manage system required for system statistics
-    // Also check if user is loaded to prevent race conditions
-    if (!authStore.user || !authStore.hasPermission('manage system')) return;
-
     try {
-        const response = await api.get('/admin/cms/system/statistics');
-        const data = parseSingleResponse(response);
-        
-        if (data) {
-            stats.value = {
-                contents: {
-                    total: data.contents?.total ?? 0,
-                    published: data.contents?.published ?? 0,
-                    pending: data.contents?.pending ?? 0,
-                },
-                media: {
-                    total: data.media?.total ?? 0,
-                },
-                users: {
-                    total: data.users?.total ?? 0,
-                },
-            };
+        // If user can manage system, get system-wide statistics
+        if (authStore.hasPermission('manage system')) {
+            const response = await api.get('/admin/cms/system/statistics');
+            const data = parseSingleResponse(response);
+            
+            if (data) {
+                stats.value = {
+                    contents: {
+                        total: data.contents?.total ?? 0,
+                        published: data.contents?.published ?? 0,
+                        pending: data.contents?.pending ?? 0,
+                    },
+                    media: {
+                        total: data.media?.total ?? 0,
+                    },
+                    users: {
+                        total: data.users?.total ?? 0,
+                    },
+                };
+            }
+        } 
+        // Otherwise, if they can at least view content, get their personal content stats
+        else if (authStore.hasPermission('view content')) {
+            const response = await api.get('/admin/cms/contents/stats');
+            const data = parseSingleResponse(response);
+            
+            if (data) {
+                stats.value.contents = {
+                    total: data.total ?? 0,
+                    published: data.published ?? 0,
+                    pending: data.pending ?? 0,
+                };
+            }
+            
+            // Also try to get media stats if allowed
+            if (authStore.hasPermission('view media')) {
+                try {
+                    const mediaResponse = await api.get('/admin/cms/media/statistics');
+                    const mediaData = parseSingleResponse(mediaResponse);
+                    if (mediaData) {
+                        stats.value.media = { total: mediaData.total_count ?? 0 };
+                    }
+                } catch (e) { /* Ignore */ }
+            }
         }
     } catch (error) {
         console.error('Failed to fetch statistics:', error);

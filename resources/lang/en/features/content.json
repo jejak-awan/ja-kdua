@@ -92,7 +92,9 @@
         "saveDraft": "Save as Draft",
         "unpublish": "Unpublish",
         "moveToTrash": "Move to Trash",
-        "duplicate": "Duplicate"
+        "duplicate": "Duplicate",
+        "approve": "Approve",
+        "reject": "Reject"
     },
     "tabs": {
         "content": "Content",

@@ -12,6 +12,11 @@ class FormController extends BaseApiController
     {
         $query = Form::with('fields');
 
+        // Multi-tenancy scoping
+        if (!$request->user()->can('manage forms')) {
+            $query->where('author_id', $request->user()->id);
+        }
+
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
@@ -32,6 +37,8 @@ class FormController extends BaseApiController
             'settings' => 'nullable|array',
         ]);
 
+        $validated['author_id'] = $request->user()->id;
+
         $form = Form::create($validated);
 
         // Add fields if provided
@@ -44,13 +51,21 @@ class FormController extends BaseApiController
         return $this->success($form->load('fields'), 'Form created successfully', 201);
     }
 
-    public function show(Form $form)
+    public function show(Request $request, Form $form)
     {
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to view this form');
+        }
+
         return $this->success($form->load('fields'), 'Form retrieved successfully');
     }
 
     public function update(Request $request, Form $form)
     {
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to update this form');
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|unique:forms,slug,'.$form->id,
@@ -66,8 +81,12 @@ class FormController extends BaseApiController
         return $this->success($form->load('fields'), 'Form updated successfully');
     }
 
-    public function destroy(Form $form)
+    public function destroy(Request $request, Form $form)
     {
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to delete this form');
+        }
+
         $form->delete();
 
         return $this->success(null, 'Form deleted successfully');
@@ -210,7 +229,13 @@ class FormController extends BaseApiController
 
         try {
             if ($action === 'delete') {
-                Form::whereIn('id', $ids)->delete();
+                $query = Form::whereIn('id', $ids);
+                
+                if (!$request->user()->can('manage forms')) {
+                    $query->where('author_id', $request->user()->id);
+                }
+
+                $query->delete();
                 return $this->success(null, 'Selected forms deleted successfully');
             }
         } catch (\Exception $e) {

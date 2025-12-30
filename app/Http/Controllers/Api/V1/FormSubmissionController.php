@@ -12,6 +12,13 @@ class FormSubmissionController extends BaseApiController
     {
         $query = FormSubmission::with(['form', 'user']);
 
+        // Multi-tenancy scoping
+        if (!$request->user()->can('manage forms')) {
+            $query->whereHas('form', function ($q) use ($request) {
+                $q->where('author_id', $request->user()->id);
+            });
+        }
+
         if ($form) {
             $query->where('form_id', $form->id);
         } elseif ($request->has('form_id')) {
@@ -157,6 +164,13 @@ class FormSubmissionController extends BaseApiController
     {
         $query = FormSubmission::query();
 
+        // Multi-tenancy scoping
+        if (!$request->user()->can('manage forms')) {
+            $query->whereHas('form', function ($q) use ($request) {
+                $q->where('author_id', $request->user()->id);
+            });
+        }
+
         if ($form) {
             $query->where('form_id', $form->id);
         } elseif ($request->has('form_id')) {
@@ -164,7 +178,7 @@ class FormSubmissionController extends BaseApiController
         }
 
         $stats = [
-            'total' => $query->count(),
+            'total' => (clone $query)->count(),
             'new' => (clone $query)->where('status', 'new')->count(),
             'read' => (clone $query)->where('status', 'read')->count(),
             'archived' => (clone $query)->where('status', 'archived')->count(),

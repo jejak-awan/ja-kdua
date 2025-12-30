@@ -26,6 +26,34 @@ class SettingController extends BaseApiController
 
     public function getGroup($group)
     {
+        // Permission check: if user doesn't have 'view settings', 
+        // they might still need specific group settings (e.g. media settings for authors)
+        if (!request()->user()->can('view settings')) {
+            $allowedGroups = [
+                'media' => ['view media', 'upload media'],
+                'general' => [],
+            ];
+
+            $requiredPermissions = $allowedGroups[$group] ?? null;
+            
+            if (is_null($requiredPermissions)) {
+                return $this->forbidden('You do not have permission to view these settings');
+            }
+
+            if (!empty($requiredPermissions)) {
+                $hasAny = false;
+                foreach ($requiredPermissions as $perm) {
+                    if (request()->user()->can($perm)) {
+                        $hasAny = true;
+                        break;
+                    }
+                }
+                if (!$hasAny) {
+                    return $this->forbidden('You do not have permission to view these settings');
+                }
+            }
+        }
+
         $settings = Setting::getGroup($group);
 
         return $this->success($settings, 'Settings retrieved successfully');

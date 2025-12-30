@@ -20,7 +20,13 @@ class ContentTemplate extends Model
         'category_id',
         'is_active',
         'usage_count',
+        'author_id',
     ];
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     protected $casts = [
         'default_fields' => 'array',

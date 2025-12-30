@@ -11,28 +11,38 @@ class CategoryController extends BaseApiController
 {
     public function index(Request $request)
     {
-        // Get tree structure if requested
-        if ($request->has('tree') && $request->tree) {
-            $categories = Cache::remember('categories_tree', now()->addHours(24), function () {
-                return Category::whereNull('parent_id')
-                    ->where('is_active', true)
-                    ->with(['children' => function ($q) {
-                        $q->where('is_active', true)->orderBy('sort_order');
-                    }])
-                    ->orderBy('sort_order')
-                    ->get();
+        $query = Category::query();
+
+        // Admin/Manager can see all, others see own + global
+        if ($request->user() && !$request->user()->can('manage categories')) {
+            $query->where(function($q) use ($request) {
+                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
             });
+        } elseif (!$request->user()) {
+             // Public/Guest sees only global categories
+             $query->whereNull('author_id');
+        }
+
+        // Tree view
+        if ($request->has('tree') && $request->tree) {
+            // Note: Tree view with partial permissions might break hierarchy if parent is missing.
+            // For now, we assume global categories are parents.
+            $categories = $query->whereNull('parent_id')
+                ->where('is_active', true)
+                ->with(['children' => function ($q) {
+                    $q->where('is_active', true)->orderBy('sort_order');
+                }])
+                ->orderBy('sort_order')
+                ->get();
 
             return $this->success($categories, 'Categories tree retrieved successfully');
         }
 
-        // Get flat list with parent info (cached)
-        $categories = Cache::remember('categories_flat', now()->addHours(6), function () {
-            return Category::where('is_active', true)
-                ->with('parent')
-                ->orderBy('sort_order')
-                ->get();
-        });
+        // Flat list
+        $categories = $query->where('is_active', true)
+            ->with('parent')
+            ->orderBy('sort_order')
+            ->get();
 
         return $this->success($categories, 'Categories retrieved successfully');
     }
@@ -47,19 +57,29 @@ class CategoryController extends BaseApiController
             'is_active' => 'boolean',
             'parent_id' => 'nullable|exists:categories,id',
             'sort_order' => 'integer|min:0',
+            'author_id' => 'nullable|exists:users,id',
         ]);
 
         // Prevent circular reference
-        if ($validated['parent_id']) {
+        if (isset($validated['parent_id']) && $validated['parent_id']) {
             $parent = Category::find($validated['parent_id']);
             if ($parent && $parent->parent_id == $request->input('id')) {
                 return $this->validationError(['parent_id' => ['Cannot set parent to a child category']], 'Cannot set parent to a child category');
             }
         }
 
+        // Assign author logic
+        if ($request->user()->can('manage categories')) {
+            // Admin can assign author or leave null (Global)
+            // validated['author_id'] is already in array if sent
+        } else {
+            // Regular user forces ownership
+            $validated['author_id'] = $request->user()->id;
+        }
+
         $category = Category::create($validated);
 
-        // Clear caches
+        // Clear caches (kept for global lists, though index is not cached per auth now)
         $cacheService = new CacheService;
         $cacheService->clearCategoryCaches();
         $cacheService->clearSeoCaches();
@@ -69,11 +89,32 @@ class CategoryController extends BaseApiController
 
     public function show(Category $category)
     {
+        // Scope check for show?
+        // Usually view permissions handled by middleware, but "view own" needs check.
+        // If middleware is 'view categories' and user is Author, they might try to view Admin's Private category?
+        // Current logic: Admin categories are NULL (Global). So visible.
+        // Private categories have AuthorID.
+        // If Author A tries to view Author B's category:
+        if (request()->user() && !request()->user()->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to view this category');
+            }
+        }
+
         return $this->success($category->load(['parent', 'children', 'contents']), 'Category retrieved successfully');
     }
 
     public function update(Request $request, Category $category)
     {
+        // Ownership check
+        if (!request()->user()->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to update this category');
+            }
+            // Cannot change author_id
+            unset($request['author_id']);
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|unique:categories,slug,'.$category->id,
@@ -82,6 +123,7 @@ class CategoryController extends BaseApiController
             'is_active' => 'boolean',
             'parent_id' => 'nullable|exists:categories,id',
             'sort_order' => 'integer|min:0',
+            'author_id' => 'nullable|exists:users,id',
         ]);
 
         // Prevent setting self as parent
@@ -115,6 +157,17 @@ class CategoryController extends BaseApiController
 
     public function destroy(Category $category)
     {
+         // Ownership check
+        if (!request()->user()->can('manage categories')) {
+            if ($category->author_id && $category->author_id !== request()->user()->id) {
+                 return $this->forbidden('You do not have permission to delete this category');
+            }
+            // Global categories (null author) cannot be deleted by non-managers
+             if (is_null($category->author_id)) {
+                 return $this->forbidden('You do not have permission to delete global categories');
+            }
+        }
+
         // Check if has children
         if ($category->children()->count() > 0) {
             return $this->validationError([

@@ -17,7 +17,13 @@ class MediaFolder extends Model
         'slug',
         'parent_id',
         'sort_order',
+        'author_id',
     ];
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     public function parent(): BelongsTo
     {

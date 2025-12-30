@@ -54,6 +54,13 @@ class CommentController extends BaseApiController
     {
         $query = Comment::with(['content', 'user', 'parent']);
 
+        // Multi-tenancy: Authors only see comments on their own content
+        if (!$request->user()->can('manage comments')) {
+            $query->whereHas('content', function ($q) use ($request) {
+                $q->where('author_id', $request->user()->id);
+            });
+        }
+
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -77,16 +84,25 @@ class CommentController extends BaseApiController
         return $this->paginated($comments, 'Comments retrieved successfully');
     }
 
-    public function statistics()
+    public function statistics(Request $request)
     {
+        $query = Comment::query();
+
+        // Multi-tenancy scoping
+        if (!$request->user()->can('manage comments')) {
+            $query->whereHas('content', function ($q) use ($request) {
+                $q->where('author_id', $request->user()->id);
+            });
+        }
+
         $stats = [
-            'total' => Comment::count(),
-            'pending' => Comment::where('status', 'pending')->count(),
-            'approved' => Comment::where('status', 'approved')->count(),
-            'rejected' => Comment::where('status', 'rejected')->count(),
-            'spam' => Comment::where('status', 'spam')->count(),
-            'today' => Comment::whereDate('created_at', today())->count(),
-            'this_week' => Comment::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total' => (clone $query)->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'approved' => (clone $query)->where('status', 'approved')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+            'spam' => (clone $query)->where('status', 'spam')->count(),
+            'today' => (clone $query)->whereDate('created_at', today())->count(),
+            'this_week' => (clone $query)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
         ];
 
         return $this->success($stats, 'Comment statistics retrieved successfully');

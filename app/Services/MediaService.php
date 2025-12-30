@@ -19,7 +19,7 @@ class MediaService
     /**
      * Upload and process a media file
      */
-    public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true): Media
+    public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true, ?int $authorId = null): Media
     {
         $path = $file->store('media', 'public');
         $fullPath = Storage::disk('public')->path($path);
@@ -37,6 +37,7 @@ class MediaService
             'path' => $path,
             'size' => filesize($fullPath),
             'folder_id' => $folderId,
+            'author_id' => $authorId,
         ]);
 
         // Auto-generate thumbnail for images

@@ -21,8 +21,15 @@ class Media extends Model
         'size',
         'alt',
         'description',
+        'description',
         'folder_id',
+        'author_id',
     ];
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     protected $casts = [
         'size' => 'integer',

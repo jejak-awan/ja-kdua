@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Form extends Model
 {
     protected $fillable = [
+        'author_id',
         'name',
         'slug',
         'description',
@@ -23,6 +24,11 @@ class Form extends Model
         'is_active' => 'boolean',
         'submission_count' => 'integer',
     ];
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     public function fields(): HasMany
     {

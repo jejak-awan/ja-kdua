@@ -11,6 +11,7 @@
       <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3">
         <!-- Create Post -->
         <button
+          v-if="authStore.hasPermission('create content')"
           @click="handleAction('create-post')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group relative overflow-hidden"
           :disabled="loading"
@@ -22,9 +23,10 @@
             {{ $t('features.dashboard.widgets.quickActions.createPost') }}
           </span>
         </button>
-
+ 
         <!-- Create Page -->
         <button
+          v-if="authStore.hasPermission('create content')"
           @click="handleAction('create-page')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group"
           :disabled="loading"
@@ -36,9 +38,10 @@
             {{ $t('features.dashboard.widgets.quickActions.createPage') }}
           </span>
         </button>
-
+ 
         <!-- Upload Media -->
         <button
+          v-if="authStore.hasPermission('upload media') || authStore.hasPermission('create media')"
           @click="handleAction('upload-media')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group"
           :disabled="loading"
@@ -50,9 +53,10 @@
             {{ $t('features.dashboard.widgets.quickActions.uploadMedia') }}
           </span>
         </button>
-
+ 
         <!-- Create Category -->
         <button
+          v-if="authStore.hasPermission('create categories')"
           @click="handleAction('create-category')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group"
           :disabled="loading"
@@ -64,9 +68,10 @@
             {{ $t('features.dashboard.widgets.quickActions.createCategory') }}
           </span>
         </button>
-
+ 
         <!-- Create Tag -->
         <button
+          v-if="authStore.hasPermission('create tags')"
           @click="handleAction('create-tag')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-rose-500/50 hover:bg-rose-500/5 transition-all group"
           :disabled="loading"
@@ -78,9 +83,10 @@
             {{ $t('features.dashboard.widgets.quickActions.createTag') }}
           </span>
         </button>
-
+ 
         <!-- Manage Users -->
         <button
+          v-if="authStore.hasPermission('view users')"
           @click="handleAction('manage-users')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all group"
           :disabled="loading"
@@ -92,9 +98,10 @@
             {{ $t('features.dashboard.widgets.quickActions.manageUsers') }}
           </span>
         </button>
-
+ 
         <!-- View Comments -->
         <button
+          v-if="authStore.hasPermission('view comments')"
           @click="handleAction('view-comments')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-orange-500/50 hover:bg-orange-500/5 transition-all group"
           :disabled="loading"
@@ -106,9 +113,10 @@
             {{ $t('features.dashboard.widgets.quickActions.viewComments') }}
           </span>
         </button>
-
+ 
         <!-- Settings -->
         <button
+          v-if="authStore.hasPermission('view settings')"
           @click="handleAction('settings')"
           class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-slate-500/50 hover:bg-slate-500/5 transition-all group"
           :disabled="loading"
@@ -146,6 +154,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '../../stores/auth';
 import Card from '@/components/ui/card.vue';
 import CardHeader from '@/components/ui/card-header.vue';
 import CardTitle from '@/components/ui/card-title.vue';
@@ -165,6 +174,7 @@ import {
 
 const { t } = useI18n();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const props = defineProps({
   showRecent: {

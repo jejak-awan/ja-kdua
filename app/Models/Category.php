@@ -20,7 +20,13 @@ class Category extends Model
         'is_active',
         'parent_id',
         'sort_order',
+        'author_id',
     ];
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     protected $casts = [
         'is_active' => 'boolean',

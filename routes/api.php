@@ -106,6 +106,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'destroy'])->middleware('permission:delete content');
         Route::post('contents/{content}/duplicate', [App\Http\Controllers\Api\V1\ContentController::class, 'duplicate'])->middleware('permission:create content');
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');
+        Route::put('contents/{content}/approve', [App\Http\Controllers\Api\V1\ContentController::class, 'approve'])->middleware('permission:approve content');
+        Route::put('contents/{content}/reject', [App\Http\Controllers\Api\V1\ContentController::class, 'reject'])->middleware('permission:approve content');
 
         // Newsletter
         Route::post('newsletter/subscribers/bulk-action', [App\Http\Controllers\Api\V1\NewsletterController::class, 'bulkAction'])->middleware('permission:manage users');
@@ -372,7 +374,7 @@ Route::prefix('v1')->group(function () {
 
         // Settings
         Route::apiResource('settings', App\Http\Controllers\Api\V1\SettingController::class)->middleware('permission:view settings');
-        Route::get('settings/group/{group}', [App\Http\Controllers\Api\V1\SettingController::class, 'getGroup'])->middleware('permission:view settings');
+        Route::get('settings/group/{group}', [App\Http\Controllers\Api\V1\SettingController::class, 'getGroup']);
         Route::post('settings/bulk-update', [App\Http\Controllers\Api\V1\SettingController::class, 'bulkUpdate'])->middleware('permission:manage settings');
         Route::post('settings/test-storage', [App\Http\Controllers\Api\V1\SettingController::class, 'testStorage'])->middleware('permission:manage settings');
 
