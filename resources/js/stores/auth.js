@@ -39,12 +39,32 @@ export const useAuthStore = defineStore('auth', {
                 'member': 20,
             };
             const minRank = roleRanks[roleName] || 0;
-            return getters.getRoleRank() >= minRank;
+            const currentUserRank = getters.getRoleRank();
+            return currentUserRank >= minRank;
         },
 
         isHigherThan: (state, getters) => (otherUser) => {
             if (!otherUser) return true;
-            return getters.getRoleRank() > getters.getRoleRank(otherUser);
+
+            // Calculate other user's rank inline
+            const roleRanks = {
+                'super-admin': 100,
+                'admin': 80,
+                'editor': 60,
+                'author': 40,
+                'member': 20,
+            };
+
+            let otherRank = 0;
+            if (otherUser.roles) {
+                otherUser.roles.forEach(role => {
+                    const rank = roleRanks[role.name] || 0;
+                    if (rank > otherRank) otherRank = rank;
+                });
+            }
+
+            const myRank = getters.getRoleRank();
+            return myRank > otherRank;
         },
 
         isAdmin: (state, getters) => {
