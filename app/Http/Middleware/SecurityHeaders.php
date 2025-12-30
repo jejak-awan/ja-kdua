@@ -55,6 +55,7 @@ class SecurityHeaders
             'https://cdn.jsdelivr.net',
             'https://code.jquery.com',
             'https://static.cloudflareinsights.com',
+            'https://cloudflareinsights.com',
             // Note: We removed specific hashes ("'sha256-...'") to allow 'unsafe-inline' to work.
             // When hashes or nonces are present, browsers ignore 'unsafe-inline', causing constant blocking 
             // of new inline scripts. By removing hashes, we fall back to 'unsafe-inline' which allows 
@@ -104,6 +105,7 @@ class SecurityHeaders
         
         $connectSrc = array_merge($connectSrc, [
             'https://static.cloudflareinsights.com',
+            'https://cloudflareinsights.com',
             'wss:',
             'ws:',
         ]);
