@@ -26,7 +26,11 @@
                             required
                             :placeholder="$t('features.roles.form.namePlaceholder')"
                             class="max-w-md"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                         />
+                        <p v-if="errors.name" class="text-sm text-destructive mt-1">
+                            {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                        </p>
                     </div>
 
                     <!-- Permissions Matrix -->
@@ -108,7 +112,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
@@ -120,10 +124,12 @@ import { ArrowLeft, Check, Loader2 } from 'lucide-vue-next';
 
 const router = useRouter();
 const { t } = useI18n();
+const toast = useToast();
 
 const saving = ref(false);
 const loadingPermissions = ref(false);
 const permissions = ref({});
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -190,19 +196,22 @@ const formatPermissionName = (name, category) => {
 };
 
 const handleSubmit = async () => {
-    if (!form.value.name) {
-        toast.error(t('features.roles.messages.enterName'));
-        return;
-    }
-
     saving.value = true;
+    errors.value = {};
     try {
         await api.post('/admin/cms/roles', form.value);
-        toast.success(t('common.messages.success.created', { item: 'Role' }));
+        toast.success.create('Role');
         router.push({ name: 'roles' });
     } catch (error) {
-        console.error('Failed to create role:', error);
-        toast.error(error.response?.data?.message || t('features.roles.messages.saveFailed'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+            // If there's a general error message in the response, show it too, or just toast general failure
+             if (!errors.value.name && !errors.value.permissions) {
+                 toast.error.fromResponse(error);
+            }
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

@@ -30,7 +30,11 @@
                             required
                             @input="generateSlug"
                             :placeholder="$t('features.forms.modal.placeholders.name')"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                         />
+                        <p v-if="errors.name" class="text-sm text-destructive mt-1">
+                            {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                        </p>
                     </div>
 
                     <div>
@@ -42,7 +46,11 @@
                             type="text"
                             required
                             :placeholder="$t('features.forms.modal.placeholders.slug')"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
                         />
+                        <p v-if="errors.slug" class="text-sm text-destructive mt-1">
+                            {{ Array.isArray(errors.slug) ? errors.slug[0] : errors.slug }}
+                        </p>
                     </div>
                 </div>
 
@@ -156,7 +164,7 @@ import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import FieldBuilder from '../../../components/forms/FieldBuilder.vue';
 import FieldModal from '../../../components/forms/FieldModal.vue';
 import Button from '../../../components/ui/button.vue';
@@ -166,10 +174,12 @@ import Checkbox from '../../../components/ui/checkbox.vue';
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
 
 const saving = ref(false);
 const showFieldModal = ref(false);
 const editingField = ref(null);
+const errors = ref({});
 
 const formData = reactive({
     name: '',
@@ -201,6 +211,7 @@ const slugify = (text) => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         const payload = {
             name: formData.name,
@@ -221,11 +232,14 @@ const handleSubmit = async () => {
             }))
         };
         await api.post('/admin/cms/forms', payload);
-        toast.success(t('features.forms.messages.createSuccess'));
+        toast.success.create('Form');
         router.push({ name: 'forms.index' });
     } catch (error) {
-        console.error('Failed to create form:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.messages.createFailed'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
