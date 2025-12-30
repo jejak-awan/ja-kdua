@@ -58,10 +58,9 @@ class UserController extends BaseApiController
             if (! $user->relationLoaded('roles') || $user->roles === null) {
                 $user->setRelation('roles', collect([]));
             }
-            // Ensure permissions is always a collection (will be serialized as array in JSON)
-            if (! $user->relationLoaded('permissions') || $user->permissions === null) {
-                $user->setRelation('permissions', collect([]));
-            }
+            // Ensure permissions includes inherited ones
+            // getAllPermissions() returns a collection of all permissions (direct + inherited)
+            $user->setRelation('permissions', $user->getAllPermissions());
 
             return $user;
         });
@@ -149,17 +148,24 @@ class UserController extends BaseApiController
             $user->syncRoles($request->roles);
         }
 
-        return $this->success($user->load(['roles', 'permissions']), 'User created successfully', 201);
+        $user->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+
+        return $this->success($user, 'User created successfully', 201);
     }
 
     public function show(User $user)
     {
-        return $this->success($user->load(['roles', 'permissions']), 'User retrieved successfully');
+        $user->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'User retrieved successfully');
     }
 
     public function profile(Request $request)
     {
-        return $this->success($request->user()->load(['roles', 'permissions']), 'Profile retrieved successfully');
+        $user = $request->user()->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'Profile retrieved successfully');
     }
 
     public function loginHistory(Request $request)
@@ -194,7 +200,9 @@ class UserController extends BaseApiController
 
         $user->update($validated);
 
-        return $this->success($user->load(['roles', 'permissions']), 'Profile updated successfully');
+        $user->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'Profile updated successfully');
     }
 
     public function uploadAvatar(Request $request)
@@ -215,7 +223,7 @@ class UserController extends BaseApiController
 
         return $this->success([
             'avatar' => Storage::disk('public')->url($path),
-            'user' => $user->load(['roles', 'permissions']),
+            'user' => $user->load(['roles'])->setRelation('permissions', $user->getAllPermissions()),
         ], 'Avatar uploaded successfully');
     }
 
@@ -351,7 +359,9 @@ class UserController extends BaseApiController
             $user->syncRoles($request->roles);
         }
 
-        return $this->success($user->load(['roles', 'permissions']), 'User updated successfully');
+        $user->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'User updated successfully');
     }
 
     public function destroy(User $user)
@@ -443,7 +453,9 @@ class UserController extends BaseApiController
 
         $user->markEmailAsVerified();
 
-        return $this->success($user->load(['roles', 'permissions']), 'User verified successfully');
+        $user->load(['roles']);
+        $user->setRelation('permissions', $user->getAllPermissions());
+        return $this->success($user, 'User verified successfully');
     }
 
     public function bulkAction(Request $request)

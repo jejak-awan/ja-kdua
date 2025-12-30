@@ -52,6 +52,7 @@ const routes = [
                 path: 'contents',
                 name: 'contents',
                 component: () => import('../views/admin/contents/Index.vue'),
+                meta: { permission: 'manage content' },
             },
             {
                 path: 'contents/calendar',
@@ -77,6 +78,7 @@ const routes = [
                 path: 'media',
                 name: 'media',
                 component: () => import('../views/admin/media/Index.vue'),
+                meta: { permission: 'manage media' },
             },
             {
                 path: 'categories',
@@ -97,6 +99,7 @@ const routes = [
                 path: 'users',
                 name: 'users.index',
                 component: () => import('../views/admin/users/Index.vue'),
+                meta: { permission: 'manage users' },
             },
             {
                 path: 'users/create',
@@ -112,6 +115,7 @@ const routes = [
                 path: 'roles',
                 name: 'roles',
                 component: () => import('../views/admin/roles/Index.vue'),
+                meta: { permission: 'manage roles' },
             },
             {
                 path: 'roles/create',
@@ -127,6 +131,7 @@ const routes = [
                 path: 'settings',
                 name: 'settings',
                 component: () => import('../views/admin/settings/Index.vue'),
+                meta: { permission: 'manage settings' },
             },
             {
                 path: 'newsletter',
@@ -142,6 +147,7 @@ const routes = [
                 path: 'analytics',
                 name: 'analytics',
                 component: () => import('../views/admin/analytics/Index.vue'),
+                meta: { permission: 'view analytics' },
             },
             {
                 path: 'comments',
@@ -232,6 +238,7 @@ const routes = [
                 path: 'backups',
                 name: 'backups',
                 component: () => import('../views/admin/backups/Index.vue'),
+                meta: { permission: 'manage backups' },
             },
             {
                 path: 'security',
@@ -242,12 +249,13 @@ const routes = [
                 path: 'system',
                 name: 'system',
                 component: () => import('../views/admin/system/Index.vue'),
+                meta: { permission: 'manage system' },
             },
             {
                 path: 'redis',
                 name: 'redis',
                 component: () => import('../views/admin/system/Redis.vue'),
-                meta: { title: 'Redis Management' },
+                meta: { title: 'Redis Management', permission: 'manage settings' },
             },
             {
                 path: 'activity-logs',
@@ -273,6 +281,7 @@ const routes = [
                 path: 'scheduled-tasks',
                 name: 'scheduled-tasks',
                 component: () => import('../views/admin/system/ScheduledTasks.vue'),
+                meta: { permission: 'manage scheduled tasks' },
             },
             {
                 path: 'command-runner',
@@ -309,11 +318,13 @@ const routes = [
                 path: 'themes',
                 name: 'themes',
                 component: () => import('../views/admin/themes/Index.vue'),
+                meta: { permission: 'manage themes' },
             },
             {
                 path: 'menus',
                 name: 'menus',
                 component: () => import('../views/admin/menus/Index.vue'),
+                meta: { permission: 'manage menus' },
             },
             {
                 path: 'menus/:id/edit',
@@ -324,16 +335,19 @@ const routes = [
                 path: 'widgets',
                 name: 'widgets',
                 component: () => import('../views/admin/widgets/Index.vue'),
+                meta: { permission: 'manage widgets' },
             },
             {
                 path: 'plugins',
                 name: 'plugins',
                 component: () => import('../views/admin/plugins/Index.vue'),
+                meta: { permission: 'manage plugins' },
             },
             {
                 path: 'languages',
                 name: 'languages',
                 component: () => import('../views/admin/languages/Index.vue'),
+                meta: { permission: 'manage settings' },
             },
             {
                 path: 'translations/:lang',
@@ -411,6 +425,12 @@ router.beforeEach((to, from, next) => {
     // If route is for guests but user is authenticated, redirect to dashboard
     if (to.meta.guest && authStore.isAuthenticated) {
         next({ name: 'dashboard' });
+        return;
+    }
+
+    // Check for specific permission requirement
+    if (to.meta.permission && !authStore.hasPermission(to.meta.permission)) {
+        next({ name: 'forbidden' });
         return;
     }
 
