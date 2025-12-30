@@ -1040,7 +1040,15 @@ const restoreMedia = async (media) => {
 };
 
 const emptyTrash = async () => {
-    if (!confirm(t('features.media.messages.emptyTrashConfirm') || 'Are you sure you want to permanently delete all items in trash? This action cannot be undone.')) {
+    const confirmed = await confirm({
+        title: t('features.media.confirm.emptyTrashTitle'),
+        message: t('features.media.confirm.emptyTrashMessage'),
+        variant: 'danger',
+        confirmText: t('features.media.confirm.delete'),
+        cancelText: t('features.media.confirm.cancel')
+    });
+    
+    if (!confirmed) {
         return;
     }
     

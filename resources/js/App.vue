@@ -14,6 +14,19 @@
     
     <!-- Global Toast Notifications -->
     <Toast ref="toastRef" />
+    
+    <!-- Global Confirmation Modal -->
+    <ConfirmModal
+        v-model:isOpen="confirmState.isOpen"
+        :title="confirmState.title"
+        :message="confirmState.message"
+        :description="confirmState.description"
+        :variant="confirmState.variant"
+        :confirmText="confirmState.confirmText"
+        :cancelText="confirmState.cancelText"
+        @confirm="confirmState.onConfirm"
+        @cancel="confirmState.onCancel"
+    />
 </template>
 
 <script setup>
@@ -22,15 +35,18 @@ import { useAuthStore } from './stores/auth';
 import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
+import { useConfirm } from './composables/useConfirm';
 import SessionTimeoutModal from './components/SessionTimeoutModal.vue';
 import SystemOverlay from './components/SystemOverlay.vue';
 import { SystemMonitor } from './services/SystemMonitor';
 import Toast from './components/ui/toast.vue';
+import ConfirmModal from './components/ConfirmModal.vue';
 import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
 const { loadActiveTheme } = useTheme();
 const { initializeLanguage } = useLanguage();
+const { confirmState } = useConfirm();
 
 // Toast reference
 const toastRef = ref(null);
