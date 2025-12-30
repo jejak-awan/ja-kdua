@@ -7,36 +7,36 @@
                 </h2>
             </div>
             <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-                <div class="rounded-md -space-y-px">
-                    <div>
-                        <label for="email" class="sr-only">Email address</label>
-                        <input
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="email" class="sr-only">{{ t('features.auth.login.emailPlaceholder') }}</Label>
+                        <Input
                             id="email"
                             v-model="form.email"
                             name="email"
                             type="email"
                             autocomplete="email"
                             required
-                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
                             :placeholder="t('features.auth.login.emailPlaceholder')"
-                        >
-                        <p v-if="errors.email" class="mt-1 text-sm text-red-600">
+                        />
+                        <p v-if="errors.email" class="text-sm text-destructive">
                             {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
                         </p>
                     </div>
-                    <div>
-                        <label for="password" class="sr-only">Password</label>
-                        <input
+                    <div class="space-y-2">
+                        <Label for="password" class="sr-only">{{ t('features.auth.login.passwordPlaceholder') }}</Label>
+                        <Input
                             id="password"
                             v-model="form.password"
                             name="password"
                             type="password"
                             autocomplete="current-password"
                             required
-                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
                             :placeholder="t('features.auth.login.passwordPlaceholder')"
-                        >
-                        <p v-if="errors.password" class="mt-1 text-sm text-red-600">
+                        />
+                        <p v-if="errors.password" class="text-sm text-destructive">
                             {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
                         </p>
                     </div>
@@ -123,6 +123,8 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import Input from '../../components/ui/input.vue';
+import Label from '../../components/ui/label.vue';
 
 const router = useRouter();
 const route = useRoute();
