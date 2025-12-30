@@ -753,7 +753,7 @@ class MediaController extends BaseApiController
                         // Generate thumbnail if needed
                         if (config('media.generate_thumbnails', true)) {
                             try {
-                                $thumbnailPath = $this->generateThumbnailForMedia($newMedia);
+                                $thumbnailPath = $this->mediaService->generateThumbnail($newMedia);
                                 $newMedia->update(['thumbnail_path' => $thumbnailPath]);
                             } catch (\Exception $e) {
                                 \Log::warning('Thumbnail generation failed for edited image: '.$e->getMessage());
@@ -774,7 +774,7 @@ class MediaController extends BaseApiController
                         // Regenerate thumbnail
                         if (config('media.generate_thumbnails', true) && $media->thumbnail_path) {
                             try {
-                                $thumbnailPath = $this->generateThumbnailForMedia($media);
+                                $thumbnailPath = $this->mediaService->generateThumbnail($media);
                                 $media->update(['thumbnail_path' => $thumbnailPath]);
                             } catch (\Exception $e) {
                                 \Log::warning('Thumbnail regeneration failed: '.$e->getMessage());
