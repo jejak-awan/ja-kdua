@@ -10,8 +10,12 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create permissions
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // 1. Create permissions
         $permissions = [
+            // Content
             'create content',
             'edit content',
             'delete content',
@@ -20,47 +24,76 @@ class RolePermissionSeeder extends Seeder
             'manage content templates',
             'manage categories',
             'manage tags',
+            
+            // Media
             'manage media',
-            'manage files', // NEW: Admin-level file system access
+            'manage files',
+            
+            // Interaction
             'manage comments',
-            'manage users',
             'manage forms',
+            
+            // System & Settings
+            'manage users',
+            'manage roles',
             'manage settings',
-            'view analytics',
             'manage themes',
             'manage plugins',
             'manage menus',
             'manage widgets',
+            'manage redirects',
+            'manage scheduled tasks',
+            'manage backups',
+            'manage system',
+            
+            // Logs & Analytics
+            'view logs',
+            'view analytics',
+            'view activity logs',
+            'view security logs',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Create roles
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $adminRole->givePermissionTo(Permission::all());
+        // 2. Define Roles and Assign Permissions
 
+        // SUPER ADMIN - Gets everything via Gate::before in AppServiceProvider,
+        // but it's good practice to assign permissions or just create the role.
+        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
+
+        // ADMIN - Full operational control but maybe not "super-admin" root stuff if needed
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
+
+        // EDITOR - Focused on content management
         $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
-        $editorRole->givePermissionTo([
+        $editorRole->syncPermissions([
             'create content',
             'edit content',
+            'delete content',
             'publish content',
+            'manage content',
             'manage categories',
             'manage tags',
             'manage media',
             'manage comments',
+            'view analytics',
         ]);
 
-        // Author role - can create and edit own content
+        // AUTHOR - Can create and manage own content
         $authorRole = Role::firstOrCreate(['name' => 'author', 'guard_name' => 'web']);
-        $authorRole->givePermissionTo([
+        $authorRole->syncPermissions([
             'create content',
             'edit content',
             'manage media',
         ]);
 
+        // MEMBER - Default user role
         $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
-        // Members have no special permissions by default
+        // Members typically have no admin permissions
+
+        $this->command->info('Standard roles and permissions seeded successfully!');
     }
 }

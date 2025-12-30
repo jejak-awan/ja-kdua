@@ -10,15 +10,70 @@ class RoleController extends BaseApiController
 {
     public function index(Request $request)
     {
-        $roles = Role::with('permissions')->orderBy('name')->get();
+        $limit = $request->input('limit', 10);
+        $search = $request->input('search');
+
+        $query = Role::with('permissions')->orderBy('name');
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $roles = $query->paginate($limit);
+
+        // Safely add users_count manually since Spatie's users() relation 
+        // sometimes fails to resolve the model in this environment
+        $roles->getCollection()->transform(function ($role) {
+            $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
+                ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
+                ->count();
+            return $role;
+        });
 
         return $this->success($roles, 'Roles retrieved successfully');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|in:delete',
+            'ids' => 'required|array',
+            'ids.*' => 'exists:roles,id',
+        ]);
+
+        $action = $validated['action'];
+        $ids = $validated['ids'];
+        $count = 0;
+
+        foreach ($ids as $id) {
+            $role = Role::find($id);
+            
+            // Prevent deleting protected roles
+            if (in_array($role->name, ['super-admin', 'admin', 'author', 'editor'])) {
+                continue;
+            }
+
+            // Prevent deleting roles with users
+            if ($role->users()->count() > 0) {
+                 continue;
+            }
+
+            if ($action === 'delete') {
+                $role->delete();
+                $count++;
+            }
+        }
+
+        return $this->success(null, ucfirst($action) . " completed for {$count} roles");
     }
 
     public function show(Role $role)
     {
         $role->load('permissions');
-        
+        $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
+            ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
+            ->count();
+            
         return $this->success($role, 'Role retrieved successfully');
     }
 

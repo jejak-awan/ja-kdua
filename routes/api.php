@@ -174,6 +174,7 @@ Route::prefix('v1')->group(function () {
         Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
 
         // Roles (for user management)
+        Route::post('roles/bulk-action', [App\Http\Controllers\Api\V1\RoleController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::get('roles', [App\Http\Controllers\Api\V1\RoleController::class, 'index'])->middleware('permission:manage users');
         Route::get('roles/permissions', [App\Http\Controllers\Api\V1\RoleController::class, 'permissions'])->middleware('permission:manage users');
         Route::post('roles', [App\Http\Controllers\Api\V1\RoleController::class, 'store'])->middleware('permission:manage users');

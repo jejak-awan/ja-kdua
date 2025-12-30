@@ -15,39 +15,13 @@ class SecurityHeaders
     {
         $response = $next($request);
         
-        // Prevent clickjacking attacks
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
-        
-        // Prevent MIME type sniffing
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-        
-        // Enable XSS protection
-        $response->headers->set('X-XSS-Protection', '1; mode=block');
-        
-        // Referrer Policy
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        
-        // Permissions Policy
-        $response->headers->set('Permissions-Policy', 
-            'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=()'
-        );
-        
-        // Strict Transport Security (HSTS) - only for HTTPS
-        if ($request->secure()) {
-            $response->headers->set('Strict-Transport-Security', 
-                'max-age=31536000; includeSubDomains; preload'
-            );
-        }
-        
         // Content Security Policy
         $csp = $this->getContentSecurityPolicy();
         
-        // Remove any existing CSP headers first
-        $response->headers->remove('Content-Security-Policy');
-        $response->headers->remove('Content-Security-Policy-Report-Only');
-        
-        // Set our CSP
-        $response->headers->set('Content-Security-Policy', $csp, false);
+        // ONLY set the standard CSP header. 
+        // Do NOT set Report-Only here as it might cause duplicate headers if 
+        // an external proxy (Cloudflare) is also setting one, leading to 502 errors.
+        $response->headers->set('Content-Security-Policy', $csp);
         
         // Remove server signature
         $response->headers->remove('X-Powered-By');
@@ -81,6 +55,10 @@ class SecurityHeaders
             'https://cdn.jsdelivr.net',
             'https://code.jquery.com',
             'https://static.cloudflareinsights.com',
+            // Hashes for inline scripts in app.blade.php / error pages
+            "'sha256-bYJ5jUrfnAwV0m4aathRglwVNvZrPLkrugff3Hh1b1k='", // Dark mode script (line 12)
+            "'sha256-NrYVPfGWcGFTIEFXOF0FJ30yVDzC8vN6pXoAMPaU5RI='", // SiteConfig script (line 24)
+            "'sha256-EuHBk5xLTkeNQNYrCUayLQWeV5z2hbGuaMU/F+w38hk='", // New script (likely error page or Vite)
         ]);
         
         // Add same-origin domains

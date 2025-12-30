@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Implicitly grant "super-admin" role all permissions
+        // This works in the app by using Gate::before or can be used by Spatie directly
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super-admin') ? true : null;
+        });
+
         \App\Models\MediaFolder::observe(\App\Observers\MediaFolderObserver::class);
         
         try {
