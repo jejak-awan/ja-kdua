@@ -337,27 +337,26 @@ class MediaController extends BaseApiController
 
     public function restore(Request $request, $id)
     {
-        if (!$request->user()->can('manage media')) { // Restore is usually advanced? Allow delete media users?
-            // If I can delete, I should be able to restore?
-            // Let's stick to 'manage media' or 'delete media' (implies trash management?)
-            // Or maybe just 'manage media' for now.
-             if (!$request->user()->can('delete media')) {
-                  return $this->forbidden('You do not have permission to restore media');
-             }
-        }
-
+        $user = $request->user();
         $media = Media::onlyTrashed()->findOrFail($id);
         
-        // Ownership check
-        if (!request()->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to restore this media');
-             }
-             if (is_null($media->author_id)) {
-                 // Should allow restoring global if I am admin? Yes.
-                 // If I am NOT admin, I cannot restore global.
-                 return $this->forbidden('You cannot restore global media');
-             }
+        $isOwner = $media->author_id && $media->author_id === $user->id;
+        $isManager = $user->can('manage media');
+
+        // Owners can always restore their own media
+        if (!$isOwner && !$isManager) {
+            if (!$user->can('delete media')) {
+                return $this->forbidden('You do not have permission to restore media');
+            }
+            // Has delete media permission but still can't restore others' private media
+            if ($media->author_id && !$media->is_shared) {
+                return $this->forbidden('You do not have permission to restore this media');
+            }
+        }
+
+        // Global media (no author) can only be restored by managers
+        if (is_null($media->author_id) && !$isManager) {
+            return $this->forbidden('You cannot restore global media');
         }
         
         $this->mediaService->restore($media->id);

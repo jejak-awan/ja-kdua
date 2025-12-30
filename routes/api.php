@@ -154,7 +154,7 @@ Route::prefix('v1')->group(function () {
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show'])->middleware('permission:view media');
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update']);
         Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy']);
-        Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore'])->middleware('permission:edit media');
+        Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore']);
         Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete']);
         Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:edit media');
         Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:edit media');
