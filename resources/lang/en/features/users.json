@@ -5,6 +5,18 @@
     "allRoles": "All Roles",
     "loading": "Loading users...",
     "empty": "No users found.",
+    "stats": {
+        "total": "Total Users",
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "recent": "New (7 Days)",
+        "active": "Active (30 Days)"
+    },
+    "filters": {
+        "all": "All",
+        "verifiedOnly": "Verified Only",
+        "unverifiedOnly": "Unverified Only"
+    },
     "table": {
         "user": "User",
         "email": "Email",

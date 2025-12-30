@@ -11,9 +11,78 @@
             </router-link>
         </div>
 
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <Card
+                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+                :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter }"
+                @click="clearFilters"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.total') }}</p>
+                        <p class="text-2xl font-bold text-foreground">{{ stats.total }}</p>
+                    </div>
+                    <Users class="w-8 h-8 text-primary opacity-80" />
+                </div>
+            </Card>
+            <Card
+                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+                :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' }"
+                @click="setVerificationFilter('verified')"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.verified') }}</p>
+                        <p class="text-2xl font-bold text-primary">{{ stats.verified }}</p>
+                    </div>
+                    <CheckCircle class="w-8 h-8 text-primary opacity-80" />
+                </div>
+            </Card>
+            <Card
+                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-amber-500/50"
+                :class="{ 'border-amber-500 ring-2 ring-amber-500/20': verificationFilter === 'unverified' }"
+                @click="setVerificationFilter('unverified')"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.unverified') }}</p>
+                        <p class="text-2xl font-bold text-amber-500">{{ stats.unverified }}</p>
+                    </div>
+                    <AlertCircle class="w-8 h-8 text-amber-500 opacity-80" />
+                </div>
+            </Card>
+            <Card
+                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-emerald-500/50"
+                :class="{ 'border-emerald-500 ring-2 ring-emerald-500/20': activeStatFilter === 'recent' }"
+                @click="setStatFilter('recent')"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.recent') }}</p>
+                        <p class="text-2xl font-bold text-emerald-500">{{ stats.recent }}</p>
+                    </div>
+                    <UserPlus class="w-8 h-8 text-emerald-500 opacity-80" />
+                </div>
+            </Card>
+            <Card
+                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-blue-500/50"
+                :class="{ 'border-blue-500 ring-2 ring-blue-500/20': activeStatFilter === 'active' }"
+                @click="setStatFilter('active')"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.active') }}</p>
+                        <p class="text-2xl font-bold text-blue-500">{{ stats.active }}</p>
+                    </div>
+                    <Activity class="w-8 h-8 text-blue-500 opacity-80" />
+                </div>
+            </Card>
+        </div>
+
         <!-- Filters -->
         <Card class="p-4 mb-4">
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center gap-4">
                 <div class="relative flex-1 max-w-xs">
                     <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -36,6 +105,16 @@
                         >
                             {{ role.name }}
                         </SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select v-model="verificationFilter">
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('features.users.filters.all')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.users.filters.all') }}</SelectItem>
+                        <SelectItem value="verified">{{ $t('features.users.filters.verifiedOnly') }}</SelectItem>
+                        <SelectItem value="unverified">{{ $t('features.users.filters.unverifiedOnly') }}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -247,7 +326,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck } from 'lucide-vue-next';
+import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
@@ -257,8 +336,18 @@ const users = ref([]);
 const roles = ref([]);
 const search = ref('');
 const roleFilter = ref('all');
+const verificationFilter = ref('all');
+const activeStatFilter = ref(null);
 const pagination = ref(null);
 const authStore = useAuthStore();
+const stats = ref({
+    total: 0,
+    verified: 0,
+    unverified: 0,
+    recent: 0,
+    active: 0,
+    by_role: {},
+});
 
 const isSuperAdmin = (u) => u.roles?.some(r => r.name === 'super-admin');
 
@@ -303,6 +392,20 @@ const fetchUsers = async () => {
             params.role = roleFilter.value;
         }
 
+        // Add verification filter
+        if (verificationFilter.value === 'verified') {
+            params.verified = 1;
+        } else if (verificationFilter.value === 'unverified') {
+            params.verified = 0;
+        }
+
+        // Add stat filters
+        if (activeStatFilter.value === 'recent') {
+            params.recent = 1;
+        } else if (activeStatFilter.value === 'active') {
+            params.active = 1;
+        }
+
         const response = await api.get('/admin/cms/users', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         // Ensure each user has roles array
@@ -318,6 +421,34 @@ const fetchUsers = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const fetchStats = async () => {
+    try {
+        const response = await api.get('/admin/cms/users/stats');
+        const { data } = parseResponse(response);
+        stats.value = data;
+    } catch (error) {
+        console.error('Failed to fetch stats:', error);
+    }
+};
+
+const setVerificationFilter = (filter) => {
+    activeStatFilter.value = null;
+    verificationFilter.value = filter;
+};
+
+const setStatFilter = (filter) => {
+    verificationFilter.value = 'all';
+    activeStatFilter.value = activeStatFilter.value === filter ? null : filter;
+    fetchUsers();
+};
+
+const clearFilters = () => {
+    verificationFilter.value = 'all';
+    activeStatFilter.value = null;
+    roleFilter.value = 'all';
+    search.value = '';
 };
 
 const fetchRoles = async () => {
@@ -484,7 +615,7 @@ const formatDate = (date) => {
     });
 };
 
-watch([search, roleFilter], () => {
+watch([search, roleFilter, verificationFilter], () => {
     if (pagination.value) {
         pagination.value.current_page = 1;
     }
@@ -494,5 +625,6 @@ watch([search, roleFilter], () => {
 onMounted(() => {
     fetchUsers();
     fetchRoles();
+    fetchStats();
 });
 </script>

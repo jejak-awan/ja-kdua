@@ -29,6 +29,26 @@ class UserController extends BaseApiController
             });
         }
 
+        // Verification filter
+        if ($request->has('verified')) {
+            if ($request->verified == 1) {
+                $query->whereNotNull('email_verified_at');
+            } else {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        // Recent filter (registered in last 7 days)
+        if ($request->has('recent') && $request->recent == 1) {
+            $query->where('created_at', '>=', now()->subDays(7));
+        }
+
+        // Active filter (logged in within last 30 days)
+        if ($request->has('active') && $request->active == 1) {
+            $query->whereNotNull('last_login_at')
+                ->where('last_login_at', '>=', now()->subDays(30));
+        }
+
         $perPage = $request->input('per_page', 20);
         $users = $query->latest()->paginate($perPage);
 
@@ -47,6 +67,40 @@ class UserController extends BaseApiController
         });
 
         return $this->paginated($users, 'Users retrieved successfully');
+    }
+
+    /**
+     * Get user statistics for dashboard cards.
+     */
+    public function stats()
+    {
+        $total = User::count();
+        $verified = User::whereNotNull('email_verified_at')->count();
+        $unverified = User::whereNull('email_verified_at')->count();
+        
+        // Count by roles
+        $roleCounts = [];
+        $roles = \Spatie\Permission\Models\Role::all();
+        foreach ($roles as $role) {
+            $roleCounts[$role->name] = User::role($role->name)->count();
+        }
+        
+        // Recent (last 7 days)
+        $recent = User::where('created_at', '>=', now()->subDays(7))->count();
+        
+        // Active (logged in within last 30 days)
+        $active = User::whereNotNull('last_login_at')
+            ->where('last_login_at', '>=', now()->subDays(30))
+            ->count();
+
+        return $this->success([
+            'total' => $total,
+            'verified' => $verified,
+            'unverified' => $unverified,
+            'recent' => $recent,
+            'active' => $active,
+            'by_role' => $roleCounts,
+        ], 'User statistics retrieved successfully');
     }
 
     public function store(Request $request)

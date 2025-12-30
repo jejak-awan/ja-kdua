@@ -5,6 +5,18 @@
     "allRoles": "Semua Peran",
     "loading": "Memuat pengguna...",
     "empty": "Tidak ada pengguna ditemukan.",
+    "stats": {
+        "total": "Total Pengguna",
+        "verified": "Terverifikasi",
+        "unverified": "Belum Diverifikasi",
+        "recent": "Baru (7 Hari)",
+        "active": "Aktif (30 Hari)"
+    },
+    "filters": {
+        "all": "Semua",
+        "verifiedOnly": "Terverifikasi Saja",
+        "unverifiedOnly": "Belum Terverifikasi Saja"
+    },
     "table": {
         "user": "Pengguna",
         "email": "Email",

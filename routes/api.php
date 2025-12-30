@@ -170,6 +170,7 @@ Route::prefix('v1')->group(function () {
 
         // Users Management
         Route::post('users/bulk-action', [App\Http\Controllers\Api\V1\UserController::class, 'bulkAction'])->middleware('permission:manage users');
+        Route::get('users/stats', [App\Http\Controllers\Api\V1\UserController::class, 'stats'])->middleware('permission:manage users');
         Route::apiResource('users', App\Http\Controllers\Api\V1\UserController::class)->middleware('permission:manage users');
         Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
         Route::post('users/{user}/verify', [App\Http\Controllers\Api\V1\UserController::class, 'verify'])->middleware('permission:manage users');
