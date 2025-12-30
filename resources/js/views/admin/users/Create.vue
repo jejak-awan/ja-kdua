@@ -85,7 +85,7 @@
                             v-model="form.password"
                             type="password"
                             required
-                            :placeholder="$t('features.users.form.placeholders.password')"
+                            :placeholder="$t('features.users.form.placeholders.password') + ' (min 8, A-Z, a-z, 0-9)'"
                         />
                     </div>
 
@@ -155,6 +155,7 @@
                             <Checkbox
                                 :id="`role-${role.id}`"
                                 :checked="form.roles.includes(role.id)"
+                                :disabled="getRoleRank(role.name) > authStore.getRoleRank()"
                                 @update:checked="(checked) => {
                                     if (checked) form.roles.push(role.id);
                                     else form.roles = form.roles.filter(id => id !== role.id);
@@ -163,6 +164,7 @@
                             <label
                                 :for="`role-${role.id}`"
                                 class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                                :class="{ 'opacity-50': getRoleRank(role.name) > authStore.getRoleRank() }"
                             >
                                 {{ role.name }}
                             </label>
@@ -197,7 +199,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -208,9 +210,21 @@ import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
+import { useAuthStore } from '../../../stores/auth';
 
 const router = useRouter();
 const { t } = useI18n();
+const authStore = useAuthStore();
+
+const roleRanks = {
+    'super-admin': 100,
+    'admin': 80,
+    'editor': 60,
+    'author': 40,
+    'member': 20,
+};
+
+const getRoleRank = (roleName) => roleRanks[roleName] || 0;
 
 const saving = ref(false);
 const loadingRoles = ref(false);

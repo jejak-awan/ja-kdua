@@ -9,13 +9,52 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     getters: {
-        isAdmin: (state) => {
-            if (!state.user) return false;
-            return state.user.roles?.some(role => role.name === 'admin') || false;
+        getRoleRank: (state) => (user = null) => {
+            const targetUser = user || state.user;
+            if (!targetUser || !targetUser.roles) return 0;
+
+            const roleRanks = {
+                'super-admin': 100,
+                'admin': 80,
+                'editor': 60,
+                'author': 40,
+                'member': 20,
+            };
+
+            let maxRank = 0;
+            targetUser.roles.forEach(role => {
+                const rank = roleRanks[role.name] || 0;
+                if (rank > maxRank) maxRank = rank;
+            });
+
+            return maxRank;
         },
+
+        isAtLeastRole: (state, getters) => (roleName) => {
+            const roleRanks = {
+                'super-admin': 100,
+                'admin': 80,
+                'editor': 60,
+                'author': 40,
+                'member': 20,
+            };
+            const minRank = roleRanks[roleName] || 0;
+            return getters.getRoleRank() >= minRank;
+        },
+
+        isHigherThan: (state, getters) => (otherUser) => {
+            if (!otherUser) return true;
+            return getters.getRoleRank() > getters.getRoleRank(otherUser);
+        },
+
+        isAdmin: (state, getters) => {
+            return getters.isAtLeastRole('admin');
+        },
+
         hasPermission: (state) => (permission) => {
             if (!state.user) return false;
-            if (state.user.roles?.some(role => role.name === 'admin')) return true;
+            // Super-admin always has all permissions
+            if (state.user.roles?.some(role => role.name === 'super-admin')) return true;
             return state.user.permissions?.some(perm => perm.name === permission) || false;
         },
     },

@@ -105,6 +105,10 @@ class MediaFolderController extends BaseApiController
 
     public function store(Request $request)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to create media folders');
+        }
+
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -137,51 +141,65 @@ class MediaFolderController extends BaseApiController
         return $this->success($mediaFolder->load(['parent', 'children']), 'Folder retrieved successfully');
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, MediaFolder $mediaFolder)
     {
-        $mediaFolder = MediaFolder::withTrashed()->findOrFail($id);
-        
-        $validated = $request->validate([
-            'name' => 'string|max:255',
-            'parent_id' => 'nullable|exists:media_folders,id',
-            'sort_order' => 'integer|min:0',
-        ]);
-
-        if (isset($validated['name'])) {
-            $validated['slug'] = Str::slug($validated['name']);
-            
-            // Ensure slug is unique
-            $originalSlug = $validated['slug'];
-            $counter = 1;
-            $parentId = $validated['parent_id'] ?? $mediaFolder->parent_id;
-            $parentQuery = MediaFolder::where('parent_id', $parentId);
-            while ($parentQuery->clone()->where('slug', $validated['slug'])->where('id', '!=', $mediaFolder->id)->exists()) {
-                $validated['slug'] = $originalSlug . '-' . $counter++;
-            }
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to update media folders');
         }
 
-        $mediaFolder->update($validated);
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'parent_id' => 'nullable|exists:media_folders,id',
+                'sort_order' => 'integer|min:0',
+            ]);
 
-        return $this->success($mediaFolder, 'Folder updated successfully');
+            if (isset($validated['name'])) {
+                $validated['slug'] = Str::slug($validated['name']);
+                
+                // Ensure slug is unique
+                $originalSlug = $validated['slug'];
+                $counter = 1;
+                $parentId = $validated['parent_id'] ?? $mediaFolder->parent_id;
+                $parentQuery = MediaFolder::where('parent_id', $parentId);
+                while ($parentQuery->clone()->where('slug', $validated['slug'])->where('id', '!=', $mediaFolder->id)->exists()) {
+                    $validated['slug'] = $originalSlug . '-' . $counter++;
+                }
+            }
+
+            $mediaFolder->update($validated);
+
+            return $this->success($mediaFolder, 'Folder updated successfully');
+        } catch (\Exception $e) {
+            Log::error('Media folder update error: '.$e->getMessage());
+            return $this->error($e->getMessage(), 500);
+        }
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, MediaFolder $mediaFolder)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to delete media folders');
+        }
+
         $permanent = $request->boolean('permanent', false);
-        $folder = MediaFolder::withTrashed()->findOrFail($id);
         
         if ($permanent) {
-            return $this->forceDelete($request, $id);
+            return $this->forceDelete($request, $mediaFolder->id); // Pass ID to forceDelete
         }
 
         // Soft delete - recursive behavior is handled by MediaFolderObserver
-        $folder->delete();
+        $mediaFolder->delete();
 
         return $this->success(null, 'Folder moved to trash');
     }
 
     public function restore(Request $request, $id)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to restore media folders');
+        }
+
         $folder = MediaFolder::onlyTrashed()->findOrFail($id);
         // Recursive restore is handled by MediaFolderObserver
         $folder->restore();
@@ -191,6 +209,10 @@ class MediaFolderController extends BaseApiController
 
     public function forceDelete(Request $request, $id)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to permanently delete media folders');
+        }
+
         $folder = MediaFolder::withTrashed()->findOrFail($id);
         
         // Safety: Prevent deleting folders that have non-trashed children/media if context is weird
@@ -205,9 +227,12 @@ class MediaFolderController extends BaseApiController
         return $this->success(null, 'Folder permanently deleted');
     }
 
-    public function move(Request $request, $id)
+    public function move(Request $request, MediaFolder $mediaFolder)
     {
-        $mediaFolder = MediaFolder::withTrashed()->findOrFail($id);
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to move media folders');
+        }
+
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:media_folders,id',
             'sort_order' => 'integer|min:0',

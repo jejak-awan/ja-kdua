@@ -54,21 +54,44 @@ class UserController extends BaseApiController
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
+            'password' => ['required', 'min:8', new StrongPassword()],
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',
             'location' => 'nullable|string|max:255',
             'avatar' => 'nullable|string',
-            'roles' => 'nullable|array',
+            'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+        $validated['email_verified_at'] = now();
         
         $user = User::create($validated);
 
         if ($request->has('roles')) {
+            $maxRequestedRank = 0;
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->roles)->get();
+            
+            $roleRanks = [
+                'super-admin' => 100,
+                'admin'       => 80,
+                'editor'      => 60,
+                'author'      => 40,
+                'member'      => 20,
+            ];
+
+            foreach ($roles as $role) {
+                $rank = $roleRanks[$role->name] ?? 0;
+                if ($rank > $maxRequestedRank) {
+                    $maxRequestedRank = $rank;
+                }
+            }
+
+            if ($maxRequestedRank > auth()->user()->getRoleRank()) {
+                return $this->forbidden('You cannot assign a role higher than your own rank');
+            }
+
             $user->syncRoles($request->roles);
         }
 
@@ -205,18 +228,70 @@ class UserController extends BaseApiController
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
+            'password' => ['sometimes', 'nullable', 'min:8', new StrongPassword()],
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',
             'location' => 'nullable|string|max:255',
             'avatar' => 'nullable|string',
-            'roles' => 'nullable|array',
+            'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
+            'is_verified' => 'sometimes|boolean',
         ]);
+
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        if (isset($validated['is_verified'])) {
+            $user->email_verified_at = $validated['is_verified'] ? now() : null;
+            unset($validated['is_verified']);
+        }
 
         $user->update($validated);
 
+        // Guard: Hierarchy check
+        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+            return $this->forbidden('You can only manage users with a lower rank than yours');
+        }
+
         if ($request->has('roles')) {
+            $maxRequestedRank = 0;
+            $roles = \Spatie\Permission\Models\Role::whereIn('id', $request->roles)->get();
+            
+            $roleRanks = [
+                'super-admin' => 100,
+                'admin'       => 80,
+                'editor'      => 60,
+                'author'      => 40,
+                'member'      => 20,
+            ];
+
+            foreach ($roles as $role) {
+                $rank = $roleRanks[$role->name] ?? 0;
+                if ($rank > $maxRequestedRank) {
+                    $maxRequestedRank = $rank;
+                }
+            }
+
+            // Cannot assign role higher than own
+            if ($maxRequestedRank > auth()->user()->getRoleRank()) {
+                return $this->forbidden('You cannot assign a role higher than your own rank');
+            }
+
+            // Guard: cannot remove super-admin role from the last super-admin
+            $isCurrentlySuperAdmin = $user->hasRole('super-admin');
+            $requestedSuperAdmin = $roles->contains('name', 'super-admin');
+
+            if ($isCurrentlySuperAdmin && !$requestedSuperAdmin) {
+                $superAdminCount = User::role('super-admin')->count();
+                if ($superAdminCount <= 1) {
+                    return $this->validationError(['roles' => ['Cannot remove the last super-admin role']], 'Cannot remove the last super-admin role');
+                }
+            }
+
             $user->syncRoles($request->roles);
         }
 
@@ -228,6 +303,19 @@ class UserController extends BaseApiController
         // Prevent deleting yourself
         if ($user->id === auth()->id()) {
             return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
+        }
+
+        // Prevent deleting users with higher or equal rank
+        if (!auth()->user()->isHigherThan($user)) {
+            return $this->forbidden('You can only delete users with a lower rank than yours');
+        }
+
+        // Prevent deleting the last super-admin
+        if ($user->hasRole('super-admin')) {
+            $superAdminCount = User::role('super-admin')->count();
+            if ($superAdminCount <= 1) {
+                return $this->validationError(['user' => ['Cannot delete the last super-admin account']], 'Cannot delete the last super-admin account');
+            }
         }
 
         // Delete avatar if exists
@@ -246,6 +334,11 @@ class UserController extends BaseApiController
      */
     public function forceLogout(User $user)
     {
+        // Guard: Hierarchy check
+        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+            return $this->forbidden('You can only manage users with a lower rank than yours');
+        }
+
         // Prevent force logging out yourself
         if ($user->id === auth()->id()) {
             return $this->validationError(
@@ -276,12 +369,31 @@ class UserController extends BaseApiController
         ], "User logged out from {$tokenCount} device(s) successfully");
     }
 
+    /**
+     * Verify a user's email manually.
+     */
+    public function verify(User $user)
+    {
+        // Guard: Hierarchy check
+        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+            return $this->forbidden('You can only manage users with a lower rank than yours');
+        }
+
+        if ($user->email_verified_at) {
+            return $this->error('User is already verified', 400);
+        }
+
+        $user->markEmailAsVerified();
+
+        return $this->success($user->load(['roles', 'permissions']), 'User verified successfully');
+    }
+
     public function bulkAction(Request $request)
     {
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:users,id',
-            'action' => 'required|in:delete,force_logout',
+            'action' => 'required|in:delete,force_logout,verify',
         ]);
 
         $ids = $request->ids;
@@ -289,10 +401,28 @@ class UserController extends BaseApiController
         $count = 0;
 
         if ($action === 'delete') {
-            // Filter out self-deletion
+            // Filter out self-deletion and hierarchy protection
             $ids = array_filter($ids, function($id) {
-                return $id != auth()->id();
+                // Self deletion check
+                if ($id == auth()->id()) return false;
+                
+                $target = User::find($id);
+                if (!$target) return false;
+
+                // Rank check
+                if (!auth()->user()->isHigherThan($target)) return false;
+
+                return true;
             });
+
+            // Prevent deleting the last super-admin in bulk delete
+            $superAdminsToDelete = User::whereIn('id', $ids)->role('super-admin')->count();
+            if ($superAdminsToDelete > 0) {
+                $totalSuperAdmins = User::role('super-admin')->count();
+                if ($totalSuperAdmins - $superAdminsToDelete < 1) {
+                    return $this->validationError(['ids' => ['Bulk action would leave the system without a super-admin']], 'Cannot delete the last super-admin');
+                }
+            }
 
             // Delete avatars
             $users = User::whereIn('id', $ids)->get();
@@ -305,9 +435,15 @@ class UserController extends BaseApiController
             $count = User::whereIn('id', $ids)->delete();
             $message = "{$count} users deleted successfully";
         } elseif ($action === 'force_logout') {
-            // Filter out self-logout
+            // Filter out self-logout and hierarchy protection
             $ids = array_filter($ids, function($id) {
-                return $id != auth()->id();
+                if ($id == auth()->id()) return false;
+                
+                $target = User::find($id);
+                if (!$target) return false;
+                if (!auth()->user()->isHigherThan($target)) return false;
+                
+                return true;
             });
             
             $users = User::whereIn('id', $ids)->get();
@@ -316,6 +452,21 @@ class UserController extends BaseApiController
                 $count++;
             }
             $message = "{$count} users force logged out successfully";
+        } elseif ($action === 'verify') {
+            // Filter hierarchy protection
+            $ids = array_filter($ids, function($id) {
+                $target = User::find($id);
+                if (!$target) return false;
+                if (auth()->id() !== $id && !auth()->user()->isHigherThan($target)) return false;
+                return true;
+            });
+
+            $users = User::whereIn('id', $ids)->whereNull('email_verified_at')->get();
+            foreach ($users as $user) {
+                $user->markEmailAsVerified();
+                $count++;
+            }
+            $message = "{$count} users verified successfully";
         }
 
         return $this->success(['count' => $count], $message);

@@ -91,7 +91,7 @@ class MediaController extends BaseApiController
 
     public function upload(Request $request)
     {
-        if (!$request->user()->hasRole('admin') && !$request->user()->can('manage media')) {
+        if (!$request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
@@ -138,6 +138,45 @@ class MediaController extends BaseApiController
         ], 'Media uploaded successfully', 201);
     }
 
+    public function uploadMultiple(Request $request)
+    {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to upload media');
+        }
+
+        try {
+            $maxSize = \App\Models\Setting::get('max_upload_size', 10240);
+            
+            $request->validate([
+                'files' => 'required|array',
+                'files.*' => ['required', 'file', 'max:' . $maxSize],
+                'folder_id' => 'nullable|exists:media_folders,id',
+                'optimize' => 'boolean',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        $uploadedMedia = [];
+        $files = $request->file('files');
+        $folderId = $request->input('folder_id');
+        $optimize = $request->input('optimize', config('media.optimize', true));
+
+        foreach ($files as $file) {
+            try {
+                $media = $this->mediaService->upload($file, $folderId, $optimize);
+                $uploadedMedia[] = $media->load(['folder', 'usages']);
+            } catch (\Exception $e) {
+                Log::error('Bulk upload failed for a file: ' . $e->getMessage());
+            }
+        }
+
+        return $this->success([
+            'media' => $uploadedMedia,
+            'count' => count($uploadedMedia),
+        ], 'Media uploaded successfully', 201);
+    }
+
     public function show(Media $media)
     {
         return $this->success($media->load(['folder', 'usages.model']), 'Media retrieved successfully');
@@ -145,6 +184,10 @@ class MediaController extends BaseApiController
 
     public function update(Request $request, Media $media)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to update media');
+        }
+
         try {
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
@@ -165,6 +208,10 @@ class MediaController extends BaseApiController
 
     public function destroy(Request $request, Media $media)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to delete media');
+        }
+
         $permanent = $request->boolean('permanent', false);
         
         if ($permanent) {
@@ -190,6 +237,10 @@ class MediaController extends BaseApiController
 
     public function restore(Request $request, $id)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to restore media');
+        }
+
         $media = Media::onlyTrashed()->findOrFail($id);
         $this->mediaService->restore($media->id);
 
@@ -198,6 +249,10 @@ class MediaController extends BaseApiController
 
     public function forceDelete(Request $request, $id)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to permanently delete media');
+        }
+
         $media = Media::withTrashed()->findOrFail($id);
         
         // Safety check: if not forcing and in use, block
@@ -219,6 +274,10 @@ class MediaController extends BaseApiController
      */
     public function emptyTrash(Request $request)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to empty trash');
+        }
+
         // Get all trashed media
         $trashedMedia = Media::onlyTrashed()->get();
         $deletedCount = 0;
@@ -349,6 +408,10 @@ class MediaController extends BaseApiController
 
     public function bulkAction(Request $request)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to perform bulk actions on media');
+        }
+
         $ids = $request->input('ids', $request->input('media_ids', []));
         $action = $request->input('action');
 
@@ -393,6 +456,10 @@ class MediaController extends BaseApiController
 
     public function generateThumbnail(Request $request, Media $media)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to generate thumbnails');
+        }
+
         if (!str_starts_with($media->mime_type, 'image/')) {
             return $this->error('Thumbnail can only be generated for images', 400, [], 'INVALID_MEDIA_TYPE');
         }
@@ -419,6 +486,10 @@ class MediaController extends BaseApiController
 
     public function resize(Request $request, Media $media)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to resize media');
+        }
+
         // Only for images
         if (! str_starts_with($media->mime_type, 'image/')) {
             return $this->validationError(['media' => ['Resize can only be performed on images']], 'Resize can only be performed on images');
@@ -490,6 +561,10 @@ class MediaController extends BaseApiController
      */
     public function downloadZip(Request $request)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to download media');
+        }
+
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:media,id',
@@ -532,6 +607,10 @@ class MediaController extends BaseApiController
 
     public function edit(Request $request, Media $media)
     {
+        if (!$request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to edit media');
+        }
+
         // Only for images
         if (! str_starts_with($media->mime_type, 'image/')) {
             return $this->validationError(['media' => ['Image editing can only be performed on images']], 'Image editing can only be performed on images');

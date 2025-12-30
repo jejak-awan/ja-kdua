@@ -60,7 +60,7 @@ class ContentController extends BaseApiController
     {
         // Allow preview for draft content if user is the author or admin
         if ($content->status === 'draft' && $content->author_id !== $request->user()->id) {
-            if (! $request->user()->hasRole('admin')) {
+            if (! $request->user()->can('manage content')) {
                 return $this->forbidden('Unauthorized to preview this content');
             }
         }
@@ -351,7 +351,7 @@ class ContentController extends BaseApiController
     public function unlock(Request $request, Content $content)
     {
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
-            if (!$request->user()->hasRole('admin')) {
+            if (!$request->user()->can('manage content')) {
                 return $this->forbidden('You can only unlock content you locked');
             }
         }

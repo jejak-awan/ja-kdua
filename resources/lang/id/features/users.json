@@ -31,10 +31,14 @@
         "forceLogoutConfirm": "Apakah Anda yakin ingin melogout paksa pengguna \"{name}\" dari semua perangkat?",
         "forceLogoutSuccess": "Berhasil Logout Paksa",
         "forceLogoutSessions": "Pengguna berhasil dilogout dari {count} perangkat",
-        "forceLogoutFailed": "Gagal melogout paksa pengguna"
+        "forceLogoutFailed": "Gagal melogout paksa pengguna",
+        "verifySuccess": "Pengguna berhasil diverifikasi",
+        "cannotManageSuperAdmin": "Anda tidak dapat mengelola akun super-admin",
+        "cannotDeleteLastSuperAdmin": "Tidak dapat menghapus satu-satunya akun super-admin"
     },
     "actions": {
-        "forceLogout": "Logout Paksa"
+        "forceLogout": "Logout Paksa",
+        "verify": "Verifikasi Email"
     },
     "modals": {
         "user": {
@@ -80,6 +84,7 @@
         "bio": "Bio",
         "website": "Situs Web",
         "location": "Lokasi",
+        "verified": "Terverifikasi",
         "roles": "Peran",
         "placeholders": {
             "passwordCurrent": "Kata sandi",

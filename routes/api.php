@@ -172,6 +172,7 @@ Route::prefix('v1')->group(function () {
         Route::post('users/bulk-action', [App\Http\Controllers\Api\V1\UserController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::apiResource('users', App\Http\Controllers\Api\V1\UserController::class)->middleware('permission:manage users');
         Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
+        Route::post('users/{user}/verify', [App\Http\Controllers\Api\V1\UserController::class, 'verify'])->middleware('permission:manage users');
 
         // Roles (for user management)
         Route::post('roles/bulk-action', [App\Http\Controllers\Api\V1\RoleController::class, 'bulkAction'])->middleware('permission:manage users');

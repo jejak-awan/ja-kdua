@@ -133,9 +133,63 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if ($enforcement === 'admin') {
-            return $this->hasRole('admin') || $this->hasRole('super-admin');
+            return $this->isAtLeastRole('admin');
         }
 
         return false;
+    }
+
+    /**
+     * Get the numerical rank of the user's highest role.
+     * Higher number means higher authority.
+     */
+    public function getRoleRank(): int
+    {
+        $roleRanks = [
+            'super-admin' => 100,
+            'admin'       => 80,
+            'editor'      => 60,
+            'author'      => 40,
+            'member'      => 20,
+        ];
+
+        $userRoles = $this->getRoleNames();
+        
+        $maxRank = 0;
+        foreach ($userRoles as $role) {
+            if (isset($roleRanks[$role]) && $roleRanks[$role] > $maxRank) {
+                $maxRank = $roleRanks[$role];
+            }
+        }
+
+        return $maxRank;
+    }
+
+    /**
+     * Compare this user's rank with another user.
+     */
+    public function isHigherThan(User $target): bool
+    {
+        return $this->getRoleRank() > $target->getRoleRank();
+    }
+
+    /**
+     * Check if user has at least the minimum required role level.
+     */
+    public function isAtLeastRole(string $roleName): bool
+    {
+        $roleRanks = [
+            'super-admin' => 100,
+            'admin'       => 80,
+            'editor'      => 60,
+            'author'      => 40,
+            'member'      => 20,
+        ];
+
+        if (!isset($roleRanks[$roleName])) {
+            return false;
+        }
+
+        return $this->getRoleRank() >= $roleRanks[$roleName];
     }
 }

@@ -31,10 +31,14 @@
         "forceLogoutConfirm": "Are you sure you want to force logout user \"{name}\" from all devices?",
         "forceLogoutSuccess": "Force Logout Successful",
         "forceLogoutSessions": "User logged out from {count} device(s)",
-        "forceLogoutFailed": "Failed to force logout user"
+        "forceLogoutFailed": "Failed to force logout user",
+        "verifySuccess": "User verified successfully",
+        "cannotManageSuperAdmin": "You cannot manage super-admin accounts",
+        "cannotDeleteLastSuperAdmin": "Cannot delete the last super-admin account"
     },
     "actions": {
-        "forceLogout": "Force Logout"
+        "forceLogout": "Force Logout",
+        "verify": "Verify Email"
     },
     "modals": {
         "user": {
@@ -76,6 +80,7 @@
         "bio": "Bio",
         "website": "Website",
         "location": "Location",
+        "verified": "Verified",
         "roles": "Roles",
         "placeholders": {
             "name": "Full name",

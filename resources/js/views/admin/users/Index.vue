@@ -56,6 +56,7 @@
                         </SelectTrigger>
                         <SelectContent>
                              <SelectItem value="force_logout" class="text-amber-600 focus:text-amber-600">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
+                             <SelectItem value="verify" class="text-primary focus:text-primary">{{ $t('features.users.actions.verify') }}</SelectItem>
                              <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
                         </SelectContent>
                     </Select>
@@ -166,13 +167,25 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex justify-center items-center space-x-1">
                                 <Button
+                                    v-if="!user.email_verified_at"
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="verifyUser(user)"
+                                    class="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                    :title="$t('features.users.actions.verify')"
+                                    :disabled="!canManage(user)"
+                                >
+                                    <CheckCheck class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
+                                </Button>
+                                <Button
                                     variant="ghost"
                                     size="icon"
                                     @click="forceLogoutUser(user)"
                                     class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
                                     :title="$t('features.users.actions.forceLogout')"
+                                    :disabled="!canManage(user)"
                                 >
-                                    <LogOut class="w-4 h-4" />
+                                    <LogOut class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -180,8 +193,9 @@
                                     @click="editUser(user)"
                                     class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
                                     :title="$t('common.actions.edit')"
+                                    :disabled="!canManage(user)"
                                 >
-                                    <Pencil class="w-4 h-4" />
+                                    <Pencil class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -189,8 +203,9 @@
                                     @click="deleteUser(user)"
                                     class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                     :title="$t('common.actions.delete')"
+                                    :disabled="!canDelete(user)"
                                 >
-                                    <Trash2 class="w-4 h-4" />
+                                    <Trash2 class="w-4 h-4" :class="{ 'opacity-50': !canDelete(user) }" />
                                 </Button>
                             </div>
                         </td>
@@ -232,7 +247,8 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2 } from 'lucide-vue-next';
+import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck } from 'lucide-vue-next';
+import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -242,6 +258,33 @@ const roles = ref([]);
 const search = ref('');
 const roleFilter = ref('all');
 const pagination = ref(null);
+const authStore = useAuthStore();
+
+const isSuperAdmin = (u) => u.roles?.some(r => r.name === 'super-admin');
+
+const canManage = (targetUser) => {
+    // Cannot manage someone with equal or higher rank
+    // Except if it's yourself (e.g. editing your own profile, though index typically handles others)
+    if (targetUser.id === authStore.user?.id) return true;
+    return authStore.isHigherThan(targetUser);
+};
+
+const canDelete = (targetUser) => {
+    // Cannot delete self
+    if (targetUser.id === authStore.user?.id) return false;
+    
+    // Can only delete users with strictly lower rank
+    if (!authStore.isHigherThan(targetUser)) return false;
+    
+    // Super Admin protection for last one
+    if (isSuperAdmin(targetUser)) {
+        const superAdminCount = users.value.filter(u => isSuperAdmin(u)).length;
+        // This is only a frontend check, backend will re-verify
+        if (superAdminCount <= 1 && pagination.value?.total <= 1) return false;
+    }
+    
+    return true;
+};
 
 const fetchUsers = async () => {
     loading.value = true;
@@ -354,6 +397,18 @@ const forceLogoutUser = async (user) => {
     }
 };
 
+const verifyUser = async (user) => {
+    try {
+        await api.post(`/admin/cms/users/${user.id}/verify`);
+        toast.success(t('features.users.messages.verifySuccess'));
+        await fetchUsers();
+    } catch (error) {
+        console.error('Failed to verify user:', error);
+        const message = error.response?.data?.message || t('common.messages.error.action');
+        toast.error(t('common.messages.error.action'), message);
+    }
+};
+
 const selectedIds = ref([]);
 
 const isAllSelected = computed(() => {
@@ -393,6 +448,8 @@ const bulkAction = async (action) => {
         confirmMessage = t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length });
     } else if (action === 'force_logout') {
         confirmMessage = t('features.users.messages.bulkForceLogoutConfirm', { count: selectedIds.value.length }) || `Force logout ${selectedIds.value.length} users?`;
+    } else if (action === 'verify') {
+        confirmMessage = t('features.users.messages.bulkVerifyConfirm', { count: selectedIds.value.length }) || `Verify ${selectedIds.value.length} users?`;
     }
 
     if (!confirm(confirmMessage)) {

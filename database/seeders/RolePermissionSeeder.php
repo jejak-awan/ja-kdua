@@ -62,10 +62,16 @@ class RolePermissionSeeder extends Seeder
         // SUPER ADMIN - Gets everything via Gate::before in AppServiceProvider,
         // but it's good practice to assign permissions or just create the role.
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
+        $superAdminRole->syncPermissions(Permission::all());
 
-        // ADMIN - Full operational control but maybe not "super-admin" root stuff if needed
+        // ADMIN - Full operational control but NO system-level configuration
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $adminRole->syncPermissions(Permission::all());
+        $adminRole->syncPermissions(Permission::whereNotIn('name', [
+            'manage scheduled tasks',
+            'manage backups',
+            'manage system',
+            'manage roles', // Only super-admin should manage roles for security
+        ])->get());
 
         // EDITOR - Focused on content management
         $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);

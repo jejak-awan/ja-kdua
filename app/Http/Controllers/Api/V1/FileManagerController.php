@@ -13,6 +13,10 @@ class FileManagerController extends BaseApiController
 {
     public function index(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to manage files');
+        }
+
         $path = $request->input('path', '/');
         $disk = $request->input('disk', 'public');
 
@@ -65,8 +69,34 @@ class FileManagerController extends BaseApiController
         ], 'Directory contents retrieved successfully');
     }
 
+    public function download(Request $request)
+    {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to download files');
+        }
+
+        $path = $request->input('path');
+        $disk = $request->input('disk', 'public');
+
+        if (!$path || !Storage::disk($disk)->exists($path)) {
+            return $this->notFound('File');
+        }
+
+        $fullPath = Storage::disk($disk)->path($path);
+        
+        if (is_dir($fullPath)) {
+            return $this->downloadFolder($path, $disk);
+        }
+
+        return response()->download($fullPath);
+    }
+
     public function upload(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to upload files');
+        }
+
         // Get settings from MediaSettingsHelper (shared with Media component)
         $maxSize = MediaSettingsHelper::getMaxUploadSize();
         $allowedExtensions = MediaSettingsHelper::getAllowedExtensions();
@@ -124,6 +154,10 @@ class FileManagerController extends BaseApiController
      */
     public function delete(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to delete files or folders');
+        }
+
         $request->validate([
             'path' => 'required|string',
             'disk' => 'nullable|string',
@@ -180,6 +214,10 @@ class FileManagerController extends BaseApiController
      */
     public function deleteFolder(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to delete folders');
+        }
+
         $request->validate([
             'path' => 'required|string',
             'disk' => 'nullable|string',
@@ -230,6 +268,10 @@ class FileManagerController extends BaseApiController
 
     public function createFolder(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to create folders');
+        }
+
         $request->validate([
             'name' => 'required|string',
             'path' => 'nullable|string',
@@ -256,6 +298,10 @@ class FileManagerController extends BaseApiController
      */
     public function move(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to move files or folders');
+        }
+
         $request->validate([
             'source' => 'required|string',
             'destination' => 'nullable|string',
@@ -308,6 +354,10 @@ class FileManagerController extends BaseApiController
      */
     public function copy(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to copy files or folders');
+        }
+
         $request->validate([
             'source' => 'required|string',
             'destination' => 'nullable|string',
@@ -380,6 +430,10 @@ class FileManagerController extends BaseApiController
      */
     public function rename(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to rename files or folders');
+        }
+
         $request->validate([
             'path' => 'required|string',
             'newName' => 'required|string',
@@ -429,6 +483,10 @@ class FileManagerController extends BaseApiController
      */
     public function trash(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to view trashed files');
+        }
+
         $items = DeletedFile::with('deletedByUser')
             ->orderBy('deleted_at', 'desc')
             ->get()
@@ -457,6 +515,10 @@ class FileManagerController extends BaseApiController
      */
     public function restore(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to restore files');
+        }
+
         $request->validate([
             'id' => 'required|integer|exists:deleted_files,id',
             'disk' => 'nullable|string',
@@ -517,6 +579,10 @@ class FileManagerController extends BaseApiController
      */
     public function emptyTrash(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to empty trash');
+        }
+
         $request->validate([
             'disk' => 'nullable|string',
         ]);
@@ -544,6 +610,10 @@ class FileManagerController extends BaseApiController
      */
     public function deletePermanently(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to permanently delete files');
+        }
+
         $request->validate([
             'id' => 'required|integer|exists:deleted_files,id',
             'disk' => 'nullable|string',
@@ -577,6 +647,10 @@ class FileManagerController extends BaseApiController
      */
     public function extract(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to extract archives');
+        }
+
         $request->validate([
             'path' => 'required|string',
             'disk' => 'nullable|string',
@@ -649,6 +723,10 @@ class FileManagerController extends BaseApiController
      */
     public function compress(Request $request)
     {
+        if (!$request->user()->can('manage files')) {
+            return $this->forbidden('You do not have permission to compress files');
+        }
+
         $request->validate([
             'paths' => 'required|array|min:1',
             'paths.*' => 'string',

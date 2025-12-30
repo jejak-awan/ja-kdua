@@ -89,7 +89,7 @@
                         <Input
                             v-model="form.password"
                             type="password"
-                            :placeholder="$t('features.users.form.placeholders.passwordCurrent')"
+                            :placeholder="$t('features.users.form.placeholders.passwordCurrent') + ' (min 8, A-Z, a-z, 0-9)'"
                         />
                         <p class="mt-1 text-xs text-muted-foreground">{{ $t('features.users.form.hints.passwordUpdate') }}</p>
                     </div>
@@ -140,6 +140,20 @@
                             :placeholder="$t('features.users.form.placeholders.location')"
                         />
                     </div>
+
+                    <div class="flex items-center space-x-2 mt-4">
+                        <Checkbox
+                            id="is_verified"
+                            :checked="form.is_verified"
+                            @update:checked="(checked) => form.is_verified = checked"
+                        />
+                        <label
+                            for="is_verified"
+                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                        >
+                            {{ $t('features.users.form.verified') || 'Email Verified' }}
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Roles -->
@@ -160,6 +174,7 @@
                             <Checkbox
                                 :id="`role-${role.id}`"
                                 :checked="form.roles.includes(role.id)"
+                                :disabled="getRoleRank(role.name) > authStore.getRoleRank()"
                                 @update:checked="(checked) => {
                                     if (checked) form.roles.push(role.id);
                                     else form.roles = form.roles.filter(id => id !== role.id);
@@ -168,6 +183,7 @@
                             <label
                                 :for="`role-${role.id}`"
                                 class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                                :class="{ 'opacity-50': getRoleRank(role.name) > authStore.getRoleRank() }"
                             >
                                 {{ role.name }}
                             </label>
@@ -214,6 +230,8 @@ import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
+import toast from '../../../services/toast';
+import { computed } from 'vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -235,7 +253,18 @@ const form = ref({
     location: '',
     avatar: null,
     roles: [],
+    is_verified: false,
 });
+
+const roleRanks = {
+    'super-admin': 100,
+    'admin': 80,
+    'editor': 60,
+    'author': 40,
+    'member': 20,
+};
+
+const getRoleRank = (roleName) => roleRanks[roleName] || 0;
 
 const fetchRoles = async () => {
     loadingRoles.value = true;
@@ -257,6 +286,13 @@ const fetchUser = async () => {
         const response = await api.get(`/admin/cms/users/${userId}`);
         const data = parseSingleResponse(response);
         
+        // Guard: hierarchy check
+        if (!authStore.isHigherThan(data) && authStore.user?.id !== data.id) {
+            toast.error(t('common.messages.error.action'), t('features.users.messages.cannotManageSuperAdmin'));
+            router.push({ name: 'users.index' });
+            return;
+        }
+
         form.value = {
             name: data.name || '',
             email: data.email || '',
@@ -267,6 +303,7 @@ const fetchUser = async () => {
             location: data.location || '',
             avatar: data.avatar || null,
             roles: data.roles?.map(r => r.id) || [],
+            is_verified: !!data.email_verified_at,
         };
     } catch (error) {
         console.error('Failed to fetch user:', error);

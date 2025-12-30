@@ -101,7 +101,7 @@ class SearchController extends BaseApiController
     public function reindex(Request $request)
     {
         // Only allow admins to reindex
-        if (! $request->user()->hasRole('admin')) {
+        if (! $request->user()->can('manage settings')) {
             return $this->forbidden('Unauthorized');
         }
 
