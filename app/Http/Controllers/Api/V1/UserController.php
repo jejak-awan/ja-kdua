@@ -307,7 +307,9 @@ class UserController extends BaseApiController
         $user->update($validated);
 
         // Guard: Hierarchy check
-        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+        // Guard: Hierarchy check
+        // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
+        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
             return $this->forbidden('You can only manage users with a lower rank than yours');
         }
 
@@ -359,8 +361,8 @@ class UserController extends BaseApiController
             return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
         }
 
-        // Prevent deleting users with higher or equal rank
-        if (!auth()->user()->isHigherThan($user)) {
+        // Prevent deleting users with higher or equal rank (unless super-admin)
+        if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
             return $this->forbidden('You can only delete users with a lower rank than yours');
         }
 
@@ -389,7 +391,8 @@ class UserController extends BaseApiController
     public function forceLogout(User $user)
     {
         // Guard: Hierarchy check
-        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+        // Guard: Hierarchy check
+        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
             return $this->forbidden('You can only manage users with a lower rank than yours');
         }
 
@@ -429,7 +432,8 @@ class UserController extends BaseApiController
     public function verify(User $user)
     {
         // Guard: Hierarchy check
-        if (!auth()->user()->isHigherThan($user) && auth()->id() !== $user->id) {
+        // Guard: Hierarchy check
+        if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
             return $this->forbidden('You can only manage users with a lower rank than yours');
         }
 
@@ -464,7 +468,7 @@ class UserController extends BaseApiController
                 if (!$target) return false;
 
                 // Rank check
-                if (!auth()->user()->isHigherThan($target)) return false;
+                if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($target)) return false;
 
                 return true;
             });
@@ -495,7 +499,7 @@ class UserController extends BaseApiController
                 
                 $target = User::find($id);
                 if (!$target) return false;
-                if (!auth()->user()->isHigherThan($target)) return false;
+                if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($target)) return false;
                 
                 return true;
             });
@@ -511,7 +515,7 @@ class UserController extends BaseApiController
             $ids = array_filter($ids, function($id) {
                 $target = User::find($id);
                 if (!$target) return false;
-                if (auth()->id() !== $id && !auth()->user()->isHigherThan($target)) return false;
+                if (auth()->id() !== $id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($target)) return false;
                 return true;
             });
 
