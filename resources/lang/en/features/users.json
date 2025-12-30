@@ -46,7 +46,8 @@
         "forceLogoutFailed": "Failed to force logout user",
         "verifySuccess": "User verified successfully",
         "cannotManageSuperAdmin": "You cannot manage super-admin accounts",
-        "cannotDeleteLastSuperAdmin": "Cannot delete the last super-admin account"
+        "cannotDeleteLastSuperAdmin": "Cannot delete the last super-admin account",
+        "hierarchy_restriction": "You can only manage users with a lower rank than yours"
     },
     "actions": {
         "forceLogout": "Force Logout",

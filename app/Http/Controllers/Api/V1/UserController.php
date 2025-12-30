@@ -310,7 +310,7 @@ class UserController extends BaseApiController
         // Guard: Hierarchy check
         // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
         if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
-            return $this->forbidden('You can only manage users with a lower rank than yours');
+            return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         if ($request->has('roles')) {
@@ -363,7 +363,7 @@ class UserController extends BaseApiController
 
         // Prevent deleting users with higher or equal rank (unless super-admin)
         if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
-            return $this->forbidden('You can only delete users with a lower rank than yours');
+            return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         // Prevent deleting the last super-admin
@@ -393,7 +393,7 @@ class UserController extends BaseApiController
         // Guard: Hierarchy check
         // Guard: Hierarchy check
         if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
-            return $this->forbidden('You can only manage users with a lower rank than yours');
+            return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         // Prevent force logging out yourself
@@ -434,7 +434,7 @@ class UserController extends BaseApiController
         // Guard: Hierarchy check
         // Guard: Hierarchy check
         if (auth()->id() !== $user->id && auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
-            return $this->forbidden('You can only manage users with a lower rank than yours');
+            return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
         }
 
         if ($user->email_verified_at) {

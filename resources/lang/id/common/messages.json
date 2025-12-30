@@ -18,7 +18,8 @@
         "server": "Kesalahan server. Silakan coba lagi nanti",
         "validation": "Silakan periksa formulir untuk kesalahan",
         "uploadFailed": "Gagal mengunggah file",
-        "deleteFailed": "Gagal menghapus {item}"
+        "deleteFailed": "Gagal menghapus {item}",
+        "action": "Gagal Melakukan Tindakan"
     },
     "confirm": {
         "delete": "Apakah Anda yakin ingin menghapus {item} ini?",

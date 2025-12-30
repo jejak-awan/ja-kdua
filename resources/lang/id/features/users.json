@@ -46,7 +46,8 @@
         "forceLogoutFailed": "Gagal melogout paksa pengguna",
         "verifySuccess": "Pengguna berhasil diverifikasi",
         "cannotManageSuperAdmin": "Anda tidak dapat mengelola akun super-admin",
-        "cannotDeleteLastSuperAdmin": "Tidak dapat menghapus satu-satunya akun super-admin"
+        "cannotDeleteLastSuperAdmin": "Tidak dapat menghapus satu-satunya akun super-admin",
+        "hierarchy_restriction": "Anda hanya dapat mengelola pengguna dengan peringkat lebih rendah dari Anda"
     },
     "actions": {
         "forceLogout": "Logout Paksa",
