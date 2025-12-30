@@ -152,13 +152,13 @@ Route::prefix('v1')->group(function () {
         Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:view media');
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index'])->middleware('permission:view media');
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show'])->middleware('permission:view media');
-        Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:edit media');
-        Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy'])->middleware('permission:delete media');
+        Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update']);
+        Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy']);
         Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore'])->middleware('permission:edit media');
-        Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete'])->middleware('permission:delete media');
+        Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete']);
         Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:edit media');
         Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:edit media');
-        Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit'])->middleware('permission:edit media');
+        Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit']);
         Route::get('media/{media}/usage', [App\Http\Controllers\Api\V1\MediaController::class, 'usage'])->middleware('permission:view media');
 
         // Media Folders
