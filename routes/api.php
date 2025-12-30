@@ -237,13 +237,13 @@ Route::prefix('v1')->group(function () {
 
         // Backups
         // Statistics route must be defined before apiResource to avoid route conflict
-        Route::get('backups/statistics', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage settings');
-        Route::get('backups/stats', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage settings');
-        Route::match(['GET', 'POST'], 'backups/schedule', [App\Http\Controllers\Api\V1\BackupController::class, 'schedule'])->middleware('permission:manage settings');
-        Route::post('backups/cleanup', [App\Http\Controllers\Api\V1\BackupController::class, 'cleanup'])->middleware('permission:manage settings');
-        Route::apiResource('backups', App\Http\Controllers\Api\V1\BackupController::class)->middleware('permission:manage settings');
-        Route::post('backups/{backup}/restore', [App\Http\Controllers\Api\V1\BackupController::class, 'restore'])->middleware('permission:manage settings');
-        Route::get('backups/{backup}/download', [App\Http\Controllers\Api\V1\BackupController::class, 'download'])->middleware('permission:manage settings');
+        Route::get('backups/statistics', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage backups');
+        Route::get('backups/stats', [App\Http\Controllers\Api\V1\BackupController::class, 'stats'])->middleware('permission:manage backups');
+        Route::match(['GET', 'POST'], 'backups/schedule', [App\Http\Controllers\Api\V1\BackupController::class, 'schedule'])->middleware('permission:manage backups');
+        Route::post('backups/cleanup', [App\Http\Controllers\Api\V1\BackupController::class, 'cleanup'])->middleware('permission:manage backups');
+        Route::apiResource('backups', App\Http\Controllers\Api\V1\BackupController::class)->middleware('permission:manage backups');
+        Route::post('backups/{backup}/restore', [App\Http\Controllers\Api\V1\BackupController::class, 'restore'])->middleware('permission:manage backups');
+        Route::get('backups/{backup}/download', [App\Http\Controllers\Api\V1\BackupController::class, 'download'])->middleware('permission:manage backups');
 
         // Security
         Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
@@ -409,9 +409,9 @@ Route::prefix('v1')->group(function () {
         Route::get('contents/{content}/preview', [App\Http\Controllers\Api\V1\ContentController::class, 'preview'])->middleware('permission:edit content');
 
         // Scheduled Tasks
-        Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage settings');
-        Route::get('scheduled-tasks/meta/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage settings');
-        Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage settings');
+        Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage scheduled tasks');
+        Route::get('scheduled-tasks/meta/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
+        Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage scheduled tasks');
 
         // File Manager (Admin-level file system access)
         Route::get('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'index'])->middleware('permission:manage files');
@@ -436,17 +436,17 @@ Route::prefix('v1')->group(function () {
         Route::get('logs/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');
 
         // System Information
-        Route::get('system/info', [App\Http\Controllers\Api\V1\SystemController::class, 'info'])->middleware('permission:manage settings');
-        Route::get('system/health', [App\Http\Controllers\Api\V1\SystemController::class, 'health'])->middleware('permission:manage settings');
-        Route::get('system/health/detailed', [App\Http\Controllers\Api\V1\SystemController::class, 'systemHealth'])->middleware('permission:manage settings');
-        Route::get('system/statistics', [App\Http\Controllers\Api\V1\SystemController::class, 'statistics'])->middleware('permission:manage settings');
-        Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage settings');
-        Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage settings');
-        Route::post('system/cache/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearCache'])->middleware('permission:manage settings');
-        Route::post('system/cache/warm', [App\Http\Controllers\Api\V1\SystemController::class, 'warmCache'])->middleware('permission:manage settings');
-        Route::get('system/cache/warming-stats', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheWarmingStats'])->middleware('permission:manage settings');
-        Route::get('system/query-performance', [App\Http\Controllers\Api\V1\SystemController::class, 'queryPerformance'])->middleware('permission:manage settings');
-        Route::post('system/rate-limit/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit'])->middleware('permission:manage settings');
+        Route::get('system/info', [App\Http\Controllers\Api\V1\SystemController::class, 'info'])->middleware('permission:manage system');
+        Route::get('system/health', [App\Http\Controllers\Api\V1\SystemController::class, 'health'])->middleware('permission:manage system');
+        Route::get('system/health/detailed', [App\Http\Controllers\Api\V1\SystemController::class, 'systemHealth'])->middleware('permission:manage system');
+        Route::get('system/statistics', [App\Http\Controllers\Api\V1\SystemController::class, 'statistics'])->middleware('permission:manage system');
+        Route::get('system/cache', [App\Http\Controllers\Api\V1\SystemController::class, 'cache'])->middleware('permission:manage system');
+        Route::get('system/cache-status', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheStatus'])->middleware('permission:manage system');
+        Route::post('system/cache/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearCache'])->middleware('permission:manage system');
+        Route::post('system/cache/warm', [App\Http\Controllers\Api\V1\SystemController::class, 'warmCache'])->middleware('permission:manage system');
+        Route::get('system/cache/warming-stats', [App\Http\Controllers\Api\V1\SystemController::class, 'cacheWarmingStats'])->middleware('permission:manage system');
+        Route::get('system/query-performance', [App\Http\Controllers\Api\V1\SystemController::class, 'queryPerformance'])->middleware('permission:manage system');
+        Route::post('system/rate-limit/clear', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit'])->middleware('permission:manage system');
 
         // Redis Management
         Route::get('redis/settings', [App\Http\Controllers\Api\V1\RedisController::class, 'index'])->middleware('permission:manage settings');

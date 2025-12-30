@@ -59,13 +59,13 @@
                 </div>
 
                 <!-- Content -->
-                <div>
+                <div v-if="filteredNavigation.content.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.content') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.content"
+                            v-for="item in filteredNavigation.content"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -83,13 +83,13 @@
                 </div>
 
                 <!-- Media -->
-                <div v-if="filteredMediaItems.length > 0">
+                <div v-if="filteredNavigation.media.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.media') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in filteredMediaItems"
+                            v-for="item in filteredNavigation.media"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -107,13 +107,13 @@
                 </div>
 
                 <!-- Engagement -->
-                <div>
+                <div v-if="filteredNavigation.engagement.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.engagement') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.engagement"
+                            v-for="item in filteredNavigation.engagement"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -131,13 +131,13 @@
                 </div>
 
                 <!-- Users & Access -->
-                <div>
+                <div v-if="filteredNavigation.users.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.usersAccess') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.users"
+                            v-for="item in filteredNavigation.users"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -155,13 +155,13 @@
                 </div>
 
                 <!-- Appearance -->
-                <div>
+                <div v-if="filteredNavigation.appearance.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.appearance') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.appearance"
+                            v-for="item in filteredNavigation.appearance"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -179,13 +179,13 @@
                 </div>
 
                 <!-- Analytics & SEO -->
-                <div>
+                <div v-if="filteredNavigation.analytics.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.analyticsSeo') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.analytics"
+                            v-for="item in filteredNavigation.analytics"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -203,13 +203,13 @@
                 </div>
 
                 <!-- Logs & Monitoring -->
-                <div>
+                <div v-if="filteredNavigation.logs.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.logs') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.logs"
+                            v-for="item in filteredNavigation.logs"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -227,13 +227,13 @@
                 </div>
 
                 <!-- System -->
-                <div>
+                <div v-if="filteredNavigation.system.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.system') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.system"
+                            v-for="item in filteredNavigation.system"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -251,13 +251,13 @@
                 </div>
 
                 <!-- Developer -->
-                <div>
+                <div v-if="filteredNavigation.developer.length > 0">
                     <h3 v-if="!sidebarMinimized" class="px-3 text-xs font-semibold text-muted-foreground tracking-wider mb-2">
                         {{ t('common.navigation.sections.developer') }}
                     </h3>
                     <div class="space-y-1">
                         <router-link
-                            v-for="item in navigationGroups.developer"
+                            v-for="item in filteredNavigation.developer"
                             :key="item.name"
                             :to="item.to"
                             class="flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors group"
@@ -312,12 +312,16 @@ const authStore = useAuthStore();
 // Use shared mounted state for synchronized transitions
 const { mounted } = useLayoutMount();
 
-// Filter media items based on permissions
-const filteredMediaItems = computed(() => {
-    return navigationGroups.media.filter(item => {
-        if (!item.permission) return true;
-        return authStore.hasPermission(item.permission);
-    });
+// Filter all navigation groups based on permissions
+const filteredNavigation = computed(() => {
+    const filtered = {};
+    for (const [group, items] of Object.entries(navigationGroups)) {
+        filtered[group] = items.filter(item => {
+            if (!item.permission) return true;
+            return authStore.hasPermission(item.permission);
+        });
+    }
+    return filtered;
 });
 
 const getNavigationLabel = (item) => {

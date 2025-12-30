@@ -142,12 +142,12 @@
         <!-- Row 3: Widgets Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Recent Activity -->
-            <div class="col-span-1">
+            <div class="col-span-1" v-if="authStore.hasPermission('manage users')">
                 <RecentActivityWidget ref="recentActivityWidget" />
             </div>
 
             <!-- System Health -->
-            <div class="col-span-1">
+            <div class="col-span-1" v-if="authStore.hasPermission('manage system')">
                 <SystemHealthWidget class="h-full" />
             </div>
 
@@ -225,6 +225,9 @@ const refreshDashboard = async () => {
 };
 
 const fetchStats = async () => {
+    // Permission check: manage system required for system statistics
+    if (!authStore.hasPermission('manage system')) return;
+
     try {
         const response = await api.get('/admin/cms/system/statistics');
         const data = parseSingleResponse(response);
@@ -250,6 +253,9 @@ const fetchStats = async () => {
 };
 
 const fetchTraffic = async () => {
+    // Permission check: view analytics required
+    if (!authStore.hasPermission('view analytics')) return;
+
     loadingVisits.value = true;
     try {
         const days = parseInt(timeRange.value);

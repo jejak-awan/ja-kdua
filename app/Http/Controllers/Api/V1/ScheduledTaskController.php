@@ -130,8 +130,8 @@ class ScheduledTaskController extends BaseApiController
             return $this->notFound('Task');
         }
 
-        // Check if user has permission (super-admin only for running commands)
-        if (!auth()->user()->hasRole('super-admin')) {
+        // Check if user has permission
+        if (!auth()->user()->can('manage scheduled tasks')) {
             Log::warning('Unauthorized task execution attempt', [
                 'task_id' => $task->id,
                 'command' => $task->command,
@@ -139,7 +139,7 @@ class ScheduledTaskController extends BaseApiController
             ]);
 
             return $this->error(
-                'Only super-admin can execute scheduled tasks',
+                'Insufficient permissions to execute scheduled tasks',
                 403,
                 [],
                 'INSUFFICIENT_PERMISSIONS'
