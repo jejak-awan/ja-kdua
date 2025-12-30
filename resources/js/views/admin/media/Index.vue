@@ -860,7 +860,7 @@ import CardDescription from '@/components/ui/card-description.vue';
 
 const { t } = useI18n();
 const mediaToast = useMediaToast();
-const { confirm } = useConfirm();
+const { confirm: confirmDialog } = useConfirm();
 const viewMode = ref('grid');
 const loading = ref(false);
 const isReady = ref(false);
@@ -1040,7 +1040,7 @@ const restoreMedia = async (media) => {
 };
 
 const emptyTrash = async () => {
-    const confirmed = await confirm({
+    const confirmed = await confirmDialog({
         title: t('features.media.confirm.emptyTrashTitle'),
         message: t('features.media.confirm.emptyTrashMessage'),
         variant: 'danger',
@@ -1105,7 +1105,7 @@ const handleBulkAction = async () => {
     const count = selectedMedia.value.length;
     
     if (action === 'delete') {
-        const confirmed = await confirm({
+        const confirmed = await confirmDialog({
             title: t('features.media.confirm.deleteTitle'),
             message: t('features.media.confirm.deleteMessage'),
             variant: 'danger',
@@ -1155,7 +1155,7 @@ const handleBulkAction = async () => {
             bulkProcessing.value = false;
         }
     } else if (action === 'delete_permanent') {
-        const confirmed = await confirm({
+        const confirmed = await confirmDialog({
             title: t('features.media.confirm.deletePermanentTitle'),
             message: t('features.media.confirm.deletePermanentMessage'),
             variant: 'danger',
@@ -1291,7 +1291,7 @@ const editMedia = (media) => {
 const deleteMedia = async (media) => {
     const isPermanent = isTrashMode.value;
     
-    const confirmed = await confirm({
+    const confirmed = await confirmDialog({
         title: isPermanent 
             ? t('features.media.confirm.deletePermanentTitle')
             : t('features.media.confirm.deleteTitle'),
@@ -1326,7 +1326,7 @@ const deleteMedia = async (media) => {
 const deleteFolder = async (folder) => {
     const isPermanent = isTrashMode.value;
     
-    const confirmed = await confirm({
+    const confirmed = await confirmDialog({
         title: isPermanent 
             ? t('features.media.confirm.deletePermanentTitle')
             : t('features.media.confirm.deleteTitle'),
