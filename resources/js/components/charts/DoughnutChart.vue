@@ -58,8 +58,13 @@ const chartOptions = {
     maintainAspectRatio: false,
     plugins: {
         legend: {
-            position: 'right',
+            position: 'bottom',
+             labels: {
+                usePointStyle: true,
+                padding: 20,
+            }
         },
     },
+    cutout: '60%',
 };
 </script>
