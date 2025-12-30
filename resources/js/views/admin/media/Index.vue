@@ -1105,7 +1105,15 @@ const handleBulkAction = async () => {
     const count = selectedMedia.value.length;
     
     if (action === 'delete') {
-        if (!confirm(t('features.media.messages.deleteConfirm', { count }))) {
+        const confirmed = await confirm({
+            title: t('features.media.confirm.deleteTitle'),
+            message: t('features.media.confirm.deleteMessage'),
+            variant: 'danger',
+            confirmText: t('features.media.confirm.delete'),
+            cancelText: t('features.media.confirm.cancel')
+        });
+        
+        if (!confirmed) {
             bulkAction.value = '';
             return;
         }
@@ -1147,7 +1155,15 @@ const handleBulkAction = async () => {
             bulkProcessing.value = false;
         }
     } else if (action === 'delete_permanent') {
-        if (!confirm(t('features.media.messages.deletePermanentConfirm', { count }))) {
+        const confirmed = await confirm({
+            title: t('features.media.confirm.deletePermanentTitle'),
+            message: t('features.media.confirm.deletePermanentMessage'),
+            variant: 'danger',
+            confirmText: t('features.media.confirm.delete'),
+            cancelText: t('features.media.confirm.cancel')
+        });
+        
+        if (!confirmed) {
             bulkAction.value = '';
             return;
         }
