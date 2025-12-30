@@ -9,6 +9,7 @@
                 class="hidden"
             >
             <button
+                type="button"
                 @click="$refs.fileInput.click()"
                 class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/80"
             >
@@ -30,6 +31,7 @@
             <img :src="preview" alt="Preview" class="w-full h-64 object-cover rounded-lg">
             <div class="mt-4 flex space-x-2">
                 <button
+                    type="button"
                     @click="uploadFile"
                     :disabled="uploading"
                     class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
@@ -37,6 +39,7 @@
                     {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.upload') }}
                 </button>
                 <button
+                    type="button"
                     @click="clearPreview"
                     class="bg-muted text-white px-4 py-2 rounded-md hover:bg-muted"
                 >

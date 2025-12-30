@@ -23,6 +23,7 @@
                     <div class="flex items-center justify-between p-4 border-b border-border">
                         <h3 class="text-lg font-semibold">{{ $t('features.media.modals.picker.title') }}</h3>
                         <Button
+                            type="button"
                             variant="ghost"
                             size="icon"
                             @click="showModal = false"
@@ -39,6 +40,7 @@
                             <div class="flex items-center text-sm overflow-hidden whitespace-nowrap">
                                 <Button 
                                     @click="navigateToBreadcrumb(-1)"
+                                    type="button"
                                     variant="ghost"
                                     size="icon"
                                     class="h-8 w-8 text-muted-foreground hover:text-foreground"
@@ -49,6 +51,7 @@
                                     <ChevronRight class="w-4 h-4 text-muted-foreground mx-0.5" />
                                     <Button 
                                         @click="navigateToBreadcrumb(index)"
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         class="h-8 px-2 text-foreground font-medium truncate max-w-[120px]"
@@ -59,10 +62,10 @@
                             </div>
 
                             <div class="flex items-center gap-1 bg-muted/20 p-1 rounded-md">
-                                <Button variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'grid'" :class="{ 'bg-background shadow-sm': viewMode === 'grid', 'text-muted-foreground': viewMode !== 'grid' }">
+                                <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'grid'" :class="{ 'bg-background shadow-sm': viewMode === 'grid', 'text-muted-foreground': viewMode !== 'grid' }">
                                     <Grid class="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'list'" :class="{ 'bg-background shadow-sm': viewMode === 'list', 'text-muted-foreground': viewMode !== 'list' }">
+                                <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'list'" :class="{ 'bg-background shadow-sm': viewMode === 'list', 'text-muted-foreground': viewMode !== 'list' }">
                                     <ListIcon class="w-4 h-4" />
                                 </Button>
                             </div>
@@ -191,6 +194,7 @@
                     <div class="flex items-center justify-between p-4 border-t border-border bg-muted/20">
                         <Button
                             @click="showUpload = true"
+                            type="button"
                             variant="default"
                             size="sm"
                         >
@@ -199,6 +203,7 @@
                         <div class="flex space-x-2">
                             <Button
                                 @click="showModal = false"
+                                type="button"
                                 variant="outline"
                                 size="sm"
                             >
@@ -206,6 +211,7 @@
                             </Button>
                             <Button
                                 @click="confirmSelection"
+                                type="button"
                                 :disabled="!selectedMediaId"
                                 variant="default"
                                 size="sm"
@@ -233,6 +239,7 @@
                 />
                 <Button
                     @click="showUpload = false"
+                    type="button"
                     variant="ghost"
                     class="mt-4 w-full"
                 >
