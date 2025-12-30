@@ -49,6 +49,32 @@ class UserController extends BaseApiController
         return $this->paginated($users, 'Users retrieved successfully');
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
+            'phone' => 'nullable|string|max:20',
+            'bio' => 'nullable|string|max:1000',
+            'website' => 'nullable|url|max:255',
+            'location' => 'nullable|string|max:255',
+            'avatar' => 'nullable|string',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,id',
+        ]);
+
+        $validated['password'] = Hash::make($validated['password']);
+        
+        $user = User::create($validated);
+
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
+        }
+
+        return $this->success($user->load(['roles', 'permissions']), 'User created successfully', 201);
+    }
+
     public function show(User $user)
     {
         return $this->success($user->load(['roles', 'permissions']), 'User retrieved successfully');
@@ -183,6 +209,7 @@ class UserController extends BaseApiController
             'bio' => 'nullable|string|max:1000',
             'website' => 'nullable|url|max:255',
             'location' => 'nullable|string|max:255',
+            'avatar' => 'nullable|string',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
         ]);
