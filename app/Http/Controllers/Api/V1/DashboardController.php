@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ],
             'charts' => [
                 'myContentByStatus' => $this->getMyContentByStatus($userId),
-                'recentActivity' => $this->getMyRecentActivity($userId),
+                'contentTraffic' => $this->getMyContentTraffic($userId),
             ],
         ]);
     }
@@ -144,11 +144,21 @@ class DashboardController extends Controller
             ->get();
     }
 
-    private function getMyRecentActivity($userId)
+    private function getMyContentTraffic($userId)
     {
-        return Content::where('author_id', $userId)
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', now()->subDays(30))
+        $slugs = Content::where('author_id', $userId)->pluck('slug');
+        
+        if ($slugs->isEmpty()) {
+            return [];
+        }
+
+        return AnalyticsVisit::where(function ($query) use ($slugs) {
+                foreach ($slugs as $slug) {
+                    $query->orWhere('url', 'like', '%' . $slug);
+                }
+            })
+            ->where('visited_at', '>=', now()->subDays(30))
+            ->select(DB::raw('DATE(visited_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->orderBy('date')
             ->get();

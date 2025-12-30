@@ -95,18 +95,18 @@
         <!-- Row 2: Recent Activity (Full Width) -->
         <Card>
             <CardHeader>
-                <CardTitle>{{ $t('features.dashboard.stats.creator.recentActivity') }}</CardTitle>
+                <CardTitle>{{ $t('features.dashboard.traffic.visits') }}</CardTitle>
             </CardHeader>
                 <CardContent>
                     <div class="h-[350px] w-full">
                     <LineChart 
                         v-if="activityData.length > 0"
                         :data="activityData" 
-                        :label="$t('features.dashboard.stats.creator.recentActivity')"
+                        :label="$t('features.dashboard.traffic.visits')"
                     />
                     <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground">
                         <Activity class="w-10 h-10 mb-2 opacity-50" />
-                        <span class="text-sm">{{ $t('features.dashboard.widgets.recentActivity.empty') }}</span>
+                        <span class="text-sm">{{ $t('features.dashboard.traffic.noData') }}</span>
                     </div>
                     </div>
             </CardContent>
@@ -211,16 +211,14 @@ const fetchStats = async () => {
                 }));
             }
             
-            // Recent Activity Chart
-            if (data.charts && data.charts.recentActivity) {
-                const rawActivity = ensureArray(data.charts.recentActivity);
-                // LineChart expects { period: ..., visits: ... }
-                // API returns { date: ..., count: ... }
-                activityData.value = rawActivity.map(item => ({
-                    period: item.date,
-                    visits: item.count
-                }));
-            }
+            // Recent Activity Chart (Now Content Traffic)
+            // Note: API key changed to 'contentTraffic'
+            const rawTraffic = data.charts.contentTraffic ? ensureArray(data.charts.contentTraffic) : (data.charts.recentActivity ? ensureArray(data.charts.recentActivity) : []);
+            
+            activityData.value = rawTraffic.map(item => ({
+                period: item.date,
+                visits: item.count
+            }));
         }
     } catch (error) {
         console.error('Failed to fetch creator stats:', error);
