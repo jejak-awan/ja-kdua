@@ -229,6 +229,19 @@ class MediaController extends BaseApiController
         return $this->success($media->load(['folder', 'usages.model']), 'Media retrieved successfully');
     }
 
+    public function usage(Media $media)
+    {
+        // Scope check
+        if (request()->user() && !request()->user()->can('manage media')) {
+             if ($media->author_id !== request()->user()->id && !$media->is_shared) {
+                 return $this->forbidden('You do not have permission to view this media');
+             }
+        }
+
+        $usageInfo = $this->mediaService->getUsageInfo($media);
+        return $this->success($usageInfo, 'Media usage retrieved successfully');
+    }
+
     public function update(Request $request, Media $media)
     {
         if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
