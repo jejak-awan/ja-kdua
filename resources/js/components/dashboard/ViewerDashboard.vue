@@ -68,7 +68,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
-import { parseResponse, ensureArray } from '../../utils/responseParser';
+import { parseSingleResponse, ensureArray } from '../../utils/responseParser';
 import dayjs from 'dayjs';
 
 import Card from '@/components/ui/card.vue';
@@ -85,8 +85,10 @@ const fetchDashboard = async () => {
     loading.value = true;
     try {
         const response = await api.get('/dashboard/viewer');
-        const data = parseResponse(response);
-        recentContent.value = ensureArray(data.recentContent);
+        const data = parseSingleResponse(response);
+        if (data) {
+             recentContent.value = ensureArray(data.recentContent);
+        }
     } catch (error) {
         console.error('Failed to fetch viewer dashboard:', error);
     } finally {

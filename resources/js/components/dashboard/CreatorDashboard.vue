@@ -132,7 +132,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
-import { parseResponse } from '../../utils/responseParser';
+import { parseSingleResponse } from '../../utils/responseParser';
 
 import QuickActions from '@/components/admin/QuickActions.vue';
 import Card from '@/components/ui/card.vue';
@@ -161,7 +161,10 @@ const fetchStats = async () => {
     loading.value = true;
     try {
         const response = await api.get('/dashboard/creator');
-        stats.value = parseResponse(response).stats;
+        const data = parseSingleResponse(response);
+        if (data && data.stats) {
+            stats.value = data.stats;
+        }
     } catch (error) {
         console.error('Failed to fetch creator stats:', error);
     } finally {

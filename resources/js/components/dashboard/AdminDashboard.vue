@@ -146,7 +146,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
-import { parseResponse, ensureArray } from '../../utils/responseParser';
+import { parseSingleResponse, ensureArray } from '../../utils/responseParser';
 
 const { t } = useI18n();
 import QuickActions from '@/components/admin/QuickActions.vue';
@@ -183,10 +183,10 @@ const fetchStats = async () => {
     try {
         // Use the new consolidated admin endpoint
         const response = await api.get('/dashboard/admin'); 
-        const data = parseResponse(response);
+        const data = parseSingleResponse(response);
         
         // Map the new API structure to match what the template expects
-        if (data.stats) {
+        if (data && data.stats) {
             stats.value = {
                 contents: data.stats.contents || { total: 0, published: 0, pending: 0 },
                 media: data.stats.media || { total: 0 },
@@ -207,13 +207,15 @@ const fetchVisits = async () => {
         const response = await api.get('/admin/cms/analytics/visits', {
             params: { period: visitPeriod.value }
         });
-        const data = parseResponse(response);
+        const data = parseSingleResponse(response);
         
-        visitsCategories.value = ensureArray(data.labels);
-        visitsData.value = [{
-            name: t('features.dashboard.traffic.visitors'),
-            data: ensureArray(data.values)
-        }];
+        if (data) {
+            visitsCategories.value = ensureArray(data.labels);
+            visitsData.value = [{
+                name: t('features.dashboard.traffic.visitors'),
+                data: ensureArray(data.values)
+            }];
+        }
     } catch (error) {
         console.error('Failed to fetch visits:', error);
         // Fallback or empty state

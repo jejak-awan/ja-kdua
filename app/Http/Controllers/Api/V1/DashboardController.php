@@ -78,9 +78,10 @@ class DashboardController extends Controller
     {
         return [
             'total' => Media::count(),
-            'images' => Media::where('type', 'image')->count(),
-            'videos' => Media::where('type', 'video')->count(),
-            'documents' => Media::where('type', 'document')->count(),
+            'images' => Media::where('mime_type', 'like', 'image/%')->count(),
+            'videos' => Media::where('mime_type', 'like', 'video/%')->count(),
+            'documents' => Media::where('mime_type', 'not like', 'image/%')
+                           ->where('mime_type', 'not like', 'video/%')->count(),
         ];
     }
 
@@ -101,7 +102,9 @@ class DashboardController extends Controller
 
     private function getMediaByType()
     {
-        return Media::select('type', DB::raw('count(*) as count'))
+        // Group by mime_type simplification (image, video, etc)
+        // Using substring to get valid grouping (MySQL/MariaDB compatible)
+        return Media::select(DB::raw("SUBSTRING_INDEX(mime_type, '/', 1) as type"), DB::raw('count(*) as count'))
             ->groupBy('type')
             ->get();
     }
