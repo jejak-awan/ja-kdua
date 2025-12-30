@@ -16,12 +16,12 @@ export function useMediaToast() {
             thumbnail: () => toast.success(t('features.media.toast.thumbnailSuccess')),
         },
         error: {
-            generic: (message) => toast.error(t('common.error'), message),
-            permission: () => toast.error(t('features.media.toast.permissionDenied')),
-            fileTooLarge: () => toast.warning(t('features.media.toast.fileTooLarge')),
+            generic: (message) => toast.error('Error', message),
+            permission: () => toast.error('Permission Denied', t('features.media.toast.permissionDenied')),
+            fileTooLarge: () => toast.warning('File Too Large', t('features.media.toast.fileTooLarge')),
             fromResponse: (error) => {
-                const message = error?.response?.data?.message || error?.message || t('common.error');
-                toast.error(t('common.error'), message);
+                const message = error?.response?.data?.message || error?.message || 'An error occurred';
+                toast.error('Error', message);
             }
         }
     };
