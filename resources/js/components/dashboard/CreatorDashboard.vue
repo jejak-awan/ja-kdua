@@ -176,7 +176,7 @@
                                 <TableCell class="text-right">{{ content.views }}</TableCell>
                                 <TableCell class="text-right">
                                     <Badge variant="outline" :class="getStatusColor(content.status)" class="capitalize">
-                                        {{ content.status }}
+                                        {{ mapStatusToLabel(content.status) }}
                                     </Badge>
                                 </TableCell>
                             </TableRow>
