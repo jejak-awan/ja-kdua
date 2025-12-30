@@ -101,7 +101,7 @@ class ContentController extends BaseApiController
 
     public function stats(Request $request)
     {
-        if (!$request->user()->can('manage content')) {
+        if (!$request->user()->can('view content')) {
             return $this->forbidden('Unauthorized to view content statistics');
         }
 

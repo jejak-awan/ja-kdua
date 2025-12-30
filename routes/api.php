@@ -125,40 +125,40 @@ Route::prefix('v1')->group(function () {
         Route::post('contents/{content}/unlock', [App\Http\Controllers\Api\V1\ContentController::class, 'unlock']);
 
         // Categories
-        Route::apiResource('categories', App\Http\Controllers\Api\V1\CategoryController::class)->middleware('permission:manage categories');
-        Route::post('categories/{category}/move', [App\Http\Controllers\Api\V1\CategoryController::class, 'move'])->middleware('permission:manage categories');
+        Route::apiResource('categories', App\Http\Controllers\Api\V1\CategoryController::class)->middleware('permission:view categories');
+        Route::post('categories/{category}/move', [App\Http\Controllers\Api\V1\CategoryController::class, 'move'])->middleware('permission:edit categories');
 
         // Tags
         // Statistics and bulk-delete routes must be defined before apiResource to avoid route conflict
-        Route::get('tags/statistics', [App\Http\Controllers\Api\V1\TagController::class, 'statistics'])->middleware('permission:manage tags');
-        Route::post('tags/bulk-delete', [App\Http\Controllers\Api\V1\TagController::class, 'bulkDelete'])->middleware('permission:manage tags');
-        Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:manage tags');
+        Route::get('tags/statistics', [App\Http\Controllers\Api\V1\TagController::class, 'statistics'])->middleware('permission:view tags');
+        Route::post('tags/bulk-delete', [App\Http\Controllers\Api\V1\TagController::class, 'bulkDelete'])->middleware('permission:delete tags');
+        Route::apiResource('tags', App\Http\Controllers\Api\V1\TagController::class)->middleware('permission:view tags');
 
         // Media (with rate limiting for uploads - increased for better UX)
-        Route::get('media/statistics', [App\Http\Controllers\Api\V1\MediaController::class, 'statistics'])->middleware('permission:manage media');
+        Route::get('media/statistics', [App\Http\Controllers\Api\V1\MediaController::class, 'statistics'])->middleware('permission:view media');
         Route::post('media/upload', [App\Http\Controllers\Api\V1\MediaController::class, 'upload'])
             ->middleware('throttle:30,1'); // 30 uploads per minute (increased from 10)
         Route::post('media/upload-multiple', [App\Http\Controllers\Api\V1\MediaController::class, 'uploadMultiple'])
             ->middleware('throttle:10,1'); // 10 batch uploads per minute (increased from 5)
-        Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:manage media');
-        Route::delete('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:manage media');
-        Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:manage media');
-        Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index']);
-        Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show']);
-        Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:manage media');
-        Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy'])->middleware('permission:manage media');
-        Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore'])->middleware('permission:manage media');
-        Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete'])->middleware('permission:manage media');
-        Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:manage media');
-        Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:manage media');
-        Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit'])->middleware('permission:manage media');
-        Route::get('media/{media}/usage', [App\Http\Controllers\Api\V1\MediaController::class, 'usage'])->middleware('permission:manage media');
+        Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:edit media');
+        Route::delete('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:delete media');
+        Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:view media');
+        Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index'])->middleware('permission:view media');
+        Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show'])->middleware('permission:view media');
+        Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update'])->middleware('permission:edit media');
+        Route::delete('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'destroy'])->middleware('permission:delete media');
+        Route::post('media/{id}/restore', [App\Http\Controllers\Api\V1\MediaController::class, 'restore'])->middleware('permission:edit media');
+        Route::delete('media/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaController::class, 'forceDelete'])->middleware('permission:delete media');
+        Route::post('media/{media}/thumbnail', [App\Http\Controllers\Api\V1\MediaController::class, 'generateThumbnail'])->middleware('permission:edit media');
+        Route::post('media/{media}/resize', [App\Http\Controllers\Api\V1\MediaController::class, 'resize'])->middleware('permission:edit media');
+        Route::post('media/{media}/edit', [App\Http\Controllers\Api\V1\MediaController::class, 'edit'])->middleware('permission:edit media');
+        Route::get('media/{media}/usage', [App\Http\Controllers\Api\V1\MediaController::class, 'usage'])->middleware('permission:view media');
 
         // Media Folders
-        Route::post('media-folders/{id}/restore', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'restore'])->middleware('permission:manage media');
-        Route::delete('media-folders/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'forceDelete'])->middleware('permission:manage media');
-        Route::apiResource('media-folders', App\Http\Controllers\Api\V1\MediaFolderController::class)->middleware('permission:manage media');
-        Route::post('media-folders/{mediaFolder}/move', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'move'])->middleware('permission:manage media');
+        Route::post('media-folders/{id}/restore', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'restore'])->middleware('permission:edit media');
+        Route::delete('media-folders/{id}/force-delete', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'forceDelete'])->middleware('permission:delete media');
+        Route::apiResource('media-folders', App\Http\Controllers\Api\V1\MediaFolderController::class)->middleware('permission:view media');
+        Route::post('media-folders/{mediaFolder}/move', [App\Http\Controllers\Api\V1\MediaFolderController::class, 'move'])->middleware('permission:edit media');
 
         // Comments (admin)
         Route::get('comments', [App\Http\Controllers\Api\V1\CommentController::class, 'adminIndex']);
@@ -371,8 +371,8 @@ Route::prefix('v1')->group(function () {
         });
 
         // Settings
-        Route::apiResource('settings', App\Http\Controllers\Api\V1\SettingController::class)->middleware('permission:manage settings');
-        Route::get('settings/group/{group}', [App\Http\Controllers\Api\V1\SettingController::class, 'getGroup'])->middleware('permission:manage settings');
+        Route::apiResource('settings', App\Http\Controllers\Api\V1\SettingController::class)->middleware('permission:view settings');
+        Route::get('settings/group/{group}', [App\Http\Controllers\Api\V1\SettingController::class, 'getGroup'])->middleware('permission:view settings');
         Route::post('settings/bulk-update', [App\Http\Controllers\Api\V1\SettingController::class, 'bulkUpdate'])->middleware('permission:manage settings');
         Route::post('settings/test-storage', [App\Http\Controllers\Api\V1\SettingController::class, 'testStorage'])->middleware('permission:manage settings');
 
