@@ -92,8 +92,29 @@
             </Card>
         </div>
 
-        <!-- Row 2: Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Row 2: Recent Activity (Full Width) -->
+        <Card>
+            <CardHeader>
+                <CardTitle>{{ $t('features.dashboard.stats.creator.recentActivity') }}</CardTitle>
+            </CardHeader>
+                <CardContent>
+                    <div class="h-[350px] w-full">
+                    <LineChart 
+                        v-if="activityData.length > 0"
+                        :data="activityData" 
+                        :label="$t('features.dashboard.stats.creator.recentActivity')"
+                    />
+                    <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground">
+                        <Activity class="w-10 h-10 mb-2 opacity-50" />
+                        <span class="text-sm">{{ $t('features.dashboard.widgets.recentActivity.empty') }}</span>
+                    </div>
+                    </div>
+            </CardContent>
+        </Card>
+
+        <!-- Row 3: Status Distribution & Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+             <!-- Status Distribution -->
              <Card class="col-span-1">
                 <CardHeader>
                     <CardTitle>{{ $t('features.dashboard.stats.creator.contentStatus') }}</CardTitle>
@@ -113,30 +134,11 @@
                      </div>
                 </CardContent>
             </Card>
-            
-            <Card class="col-span-1">
-                <CardHeader>
-                    <CardTitle>{{ $t('features.dashboard.stats.creator.recentActivity') }}</CardTitle>
-                </CardHeader>
-                 <CardContent>
-                     <div class="h-[300px] w-full">
-                        <LineChart 
-                            v-if="activityData.length > 0"
-                            :data="activityData" 
-                            :label="$t('features.dashboard.stats.creator.recentActivity')"
-                        />
-                        <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground">
-                            <Activity class="w-10 h-10 mb-2 opacity-50" />
-                            <span class="text-sm">{{ $t('features.dashboard.widgets.recentActivity.empty') }}</span>
-                        </div>
-                     </div>
-                </CardContent>
-            </Card>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="mt-8">
-             <QuickActions />
+            <!-- Quick Actions -->
+            <div class="col-span-1 lg:col-span-2">
+                 <QuickActions />
+            </div>
         </div>
     </div>
 </template>
