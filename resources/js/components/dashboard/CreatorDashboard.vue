@@ -103,7 +103,8 @@
                         <DoughnutChart 
                             v-if="statusData.length > 0" 
                             :data="statusData" 
-                            :labels="statusLabels" 
+                            label-key="label"
+                            value-key="count"
                         />
                         <div v-else class="text-center text-muted-foreground">
                              <PieChart class="w-10 h-10 mb-2 opacity-50 mx-auto" />
@@ -121,8 +122,8 @@
                      <div class="h-[300px] w-full">
                         <LineChart 
                             v-if="activityData.length > 0"
-                            :data="[{ name: 'Activity', data: activityData }]" 
-                            :categories="activityLabels"
+                            :data="activityData" 
+                            :label="$t('features.dashboard.stats.creator.recentActivity')"
                         />
                         <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground">
                             <Activity class="w-10 h-10 mb-2 opacity-50" />
@@ -173,10 +174,19 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const stats = ref({});
 const statusData = ref([]);
-const statusLabels = ref([]);
 const activityData = ref([]);
-const activityLabels = ref([]);
 const loading = ref(false);
+
+const mapStatusToLabel = (status) => {
+    // Map status to translation key
+    // assuming status are: published, draft, pending
+    const map = {
+        'published': t('features.dashboard.stats.creator.published'),
+        'draft': t('features.dashboard.stats.creator.drafts'),
+        'pending': t('features.dashboard.stats.creator.pendingReview'),
+    };
+    return map[status] || status; // Fallback to raw status
+};
 
 const fetchStats = async () => {
     loading.value = true;
@@ -192,16 +202,22 @@ const fetchStats = async () => {
             
             // Content Status Chart
             if (data.charts && data.charts.myContentByStatus) {
-                const statusChart = ensureArray(data.charts.myContentByStatus);
-                statusLabels.value = statusChart.map(item => item.status);
-                statusData.value = statusChart.map(item => item.count);
+                const rawStatus = ensureArray(data.charts.myContentByStatus);
+                statusData.value = rawStatus.map(item => ({
+                    label: mapStatusToLabel(item.status),
+                    count: item.count
+                }));
             }
             
             // Recent Activity Chart
             if (data.charts && data.charts.recentActivity) {
-                const activityChart = ensureArray(data.charts.recentActivity);
-                activityLabels.value = activityChart.map(item => item.date);
-                activityData.value = activityChart.map(item => item.count);
+                const rawActivity = ensureArray(data.charts.recentActivity);
+                // LineChart expects { period: ..., visits: ... }
+                // API returns { date: ..., count: ... }
+                activityData.value = rawActivity.map(item => ({
+                    period: item.date,
+                    visits: item.count
+                }));
             }
         }
     } catch (error) {
