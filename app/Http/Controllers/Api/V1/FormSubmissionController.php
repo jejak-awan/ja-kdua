@@ -30,7 +30,8 @@ class FormSubmissionController extends BaseApiController
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $submissions = $query->latest()->paginate(50);
+        $perPage = min($request->input('per_page', 15), 100);
+        $submissions = $query->latest()->paginate($perPage);
 
         return $this->paginated($submissions, 'Form submissions retrieved successfully');
     }

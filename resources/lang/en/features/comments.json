@@ -2,7 +2,9 @@
     "list": {
         "title": "Comments",
         "subtitle": "Manage and moderate comments",
-        "empty": "No comments found"
+        "empty": "No comments found",
+        "on": "On",
+        "replyTo": "Reply to"
     },
     "stats": {
         "total": "Total",
@@ -33,8 +35,7 @@
         "author": "Author",
         "email": "Email",
         "postedOn": "Posted on",
-        "repliesCount": "{count} reply | {count} replies",
-        "replyTo": "Reply to"
+        "repliesCount": "{count} reply | {count} replies"
     },
     "messages": {
         "bulkDeleteConfirm": "Delete {count} comments? This cannot be undone.",

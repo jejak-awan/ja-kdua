@@ -1,118 +1,105 @@
 <template>
     <div class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50" @click.self="close">
-        <div class="relative top-10 mx-auto p-5 border w-full max-w-6xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
+        <div class="relative top-10 mx-auto p-5 border border-border w-full max-w-6xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-foreground">{{ t('features.forms.submissions.title') }}</h2>
                     <p class="text-sm text-muted-foreground mt-1">{{ form.name }}</p>
                 </div>
-                <button
-                    @click="close"
-                    class="text-muted-foreground hover:text-muted-foreground"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                <Button variant="ghost" size="icon" @click="close">
+                    <X class="w-5 h-5" />
+                </Button>
             </div>
 
             <!-- Statistics -->
             <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-blue-500/20 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-blue-900">{{ statistics.total || 0 }}</div>
-                    <div class="text-sm text-blue-700">{{ t('features.forms.stats.total') }}</div>
-                </div>
-                <div class="bg-green-500/20 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-green-900">{{ statistics.new || 0 }}</div>
-                    <div class="text-sm text-green-700">{{ t('features.forms.stats.new') }}</div>
-                </div>
-                <div class="bg-yellow-500/20 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-yellow-900">{{ statistics.read || 0 }}</div>
-                    <div class="text-sm text-yellow-700">{{ t('features.forms.stats.read') }}</div>
-                </div>
-                <div class="bg-muted rounded-lg p-4">
-                    <div class="text-2xl font-bold text-foreground">{{ statistics.archived || 0 }}</div>
-                    <div class="text-sm text-foreground">{{ t('features.forms.stats.archived') }}</div>
-                </div>
+                <Card class="p-4 bg-blue-500/10 border-blue-500/20">
+                    <p class="text-2xl font-bold text-blue-500">{{ statistics.total || 0 }}</p>
+                    <p class="text-sm text-blue-500/70">{{ t('features.forms.stats.total') }}</p>
+                </Card>
+                <Card class="p-4 bg-green-500/10 border-green-500/20">
+                    <p class="text-2xl font-bold text-green-500">{{ statistics.new || 0 }}</p>
+                    <p class="text-sm text-green-500/70">{{ t('features.forms.stats.new') }}</p>
+                </Card>
+                <Card class="p-4 bg-yellow-500/10 border-yellow-500/20">
+                    <p class="text-2xl font-bold text-yellow-500">{{ statistics.read || 0 }}</p>
+                    <p class="text-sm text-yellow-500/70">{{ t('features.forms.stats.read') }}</p>
+                </Card>
+                <Card class="p-4">
+                    <p class="text-2xl font-bold text-muted-foreground">{{ statistics.archived || 0 }}</p>
+                    <p class="text-sm text-muted-foreground">{{ t('features.forms.stats.archived') }}</p>
+                </Card>
             </div>
 
             <!-- Filters -->
-            <div class="bg-muted rounded-lg p-4 mb-4">
+            <Card class="p-4 mb-4">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <input
+                    <Input
                         v-model="search"
                         type="text"
                         :placeholder="t('features.forms.submissions.search')"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                    <select
-                        v-model="statusFilter"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="">{{ t('features.forms.filters.status') }}</option>
-                        <option value="new">{{ t('features.forms.stats.new') }}</option>
-                        <option value="read">{{ t('features.forms.stats.read') }}</option>
-                        <option value="archived">{{ t('features.forms.stats.archived') }}</option>
-                    </select>
-                    <input
+                    />
+                    <Select v-model="statusFilter">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.forms.filters.status')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">{{ t('features.forms.filters.status') }}</SelectItem>
+                            <SelectItem value="new">{{ t('features.forms.stats.new') }}</SelectItem>
+                            <SelectItem value="read">{{ t('features.forms.stats.read') }}</SelectItem>
+                            <SelectItem value="archived">{{ t('features.forms.stats.archived') }}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Input
                         v-model="dateFrom"
                         type="date"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                    <input
+                    />
+                    <Input
                         v-model="dateTo"
                         type="date"
-                        class="px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
+                    />
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <button
-                        @click="exportSubmissions"
-                        class="inline-flex items-center px-4 py-2 border border-input bg-card text-foreground rounded-md text-sm font-medium text-foreground bg-card hover:bg-muted"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                    <Button variant="outline" @click="exportSubmissions">
+                        <Download class="w-4 h-4 mr-2" />
                         {{ t('features.forms.actions.export') }}
-                    </button>
+                    </Button>
                 </div>
-            </div>
+            </Card>
 
             <!-- Submissions List -->
             <div v-if="loading" class="text-center py-12">
-                <p class="text-muted-foreground">{{ t('features.forms.messages.loading') }}</p>
+                <Loader2 class="w-8 h-8 mx-auto animate-spin text-muted-foreground" />
+                <p class="text-muted-foreground mt-2">{{ t('features.forms.messages.loading') }}</p>
             </div>
 
             <div v-else-if="submissions.length === 0" class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <FileText class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                 <p class="mt-4 text-muted-foreground">{{ t('features.forms.submissions.empty') }}</p>
             </div>
 
             <div v-else class="space-y-3">
-                <div
+                <Card
                     v-for="submission in submissions"
                     :key="submission.id"
                     :class="[
-                        'bg-card border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer',
-                        submission.status === 'new' ? 'border-blue-300 bg-blue-50' : 'border-border'
+                        'p-4 cursor-pointer hover:shadow-md transition-shadow',
+                        submission.status === 'new' ? 'border-blue-500/50 bg-blue-500/5' : ''
                     ]"
                     @click="viewSubmission(submission)"
                 >
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center space-x-2 mb-2">
-                                <span
-                                    :class="[
-                                        'px-2 py-1 text-xs font-medium rounded-full',
-                                        submission.status === 'new' ? 'bg-blue-500/20 text-blue-400' :
-                                        submission.status === 'read' ? 'bg-yellow-500/20 text-yellow-400' :
-                                        'bg-secondary text-secondary-foreground'
-                                    ]"
+                                <Badge
+                                    :variant="submission.status === 'new' ? 'default' : submission.status === 'read' ? 'secondary' : 'outline'"
+                                    :class="{
+                                        'bg-blue-500/20 text-blue-500 border-blue-500/30': submission.status === 'new',
+                                        'bg-yellow-500/20 text-yellow-500 border-yellow-500/30': submission.status === 'read',
+                                    }"
                                 >
                                     {{ submission.status === 'new' ? t('features.forms.stats.new') : submission.status === 'read' ? t('features.forms.stats.read') : t('features.forms.stats.archived') }}
-                                </span>
+                                </Badge>
                                 <span class="text-sm text-muted-foreground">
                                     {{ formatDate(submission.created_at) }}
                                 </span>
@@ -127,29 +114,27 @@
                                 {{ t('features.forms.submissions.submittedBy') }} {{ submission.user.name || submission.user.email }}
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2 ml-4">
-                            <button
+                        <div class="flex items-center space-x-1 ml-4">
+                            <Button
                                 v-if="submission.status === 'new'"
                                 @click.stop="markAsRead(submission)"
-                                class="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-500/20 rounded transition-colors"
-                                title="Mark as read"
+                                variant="ghost"
+                                size="icon"
+                                class="h-8 w-8 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-500/10"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </button>
-                            <button
+                                <Check class="w-4 h-4" />
+                            </Button>
+                            <Button
                                 @click.stop="deleteSubmission(submission)"
-                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-500/20 rounded transition-colors"
-                                title="Delete"
+                                variant="ghost"
+                                size="icon"
+                                class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                                <Trash2 class="w-4 h-4" />
+                            </Button>
                         </div>
                     </div>
-                </div>
+                </Card>
             </div>
 
             <!-- Pagination -->
@@ -158,6 +143,7 @@
                 :current-page="pagination.current_page"
                 :total-items="pagination.total"
                 :per-page="Number(pagination.per_page || 15)"
+                :show-page-numbers="true"
                 @page-change="loadPage"
                 @update:per-page="(val) => { if(pagination) { pagination.per_page = val; loadPage(1); } }"
                 class="border-none shadow-none mt-6"
@@ -169,36 +155,33 @@
                 class="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50"
                 @click.self="selectedSubmission = null"
             >
-                <div class="relative top-20 mx-auto p-5 border w-full max-w-3xl rounded-md bg-card max-h-[90vh] overflow-y-auto">
+                <Card class="relative top-20 mx-auto p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-foreground">{{ t('features.forms.submissions.detailTitle') }}</h3>
-                        <button
-                            @click="selectedSubmission = null"
-                            class="text-muted-foreground hover:text-muted-foreground"
-                        >
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        <Button variant="ghost" size="icon" @click="selectedSubmission = null">
+                            <X class="w-5 h-5" />
+                        </Button>
                     </div>
 
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <span class="font-medium text-foreground">{{ t('features.forms.submissions.status') }}:</span>
-                                <span class="ml-2">{{ selectedSubmission.status }}</span>
+                                <Badge class="ml-2" :variant="selectedSubmission.status === 'new' ? 'default' : 'secondary'">
+                                    {{ selectedSubmission.status === 'new' ? t('features.forms.stats.new') : selectedSubmission.status === 'read' ? t('features.forms.stats.read') : t('features.forms.stats.archived') }}
+                                </Badge>
                             </div>
                             <div>
                                 <span class="font-medium text-foreground">{{ t('features.forms.submissions.submitted') }}:</span>
-                                <span class="ml-2">{{ formatDate(selectedSubmission.created_at) }}</span>
+                                <span class="ml-2 text-muted-foreground">{{ formatDate(selectedSubmission.created_at) }}</span>
                             </div>
                             <div>
                                 <span class="font-medium text-foreground">{{ t('features.forms.submissions.ipAddress') }}:</span>
-                                <span class="ml-2">{{ selectedSubmission.ip_address }}</span>
+                                <span class="ml-2 text-muted-foreground">{{ selectedSubmission.ip_address }}</span>
                             </div>
                             <div v-if="selectedSubmission.user">
                                 <span class="font-medium text-foreground">{{ t('features.forms.submissions.user') }}:</span>
-                                <span class="ml-2">{{ selectedSubmission.user.name || selectedSubmission.user.email }}</span>
+                                <span class="ml-2 text-muted-foreground">{{ selectedSubmission.user.name || selectedSubmission.user.email }}</span>
                             </div>
                         </div>
 
@@ -207,12 +190,12 @@
                             <dl class="space-y-3">
                                 <div v-for="(value, key) in selectedSubmission.data" :key="key" class="border-b border-border pb-2">
                                     <dt class="text-sm font-medium text-foreground">{{ key }}</dt>
-                                    <dd class="mt-1 text-sm text-foreground">{{ formatValue(value) }}</dd>
+                                    <dd class="mt-1 text-sm text-muted-foreground">{{ formatValue(value) }}</dd>
                                 </div>
                             </dl>
                         </div>
                     </div>
-                </div>
+                </Card>
             </div>
         </div>
     </div>
@@ -223,6 +206,16 @@ import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import Pagination from '../../../components/ui/pagination.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Card from '../../../components/ui/card.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import { X, Download, Loader2, FileText, Check, Trash2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -240,7 +233,7 @@ const loading = ref(true);
 const statistics = ref(null);
 const pagination = ref(null);
 const search = ref('');
-const statusFilter = ref('');
+const statusFilter = ref('all');
 const dateFrom = ref('');
 const dateTo = ref('');
 const selectedSubmission = ref(null);
@@ -251,7 +244,7 @@ const fetchSubmissions = async (page = 1) => {
         const params = {
             page,
             per_page: pagination.value?.per_page || 15,
-            ...(statusFilter.value && { status: statusFilter.value }),
+            ...(statusFilter.value && statusFilter.value !== 'all' && { status: statusFilter.value }),
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         };
@@ -268,7 +261,7 @@ const fetchSubmissions = async (page = 1) => {
 const fetchStatistics = async () => {
     try {
         const response = await api.get(`/admin/cms/forms/${props.form.id}/submissions/statistics`);
-        statistics.value = response.data;
+        statistics.value = response.data?.data || response.data;
     } catch (error) {
         console.error('Error fetching statistics:', error);
     }
@@ -316,24 +309,21 @@ const deleteSubmission = async (submission) => {
         fetchStatistics();
     } catch (error) {
         console.error('Error deleting submission:', error);
-        alert('Failed to delete submission');
+        alert(t('features.forms.messages.exportFailed'));
     }
 };
 
 const exportSubmissions = async () => {
     try {
-        // Build query params for filtering
         const params = new URLSearchParams({
             format: 'csv',
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         });
 
-        // Use window.open for direct file download
         const baseUrl = import.meta.env.VITE_API_URL || '';
         const exportUrl = `${baseUrl}/api/v1/admin/cms/forms/${props.form.id}/submissions/export?${params.toString()}`;
         
-        // Create a link and trigger download
         const link = document.createElement('a');
         link.href = exportUrl;
         link.setAttribute('download', '');
@@ -342,12 +332,15 @@ const exportSubmissions = async () => {
         document.body.removeChild(link);
     } catch (error) {
         console.error('Error exporting submissions:', error);
-        alert('Failed to export submissions');
+        alert(t('features.forms.messages.exportFailed'));
     }
 };
 
 const formatDate = (date) => {
-    return new Date(date).toLocaleString();
+    if (!date) return '-';
+    const parsed = new Date(date);
+    if (isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleString();
 };
 
 const formatValue = (value) => {
@@ -373,4 +366,3 @@ onMounted(() => {
     fetchStatistics();
 });
 </script>
-

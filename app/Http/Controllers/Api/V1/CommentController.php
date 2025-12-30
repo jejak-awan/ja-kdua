@@ -71,7 +71,8 @@ class CommentController extends BaseApiController
             });
         }
 
-        $comments = $query->latest()->paginate(20);
+        $perPage = min($request->input('per_page', 10), 100); // Max 100 per page
+        $comments = $query->latest()->paginate($perPage);
 
         return $this->paginated($comments, 'Comments retrieved successfully');
     }

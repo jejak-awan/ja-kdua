@@ -96,5 +96,18 @@
         "copyright": "© {year} JA-CMS. All rights reserved.",
         "powered": "Powered by",
         "system": "Modern Content Management System"
+    },
+    "comments": {
+        "title": "Comments",
+        "leaveComment": "Leave a Comment",
+        "name": "Name",
+        "email": "Email",
+        "comment": "Comment",
+        "submit": "Post Comment",
+        "submitting": "Posting...",
+        "loading": "Loading comments...",
+        "empty": "No comments yet. Be the first to comment!",
+        "success": "Comment posted successfully",
+        "error": "Failed to post comment"
     }
 }

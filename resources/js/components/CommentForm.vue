@@ -1,58 +1,69 @@
 <template>
-    <div class="comment-form">
-        <h3 class="text-lg font-semibold text-foreground mb-4">Leave a Comment</h3>
-        <form @submit.prevent="handleSubmit" class="space-y-4">
-            <div v-if="!authStore.isAuthenticated" class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-foreground">Name</label>
-                    <input
-                        id="name"
-                        v-model="form.name"
-                        type="text"
-                        required
-                        class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
-                    >
+    <Card class="comment-form">
+        <CardHeader>
+            <CardTitle>{{ $t('features.comments.leaveComment') }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <form @submit.prevent="handleSubmit" class="space-y-4">
+                <div v-if="!authStore.isAuthenticated" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <Label for="name">{{ $t('features.comments.name') }}</Label>
+                        <Input
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            required
+                        />
+                    </div>
+                    <div class="space-y-2">
+                        <Label for="email">{{ $t('features.comments.email') }}</Label>
+                        <Input
+                            id="email"
+                            v-model="form.email"
+                            type="email"
+                            required
+                        />
+                    </div>
                 </div>
-                <div>
-                    <label for="email" class="block text-sm font-medium text-foreground">Email</label>
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        type="email"
+
+                <div class="space-y-2">
+                    <Label for="body">{{ $t('features.comments.comment') }}</Label>
+                    <Textarea
+                        id="body"
+                        v-model="form.body"
+                        rows="4"
                         required
-                        class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
-                    >
+                    />
                 </div>
-            </div>
 
-            <div>
-                <label for="body" class="block text-sm font-medium text-foreground">Comment</label>
-                <textarea
-                    id="body"
-                    v-model="form.body"
-                    rows="4"
-                    required
-                    class="mt-1 block w-full rounded-md border-input focus:border-indigo-500 focus:ring-indigo-500"
-                />
-            </div>
-
-            <div>
-                <button
+                <Button
                     type="submit"
                     :disabled="loading"
-                    class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/80 disabled:opacity-50"
+                    class="w-full sm:w-auto"
                 >
-                    {{ loading ? 'Posting...' : 'Post Comment' }}
-                </button>
-            </div>
-        </form>
-    </div>
+                    <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ loading ? $t('features.comments.submitting') : $t('features.comments.submit') }}
+                </Button>
+            </form>
+        </CardContent>
+    </Card>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
+import { useI18n } from 'vue-i18n';
+import api from '../services/api';
 import { useAuthStore } from '../stores/auth';
+import { Loader2 } from 'lucide-vue-next';
+import Card from './ui/card.vue';
+import CardHeader from './ui/card-header.vue';
+import CardTitle from './ui/card-title.vue';
+import CardContent from './ui/card-content.vue';
+import Input from './ui/input.vue';
+import Label from './ui/label.vue';
+import Textarea from './ui/textarea.vue';
+import Button from './ui/button.vue';
+import { toast } from 'vue-sonner'; // Assuming sonner is used, if not we'll use window.alert fallback or standard toast if available
 
 const props = defineProps({
     contentId: {
@@ -66,7 +77,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['submitted']);
-
+const { t } = useI18n();
 const authStore = useAuthStore();
 
 const form = ref({
@@ -81,7 +92,7 @@ const loading = ref(false);
 const handleSubmit = async () => {
     loading.value = true;
     try {
-        await axios.post(`/api/v1/cms/contents/${props.contentId}/comments`, form.value);
+        await api.post(`/cms/contents/${props.contentId}/comments`, form.value);
         
         // Reset form
         form.value = {
@@ -92,12 +103,15 @@ const handleSubmit = async () => {
         };
 
         emit('submitted');
+        // If toast available: toast.success(t('features.comments.success'))
     } catch (error) {
         console.error('Error posting comment:', error);
-        alert('Failed to post comment. Please try again.');
+        // If toast available: toast.error(t('features.comments.error'))
+        alert(t('features.comments.error')); 
     } finally {
         loading.value = false;
     }
 };
 </script>
+
 

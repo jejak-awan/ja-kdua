@@ -2,7 +2,9 @@
     "list": {
         "title": "Komentar",
         "subtitle": "Kelola dan moderasi komentar",
-        "empty": "Tidak ada komentar ditemukan"
+        "empty": "Tidak ada komentar ditemukan",
+        "on": "Pada",
+        "replyTo": "Balas ke"
     },
     "stats": {
         "total": "Total",
@@ -33,8 +35,7 @@
         "author": "Penulis",
         "email": "Email",
         "postedOn": "Diposting pada",
-        "repliesCount": "{count} balasan",
-        "replyTo": "Balas ke"
+        "repliesCount": "{count} balasan"
     },
     "messages": {
         "bulkDeleteConfirm": "Hapus {count} komentar? Tindakan ini tidak dapat dibatalkan.",

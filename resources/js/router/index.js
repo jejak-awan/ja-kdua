@@ -164,6 +164,11 @@ const routes = [
                 component: () => import('../views/admin/forms/Edit.vue'),
             },
             {
+                path: 'forms/:id/submissions',
+                name: 'forms.submissions',
+                component: () => import('../views/admin/forms/SubmissionsPage.vue'),
+            },
+            {
                 path: 'tags',
                 name: 'tags',
                 component: () => import('../views/admin/tags/Index.vue'),

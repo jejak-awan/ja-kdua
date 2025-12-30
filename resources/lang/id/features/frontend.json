@@ -96,5 +96,18 @@
         "copyright": "© {year} JA-CMS. Hak cipta dilindungi undang-undang.",
         "powered": "Ditenagai oleh",
         "system": "Sistem Manajemen Konten Modern"
+    },
+    "comments": {
+        "title": "Komentar",
+        "leaveComment": "Tinggalkan Komentar",
+        "name": "Nama",
+        "email": "Email",
+        "comment": "Komentar",
+        "submit": "Kirim Komentar",
+        "submitting": "Mengirim...",
+        "loading": "Memuat komentar...",
+        "empty": "Belum ada komentar. Jadilah yang pertama memberikan komentar!",
+        "success": "Komentar berhasil dikirim",
+        "error": "Gagal mengirim komentar"
     }
 }

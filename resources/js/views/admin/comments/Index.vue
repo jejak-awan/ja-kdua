@@ -10,7 +10,11 @@
 
         <!-- Statistics Cards -->
         <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <Card class="p-4">
+            <Card 
+                class="p-4 cursor-pointer hover:bg-primary/5 transition-colors" 
+                @click="statusFilter = 'all'"
+                :class="{ 'ring-2 ring-primary/50': statusFilter === 'all' }"
+            >
                 <p class="text-2xl font-bold">{{ statistics.total }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
             </Card>
@@ -64,7 +68,7 @@
                         <SelectValue :placeholder="$t('features.comments.filter.allStatus')" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                        <SelectItem value="all">{{ $t('features.comments.filter.allStatus') }}</SelectItem>
                         <SelectItem value="pending">{{ $t('features.comments.status.pending') }}</SelectItem>
                         <SelectItem value="approved">{{ $t('features.comments.status.approved') }}</SelectItem>
                         <SelectItem value="rejected">{{ $t('features.comments.status.rejected') }}</SelectItem>
@@ -99,7 +103,7 @@
 
         <!-- Comments List -->
         <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
+            <p class="text-muted-foreground">{{ $t('common.messages.loading.default') }}</p>
         </div>
 
         <Card v-else-if="comments.length === 0" class="p-12 text-center">
@@ -145,7 +149,7 @@
                                             'bg-muted text-muted-foreground': comment.status === 'spam',
                                         }"
                                     >
-                                        {{ comment.status }}
+                                        {{ $t('features.comments.status.' + comment.status) }}
                                     </Badge>
                                 </div>
                                 <div class="flex items-center gap-x-3 mt-1 text-xs text-muted-foreground">
@@ -166,7 +170,7 @@
                                 class="h-8 text-green-600 hover:text-green-600 hover:bg-green-500/10"
                             >
                                 <Check class="w-4 h-4 mr-1" />
-                                Approve
+                                {{ $t('features.comments.actions.approve') }}
                             </Button>
                             <Button
                                 v-if="comment.status === 'pending' || comment.status === 'approved'"
@@ -176,7 +180,7 @@
                                 class="h-8 text-yellow-600 hover:text-yellow-600 hover:bg-yellow-500/10"
                             >
                                 <X class="w-4 h-4 mr-1" />
-                                Reject
+                                {{ $t('features.comments.actions.reject') }}
                             </Button>
                             <Button
                                 v-if="comment.status !== 'spam'"
@@ -186,7 +190,7 @@
                                 class="h-8 text-muted-foreground"
                             >
                                 <AlertTriangle class="w-4 h-4 mr-1" />
-                                Spam
+                                {{ $t('features.comments.actions.markSpam') }}
                             </Button>
                             <Button
                                 variant="ghost"
@@ -195,7 +199,7 @@
                                 class="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                                 <Trash2 class="w-4 h-4 mr-1" />
-                                Delete
+                                {{ $t('common.actions.delete') }}
                             </Button>
                         </div>
                     </div>
@@ -260,7 +264,7 @@
                                             'bg-red-500/10 text-red-500 border-red-500/20': reply.status === 'rejected',
                                         }"
                                     >
-                                        {{ reply.status }}
+                                        {{ $t('features.comments.status.' + reply.status) }}
                                     </Badge>
                                 </div>
                                 <p class="text-xs text-foreground/80 leading-relaxed">{{ reply.body }}</p>
@@ -305,6 +309,7 @@
                 :current-page="pagination.current_page"
                 :total-items="pagination.total"
                 :per-page="Number(pagination.per_page || 10)"
+                :show-page-numbers="true"
                 @page-change="changePage"
                 @update:per-page="(val) => { if(pagination) { pagination.per_page = val; pagination.current_page = 1; fetchComments(); } }"
                 class="border-none shadow-none mt-4"
@@ -399,7 +404,7 @@ const fetchComments = async () => {
             per_page: pagination.value?.per_page || 10,
         };
 
-        if (statusFilter.value) {
+        if (statusFilter.value && statusFilter.value !== 'all') {
             params.status = statusFilter.value;
         }
 
