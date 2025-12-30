@@ -10,17 +10,16 @@
                 </p>
             </div>
             <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-foreground">{{ t('common.labels.email') }}</label>
-                    <input
+                <div class="space-y-2">
+                    <Label for="email">{{ t('common.labels.email') }}</Label>
+                    <Input
                         id="email"
                         v-model="form.email"
                         name="email"
                         type="email"
                         required
-                        class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         :placeholder="t('features.auth.login.emailPlaceholder')"
-                    >
+                    />
                 </div>
 
                 <div v-if="message" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-500/20 text-red-800' : 'bg-green-500/20 text-green-800'">
@@ -55,6 +54,8 @@
 import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import Input from '../../components/ui/input.vue';
+import Label from '../../components/ui/label.vue';
 
 const { t } = useI18n();
 const authStore = useAuthStore();

@@ -8,50 +8,47 @@
             </div>
             <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
                 <div class="space-y-4">
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-foreground">{{ t('common.labels.email') }}</label>
-                        <input
+                    <div class="space-y-2">
+                        <Label for="email">{{ t('common.labels.email') }}</Label>
+                        <Input
                             id="email"
                             v-model="form.email"
                             name="email"
                             type="email"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
+                        />
                     </div>
-                    <div>
-                        <label for="token" class="block text-sm font-medium text-foreground">{{ t('features.auth.resetPassword.tokenLabel') }}</label>
-                        <input
+                    <div class="space-y-2">
+                        <Label for="token">{{ t('features.auth.resetPassword.tokenLabel') }}</Label>
+                        <Input
                             id="token"
                             v-model="form.token"
                             name="token"
                             type="text"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
+                        />
                     </div>
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-foreground">{{ t('common.labels.password') }}</label>
-                        <input
+                    <div class="space-y-2">
+                        <Label for="password">{{ t('common.labels.password') }}</Label>
+                        <Input
                             id="password"
                             v-model="form.password"
                             name="password"
                             type="password"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                        <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password[0] }}</p>
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
+                        />
+                        <p v-if="errors.password" class="text-sm text-destructive">{{ errors.password[0] }}</p>
                     </div>
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-foreground">{{ t('common.labels.confirmPassword') }}</label>
-                        <input
+                    <div class="space-y-2">
+                        <Label for="password_confirmation">{{ t('common.labels.confirmPassword') }}</Label>
+                        <Input
                             id="password_confirmation"
                             v-model="form.password_confirmation"
                             name="password_confirmation"
                             type="password"
                             required
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-input placeholder-gray-500 text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
+                        />
                     </div>
                 </div>
 
@@ -88,6 +85,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import Input from '../../components/ui/input.vue';
+import Label from '../../components/ui/label.vue';
 
 const router = useRouter();
 const route = useRoute();
