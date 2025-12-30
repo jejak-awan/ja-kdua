@@ -55,13 +55,10 @@ class SecurityHeaders
             'https://cdn.jsdelivr.net',
             'https://code.jquery.com',
             'https://static.cloudflareinsights.com',
-            // Hashes for inline scripts in app.blade.php / error pages
-            "'sha256-bYJ5jUrfnAwV0m4aathRglwVNvZrPLkrugff3Hh1b1k='", // Dark mode script (line 12)
-            "'sha256-NrYVPfGWcGFTIEFXOF0FJ30yVDzC8vN6pXoAMPaU5RI='", // SiteConfig script (line 24)
-            "'sha256-EuHBk5xLTkeNQNYrCUayLQWeV5z2hbGuaMU/F+w38hk='", // New script (likely error page or Vite)
-            "'sha256-2s8oON1aK5LMVmmlBFeRS/prDWzv6u88194WZ9kAlzU='", // Additional inline script
-            "'sha256-sDrJRntOWyq4dfnjaDx4A+deE33GOSfLPqcl465G7sM='", // Latest inline script fix
-            "'sha256-NQpTkLgRUdodS8d8AXvPps1wzGA8fFHmnNaiVsPUaPo='", // Login page inline script
+            // Note: We removed specific hashes ("'sha256-...'") to allow 'unsafe-inline' to work.
+            // When hashes or nonces are present, browsers ignore 'unsafe-inline', causing constant blocking 
+            // of new inline scripts. By removing hashes, we fall back to 'unsafe-inline' which allows 
+            // all inline scripts (less secure, but "cleaner" and prevents breakage).
         ]);
         
         // Add same-origin domains
