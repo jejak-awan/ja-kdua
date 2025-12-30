@@ -344,19 +344,19 @@ const filteredContents = computed(() => {
 
 const fetchStats = async () => {
     try {
-        // Fetch stats from specific endpoint or aggregate from list if needed
-        // For now, using the system statistics endpoint which we saw in Dashboard
-        // Only fetch if has permission
-        if (!authStore.hasPermission('manage system')) return;
+        // Only fetch if has permission (manage content is required for stats now)
+        if (!authStore.hasPermission('manage content')) return;
 
-        const response = await api.get('/admin/cms/system/statistics');
+        // Use dedicated content stats endpoint
+        const response = await api.get('/admin/cms/contents/stats');
         const data = parseSingleResponse(response);
-        if (data && data.contents) {
+        
+        if (data) {
             stats.value = {
-                total: data.contents.total || 0,
-                published: data.contents.published || 0,
-                draft: data.contents.draft || 0,
-                archived: data.contents.archived || 0
+                total: data.total || 0,
+                published: data.published || 0,
+                draft: data.draft || 0,
+                archived: data.archived || 0
             };
         }
     } catch (error) {

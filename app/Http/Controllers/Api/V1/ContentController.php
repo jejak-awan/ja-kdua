@@ -99,6 +99,22 @@ class ContentController extends BaseApiController
         return $this->success($content->load(['author', 'category', 'tags', 'allComments', 'customFields.customField.fieldGroup']), 'Content retrieved successfully');
     }
 
+    public function stats(Request $request)
+    {
+        if (!$request->user()->can('manage content')) {
+            return $this->forbidden('Unauthorized to view content statistics');
+        }
+
+        $stats = [
+            'total' => Content::count(),
+            'published' => Content::where('status', 'published')->count(),
+            'draft' => Content::where('status', 'draft')->count(),
+            'archived' => Content::where('status', 'archived')->count(),
+        ];
+
+        return $this->success($stats, 'Content statistics retrieved successfully');
+    }
+
     public function store(Request $request)
     {
         try {

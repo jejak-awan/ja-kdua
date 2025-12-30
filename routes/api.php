@@ -96,6 +96,7 @@ Route::prefix('v1')->group(function () {
     // Increased from 60 to 300 to allow dashboard concurrent requests (7-10 on initial load)
     Route::prefix('admin/cms')->middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
         // Contents
+        Route::get('contents/stats', [App\Http\Controllers\Api\V1\ContentController::class, 'stats']);
         Route::get('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'adminIndex']);
         Route::get('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'adminShow']);
         Route::post('contents', [App\Http\Controllers\Api\V1\ContentController::class, 'store'])->middleware('permission:create content');
