@@ -1059,7 +1059,7 @@ const emptyTrash = async () => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to empty trash:', error);
-        alert(error.response?.data?.message || t('features.media.messages.emptyTrashFailed') || 'Failed to empty trash');
+        mediaToast.error.fromResponse(error);
     }
 };
 
@@ -1150,7 +1150,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to restore media:', error);
-            alert(error.response?.data?.message || t('features.media.messages.restoreFailed'));
+            mediaToast.error.fromResponse(error);
         } finally {
             bulkProcessing.value = false;
         }
@@ -1179,7 +1179,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to delete permanent:', error);
-            alert(error.response?.data?.message);
+            mediaToast.error.fromResponse(error);
         } finally {
             bulkProcessing.value = false;
         }
@@ -1212,10 +1212,10 @@ const handleBulkAction = async () => {
             bulkProgress.value = 100;
             selectedMedia.value = [];
             bulkAction.value = '';
-            alert(t('features.media.messages.downloadSuccess', { count }));
+            mediaToast.success.upload();  // Reusing upload success
         } catch (error) {
             // console.error('Failed to download media:', error);
-            alert(error.response?.data?.message || t('features.media.messages.downloadFailed'));
+            mediaToast.error.fromResponse(error);
             bulkAction.value = '';
         } finally {
             bulkProcessing.value = false;
@@ -1239,10 +1239,10 @@ const handleMoveToFolder = async (folderId) => {
         selectedMedia.value = [];
         bulkAction.value = '';
         showMoveFolderModal.value = false;
-        alert(t('features.media.messages.moveSuccess', { count }));
+        mediaToast.success.move();
     } catch (error) {
         // console.error('Failed to move media:', error);
-        alert(error.response?.data?.message || t('features.media.messages.moveFailed'));
+        mediaToast.error.fromResponse(error);
     } finally {
         bulkProcessing.value = false;
         bulkProgress.value = 0;
@@ -1268,10 +1268,10 @@ const handleUpdateAltText = async () => {
         bulkAction.value = '';
         bulkAltText.value = '';
         showUpdateAltModal.value = false;
-        alert(t('features.media.messages.updateAltSuccess'));
+        mediaToast.success.update();
     } catch (error) {
         // console.error('Failed to update alt text:', error);
-        alert(error.response?.data?.message || t('features.media.messages.updateAltFailed'));
+        mediaToast.error.fromResponse(error);
     } finally {
         bulkProcessing.value = false;
         bulkProgress.value = 0;
@@ -1319,7 +1319,7 @@ const deleteMedia = async (media) => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to delete media:', error);
-        alert(t('features.media.messages.deleteFailed'));
+        mediaToast.error.fromResponse(error);
     }
 };
 
