@@ -125,10 +125,10 @@
             </CardContent>
         </Card>
 
-        <!-- Row 3: Status Distribution & Quick Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <!-- Status Distribution -->
-             <Card class="col-span-1">
+        <!-- Row 3: Status Distribution & Top Content & Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+             <!-- Status Distribution (Col 1) -->
+             <Card class="col-span-1 lg:col-span-1">
                 <CardHeader>
                     <CardTitle>{{ $t('features.dashboard.stats.creator.contentStatus') }}</CardTitle>
                 </CardHeader>
@@ -148,8 +148,49 @@
                 </CardContent>
             </Card>
 
-            <!-- Quick Actions -->
-            <div class="col-span-1 lg:col-span-2">
+            <!-- Top Content (Col 2-3) -->
+            <Card class="col-span-1 lg:col-span-2">
+                <CardHeader>
+                    <CardTitle class="flex items-center gap-2">
+                        <Trophy class="w-5 h-5 text-amber-500" />
+                        {{ $t('features.dashboard.stats.creator.topContent') }}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table v-if="topContent.length > 0">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{{ $t('features.dashboard.table.content') }}</TableHead>
+                                <TableHead class="text-right">{{ $t('features.dashboard.table.views') }}</TableHead>
+                                <TableHead class="text-right">{{ $t('features.dashboard.table.status') }}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="content in topContent" :key="content.id">
+                                <TableCell class="font-medium">
+                                    <div class="flex flex-col">
+                                        <span class="truncate max-w-[200px]">{{ content.title }}</span>
+                                        <span class="text-xs text-muted-foreground capitalize">{{ content.type }}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell class="text-right">{{ content.views }}</TableCell>
+                                <TableCell class="text-right">
+                                    <Badge variant="outline" :class="getStatusColor(content.status)" class="capitalize">
+                                        {{ content.status }}
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                     <div v-else class="h-[200px] flex flex-col items-center justify-center text-muted-foreground">
+                        <FileText class="w-10 h-10 mb-2 opacity-50" />
+                        <span class="text-sm">{{ $t('features.dashboard.traffic.noData') }}</span>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Quick Actions (Col 4) -->
+            <div class="col-span-1 lg:col-span-1">
                  <QuickActions />
             </div>
         </div>
@@ -176,6 +217,16 @@ import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
 import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
+import Badge from '@/components/ui/badge.vue';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import { 
     FileText, 
@@ -187,7 +238,8 @@ import {
     PenTool,
     Edit3,
     PieChart,
-    Activity
+    Activity,
+    Trophy
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -195,6 +247,7 @@ const authStore = useAuthStore();
 const stats = ref({});
 const statusData = ref([]);
 const activityData = ref([]);
+const topContent = ref([]);
 const loading = ref(false);
 const timeRange = ref('30'); // Default to 30 days
 
@@ -207,6 +260,15 @@ const mapStatusToLabel = (status) => {
         'pending': t('features.dashboard.stats.creator.pendingReview'),
     };
     return map[status] || status; // Fallback to raw status
+};
+
+const getStatusColor = (status) => {
+    switch (status) {
+        case 'published': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        case 'pending': return 'bg-amber-50 text-amber-700 border-amber-200';
+        case 'draft': return 'bg-slate-50 text-slate-700 border-slate-200';
+        default: return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
 };
 
 const fetchStats = async () => {
@@ -240,6 +302,11 @@ const fetchStats = async () => {
                 period: item.date,
                 visits: item.count
             }));
+
+            // Top Content
+            if (data.topContent) {
+                 topContent.value = ensureArray(data.topContent);
+            }
         }
     } catch (error) {
         console.error('Failed to fetch creator stats:', error);
