@@ -215,7 +215,7 @@
         "noPermissionManage": "Anda tidak memiliki izin untuk mengelola media ini",
         "mediaInUse": "Media sedang digunakan"
     }
-    },
+    ,
     "confirm": {
         "deleteTitle": "Hapus Media",
         "deleteMessage": "Apakah Anda yakin ingin menghapus media ini?",
