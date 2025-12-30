@@ -279,8 +279,10 @@ const fetchUser = async () => {
         const data = parseSingleResponse(response);
         
         // Guard: hierarchy check
-        if (!authStore.isHigherThan(data) && authStore.user?.id !== data.id) {
-            toast.error(t('common.messages.error.action'), t('features.users.messages.cannotManageSuperAdmin'));
+        // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
+        const isSuperAdmin = authStore.getRoleRank() >= 100;
+        if (!isSuperAdmin && !authStore.isHigherThan(data) && authStore.user?.id !== data.id) {
+            toast.error(t('common.messages.error.action'), t('features.users.messages.hierarchy_restriction'));
             router.push({ name: 'users.index' });
             return;
         }
