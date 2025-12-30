@@ -3,71 +3,71 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
-            <router-link
-                :to="{ name: 'users.create' }"
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ $t('features.users.createNew') }}
+            <router-link :to="{ name: 'users.create' }">
+                <Button>
+                    <Plus class="w-5 h-5 mr-2" />
+                    {{ $t('features.users.createNew') }}
+                </Button>
             </router-link>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card border border-border rounded-lg p-4 mb-4">
-            <div class="flex items-center space-x-4">
-                <Input
-                    v-model="search"
-                    type="text"
-                    :placeholder="$t('features.users.search')"
-                    class="max-w-xs"
-                />
-                <select
-                    v-model="roleFilter"
-                    class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 max-w-xs"
-                >
-                    <option value="">{{ $t('features.users.allRoles') }}</option>
-                    <option
-                        v-for="role in roles"
-                        :key="role.id"
-                        :value="role.name"
-                    >
-                        {{ role.name }}
-                    </option>
-                </select>
+        <Card class="p-4 mb-4">
+            <div class="flex items-center gap-4">
+                <div class="relative flex-1 max-w-xs">
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        v-model="search"
+                        type="text"
+                        :placeholder="$t('features.users.search')"
+                        class="pl-9"
+                    />
+                </div>
+                <Select v-model="roleFilter">
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('features.users.allRoles')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{{ $t('features.users.allRoles') }}</SelectItem>
+                        <SelectItem
+                            v-for="role in roles"
+                            :key="role.id"
+                            :value="role.name"
+                        >
+                            {{ role.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
-        </div>
+        </Card>
 
-        <!-- Users List -->
         <div v-if="loading" class="bg-card border border-border rounded-lg p-12 text-center">
-            <p class="text-muted-foreground">{{ $t('features.users.loading') }}</p>
+            <Loader2 class="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+            <p class="mt-2 text-muted-foreground">{{ $t('features.users.loading') }}</p>
         </div>
 
         <div v-else-if="users.length === 0" class="bg-card border border-border rounded-lg p-12 text-center">
-            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
+            <Users class="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
             <p class="mt-4 text-muted-foreground">{{ $t('features.users.empty') }}</p>
         </div>
 
         <div v-else class="bg-card border border-border rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-border">
-                <thead class="bg-muted">
+                <thead class="bg-muted/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.user') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.email') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.roles') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.lastLogin') }}
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
+                        <th class="px-6 py-3 text-center text-xs font-medium text-muted-foreground">
                             {{ $t('features.users.table.actions') }}
                         </th>
                     </tr>
@@ -129,31 +129,34 @@
                                 {{ $t('features.users.status.never') }}
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex justify-center items-center space-x-1">
                                 <Button
                                     variant="ghost"
-                                    size="sm"
+                                    size="icon"
                                     @click="forceLogoutUser(user)"
-                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
                                     :title="$t('features.users.actions.forceLogout')"
                                 >
-                                    {{ $t('features.users.actions.forceLogout') }}
+                                    <LogOut class="w-4 h-4" />
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    size="sm"
+                                    size="icon"
                                     @click="editUser(user)"
+                                    class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
+                                    :title="$t('common.actions.edit')"
                                 >
-                                    {{ $t('common.actions.edit') }}
+                                    <Pencil class="w-4 h-4" />
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    size="sm"
+                                    size="icon"
                                     @click="deleteUser(user)"
-                                    class="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    :title="$t('common.actions.delete')"
                                 >
-                                    {{ $t('common.actions.delete') }}
+                                    <Trash2 class="w-4 h-4" />
                                 </Button>
                             </div>
                         </td>
@@ -167,9 +170,10 @@
                 :current-page="pagination.current_page"
                 :total-items="pagination.total"
                 :per-page="Number(pagination.per_page || 10)"
+                :show-page-numbers="true"
                 @page-change="changePage"
-                @update:per-page="(val) => { if(pagination) { pagination.per_page = val; pagination.current_page = 1; fetchUsers(); } }"
-                class="border-none shadow-none mt-4"
+                @update:per-page="changePerPage"
+                class="mt-4"
             />
         </div>
 
@@ -187,6 +191,13 @@ import toast from '../../../services/toast';
 import Button from '../../../components/ui/button.vue';
 import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
+import Card from '../../../components/ui/card.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -194,7 +205,7 @@ const loading = ref(false);
 const users = ref([]);
 const roles = ref([]);
 const search = ref('');
-const roleFilter = ref('');
+const roleFilter = ref('all');
 const pagination = ref(null);
 
 const fetchUsers = async () => {
@@ -209,7 +220,8 @@ const fetchUsers = async () => {
             params.search = search.value;
         }
 
-        if (roleFilter.value) {
+        // Don't send 'all' role to API
+        if (roleFilter.value && roleFilter.value !== 'all') {
             params.role = roleFilter.value;
         }
 
@@ -256,6 +268,14 @@ const fetchRoles = async () => {
 const changePage = (page) => {
     if (pagination.value) {
         pagination.value.current_page = page;
+        fetchUsers();
+    }
+};
+
+const changePerPage = (perPage) => {
+    if (pagination.value) {
+        pagination.value.per_page = perPage;
+        pagination.value.current_page = 1;
         fetchUsers();
     }
 };

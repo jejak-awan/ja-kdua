@@ -3,16 +3,16 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('common.actions.edit') }} {{ $t('features.users.table.user') }}</h1>
-            <router-link
-                :to="{ name: 'users.index' }"
-                class="text-muted-foreground hover:text-foreground text-sm flex items-center"
-            >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                {{ $t('common.actions.back') }}
+            <router-link :to="{ name: 'users.index' }">
+                <Button variant="ghost" class="pl-0 hover:bg-transparent hover:text-foreground">
+                    <ArrowLeft class="w-4 h-4 mr-2" />
+                    {{ $t('common.actions.back') }}
+                </Button>
             </router-link>
         </div>
 
-        <div v-if="loading" class="text-center py-12">
+        <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+            <Loader2 class="h-8 w-8 animate-spin text-muted-foreground mb-4" />
             <p class="text-muted-foreground">{{ $t('common.messages.loading.default') }}</p>
         </div>
 
@@ -147,23 +147,31 @@
                     <label class="block text-sm font-medium text-foreground mb-2">
                         {{ $t('features.users.form.roles') }} <span class="text-destructive">*</span>
                     </label>
-                    <div v-if="loadingRoles" class="text-sm text-muted-foreground">
+                    <div v-if="loadingRoles" class="flex items-center text-sm text-muted-foreground">
+                        <Loader2 class="w-4 h-4 mr-2 animate-spin" />
                         {{ $t('common.messages.loading.default') }}
                     </div>
                     <div v-else-if="availableRoles.length > 0" class="flex flex-wrap gap-4">
-                        <label
+                        <div
                             v-for="role in availableRoles"
                             :key="role.id"
-                            class="flex items-center space-x-2 bg-transparent border border-input px-3 py-2 rounded-md cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                            class="flex items-center space-x-2 border border-input px-3 py-2 rounded-md hover:bg-accent/50 transition-colors"
                         >
-                            <input
-                                v-model="form.roles"
-                                type="checkbox"
-                                :value="role.id"
-                                class="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                            <Checkbox
+                                :id="`role-${role.id}`"
+                                :checked="form.roles.includes(role.id)"
+                                @update:checked="(checked) => {
+                                    if (checked) form.roles.push(role.id);
+                                    else form.roles = form.roles.filter(id => id !== role.id);
+                                }"
                             />
-                            <span class="text-sm text-foreground select-none">{{ role.name }}</span>
-                        </label>
+                            <label
+                                :for="`role-${role.id}`"
+                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                            >
+                                {{ role.name }}
+                            </label>
+                        </div>
                     </div>
                     <p v-else class="text-sm text-destructive">
                         {{ $t('features.users.modals.user.noRoles') }}
@@ -185,6 +193,7 @@
                     type="submit"
                     :disabled="saving"
                 >
+                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.save') }}
                 </Button>
             </div>
@@ -202,6 +211,8 @@ import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
+import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 
 const router = useRouter();
 const route = useRoute();

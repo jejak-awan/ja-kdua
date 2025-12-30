@@ -29,7 +29,8 @@ class UserController extends BaseApiController
             });
         }
 
-        $users = $query->latest()->paginate(20);
+        $perPage = $request->input('per_page', 20);
+        $users = $query->latest()->paginate($perPage);
 
         // Ensure roles and permissions are always arrays (not null)
         $users->getCollection()->transform(function ($user) {
