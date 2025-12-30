@@ -208,16 +208,19 @@ const routes = [
                 path: 'content-templates',
                 name: 'content-templates',
                 component: () => import('../views/admin/content-templates/Index.vue'),
+                meta: { permission: 'manage content' },
             },
             {
                 path: 'content-templates/create',
                 name: 'content-templates.create',
                 component: () => import('../views/admin/content-templates/Create.vue'),
+                meta: { permission: 'manage content' },
             },
             {
                 path: 'content-templates/:id/edit',
                 name: 'content-templates.edit',
                 component: () => import('../views/admin/content-templates/Edit.vue'),
+                meta: { permission: 'manage content' },
             },
             {
                 path: 'seo',
