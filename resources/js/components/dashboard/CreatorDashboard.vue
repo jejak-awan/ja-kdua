@@ -261,10 +261,10 @@ const mapStatusToLabel = (status) => {
 
 const getStatusColor = (status) => {
     switch (status) {
-        case 'published': return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
-        case 'pending': return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800';
-        case 'draft': return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800';
-        default: return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800';
+        case 'published': return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0';
+        case 'pending': return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-0';
+        case 'draft': return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-0';
+        default: return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-0';
     }
 };
 
