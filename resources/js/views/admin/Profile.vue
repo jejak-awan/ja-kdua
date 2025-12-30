@@ -1,142 +1,153 @@
 <template>
-    <div class="p-6">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.profile.title') }}</h1>
-            <p class="text-muted-foreground mt-1">{{ $t('features.profile.subtitle') }}</p>
+    <div class="p-6 space-y-6">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight">{{ $t('features.profile.title') }}</h2>
+            <p class="text-muted-foreground">
+                {{ $t('features.profile.subtitle') }}
+            </p>
         </div>
 
-        <!-- Shadcn Tabs -->
-        <Tabs v-model="activeTab" class="w-full">
-            <TabsList class="mb-6">
+        <Tabs v-model="activeTab" class="space-y-4">
+            <TabsList>
                 <TabsTrigger value="profile">{{ $t('features.profile.tabs.profile') }}</TabsTrigger>
                 <TabsTrigger value="password">{{ $t('features.profile.tabs.password') }}</TabsTrigger>
                 <TabsTrigger value="two-factor">{{ $t('features.profile.tabs.two-factor') }}</TabsTrigger>
                 <TabsTrigger value="history">{{ $t('features.profile.tabs.history') }}</TabsTrigger>
             </TabsList>
 
-            <!-- Profile Info Tab -->
-            <TabsContent value="profile">
-                <div class="bg-card rounded-lg border border-border p-6">
-                    <form @submit.prevent="updateProfile" class="space-y-6">
+            <TabsContent value="profile" class="space-y-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ $t('features.profile.tabs.profile') }}</CardTitle>
+                        <CardDescription>
+                            {{ $t('features.profile.subtitle') }}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-6">
+                        <!-- Avatar Upload -->
+                        <div class="flex items-center gap-x-6">
+                             <div class="relative">
+                                <Avatar class="h-24 w-24">
+                                    <AvatarImage :src="profileForm.avatar" alt="Avatar" />
+                                    <AvatarFallback class="text-lg">{{ getInitials(profileForm.name) }}</AvatarFallback>
+                                </Avatar>
+                                 <button
+                                    v-if="profileForm.avatar"
+                                    type="button"
+                                    class="absolute -top-1 -right-1 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90 shadow-sm"
+                                    @click="profileForm.avatar = null"
+                                    title="Remove Avatar"
+                                >
+                                    <X class="h-3 w-3" />
+                                </button>
+                             </div>
+                             <div>
+                                <MediaPicker
+                                    :label="$t('features.users.form.selectAvatar')"
+                                    @selected="(media) => profileForm.avatar = media.url"
+                                />
+                                <p class="mt-2 text-xs text-muted-foreground">
+                                    JPG, GIF or PNG. 1MB max.
+                                </p>
+                             </div>
+                        </div>
+
+                        <Separator class="my-4" />
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">
-                                    {{ $t('features.profile.form.name') }}
-                                </label>
-                                <Input
-                                    v-model="profileForm.name"
-                                    type="text"
-                                />
+                            <div class="space-y-2">
+                                <Label for="name">{{ $t('features.profile.form.name') }}</Label>
+                                <Input id="name" v-model="profileForm.name" type="text" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">
-                                    {{ $t('features.profile.form.email') }}
-                                </label>
-                                <Input
-                                    v-model="profileForm.email"
-                                    type="email"
-                                />
+                            <div class="space-y-2">
+                                <Label for="email">{{ $t('features.profile.form.email') }}</Label>
+                                <Input id="email" v-model="profileForm.email" type="email" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">
-                                    {{ $t('features.profile.form.phone') }}
-                                </label>
-                                <Input
-                                    v-model="profileForm.phone"
-                                    type="text"
-                                />
+                            <div class="space-y-2">
+                                <Label for="phone">{{ $t('features.profile.form.phone') }}</Label>
+                                <Input id="phone" v-model="profileForm.phone" type="text" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">
-                                    {{ $t('features.profile.form.location') }}
-                                </label>
-                                <Input
-                                    v-model="profileForm.location"
-                                    type="text"
-                                />
+                            <div class="space-y-2">
+                                <Label for="location">{{ $t('features.profile.form.location') }}</Label>
+                                <Input id="location" v-model="profileForm.location" type="text" />
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.profile.form.bio') }}
-                            </label>
-                            <Textarea
-                                v-model="profileForm.bio"
-                                rows="4"
-                            />
+                        <div class="space-y-2">
+                            <Label for="bio">{{ $t('features.profile.form.bio') }}</Label>
+                            <Textarea id="bio" v-model="profileForm.bio" rows="4" />
                         </div>
 
                         <div class="flex justify-end">
-                            <Button
-                                :disabled="saving"
-                            >
+                            <Button :disabled="saving" @click="updateProfile">
+                                <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
                                 {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
                             </Button>
                         </div>
-                    </form>
-                </div>
+                    </CardContent>
+                </Card>
             </TabsContent>
 
-            <!-- Password Tab -->
-            <TabsContent value="password">
-                <div class="bg-card rounded-lg border border-border p-6">
-                    <form @submit.prevent="updatePassword" class="space-y-6 max-w-md">
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.profile.form.currentPassword') }}
-                            </label>
-                            <Input
-                                v-model="passwordForm.current_password"
-                                type="password"
-                            />
+            <TabsContent value="password" class="space-y-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ $t('features.profile.tabs.password') }}</CardTitle>
+                        <CardDescription>
+                            {{ $t('features.profile.form.passwordHelp') }}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4 max-w-lg">
+                        <div class="space-y-2">
+                            <Label for="current_password">{{ $t('features.profile.form.currentPassword') }}</Label>
+                            <Input id="current_password" v-model="passwordForm.current_password" type="password" />
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.profile.form.newPassword') }}
-                            </label>
-                            <Input
-                                v-model="passwordForm.password"
-                                type="password"
-                            />
-                            <p class="mt-1 text-xs text-muted-foreground">
-                                {{ $t('features.profile.form.passwordHelp') }}
-                            </p>
+                        <div class="space-y-2">
+                            <Label for="new_password">{{ $t('features.profile.form.newPassword') }}</Label>
+                            <Input id="new_password" v-model="passwordForm.password" type="password" />
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-foreground mb-2">
-                                {{ $t('features.profile.form.confirmPassword') }}
-                            </label>
-                            <Input
-                                v-model="passwordForm.password_confirmation"
-                                type="password"
-                            />
+                        <div class="space-y-2">
+                            <Label for="confirm_password">{{ $t('features.profile.form.confirmPassword') }}</Label>
+                            <Input id="confirm_password" v-model="passwordForm.password_confirmation" type="password" />
                         </div>
 
-                        <div class="flex justify-end">
-                            <Button
-                                :disabled="changingPassword"
-                            >
+                        <div class="flex justify-end pt-4">
+                            <Button :disabled="changingPassword" @click="updatePassword">
+                                <Loader2 v-if="changingPassword" class="mr-2 h-4 w-4 animate-spin" />
                                 {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
                             </Button>
                         </div>
-                    </form>
-                </div>
+                    </CardContent>
+                </Card>
             </TabsContent>
 
-            <!-- Two-Factor Authentication Tab -->
-            <TabsContent value="two-factor">
-                <TwoFactorSettings />
+            <TabsContent value="two-factor" class="space-y-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ $t('features.profile.tabs.two-factor') }}</CardTitle>
+                        <CardDescription>
+                            {{ $t('features.profile.form.twoFactorDescription') || 'Secure your account with 2FA.' }}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <TwoFactorSettings />
+                    </CardContent>
+                </Card>
             </TabsContent>
 
-            <!-- Login History Tab -->
-            <TabsContent value="history">
-                <LoginHistory />
+            <TabsContent value="history" class="space-y-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ $t('features.profile.tabs.history') }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <LoginHistory />
+                    </CardContent>
+                </Card>
             </TabsContent>
         </Tabs>
     </div>
@@ -146,17 +157,43 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import toast from '../../services/toast';
+import { useAuthStore } from '../../stores/auth';
 import LoginHistory from '../../components/admin/LoginHistory.vue';
 import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
+import MediaPicker from '../../components/MediaPicker.vue';
+
+// Shadcn Components
+import Card from '../../components/ui/card.vue';
+import CardContent from '../../components/ui/card-content.vue';
+import CardDescription from '../../components/ui/card-description.vue';
+import CardHeader from '../../components/ui/card-header.vue';
+import CardTitle from '../../components/ui/card-title.vue';
+
 import Tabs from '../../components/ui/tabs.vue';
+import TabsContent from '../../components/ui/tabs-content.vue';
 import TabsList from '../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../components/ui/tabs-trigger.vue';
-import TabsContent from '../../components/ui/tabs-content.vue';
+
 import Input from '../../components/ui/input.vue';
 import Button from '../../components/ui/button.vue';
+import Label from '../../components/ui/label.vue';
 import Textarea from '../../components/ui/textarea.vue';
+// import Separator from '../../components/ui/separator.vue'; // Removed to avoid build error, using div instead if needed
+
+import Avatar from '../../components/ui/avatar.vue';
+import AvatarImage from '../../components/ui/avatar-image.vue';
+import AvatarFallback from '../../components/ui/avatar-fallback.vue';
+
+import { Loader2, X } from 'lucide-vue-next';
+
+// Simple Separator Component (Functional)
+const Separator = { // Minimal local component or just use div
+  template: '<div class="h-px bg-border w-full" />'
+}
 
 const { t } = useI18n();
+const authStore = useAuthStore();
 
 const activeTab = ref('profile');
 const saving = ref(false);
@@ -169,6 +206,7 @@ const profileForm = ref({
     bio: '',
     location: '',
     website: '',
+    avatar: null,
 });
 
 const passwordForm = ref({
@@ -177,11 +215,21 @@ const passwordForm = ref({
     password_confirmation: '',
 });
 
+const getInitials = (name) => {
+    if (!name) return 'U';
+    return name
+        .split(' ')
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+};
+
 const fetchProfile = async () => {
     try {
         const response = await api.get('/profile');
-        if (response.data?.success) {
-            const user = response.data.data;
+        if (response.data?.success || response.data?.data) {
+            const user = response.data.data || response.data;
             profileForm.value = {
                 name: user.name || '',
                 email: user.email || '',
@@ -189,10 +237,12 @@ const fetchProfile = async () => {
                 bio: user.bio || '',
                 location: user.location || '',
                 website: user.website || '',
+                avatar: user.avatar || null,
             };
         }
     } catch (error) {
         console.error('Error fetching profile:', error);
+        toast.error(t('common.messages.error.default'));
     }
 };
 
@@ -200,10 +250,12 @@ const updateProfile = async () => {
     saving.value = true;
     try {
         await api.put('/profile', profileForm.value);
-        alert(t('features.profile.messages.updateSuccess'));
+        toast.success(t('features.profile.messages.updateSuccess'));
+        await authStore.fetchUser();
         await fetchProfile();
     } catch (error) {
-        alert(error.response?.data?.message || t('features.profile.messages.updateFailed'));
+        const msg = error.response?.data?.message || t('features.profile.messages.updateFailed');
+        toast.error(msg);
     } finally {
         saving.value = false;
     }
@@ -213,14 +265,15 @@ const updatePassword = async () => {
     changingPassword.value = true;
     try {
         await api.put('/profile/password', passwordForm.value);
-        alert(t('features.profile.messages.passwordSuccess'));
+        toast.success(t('features.profile.messages.passwordSuccess'));
         passwordForm.value = {
             current_password: '',
             password: '',
             password_confirmation: '',
         };
     } catch (error) {
-        alert(error.response?.data?.message || t('features.profile.messages.passwordFailed'));
+        const msg = error.response?.data?.message || t('features.profile.messages.passwordFailed');
+        toast.error(msg);
     } finally {
         changingPassword.value = false;
     }
