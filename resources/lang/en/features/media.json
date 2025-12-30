@@ -198,6 +198,14 @@
         }
     },
     "toast": {
+        "titles": {
+            "success": "Success",
+            "error": "Error",
+            "warning": "Warning",
+            "info": "Info",
+            "permissionDenied": "Permission Denied",
+            "fileTooLarge": "File Too Large"
+        },
         "uploadSuccess": "File uploaded successfully",
         "updateSuccess": "Media updated successfully",
         "deleteSuccess": "Media deleted successfully",

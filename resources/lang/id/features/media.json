@@ -188,6 +188,14 @@
         }
     },
     "toast": {
+        "titles": {
+            "success": "Berhasil",
+            "error": "Kesalahan",
+            "warning": "Peringatan",
+            "info": "Info",
+            "permissionDenied": "Akses Ditolak",
+            "fileTooLarge": "File Terlalu Besar"
+        },
         "uploadSuccess": "File berhasil diunggah",
         "updateSuccess": "Media berhasil diperbarui",
         "deleteSuccess": "Media berhasil dihapus",
