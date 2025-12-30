@@ -142,10 +142,8 @@ class MediaFolderController extends BaseApiController
              // MediaController checked 'manage media' for upload. I need to fix that too!
         }
         // Just checking 'create media' which implies upload rights?
-        // Let's use 'edit media' or 'create media'.
-        // Code originally checked 'manage media'.
-        // Author has 'view media', 'create media', 'edit media', 'delete media'.
-        if (!$request->user()->can('create media') && !$request->user()->can('manage media')) {
+        // Authors with 'upload media' should be able to create folders for organization
+        if (!$request->user()->can('upload media') && !$request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to create media folders');
         }
 
