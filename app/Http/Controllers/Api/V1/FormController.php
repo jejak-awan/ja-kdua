@@ -196,4 +196,27 @@ class FormController extends BaseApiController
             'submission_id' => $submission->id,
         ]);
     }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:forms,id',
+            'action' => 'required|in:delete',
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+
+        try {
+            if ($action === 'delete') {
+                Form::whereIn('id', $ids)->delete();
+                return $this->success(null, 'Selected forms deleted successfully');
+            }
+        } catch (\Exception $e) {
+            return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
+        }
+
+        return $this->error('Invalid action', 422);
+    }
 }

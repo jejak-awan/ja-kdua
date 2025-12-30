@@ -197,5 +197,38 @@ class NewsletterController extends BaseApiController
              return $this->error('Failed to export subscribers', 500);
         }
     }
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:newsletter_subscribers,id',
+            'action' => 'required|in:delete,unsubscribe,subscribe',
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+
+        try {
+            if ($action === 'delete') {
+                NewsletterSubscriber::whereIn('id', $ids)->delete();
+                return $this->success(null, 'Selected subscribers deleted successfully');
+            }
+
+            if ($action === 'unsubscribe') {
+                NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'unsubscribed', 'unsubscribed_at' => now()]);
+                return $this->success(null, 'Selected subscribers unsubscribed successfully');
+            }
+
+            if ($action === 'subscribe') {
+                 NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'subscribed', 'subscribed_at' => now(), 'unsubscribed_at' => null]);
+                return $this->success(null, 'Selected subscribers subscribed successfully');
+            }
+
+        } catch (\Exception $e) {
+            return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
+        }
+
+        return $this->error('Invalid action', 422);
+    }
 }
 

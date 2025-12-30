@@ -107,6 +107,7 @@ Route::prefix('v1')->group(function () {
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');
 
         // Newsletter
+        Route::post('newsletter/subscribers/bulk-action', [App\Http\Controllers\Api\V1\NewsletterController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::get('newsletter/subscribers', [App\Http\Controllers\Api\V1\NewsletterController::class, 'index'])->middleware('permission:manage users');
         Route::delete('newsletter/subscribers/{id}', [App\Http\Controllers\Api\V1\NewsletterController::class, 'destroy'])->middleware('permission:manage users');
         Route::get('newsletter/export', [App\Http\Controllers\Api\V1\NewsletterController::class, 'export'])->middleware('permission:manage users');
@@ -316,6 +317,7 @@ Route::prefix('v1')->group(function () {
         Route::get('custom-fields/types', [App\Http\Controllers\Api\V1\CustomFieldController::class, 'getFieldTypes']);
 
         // Forms
+        Route::post('forms/bulk-action', [App\Http\Controllers\Api\V1\FormController::class, 'bulkAction'])->middleware('permission:manage forms');
         Route::apiResource('forms', App\Http\Controllers\Api\V1\FormController::class)->middleware('permission:manage forms');
         Route::post('forms/{form}/fields', [App\Http\Controllers\Api\V1\FormController::class, 'addField'])->middleware('permission:manage forms');
         Route::put('forms/{form}/fields/{formField}', [App\Http\Controllers\Api\V1\FormController::class, 'updateField'])->middleware('permission:manage forms');

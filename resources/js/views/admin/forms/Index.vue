@@ -57,6 +57,21 @@
                     </Button>
                 </div>
             </div>
+            <!-- Bulk Actions -->
+            <div v-if="selectedIds.length > 0" class="mt-4 pt-4 border-t flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
+                </div>
+                <div class="flex items-center gap-2">
+                     <Button variant="destructive" size="sm" @click="bulkAction('delete')">
+                        <Trash2 class="w-4 h-4 mr-2" />
+                        {{ $t('common.actions.delete') }}
+                    </Button>
+                    <Button variant="ghost" size="sm" @click="selectedIds = []">
+                        {{ $t('common.actions.clear') }}
+                    </Button>
+                </div>
+            </div>
         </Card>
 
         <!-- Loading State -->
@@ -85,9 +100,16 @@
             >
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-foreground">{{ form.name }}</h3>
-                            <p class="text-sm text-muted-foreground mt-1">{{ form.slug }}</p>
+                        <div class="flex items-start gap-3 flex-1">
+                             <Checkbox 
+                                :checked="selectedIds.includes(form.id)"
+                                @update:checked="toggleSelection(form.id)"
+                                class="mt-1"
+                            />
+                            <div>
+                                <h3 class="text-lg font-semibold text-foreground">{{ form.name }}</h3>
+                                <p class="text-sm text-muted-foreground mt-1">{{ form.slug }}</p>
+                            </div>
                         </div>
                         <Badge
                             :class="{
@@ -151,6 +173,12 @@
                 <table class="w-full">
                     <thead class="bg-muted/50">
                         <tr>
+                            <th class="px-4 py-3 w-[50px]">
+                                <Checkbox 
+                                    :checked="isAllSelected"
+                                    @update:checked="toggleSelectAll"
+                                />
+                            </th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                                 {{ $t('features.forms.modal.formName') }}
                             </th>
@@ -173,6 +201,12 @@
                     </thead>
                     <tbody class="divide-y divide-border">
                         <tr v-for="form in filteredForms" :key="form.id" class="hover:bg-muted/30 transition-colors">
+                            <td class="px-4 py-4">
+                                <Checkbox 
+                                    :checked="selectedIds.includes(form.id)"
+                                    @update:checked="toggleSelection(form.id)"
+                                />
+                            </td>
                             <td class="px-4 py-4">
                                 <div>
                                     <p class="font-medium text-foreground">{{ form.name }}</p>
@@ -260,6 +294,7 @@ import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
 import { 
     Plus, Search, LayoutGrid, List, Loader2, FileText, Tag, 
     Pencil, Inbox, Ban, Check, Trash2 
@@ -343,6 +378,50 @@ const deleteForm = async (form) => {
     } catch (error) {
         console.error('Error deleting form:', error);
         alert(t('common.messages.error.deleteFailed', { item: 'form' }));
+    }
+};
+
+const selectedIds = ref([]);
+
+const isAllSelected = computed(() => {
+    return filteredForms.value.length > 0 && selectedIds.value.length === filteredForms.value.length;
+});
+
+const toggleSelection = (formId) => {
+    const index = selectedIds.value.indexOf(formId);
+    if (index === -1) {
+        selectedIds.value.push(formId);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedIds.value = filteredForms.value.map(f => f.id);
+    } else {
+        selectedIds.value = [];
+    }
+};
+
+const bulkAction = async (action) => {
+    if (selectedIds.value.length === 0) return;
+    
+    if (action === 'delete') {
+         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) return;
+
+         try {
+             await api.post('/admin/cms/forms/bulk-action', {
+                 ids: selectedIds.value,
+                 action: 'delete'
+             });
+             selectedIds.value = [];
+             await fetchForms();
+             alert(t('common.messages.success.deleted'));
+         } catch (error) {
+             console.error('Bulk delete failed:', error);
+             alert(t('common.messages.error.deleteFailed', { item: 'forms' }));
+         }
     }
 };
 

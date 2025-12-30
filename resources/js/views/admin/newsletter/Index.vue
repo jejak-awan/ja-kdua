@@ -44,11 +44,31 @@
                     />
                 </div>
             </div>
+            
+            <!-- Bulk Actions -->
+            <div v-if="selectedIds.length > 0" class="px-4 py-2 border-b border-border flex items-center justify-between text-sm bg-muted/20">
+                <span class="text-muted-foreground">{{ selectedIds.length }} selected</span>
+                <div class="flex items-center gap-2">
+                     <Button variant="destructive" size="sm" @click="bulkAction('delete')">
+                        <Trash2 class="w-4 h-4 mr-2" />
+                        {{ $t('common.actions.delete') }}
+                    </Button>
+                    <Button variant="ghost" size="sm" @click="selectedIds = []">
+                        {{ $t('common.actions.clear') }}
+                    </Button>
+                </div>
+            </div>
 
             <!-- Table -->
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead class="w-[50px]">
+                            <Checkbox 
+                                :checked="isAllSelected"
+                                @update:checked="toggleSelectAll"
+                            />
+                        </TableHead>
                         <TableHead>{{ $t('features.newsletter.table.subscriber') }}</TableHead>
                         <TableHead>{{ $t('features.newsletter.table.status') }}</TableHead>
                         <TableHead>{{ $t('features.newsletter.table.joinedAt') }}</TableHead>
@@ -58,16 +78,22 @@
                 </TableHeader>
                 <TableBody>
                     <TableRow v-if="loading">
-                        <TableCell colspan="5" class="h-24 text-center">
+                        <TableCell colspan="6" class="h-24 text-center">
                             {{ $t('features.newsletter.messages.loading') }}
                         </TableCell>
                     </TableRow>
                     <TableRow v-else-if="subscribers.length === 0">
-                        <TableCell colspan="5" class="h-24 text-center">
+                        <TableCell colspan="6" class="h-24 text-center">
                             {{ $t('features.newsletter.messages.empty') }}
                         </TableCell>
                     </TableRow>
                     <TableRow v-for="subscriber in subscribers" :key="subscriber.id">
+                        <TableCell>
+                            <Checkbox 
+                                :checked="selectedIds.includes(subscriber.id)"
+                                @update:checked="toggleSelection(subscriber.id)"
+                            />
+                        </TableCell>
                         <TableCell>
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-9 w-9">
@@ -132,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse } from '../../../utils/responseParser';
@@ -145,6 +171,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Badge from '../../../components/ui/badge.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
 import Table from '../../../components/ui/table.vue';
 import TableHeader from '../../../components/ui/table-header.vue';
 import TableRow from '../../../components/ui/table-row.vue';
@@ -244,6 +271,49 @@ const formatDate = (dateString) => {
         hour: '2-digit',
         minute: '2-digit',
     });
+};
+
+const selectedIds = ref([]);
+
+const isAllSelected = computed(() => {
+    return subscribers.value.length > 0 && selectedIds.value.length === subscribers.value.length;
+});
+
+const toggleSelection = (id) => {
+    const index = selectedIds.value.indexOf(id);
+    if (index === -1) {
+        selectedIds.value.push(id);
+    } else {
+        selectedIds.value.splice(index, 1);
+    }
+};
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedIds.value = subscribers.value.map(s => s.id);
+    } else {
+        selectedIds.value = [];
+    }
+};
+
+const bulkAction = async (action) => {
+    if (selectedIds.value.length === 0) return;
+    
+    if (action === 'delete') {
+         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) return;
+
+         try {
+             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: 'delete'
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             alert(t('common.messages.success.deleted'));
+         } catch (error) {
+             alert(t('features.newsletter.messages.deleteFailed'));
+         }
+    }
 };
 
 onMounted(() => {

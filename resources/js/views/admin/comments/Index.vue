@@ -76,8 +76,22 @@
                     </SelectContent>
                 </Select>
             </div>
+            
+             
             <!-- Bulk Actions -->
-            <div v-if="selectedIds.length > 0" class="mt-4 flex items-center flex-wrap gap-2 pt-4 border-t">
+            <div class="mt-4 pt-4 border-t flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <Checkbox 
+                        :checked="isAllSelected"
+                        @update:checked="toggleSelectAll"
+                        id="select-all"
+                    />
+                    <label for="select-all" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {{ $t('common.actions.selectAll') }}
+                    </label>
+                </div>
+
+                <div v-if="selectedIds.length > 0" class="flex items-center flex-wrap gap-2">
                 <span class="text-sm text-muted-foreground mr-2">{{ selectedIds.length }} selected:</span>
                 <Button variant="outline" size="sm" @click="bulkAction('approve')" class="text-green-600 hover:text-green-600 hover:bg-green-500/10 border-green-500/20">
                     <Check class="w-4 h-4 mr-2" />
@@ -98,6 +112,7 @@
                 <Button variant="ghost" size="sm" @click="selectedIds = []">
                     {{ $t('common.actions.clear') }}
                 </Button>
+            </div>
             </div>
         </Card>
 
@@ -319,7 +334,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
@@ -499,6 +514,18 @@ watch([statusFilter, search], () => {
     }
     fetchComments();
 });
+
+const isAllSelected = computed(() => {
+    return comments.value.length > 0 && selectedIds.value.length === comments.value.length;
+});
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedIds.value = comments.value.map(c => c.id);
+    } else {
+        selectedIds.value = [];
+    }
+};
 
 onMounted(() => {
     fetchComments();
