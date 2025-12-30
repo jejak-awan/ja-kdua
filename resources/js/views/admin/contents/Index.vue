@@ -346,6 +346,9 @@ const fetchStats = async () => {
     try {
         // Fetch stats from specific endpoint or aggregate from list if needed
         // For now, using the system statistics endpoint which we saw in Dashboard
+        // Only fetch if has permission
+        if (!authStore.hasPermission('manage system')) return;
+
         const response = await api.get('/admin/cms/system/statistics');
         const data = parseSingleResponse(response);
         if (data && data.contents) {

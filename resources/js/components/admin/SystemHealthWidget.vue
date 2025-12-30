@@ -143,6 +143,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
 import { parseSingleResponse } from '@/utils/responseParser';
 import Card from '@/components/ui/card.vue';
 import CardHeader from '@/components/ui/card-header.vue';
@@ -165,6 +166,8 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const authStore = useAuthStore();
+
 
 const health = ref({
   cpu: { percent: 0, status: 'unknown' },
@@ -221,6 +224,9 @@ const fetchHealth = async () => {
     if (refreshInterval) clearInterval(refreshInterval);
     return;
   }
+
+  // Permission check
+  if (!authStore.hasPermission('manage system')) return;
 
   loading.value = true;
   try {
