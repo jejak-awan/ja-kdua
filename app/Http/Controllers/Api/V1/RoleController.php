@@ -49,7 +49,7 @@ class RoleController extends BaseApiController
             $role = Role::find($id);
             
             // Prevent deleting protected roles
-            if (in_array($role->name, ['super-admin', 'admin', 'author', 'editor'])) {
+            if ($role->name === 'super-admin') {
                 continue;
             }
 
@@ -97,7 +97,7 @@ class RoleController extends BaseApiController
     public function update(Request $request, Role $role)
     {
         // Prevent editing protected roles
-        if (in_array($role->name, ['super-admin', 'admin'])) {
+        if ($role->name === 'super-admin') {
             return $this->error('Cannot modify protected role', 403);
         }
 
@@ -121,7 +121,7 @@ class RoleController extends BaseApiController
     public function destroy(Role $role)
     {
         // Prevent deleting protected roles
-        if (in_array($role->name, ['super-admin', 'admin', 'author', 'editor'])) {
+        if ($role->name === 'super-admin') {
             return $this->error('Cannot delete protected role', 403);
         }
 

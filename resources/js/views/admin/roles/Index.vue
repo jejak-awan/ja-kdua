@@ -395,7 +395,7 @@ const pagination = ref({
     total: 0
 });
 
-const protectedRoles = ['super-admin', 'admin', 'author', 'editor'];
+const protectedRoles = ['super-admin'];
 
 const isProtectedRole = (name) => protectedRoles.includes(name);
 
