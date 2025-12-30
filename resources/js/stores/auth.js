@@ -9,6 +9,7 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     getters: {
+        // Helper to calculate role rank from a user object
         getRoleRank: (state) => (user = null) => {
             const targetUser = user || state.user;
             if (!targetUser || !targetUser.roles) return 0;
@@ -30,7 +31,10 @@ export const useAuthStore = defineStore('auth', {
             return maxRank;
         },
 
-        isAtLeastRole: (state, getters) => (roleName) => {
+        // Check if current user has at least the specified role level
+        isAtLeastRole: (state) => (roleName) => {
+            if (!state.user || !state.user.roles) return false;
+
             const roleRanks = {
                 'super-admin': 100,
                 'admin': 80,
@@ -38,15 +42,23 @@ export const useAuthStore = defineStore('auth', {
                 'author': 40,
                 'member': 20,
             };
+
             const minRank = roleRanks[roleName] || 0;
-            const currentUserRank = getters.getRoleRank();
-            return currentUserRank >= minRank;
+
+            let myRank = 0;
+            state.user.roles.forEach(role => {
+                const rank = roleRanks[role.name] || 0;
+                if (rank > myRank) myRank = rank;
+            });
+
+            return myRank >= minRank;
         },
 
-        isHigherThan: (state, getters) => (otherUser) => {
+        // Check if current user has higher rank than another user
+        isHigherThan: (state) => (otherUser) => {
             if (!otherUser) return true;
+            if (!state.user || !state.user.roles) return false;
 
-            // Calculate other user's rank inline
             const roleRanks = {
                 'super-admin': 100,
                 'admin': 80,
@@ -55,6 +67,14 @@ export const useAuthStore = defineStore('auth', {
                 'member': 20,
             };
 
+            // Calculate my rank
+            let myRank = 0;
+            state.user.roles.forEach(role => {
+                const rank = roleRanks[role.name] || 0;
+                if (rank > myRank) myRank = rank;
+            });
+
+            // Calculate other user's rank
             let otherRank = 0;
             if (otherUser.roles) {
                 otherUser.roles.forEach(role => {
@@ -63,12 +83,12 @@ export const useAuthStore = defineStore('auth', {
                 });
             }
 
-            const myRank = getters.getRoleRank();
             return myRank > otherRank;
         },
 
-        isAdmin: (state, getters) => {
-            return getters.isAtLeastRole('admin');
+        isAdmin: (state) => {
+            if (!state.user || !state.user.roles) return false;
+            return state.user.roles.some(role => role.name === 'admin' || role.name === 'super-admin');
         },
 
         hasPermission: (state) => (permission) => {
