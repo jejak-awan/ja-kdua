@@ -1274,11 +1274,20 @@ const editMedia = (media) => {
 
 const deleteMedia = async (media) => {
     const isPermanent = isTrashMode.value;
-    const confirmMessage = isPermanent 
-        ? t('features.media.messages.deletePermanentSingleConfirm', { name: media.name })
-        : t('features.media.messages.deleteSingleConfirm', { name: media.name });
+    
+    const confirmed = await confirm({
+        title: isPermanent 
+            ? t('features.media.confirm.deletePermanentTitle')
+            : t('features.media.confirm.deleteTitle'),
+        message: isPermanent
+            ? t('features.media.confirm.deletePermanentMessage')
+            : t('features.media.confirm.deleteMessage'),
+        variant: 'danger',
+        confirmText: t('features.media.confirm.delete'),
+        cancelText: t('features.media.confirm.cancel')
+    });
 
-    if (!confirm(confirmMessage)) {
+    if (!confirmed) {
         return;
     }
 
@@ -1300,11 +1309,20 @@ const deleteMedia = async (media) => {
 
 const deleteFolder = async (folder) => {
     const isPermanent = isTrashMode.value;
-    const confirmMessage = isPermanent 
-        ? t('features.media.messages.deletePermanentSingleConfirm', { name: folder.name })
-        : t('features.media.messages.deleteSingleConfirm', { name: folder.name });
+    
+    const confirmed = await confirm({
+        title: isPermanent 
+            ? t('features.media.confirm.deletePermanentTitle')
+            : t('features.media.confirm.deleteTitle'),
+        message: isPermanent
+            ? t('features.media.confirm.deletePermanentMessage')
+            : t('features.media.confirm.deleteMessage'),
+        variant: 'danger',
+        confirmText: t('features.media.confirm.delete'),
+        cancelText: t('features.media.confirm.cancel')
+    });
 
-    if (!confirm(confirmMessage)) {
+    if (!confirmed) {
         return;
     }
 
