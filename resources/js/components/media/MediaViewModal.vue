@@ -226,6 +226,7 @@
 <script setup>
 import { ref, onMounted, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useMediaToast } from '../../composables/useMediaToast';
 import { X, Copy, Edit, Scissors, RefreshCw, Move, Square, Maximize, FileText } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
@@ -241,6 +242,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'updated']);
 const { t } = useI18n();
+const mediaToast = useMediaToast();
 
 const loadingUsage = ref(false);
 const usageDetail = ref([]);
@@ -326,11 +328,11 @@ const generateThumbnail = async () => {
     generatingThumbnail.value = true;
     try {
         await api.post(`/admin/cms/media/${props.media.id}/thumbnail`);
-        alert(t('features.media.modals.view.thumbnailSuccess'));
+        mediaToast.success.thumbnail();
         emit('updated');
     } catch (error) {
         console.error('Failed to generate thumbnail:', error);
-        alert(error.response?.data?.message || 'Failed to generate thumbnail');
+        mediaToast.error.fromResponse(error);
     } finally {
         generatingThumbnail.value = false;
     }
@@ -348,7 +350,7 @@ const handleImageEdited = () => {
 
 const copyUrl = () => {
     navigator.clipboard.writeText(props.media.url);
-    alert(t('features.media.modals.view.urlCopied'));
+    mediaToast.success.urlCopied();
 };
 
 const formatFileSize = (bytes) => {

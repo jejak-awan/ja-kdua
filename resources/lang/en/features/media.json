@@ -196,5 +196,18 @@
             "success": "Image resized successfully!",
             "failed": "Failed to save image"
         }
+    },
+    "toast": {
+        "uploadSuccess": "File uploaded successfully",
+        "updateSuccess": "Media updated successfully",
+        "deleteSuccess": "Media deleted successfully",
+        "restoreSuccess": "Media restored successfully",
+        "moveSuccess": "Media moved successfully",
+        "folderCreatedSuccess": "Folder created successfully",
+        "urlCopied": "URL copied to clipboard",
+        "thumbnailSuccess": "Thumbnail generated successfully",
+        "fileTooLarge": "File is too large (max 10MB)",
+        "permissionDenied": "You don't have permission to perform this action"
+    }
     }
 }

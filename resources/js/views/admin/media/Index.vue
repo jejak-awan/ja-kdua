@@ -803,6 +803,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useMediaToast } from '../../composables/useMediaToast';
 import { 
     LayoutGrid, 
     List, 
@@ -857,6 +858,7 @@ import CardTitle from '@/components/ui/card-title.vue';
 import CardDescription from '@/components/ui/card-description.vue';
 
 const { t } = useI18n();
+const mediaToast = useMediaToast();
 const viewMode = ref('grid');
 const loading = ref(false);
 const isReady = ref(false);
@@ -1112,7 +1114,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to delete media:', error);
-            alert(error.response?.data?.message || t('features.media.messages.deleteFailed'));
+            mediaToast.error.fromResponse(error);
             bulkAction.value = '';
         } finally {
             bulkProcessing.value = false;
@@ -1307,7 +1309,7 @@ const deleteFolder = async (folder) => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to delete folder:', error);
-        alert(error.response?.data?.message || t('features.media.messages.deleteFailed'));
+        mediaToast.error.fromResponse(error);
     }
 };
 

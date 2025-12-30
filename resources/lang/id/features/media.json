@@ -186,5 +186,18 @@
             "success": "Berhasil mengubah ukuran gambar!",
             "failed": "Gagal menyimpan gambar"
         }
+    },
+    "toast": {
+        "uploadSuccess": "File berhasil diunggah",
+        "updateSuccess": "Media berhasil diperbarui",
+        "deleteSuccess": "Media berhasil dihapus",
+        "restoreSuccess": "Media berhasil dipulihkan",
+        "moveSuccess": "Media berhasil dipindahkan",
+        "folderCreatedSuccess": "Folder berhasil dibuat",
+        "urlCopied": "URL berhasil disalin",
+        "thumbnailSuccess": "Thumbnail berhasil dibuat",
+        "fileTooLarge": "File terlalu besar (maks 10MB)",
+        "permissionDenied": "Anda tidak memiliki izin untuk melakukan aksi ini"
+    }
     }
 }

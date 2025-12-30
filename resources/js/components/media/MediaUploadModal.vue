@@ -99,6 +99,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useMediaToast } from '../../composables/useMediaToast';
 import { CloudUpload, Trash2, Loader2 } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
@@ -110,6 +111,7 @@ import DialogDescription from '@/components/ui/dialog-description.vue';
 import DialogFooter from '@/components/ui/dialog-footer.vue';
 
 const { t } = useI18n();
+const mediaToast = useMediaToast();
 
 const props = defineProps({
     folderId: {
@@ -140,7 +142,7 @@ const handleDrop = (event) => {
 const addFiles = (files) => {
     files.forEach(file => {
         if (file.size > 10 * 1024 * 1024) {
-            alert(t('features.media.messages.fileTooLarge', { name: file.name }));
+            mediaToast.error.fileTooLarge();
             return;
         }
         if (!selectedFiles.value.find(f => f.name === file.name && f.size === file.size)) {
@@ -185,7 +187,7 @@ const handleUpload = async () => {
         uploadProgress.value = 0;
     } catch (error) {
         console.error('Upload error:', error);
-        alert(t('features.media.messages.uploadFailed'));
+        mediaToast.error.fromResponse(error);
     } finally {
         uploading.value = false;
     }

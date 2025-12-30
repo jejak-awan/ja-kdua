@@ -148,6 +148,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useMediaToast } from '../../composables/useMediaToast';
 import { X, FileText as FileIcon } from 'lucide-vue-next';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
@@ -162,6 +163,7 @@ import Checkbox from '../ui/checkbox.vue';
 
 const authStore = useAuthStore();
 const { t } = useI18n();
+const mediaToast = useMediaToast();
 
 const props = defineProps({
     media: {
@@ -228,7 +230,7 @@ const handleSubmit = async () => {
         emit('updated');
     } catch (error) {
         // console.error('Failed to update media:', error);
-        alert(t('features.media.messages.updateFailed'));
+        mediaToast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }
