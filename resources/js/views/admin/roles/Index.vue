@@ -5,7 +5,7 @@
                 <h1 class="text-2xl font-bold text-foreground">{{ $t('features.roles.title') }}</h1>
                 <p class="mt-1 text-sm text-muted-foreground">{{ $t('features.roles.subtitle') }}</p>
             </div>
-             <Button as-child variant="default">
+             <Button as-child variant="default" v-if="authStore.hasPermission('create roles')">
                 <router-link :to="{ name: 'roles.create' }" class="flex items-center justify-center">
                     <Plus class="w-4 h-4 mr-2" />
                     {{ $t('features.roles.create') }}
@@ -113,7 +113,7 @@
              <Button v-if="search" variant="outline" @click="search = ''; fetchRoles()">
                 {{ $t('common.actions.clear') }}
             </Button>
-             <Button v-else as-child variant="default">
+             <Button v-else as-child variant="default" v-if="authStore.hasPermission('create roles')">
                 <router-link :to="{ name: 'roles.create' }" class="flex items-center justify-center">
                     <Plus class="w-4 h-4 mr-2" />
                     {{ $t('features.roles.create') }}
@@ -196,6 +196,7 @@
                     <div class="bg-muted/30 border-t px-6 py-3 flex justify-between items-center mt-auto">
                         <div class="flex space-x-2">
                             <Button
+                                v-if="authStore.hasPermission('edit roles')"
                                 variant="ghost"
                                 size="sm"
                                 @click="editRole(role)"
@@ -210,6 +211,7 @@
                         
                          <div class="flex gap-1">
                              <Button
+                                v-if="authStore.hasPermission('create roles')"
                                 variant="ghost"
                                 size="icon"
                                 @click="duplicateRole(role)"
@@ -219,7 +221,7 @@
                                 <Copy class="w-4 h-4" />
                             </Button>
                             <Button
-                                v-if="!isProtectedRole(role.name)"
+                                v-if="!isProtectedRole(role.name) && authStore.hasPermission('delete roles')"
                                 variant="ghost"
                                 size="icon"
                                 @click="deleteRole(role)"
@@ -298,6 +300,7 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-2">
                                          <Button
+                                            v-if="authStore.hasPermission('edit roles')"
                                             variant="ghost"
                                             size="icon"
                                             @click="editRole(role)"
@@ -308,6 +311,7 @@
                                             <Edit class="w-4 h-4" />
                                         </Button>
                                         <Button
+                                            v-if="authStore.hasPermission('create roles')"
                                             variant="ghost"
                                             size="icon"
                                             @click="duplicateRole(role)"
@@ -317,7 +321,7 @@
                                             <Copy class="w-4 h-4" />
                                         </Button>
                                         <Button
-                                            v-if="!isProtectedRole(role.name)"
+                                            v-if="!isProtectedRole(role.name) && authStore.hasPermission('delete roles')"
                                             variant="ghost"
                                             size="icon"
                                             @click="deleteRole(role)"
@@ -376,9 +380,11 @@ import {
     Search,
     CheckSquare
 } from 'lucide-vue-next';
+import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const loading = ref(true);
 const roles = ref([]);

@@ -7,7 +7,7 @@
                 <p class="text-muted-foreground mt-2">{{ $t('features.categories.description') }}</p>
             </div>
             <div class="flex space-x-3">
-                <router-link :to="{ name: 'categories.create' }">
+                <router-link :to="{ name: 'categories.create' }" v-if="authStore.hasPermission('create categories')">
                     <Button>
                         <Plus class="w-4 h-4 mr-2" />
                         {{ $t('features.categories.createNew') }}
@@ -63,6 +63,7 @@
                             <TableRow>
                                 <TableHead class="w-[40px] text-center">
                                     <Checkbox 
+                                        v-if="authStore.hasPermission('delete categories')"
                                         :checked="isAllSelected"
                                         @update:checked="toggleSelectAll"
                                     />
@@ -93,6 +94,7 @@
                             >
                                 <TableCell class="text-center">
                                     <Checkbox 
+                                        v-if="authStore.hasPermission('delete categories')"
                                         :checked="selectedIds.includes(category.id)" 
                                         @update:checked="(checked) => toggleSelect(checked, category.id)"
                                     />
@@ -124,6 +126,7 @@
                                 <TableCell class="text-center">
                                     <div class="flex justify-center gap-1">
                                         <Button 
+                                            v-if="authStore.hasPermission('edit categories')"
                                             variant="ghost" 
                                             size="icon" 
                                             class="h-8 w-8 text-muted-foreground hover:text-foreground" 
@@ -132,6 +135,7 @@
                                             <Edit2 class="w-4 h-4" />
                                         </Button>
                                         <Button 
+                                            v-if="authStore.hasPermission('delete categories')"
                                             variant="ghost" 
                                             size="icon" 
                                             class="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
@@ -196,9 +200,11 @@ import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
 import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
+import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const loading = ref(true);
 const categories = ref([]); // Raw tree data

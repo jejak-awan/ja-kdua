@@ -70,7 +70,7 @@
                                             :for="`perm-${permission.id}`"
                                             class="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
                                         >
-                                            {{ permission.name }}
+                                            {{ formatPermissionName(permission.name, category) }}
                                         </label>
                                     </div>
                                 </div>
@@ -172,6 +172,21 @@ const togglePermission = (checked, permissionName) => {
     } else {
         form.value.permissions = form.value.permissions.filter(p => p !== permissionName);
     }
+};
+
+const formatPermissionName = (name, category) => {
+    if (!name || !category) return name;
+    // Special case for 'manage X' vs 'X' category
+    const lowerName = name.toLowerCase();
+    const lowerCategory = category.toLowerCase();
+    
+    // Replace category name from permission
+    let formatted = lowerName.replace(lowerCategory, '').trim();
+    
+    // If we removed everything (e.g. 'content' category, 'content' permission?), shouldn't happen with our verb logic
+    if (!formatted) return name;
+    
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 };
 
 const handleSubmit = async () => {

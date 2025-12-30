@@ -142,7 +142,7 @@
         <!-- Row 3: Widgets Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Recent Activity -->
-            <div class="col-span-1" v-if="authStore.hasPermission('manage users')">
+            <div class="col-span-1" v-if="authStore.hasPermission('view users')">
                 <RecentActivityWidget ref="recentActivityWidget" />
             </div>
 

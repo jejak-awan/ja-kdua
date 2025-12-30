@@ -1,9 +1,9 @@
 <template>
     <div>
-        <!-- Header -->
+            <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
-            <router-link :to="{ name: 'users.create' }" v-if="authStore.hasPermission('manage users')">
+            <router-link :to="{ name: 'users.create' }" v-if="authStore.hasPermission('create users')">
                 <Button>
                     <Plus class="w-5 h-5 mr-2" />
                     {{ $t('features.users.createNew') }}
@@ -246,7 +246,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex justify-center items-center space-x-1">
                                 <Button
-                                    v-if="!user.email_verified_at"
+                                    v-if="!user.email_verified_at && authStore.hasPermission('edit users')"
                                     variant="ghost"
                                     size="icon"
                                     @click="verifyUser(user)"
@@ -257,6 +257,7 @@
                                     <CheckCheck class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
                                 </Button>
                                 <Button
+                                    v-if="authStore.hasPermission('edit users')"
                                     variant="ghost"
                                     size="icon"
                                     @click="forceLogoutUser(user)"
@@ -267,6 +268,7 @@
                                     <LogOut class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
                                 </Button>
                                 <Button
+                                    v-if="authStore.hasPermission('edit users')"
                                     variant="ghost"
                                     size="icon"
                                     @click="editUser(user)"
@@ -277,6 +279,7 @@
                                     <Pencil class="w-4 h-4" :class="{ 'opacity-50': !canManage(user) }" />
                                 </Button>
                                 <Button
+                                    v-if="authStore.hasPermission('delete users')"
                                     variant="ghost"
                                     size="icon"
                                     @click="deleteUser(user)"

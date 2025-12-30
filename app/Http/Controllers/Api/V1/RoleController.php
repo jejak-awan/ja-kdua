@@ -138,9 +138,9 @@ class RoleController extends BaseApiController
     public function permissions()
     {
         $permissions = Permission::orderBy('name')->get()->groupBy(function ($permission) {
-            // Group by category (first part of permission name)
-            $parts = explode(' ', $permission->name);
-            return $parts[0] ?? 'general';
+            // Group by category (resource name - everything after the first word)
+            $parts = explode(' ', $permission->name, 2);
+            return isset($parts[1]) ? ucfirst($parts[1]) : 'General';
         });
 
         return $this->success($permissions, 'Permissions retrieved successfully');
