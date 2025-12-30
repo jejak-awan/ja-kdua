@@ -74,8 +74,12 @@
                                     id="name"
                                     v-model="form.name"
                                     required
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
                                     :placeholder="t('features.content_templates.form.namePlaceholder')"
                                 />
+                                <p v-if="errors.name" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                                </p>
                             </div>
 
                             <div class="space-y-2">
@@ -162,6 +166,7 @@ const templateId = route.params.id;
 
 const loading = ref(false);
 const saving = ref(false);
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -197,13 +202,17 @@ const fetchTemplate = async () => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         await api.put(`/admin/cms/content-templates/${templateId}`, form.value);
         toast.success.update('Template');
         router.push({ name: 'content-templates' });
     } catch (error) {
-        console.error('Failed to update template:', error);
-        toast.error.update(error, 'Template');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

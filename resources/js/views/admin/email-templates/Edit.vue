@@ -1,132 +1,149 @@
 <template>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">Edit Email Template</h1>
-            <router-link
-                :to="{ name: 'email-templates' }"
-                class="text-muted-foreground hover:text-foreground"
-            >
-                ← Back to Templates
-            </router-link>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.email_templates.form.editTitle') }}</h1>
+            <Button variant="ghost" @click="router.push({ name: 'email-templates' })">
+                <ArrowLeft class="w-4 h-4 mr-2" />
+                {{ $t('common.actions.back') }}
+            </Button>
         </div>
 
-        <div v-if="loading && !form.name" class="text-center py-8">
-            <p class="text-muted-foreground">Loading template...</p>
+        <div v-if="loading && !form.name" class="flex justify-center py-12">
+            <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
 
-        <form v-else @submit.prevent="handleSubmit" class="space-y-6">
-            <div class="bg-card border border-border rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-foreground mb-4">Template Details</h2>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            Name <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Template name"
-                        >
-                    </div>
+        <form v-else @submit.prevent="handleSubmit" class="pb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Content (Left) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <div class="flex justify-between items-center">
+                                <CardTitle class="text-lg font-semibold">{{ $t('features.email_templates.form.content') }}</CardTitle>
+                                <div class="flex space-x-2">
+                                     <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        @click="showVariables = !showVariables"
+                                    >
+                                        {{ showVariables ? $t('features.email_templates.form.hideVariables') : $t('features.email_templates.form.showVariables') }}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        @click="previewTemplate"
+                                    >
+                                        {{ $t('common.actions.preview') }}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        @click="handleSendTest"
+                                    >
+                                        {{ $t('features.email_templates.form.sendTest') }}
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div v-if="showVariables" class="p-4 bg-muted rounded-lg mb-4">
+                                <h3 class="text-sm font-medium text-foreground mb-2">{{ $t('features.email_templates.form.availableVariables') }}:</h3>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                                    <div v-for="variable in variables" :key="variable" class="flex items-center">
+                                        <code class="px-2 py-1 bg-background rounded border border-border">{{ variable }}</code>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            Subject <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            v-model="form.subject"
-                            type="text"
-                            required
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Email subject"
-                        >
-                    </div>
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ $t('features.email_templates.form.subject') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    v-model="form.subject"
+                                    required
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.subject }"
+                                    :placeholder="$t('features.email_templates.form.subjectPlaceholder')"
+                                />
+                                <p v-if="errors.subject" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.subject) ? errors.subject[0] : errors.subject }}
+                                </p>
+                            </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-foreground mb-1">
-                            Type
-                        </label>
-                        <select
-                            v-model="form.type"
-                            class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="custom">Custom</option>
-                            <option value="notification">Notification</option>
-                            <option value="transactional">Transactional</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-card border border-border rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-foreground">Template Content</h2>
-                    <div class="flex items-center space-x-2">
-                        <button
-                            type="button"
-                            @click="showVariables = !showVariables"
-                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
-                        >
-                            {{ showVariables ? 'Hide' : 'Show' }} Variables
-                        </button>
-                        <button
-                            type="button"
-                            @click="handlePreview"
-                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
-                        >
-                            Preview
-                        </button>
-                        <button
-                            type="button"
-                            @click="handleSendTest"
-                            class="px-3 py-1 text-sm border border-input bg-card text-foreground rounded-md hover:bg-muted"
-                        >
-                            Send Test
-                        </button>
-                    </div>
-                </div>
-
-                <div v-if="showVariables" class="mb-4 p-4 bg-muted rounded-lg">
-                    <h3 class="text-sm font-medium text-foreground mb-2">Available Variables:</h3>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div v-for="variable in variables" :key="variable" class="flex items-center">
-                            <code class="px-2 py-1 bg-card rounded">{{ variable }}</code>
-                        </div>
-                    </div>
-                    <p class="mt-2 text-xs text-muted-foreground">Use <code>{{ '{' }}{{ '{' }} variable_name {{ '}' }}{{ '}' }}</code> in your template</p>
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ $t('features.email_templates.form.body') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Textarea
+                                    v-model="form.body"
+                                    rows="20"
+                                    required
+                                    class="font-mono text-sm"
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.body }"
+                                    :placeholder="$t('features.email_templates.form.bodyPlaceholder')"
+                                />
+                                <p v-if="errors.body" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.body) ? errors.body[0] : errors.body }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-foreground mb-1">
-                        HTML Content <span class="text-red-500">*</span>
-                    </label>
-                    <textarea
-                        v-model="form.body"
-                        rows="20"
-                        required
-                        class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                        placeholder="Enter HTML template content..."
-                    />
-                </div>
-            </div>
+                <!-- Sidebar (Right) -->
+                <div class="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="text-lg font-semibold">{{ $t('features.email_templates.form.details') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ $t('features.email_templates.form.name') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    v-model="form.name"
+                                    required
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
+                                    :placeholder="$t('features.email_templates.form.namePlaceholder')"
+                                />
+                                <p v-if="errors.name" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                                </p>
+                            </div>
 
-            <div class="flex justify-end space-x-3">
-                <router-link
-                    :to="{ name: 'email-templates' }"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted"
-                >
-                    Cancel
-                </router-link>
-                <button
-                    type="submit"
-                    :disabled="saving"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-                >
-                    {{ saving ? 'Updating...' : 'Update Template' }}
-                </button>
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ $t('features.email_templates.form.type') }}
+                                </Label>
+                                <Select v-model="form.type">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                        <SelectItem value="notification">Notification</SelectItem>
+                                        <SelectItem value="transactional">Transactional</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1"></div>
+                        <Button variant="outline" type="button" @click="router.push({ name: 'email-templates' })">
+                            {{ $t('common.actions.cancel') }}
+                        </Button>
+                        <Button type="submit" :disabled="saving">
+                            <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                            {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.save') }}
+                        </Button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -134,18 +151,36 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { parseSingleResponse } from '../../../utils/responseParser';
+import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 
-const route = useRoute();
+import Button from '@/components/ui/button.vue';
+import Input from '@/components/ui/input.vue';
+import Label from '@/components/ui/label.vue';
+import Textarea from '@/components/ui/textarea.vue';
+import Select from '@/components/ui/select.vue';
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+import SelectValue from '@/components/ui/select-value.vue';
+import SelectContent from '@/components/ui/select-content.vue';
+import SelectItem from '@/components/ui/select-item.vue';
+import Card from '@/components/ui/card.vue';
+import CardHeader from '@/components/ui/card-header.vue';
+import CardTitle from '@/components/ui/card-title.vue';
+import CardContent from '@/components/ui/card-content.vue';
+
+const { t } = useI18n();
 const router = useRouter();
-const templateId = route.params.id;
-
-const loading = ref(false);
+const route = useRoute();
+const toast = useToast();
 const saving = ref(false);
+const loading = ref(true);
 const showVariables = ref(false);
+const errors = ref({});
+const templateId = route.params.id;
 
 const form = ref({
     name: '',
@@ -177,7 +212,7 @@ const fetchTemplate = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch template:', error);
-        toast.error('Error', 'Failed to load template');
+        toast.error.load(error);
         router.push({ name: 'email-templates' });
     } finally {
         loading.value = false;
@@ -189,33 +224,37 @@ const previewTemplate = async () => {
         const response = await api.post('/admin/cms/email-templates/preview', form.value);
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
-            previewWindow.document.write(response.data.html || '');
+            previewWindow.document.write(response.data.html);
         }
     } catch (error) {
         console.error('Failed to preview template:', error);
-        toast.error('Error', 'Failed to preview template');
+        toast.error.default(t('features.email_templates.form.previewFailed'));
     }
 };
 
 const handleSendTest = async () => {
     try {
         await api.post(`/admin/cms/email-templates/${templateId}/send-test`);
-        toast.success('Success', 'Test email sent successfully');
+        toast.success.default(t('features.email_templates.form.testSent'));
     } catch (error) {
         console.error('Failed to send test email:', error);
-        toast.error('Error', error.response?.data?.message || 'Failed to send test email');
+        toast.error.default(error.response?.data?.message || t('features.email_templates.form.testFailed'));
     }
 };
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         await api.put(`/admin/cms/email-templates/${templateId}`, form.value);
-        toast.success('Success', 'Template updated successfully');
-        router.push({ name: 'email-templates.index' });
+        toast.success.update('Email Template');
+        router.push({ name: 'email-templates' });
     } catch (error) {
-        console.error('Failed to update template:', error);
-        toast.error('Error', error.response?.data?.message || 'Failed to update template');
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
@@ -225,4 +264,3 @@ onMounted(() => {
     fetchTemplate();
 });
 </script>
-
