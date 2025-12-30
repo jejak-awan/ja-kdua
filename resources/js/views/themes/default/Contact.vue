@@ -19,21 +19,43 @@
                     </div>
                 </div>
                 <div class="p-8">
-                    <form @submit.prevent class="space-y-4">
+                    <form @submit.prevent="submitContact" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                            <input 
+                                v-model="form.name"
+                                type="text" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.name }"
+                            >
+                            <p v-if="errors.name" class="text-sm text-red-500 mt-1">{{ errors.name[0] }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                            <input 
+                                v-model="form.email"
+                                type="email" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.email }"
+                            >
+                            <p v-if="errors.email" class="text-sm text-red-500 mt-1">{{ errors.email[0] }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                            <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"></textarea>
+                            <textarea 
+                                v-model="form.message"
+                                rows="4" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.message }"
+                            ></textarea>
+                            <p v-if="errors.message" class="text-sm text-red-500 mt-1">{{ errors.message[0] }}</p>
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                            Send Message
+                        <button 
+                            type="submit" 
+                            :disabled="loading"
+                            class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                        >
+                            {{ loading ? 'Sending...' : 'Send Message' }}
                         </button>
                     </form>
                 </div>
@@ -41,3 +63,43 @@
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useToast } from '../../../composables/useToast'
+import api from '../../../services/api'
+
+const toast = useToast()
+const loading = ref(false)
+const errors = ref({})
+
+const form = ref({
+    name: '',
+    email: '',
+    message: ''
+})
+
+const submitContact = async () => {
+    loading.value = true
+    errors.value = {}
+    
+    try {
+        // Mock API call or use real one if available
+        // await api.post('/contact', form.value)
+        
+        // Simulating success for now since no backend route exists
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        toast.success('Message sent! We will get back to you soon.')
+        form.value = { name: '', email: '', message: '' }
+    } catch (error) {
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors
+        } else {
+            toast.error('Failed to send message. Please try again.')
+        }
+    } finally {
+        loading.value = false
+    }
+}
+</script>

@@ -136,13 +136,14 @@
         <form @submit.prevent="saveTask" class="space-y-4 py-4">
           <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.name') }}</Label>
-            <Input v-model="form.name" required />
+            <Input v-model="form.name" required :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }" />
+            <p v-if="errors.name" class="text-sm text-destructive">{{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}</p>
           </div>
 
           <div class="grid gap-2">
             <Label>{{ $t('features.scheduled_tasks.form.command') }}</Label>
             <Select v-model="form.command" required>
-              <SelectTrigger>
+              <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': errors.command }">
                 <SelectValue :placeholder="$t('features.scheduled_tasks.form.select_command')" />
               </SelectTrigger>
               <SelectContent>
@@ -155,6 +156,7 @@
                 </SelectItem>
               </SelectContent>
             </Select>
+            <p v-if="errors.command" class="text-sm text-destructive mt-1">{{ Array.isArray(errors.command) ? errors.command[0] : errors.command }}</p>
           </div>
 
           <div class="grid gap-2">
@@ -176,8 +178,10 @@
                 placeholder="* * * * *" 
                 class="flex-1 font-mono"
                 required
+                :class="{ 'border-destructive focus-visible:ring-destructive': errors.schedule }"
               />
             </div>
+             <p v-if="errors.schedule" class="text-sm text-destructive mt-1">{{ Array.isArray(errors.schedule) ? errors.schedule[0] : errors.schedule }}</p>
             <p class="text-xs text-muted-foreground">
               {{ $t('features.scheduled_tasks.form.cron_help') }}
             </p>
@@ -224,7 +228,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import api from '@/services/api';
-import toast from '@/services/toast';
+import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 
 // UI Components - individual imports
@@ -253,7 +257,9 @@ import SelectItem from '@/components/ui/select-item.vue';
 import { Plus, Play, Pencil, Trash2, FileText, Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+
 const { confirm } = useConfirm();
+const toast = useToast();
 
 const tasks = ref([]);
 const loading = ref(true);
@@ -265,6 +271,7 @@ const saving = ref(false);
 const running = ref(null);
 const allowedCommands = ref([]);
 const cronPreset = ref('');
+const errors = ref({});
 
 const form = ref({
   name: '',
@@ -319,11 +326,13 @@ function openCreateDialog() {
     is_active: true
   };
   cronPreset.value = '';
+  errors.value = {};
   dialogOpen.value = true;
 }
 
 function editTask(task) {
   editingTask.value = task;
+  errors.value = {};
   form.value = {
     name: task.name,
     command: task.command,
@@ -341,20 +350,25 @@ function applyCronPreset(preset) {
 async function saveTask() {
   try {
     saving.value = true;
+    errors.value = {};
     
     if (editingTask.value) {
       await api.put(`/admin/cms/scheduled-tasks/${editingTask.value.id}`, form.value);
-      toast.success(t('features.scheduled_tasks.messages.updated') || 'Task updated successfully');
+      toast.success.update('Scheduled Task');
     } else {
       await api.post('/admin/cms/scheduled-tasks', form.value);
-      toast.success(t('features.scheduled_tasks.messages.created') || 'Task created successfully');
+      toast.success.create('Scheduled Task');
     }
     
     dialogOpen.value = false;
     await fetchTasks();
   } catch (error) {
-    console.error('Failed to save task:', error.response?.data?.message || error.message);
-    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.save_failed'));
+    if (error.response?.status === 422) {
+      errors.value = error.response.data.errors || {};
+    } else {
+        console.error('Failed to save task:', error.response?.data?.message || error.message);
+        toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.save_failed'));
+    }
   } finally {
     saving.value = false;
   }
@@ -407,7 +421,7 @@ function viewOutput(task) {
   outputDialogOpen.value = true;
 }
 
-async function deleteTask(task) {
+async function confirmDelete(task) {
   const confirmed = await confirm({
     title: t('features.scheduled_tasks.actions.delete'),
     message: t('features.scheduled_tasks.confirm_delete', { name: task.name }),

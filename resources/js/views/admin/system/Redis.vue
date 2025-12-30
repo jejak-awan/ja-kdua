@@ -247,7 +247,9 @@
                       :id="setting.key"
                       :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
                       v-model="settingsForm[setting.key]"
+                      :class="{ 'border-destructive focus-visible:ring-destructive': errors[setting.key] }"
                     />
+                    <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
 
                     <Select
                       v-else-if="setting.type === 'boolean'"
@@ -486,7 +488,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import api from '@/services/api'
-import toast from '@/services/toast'
+import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import { cn } from '@/lib/utils'
 import Tabs from '@/components/ui/tabs.vue'
@@ -530,7 +532,9 @@ import {
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
+
 const { confirm } = useConfirm()
+const toast = useToast()
 const activeTab = ref('statistics')
 const tabs = [
   { id: 'statistics', label: 'Statistics' },
@@ -541,6 +545,7 @@ const tabs = [
 // Settings
 const settings = ref({})
 const settingsForm = ref({})
+const errors = ref({})
 const cacheDriver = ref(null) // Global cache driver status
 
 const groupedSettings = computed(() => {
@@ -604,6 +609,7 @@ const loadSettings = async () => {
 
 const saveSettings = async () => {
   saving.value = true
+  errors.value = {}
   try {
     const settingsArray = Object.entries(settingsForm.value).map(([key, value]) => ({
       key,
@@ -614,6 +620,8 @@ const saveSettings = async () => {
       settings: settingsArray
     })
 
+    toast.success('Redis settings saved successfully')
+
     connectionStatus.value = {
       type: 'success',
       message: t('features.redis.messages.saveSuccess')
@@ -623,9 +631,15 @@ const saveSettings = async () => {
       connectionStatus.value = null
     }, 3000)
   } catch (error) {
-    connectionStatus.value = {
-      type: 'error',
-      message: error.response?.data?.message || t('features.redis.messages.saveFailed')
+    if (error.response?.status === 422) {
+      errors.value = error.response.data.errors || {}
+      toast.error('Validation Error', 'Please check the form for errors.')
+    } else {
+      toast.error.fromResponse(error)
+      connectionStatus.value = {
+        type: 'error',
+        message: error.response?.data?.message || t('features.redis.messages.saveFailed')
+      }
     }
   } finally {
     saving.value = false
@@ -698,10 +712,10 @@ const flushCache = async (type) => {
   flushing.value = true
   try {
     await api.post('/admin/cms/redis/flush-cache', { type })
-    toast.success(t('features.redis.messages.flushSuccess', { type }))
+    toast.success.action(t('features.redis.messages.flushSuccess', { type }))
     loadCacheStats()
   } catch (error) {
-    toast.error('Error', error.response?.data?.message || t('features.redis.messages.flushFailed'))
+    toast.error.fromResponse(error)
   } finally {
     flushing.value = false
   }
@@ -722,11 +736,11 @@ const warmCache = async () => {
   warming.value = true
   try {
     await api.post('/admin/cms/redis/warm-cache')
-    toast.success(t('features.redis.messages.warmSuccess'))
+    toast.success.action(t('features.redis.messages.warmSuccess'))
     loadCacheStats()
     loadStats()
   } catch (error) {
-    toast.error('Error', error.response?.data?.message || t('features.redis.messages.warmFailed'))
+    toast.error.fromResponse(error)
   } finally {
     warming.value = false
   }
