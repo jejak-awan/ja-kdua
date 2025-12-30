@@ -108,7 +108,7 @@ class MediaController extends BaseApiController
 
     public function upload(Request $request)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('create media')) {
+        if (!$request->user()->can('upload media') && !$request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
@@ -167,7 +167,7 @@ class MediaController extends BaseApiController
 
     public function uploadMultiple(Request $request)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('create media')) {
+        if (!$request->user()->can('upload media') && !$request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
