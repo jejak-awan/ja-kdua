@@ -99,7 +99,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMediaToast } from '../../composables/useMediaToast';
+import { useMediaToast } from '@/composables/useMediaToast.js';
 import { CloudUpload, Trash2, Loader2 } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';

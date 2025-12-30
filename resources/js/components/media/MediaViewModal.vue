@@ -226,7 +226,7 @@
 <script setup>
 import { ref, onMounted, markRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMediaToast } from '../../composables/useMediaToast';
+import { useMediaToast } from '@/composables/useMediaToast.js';
 import { X, Copy, Edit, Scissors, RefreshCw, Move, Square, Maximize, FileText } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';

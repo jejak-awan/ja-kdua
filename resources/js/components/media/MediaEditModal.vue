@@ -148,7 +148,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMediaToast } from '../../composables/useMediaToast';
+import { useMediaToast } from '@/composables/useMediaToast.js';
 import { X, FileText as FileIcon } from 'lucide-vue-next';
 import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
