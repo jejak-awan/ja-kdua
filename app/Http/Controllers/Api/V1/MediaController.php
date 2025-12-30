@@ -21,7 +21,7 @@ class MediaController extends BaseApiController
     {
         $query = Media::with(['folder', 'usages']);
 
-        // Scope logic
+        // Scope logic - apply BEFORE trash handling
         if ($request->user() && !$request->user()->can('manage media')) {
             $query->where(function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id)
@@ -31,7 +31,7 @@ class MediaController extends BaseApiController
             $query->where('is_shared', true);
         }
 
-        // Handle trashed items
+        // Handle trashed items (applied after scoping)
         if ($request->input('trashed') === 'only') {
             $query->onlyTrashed();
         } elseif ($request->input('trashed') === 'with') {
