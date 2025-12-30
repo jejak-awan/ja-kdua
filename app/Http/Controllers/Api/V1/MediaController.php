@@ -244,20 +244,24 @@ class MediaController extends BaseApiController
 
     public function update(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
-            return $this->forbidden('You do not have permission to update media');
+        $user = $request->user();
+        $isOwner = $media->author_id && $media->author_id === $user->id;
+        $isManager = $user->can('manage media');
+
+        // Owners can always update their own media
+        if (!$isOwner && !$isManager) {
+            if (!$user->can('edit media')) {
+                return $this->forbidden('You do not have permission to update media');
+            }
+            // Has edit media permission but still can't edit others' private media
+            if ($media->author_id && !$media->is_shared) {
+                return $this->forbidden('You do not have permission to update this media');
+            }
         }
 
-        // Ownership check
-        if (!request()->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to update this media');
-             }
-             if (is_null($media->author_id)) {
-                 return $this->forbidden('You cannot update global media');
-             }
-             // Ensure author_id is not changed or unset
-             // unset($request['author_id']); // Not in validated anyway
+        // Global media (no author) can only be updated by managers
+        if (is_null($media->author_id) && !$isManager) {
+            return $this->forbidden('You cannot update global media');
         }
 
         try {
@@ -287,18 +291,25 @@ class MediaController extends BaseApiController
 
     public function destroy(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
-            return $this->forbidden('You do not have permission to delete media');
+        $user = $request->user();
+        $isOwner = $media->author_id && $media->author_id === $user->id;
+        $isManager = $user->can('manage media');
+
+        // Owners can always delete their own media
+        if (!$isOwner && !$isManager) {
+            // Not owner and not manager - check if they have delete permission for shared items
+            if (!$user->can('delete media')) {
+                return $this->forbidden('You do not have permission to delete media');
+            }
+            // Has delete media permission but still can't delete others' private media
+            if ($media->author_id && !$media->is_shared) {
+                return $this->forbidden('You do not have permission to delete this media');
+            }
         }
 
-        // Ownership check
-        if (!request()->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to delete this media');
-             }
-             if (is_null($media->author_id)) {
-                 return $this->forbidden('You cannot delete global media');
-             }
+        // Global media (no author) can only be deleted by managers
+        if (is_null($media->author_id) && !$isManager) {
+            return $this->forbidden('You cannot delete global media');
         }
 
         $permanent = $request->boolean('permanent', false);
@@ -356,20 +367,26 @@ class MediaController extends BaseApiController
 
     public function forceDelete(Request $request, $id)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
-            return $this->forbidden('You do not have permission to permanently delete media');
-        }
-
+        $user = $request->user();
         $media = Media::withTrashed()->findOrFail($id);
         
-        // Ownership check
-        if (!request()->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to manage this media');
-             }
-             if (is_null($media->author_id)) {
-                 return $this->forbidden('You cannot delete global media');
-             }
+        $isOwner = $media->author_id && $media->author_id === $user->id;
+        $isManager = $user->can('manage media');
+
+        // Owners can always permanently delete their own media
+        if (!$isOwner && !$isManager) {
+            if (!$user->can('delete media')) {
+                return $this->forbidden('You do not have permission to permanently delete media');
+            }
+            // Has delete media permission but still can't delete others' private media
+            if ($media->author_id && !$media->is_shared) {
+                return $this->forbidden('You do not have permission to manage this media');
+            }
+        }
+
+        // Global media (no author) can only be deleted by managers
+        if (is_null($media->author_id) && !$isManager) {
+            return $this->forbidden('You cannot delete global media');
         }
         
         // Safety check: if not forcing and in use, block
