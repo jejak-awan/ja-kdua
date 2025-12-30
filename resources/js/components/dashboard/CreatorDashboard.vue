@@ -218,15 +218,12 @@ import SelectItem from '@/components/ui/select-item.vue';
 import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import Badge from '@/components/ui/badge.vue';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import Table from '@/components/ui/table.vue';
+import TableBody from '@/components/ui/table-body.vue';
+import TableCell from '@/components/ui/table-cell.vue';
+import TableHead from '@/components/ui/table-head.vue';
+import TableHeader from '@/components/ui/table-header.vue';
+import TableRow from '@/components/ui/table-row.vue';
 
 import { 
     FileText, 
