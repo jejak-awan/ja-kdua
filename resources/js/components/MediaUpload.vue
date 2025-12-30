@@ -216,8 +216,9 @@ const uploadFile = async () => {
             },
         });
 
-        uploadedMedia.value = response.data;
-        emit('uploaded', response.data);
+        const responseData = response.data;
+        uploadedMedia.value = responseData.data || responseData;
+        emit('uploaded', responseData.data?.media || responseData);
         
         // Clear after 3 seconds
         setTimeout(() => {
