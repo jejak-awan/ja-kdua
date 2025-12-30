@@ -17,6 +17,7 @@
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
+                :error="errors[setting.key]"
             />
 
             <!-- SMTP Group Actions -->
@@ -99,7 +100,11 @@ const props = defineProps({
     validatingConfig: Boolean,
     configValidation: Object,
     testingConnection: Boolean,
-    connectionResult: Object
+    connectionResult: Object,
+    errors: {
+        type: Object,
+        default: () => ({})
+    }
 })
 
 defineEmits(['validate-config', 'test-connection'])

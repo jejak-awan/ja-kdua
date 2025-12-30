@@ -13,7 +13,7 @@
             :model-value="localValue"
             @update:model-value="localValue = $event; updateValue()"
         >
-            <SelectTrigger>
+            <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
                 <SelectValue :placeholder="$t('common.actions.select')" />
             </SelectTrigger>
             <SelectContent>
@@ -33,7 +33,7 @@
             :model-value="String(localValue)"
             @update:model-value="localValue = Number($event); updateValue()"
         >
-            <SelectTrigger>
+            <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
                 <SelectValue :placeholder="$t('common.actions.select')" />
             </SelectTrigger>
             <SelectContent>
@@ -53,6 +53,7 @@
             v-model="localValue"
             @input="updateValue"
             :type="(isPassword || type === 'password') ? 'password' : 'text'"
+            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
         />
 
         <!-- Textarea -->
@@ -61,6 +62,7 @@
             v-model="localValue"
             @input="updateValue"
             :rows="3"
+            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
         />
 
         <!-- Number Input -->
@@ -69,6 +71,7 @@
             v-model.number="localValue"
             @input="updateValue"
             type="number"
+            :class="{ 'border-destructive focus-visible:ring-destructive': error }"
         />
 
         <!-- Boolean Toggle -->
@@ -81,6 +84,11 @@
                 {{ localValue ? enabledText : disabledText }}
             </span>
         </div>
+        
+        <!-- Error Message -->
+        <p v-if="error" class="text-sm text-destructive mt-1">
+            {{ Array.isArray(error) ? error[0] : error }}
+        </p>
     </div>
 </template>
 
@@ -130,6 +138,10 @@ const props = defineProps({
     disabledText: {
         type: String,
         default: 'Disabled'
+    },
+    error: {
+        type: [String, Array],
+        default: null
     }
 })
 

@@ -19,6 +19,10 @@ const props = defineProps({
     formData: {
         type: Object,
         required: true
+    },
+    errors: {
+        type: Object,
+        default: () => ({})
     }
 })
 
@@ -259,6 +263,7 @@ const handleStopMigration = () => {
                 :type="setting.type"
                 :enabled-text="$t('features.settings.enabled')"
                 :disabled-text="$t('features.settings.disabled')"
+                :error="errors[setting.key]"
             />
 
 

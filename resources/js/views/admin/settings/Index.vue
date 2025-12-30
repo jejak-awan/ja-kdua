@@ -32,6 +32,7 @@
                         v-else-if="activeTab === 'general'"
                         :settings="settings"
                         v-model:form-data="formData"
+                        :errors="errors"
                     />
 
                     <!-- Security Tab (New Component) -->
@@ -39,6 +40,7 @@
                         v-else-if="activeTab === 'security'"
                         :settings="settings"
                         :form-data="formData"
+                        :errors="errors"
                     />
 
                     <!-- Performance Tab (New Component) -->
@@ -46,6 +48,7 @@
                         v-else-if="activeTab === 'performance'"
                         :settings="settings"
                         :form-data="formData"
+                        :errors="errors"
                         :cache-status="cacheStatus"
                         :clearing-cache="clearingCache"
                         :warming-cache="warmingCache"
@@ -58,6 +61,7 @@
                         v-else-if="activeTab === 'email'"
                         :settings="settings"
                         :form-data="formData"
+                        :errors="errors"
                         :validating-config="validatingConfig"
                         :config-validation="configValidation"
                         :testing-connection="testingConnection"
@@ -71,6 +75,7 @@
                         v-else-if="activeTab === 'seo'"
                         :settings="settings"
                         :form-data="formData"
+                        :errors="errors"
                     />
 
                     <!-- Media Tab (New Component) -->
@@ -78,6 +83,7 @@
                         v-else-if="activeTab === 'media'"
                         :settings="settings"
                         :form-data="formData"
+                        :errors="errors"
                     />
 
 
@@ -156,6 +162,7 @@ const initialTab = validTabs.includes(route.query.tab) ? route.query.tab : 'gene
 const activeTab = ref(initialTab);
 const settings = ref([]);
 const formData = ref({});
+const errors = ref({});
 
 // Email testing state
 const validatingConfig = ref(false);
@@ -297,6 +304,7 @@ const formatValue = (value, type) => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         // Prepare settings array for bulk update
         const settingsToUpdate = currentSettings.value.map(setting => {
@@ -333,7 +341,11 @@ const handleSubmit = async () => {
             getCacheStatus();
         }
     } catch (error) {
-        toast.error.fromResponse(error);
+        if (error.response?.status === 422) {
+             errors.value = error.response.data.errors || {};
+        } else {
+             toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

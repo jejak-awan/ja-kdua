@@ -94,12 +94,14 @@
                                 v-if="setting.key === 'cache_driver'"
                                 v-model="formData[setting.key]"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[setting.key] }"
                             >
                                 <option value="file">File</option>
                                 <option value="redis">Redis</option>
                                 <option value="memcached">Memcached</option>
                                 <option value="database">Database</option>
                             </select>
+                            <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
 
                             <!-- Enable Cache Toggle -->
                             <div v-else-if="setting.key === 'enable_cache'">
@@ -115,12 +117,15 @@
                             </div>
 
                             <!-- Cache TTL -->
+                            <!-- Cache TTL -->
                             <input
                                 v-else
                                 v-model.number="formData[setting.key]"
                                 type="number"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                                :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[setting.key] }"
                             >
+                             <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
                         </div>
                     </template>
                 </div>
@@ -191,7 +196,9 @@
                                 :disabled="!formData.enable_cdn"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 :placeholder="!formData.enable_cdn ? 'Enable CDN to configure URL' : 'https://cdn.example.com'"
+                                :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[cdnUrlSetting.key] }"
                             >
+                            <p v-if="errors[cdnUrlSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnUrlSetting.key]) ? errors[cdnUrlSetting.key][0] : errors[cdnUrlSetting.key] }}</p>
                              <p v-if="formData.cdn_preset === 'bunny'" class="text-xs text-blue-600 mt-1">
                                 Tip: Use your BunnyCDN Pull Zone URL (e.g. https://my-zone.b-cdn.net)
                             </p>
@@ -210,7 +217,9 @@
                                 type="text"
                                 :disabled="!formData.enable_cdn"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[cdnIncludedDirsSetting.key] }"
                             >
+                            <p v-if="errors[cdnIncludedDirsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnIncludedDirsSetting.key]) ? errors[cdnIncludedDirsSetting.key][0] : errors[cdnIncludedDirsSetting.key] }}</p>
                         </div>
 
                          <!-- Excluded Extensions -->
@@ -226,7 +235,9 @@
                                 type="text"
                                 :disabled="!formData.enable_cdn"
                                 class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[cdnExcludedExtsSetting.key] }"
                             >
+                           <p v-if="errors[cdnExcludedExtsSetting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[cdnExcludedExtsSetting.key]) ? errors[cdnExcludedExtsSetting.key][0] : errors[cdnExcludedExtsSetting.key] }}</p>
                         </div>
                     </div>
                 </div>
@@ -245,13 +256,17 @@
                             v-model="formData[setting.key]"
                             type="text"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                           :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[setting.key] }"
                         >
+                        <p v-if="setting.type === 'string' && errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
                         <input
                             v-else-if="setting.type === 'integer'"
                             v-model.number="formData[setting.key]"
                             type="number"
                             class="w-full px-3 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm"
+                            :class="{ 'border-destructive focus:border-destructive focus:ring-destructive': errors[setting.key] }"
                         >
+                        <p v-if="setting.type === 'integer' && errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
                         <div v-else-if="setting.type === 'boolean'">
                             <label class="flex items-center cursor-pointer">
                                 <div class="relative">
@@ -293,6 +308,10 @@ const props = defineProps({
     warmingCache: {
         type: Boolean,
         default: false
+    },
+    errors: {
+        type: Object,
+        default: () => ({})
     }
 })
 

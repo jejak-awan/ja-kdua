@@ -10,7 +10,8 @@
             <form @submit.prevent="handleSubmit" class="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
                 <div class="space-y-2">
                     <Label>{{ t('features.menus.form.label') }} <span class="text-red-500">*</span></Label>
-                    <Input v-model="form.label" type="text" required />
+                    <Input v-model="form.label" type="text" required :class="{ 'border-destructive focus-visible:ring-destructive': errors.label }" />
+                    <p v-if="errors.label" class="text-sm text-destructive">{{ Array.isArray(errors.label) ? errors.label[0] : errors.label }}</p>
                 </div>
 
                 <div class="space-y-2">
@@ -30,7 +31,8 @@
 
                 <div v-if="form.type === 'link'" class="space-y-2">
                     <Label>{{ t('features.menus.form.url') }} <span class="text-red-500">*</span></Label>
-                    <Input v-model="form.url" type="url" required />
+                    <Input v-model="form.url" type="url" required :class="{ 'border-destructive focus-visible:ring-destructive': errors.url }" />
+                     <p v-if="errors.url" class="text-sm text-destructive">{{ Array.isArray(errors.url) ? errors.url[0] : errors.url }}</p>
                 </div>
 
                 <div v-else-if="form.type === 'page'" class="space-y-2">
@@ -114,7 +116,7 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
 
@@ -125,7 +127,9 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
+const toast = useToast();
 const saving = ref(false);
+const errors = ref({}); // Add errors ref
 const form = ref({
     label: '',
     type: 'link',
@@ -143,17 +147,23 @@ const handleTypeChange = () => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         const payload = { ...form.value, menu_id: props.menuId };
         if (props.item) {
             await api.put(`/admin/cms/menu-items/${props.item.id}`, payload);
+            toast.success.update('Menu Item');
         } else {
             await api.post('/admin/cms/menu-items', payload);
+            toast.success.create('Menu Item');
         }
         emit('saved');
     } catch (error) {
-        console.error('Failed to save menu item:', error);
-        toast.error('Error', t('features.menus.messages.saveItemFailed'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+             toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
