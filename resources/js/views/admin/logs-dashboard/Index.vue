@@ -116,7 +116,7 @@
                     <div v-for="log in recentActivity" :key="log.id" class="px-6 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span :class="getActionBadgeClass(log.action)" class="text-xs px-2 py-1 rounded-full">
-                                {{ log.action }}
+                                {{ getActionLabel(log.action) }}
                             </span>
                             <span class="text-sm text-foreground">{{ log.description || log.model_type }}</span>
                         </div>
@@ -139,7 +139,7 @@
                     <div v-for="log in recentSecurity" :key="log.id" class="px-6 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span :class="getSecurityBadgeClass(log.event_type)" class="text-xs px-2 py-1 rounded-full">
-                                {{ log.event_type }}
+                                {{ getSecurityEventLabel(log.event_type) }}
                             </span>
                             <span class="text-sm text-foreground">{{ log.ip_address }}</span>
                         </div>
@@ -219,6 +219,27 @@ const getSecurityBadgeClass = (eventType) => {
         return 'bg-green-500/20 text-green-500';
     }
     return 'bg-yellow-500/20 text-yellow-500';
+};
+
+const getActionLabel = (action) => {
+    if (!action) return '-';
+    const key = `features.activityLogs.filters.types.${action}`;
+    const translated = t(key);
+    return translated !== key ? translated : action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
+
+const getSecurityEventLabel = (eventType) => {
+    if (!eventType) return '-';
+    // Use security event types if possible, fallback to activity logs types
+    let key = `features.security.logs.eventTypes.${eventType}`;
+    let translated = t(key);
+    
+    if (translated === key) {
+        key = `features.activityLogs.filters.types.${eventType}`;
+        translated = t(key);
+    }
+    
+    return translated !== key ? translated : eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 const formatDate = (dateString) => {

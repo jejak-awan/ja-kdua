@@ -98,6 +98,7 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
+import { useToast } from '../../composables/useToast';
 
 const props = defineProps({
     redirect: {
@@ -109,6 +110,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const saving = ref(false);
+const toast = useToast();
 
 const form = ref({
     from_url: '',
@@ -139,7 +141,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save redirect:', error);
-        alert(error.response?.data?.message || t('features.redirects.messages.saveFailed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

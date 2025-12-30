@@ -193,6 +193,8 @@ import {
     Loader2
 } from 'lucide-vue-next';
 import api from '../../../services/api';
+import { useConfirm } from '../../../composables/useConfirm';
+import { useToast } from '../../../composables/useToast';
 import _ from 'lodash';
 import { parseResponse } from '../../../utils/responseParser';
 
@@ -219,6 +221,8 @@ import SelectValue from '@/components/ui/select-value.vue';
 import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(true);
@@ -312,17 +316,23 @@ const toggleAll = (checked) => {
 const bulkDelete = async () => {
     if (selectedIds.value.length === 0) return;
     
-    if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.tags.actions.bulkDelete'),
+        message: t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/tags/bulk-delete', { ids: selectedIds.value });
         selectedIds.value = [];
-        fetchTags(pagination.value.current_page);
+        await fetchTags(pagination.value.current_page);
+        toast.success.delete('Tags');
     } catch (error) {
         console.error('Bulk delete failed:', error);
-        alert(t('common.messages.error.bulkDeleteFailed'));
+        toast.error.action(error);
     }
 };
 
@@ -331,17 +341,22 @@ const editTag = (tag) => {
 };
 
 const deleteTag = async (tag) => {
-    if (!confirm(t('features.tags.messages.deleteConfirm', { name: tag.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.tags.actions.delete'),
+        message: t('features.tags.messages.deleteConfirm', { name: tag.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/tags/${tag.id}`);
         await fetchTags();
+        toast.success.delete('Tag');
     } catch (error) {
         console.error('Failed to delete tag:', error);
-        const message = error.response?.data?.message || t('features.tags.messages.deleteError');
-        alert(message);
+        toast.error.delete(error, 'Tag');
     }
 };
 

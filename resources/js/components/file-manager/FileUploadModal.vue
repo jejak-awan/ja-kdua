@@ -81,6 +81,7 @@ import DialogHeader from '../ui/dialog-header.vue';
 import DialogTitle from '../ui/dialog-title.vue';
 import DialogFooter from '../ui/dialog-footer.vue';
 import { CloudUpload, X, Loader2 } from 'lucide-vue-next';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -134,7 +135,7 @@ const handleUpload = async () => {
         emit('close');
     } catch (error) {
         console.error('Failed to upload files:', error);
-        alert(t('features.file_manager.messages.uploadFailed'));
+        toast.error('Error', t('features.file_manager.messages.uploadFailed'));
     } finally {
         uploading.value = false;
     }

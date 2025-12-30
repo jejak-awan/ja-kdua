@@ -147,7 +147,7 @@
 
             <div v-if="loading && contents.length === 0" class="flex flex-col items-center justify-center py-24 text-muted-foreground space-y-4">
                 <Loader2 class="w-10 h-10 animate-spin opacity-20" />
-                <p class="text-sm font-medium animate-pulse">{{ $t('common.loading.default') }}</p>
+                <p class="text-sm font-medium animate-pulse">{{ $t('common.messages.loading.default') }}</p>
             </div>
 
             <div v-else-if="contents.length === 0" class="flex flex-col items-center justify-center py-24 text-muted-foreground space-y-4">
@@ -325,9 +325,12 @@ import {
     XCircle
 } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
+import { useConfirm } from '../../../composables/useConfirm';
+import { useToast } from '../../../composables/useToast';
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
 const contents = ref([]);
 const loading = ref(false);
 const search = ref('');
@@ -443,11 +446,12 @@ const toggleFeatured = async (content) => {
     
     try {
         await api.post(`/admin/cms/contents/${content.id}/toggle-featured`);
+        toast.success.update();
     } catch (error) {
         console.error('Failed to toggle featured status:', error);
         // Revert on failure
         content.is_featured = originalState;
-        alert('Failed to update featured status');
+        toast.error.update(error);
     }
 };
 
@@ -457,9 +461,10 @@ const handleApprove = async (content) => {
         await api.put(`/admin/cms/contents/${content.id}/approve`);
         await fetchContents();
         await fetchStats();
+        toast.success.approve();
     } catch (error) {
         console.error('Failed to approve content:', error);
-        alert(error.response?.data?.message || 'Failed to approve content');
+        toast.error.approve(error);
     }
 };
 
@@ -469,9 +474,10 @@ const handleReject = async (content) => {
         await api.put(`/admin/cms/contents/${content.id}/reject`);
         await fetchContents();
         await fetchStats();
+        toast.success.reject();
     } catch (error) {
         console.error('Failed to reject content:', error);
-        alert(error.response?.data?.message || 'Failed to reject content');
+        toast.error.reject(error);
     }
 };
 
@@ -483,10 +489,11 @@ const handleDuplicate = async (content) => {
     try {
         const response = await api.post(`/admin/cms/contents/${content.id}/duplicate`);
         const duplicatedContent = response.data.data || response.data;
+        toast.success.duplicate();
         router.push({ name: 'contents.edit', params: { id: duplicatedContent.id } });
     } catch (error) {
         console.error('Failed to duplicate content:', error);
-        alert(error.response?.data?.message || 'Failed to duplicate content');
+        toast.error.duplicate(error);
     }
 };
 
@@ -537,10 +544,11 @@ const handleBulkAction = async () => {
             ids: selectedContents.value,
         });
         await fetchContents();
+        toast.success.update();
         bulkAction.value = '';
     } catch (error) {
         console.error('Failed to perform bulk action:', error);
-        alert(error.response?.data?.message || 'Failed to perform bulk action');
+        toast.error.action(error);
         bulkAction.value = '';
     }
 };

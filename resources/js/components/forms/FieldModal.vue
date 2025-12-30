@@ -173,7 +173,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
+
 import { useI18n } from 'vue-i18n';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -240,7 +242,7 @@ const removeOption = (index) => {
 
 const saveField = () => {
     if (needsOptions.value && fieldData.options.length === 0) {
-        alert(t('features.forms.fieldModal.optionRequired'));
+        toast.error('Error', t('features.forms.fieldModal.optionRequired'));
         return;
     }
 

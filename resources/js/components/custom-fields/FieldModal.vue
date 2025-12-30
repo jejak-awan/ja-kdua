@@ -154,6 +154,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import { useToast } from '../../composables/useToast';
 import Dialog from '../../components/ui/dialog.vue';
 import DialogContent from '../../components/ui/dialog-content.vue';
 import DialogHeader from '../../components/ui/dialog-header.vue';
@@ -234,6 +235,8 @@ const loadField = () => {
     }
 };
 
+const toast = useToast();
+
 const handleSubmit = async () => {
     saving.value = true;
     try {
@@ -244,13 +247,15 @@ const handleSubmit = async () => {
         
         if (props.field) {
             await api.put(`/admin/cms/custom-fields/${props.field.id}`, payload);
+            toast.success.update(t('features.developer.custom_fields.fields.title'));
         } else {
             await api.post('/admin/cms/custom-fields', payload);
+            toast.success.create(t('features.developer.custom_fields.fields.title'));
         }
         emit('saved');
     } catch (error) {
         console.error('Failed to save field:', error);
-        alert(error.response?.data?.message || t('features.developer.custom_fields.fields.messages.save_failed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

@@ -80,6 +80,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import { Loader2 } from 'lucide-vue-next';
 
 import Button from '@/components/ui/button.vue';
@@ -95,7 +96,7 @@ import CardFooter from '@/components/ui/card-footer.vue';
 
 const { t } = useI18n();
 const router = useRouter();
-
+const toast = useToast();
 const saving = ref(false);
 
 const form = ref({
@@ -126,10 +127,11 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         await api.post('/admin/cms/tags', form.value);
-        router.push({ name: 'tags' });
+        toast.success.create('Tag');
+        router.push({ name: 'tags.index' });
     } catch (error) {
         console.error('Failed to create tag:', error);
-        alert(error.response?.data?.message || t('features.tags.form.saveError', 'Failed to save tag'));
+        toast.error.create(error, 'Tag');
     } finally {
         saving.value = false;
     }

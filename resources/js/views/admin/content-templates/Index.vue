@@ -172,6 +172,8 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useConfirm } from '../../../composables/useConfirm';
+import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import { debounce } from 'lodash';
 import Card from '../../../components/ui/card.vue';
@@ -204,6 +206,8 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 const router = useRouter();
 const templates = ref([]);
 const loading = ref(false);
@@ -250,25 +254,32 @@ const createFromTemplate = async (template) => {
         const response = await api.post(`/admin/cms/content-templates/${template.id}/create-content`);
         const content = parseSingleResponse(response);
         if (content && content.id) {
+            toast.success.createFromTemplate();
             router.push({ name: 'contents.edit', params: { id: content.id } });
         }
     } catch (error) {
         console.error('Failed to create content from template:', error);
-        alert(error.response?.data?.message || t('features.content_templates.messages.createError'));
+        toast.error.templateCreateContent(error);
     }
 };
 
 const handleDelete = async (template) => {
-    if (!confirm(t('features.content_templates.messages.deleteConfirm', { name: template.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.content_templates.actions.delete'),
+        message: t('features.content_templates.messages.deleteConfirm', { name: template.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/content-templates/${template.id}`);
         await fetchTemplates(pagination.value?.current_page || 1);
+        toast.success.delete('Template');
     } catch (error) {
         console.error('Failed to delete template:', error);
-        alert(t('features.content_templates.messages.deleteError'));
+        toast.error.delete(error, 'Template');
     }
 };
 
@@ -292,7 +303,14 @@ const handleBulkAction = async () => {
     if (!bulkAction.value || selectedTemplates.value.length === 0) return;
 
     if (bulkAction.value === 'delete') {
-        if (!confirm(`Are you sure you want to delete ${selectedTemplates.value.length} templates?`)) {
+        const confirmed = await confirm({
+            title: t('features.content_templates.actions.bulkDelete'),
+            message: `Are you sure you want to delete ${selectedTemplates.value.length} templates?`,
+            variant: 'danger',
+            confirmText: t('common.actions.delete'),
+        });
+
+        if (!confirmed) {
             bulkAction.value = '';
             return;
         }
@@ -304,9 +322,10 @@ const handleBulkAction = async () => {
             });
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
+            toast.success.delete('Templates');
         } catch (error) {
             console.error('Bulk action failed:', error);
-            alert('Failed to perform bulk action');
+            toast.error.action(error);
         }
     }
 };

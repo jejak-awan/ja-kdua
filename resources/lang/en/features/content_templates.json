@@ -46,6 +46,11 @@
         "deleteError": "Failed to delete template",
         "saveError": "Failed to create template",
         "updateError": "Failed to update template",
-        "loadError": "Failed to load template"
+        "loadError": "Failed to load template",
+        "deleteSuccess": "Template deleted successfully",
+        "createSuccess": "Template created successfully",
+        "updateSuccess": "Template updated successfully",
+        "createContentSuccess": "Content created from template successfully",
+        "bulkDeleteSuccess": "Selected templates deleted successfully"
     }
 }

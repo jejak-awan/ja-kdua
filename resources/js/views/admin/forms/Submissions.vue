@@ -205,6 +205,8 @@
 import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Pagination from '../../../components/ui/pagination.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
@@ -228,6 +230,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
+const { confirm } = useConfirm();
 const submissions = ref([]);
 const loading = ref(true);
 const statistics = ref(null);
@@ -299,17 +302,22 @@ const markAsRead = async (submission, refresh = true) => {
 };
 
 const deleteSubmission = async (submission) => {
-    if (!confirm(t('features.forms.messages.submissionDeleteConfirm'))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.forms.submissions.actions.delete'),
+        message: t('features.forms.submissions.messages.deleteConfirm'),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/form-submissions/${submission.id}`);
-        submissions.value = submissions.value.filter(s => s.id !== submission.id);
-        fetchStatistics();
+        await api.delete(`/admin/cms/forms/${props.form.id}/submissions/${submission.id}`);
+        toast.success(t('features.forms.submissions.messages.deleteSuccess'));
+        fetchSubmissions();
     } catch (error) {
-        console.error('Error deleting submission:', error);
-        alert(t('features.forms.messages.exportFailed'));
+        console.error('Failed to delete submission:', error);
+        toast.error('Error', error.response?.data?.message || t('features.forms.submissions.messages.deleteFailed'));
     }
 };
 
@@ -330,9 +338,10 @@ const exportSubmissions = async () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        toast.success(t('features.forms.submissions.messages.exportSuccess'));
     } catch (error) {
-        console.error('Error exporting submissions:', error);
-        alert(t('features.forms.messages.exportFailed'));
+        console.error('Failed to export submissions:', error);
+        toast.error('Error', t('features.forms.submissions.messages.exportFailed'));
     }
 };
 

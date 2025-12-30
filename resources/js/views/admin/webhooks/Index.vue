@@ -127,7 +127,7 @@
                                     :key="event"
                                     class="px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded"
                                 >
-                                    {{ event }}
+                                    {{ t('features.developer.webhooks.events.' + event) }}
                                 </span>
                             </div>
                         </td>
@@ -183,10 +183,14 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 import WebhookModal from '../../../components/webhooks/WebhookModal.vue';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 
 const webhooks = ref([]);
 const statistics = ref(null);
@@ -241,24 +245,30 @@ const editWebhook = (webhook) => {
 const testWebhook = async (webhook) => {
     try {
         await api.post(`/admin/cms/webhooks/${webhook.id}/test`);
-        alert(t('features.developer.webhooks.messages.test_success'));
+        toast.success.action(t('features.developer.webhooks.messages.test_success'));
     } catch (error) {
         console.error('Failed to test webhook:', error);
-        alert(error.response?.data?.message || t('features.developer.webhooks.messages.test_failed'));
+        toast.error.fromResponse(error);
     }
 };
 
 const deleteWebhook = async (webhook) => {
-    if (!confirm(t('features.developer.webhooks.confirm.delete', { name: webhook.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.developer.webhooks.actions.delete'),
+        message: t('features.developer.webhooks.confirm.delete', { name: webhook.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/webhooks/${webhook.id}`);
-        await fetchWebhooks();
+        toast.success.delete('Webhook');
+        fetchWebhooks();
     } catch (error) {
         console.error('Failed to delete webhook:', error);
-        alert(t('features.developer.webhooks.messages.delete_failed'));
+        toast.error.delete(error, 'Webhook');
     }
 };
 

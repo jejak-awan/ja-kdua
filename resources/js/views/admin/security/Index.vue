@@ -513,6 +513,8 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
@@ -554,7 +556,7 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
-
+const { confirm } = useConfirm();
 // Data
 const logs = ref([]);
 const statistics = ref(null);
@@ -654,16 +656,22 @@ const fetchLogs = async () => {
 };
 
 const clearLogs = async () => {
-    if (!confirm(t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.logs.confirm.clear') || 'Clear Logs',
+        message: 'Are you sure you want to clear all logs?',
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/logs/clear');
+        await api.delete('/admin/cms/security/logs');
+        toast.success(t('features.system.logs.messages.cleared'));
         fetchLogs();
-        fetchStats();
     } catch (error) {
         console.error('Failed to clear logs:', error);
+        toast.error('Error', t('features.system.logs.messages.failed_clear'));
     }
 };
 
@@ -697,29 +705,34 @@ const fetchWhitelist = async () => {
 // IP Actions
 const blockIP = async () => {
     if (!ipToBlock.value) {
-        alert(t('features.security.messages.enterIp'));
+        toast.error('Error', t('features.security.messages.enterIp'));
         return;
     }
 
-    if (!confirm(t('features.security.messages.confirmBlock', { ip: ipToBlock.value }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.security.ipManagement.block.button'),
+        message: t('features.security.messages.confirmBlock', { ip: ipToBlock.value }),
+        variant: 'danger',
+        confirmText: t('features.security.ipManagement.block.button'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/security/block-ip', { ip_address: ipToBlock.value });
-        alert(t('features.security.messages.blockSuccess'));
+        toast.success(t('features.security.messages.blockSuccess'));
         ipToBlock.value = '';
         await fetchBlocklist();
         await fetchLogs();
     } catch (error) {
         console.error('Failed to block IP:', error);
-        alert(error.response?.data?.message || t('features.security.messages.blockFailed'));
+        toast.error('Error', error.response?.data?.message || t('features.security.messages.blockFailed'));
     }
 };
 
 const checkIPStatus = async () => {
     if (!ipToCheck.value) {
-        alert(t('features.security.messages.enterIp'));
+        toast.error('Error', t('features.security.messages.enterIp'));
         return;
     }
 
@@ -728,46 +741,56 @@ const checkIPStatus = async () => {
         ipStatus.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to check IP status:', error);
-        alert(t('features.security.messages.checkFailed'));
+        toast.error('Error', t('features.security.messages.checkFailed'));
     }
 };
 
 const unblockIP = async () => {
     if (!ipToUnblock.value) {
-        alert(t('features.security.messages.enterIp'));
+        toast.error('Error', t('features.security.messages.enterIp'));
         return;
     }
 
-    if (!confirm(t('features.security.messages.confirmUnblock', { ip: ipToUnblock.value }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.security.ipManagement.unblock.button'),
+        message: t('features.security.messages.confirmUnblock', { ip: ipToUnblock.value }),
+        variant: 'warning',
+        confirmText: t('features.security.ipManagement.unblock.button'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/security/unblock-ip', { ip_address: ipToUnblock.value });
         await api.post('/admin/cms/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
-        alert(t('features.security.messages.unblockSuccess'));
+        toast.success(t('features.security.messages.unblockSuccess'));
         ipToUnblock.value = '';
         await fetchBlocklist();
         await fetchLogs();
     } catch (error) {
         console.error('Failed to unblock IP:', error);
-        alert(error.response?.data?.message || t('features.security.messages.unblockFailed'));
+        toast.error('Error', error.response?.data?.message || t('features.security.messages.unblockFailed'));
     }
 };
 
 const blockIPFromLog = async (ip) => {
-    if (!confirm(t('features.security.messages.confirmBlock', { ip }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.security.logs.actions.blockIp'),
+        message: t('features.security.messages.confirmBlock', { ip }),
+        variant: 'danger',
+        confirmText: t('features.security.logs.actions.blockIp'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/security/block-ip', { ip_address: ip });
-        alert(t('features.security.messages.blockSuccess'));
+        toast.success(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
     } catch (error) {
         console.error('Failed to block IP:', error);
-        alert(t('features.security.messages.blockFailed'));
+        toast.error('Error', t('features.security.messages.blockFailed'));
     }
 };
 
@@ -779,12 +802,13 @@ const bulkBlockFromLogs = async () => {
     
     try {
         await api.post('/admin/cms/security/bulk-block', { ip_addresses: uniqueIps });
-        alert(t('features.security.messages.bulkBlockSuccess', { blocked: uniqueIps.length, skipped: 0 }));
+        toast.success(t('features.security.messages.bulkBlockSuccess', { blocked: uniqueIps.length, skipped: 0 }));
         selectedLogIds.value = [];
         await fetchBlocklist();
         await fetchLogs();
     } catch (error) {
         console.error('Failed to bulk block:', error);
+        toast.error('Error', t('features.security.messages.blockFailed'));
     }
 };
 
@@ -831,11 +855,12 @@ const bulkUnblock = async () => {
     
     try {
         await api.post('/admin/cms/security/bulk-unblock', { ip_addresses: selectedBlocklistIds.value });
-        alert(t('features.security.messages.bulkUnblockSuccess', { count: selectedBlocklistIds.value.length }));
+        toast.success(t('features.security.messages.bulkUnblockSuccess', { count: selectedBlocklistIds.value.length }));
         selectedBlocklistIds.value = [];
         await fetchBlocklist();
     } catch (error) {
         console.error('Failed to bulk unblock:', error);
+        toast.error('Error', t('features.security.messages.unblockFailed'));
     }
 };
 
@@ -860,32 +885,39 @@ const handleSelectBlocklist = (checked, ip) => {
 // Whitelist Actions
 const addToWhitelist = async (ip) => {
     if (!ip) {
-        alert(t('features.security.messages.enterIp'));
+        toast.error('Error', t('features.security.messages.enterIp'));
         return;
     }
 
     try {
         await api.post('/admin/cms/security/whitelist', { ip_address: ip });
-        alert(t('features.security.messages.whitelistSuccess'));
+        toast.success(t('features.security.messages.whitelistSuccess'));
         ipToWhitelist.value = '';
         await fetchWhitelist();
         await fetchBlocklist();
     } catch (error) {
         console.error('Failed to add to whitelist:', error);
-        alert(t('features.security.messages.whitelistFailed'));
+        toast.error('Error', t('features.security.messages.whitelistFailed'));
     }
 };
 
 const removeFromWhitelist = async (ip) => {
-    if (!confirm(t('features.security.messages.confirmRemoveWhitelist', { ip }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.security.whitelist.actions.remove'),
+        message: t('features.security.messages.confirmRemoveWhitelist', { ip }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete('/admin/cms/security/whitelist', { data: { ip_address: ip } });
+        toast.success(t('features.security.messages.whitelistRemoved'));
         await fetchWhitelist();
     } catch (error) {
         console.error('Failed to remove from whitelist:', error);
+        toast.error('Error', t('features.security.messages.whitelistRemoveFailed'));
     }
 };
 
@@ -894,11 +926,12 @@ const bulkRemoveWhitelist = async () => {
     
     try {
         await api.post('/admin/cms/security/bulk-remove-whitelist', { ip_addresses: selectedWhitelistIds.value });
-        alert(t('features.security.messages.bulkRemoveSuccess', { count: selectedWhitelistIds.value.length }));
+        toast.success(t('features.security.messages.bulkRemoveSuccess', { count: selectedWhitelistIds.value.length }));
         selectedWhitelistIds.value = [];
         await fetchWhitelist();
     } catch (error) {
         console.error('Failed to bulk remove whitelist:', error);
+        toast.error('Error', t('features.security.messages.whitelistRemoveFailed'));
     }
 };
 

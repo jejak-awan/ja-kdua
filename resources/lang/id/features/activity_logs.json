@@ -22,7 +22,10 @@
             "logout": "Keluar",
             "viewed": "Dilihat",
             "published": "Diterbitkan",
-            "unpublished": "Tidak Diterbitkan"
+            "unpublished": "Tidak Diterbitkan",
+            "login_success": "Login Berhasil",
+            "login_failed": "Login Gagal",
+            "session_invalidated": "Sesi Berakhir"
         }
     },
     "export": {

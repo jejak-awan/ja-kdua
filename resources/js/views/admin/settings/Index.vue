@@ -131,6 +131,8 @@ import Tabs from '../../../components/ui/tabs.vue';
 import TabsList from '../../../components/ui/tabs-list.vue';
 import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import Button from '../../../components/ui/button.vue';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 
 // Import tab components
 import GeneralTab from './tabs/GeneralTab.vue';
@@ -142,6 +144,8 @@ import PerformanceTab from './tabs/PerformanceTab.vue';
 import EmailTestSection from './EmailTestSection.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 const route = useRoute();
 
 const loading = ref(false);
@@ -319,7 +323,9 @@ const handleSubmit = async () => {
             settings: settingsToUpdate,
         });
         
-        alert(t('features.settings.saved'));
+
+        
+        toast.success.save();
         await fetchSettings();
 
         // Refresh cache status if on performance tab
@@ -327,7 +333,7 @@ const handleSubmit = async () => {
             getCacheStatus();
         }
     } catch (error) {
-        alert(error.response?.data?.message || t('features.settings.failed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }
@@ -453,15 +459,22 @@ const getCacheStatus = async () => {
 };
 
 const clearSystemCache = async () => {
-    if (!confirm('Are you sure you want to clear the system cache?')) return;
+    const confirmed = await confirm({
+        title: t('features.settings.cache.clearTitle', 'Clear Cache'),
+        message: 'Are you sure you want to clear the system cache?',
+        variant: 'warning',
+        confirmText: t('features.settings.cache.clearConfirm', 'Clear Cache'),
+    });
+
+    if (!confirmed) return;
     
     clearingCache.value = true;
     try {
         await api.post('/admin/cms/system/cache/clear');
-        alert(t('features.settings.cache.cleared'));
+        toast.success.action(t('features.settings.cache.cleared'));
         getCacheStatus();
     } catch (error) {
-        alert(error.response?.data?.message || t('features.settings.failed'));
+        toast.error.fromResponse(error);
     } finally {
         clearingCache.value = false;
     }
@@ -471,10 +484,10 @@ const warmSystemCache = async () => {
     warmingCache.value = true;
     try {
         await api.post('/admin/cms/system/cache/warm');
-        alert(t('features.settings.cache.warmed'));
+        toast.success.action(t('features.settings.cache.warmed'));
         getCacheStatus();
     } catch (error) {
-        alert(error.response?.data?.message || t('features.settings.failed'));
+        toast.error.fromResponse(error);
     } finally {
         warmingCache.value = false;
     }

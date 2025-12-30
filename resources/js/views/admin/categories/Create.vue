@@ -160,6 +160,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import { Loader2, X } from 'lucide-vue-next';
 
@@ -182,6 +183,7 @@ import SelectValue from '@/components/ui/select-value.vue';
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
 
 const saving = ref(false);
 const categories = ref([]);
@@ -254,11 +256,13 @@ const handleSubmit = async () => {
             payload.parent_id = null;
         }
         
+        
         await api.post('/admin/cms/categories', payload);
-        router.push({ name: 'categories' });
+        toast.success.create('Category');
+        router.push({ name: 'categories.index' });
     } catch (error) {
         console.error('Failed to create category:', error);
-        alert(error.response?.data?.message || t('features.categories.form.saveError'));
+        toast.error.create(error, 'Category');
     } finally {
         saving.value = false;
     }

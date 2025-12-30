@@ -34,6 +34,8 @@
         "deleteConfirm": "Are you sure you want to delete user \"{name}\"?",
         "deleteFailed": "Failed to delete user",
         "saveSuccess": "User saved successfully",
+        "create_success": "User created successfully",
+        "update_success": "User updated successfully",
         "saveFailed": "Failed to save user",
         "roleRequired": "Please select at least one role",
         "passwordRequired": "Password is required for new users",

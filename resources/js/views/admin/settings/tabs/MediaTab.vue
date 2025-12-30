@@ -5,8 +5,11 @@ import axios from 'axios'
 import SettingGroup from '../../../../components/settings/SettingGroup.vue'
 import SettingField from '../../../../components/settings/SettingField.vue'
 import Button from '../../../../components/ui/button.vue'
+import { useConfirm } from '../../../../composables/useConfirm'
+import toast from '../../../../services/toast'
 
 const { t } = useI18n()
+const { confirm } = useConfirm()
 
 const props = defineProps({
     settings: {
@@ -167,7 +170,14 @@ const migrationProgress = computed(() => {
 });
 
 const startMigration = async () => {
-    if (!confirm('This will copy all files from Local Storage to the currently configured External Storage. Process may take time. Continue?')) return;
+    const confirmed = await confirm({
+        title: 'Storage Migration',
+        message: 'This will copy all files from Local Storage to the currently configured External Storage. Process may take time. Continue?',
+        variant: 'warning',
+        confirmText: 'Start Migration',
+    });
+
+    if (!confirmed) return;
 
     migrationStatus.value = 'scanning';
     migrationLogs.value = [];

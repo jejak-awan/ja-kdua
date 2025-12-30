@@ -166,6 +166,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 import FieldGroupModal from '../../../components/custom-fields/FieldGroupModal.vue';
 import FieldModal from '../../../components/custom-fields/FieldModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
@@ -197,6 +199,8 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 
 const currentTab = ref('groups');
 const tabs = computed(() => [
@@ -261,16 +265,22 @@ const editGroup = (group) => {
 };
 
 const deleteGroup = async (group) => {
-    if (!confirm(t('features.developer.custom_fields.groups.confirm.delete', { name: group.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.developer.custom_fields.groups.actions.delete'),
+        message: t('features.developer.custom_fields.groups.confirm.delete', { name: group.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/field-groups/${group.id}`);
-        await fetchFieldGroups();
+        await api.delete(`/admin/cms/custom-fields/groups/${group.id}`);
+        toast.success.delete(t('features.developer.custom_fields.tabs.groups'));
+        fetchFieldGroups();
     } catch (error) {
-        console.error('Failed to delete field group:', error);
-        alert(t('features.developer.custom_fields.groups.messages.delete_failed'));
+        console.error('Failed to delete group:', error);
+        toast.error.delete(error, t('features.developer.custom_fields.tabs.groups'));
     }
 };
 
@@ -292,16 +302,22 @@ const editField = (field) => {
 };
 
 const deleteField = async (field) => {
-    if (!confirm(t('features.developer.custom_fields.fields.confirm.delete', { label: field.label }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.developer.custom_fields.fields.actions.delete'),
+        message: t('features.developer.custom_fields.fields.confirm.delete', { label: field.label }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/custom-fields/${field.id}`);
-        await fetchCustomFields();
+        await api.delete(`/admin/cms/custom-fields/fields/${field.id}`);
+        toast.success.delete(t('features.developer.custom_fields.tabs.fields'));
+        fetchCustomFields();
     } catch (error) {
-        console.error('Failed to delete custom field:', error);
-        alert(t('features.developer.custom_fields.fields.messages.delete_failed'));
+        console.error('Failed to delete field:', error);
+        toast.error.delete(error, t('features.developer.custom_fields.tabs.fields'));
     }
 };
 

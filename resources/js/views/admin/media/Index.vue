@@ -803,7 +803,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMediaToast } from '@/composables/useMediaToast.js';
+import { useToast } from '@/composables/useToast.js';
 import { useConfirm } from '@/composables/useConfirm.js';
 import { 
     LayoutGrid, 
@@ -859,7 +859,7 @@ import CardTitle from '@/components/ui/card-title.vue';
 import CardDescription from '@/components/ui/card-description.vue';
 
 const { t } = useI18n();
-const mediaToast = useMediaToast();
+const toast = useToast();
 const { confirm: confirmDialog } = useConfirm();
 const viewMode = ref('grid');
 const loading = ref(false);
@@ -1059,7 +1059,7 @@ const emptyTrash = async () => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to empty trash:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -1132,7 +1132,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to delete media:', error);
-            mediaToast.error.fromResponse(error);
+            toast.error.fromResponse(error);
             bulkAction.value = '';
         } finally {
             bulkProcessing.value = false;
@@ -1150,7 +1150,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to restore media:', error);
-            mediaToast.error.fromResponse(error);
+            toast.error.fromResponse(error);
         } finally {
             bulkProcessing.value = false;
         }
@@ -1179,7 +1179,7 @@ const handleBulkAction = async () => {
             bulkAction.value = '';
         } catch (error) {
             // console.error('Failed to delete permanent:', error);
-            mediaToast.error.fromResponse(error);
+            toast.error.fromResponse(error);
         } finally {
             bulkProcessing.value = false;
         }
@@ -1212,10 +1212,10 @@ const handleBulkAction = async () => {
             bulkProgress.value = 100;
             selectedMedia.value = [];
             bulkAction.value = '';
-            mediaToast.success.upload();  // Reusing upload success
+            toast.success.upload();  // Reusing upload success
         } catch (error) {
             // console.error('Failed to download media:', error);
-            mediaToast.error.fromResponse(error);
+            toast.error.fromResponse(error);
             bulkAction.value = '';
         } finally {
             bulkProcessing.value = false;
@@ -1239,10 +1239,10 @@ const handleMoveToFolder = async (folderId) => {
         selectedMedia.value = [];
         bulkAction.value = '';
         showMoveFolderModal.value = false;
-        mediaToast.success.move();
+        toast.success.move();
     } catch (error) {
         // console.error('Failed to move media:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     } finally {
         bulkProcessing.value = false;
         bulkProgress.value = 0;
@@ -1268,10 +1268,10 @@ const handleUpdateAltText = async () => {
         bulkAction.value = '';
         bulkAltText.value = '';
         showUpdateAltModal.value = false;
-        mediaToast.success.update();
+        toast.success.update();
     } catch (error) {
         // console.error('Failed to update alt text:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     } finally {
         bulkProcessing.value = false;
         bulkProgress.value = 0;
@@ -1319,7 +1319,7 @@ const deleteMedia = async (media) => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to delete media:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -1353,7 +1353,7 @@ const deleteFolder = async (folder) => {
         fetchStatistics();
     } catch (error) {
         // console.error('Failed to delete folder:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     }
 };
 

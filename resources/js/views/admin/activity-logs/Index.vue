@@ -237,6 +237,8 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Button from '../../../components/ui/button.vue';
 import Pagination from '../../../components/ui/pagination.vue';
@@ -249,6 +251,7 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const logs = ref([]);
 const users = ref([]);
@@ -334,19 +337,24 @@ const clearDateFilter = () => {
 };
 
 const clearLogs = async () => {
-    if (!confirm(t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.logs.actions.clear'),
+        message: t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?',
+        variant: 'danger',
+        confirmText: t('common.actions.clear'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/activity-logs/clear');
+        toast.success(t('features.system.logs.messages.cleared'));
         fetchLogs();
-        if (typeof fetchStatistics === 'function') fetchStatistics();
     } catch (error) {
         console.error('Failed to clear logs:', error);
+        toast.error('Error', t('features.system.logs.messages.failed_clear'));
     }
 };
-
 const exportLogs = async () => {
     exporting.value = true;
     try {
@@ -371,7 +379,7 @@ const exportLogs = async () => {
         window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Failed to export activity logs:', error);
-        alert('Gagal mengekspor log aktivitas');
+        toast.error('Error', t('features.system.logs.messages.failed_export') || 'Gagal mengekspor log aktivitas');
     } finally {
         exporting.value = false;
     }

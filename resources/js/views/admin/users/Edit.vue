@@ -222,21 +222,21 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import MediaPicker from '../../../components/MediaPicker.vue';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
+import { useToast } from '../../../composables/useToast';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 import { useAuthStore, ROLE_RANKS } from '../../../stores/auth';
-import toast from '../../../services/toast';
 import { computed } from 'vue';
 
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const authStore = useAuthStore();
+const toast = useToast();
 
 const loading = ref(true);
 const saving = ref(false);
@@ -282,7 +282,7 @@ const fetchUser = async () => {
         // Allow if self OR if super-admin (rank >= 100) OR if strictly higher rank
         const isSuperAdmin = authStore.getRoleRank() >= 100;
         if (!isSuperAdmin && !authStore.isHigherThan(data) && authStore.user?.id !== data.id) {
-            toast.error(t('common.messages.error.action'), t('features.users.messages.hierarchy_restriction'));
+            toast.error.action(new Error(t('features.users.messages.hierarchy_restriction')));
             router.push({ name: 'users.index' });
             return;
         }
@@ -301,7 +301,7 @@ const fetchUser = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch user:', error);
-        alert(t('features.users.messages.fetchFailed'));
+        toast.error.load();
         router.push({ name: 'users.index' });
     } finally {
         loading.value = false;
@@ -310,7 +310,7 @@ const fetchUser = async () => {
 
 const handleSubmit = async () => {
     if (form.value.roles.length === 0) {
-        alert(t('features.users.messages.roleRequired'));
+        toast.error.validation(t('features.users.messages.roleRequired'));
         return;
     }
 
@@ -326,10 +326,11 @@ const handleSubmit = async () => {
             await authStore.fetchUser();
         }
 
+        toast.success.update('User');
         router.push({ name: 'users.index' });
     } catch (error) {
         console.error('Failed to update user:', error);
-        alert(error.response?.data?.message || t('features.users.messages.updateFailed'));
+        toast.error.update(error, 'User');
     } finally {
         saving.value = false;
     }

@@ -88,9 +88,11 @@ import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
 import ContentMain from '../../../components/content/ContentMain.vue';
 import ContentSidebar from '../../../components/content/ContentSidebar.vue';
 import { useAutoSave } from '../../../composables/useAutoSave';
+import { useToast } from '../../../composables/useToast';
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
 
 const isSidebarOpen = ref(true);
 
@@ -226,10 +228,11 @@ const handleSubmit = async () => {
             ? await api.put(endpoint, payload)
             : await api.post(endpoint, payload);
         
+        toast.success.create();
         router.push({ name: 'contents' });
     } catch (error) {
         console.error('Failed to create content:', error);
-        alert(error.response?.data?.message || t('features.content.messages.createFailed'));
+        toast.error.create(error);
     } finally {
         loading.value = false;
     }

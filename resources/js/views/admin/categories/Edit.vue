@@ -160,6 +160,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import { Loader2, X } from 'lucide-vue-next';
 
@@ -183,6 +184,7 @@ import SelectValue from '@/components/ui/select-value.vue';
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
 
 const loading = ref(true);
 const saving = ref(false);
@@ -269,8 +271,8 @@ const fetchCategory = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch category:', error);
-        alert(t('common.messages.error.fetchFailed'));
-        router.push({ name: 'categories' });
+        toast.error.load(error);
+        router.push({ name: 'categories.index' });
     }
 };
 
@@ -282,10 +284,11 @@ const handleSubmit = async () => {
             payload.parent_id = null;
         }
         await api.put(`/admin/cms/categories/${route.params.id}`, payload);
-        router.push({ name: 'categories' });
+        toast.success.update('Category');
+        router.push({ name: 'categories.index' });
     } catch (error) {
         console.error('Failed to update category:', error);
-        alert(error.response?.data?.message || t('features.categories.form.saveError'));
+        toast.error.update(error, 'Category');
     } finally {
         saving.value = false;
     }

@@ -84,6 +84,8 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { parseSingleResponse } from '../../../utils/responseParser';
 import { Loader2 } from 'lucide-vue-next';
 
 import Button from '@/components/ui/button.vue';
@@ -100,9 +102,11 @@ import CardFooter from '@/components/ui/card-footer.vue';
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
 
 const loading = ref(true);
 const saving = ref(false);
+const tagId = route.params.id;
 
 const form = ref({
     name: '',
@@ -130,7 +134,7 @@ const slugify = (text) => {
 
 const fetchTag = async () => {
     try {
-        const response = await api.get(`/admin/cms/tags/${route.params.id}`);
+        const response = await api.get(`/admin/cms/tags/${tagId}`);
         const data = response.data?.data || response.data;
         form.value = {
             name: data.name || '',
@@ -139,8 +143,8 @@ const fetchTag = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch tag:', error);
-        alert(t('common.messages.error.fetchFailed', 'Failed to fetch tag'));
-        router.push({ name: 'tags' });
+        toast.error.load(error);
+        router.push({ name: 'tags.index' });
     } finally {
         loading.value = false;
     }
@@ -149,11 +153,12 @@ const fetchTag = async () => {
 const handleSubmit = async () => {
     saving.value = true;
     try {
-        await api.put(`/admin/cms/tags/${route.params.id}`, form.value);
-        router.push({ name: 'tags' });
+        await api.put(`/admin/cms/tags/${tagId}`, form.value);
+        toast.success.update('Tag');
+        router.push({ name: 'tags.index' });
     } catch (error) {
         console.error('Failed to update tag:', error);
-        alert(error.response?.data?.message || t('features.tags.form.saveError', 'Failed to save tag'));
+        toast.error.update(error, 'Tag');
     } finally {
         saving.value = false;
     }

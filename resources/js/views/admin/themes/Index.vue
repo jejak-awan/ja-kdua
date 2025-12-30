@@ -227,6 +227,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import ThemePreview from '../../../components/themes/ThemePreview.vue';
 import ThemeCustomizer from '../../../components/themes/ThemeCustomizer.vue';
@@ -241,6 +243,7 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const themes = ref([]);
 const selectedType = ref('');
@@ -267,27 +270,32 @@ const scanThemes = async () => {
         const response = await api.post('/admin/cms/themes/scan');
         await fetchThemes();
         const count = response.data?.data?.count || 0;
-        alert(t('features.themes.messages.scanSuccess', { count }));
+        toast.success(t('features.themes.messages.scanSuccess', { count }));
     } catch (error) {
         console.error('Failed to scan themes:', error);
-        alert(t('features.themes.messages.scanFailed'));
+        toast.error('Error', t('features.themes.messages.scanFailed'));
     } finally {
         scanning.value = false;
     }
 };
 
 const activateTheme = async (theme) => {
-    if (!confirm(t('features.themes.messages.activateConfirm', { name: theme.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.themes.actions.activate'),
+        message: t('features.themes.messages.activateConfirm', { name: theme.name }),
+        variant: 'info',
+        confirmText: t('features.themes.actions.activate'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post(`/admin/cms/themes/${theme.id}/activate`);
         await fetchThemes();
-        alert(t('features.themes.messages.activateSuccess'));
+        toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error) {
         console.error('Failed to activate theme:', error);
-        alert(error.response?.data?.message || t('features.themes.messages.activateFailed'));
+        toast.error('Error', error.response?.data?.message || t('features.themes.messages.activateFailed'));
     }
 };
 
@@ -297,15 +305,18 @@ const validateTheme = async (theme) => {
         const data = response.data?.data || response.data;
         
         if (data.valid) {
-            alert(t('features.themes.messages.validateSuccess'));
+            toast.success(t('features.themes.messages.validateSuccess'));
         } else {
-            alert(t('features.themes.messages.validateFailed') + '\n' + data.errors.join('\n'));
+            // Can be replaced with a modal or detailed toast if needed, 
+            // but multiline toast might be tricky. Using error toast with detail.
+            console.error('Validation errors:', data.errors);
+            toast.error(t('features.themes.messages.validateFailed'), data.errors.join(', '));
         }
         
         await fetchThemes();
     } catch (error) {
         console.error('Failed to validate theme:', error);
-        alert(t('features.themes.messages.validateError'));
+        toast.error('Error', t('features.themes.messages.validateError'));
     }
 };
 

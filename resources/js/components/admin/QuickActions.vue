@@ -8,7 +8,7 @@
     </CardHeader>
     
     <CardContent>
-      <div class="grid grid-cols-1 gap-3">
+      <div class="grid grid-cols-2 gap-3">
         <!-- Create Post -->
         <button
           v-if="authStore.hasPermission('create content')"

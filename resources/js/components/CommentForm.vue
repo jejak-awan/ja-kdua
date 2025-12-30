@@ -63,7 +63,8 @@ import Input from './ui/input.vue';
 import Label from './ui/label.vue';
 import Textarea from './ui/textarea.vue';
 import Button from './ui/button.vue';
-import { toast } from 'vue-sonner'; // Assuming sonner is used, if not we'll use window.alert fallback or standard toast if available
+import Button from './ui/button.vue';
+import toast from '../services/toast';
 
 const props = defineProps({
     contentId: {
@@ -103,11 +104,10 @@ const handleSubmit = async () => {
         };
 
         emit('submitted');
-        // If toast available: toast.success(t('features.comments.success'))
+        toast.success(t('common.messages.success.created', { item: 'Comment' }));
     } catch (error) {
         console.error('Error posting comment:', error);
-        // If toast available: toast.error(t('features.comments.error'))
-        alert(t('features.comments.error')); 
+        toast.error('Error', t('features.comments.error'));
     } finally {
         loading.value = false;
     }

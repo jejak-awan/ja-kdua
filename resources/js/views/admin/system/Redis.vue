@@ -484,7 +484,10 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 import api from '@/services/api'
+import toast from '@/services/toast'
+import { useConfirm } from '@/composables/useConfirm'
 import { cn } from '@/lib/utils'
 import Tabs from '@/components/ui/tabs.vue'
 import TabsList from '@/components/ui/tabs-list.vue'
@@ -527,6 +530,7 @@ import {
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
+const { confirm } = useConfirm()
 const activeTab = ref('statistics')
 const tabs = [
   { id: 'statistics', label: 'Statistics' },
@@ -680,35 +684,49 @@ const getCacheStatus = async () => {
 }
 
 const flushCache = async (type) => {
-  if (!confirm(t('features.redis.messages.flushConfirm', { type }))) {
+  const confirmed = await confirm({
+    title: t('features.redis.messages.flushTitle', 'Flush Cache'),
+    message: t('features.redis.messages.flushConfirm', { type }),
+    variant: 'destructive',
+    confirmText: t('features.redis.messages.flushAction', 'Flush'),
+  })
+
+  if (!confirmed) {
     return
   }
 
   flushing.value = true
   try {
     await api.post('/admin/cms/redis/flush-cache', { type })
-    alert(t('features.redis.messages.flushSuccess', { type }))
+    toast.success(t('features.redis.messages.flushSuccess', { type }))
     loadCacheStats()
   } catch (error) {
-    alert(error.response?.data?.message || t('features.redis.messages.flushFailed'))
+    toast.error('Error', error.response?.data?.message || t('features.redis.messages.flushFailed'))
   } finally {
     flushing.value = false
   }
 }
 
 const warmCache = async () => {
-  if (!confirm(t('features.redis.messages.warmConfirm'))) {
+  const confirmed = await confirm({
+    title: t('features.redis.messages.warmTitle', 'Warm Cache'),
+    message: t('features.redis.messages.warmConfirm'),
+    variant: 'default',
+    confirmText: t('features.redis.messages.warmAction', 'Warm Up'),
+  })
+
+  if (!confirmed) {
     return
   }
 
   warming.value = true
   try {
     await api.post('/admin/cms/redis/warm-cache')
-    alert(t('features.redis.messages.warmSuccess'))
+    toast.success(t('features.redis.messages.warmSuccess'))
     loadCacheStats()
     loadStats()
   } catch (error) {
-    alert(error.response?.data?.message || t('features.redis.messages.warmFailed'))
+    toast.error('Error', error.response?.data?.message || t('features.redis.messages.warmFailed'))
   } finally {
     warming.value = false
   }

@@ -63,6 +63,21 @@
         "confirm": {
             "delete": "Are you sure you want to delete webhook \"{name}\"?"
         },
+        "events": {
+            "content": {
+                "created": "Content Created",
+                "updated": "Content Updated",
+                "deleted": "Content Deleted"
+            },
+            "user": {
+                "created": "User Created",
+                "updated": "User Updated"
+            },
+            "comment": {
+                "created": "Comment Created",
+                "approved": "Comment Approved"
+            }
+        },
         "modal": {
             "title_create": "Create Webhook",
             "title_edit": "Edit Webhook",

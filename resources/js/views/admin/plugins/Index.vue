@@ -22,8 +22,8 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
-                                <button v-if="!plugin.is_active" @click="activatePlugin(plugin)" class="text-green-600 hover:text-green-900">{{ t('features.developer.plugins.actions.activate') }}</button>
-                                <button v-else @click="deactivatePlugin(plugin)" class="text-yellow-600 hover:text-yellow-900">{{ t('features.developer.plugins.actions.deactivate') }}</button>
+                                <button v-if="!plugin.is_active" @click="togglePlugin(plugin)" class="text-green-600 hover:text-green-900">{{ t('features.developer.plugins.actions.activate') }}</button>
+                                <button v-else @click="togglePlugin(plugin)" class="text-yellow-600 hover:text-yellow-900">{{ t('features.developer.plugins.actions.deactivate') }}</button>
                                 <button @click="openSettings(plugin)" class="text-indigo-600 hover:text-indigo-900">{{ t('features.developer.plugins.actions.settings') }}</button>
                             </div>
                         </td>
@@ -36,9 +36,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import PluginSettingsModal from '../../../components/plugins/PluginSettingsModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
@@ -57,28 +58,30 @@ const fetchPlugins = async () => {
         plugins.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch plugins:', error);
+        toast.error(t('features.developer.plugins.messages.failed_fetch'));
     } finally {
         loading.value = false;
     }
 };
 
-const activatePlugin = async (plugin) => {
+const togglePlugin = async (plugin) => {
     try {
-        await api.post(`/admin/cms/plugins/${plugin.id}/activate`);
-        await fetchPlugins();
+        if (plugin.is_active) {
+            await api.post(`/admin/cms/plugins/${plugin.id}/deactivate`);
+            plugin.is_active = false;
+            toast.success(t('features.developer.plugins.messages.deactivated'));
+        } else {
+            await api.post(`/admin/cms/plugins/${plugin.id}/activate`);
+            plugin.is_active = true;
+            toast.success(t('features.developer.plugins.messages.activated'));
+        }
     } catch (error) {
-        console.error('Failed to activate plugin:', error);
-        alert(t('features.developer.plugins.messages.failed_activate'));
-    }
-};
-
-const deactivatePlugin = async (plugin) => {
-    try {
-        await api.post(`/admin/cms/plugins/${plugin.id}/deactivate`);
-        await fetchPlugins();
-    } catch (error) {
-        console.error('Failed to deactivate plugin:', error);
-        alert(t('features.developer.plugins.messages.failed_deactivate'));
+        console.error('Failed to toggle plugin:', error);
+        toast.error(
+            plugin.is_active
+                ? t('features.developer.plugins.messages.failed_deactivate')
+                : t('features.developer.plugins.messages.failed_activate')
+        );
     }
 };
 

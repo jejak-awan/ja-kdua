@@ -241,6 +241,8 @@ import { ref, onMounted } from 'vue';
 import api from '../../services/api';
 import { parseResponse, parseSingleResponse } from '../../utils/responseParser';
 import QRCode from 'qrcode';
+import toast from '../../services/toast';
+import { useConfirm } from '../../composables/useConfirm';
 
 const status = ref({
     enabled: false,
@@ -258,6 +260,7 @@ const generating = ref(false);
 const enabling = ref(false);
 const disabling = ref(false);
 const regenerating = ref(false);
+const { confirm } = useConfirm();
 
 const fetchStatus = async () => {
     try {
@@ -294,15 +297,15 @@ const generateSecret = async () => {
             backupCodes.value = data.backup_codes;
         }
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to generate 2FA secret');
+        toast.error('Error', error.response?.data?.message || 'Failed to generate 2FA secret');
     } finally {
         generating.value = false;
     }
 };
 
 const enable2FA = async () => {
-    if (!verificationCode.value || verificationCode.value.length !== 6) {
-        alert('Please enter a 6-digit verification code');
+        if (!verificationCode.value || verificationCode.value.length !== 6) {
+        toast.error('Validation Error', 'Please enter a 6-digit verification code');
         return;
     }
 
@@ -313,13 +316,13 @@ const enable2FA = async () => {
         });
         const message = response.data.message;
         
-        alert(message || 'Two-factor authentication enabled successfully');
+        toast.success('Success', message || 'Two-factor authentication enabled successfully');
         verificationCode.value = '';
         qrCodeUrl.value = null;
         secret.value = null;
         await fetchStatus();
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to enable 2FA');
+        toast.error('Error', error.response?.data?.message || 'Failed to enable 2FA');
     } finally {
         enabling.value = false;
     }
@@ -327,11 +330,18 @@ const enable2FA = async () => {
 
 const disable2FA = async () => {
     if (!disablePassword.value) {
-        alert('Please enter your password');
+        toast.error('Validation Error', 'Please enter your password');
         return;
     }
 
-    if (!confirm('Are you sure you want to disable Two-Factor Authentication? This will reduce your account security.')) {
+    const confirmed = await confirm({
+        title: 'Disable 2FA',
+        message: 'Are you sure you want to disable Two-Factor Authentication? This will reduce your account security.',
+        variant: 'danger',
+        confirmText: 'Disable 2FA',
+    });
+
+    if (!confirmed) {
         return;
     }
 
@@ -342,19 +352,26 @@ const disable2FA = async () => {
         });
         const message = response.data.message;
         
-        alert(message || 'Two-factor authentication disabled successfully');
+        toast.success('Success', message || 'Two-factor authentication disabled successfully');
         disablePassword.value = '';
         backupCodes.value = [];
         await fetchStatus();
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to disable 2FA');
+        toast.error('Error', error.response?.data?.message || 'Failed to disable 2FA');
     } finally {
         disabling.value = false;
     }
 };
 
 const regenerateBackupCodes = async () => {
-    if (!confirm('This will invalidate your existing backup codes. Continue?')) {
+    const confirmed = await confirm({
+        title: 'Regenerate Backup Codes',
+        message: 'This will invalidate your existing backup codes. Continue?',
+        variant: 'warning',
+        confirmText: 'Regenerate',
+    });
+
+    if (!confirmed) {
         return;
     }
 
@@ -374,10 +391,10 @@ const regenerateBackupCodes = async () => {
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
         }
-        alert(message || 'Backup codes regenerated successfully');
+        toast.success('Success', message || 'Backup codes regenerated successfully');
         await fetchStatus();
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to regenerate backup codes');
+        toast.error('Error', error.response?.data?.message || 'Failed to regenerate backup codes');
     } finally {
         regenerating.value = false;
     }
@@ -388,10 +405,10 @@ const copySecret = async () => {
     
     try {
         await navigator.clipboard.writeText(secret.value);
-        alert('Secret key copied to clipboard');
+        toast.success('Copied', 'Secret key copied to clipboard');
     } catch (error) {
         console.error('Error copying secret:', error);
-        alert('Failed to copy secret key');
+        toast.error('Error', 'Failed to copy secret key');
     }
 };
 

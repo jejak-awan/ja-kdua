@@ -218,6 +218,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import api from '../../services/api';
 import ThemePreview from './ThemePreview.vue';
 import { toast } from '../../services/toast';
+import { useConfirm } from '../../composables/useConfirm';
 
 const props = defineProps({
     theme: { type: Object, required: true },
@@ -322,8 +323,18 @@ const updatePreviewTheme = () => {
     };
 };
 
-const resetSettings = () => {
-    if (confirm('Are you sure you want to reset all theme settings to defaults? This action cannot be undone.')) {
+const { confirm } = useConfirm();
+
+const resetSettings = async () => {
+    const confirmed = await confirm({
+        title: 'Reset Theme Settings',
+        message: 'Are you sure you want to reset all theme settings to defaults? This action cannot be undone.',
+        confirmText: 'Yes, Reset',
+        cancelText: 'Cancel',
+        variant: 'warning'
+    });
+
+    if (confirmed) {
         formValues.value = {};
         customCss.value = '';
         loadSettings();

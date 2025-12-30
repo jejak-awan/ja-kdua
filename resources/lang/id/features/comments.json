@@ -25,7 +25,9 @@
         "markSpam": "Tandai Spam",
         "reply": "Balas",
         "approveAll": "Setujui Semua",
-        "rejectAll": "Tolak Semua"
+        "rejectAll": "Tolak Semua",
+        "delete": "Hapus",
+        "bulkAction": "Aksi Massal"
     },
     "filter": {
         "allStatus": "Semua Status",

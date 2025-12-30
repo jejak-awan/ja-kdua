@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n';
 import config from '../lang/config';
-import en from '../lang/en';
-import id from '../lang/id';
+import en from '../lang/en/index.js';
+import id from '../lang/id/index.js';
 
 /**
  * Detect the best locale to use

@@ -89,6 +89,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 import api from '../../services/api';
+import toast from '../../services/toast';
 import Button from '../ui/button.vue';
 
 const props = defineProps({
@@ -161,11 +162,11 @@ const handleResize = async () => {
             height: height.value,
             maintain_aspect_ratio: maintainAspectRatio.value,
         });
-        alert(t('features.media.modals.resize.success'));
+        toast.success(t('features.media.modals.resize.success'));
         emit('resized');
     } catch (error) {
         console.error('Failed to resize media:', error);
-        alert(error.response?.data?.message || t('features.media.modals.resize.failed'));
+        toast.error('Error', error.response?.data?.message || t('features.media.modals.resize.failed'));
     } finally {
         resizing.value = false;
     }

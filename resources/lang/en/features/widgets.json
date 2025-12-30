@@ -4,9 +4,9 @@
     "loading": "Loading...",
     "empty": "No widgets found",
     "table": {
-        "name": "Name",
+        "title": "Title",
         "type": "Type",
-        "position": "Position",
+        "location": "Location",
         "actions": "Actions"
     },
     "actions": {
@@ -14,7 +14,7 @@
         "delete": "Delete"
     },
     "messages": {
-        "deleteConfirm": "Delete widget \"{name}\"?",
+        "deleteConfirm": "Delete widget \"{title}\"?",
         "deleteFailed": "Failed to delete widget",
         "saveFailed": "Failed to save widget"
     },
@@ -22,9 +22,9 @@
         "widget": {
             "titleEdit": "Edit Widget",
             "titleCreate": "Create Widget",
-            "name": "Name",
+            "title": "Title",
             "type": "Type",
-            "position": "Position",
+            "location": "Location",
             "positionPlaceholder": "sidebar, footer, etc.",
             "content": "Content",
             "active": "Active",

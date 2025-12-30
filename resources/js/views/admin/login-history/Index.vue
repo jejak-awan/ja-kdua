@@ -173,6 +173,8 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Button from '../../../components/ui/button.vue';
 import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
@@ -183,6 +185,7 @@ import SelectTrigger from '../../../components/ui/select-trigger.vue';
 import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const history = ref([]);
 const users = ref([]);
@@ -254,16 +257,23 @@ const clearDateFilter = () => {
 };
 
 const clearLogs = async () => {
-    if (!confirm(t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.logs.actions.clear'),
+        message: t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?',
+        variant: 'destructive',
+        confirmText: t('features.system.logs.actions.clear'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.post('/admin/cms/login-history/clear');
-        fetchHistory();
-        fetchStatistics();
+        await fetchHistory();
+        await fetchStatistics();
+        toast.success(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
     } catch (error) {
         console.error('Failed to clear logs:', error);
+        toast.error('Error', t('features.system.logs.messages.clearFailed') || 'Failed to clear logs');
     }
 };
 
@@ -290,7 +300,7 @@ const exportHistory = async () => {
         window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Failed to export:', error);
-        alert(t('features.login_history.export.failed'));
+        toast.error('Error', t('features.login_history.export.failed'));
     } finally {
         exporting.value = false;
     }

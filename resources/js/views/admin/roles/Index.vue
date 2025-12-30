@@ -358,7 +358,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import Button from '../../../components/ui/button.vue';
 import Badge from '../../../components/ui/badge.vue';
 import Input from '../../../components/ui/input.vue';
@@ -385,6 +385,8 @@ import { useAuthStore } from '../../../stores/auth';
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
+import { useConfirm } from '../../../composables/useConfirm';
 
 const loading = ref(true);
 const roles = ref([]);
@@ -455,7 +457,7 @@ const fetchRoles = async (page = 1) => {
 
     } catch (error) {
         console.error('Failed to fetch roles:', error);
-        toast.error(t('features.roles.messages.fetchFailed') || 'Failed to fetch roles');
+        toast.error.load(error);
     } finally {
         loading.value = false;
     }
@@ -488,6 +490,8 @@ const toggleSelectAll = (checked) => {
     }
 };
 
+const { confirm } = useConfirm();
+
 // Bulk Actions
 const handleBulkAction = async (action) => {
     if (!action) return;
@@ -495,7 +499,14 @@ const handleBulkAction = async (action) => {
     if (action === 'delete') {
         if (!selectedRoles.value.length) return;
 
-        if (!confirm(t('common.messages.confirm.bulkDelete'))) {
+        const confirmed = await confirm({
+            title: t('common.messages.confirm.title'),
+            message: t('common.messages.confirm.bulkDelete'),
+            variant: 'danger',
+            confirmText: t('common.actions.delete'),
+        });
+
+        if (!confirmed) {
             bulkActionSelection.value = ''; // Reset selection
             return;
         }
@@ -506,13 +517,13 @@ const handleBulkAction = async (action) => {
                 ids: selectedRoles.value
             });
             
-            toast.success(t('common.messages.success.deleted', { item: `${selectedRoles.value.length} Roles` }));
+            toast.success.delete(`${selectedRoles.value.length} Roles`);
             selectedRoles.value = []; // Clear selection
             bulkActionSelection.value = ''; // Reset dropdown
             fetchRoles(pagination.value.current_page); // Refresh list
         } catch (error) {
             console.error('Bulk action failed:', error);
-            toast.error(error.response?.data?.message || 'Bulk action failed');
+            toast.error.action(error);
         }
     }
 };
@@ -522,26 +533,33 @@ const editRole = (role) => {
 };
 
 const deleteRole = async (role) => {
-    if (!confirm(t('features.roles.messages.deleteConfirm', { name: role.name }))) return;
+    const confirmed = await confirm({
+        title: t('common.messages.confirm.title'),
+        message: t('features.roles.messages.deleteConfirm', { name: role.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/roles/${role.id}`);
-        toast.success(t('common.messages.success.deleted', { item: 'Role' }));
+        toast.success.delete('Role');
          fetchRoles(pagination.value.current_page);
     } catch (error) {
         console.error('Failed to delete role:', error);
-        toast.error(error.response?.data?.message || t('features.roles.messages.deleteFailed'));
+        toast.error.delete(error, 'Role');
     }
 };
 
 const duplicateRole = async (role) => {
     try {
         await api.post(`/admin/cms/roles/${role.id}/duplicate`);
-        toast.success(t('common.messages.success.created', { item: 'Role copy' }));
+        toast.success.duplicate();
         fetchRoles(pagination.value.current_page);
     } catch (error) {
         console.error('Failed to duplicate role:', error);
-        toast.error(t('features.roles.messages.duplicateFailed'));
+        toast.error.action(error);
     }
 };
 

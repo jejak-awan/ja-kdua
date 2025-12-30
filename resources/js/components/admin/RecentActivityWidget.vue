@@ -55,7 +55,7 @@
                                     class="h-5 px-1.5 text-[10px] font-bold uppercase tracking-wider border-none"
                                     :class="getActionBadgeClass(activity.action || activity.type)"
                                 >
-                                    {{ activity.action || activity.type || 'unknown' }}
+                                    {{ getActionLabel(activity.action || activity.type) }}
                                 </Badge>
                                 <span class="line-clamp-1">{{ activity.description }}</span>
                             </p>
@@ -163,6 +163,20 @@ const getActionBadgeClass = (action) => {
     if (a.includes('delete')) return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
     if (a.includes('login') || a.includes('logout')) return 'bg-purple-500/10 text-purple-600 dark:text-purple-400';
     return 'bg-muted text-muted-foreground';
+};
+
+const getActionLabel = (action) => {
+    if (!action) return '-';
+    // Check security event types first (some activity logs might be security related)
+    let key = `features.security.logs.eventTypes.${action}`;
+    let translated = t(key);
+    
+    if (translated === key) {
+        key = `features.activityLogs.filters.types.${action}`;
+        translated = t(key);
+    }
+    
+    return translated !== key ? translated : action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 onMounted(() => {

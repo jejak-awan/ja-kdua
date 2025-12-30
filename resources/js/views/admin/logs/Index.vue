@@ -111,14 +111,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+
 const logFiles = ref([]);
 const selectedLogFile = ref(null);
 const logContent = ref('');
@@ -185,30 +189,35 @@ const downloadLog = async (logFile) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', logFile.name);
+        link.setAttribute('download', 'system.log');
         document.body.appendChild(link);
         link.click();
         link.remove();
     } catch (error) {
-        console.error('Failed to download log:', error);
-        alert(t('features.system.logs.messages.failed_download'));
+        console.error('Failed to download logs:', error);
+        toast.error('Error', t('features.system.logs.messages.failed_download'));
     }
 };
 
 const clearLogs = async () => {
-    if (!confirm(t('features.system.logs.confirm.clear'))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.logs.actions.clear'),
+        message: t('features.system.logs.confirm.clear'),
+        variant: 'danger',
+        confirmText: t('common.actions.clear'),
+    });
+
+    if (!confirmed) return;
 
     clearing.value = true;
     try {
-        await api.post('/admin/cms/logs/clear');
-        alert(t('features.system.logs.messages.cleared'));
+        await api.delete('/admin/cms/logs');
+        toast.success(t('features.system.logs.messages.cleared'));
         logContent.value = '';
-        await fetchLogFiles();
+        fetchLogFiles();
     } catch (error) {
         console.error('Failed to clear logs:', error);
-        alert(t('features.system.logs.messages.failed_clear'));
+        toast.error('Error', t('features.system.logs.messages.failed_clear'));
     } finally {
         clearing.value = false;
     }

@@ -203,8 +203,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import MediaPicker from '../../../components/MediaPicker.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import { useToast } from '../../../composables/useToast';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
@@ -215,6 +215,7 @@ import { useAuthStore, ROLE_RANKS } from '../../../stores/auth';
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
+const toast = useToast();
 
 const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 
@@ -249,17 +250,18 @@ const fetchRoles = async () => {
 
 const handleSubmit = async () => {
     if (form.value.roles.length === 0) {
-        alert(t('features.users.messages.roleRequired'));
+        toast.error.validation(t('features.users.messages.roleRequired'));
         return;
     }
 
     saving.value = true;
     try {
         await api.post('/admin/cms/users', form.value);
+        toast.success.create('User');
         router.push({ name: 'users.index' });
     } catch (error) {
         console.error('Failed to create user:', error);
-        alert(error.response?.data?.message || t('features.users.messages.createFailed'));
+        toast.error.create(error, 'User');
     } finally {
         saving.value = false;
     }

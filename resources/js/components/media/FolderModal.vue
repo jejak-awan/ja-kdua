@@ -91,7 +91,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMediaToast } from '@/composables/useMediaToast.js';
+import { useToast } from '@/composables/useToast.js';
 import { X } from 'lucide-vue-next';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
@@ -106,7 +106,7 @@ import { useAuthStore } from '../../stores/auth';
 
 const authStore = useAuthStore();
 const { t } = useI18n();
-const mediaToast = useMediaToast();
+const toast = useToast();
 
 const emit = defineEmits(['close', 'created']);
 
@@ -141,7 +141,7 @@ const handleSubmit = async () => {
         form.value = { name: '', parent_id: null, is_shared: false };
     } catch (error) {
         console.error('Failed to create folder:', error);
-        mediaToast.error.fromResponse(error);
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

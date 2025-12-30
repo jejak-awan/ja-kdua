@@ -233,6 +233,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Card from '../../../components/ui/card.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
@@ -251,6 +253,8 @@ import { ArrowLeft, Download, Search, Loader2, FileText, Check, Archive, Trash2 
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
+const { confirm } = useConfirm();
 
 const form = ref(null);
 const submissions = ref([]);
@@ -360,13 +364,23 @@ const archiveSubmission = async (submission) => {
 };
 
 const deleteSubmission = async (submission) => {
-    if (!confirm(t('features.forms.messages.submissionDeleteConfirm'))) return;
+    const confirmed = await confirm({
+        title: t('features.forms.submissions.actions.delete'),
+        message: t('features.forms.submissions.messages.deleteConfirm'),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
     try {
         await api.delete(`/admin/cms/form-submissions/${submission.id}`);
         submissions.value = submissions.value.filter(s => s.id !== submission.id);
+        toast.success(t('features.forms.submissions.messages.deleteSuccess'));
         fetchStatistics();
     } catch (error) {
         console.error('Error deleting submission:', error);
+        toast.error('Error', error.response?.data?.message || t('features.forms.submissions.messages.deleteFailed'));
     }
 };
 
@@ -378,10 +392,17 @@ const exportSubmissions = async () => {
             ...(dateTo.value && { date_to: dateTo.value })
         });
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        window.open(`${baseUrl}/api/v1/admin/cms/forms/${formId.value}/submissions/export?${params.toString()}`);
+        const url = `${baseUrl}/api/v1/admin/cms/forms/${formId.value}/submissions/export?${params.toString()}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `submissions-${formId.value}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success(t('features.forms.submissions.messages.exportSuccess'));
     } catch (error) {
-        console.error('Error exporting:', error);
-        alert(t('features.forms.messages.exportFailed'));
+        console.error('Error exporting submissions:', error);
+        toast.error('Error', t('features.forms.submissions.messages.exportFailed'));
     }
 };
 

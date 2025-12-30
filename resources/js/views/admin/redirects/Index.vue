@@ -152,6 +152,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 import RedirectModal from '../../../components/redirects/RedirectModal.vue';
 import Card from '../../../components/ui/card.vue';
 import CardContent from '../../../components/ui/card-content.vue';
@@ -172,6 +174,9 @@ import {
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
+
 const redirects = ref([]);
 const statistics = ref(null);
 const loading = ref(false);
@@ -222,16 +227,22 @@ const editRedirect = (redirect) => {
 };
 
 const deleteRedirect = async (redirect) => {
-    if (!confirm(t('features.redirects.messages.deleteConfirm', { from: redirect.from_url }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.redirects.actions.delete'),
+        message: t('features.redirects.messages.deleteConfirm', { from: redirect.from_url }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/redirects/${redirect.id}`);
-        await fetchRedirects();
+        toast.success.delete(t('features.redirects.title'));
+        fetchRedirects();
     } catch (error) {
         console.error('Failed to delete redirect:', error);
-        alert(t('features.redirects.messages.deleteFailed'));
+        toast.error.delete(error, t('features.redirects.title'));
     }
 };
 

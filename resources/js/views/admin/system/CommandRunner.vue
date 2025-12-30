@@ -6,7 +6,7 @@
       <h2 class="text-xl font-bold mb-2">{{ $t('features.command_runner.access_denied') }}</h2>
       <p class="text-muted-foreground">{{ $t('features.command_runner.super_admin_only') }}</p>
       <Button @click="$router.push('/admin/dashboard')" class="mt-4">
-        {{ $t('common.navigation.dashboard') }}
+        {{ $t('common.navigation.menu.dashboard') }}
       </Button>
     </div>
 
@@ -253,9 +253,12 @@ async function runCommand() {
 
     // Add to history
     addToHistory({
-      command: fullCommand,
-      exitCode: exitCode.value,
-      timestamp: new Date().toISOString()
+      id: Date.now(),
+      command: selectedCommand.value,
+      parameters: parameters.value,
+      user: { name: authStore.user?.name || 'System' },
+      exit_code: exitCode.value,
+      created_at: new Date().toISOString()
     });
 
     if (exitCode.value === 0) {
@@ -300,12 +303,27 @@ function saveHistory() {
 function loadHistory() {
   const saved = localStorage.getItem('command_runner_history');
   if (saved) {
-    history.value = JSON.parse(saved);
+    try {
+      const parsed = JSON.parse(saved);
+      history.value = parsed.map(item => ({
+        id: item.id || Date.now() + Math.random(),
+        command: item.command,
+        parameters: item.parameters || (item.command.includes(' ') ? item.command.split(' ').slice(1).join(' ') : ''),
+        user: item.user || { name: 'System' },
+        exit_code: item.exit_code !== undefined ? item.exit_code : (item.exitCode !== undefined ? item.exitCode : 0),
+        created_at: item.created_at || item.timestamp || new Date().toISOString()
+      }));
+    } catch (e) {
+      console.error('Failed to parse history:', e);
+      history.value = [];
+    }
   }
 }
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleString();
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return isNaN(date.getTime()) ? '-' : date.toLocaleString();
 }
 </script>
 

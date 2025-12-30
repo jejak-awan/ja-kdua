@@ -4,9 +4,9 @@
     "loading": "Memuat...",
     "empty": "Tidak ada widget ditemukan",
     "table": {
-        "name": "Nama",
+        "title": "Judul",
         "type": "Tipe",
-        "position": "Posisi",
+        "location": "Lokasi",
         "actions": "Aksi"
     },
     "actions": {
@@ -14,7 +14,7 @@
         "delete": "Hapus"
     },
     "messages": {
-        "deleteConfirm": "Hapus widget \"{name}\"?",
+        "deleteConfirm": "Hapus widget \"{title}\"?",
         "deleteFailed": "Gagal menghapus widget",
         "saveFailed": "Gagal menyimpan widget"
     },
@@ -22,10 +22,10 @@
         "widget": {
             "titleEdit": "Ubah Widget",
             "titleCreate": "Buat Widget",
-            "name": "Nama",
+            "title": "Judul",
             "type": "Tipe",
-            "position": "Posisi",
-            "positionPlaceholder": "sidebar, footer, dll.",
+            "location": "Lokasi",
+            "locationPlaceholder": "sidebar, footer, dll.",
             "content": "Konten",
             "active": "Aktif",
             "saving": "Menyimpan..."

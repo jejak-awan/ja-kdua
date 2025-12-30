@@ -334,7 +334,8 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
+import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import Pagination from '../../../components/ui/pagination.vue';
@@ -354,6 +355,8 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 
 const loading = ref(false);
 const comments = ref([]);
@@ -401,7 +404,14 @@ const bulkAction = async (action) => {
             break;
     }
     
-    if (!confirm(confirmMsg)) {
+    const confirmed = await confirm({
+        title: t('features.comments.actions.bulkAction'),
+        message: confirmMsg,
+        variant: action === 'delete' ? 'danger' : 'warning',
+        confirmText: t('common.actions.confirm'),
+    });
+
+    if (!confirmed) {
         bulkActionSelection.value = '';
         return;
     }
@@ -414,10 +424,10 @@ const bulkAction = async (action) => {
         selectedIds.value = [];
         await fetchComments();
         await fetchStatistics();
-        toast.success(t('common.messages.success.action'), response.data?.message);
+        toast.success.update('Action');
     } catch (error) {
         console.error('Bulk action failed:', error);
-        toast.error(t('features.comments.messages.bulkFailed'));
+        toast.error.action(error);
     }
 };
 
@@ -457,10 +467,10 @@ const approveComment = async (comment) => {
     try {
         await api.put(`/admin/cms/comments/${comment.id}/approve`);
         await fetchComments();
-        toast.success(t('common.messages.success.updated', { item: 'Comment' }));
+        toast.success.approve('Comment');
     } catch (error) {
         console.error('Failed to approve comment:', error);
-        toast.error(t('features.comments.messages.approveFailed'));
+        toast.error.update(error, 'Comment');
     }
 };
 
@@ -469,10 +479,10 @@ const rejectComment = async (comment) => {
         await api.put(`/admin/cms/comments/${comment.id}/reject`);
         await fetchComments();
         await fetchStatistics();
-        toast.success(t('common.messages.success.updated', { item: 'Comment' }));
+        toast.success.reject('Comment');
     } catch (error) {
         console.error('Failed to reject comment:', error);
-        toast.error(t('features.comments.messages.rejectFailed'));
+        toast.error.update(error, 'Comment');
     }
 };
 
@@ -481,10 +491,10 @@ const markAsSpam = async (comment) => {
         await api.put(`/admin/cms/comments/${comment.id}/spam`);
         await fetchComments();
         await fetchStatistics();
-         toast.success(t('common.messages.success.updated', { item: 'Comment' }));
+        toast.success.markSpam('Comment');
     } catch (error) {
         console.error('Failed to mark as spam:', error);
-        toast.error(t('features.comments.messages.spamFailed'));
+        toast.error.update(error, 'Comment');
     }
 };
 
@@ -498,17 +508,22 @@ const toggleSelection = (commentId) => {
 };
 
 const deleteComment = async (comment) => {
-    if (!confirm(t('features.comments.messages.deleteConfirm'))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.comments.actions.delete'),
+        message: t('features.comments.messages.deleteConfirm'),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/comments/${comment.id}`);
         await fetchComments();
-        toast.success(t('common.messages.success.deleted', { item: 'Comment' }));
+        toast.success.delete('Comment');
     } catch (error) {
         console.error('Failed to delete comment:', error);
-        toast.error(t('features.comments.messages.deleteFailed'));
+        toast.error.delete(error, 'Comment');
     }
 };
 

@@ -269,6 +269,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
@@ -311,6 +313,7 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 const backups = ref([]);
 const statistics = ref(null);
 const loading = ref(false);
@@ -366,11 +369,11 @@ const createBackup = async () => {
     creating.value = true;
     try {
         await api.post('/admin/cms/backups');
-        alert(t('features.system.backups.messages.created'));
+        toast.success(t('features.system.backups.messages.created'));
         await fetchBackups();
     } catch (error) {
         console.error('Failed to create backup:', error);
-        alert(error.response?.data?.message || t('features.system.backups.messages.failed_create'));
+        toast.error('Error', error.response?.data?.message || t('features.system.backups.messages.failed_create'));
     } finally {
         creating.value = false;
     }
@@ -390,40 +393,58 @@ const downloadBackup = async (backup) => {
         link.remove();
     } catch (error) {
         console.error('Failed to download backup:', error);
-        alert(t('features.system.backups.messages.failed_download'));
+        toast.error('Error', t('features.system.backups.messages.failed_download'));
     }
 };
 
 const restoreBackup = async (backup) => {
-    if (!confirm(t('features.system.backups.confirm.restore', { name: backup.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.backups.actions.restore'),
+        message: t('features.system.backups.confirm.restore', { name: backup.name }),
+        variant: 'warning',
+        confirmText: t('features.system.backups.actions.restore'),
+    });
 
-    if (!confirm(t('features.system.backups.confirm.restore_warning'))) {
-        return;
-    }
+    if (!confirmed) return;
+
+    const doubleConfirmed = await confirm({
+        title: t('features.system.backups.actions.restore'),
+        message: t('features.system.backups.confirm.restore_warning'),
+        variant: 'danger',
+        confirmText: t('common.actions.confirm'),
+    });
+
+    if (!doubleConfirmed) return;
 
     try {
         await api.post(`/admin/cms/backups/${backup.id}/restore`);
-        alert(t('features.system.backups.messages.restored'));
-        window.location.reload();
+        toast.success(t('features.system.backups.messages.restored'));
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
     } catch (error) {
         console.error('Failed to restore backup:', error);
-        alert(error.response?.data?.message || t('features.system.backups.messages.failed_restore'));
+        toast.error('Error', error.response?.data?.message || t('features.system.backups.messages.failed_restore'));
     }
 };
 
 const deleteBackup = async (backup) => {
-    if (!confirm(t('features.system.backups.confirm.delete', { name: backup.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.system.backups.actions.delete'),
+        message: t('features.system.backups.confirm.delete', { name: backup.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/backups/${backup.id}`);
+        toast.success(t('features.system.backups.messages.deleted', 'Backup deleted'));
         await fetchBackups();
     } catch (error) {
         console.error('Failed to delete backup:', error);
-        alert('Failed to delete backup');
+        toast.error('Error', 'Failed to delete backup');
     }
 };
 
@@ -441,10 +462,10 @@ const saveSchedule = async () => {
         await api.post('/admin/cms/backups/schedule', scheduleForm.value);
         showScheduleModal.value = false;
         await fetchBackups(); // Refresh statistics
-        alert(t('features.system.backups.messages.saved'));
+        toast.success(t('features.system.backups.messages.saved'));
     } catch (error) {
         console.error('Failed to save schedule:', error);
-        alert(t('features.system.backups.messages.failed_save'));
+        toast.error('Error', t('features.system.backups.messages.failed_save'));
     } finally {
         savingSchedule.value = false;
     }

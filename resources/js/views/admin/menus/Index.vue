@@ -81,9 +81,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
+import MenuModal from '../../../components/menus/MenuModal.vue';
 import Button from '../../../components/ui/button.vue';
 import Card from '../../../components/ui/card.vue';
 import Badge from '../../../components/ui/badge.vue';
@@ -99,7 +103,8 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
-import MenuModal from '../../../components/menus/MenuModal.vue';
+const router = useRouter();
+const { confirm } = useConfirm();
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const menus = ref([]);
@@ -120,16 +125,22 @@ const fetchMenus = async () => {
 };
 
 const deleteMenu = async (menu) => {
-    if (!confirm(t('features.menus.messages.deleteConfirm', { name: menu.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.menus.actions.delete'),
+        message: t('features.menus.messages.deleteConfirm', { name: menu.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/menus/${menu.id}`);
-        await fetchMenus();
+        toast.success(t('features.menus.messages.deleteSuccess'));
+        fetchMenus();
     } catch (error) {
-        console.error('Failed to delete menu:', error);
-        alert(t('features.menus.messages.deleteFailed'));
+        console.error('Error deleting menu:', error);
+        toast.error('Error', error.response?.data?.message || t('features.menus.messages.deleteFailed'));
     }
 };
 

@@ -318,7 +318,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import Button from '../../../components/ui/button.vue';
 import Pagination from '../../../components/ui/pagination.vue';
 import Input from '../../../components/ui/input.vue';
@@ -331,8 +331,10 @@ import SelectItem from '../../../components/ui/select-item.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
+import { useConfirm } from '../../../composables/useConfirm';
 
 const { t } = useI18n();
+const toast = useToast();
 const router = useRouter();
 const loading = ref(false);
 const users = ref([]);
@@ -343,6 +345,8 @@ const verificationFilter = ref('all');
 const activeStatFilter = ref(null);
 const pagination = ref(null);
 const authStore = useAuthStore();
+
+const { confirm } = useConfirm();
 const stats = ref({
     total: 0,
     verified: 0,
@@ -509,22 +513,36 @@ const editUser = (user) => {
 };
 
 const deleteUser = async (user) => {
-    if (!confirm(t('features.users.messages.deleteConfirm', { name: user.name }))) {
+    const confirmed = await confirm({
+        title: t('common.messages.confirm.title'),
+        message: t('features.users.messages.deleteConfirm', { name: user.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) {
         return;
     }
 
     try {
         await api.delete(`/admin/cms/users/${user.id}`);
         await fetchUsers();
+        toast.success.delete('User');
     } catch (error) {
         console.error('Failed to delete user:', error);
-        const message = error.response?.data?.message || t('features.users.messages.deleteFailed');
-        alert(message);
+        toast.error.delete(error, 'User');
     }
 };
 
 const forceLogoutUser = async (user) => {
-    if (!confirm(t('features.users.messages.forceLogoutConfirm', { name: user.name }))) {
+    const confirmed = await confirm({
+        title: t('features.users.actions.forceLogout'),
+        message: t('features.users.messages.forceLogoutConfirm', { name: user.name }),
+        variant: 'warning',
+        confirmText: t('features.users.actions.forceLogout'),
+    });
+
+    if (!confirmed) {
         return;
     }
 
@@ -532,26 +550,21 @@ const forceLogoutUser = async (user) => {
         const response = await api.post(`/admin/cms/users/${user.id}/force-logout`);
         const { data } = parseResponse(response);
         
-        toast.success(
-            t('features.users.messages.forceLogoutSuccess'),
-            t('features.users.messages.forceLogoutSessions', { count: data.revoked_sessions || 0 })
-        );
+        toast.success.action('User forced logout');
     } catch (error) {
         console.error('Failed to force logout user:', error);
-        const message = error.response?.data?.message || t('features.users.messages.forceLogoutFailed');
-        toast.error(t('features.users.messages.forceLogoutFailed'), message);
+        toast.error.action(error);
     }
 };
 
 const verifyUser = async (user) => {
     try {
         await api.post(`/admin/cms/users/${user.id}/verify`);
-        toast.success(t('features.users.messages.verifySuccess'));
+        toast.success.action('User verified');
         await fetchUsers();
     } catch (error) {
         console.error('Failed to verify user:', error);
-        const message = error.response?.data?.message || t('common.messages.error.action');
-        toast.error(t('common.messages.error.action'), message);
+        toast.error.action(error);
     }
 };
 
@@ -590,15 +603,29 @@ const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
     let confirmMessage = '';
+    let confirmVariant = 'warning';
+    let confirmTitle = t('features.content.list.bulkActions');
+
     if (action === 'delete') {
         confirmMessage = t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length });
+        confirmVariant = 'danger';
+        confirmTitle = t('common.actions.delete');
     } else if (action === 'force_logout') {
         confirmMessage = t('features.users.messages.bulkForceLogoutConfirm', { count: selectedIds.value.length }) || `Force logout ${selectedIds.value.length} users?`;
+        confirmTitle = t('features.users.actions.forceLogout');
     } else if (action === 'verify') {
         confirmMessage = t('features.users.messages.bulkVerifyConfirm', { count: selectedIds.value.length }) || `Verify ${selectedIds.value.length} users?`;
+        confirmTitle = t('features.users.actions.verify');
     }
 
-    if (!confirm(confirmMessage)) {
+    const confirmed = await confirm({
+        title: confirmTitle,
+        message: confirmMessage,
+        variant: confirmVariant,
+        confirmText: t('common.actions.confirm') || 'Confirm',
+    });
+
+    if (!confirmed) {
         bulkActionSelection.value = '';
         return;
     }
@@ -613,10 +640,10 @@ const bulkAction = async (action) => {
         selectedIds.value = [];
         await fetchUsers();
         
-        toast.success(t('common.messages.success.action'), data.message);
+        toast.success.action('Bulk action successful');
     } catch (error) {
         console.error('Bulk action failed:', error);
-        toast.error(t('common.messages.error.action'), error.response?.data?.message || 'Bulk action failed');
+        toast.error.action(error);
     }
 };
 

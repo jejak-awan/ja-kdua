@@ -77,7 +77,12 @@
         "unlockFailed": "Gagal membuka kunci konten",
         "previewFailed": "Gagal mempratinjau konten",
         "publishSuccess": "Konten berhasil diterbitkan",
-        "publishFailed": "Gagal menerbitkan konten"
+        "publishFailed": "Gagal menerbitkan konten",
+        "approveFailed": "Gagal menyetujui konten",
+        "rejectFailed": "Gagal menolak konten",
+        "duplicateFailed": "Gagal menduplikasi konten",
+        "restoreFailed": "Gagal memulihkan konten",
+        "rescheduleFailed": "Gagal menjadwalkan ulang konten"
     },
     "status": {
         "draft": "Draf",

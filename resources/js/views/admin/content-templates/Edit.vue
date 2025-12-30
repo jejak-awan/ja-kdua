@@ -132,6 +132,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
@@ -154,8 +155,9 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
-const route = useRoute();
 const router = useRouter();
+const route = useRoute();
+const toast = useToast();
 const templateId = route.params.id;
 
 const loading = ref(false);
@@ -186,7 +188,7 @@ const fetchTemplate = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch template:', error);
-        alert(t('features.content_templates.messages.loadError'));
+        toast.error.load(error);
         router.push({ name: 'content-templates' });
     } finally {
         loading.value = false;
@@ -197,10 +199,11 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         await api.put(`/admin/cms/content-templates/${templateId}`, form.value);
+        toast.success.update('Template');
         router.push({ name: 'content-templates' });
     } catch (error) {
         console.error('Failed to update template:', error);
-        alert(error.response?.data?.message || t('features.content_templates.messages.updateError'));
+        toast.error.update(error, 'Template');
     } finally {
         saving.value = false;
     }

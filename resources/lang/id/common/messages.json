@@ -1,5 +1,7 @@
 {
     "success": {
+        "default": "Proses berhasil",
+        "action": "Tindakan Berhasil",
         "created": "{item} berhasil dibuat",
         "updated": "{item} berhasil diperbarui",
         "deleted": "{item} berhasil dihapus",
@@ -8,7 +10,10 @@
         "imported": "Data berhasil diimpor",
         "exported": "Data berhasil diekspor",
         "activated": "{item} berhasil diaktifkan",
-        "deactivated": "{item} berhasil dinonaktifkan"
+        "deactivated": "{item} berhasil dinonaktifkan",
+        "approved": "{item} berhasil disetujui",
+        "rejected": "{item} berhasil ditolak",
+        "marked_spam": "{item} ditandai sebagai spam"
     },
     "error": {
         "generic": "Terjadi kesalahan",
@@ -19,9 +24,11 @@
         "validation": "Silakan periksa formulir untuk kesalahan",
         "uploadFailed": "Gagal mengunggah file",
         "deleteFailed": "Gagal menghapus {item}",
+        "loadFailed": "Gagal memuat data",
         "action": "Gagal Melakukan Tindakan"
     },
     "confirm": {
+        "title": "Konfirmasi",
         "delete": "Apakah Anda yakin ingin menghapus {item} ini?",
         "deleteMultiple": "Apakah Anda yakin ingin menghapus {count} item?",
         "bulkDelete": "Apakah Anda yakin ingin menghapus {count} item terpilih?",
@@ -45,5 +52,11 @@
     "time": {
         "justNow": "Baru saja",
         "ago": "{time} yang lalu"
+    },
+    "toast": {
+        "success": "Berhasil",
+        "error": "Error",
+        "warning": "Peringatan",
+        "info": "Info"
     }
 }

@@ -1,3 +1,5 @@
 {
-    "online": "Online"
+    "online": "Online",
+    "success": "Berhasil",
+    "failed": "Gagal"
 }

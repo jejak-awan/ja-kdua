@@ -222,7 +222,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import api from '@/services/api';
+import toast from '@/services/toast';
+import { useConfirm } from '@/composables/useConfirm';
 
 // UI Components - individual imports
 import Table from '@/components/ui/table.vue';
@@ -250,6 +253,7 @@ import SelectItem from '@/components/ui/select-item.vue';
 import { Plus, Play, Pencil, Trash2, FileText, Loader2 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const tasks = ref([]);
 const loading = ref(true);
@@ -340,31 +344,37 @@ async function saveTask() {
     
     if (editingTask.value) {
       await api.put(`/admin/cms/scheduled-tasks/${editingTask.value.id}`, form.value);
-      console.log('Task updated successfully');
+      toast.success(t('features.scheduled_tasks.messages.updated') || 'Task updated successfully');
     } else {
       await api.post('/admin/cms/scheduled-tasks', form.value);
-      console.log('Task created successfully');
+      toast.success(t('features.scheduled_tasks.messages.created') || 'Task created successfully');
     }
     
     dialogOpen.value = false;
     await fetchTasks();
   } catch (error) {
     console.error('Failed to save task:', error.response?.data?.message || error.message);
+    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.save_failed'));
   } finally {
     saving.value = false;
   }
 }
 
 async function runTask(task) {
-  if (!confirm(t('features.scheduled_tasks.confirm_run', { name: task.name }))) {
-    return;
-  }
+  const confirmed = await confirm({
+    title: t('features.scheduled_tasks.actions.run'),
+    message: t('features.scheduled_tasks.confirm_run', { name: task.name }),
+    variant: 'info',
+    confirmText: t('common.actions.run'),
+  });
+
+  if (!confirmed) return;
 
   try {
     running.value = task.id;
     const response = await api.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
     
-    console.log('Task executed successfully');
+    toast.success(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
 
     // Show output
     selectedTaskOutput.value = response.data.data.output;
@@ -373,6 +383,7 @@ async function runTask(task) {
     await fetchTasks();
   } catch (error) {
     console.error('Failed to run task:', error.response?.data?.message || error.message);
+    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.run_failed'));
   } finally {
     running.value = null;
   }
@@ -397,16 +408,22 @@ function viewOutput(task) {
 }
 
 async function deleteTask(task) {
-  if (!confirm(t('features.scheduled_tasks.confirm_delete', { name: task.name }))) {
-    return;
-  }
+  const confirmed = await confirm({
+    title: t('features.scheduled_tasks.actions.delete'),
+    message: t('features.scheduled_tasks.confirm_delete', { name: task.name }),
+    variant: 'danger',
+    confirmText: t('common.actions.delete'),
+  });
+
+  if (!confirmed) return;
 
   try {
     await api.delete(`/admin/cms/scheduled-tasks/${task.id}`);
-    console.log('Task deleted successfully');
+    toast.success(t('features.scheduled_tasks.messages.deleted') || 'Task deleted successfully');
     await fetchTasks();
   } catch (error) {
     console.error('Failed to delete task:', error.message);
+    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.delete_failed'));
   }
 }
 

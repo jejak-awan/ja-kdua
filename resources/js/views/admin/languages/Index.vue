@@ -53,7 +53,7 @@
             </CardHeader>
             <div v-if="loading" class="flex flex-col items-center justify-center py-12">
                 <Loader2 class="w-8 h-8 animate-spin text-muted-foreground mb-2" />
-                <p class="text-muted-foreground">{{ $t('common.loading.default') }}</p>
+                <p class="text-muted-foreground">{{ $t('common.messages.loading.default') }}</p>
             </div>
             <div v-else-if="languages.length === 0" class="flex flex-col items-center justify-center py-12">
                 <LanguagesIcon class="w-12 h-12 text-muted-foreground/20 mb-4" />
@@ -162,7 +162,7 @@
                         :disabled="!selectedFile || importing"
                     >
                         <Loader2 v-if="importing" class="w-4 h-4 mr-2 animate-spin" />
-                        {{ importing ? $t('common.loading.default') : $t('features.languages.import.button') }}
+                        {{ importing ? $t('common.messages.loading.default') : $t('features.languages.import.button') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -211,7 +211,7 @@
                         :disabled="!newLanguage.code || !newLanguage.name || creating"
                     >
                         <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
-                        {{ creating ? $t('common.loading.default') : $t('common.actions.create') }}
+                        {{ creating ? $t('common.messages.loading.default') : $t('common.actions.create') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -223,6 +223,8 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -254,6 +256,8 @@ import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { getLocale, getAvailableLocales, getBrowserLocale } from '../../../i18n';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
 
 const languages = ref([]);
 const loading = ref(false);
@@ -293,20 +297,28 @@ const setDefault = async (lang) => {
     try {
         await api.post(`/admin/cms/languages/${lang.id}/set-default`);
         await fetchLanguages();
+        toast.success.action(t('features.languages.messages.set_default_success') || 'Default language updated');
     } catch (error) {
-        console.error('Failed to set default language:', error);
-        alert(t('features.languages.messages.setDefaultFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
 const deleteLanguage = async (lang) => {
-    if (!confirm(t('features.languages.actions.confirmDelete', { name: lang.name }))) return;
+    const confirmed = await confirm({
+        title: t('features.languages.actions.delete'),
+        message: t('features.languages.actions.confirmDelete', { name: lang.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
     try {
         await api.delete(`/admin/cms/languages/${lang.id}`);
         await fetchLanguages();
+        toast.success.delete('Language');
     } catch (error) {
-        console.error('Failed to delete language:', error);
-        alert(t('features.languages.messages.deleteFailed'));
+        toast.error.delete(error, 'Language');
     }
 };
 
@@ -322,10 +334,9 @@ const createLanguage = async () => {
         showCreateModal.value = false;
         newLanguage.value = { code: '', name: '', createFromTemplate: true };
         await fetchLanguages();
-        alert(t('features.languages.messages.createSuccess'));
+        toast.success.create('Language');
     } catch (error) {
-        console.error('Failed to create language:', error);
-        alert(error.response?.data?.message || t('features.languages.messages.createFailed'));
+        toast.error.create(error, 'Language');
     } finally {
         creating.value = false;
     }
@@ -348,9 +359,9 @@ const exportPack = async (lang) => {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+        toast.success.action(t('features.languages.messages.export_success') || 'Language pack exported successfully');
     } catch (error) {
-        console.error('Failed to export language pack:', error);
-        alert(t('features.languages.messages.exportFailed'));
+        toast.error.fromResponse(error);
     } finally {
         exporting.value = null;
     }
@@ -375,10 +386,9 @@ const importPack = async () => {
         showImportModal.value = false;
         selectedFile.value = null;
         await fetchLanguages();
-        alert(t('features.languages.messages.importSuccess'));
+        toast.success.action(t('features.languages.messages.importSuccess'));
     } catch (error) {
-        console.error('Failed to import language pack:', error);
-        alert(error.response?.data?.message || t('features.languages.messages.importFailed'));
+        toast.error.fromResponse(error);
     } finally {
         importing.value = false;
     }

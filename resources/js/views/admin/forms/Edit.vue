@@ -160,6 +160,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import FieldBuilder from '../../../components/forms/FieldBuilder.vue';
 import FieldModal from '../../../components/forms/FieldModal.vue';
 import Button from '../../../components/ui/button.vue';
@@ -188,21 +189,24 @@ const formData = reactive({
 });
 
 const fetchForm = async () => {
+    loading.value = true;
     try {
         const response = await api.get(`/admin/cms/forms/${route.params.id}`);
-        const form = response.data?.data || response.data;
-        formId.value = form.id;
-        formData.name = form.name || '';
-        formData.slug = form.slug || '';
-        formData.description = form.description || '';
-        formData.success_message = form.success_message || '';
-        formData.redirect_url = form.redirect_url || '';
-        formData.is_active = form.is_active ?? true;
-        formData.fields = form.fields ? [...form.fields] : [];
+        const data = response.data?.data || response.data;
+        formId.value = data.id;
+        Object.assign(formData, {
+            name: data.name,
+            slug: data.slug,
+            description: data.description,
+            success_message: data.success_message,
+            redirect_url: data.redirect_url,
+            is_active: data.is_active,
+            fields: data.fields || []
+        });
     } catch (error) {
         console.error('Failed to fetch form:', error);
-        alert(t('common.messages.error.fetchFailed'));
-        router.push({ name: 'forms' });
+        toast.error('Error', t('features.forms.messages.loadFailed'));
+        router.push({ name: 'forms.index' });
     } finally {
         loading.value = false;
     }
@@ -211,74 +215,33 @@ const fetchForm = async () => {
 const handleSubmit = async () => {
     saving.value = true;
     try {
-        // Update form
-        const formPayload = {
+        const payload = {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
             success_message: formData.success_message,
             redirect_url: formData.redirect_url,
-            is_active: formData.is_active
+            is_active: formData.is_active,
+            fields: formData.fields.map((field, index) => ({
+                id: field.id.toString().startsWith('temp-') ? null : field.id,
+                name: field.name,
+                label: field.label,
+                type: field.type,
+                placeholder: field.placeholder,
+                help_text: field.help_text,
+                options: field.options || [],
+                is_required: field.is_required || false,
+                sort_order: index
+            }))
         };
-        await api.put(`/admin/cms/forms/${formId.value}`, formPayload);
-        
-        // Update fields
-        await updateFields();
-        
-        router.push({ name: 'forms' });
+        await api.put(`/admin/cms/forms/${route.params.id}`, payload);
+        toast.success(t('features.forms.messages.updateSuccess'));
+        router.push({ name: 'forms.index' });
     } catch (error) {
         console.error('Failed to update form:', error);
-        alert(error.response?.data?.message || t('features.forms.messages.saveFailed'));
+        toast.error('Error', error.response?.data?.message || t('features.forms.messages.saveFailed'));
     } finally {
         saving.value = false;
-    }
-};
-
-const updateFields = async () => {
-    // Get existing fields from API
-    const formResponse = await api.get(`/admin/cms/forms/${formId.value}`);
-    const existingFields = formResponse.data.fields || [];
-    
-    // Delete fields that are no longer in formData.fields
-    for (const existingField of existingFields) {
-        if (!formData.fields.find(f => f.id === existingField.id)) {
-            try {
-                await api.delete(`/admin/cms/forms/${formId.value}/fields/${existingField.id}`);
-            } catch (error) {
-                console.error('Error deleting field:', error);
-            }
-        }
-    }
-    
-    // Add or update fields
-    for (let index = 0; index < formData.fields.length; index++) {
-        const field = formData.fields[index];
-        const fieldPayload = {
-            name: field.name,
-            label: field.label,
-            type: field.type,
-            placeholder: field.placeholder,
-            help_text: field.help_text,
-            options: field.options || [],
-            is_required: field.is_required || false,
-            sort_order: index
-        };
-        
-        if (field.id && !field.id.toString().startsWith('temp-')) {
-            // Update existing field
-            try {
-                await api.put(`/admin/cms/forms/${formId.value}/fields/${field.id}`, fieldPayload);
-            } catch (error) {
-                console.error('Error updating field:', error);
-            }
-        } else {
-            // Add new field
-            try {
-                await api.post(`/admin/cms/forms/${formId.value}/fields`, fieldPayload);
-            } catch (error) {
-                console.error('Error adding field:', error);
-            }
-        }
     }
 };
 

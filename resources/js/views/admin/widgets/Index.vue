@@ -19,9 +19,9 @@
             <Table v-else>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>{{ $t('features.widgets.table.name') }}</TableHead>
+                        <TableHead>{{ $t('features.widgets.table.title') }}</TableHead>
                         <TableHead>{{ $t('features.widgets.table.type') }}</TableHead>
-                        <TableHead>{{ $t('features.widgets.table.position') }}</TableHead>
+                        <TableHead>{{ $t('features.widgets.table.location') }}</TableHead>
                         <TableHead class="text-right">{{ $t('features.widgets.table.actions') }}</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -29,7 +29,7 @@
                     <TableRow v-for="widget in widgets" :key="widget.id">
                         <TableCell class="font-medium">
                             <div class="flex items-center gap-2">
-                                {{ widget.name }}
+                                {{ widget.title }}
                                 <Badge v-if="!widget.is_active" variant="destructive" class="text-[10px] px-1.5 py-0 h-4">
                                     Inactive
                                 </Badge>
@@ -40,7 +40,7 @@
                         </TableCell>
                         <TableCell>
                             <code class="text-xs bg-muted px-1.5 py-0.5 rounded border border-border">
-                                {{ widget.position || '-' }}
+                                {{ widget.location || '-' }}
                             </code>
                         </TableCell>
                         <TableCell class="text-right">
@@ -72,6 +72,8 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Button from '../../../components/ui/button.vue';
 import Card from '../../../components/ui/card.vue';
 import Badge from '../../../components/ui/badge.vue';
@@ -89,6 +91,9 @@ import WidgetModal from '../../../components/widgets/WidgetModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const toast = useToast();
+
 const widgets = ref([]);
 const loading = ref(false);
 const showCreateModal = ref(false);
@@ -114,13 +119,22 @@ const editWidget = (widget) => {
 };
 
 const deleteWidget = async (widget) => {
-    if (!confirm(t('features.widgets.messages.deleteConfirm', { name: widget.name }))) return;
+    const confirmed = await confirm({
+        title: t('features.widgets.actions.delete'),
+        message: t('features.widgets.confirm.delete', { title: widget.title }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
     try {
         await api.delete(`/admin/cms/widgets/${widget.id}`);
-        await fetchWidgets();
+        toast.success.delete(t('features.widgets.title'));
+        fetchWidgets();
     } catch (error) {
         console.error('Failed to delete widget:', error);
-        alert(t('features.widgets.messages.deleteFailed'));
+        toast.error.delete(error, t('features.widgets.title'));
     }
 };
 

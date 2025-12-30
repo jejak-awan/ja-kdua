@@ -77,7 +77,12 @@
         "unlockFailed": "Failed to unlock content",
         "previewFailed": "Failed to preview content",
         "publishSuccess": "Content published successfully",
-        "publishFailed": "Failed to publish content"
+        "publishFailed": "Failed to publish content",
+        "approveFailed": "Failed to approve content",
+        "rejectFailed": "Failed to reject content",
+        "duplicateFailed": "Failed to duplicate content",
+        "restoreFailed": "Failed to restore content",
+        "rescheduleFailed": "Failed to reschedule content"
     },
     "status": {
         "draft": "Draft",

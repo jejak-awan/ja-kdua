@@ -147,6 +147,8 @@ import {
     FileText, 
     Zap 
 } from 'lucide-vue-next';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 
 const cacheStats = ref({
     status: 'Active',
@@ -155,6 +157,7 @@ const cacheStats = ref({
 });
 const clearing = ref(false);
 const warming = ref(false);
+const { confirm } = useConfirm();
 
 const fetchCacheStats = async () => {
     try {
@@ -181,36 +184,46 @@ const fetchCacheStats = async () => {
 };
 
 const clearAllCache = async () => {
-    if (!confirm('Are you sure you want to clear all cache? This may affect performance temporarily.')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: 'Clear All Cache',
+        message: 'Are you sure you want to clear all cache? This may affect performance temporarily.',
+        variant: 'danger',
+        confirmText: 'Clear All',
+    });
+
+    if (!confirmed) return;
 
     clearing.value = true;
     try {
         await api.post('/admin/cms/cache/clear');
-        alert('All cache cleared successfully');
+        toast.success('All cache cleared successfully');
         await fetchCacheStats();
     } catch (error) {
         console.error('Failed to clear cache:', error);
-        alert('Failed to clear cache');
+        toast.error('Error', 'Failed to clear cache');
     } finally {
         clearing.value = false;
     }
 };
 
 const clearContentCache = async () => {
-    if (!confirm('Are you sure you want to clear content cache?')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: 'Clear Content Cache',
+        message: 'Are you sure you want to clear content cache?',
+        variant: 'warning',
+        confirmText: 'Clear Content Cache',
+    });
+
+    if (!confirmed) return;
 
     clearing.value = true;
     try {
         await api.post('/admin/cms/cache/clear-content');
-        alert('Content cache cleared successfully');
+        toast.success('Content cache cleared successfully');
         await fetchCacheStats();
     } catch (error) {
         console.error('Failed to clear content cache:', error);
-        alert('Failed to clear content cache');
+        toast.error('Error', 'Failed to clear content cache');
     } finally {
         clearing.value = false;
     }
@@ -220,11 +233,11 @@ const warmUpCache = async () => {
     warming.value = true;
     try {
         await api.post('/admin/cms/cache/warm-up');
-        alert('Cache warmed up successfully');
+        toast.success('Cache warmed up successfully');
         await fetchCacheStats();
     } catch (error) {
         console.error('Failed to warm up cache:', error);
-        alert('Failed to warm up cache');
+        toast.error('Error', 'Failed to warm up cache');
     } finally {
         warming.value = false;
     }

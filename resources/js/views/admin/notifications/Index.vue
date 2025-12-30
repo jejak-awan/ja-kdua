@@ -107,8 +107,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
+import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import Card from '../../../components/ui/card.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const notifications = ref([]);
 const loading = ref(false);
@@ -175,33 +180,43 @@ const fetchNotifications = async () => {
 
 const markAsRead = async (notification) => {
     try {
-        await api.post(`/admin/cms/notifications/${notification.id}/read`);
-        notification.read_at = new Date().toISOString();
+        await api.put(`/admin/cms/notifications/${notification.id}/read`);
+        toast.success(t('features.notifications.messages.mark_read_success'));
+        fetchNotifications();
     } catch (error) {
         console.error('Failed to mark notification as read:', error);
+        toast.error('Error', t('features.notifications.messages.mark_read_failed'));
     }
 };
 
 const markAllAsRead = async () => {
     try {
-        await api.post('/admin/cms/notifications/read-all');
-        await fetchNotifications();
+        await api.put('/admin/cms/notifications/read-all');
+        toast.success(t('features.notifications.messages.mark_all_read_success'));
+        fetchNotifications();
     } catch (error) {
-        console.error('Failed to mark all as read:', error);
+        console.error('Failed to mark all notifications as read:', error);
+        toast.error('Error', t('features.notifications.messages.mark_all_read_failed'));
     }
 };
 
 const deleteNotification = async (notification) => {
-    if (!confirm(t('features.notifications.messages.deleteConfirm'))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.notifications.actions.delete'),
+        message: t('features.notifications.confirm.delete'),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/notifications/${notification.id}`);
-        await fetchNotifications();
+        toast.success(t('features.notifications.messages.delete_success'));
+        fetchNotifications();
     } catch (error) {
         console.error('Failed to delete notification:', error);
-        alert(t('features.notifications.messages.deleteFailed'));
+        toast.error('Error', t('features.notifications.messages.delete_failed'));
     }
 };
 

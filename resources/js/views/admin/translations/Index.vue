@@ -106,6 +106,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n'; 
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import api from '../../../services/api';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
@@ -135,6 +138,9 @@ import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const route = useRoute();
 const router = useRouter();
+const { t, locale } = useI18n();
+const { confirm } = useConfirm();
+
 const languageCode = route.params.lang || 'en';
 
 const translations = ref([]);
@@ -162,9 +168,10 @@ const handleUpdate = async () => {
         });
         showEditModal.value = false;
         await fetchTranslations();
+        toast.success(t('features.translations.messages.update_success')); // Assuming a success message
     } catch (error) {
         console.error('Failed to update translation:', error);
-        alert('Failed to update translation');
+        toast.error('Failed to update translation');
     } finally {
         updating.value = false;
     }

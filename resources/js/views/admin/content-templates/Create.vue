@@ -127,6 +127,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -149,6 +150,7 @@ import {
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
 const saving = ref(false);
 
 const form = ref({
@@ -164,13 +166,13 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         await api.post('/admin/cms/content-templates', form.value);
+        toast.success.create('Template');
         router.push({ name: 'content-templates' });
     } catch (error) {
         console.error('Failed to create template:', error);
-        alert(error.response?.data?.message || t('features.content_templates.messages.saveError'));
+        toast.error.create(error, 'Template');
     } finally {
         saving.value = false;
     }
 };
 </script>
-

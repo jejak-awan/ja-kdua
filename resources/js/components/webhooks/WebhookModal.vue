@@ -59,7 +59,7 @@
                                     v-model="form.events"
                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                                 >
-                                <span class="ml-2 text-sm text-foreground">{{ event }}</span>
+                                <span class="ml-2 text-sm text-foreground">{{ t('features.developer.webhooks.events.' + event) }}</span>
                             </label>
                         </div>
                     </div>
@@ -113,6 +113,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
 
@@ -157,18 +158,22 @@ const loadWebhook = () => {
     }
 };
 
+const toast = useToast();
+
 const handleSubmit = async () => {
     saving.value = true;
     try {
         if (props.webhook) {
             await api.put(`/admin/cms/webhooks/${props.webhook.id}`, form.value);
+            toast.success.update('Webhook');
         } else {
             await api.post('/admin/cms/webhooks', form.value);
+            toast.success.create('Webhook');
         }
         emit('saved');
     } catch (error) {
         console.error('Failed to save webhook:', error);
-        alert(error.response?.data?.message || t('features.developer.webhooks.messages.save_failed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

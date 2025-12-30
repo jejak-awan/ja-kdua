@@ -9,8 +9,8 @@
 
             <form @submit.prevent="handleSubmit" class="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
                 <div class="space-y-2">
-                    <Label>{{ $t('features.widgets.modals.widget.name') }} <span class="text-red-500">*</span></Label>
-                    <Input v-model="form.name" type="text" required />
+                    <Label>{{ $t('features.widgets.modals.widget.title') }} <span class="text-red-500">*</span></Label>
+                    <Input v-model="form.title" type="text" required />
                 </div>
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.type') }} <span class="text-red-500">*</span></Label>
@@ -21,14 +21,15 @@
                         <SelectContent>
                             <SelectItem value="text">Text</SelectItem>
                             <SelectItem value="html">HTML</SelectItem>
-                            <SelectItem value="menu">Menu</SelectItem>
+                            <SelectItem value="recent_posts">Recent Posts</SelectItem>
+                            <SelectItem value="categories">Categories</SelectItem>
                             <SelectItem value="custom">Custom</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div class="space-y-2">
-                    <Label>{{ $t('features.widgets.modals.widget.position') }}</Label>
-                    <Input v-model="form.position" type="text" :placeholder="$t('features.widgets.modals.widget.positionPlaceholder')" />
+                    <Label>{{ $t('features.widgets.modals.widget.location') }}</Label>
+                    <Input v-model="form.location" type="text" :placeholder="$t('features.widgets.modals.widget.positionPlaceholder')" />
                 </div>
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.content') }}</Label>
@@ -44,11 +45,11 @@
 
             <DialogFooter>
                 <Button variant="outline" @click="$emit('close')">
-                    {{ $t('common.cancel') }}
+                    {{ $t('common.actions.cancel') }}
                 </Button>
                 <Button @click="handleSubmit" :disabled="saving">
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ saving ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.update') : $t('common.create')) }}
+                    {{ saving ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.actions.update') : $t('common.actions.create')) }}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -75,13 +76,15 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
+import { useToast } from '../../composables/useToast';
 
 const props = defineProps({ widget: { type: Object, default: null } });
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const saving = ref(false);
-const form = ref({ name: '', type: 'text', position: '', content: '', is_active: true });
+const toast = useToast();
+const form = ref({ title: '', type: 'text', location: '', content: '', is_active: true });
 
 const loadWidget = () => {
     if (props.widget) {
@@ -94,13 +97,15 @@ const handleSubmit = async () => {
     try {
         if (props.widget) {
             await api.put(`/admin/cms/widgets/${props.widget.id}`, form.value);
+            toast.success.update(t('features.widgets.title'));
         } else {
             await api.post('/admin/cms/widgets', form.value);
+            toast.success.create(t('features.widgets.title'));
         }
         emit('saved');
     } catch (error) {
         console.error('Failed to save widget:', error);
-        alert(t('features.widgets.messages.saveFailed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

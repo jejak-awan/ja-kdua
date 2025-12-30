@@ -21,10 +21,12 @@
     "messages": {
         "loading": "Memuat pelanggan...",
         "empty": "Tidak ada pelanggan ditemukan",
-        "deleteConfirm": "Apakah Anda yakin ingin menghapus {email}?",
-        "deleteSuccess": "Pelanggan berhasil dihapus",
-        "deleteFailed": "Gagal menghapus pelanggan",
-        "exportFailed": "Gagal mengekspor pelanggan",
+        "delete_success": "Pelanggan berhasil dihapus",
+        "delete_failed": "Gagal menghapus pelanggan",
+        "export_failed": "Gagal mengekspor pelanggan",
         "noName": "Tanpa Nama"
+    },
+    "confirm": {
+        "delete": "Apakah Anda yakin ingin menghapus {email}?"
     }
 }

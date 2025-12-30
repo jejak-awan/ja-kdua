@@ -203,6 +203,8 @@ import {
     X,
     FileText
 } from 'lucide-vue-next';
+import { useConfirm } from '../../../composables/useConfirm';
+import toast from '../../../services/toast';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -212,6 +214,7 @@ const revisions = ref([]);
 const loading = ref(false);
 const contentTitle = ref('');
 const viewingRevision = ref(null);
+const { confirm } = useConfirm();
 
 const fetchRevisions = async () => {
     loading.value = true;
@@ -248,17 +251,24 @@ const viewRevision = async (revision) => {
 };
 
 const restoreRevision = async (revision) => {
-    if (!confirm(`Are you sure you want to restore revision v${revision.version}? This will replace the current content.`)) {
+    const confirmed = await confirm({
+        title: 'Restore Revision',
+        message: `Are you sure you want to restore revision v${revision.version}? This will replace the current content.`,
+        confirmText: 'Restore',
+        variant: 'warning',
+    });
+
+    if (!confirmed) {
         return;
     }
 
     try {
         await api.post(`/admin/cms/contents/${contentId}/revisions/${revision.id}/restore`);
-        alert('Revision restored successfully');
+        toast.success(t('common.messages.success.restored', { item: `v${revision.version}` }));
         router.push({ name: 'contents.edit', params: { id: contentId } });
     } catch (error) {
         console.error('Failed to restore revision:', error);
-        alert(error.response?.data?.message || 'Failed to restore revision');
+        toast.error(t('common.messages.toast.error'), error.response?.data?.message || t('features.content.messages.restoreFailed'));
     }
 };
 

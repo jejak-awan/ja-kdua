@@ -156,6 +156,7 @@ import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import FieldBuilder from '../../../components/forms/FieldBuilder.vue';
 import FieldModal from '../../../components/forms/FieldModal.vue';
 import Button from '../../../components/ui/button.vue';
@@ -220,10 +221,11 @@ const handleSubmit = async () => {
             }))
         };
         await api.post('/admin/cms/forms', payload);
-        router.push({ name: 'forms' });
+        toast.success(t('features.forms.messages.createSuccess'));
+        router.push({ name: 'forms.index' });
     } catch (error) {
         console.error('Failed to create form:', error);
-        alert(error.response?.data?.message || t('features.forms.messages.saveFailed'));
+        toast.error('Error', error.response?.data?.message || t('features.forms.messages.createFailed'));
     } finally {
         saving.value = false;
     }

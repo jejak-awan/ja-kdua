@@ -64,6 +64,7 @@ import SelectItem from '@/components/ui/select-item.vue';
 import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import { Plus } from 'lucide-vue-next';
+import toast from '../../../services/toast';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -152,7 +153,7 @@ const handleEventDrop = async (info) => {
         await fetchContents();
     } catch (error) {
         console.error('Failed to reschedule content:', error);
-        alert('Failed to reschedule content');
+        toast.error(t('common.messages.toast.error'), t('features.content.messages.rescheduleFailed'));
         info.revert();
     }
 };

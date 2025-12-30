@@ -21,10 +21,12 @@
     "messages": {
         "loading": "Loading subscribers...",
         "empty": "No subscribers found",
-        "deleteConfirm": "Are you sure you want to delete {email}?",
-        "deleteSuccess": "Subscriber deleted successfully",
-        "deleteFailed": "Failed to delete subscriber",
-        "exportFailed": "Failed to export subscribers",
+        "delete_success": "Subscriber deleted successfully",
+        "delete_failed": "Failed to delete subscriber",
+        "export_failed": "Failed to export subscribers",
         "noName": "No Name"
+    },
+    "confirm": {
+        "delete": "Are you sure you want to delete {email}?"
     }
 }

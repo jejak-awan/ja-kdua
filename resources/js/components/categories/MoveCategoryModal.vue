@@ -66,7 +66,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -125,7 +127,7 @@ const handleSubmit = async () => {
         emit('moved');
     } catch (error) {
         console.error('Failed to move category:', error);
-        alert(error.response?.data?.message || t('features.categories.move.error'));
+        toast.error('Error', error.response?.data?.message || t('features.categories.move.error'));
     } finally {
         saving.value = false;
     }

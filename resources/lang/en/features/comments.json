@@ -25,7 +25,9 @@
         "markSpam": "Mark as Spam",
         "reply": "Reply",
         "approveAll": "Approve All",
-        "rejectAll": "Reject All"
+        "rejectAll": "Reject All",
+        "delete": "Delete",
+        "bulkAction": "Bulk Action"
     },
     "filter": {
         "allStatus": "All Status",

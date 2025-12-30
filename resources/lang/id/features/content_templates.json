@@ -46,6 +46,11 @@
         "deleteError": "Gagal menghapus templat",
         "saveError": "Gagal membuat templat",
         "updateError": "Gagal memperbarui templat",
-        "loadError": "Gagal memuat templat"
+        "loadError": "Gagal memuat templat",
+        "deleteSuccess": "Templat berhasil dihapus",
+        "createSuccess": "Templat berhasil dibuat",
+        "updateSuccess": "Templat berhasil diperbarui",
+        "createContentSuccess": "Konten berhasil dibuat dari templat",
+        "bulkDeleteSuccess": "Templat terpilih berhasil dihapus"
     }
 }

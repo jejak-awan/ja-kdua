@@ -1,0 +1,28 @@
+{
+    "confirm": {
+        "title": "Confirmation",
+        "delete": "Delete",
+        "action": "Action",
+        "yes": "Yes, Continue",
+        "no": "Cancel",
+        "warning": "Warning",
+        "danger": "Danger",
+        "messages": {
+            "delete": "Are you sure you want to delete this item? This action cannot be undone.",
+            "reset": "Are you sure you want to reset? All unsaved changes will be lost.",
+            "unsaved": "You have unsaved changes. Are you sure you want to leave this page?"
+        }
+    },
+    "toast": {
+        "success": "Success",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info",
+        "saved": "Data saved successfully.",
+        "deleted": "Data deleted successfully.",
+        "created": "Data created successfully.",
+        "updated": "Data updated successfully.",
+        "action_failed": "Failed to perform action.",
+        "permission_denied": "You do not have permission to perform this action."
+    }
+}

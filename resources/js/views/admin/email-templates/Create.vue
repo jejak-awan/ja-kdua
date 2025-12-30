@@ -125,6 +125,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseSingleResponse } from '../../../utils/responseParser';
 
 const router = useRouter();
@@ -147,31 +148,30 @@ const variables = ref([
     'current_time',
 ]);
 
-const handlePreview = async () => {
+const previewTemplate = async () => {
     try {
         const response = await api.post('/admin/cms/email-templates/preview', form.value);
-        const data = parseSingleResponse(response) || {};
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
-            previewWindow.document.write(data.html || '');
+            previewWindow.document.write(response.data.html);
         }
     } catch (error) {
         console.error('Failed to preview template:', error);
-        alert('Failed to preview template');
+        toast.error('Error', 'Failed to preview template');
     }
 };
 
 const handleSubmit = async () => {
     saving.value = true;
     try {
-        const response = await api.post('/admin/cms/email-templates', form.value);
+        await api.post('/admin/cms/email-templates', form.value);
+        toast.success('Template created successfully');
         router.push({ name: 'email-templates' });
     } catch (error) {
         console.error('Failed to create template:', error);
-        alert(error.response?.data?.message || 'Failed to create template');
+        toast.error('Error', error.response?.data?.message || 'Failed to create template');
     } finally {
         saving.value = false;
     }
 };
 </script>
-

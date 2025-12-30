@@ -202,9 +202,13 @@ import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import { useAuthStore } from '../../../stores/auth';
 
+import { useConfirm } from '../../../composables/useConfirm';
+import { useToast } from '../../../composables/useToast';
+
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
 
 const loading = ref(true);
 const categories = ref([]); // Raw tree data
@@ -221,6 +225,8 @@ const pagination = ref({
     from: 0,
     to: 0
 });
+
+const { confirm } = useConfirm();
 
 // Toggle expand/collapse
 const toggleExpand = (id) => {
@@ -367,13 +373,21 @@ const editCategory = (category) => {
 };
 
 const deleteCategory = async (category) => {
-    if (confirm(t('features.categories.messages.deleteConfirm', { name: category.name }))) {
+    const confirmed = await confirm({
+        title: t('features.categories.actions.delete'),
+        message: t('features.categories.messages.deleteConfirm', { name: category.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (confirmed) {
         try {
             await api.delete(`/admin/cms/categories/${category.id}`);
             fetchCategories(pagination.value.current_page);
+            toast.success.delete('Category');
         } catch (error) {
             console.error('Failed to delete category:', error);
-             alert( error.response?.data?.message || t('features.categories.messages.deleteError'));
+            toast.error.delete(error, 'Category');
         }
     }
 };
@@ -402,14 +416,23 @@ const isAllSelected = computed(() => {
 });
 
 const confirmBulkDelete = async () => {
-   if (confirm(`Are you sure you want to delete ${selectedIds.value.length} categories?`)) {
+   const confirmed = await confirm({
+       title: t('common.actions.bulkDelete'),
+       message: t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }) || `Are you sure you want to delete ${selectedIds.value.length} categories?`,
+       variant: 'danger',
+       confirmText: t('common.actions.delete'),
+   });
+
+   if (confirmed) {
         try {
             await api.post('/admin/cms/categories/bulk-destroy', { ids: selectedIds.value });
+            const count = selectedIds.value.length;
             selectedIds.value = [];
             fetchCategories(pagination.value.current_page);
+            toast.success.delete(`${count} Categories`);
         } catch (error) {
            console.error('Bulk delete failed:', error);
-           alert('Failed to delete selected categories');
+           toast.error.action(error);
         }
     }
 }

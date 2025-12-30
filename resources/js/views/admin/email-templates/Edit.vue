@@ -136,6 +136,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseSingleResponse } from '../../../utils/responseParser';
 
 const route = useRoute();
@@ -176,37 +177,33 @@ const fetchTemplate = async () => {
         };
     } catch (error) {
         console.error('Failed to fetch template:', error);
-        alert('Failed to load template');
+        toast.error('Error', 'Failed to load template');
         router.push({ name: 'email-templates' });
     } finally {
         loading.value = false;
     }
 };
 
-const handlePreview = async () => {
+const previewTemplate = async () => {
     try {
-        const response = await api.post(`/admin/cms/email-templates/${templateId}/preview`);
-        const data = parseSingleResponse(response) || {};
+        const response = await api.post('/admin/cms/email-templates/preview', form.value);
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
-            previewWindow.document.write(data.html || '');
+            previewWindow.document.write(response.data.html || '');
         }
     } catch (error) {
         console.error('Failed to preview template:', error);
-        alert('Failed to preview template');
+        toast.error('Error', 'Failed to preview template');
     }
 };
 
 const handleSendTest = async () => {
-    const email = prompt('Enter email address to send test email:');
-    if (!email) return;
-
     try {
-        await api.post(`/admin/cms/email-templates/${templateId}/send-test`, { email });
-        alert('Test email sent successfully');
+        await api.post(`/admin/cms/email-templates/${templateId}/send-test`);
+        toast.success('Success', 'Test email sent successfully');
     } catch (error) {
         console.error('Failed to send test email:', error);
-        alert(error.response?.data?.message || 'Failed to send test email');
+        toast.error('Error', error.response?.data?.message || 'Failed to send test email');
     }
 };
 
@@ -214,10 +211,11 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         await api.put(`/admin/cms/email-templates/${templateId}`, form.value);
-        router.push({ name: 'email-templates' });
+        toast.success('Success', 'Template updated successfully');
+        router.push({ name: 'email-templates.index' });
     } catch (error) {
         console.error('Failed to update template:', error);
-        alert(error.response?.data?.message || 'Failed to update template');
+        toast.error('Error', error.response?.data?.message || 'Failed to update template');
     } finally {
         saving.value = false;
     }

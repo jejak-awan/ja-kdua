@@ -114,6 +114,7 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -152,7 +153,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         console.error('Failed to save menu item:', error);
-        alert(t('features.menus.messages.saveItemFailed'));
+        toast.error('Error', t('features.menus.messages.saveItemFailed'));
     } finally {
         saving.value = false;
     }

@@ -22,7 +22,10 @@
             "logout": "Logout",
             "viewed": "Viewed",
             "published": "Published",
-            "unpublished": "Unpublished"
+            "unpublished": "Unpublished",
+            "login_success": "Login Success",
+            "login_failed": "Login Failed",
+            "session_invalidated": "Session Invalidated"
         }
     },
     "export": {

@@ -67,6 +67,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
+import { useToast } from '../../composables/useToast';
 import Dialog from '../../components/ui/dialog.vue';
 import DialogContent from '../../components/ui/dialog-content.vue';
 import DialogHeader from '../../components/ui/dialog-header.vue';
@@ -112,18 +113,22 @@ const loadFieldGroup = () => {
     }
 };
 
+const toast = useToast();
+
 const handleSubmit = async () => {
     saving.value = true;
     try {
         if (props.fieldGroup) {
             await api.put(`/admin/cms/field-groups/${props.fieldGroup.id}`, form.value);
+            toast.success.update(t('features.developer.custom_fields.tabs.groups'));
         } else {
             await api.post('/admin/cms/field-groups', form.value);
+            toast.success.create(t('features.developer.custom_fields.tabs.groups'));
         }
         emit('saved');
     } catch (error) {
         console.error('Failed to save field group:', error);
-        alert(error.response?.data?.message || t('features.developer.custom_fields.groups.messages.save_failed'));
+        toast.error.fromResponse(error);
     } finally {
         saving.value = false;
     }

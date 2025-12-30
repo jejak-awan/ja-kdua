@@ -17,5 +17,12 @@
     "history": "Command History",
     "no_history": "No commands executed yet",
     "executed_success": "Command executed successfully",
-    "executed_error": "Command executed with errors"
+    "executed_error": "Command executed with errors",
+    "table": {
+        "command": "Command",
+        "parameters": "Parameters",
+        "runner": "Runner",
+        "status": "Status",
+        "date": "Date"
+    }
 }

@@ -159,6 +159,7 @@ import Alert from '@/components/ui/alert.vue';
 import AlertTitle from '@/components/ui/alert-title.vue';
 import AlertDescription from '@/components/ui/alert-description.vue';
 import { useAutoSave } from '../../../composables/useAutoSave';
+import { useToast } from '../../../composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
@@ -166,6 +167,7 @@ const authStore = useAuthStore(); // Initialize Auth Store
 const isSidebarOpen = ref(true);
 const contentId = route.params.id;
 const { t } = useI18n();
+const toast = useToast();
 
 const loading = ref(false);
 const categories = ref([]);
@@ -275,7 +277,7 @@ const fetchContent = async () => {
         await lockContent();
     } catch (error) {
         console.error('Failed to fetch content:', error);
-        alert(t('features.content.messages.loadFailed'));
+        toast.error.load(error);
         router.push({ name: 'contents' });
     } finally {
         loading.value = false;
@@ -318,7 +320,7 @@ const handleUnlock = async () => {
         }
     } catch (error) {
         console.error('Failed to unlock content:', error);
-        alert(error.response?.data?.message || t('features.content.messages.unlockFailed'));
+        toast.error.unlock(error);
     }
 };
 
@@ -404,16 +406,17 @@ const handleSubmit = async () => {
 
         await api.put(`/admin/cms/contents/${contentId}`, payload);
         
-        // Unlock content after save
+        // Release lock
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
         }
         await handleUnlock();
         
+        toast.success.update();
         router.push({ name: 'contents' });
     } catch (error) {
         console.error('Failed to update content:', error);
-        alert(error.response?.data?.message || t('features.content.messages.updateFailed'));
+        toast.error.update(error);
     } finally {
         loading.value = false;
     }

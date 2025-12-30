@@ -164,8 +164,9 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
-import { parseResponse } from '../../../utils/responseParser';
+import { useToast } from '@/composables/useToast.js';
+import { useConfirm } from '../../../composables/useConfirm';
+import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Card from '../../../components/ui/card.vue';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
@@ -187,6 +188,8 @@ import { Download, Search, Trash2 } from 'lucide-vue-next';
 import _ from 'lodash';
 
 const { t } = useI18n();
+const toast = useToast();
+const { confirm } = useConfirm();
 
 const loading = ref(false);
 const subscribers = ref([]);
@@ -237,14 +240,22 @@ const changePerPage = (perPage) => {
 };
 
 const deleteSubscriber = async (subscriber) => {
-    if (!confirm(t('features.newsletter.messages.deleteConfirm', { email: subscriber.email }))) return;
+    const confirmed = await confirm({
+        title: t('features.newsletter.actions.delete'),
+        message: t('features.newsletter.confirm.delete', { email: subscriber.email }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}`);
+        toast.success.delete('Subscriber');
         fetchSubscribers();
-        toast.success(t('common.messages.success.deleted', { item: 'Subscriber' }));
     } catch (error) {
-        toast.error(t('features.newsletter.messages.deleteFailed'));
+        console.error('Failed to delete subscriber:', error);
+        toast.error.delete(error, 'Subscriber');
     }
 };
 
@@ -262,9 +273,10 @@ const exportCsv = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        toast.success(t('common.messages.success.exported'));
+        toast.success.action(t('common.messages.success.exported'));
     } catch (error) {
-        toast.error(t('features.newsletter.messages.exportFailed'));
+        console.error('Failed to export subscribers:', error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -314,7 +326,14 @@ const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
     if (action === 'delete') {
-         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) {
+         const confirmed = await confirm({
+             title: t('features.newsletter.actions.delete'),
+             message: t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }),
+             variant: 'danger',
+             confirmText: t('common.actions.delete'),
+         });
+
+         if (!confirmed) {
              bulkActionSelection.value = '';
              return;
          }
@@ -326,9 +345,9 @@ const bulkAction = async (action) => {
              });
              selectedIds.value = [];
              await fetchSubscribers();
-             toast.success(t('common.messages.success.deleted', { item: 'Subscribers' }));
+             toast.success.delete('Subscribers');
          } catch (error) {
-             toast.error(t('features.newsletter.messages.deleteFailed'));
+             toast.error.delete(error, 'Subscribers');
          }
     }
 };

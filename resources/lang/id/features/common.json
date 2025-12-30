@@ -1,0 +1,28 @@
+{
+    "confirm": {
+        "title": "Konfirmasi",
+        "delete": "Hapus",
+        "action": "Aksi",
+        "yes": "Ya, Lanjutkan",
+        "no": "Batal",
+        "warning": "Peringatan",
+        "danger": "Bahaya",
+        "messages": {
+            "delete": "Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.",
+            "reset": "Apakah Anda yakin ingin mengatur ulang? Semua perubahan yang belum disimpan akan hilang.",
+            "unsaved": "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?"
+        }
+    },
+    "toast": {
+        "success": "Berhasil",
+        "error": "Error",
+        "warning": "Peringatan",
+        "info": "Info",
+        "saved": "Data berhasil disimpan.",
+        "deleted": "Data berhasil dihapus.",
+        "created": "Data berhasil dibuat.",
+        "updated": "Data berhasil diperbarui.",
+        "action_failed": "Gagal melakukan aksi.",
+        "permission_denied": "Anda tidak memiliki izin untuk melakukan aksi ini."
+    }
+}

@@ -283,9 +283,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useConfirm } from '../../../composables/useConfirm';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
@@ -306,7 +307,9 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
-const router = useRouter();
+const { confirm } = useConfirm();
+
+// State router = useRouter();
 const forms = ref([]);
 const loading = ref(true);
 const search = ref('');
@@ -374,17 +377,56 @@ const toggleFormStatus = async (form) => {
 };
 
 const deleteForm = async (form) => {
-    if (!confirm(t('features.forms.messages.deleteConfirm', { name: form.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.forms.actions.delete'),
+        message: t('features.forms.messages.deleteConfirm', { name: form.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/forms/${form.id}`);
-        forms.value = forms.value.filter(f => f.id !== form.id);
-        toast.success(t('common.messages.success.deleted', { item: 'Form' }));
+        toast.success(t('features.forms.messages.deleteSuccess'));
+        fetchForms();
     } catch (error) {
-        console.error('Error deleting form:', error);
-        toast.error(t('common.messages.error.deleteFailed', { item: 'form' }));
+        console.error('Failed to delete form:', error);
+        toast.error('Error', error.response?.data?.message || t('features.forms.messages.deleteFailed'));
+    }
+};
+
+const bulkDelete = async () => {
+    if (selectedIds.value.length === 0) return;
+
+    const confirmed = await confirm({
+        title: t('features.forms.bulk.delete'),
+        message: t('features.forms.bulk.confirmDelete', { count: selectedIds.value.length }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post('/admin/cms/forms/bulk-delete', { ids: selectedIds.value });
+        toast.success(t('features.forms.messages.bulkDeleteSuccess'));
+        selectedIds.value = [];
+        fetchForms();
+    } catch (error) {
+        console.error('Failed to bulk delete forms:', error);
+        toast.error('Error', error.response?.data?.message || t('features.forms.messages.deleteFailed'));
+    }
+};
+
+const duplicateForm = async (form) => {
+    try {
+        await api.post(`/admin/cms/forms/${form.id}/duplicate`);
+        toast.success(t('features.forms.messages.duplicateSuccess'));
+        fetchForms();
+    } catch (error) {
+        console.error('Failed to duplicate form:', error);
+        toast.error('Error', error.response?.data?.message || t('features.forms.messages.duplicateFailed'));
     }
 };
 
@@ -415,32 +457,12 @@ const bulkActionSelection = ref('');
 
 const handleBulkAction = async (value) => {
     if (!value) return;
-    await bulkAction(value);
-    bulkActionSelection.value = '';
-};
-
-const bulkAction = async (action) => {
-    if (selectedIds.value.length === 0) return;
     
-    if (action === 'delete') {
-         if (!confirm(t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }))) {
-             bulkActionSelection.value = '';
-             return;
-         }
-
-         try {
-             await api.post('/admin/cms/forms/bulk-action', {
-                 ids: selectedIds.value,
-                 action: 'delete'
-             });
-             selectedIds.value = [];
-             await fetchForms();
-             toast.success(t('common.messages.success.deleted', { item: 'Forms' }));
-         } catch (error) {
-             console.error('Bulk delete failed:', error);
-             toast.error(t('common.messages.error.deleteFailed', { item: 'forms' }));
-         }
+    if (value === 'delete') {
+        await bulkDelete();
     }
+    
+    bulkActionSelection.value = '';
 };
 
 onMounted(() => {

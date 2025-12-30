@@ -110,6 +110,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Label from '../../../components/ui/label.vue';
@@ -123,6 +125,7 @@ import {
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import MenuItemTree from '../../../components/menus/MenuItemTree.vue';
 import MenuItemModal from '../../../components/menus/MenuItemModal.vue';
@@ -200,11 +203,11 @@ const saveMenu = async () => {
         const reordered = flattenTree(nestedItems.value);
         await api.post(`/admin/cms/menus/${menuId}/reorder`, { items: reordered });
         
-        alert(t('features.menus.actions.saved'));
+        toast.success(t('features.menus.actions.saved'));
         await fetchMenu();
     } catch (error) {
         console.error('Failed to save menu:', error);
-        alert(t('features.menus.messages.saveFailed'));
+        toast.error(t('features.menus.messages.saveFailed'));
     } finally {
         saving.value = false;
     }
@@ -221,17 +224,23 @@ const editMenuItem = (item) => {
 };
 
 const deleteMenuItem = async (item) => {
-    if (!confirm(t('features.menus.messages.deleteItemConfirm', { title: item.title || item.label }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.menus.actions.deleteItem'),
+        message: t('features.menus.messages.deleteItemConfirm', { title: item.title || item.label }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/menu-items/${item.id}`);
         // Remove from local tree to avoid full reload flicker
         removeItemFromTree(nestedItems.value, item.id);
+        toast.success(t('features.menus.messages.itemDeleted'));
     } catch (error) {
         console.error('Failed to delete menu item:', error);
-        alert(t('features.menus.messages.deleteItemFailed'));
+        toast.error(t('features.menus.messages.deleteItemFailed'));
     }
 };
 

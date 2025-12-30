@@ -229,8 +229,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -292,10 +294,10 @@ const saveRobotsTxt = async () => {
     savingRobots.value = true;
     try {
         await api.put('/admin/cms/seo/robots-txt', { content: robotsContent.value });
-        alert(t('features.seo.robots.saved'));
+        toast.success(t('features.seo.robots.saved'));
     } catch (error) {
         console.error('Failed to save robots.txt:', error);
-        alert(t('features.seo.robots.failed'));
+        toast.error('Error', t('features.seo.robots.failed'));
     } finally {
         savingRobots.value = false;
     }
@@ -305,10 +307,10 @@ const generateSitemap = async () => {
     generatingSitemap.value = true;
     try {
         await api.get('/admin/cms/seo/sitemap');
-        alert(t('features.seo.sitemap.generated'));
+        toast.success(t('features.seo.sitemap.generated'));
     } catch (error) {
         console.error('Failed to generate sitemap:', error);
-        alert(t('features.seo.sitemap.failed'));
+        toast.error('Error', t('features.seo.sitemap.failed'));
     } finally {
         generatingSitemap.value = false;
     }
@@ -316,7 +318,7 @@ const generateSitemap = async () => {
 
 const copySitemapUrl = () => {
     navigator.clipboard.writeText(window.location.origin + sitemapUrl.value);
-    alert(t('features.seo.sitemap.copySuccess'));
+    toast.success(t('features.seo.sitemap.copySuccess'));
 };
 
 const fetchContents = async () => {
@@ -339,7 +341,7 @@ const runAnalysis = async () => {
         analysisResults.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to run SEO analysis:', error);
-        alert(t('features.seo.analysis.failed'));
+        toast.error('Error', t('features.seo.analysis.failed'));
     } finally {
         analyzing.value = false;
     }
@@ -355,7 +357,7 @@ const generateSchema = async () => {
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error) {
         console.error('Failed to generate schema:', error);
-        alert(t('features.seo.schema.failed'));
+        toast.error('Error', t('features.seo.schema.failed'));
     } finally {
         generatingSchema.value = false;
     }
@@ -364,7 +366,7 @@ const generateSchema = async () => {
 const copySchema = () => {
     if (schemaJson.value) {
         navigator.clipboard.writeText(schemaJson.value);
-        alert(t('features.seo.schema.copySuccess'));
+        toast.success(t('features.seo.schema.copySuccess'));
     }
 };
 

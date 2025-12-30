@@ -17,5 +17,12 @@
     "history": "Riwayat Perintah",
     "no_history": "Belum ada perintah yang dijalankan",
     "executed_success": "Perintah berhasil dijalankan",
-    "executed_error": "Perintah dijalankan dengan error"
+    "executed_error": "Perintah dijalankan dengan error",
+    "table": {
+        "command": "Perintah",
+        "parameters": "Parameter",
+        "runner": "Pelaksana",
+        "status": "Status",
+        "date": "Tanggal"
+    }
 }

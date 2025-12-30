@@ -63,6 +63,21 @@
         "confirm": {
             "delete": "Apakah Anda yakin ingin menghapus webhook \"{name}\"?"
         },
+        "events": {
+            "content": {
+                "created": "Konten Dibuat",
+                "updated": "Konten Diperbarui",
+                "deleted": "Konten Dihapus"
+            },
+            "user": {
+                "created": "Pengguna Dibuat",
+                "updated": "Pengguna Diperbarui"
+            },
+            "comment": {
+                "created": "Komentar Dibuat",
+                "approved": "Komentar Disetujui"
+            }
+        },
         "modal": {
             "title_create": "Buat Webhook",
             "title_edit": "Edit Webhook",

@@ -770,7 +770,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { useConfirm } from '../../../composables/useConfirm';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import { 
     Search as SearchIcon, 
@@ -808,7 +811,11 @@ import {
     ClipboardPaste
 } from 'lucide-vue-next';
 
+const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
+const { confirm } = useConfirm();
+
 import FileUploadModal from '../../../components/file-manager/FileUploadModal.vue';
 import CreateFolderModal from '../../../components/file-manager/CreateFolderModal.vue';
 import Button from '@/components/ui/button.vue';
@@ -1377,7 +1384,7 @@ const extractFile = async (file) => {
         // Optional: show success message
     } catch (error) {
         console.error('Failed to extract file:', error);
-        alert('Failed to extract archive');
+        toast.error('Error', 'Failed to extract archive');
     } finally {
         loading.value = false;
     }
@@ -1397,7 +1404,7 @@ const compressItems = async (paths) => {
         
     } catch (error) {
         console.error('Failed to compress items:', error);
-        alert('Failed to compress items');
+        toast.error('Error', 'Failed to compress items');
     } finally {
         loading.value = false;
     }
@@ -1444,7 +1451,7 @@ const pasteFromClipboard = async (destinationPath) => {
 
     } catch (error) {
         console.error('Failed to paste items:', error);
-        alert('Failed to paste items');
+        toast.error('Error', 'Failed to paste items');
     } finally {
         loading.value = false;
     }
@@ -1507,7 +1514,7 @@ const onDrop = async (event, targetFolder) => {
         await moveItem(source.path, destinationPath, sourceType);
     } catch (error) {
         console.error('Failed to move item:', error);
-        alert(t('features.file_manager.messages.moveFailed') || 'Failed to move item');
+        toast.error('Error', t('features.file_manager.messages.moveFailed') || 'Failed to move item');
     }
     
     draggedItem.value = null;
@@ -1536,9 +1543,14 @@ const moveItem = async (sourcePath, destinationPath, type) => {
 };
 
 const deleteFolderAction = async (folder) => {
-    if (!confirm(t('features.file_manager.messages.deleteFolderConfirm', { name: folder.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.file_manager.actions.delete_folder'),
+        message: t('features.file_manager.messages.deleteFolderConfirm', { name: folder.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
     
     try {
         await api.delete('/admin/cms/file-manager/folder', {
@@ -1552,14 +1564,19 @@ const deleteFolderAction = async (folder) => {
         await fetchFiles();
     } catch (error) {
         console.error('Failed to delete folder:', error);
-        alert(t('features.file_manager.messages.deleteFolderFailed'));
+        toast.error('Error', t('features.file_manager.messages.deleteFolderFailed'));
     }
 };
 
 const deleteFileAction = async (file) => {
-    if (!confirm(t('features.file_manager.messages.deleteFileConfirm', { name: file.name }))) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.file_manager.actions.delete_file'),
+        message: t('features.file_manager.messages.deleteFileConfirm', { name: file.name }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
     
     try {
         await api.delete('/admin/cms/file-manager', {
@@ -1568,7 +1585,7 @@ const deleteFileAction = async (file) => {
         await fetchFiles();
     } catch (error) {
         console.error('Failed to delete file:', error);
-        alert(t('features.file_manager.messages.deleteFileFailed'));
+        toast.error('Error', t('features.file_manager.messages.deleteFileFailed'));
     }
 };
 
@@ -1626,9 +1643,16 @@ const clearSelection = () => {
 
 const bulkDelete = async () => {
     const count = selectedItems.value.length;
-    if (!confirm(t('features.file_manager.bulk.confirmDelete', count, { count }))) {
-        return;
-    }
+    
+    const confirmed = await confirm({
+        title: t('features.file_manager.bulk.delete'),
+        message: t('features.file_manager.bulk.confirmDelete', count, { count }),
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+        confirmTextClass: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+    });
+
+    if (!confirmed) return;
     
     try {
         // Delete each item
@@ -1654,7 +1678,7 @@ const bulkDelete = async () => {
         await fetchCurrentPath();
     } catch (error) {
         console.error('Failed to bulk delete:', error);
-        alert('Failed to delete some items');
+        toast.error('Error', 'Failed to delete some items');
     }
 };
 
@@ -1718,35 +1742,54 @@ const restoreItem = async (item) => {
         await fetchCurrentPath();
     } catch (error) {
         console.error('Failed to restore item:', error);
-        alert('Failed to restore item');
+        toast.error('Error', 'Failed to restore item');
     }
 };
 
 // Empty entire trash
 const emptyTrash = async () => {
-    if (!confirm('Are you sure you want to permanently delete all items in trash? This action cannot be undone.')) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.file_manager.trash.empty'),
+        message: 'Are you sure you want to permanently delete all items in trash? This action cannot be undone.',
+        variant: 'danger',
+        confirmText: t('features.file_manager.trash.empty'),
+    });
+
+    if (!confirmed) return;
+
     try {
-        await api.delete('/admin/cms/file-manager/trash');
-        trashItems.value = [];
+        await api.post('/admin/cms/file-manager/trash/empty');
+        toast.success(t('features.file_manager.messages.trashEmptied'));
+        fetchTrashItems();
     } catch (error) {
         console.error('Failed to empty trash:', error);
-        alert('Failed to empty trash');
+        toast.error('Error', error.response?.data?.message || t('features.file_manager.messages.emptyTrashFailed'));
     }
 };
 
 // Permanently delete item from trash
-const deleteFromTrash = async (item) => {
-    if (!confirm(`Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`)) {
-        return;
-    }
+const permanentDelete = async (item) => {
+    const confirmed = await confirm({
+        title: t('features.file_manager.trash.permanent_delete'),
+        message: `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`,
+        variant: 'danger',
+        confirmText: t('common.actions.delete'),
+    });
+
+    if (!confirmed) return;
+
     try {
-        await api.delete('/admin/cms/file-manager/trash/permanent', { data: { id: item.id } });
-        await fetchTrash();
+        if (item.type === 'folder') {
+            await api.delete(`/admin/cms/file-manager/trash/folder/${item.id}`);
+            toast.success(t('features.file_manager.messages.folderDeleted'));
+        } else {
+            await api.delete(`/admin/cms/file-manager/trash/${item.id}`);
+            toast.success(t('features.file_manager.messages.fileDeleted'));
+        }
+        fetchTrashItems();
     } catch (error) {
-        console.error('Failed to delete item:', error);
-        alert('Failed to delete item');
+        console.error('Failed to permanently delete item:', error);
+        toast.error('Error', error.response?.data?.message || t('features.file_manager.messages.deleteFailed'));
     }
 };
 

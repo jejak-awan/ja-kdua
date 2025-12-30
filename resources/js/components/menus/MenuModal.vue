@@ -62,6 +62,7 @@ import Button from '../ui/button.vue';
 import Input from '../ui/input.vue';
 import Label from '../ui/label.vue';
 import { Loader2 } from 'lucide-vue-next';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -83,7 +84,7 @@ const handleSubmit = async () => {
         router.push({ name: 'menus.edit', params: { id: menu.id } });
     } catch (error) {
         console.error('Failed to create menu:', error);
-        alert(t('features.menus.messages.createFailed'));
+        toast.error('Error', t('features.menus.messages.createFailed'));
     } finally {
         saving.value = false;
     }

@@ -106,8 +106,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '../../../services/api';
+import toast from '../../../services/toast';
+import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
+
+const router = useRouter();
+const { confirm } = useConfirm();
 
 const templates = ref([]);
 const loading = ref(false);
@@ -146,34 +152,37 @@ const previewTemplate = async (template) => {
         }
     } catch (error) {
         console.error('Failed to preview template:', error);
-        alert('Failed to preview template');
+        toast.error('Error', 'Failed to preview template');
     }
 };
 
 const sendTestEmail = async (template) => {
-    const email = prompt('Enter email address to send test email:');
-    if (!email) return;
-
     try {
-        await api.post(`/admin/cms/email-templates/${template.id}/send-test`, { email });
-        alert('Test email sent successfully');
+        await api.post(`/admin/cms/email-templates/${template.id}/send-test`);
+        toast.success('Test email sent successfully');
     } catch (error) {
         console.error('Failed to send test email:', error);
-        alert(error.response?.data?.message || 'Failed to send test email');
+        toast.error('Error', error.response?.data?.message || 'Failed to send test email');
     }
 };
 
-const handleDelete = async (template) => {
-    if (!confirm(`Are you sure you want to delete "${template.name}"?`)) {
-        return;
-    }
+const deleteTemplate = async (template) => {
+    const confirmed = await confirm({
+        title: 'Delete Template',
+        message: `Are you sure you want to delete "${template.name}"?`,
+        variant: 'danger',
+        confirmText: 'Delete',
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/email-templates/${template.id}`);
-        await fetchTemplates();
+        toast.success('Template deleted successfully');
+        fetchTemplates();
     } catch (error) {
         console.error('Failed to delete template:', error);
-        alert('Failed to delete template');
+        toast.error('Error', 'Failed to delete template');
     }
 };
 

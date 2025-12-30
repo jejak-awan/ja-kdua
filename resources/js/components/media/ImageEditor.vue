@@ -230,6 +230,7 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
+import toast from '../../services/toast';
 
 const props = defineProps({
     media: { type: Object, required: true },
@@ -602,7 +603,7 @@ const saveImage = async () => {
                  msg += ': ' + err.response.data.message;
             }
         }
-        alert(msg);
+        toast.error('Error', msg);
     } finally {
         saving.value = false;
     }

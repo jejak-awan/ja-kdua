@@ -51,6 +51,7 @@ import DialogContent from '../ui/dialog-content.vue';
 import DialogHeader from '../ui/dialog-header.vue';
 import DialogTitle from '../ui/dialog-title.vue';
 import DialogFooter from '../ui/dialog-footer.vue';
+import toast from '../../services/toast';
 
 const { t } = useI18n();
 
@@ -79,7 +80,7 @@ const handleSubmit = async () => {
         emit('close');
     } catch (error) {
         console.error('Failed to create folder:', error);
-        alert(t('features.file_manager.messages.createFolderFailed'));
+        toast.error('Error', t('features.file_manager.messages.createFolderFailed'));
     } finally {
         creating.value = false;
     }
