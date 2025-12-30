@@ -207,4 +207,13 @@
         "fileTooLarge": "File terlalu besar (maks 10MB)",
         "permissionDenied": "Anda tidak memiliki izin untuk melakukan aksi ini"
     }
+}    },
+    "errors": {
+        "cannotUpdateGlobal": "Anda tidak dapat memperbarui media global",
+        "cannotDeleteGlobal": "Anda tidak dapat menghapus media global",
+        "noPermissionUpdate": "Anda tidak memiliki izin untuk memperbarui media ini",
+        "noPermissionDelete": "Anda tidak memiliki izin untuk menghapus media ini",
+        "noPermissionManage": "Anda tidak memiliki izin untuk mengelola media ini",
+        "mediaInUse": "Media sedang digunakan"
+    }
 }

@@ -217,4 +217,13 @@
         "fileTooLarge": "File is too large (max 10MB)",
         "permissionDenied": "You don't have permission to perform this action"
     }
+}    },
+    "errors": {
+        "cannotUpdateGlobal": "You cannot update global media",
+        "cannotDeleteGlobal": "You cannot delete global media",
+        "noPermissionUpdate": "You do not have permission to update this media",
+        "noPermissionDelete": "You do not have permission to delete this media",
+        "noPermissionManage": "You do not have permission to manage this media",
+        "mediaInUse": "Media is currently in use"
+    }
 }
