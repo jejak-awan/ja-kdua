@@ -14,7 +14,7 @@
         "videos": "Video",
         "documents": "Dokumen",
         "other": "Lainnya"
-    },
+    ,
     "filter": {
         "allTypes": "Semua Tipe",
         "images": "Gambar",
@@ -23,7 +23,7 @@
         "allStatus": "Semua Media",
         "used": "Digunakan",
         "unused": "Tidak Digunakan"
-    },
+    ,
     "actions": {
         "bulk": "Tindakan Massal",
         "delete": "Hapus",
@@ -37,7 +37,7 @@
         "cancel": "Batal",
         "close": "Tutup",
         "save": "Simpan Perubahan"
-    },
+    ,
     "loading": "Memuat media...",
     "empty": "Tidak ada media ditemukan",
     "table": {
@@ -47,7 +47,7 @@
         "size": "Ukuran",
         "folder": "Folder",
         "actions": "Aksi"
-    },
+    ,
     "selected": "{count} dipilih",
     "messages": {
         "deleteConfirm": "Apakah Anda yakin ingin menghapus {count} file media?",
@@ -67,7 +67,7 @@
         "createFolderSuccess": "Folder berhasil dibuat",
         "createFolderFailed": "Gagal membuat folder",
         "fileTooLarge": "File {name} terlalu besar. Ukuran maksimum adalah 10MB."
-    },
+    ,
     "modals": {
         "updateAlt": {
             "title": "Perbarui Teks Alt",
@@ -77,11 +77,11 @@
             "cancel": "Batal",
             "update": "Perbarui",
             "updating": "Memperbarui..."
-        },
+    ,
         "bulk": {
             "processing": "Memproses...",
             "wait": "Mohon tunggu"
-        },
+    ,
         "upload": {
             "title": "Unggah Media",
             "clickToUpload": "Klik untuk mengunggah",
@@ -93,7 +93,7 @@
             "chooseFile": "Pilih File",
             "upload": "Unggah",
             "uploadedSuccess": "Berhasil diunggah!"
-        },
+    ,
         "edit": {
             "title": "Edit Media",
             "name": "Nama",
@@ -107,7 +107,7 @@
             "isShared": "Aset Bersama",
             "isSharedHelp": "Aset bersama dapat dilihat oleh semua pengguna",
             "saving": "Menyimpan..."
-        },
+    ,
         "folder": {
             "title": "Buat Folder",
             "name": "Nama Folder",
@@ -116,11 +116,11 @@
             "noParent": "Tidak Ada Induk",
             "creating": "Membuat...",
             "create": "Buat Folder"
-        },
+    ,
         "picker": {
             "title": "Pilih Media",
             "select": "Pilih"
-        },
+    ,
         "view": {
             "title": "Detail Media",
             "preview": "Pratinjau",
@@ -147,7 +147,7 @@
             "thumbnailSuccess": "Thumbnail berhasil dibuat",
             "thumbnailFailed": "Gagal membuat thumbnail",
             "close": "Tutup"
-        },
+    ,
         "resize": {
             "title": "Ubah Ukuran Media",
             "width": "Lebar (px)",
@@ -159,7 +159,7 @@
             "cancel": "Batal",
             "success": "Media berhasil diubah ukurannya",
             "failed": "Gagal mengubah ukuran media"
-        },
+    ,
         "editor": {
             "title": "Edit Gambar",
             "transform": "Transformasi",
@@ -186,7 +186,7 @@
             "success": "Berhasil mengubah ukuran gambar!",
             "failed": "Gagal menyimpan gambar"
         }
-    },
+    ,
     "toast": {
         "titles": {
             "success": "Berhasil",
@@ -195,7 +195,7 @@
             "info": "Info",
             "permissionDenied": "Akses Ditolak",
             "fileTooLarge": "File Terlalu Besar"
-        },
+    ,
         "uploadSuccess": "File berhasil diunggah",
         "updateSuccess": "Media berhasil diperbarui",
         "deleteSuccess": "Media berhasil dihapus",
@@ -206,7 +206,7 @@
         "thumbnailSuccess": "Thumbnail berhasil dibuat",
         "fileTooLarge": "File terlalu besar (maks 10MB)",
         "permissionDenied": "Anda tidak memiliki izin untuk melakukan aksi ini"
-    },
+    ,
     "errors": {
         "cannotUpdateGlobal": "Anda tidak dapat memperbarui media global",
         "cannotDeleteGlobal": "Anda tidak dapat menghapus media global",
@@ -214,7 +214,7 @@
         "noPermissionDelete": "Anda tidak memiliki izin untuk menghapus media ini",
         "noPermissionManage": "Anda tidak memiliki izin untuk mengelola media ini",
         "mediaInUse": "Media sedang digunakan"
-    }
+    },
     ,
     "confirm": {
         "deleteTitle": "Hapus Media",
@@ -227,12 +227,11 @@
         "no": "Tidak",
         "delete": "Hapus",
         "cancel": "Batal"
-    }
-}
+    },
     "apiErrors": {
         "unauthorized": "Anda tidak memiliki otorisasi untuk melakukan tindakan ini",
         "forbidden": "Tindakan ini dilarang",
         "notFound": "Media tidak ditemukan",
         "serverError": "Terjadi kesalahan server"
-    }
+    },
 }
