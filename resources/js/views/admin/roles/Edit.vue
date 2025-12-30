@@ -137,7 +137,7 @@ const form = ref({
     permissions: []
 });
 
-const protectedRoles = ['super-admin', 'admin'];
+const protectedRoles = ['super-admin'];
 const isProtectedRole = (name) => protectedRoles.includes(name);
 
 const groupedPermissions = computed(() => permissions.value);

@@ -229,7 +229,7 @@ import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
-import { useAuthStore } from '../../../stores/auth';
+import { useAuthStore, ROLE_RANKS } from '../../../stores/auth';
 import toast from '../../../services/toast';
 import { computed } from 'vue';
 
@@ -256,15 +256,7 @@ const form = ref({
     is_verified: false,
 });
 
-const roleRanks = {
-    'super-admin': 100,
-    'admin': 80,
-    'editor': 60,
-    'author': 40,
-    'member': 20,
-};
-
-const getRoleRank = (roleName) => roleRanks[roleName] || 0;
+const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 
 const fetchRoles = async () => {
     loadingRoles.value = true;

@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia';
 import api, { getCsrfCookie } from '../services/api';
 
+export const ROLE_RANKS = {
+    'super-admin': 100,
+    'admin': 80,
+    'editor': 60,
+    'author': 40,
+    'member': 20,
+};
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
@@ -14,17 +22,9 @@ export const useAuthStore = defineStore('auth', {
             const targetUser = user || state.user;
             if (!targetUser || !targetUser.roles) return 0;
 
-            const roleRanks = {
-                'super-admin': 100,
-                'admin': 80,
-                'editor': 60,
-                'author': 40,
-                'member': 20,
-            };
-
             let maxRank = 0;
             targetUser.roles.forEach(role => {
-                const rank = roleRanks[role.name] || 0;
+                const rank = ROLE_RANKS[role.name] || 0;
                 if (rank > maxRank) maxRank = rank;
             });
 
@@ -35,19 +35,11 @@ export const useAuthStore = defineStore('auth', {
         isAtLeastRole: (state) => (roleName) => {
             if (!state.user || !state.user.roles) return false;
 
-            const roleRanks = {
-                'super-admin': 100,
-                'admin': 80,
-                'editor': 60,
-                'author': 40,
-                'member': 20,
-            };
-
-            const minRank = roleRanks[roleName] || 0;
+            const minRank = ROLE_RANKS[roleName] || 0;
 
             let myRank = 0;
             state.user.roles.forEach(role => {
-                const rank = roleRanks[role.name] || 0;
+                const rank = ROLE_RANKS[role.name] || 0;
                 if (rank > myRank) myRank = rank;
             });
 
@@ -59,18 +51,10 @@ export const useAuthStore = defineStore('auth', {
             if (!otherUser) return true;
             if (!state.user || !state.user.roles) return false;
 
-            const roleRanks = {
-                'super-admin': 100,
-                'admin': 80,
-                'editor': 60,
-                'author': 40,
-                'member': 20,
-            };
-
             // Calculate my rank
             let myRank = 0;
             state.user.roles.forEach(role => {
-                const rank = roleRanks[role.name] || 0;
+                const rank = ROLE_RANKS[role.name] || 0;
                 if (rank > myRank) myRank = rank;
             });
 
@@ -78,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
             let otherRank = 0;
             if (otherUser.roles) {
                 otherUser.roles.forEach(role => {
-                    const rank = roleRanks[role.name] || 0;
+                    const rank = ROLE_RANKS[role.name] || 0;
                     if (rank > otherRank) otherRank = rank;
                 });
             }
