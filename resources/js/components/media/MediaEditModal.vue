@@ -103,6 +103,23 @@
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                <!-- Shared Status (Admin Only) -->
+                                <div v-if="canManageMedia" class="flex items-start space-x-2 p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
+                                    <Checkbox 
+                                        id="is_shared" 
+                                        v-model:checked="form.is_shared"
+                                        class="mt-0.5"
+                                    />
+                                    <div class="flex-1">
+                                        <label for="is_shared" class="text-sm font-medium text-foreground cursor-pointer">
+                                            {{ $t('features.media.modals.edit.isShared') }}
+                                        </label>
+                                        <p class="text-xs text-muted-foreground mt-0.5">
+                                            {{ $t('features.media.modals.edit.isSharedHelp') }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -132,6 +149,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { X, FileText as FileIcon } from 'lucide-vue-next';
+import { useAuthStore } from '../../stores/auth';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
 import Input from '../ui/input.vue';
@@ -140,7 +158,9 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import SelectTrigger from '../ui/select-trigger.vue';
 import SelectValue from '../ui/select-value.vue';
+import Checkbox from '../ui/checkbox.vue';
 
+const authStore = useAuthStore();
 const { t } = useI18n();
 
 const props = defineProps({
@@ -164,7 +184,10 @@ const form = ref({
     url: '',
     mime_type: '',
     size: 0,
+    is_shared: false,
 });
+
+const canManageMedia = authStore.hasPermission('manage media');
 
 const fetchFolders = async () => {
     try {
@@ -186,6 +209,7 @@ const loadMedia = () => {
             url: props.media.url || '',
             mime_type: props.media.mime_type || '',
             size: props.media.size || 0,
+            is_shared: props.media.is_shared || false,
         };
     }
 };
@@ -198,6 +222,7 @@ const handleSubmit = async () => {
             alt: form.value.alt,
             description: form.value.description,
             folder_id: form.value.folder_id,
+            is_shared: form.value.is_shared,
         });
         
         emit('updated');

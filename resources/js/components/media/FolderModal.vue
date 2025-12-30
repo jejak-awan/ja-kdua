@@ -48,6 +48,23 @@
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        <!-- Shared Status (Admin Only) -->
+                        <div v-if="canManageMedia" class="flex items-start space-x-2 p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
+                            <Checkbox 
+                                id="folder_is_shared" 
+                                v-model:checked="form.is_shared"
+                                class="mt-0.5"
+                            />
+                            <div class="flex-1">
+                                <label for="folder_is_shared" class="text-sm font-medium text-foreground cursor-pointer">
+                                    {{ $t('features.media.modals.edit.isShared') }}
+                                </label>
+                                <p class="text-xs text-muted-foreground mt-0.5">
+                                    {{ $t('features.media.modals.edit.isSharedHelp') }}
+                                </p>
+                            </div>
+                        </div>
                     </form>
                 </div>
 
@@ -83,7 +100,10 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import SelectTrigger from '../ui/select-trigger.vue';
 import SelectValue from '../ui/select-value.vue';
+import Checkbox from '../ui/checkbox.vue';
+import { useAuthStore } from '../../stores/auth';
 
+const authStore = useAuthStore();
 const { t } = useI18n();
 
 const emit = defineEmits(['close', 'created']);
@@ -94,7 +114,10 @@ const folders = ref([]);
 const form = ref({
     name: '',
     parent_id: null,
+    is_shared: false,
 });
+
+const canManageMedia = authStore.hasPermission('manage media');
 
 const fetchFolders = async () => {
     try {
@@ -113,7 +136,7 @@ const handleSubmit = async () => {
     try {
         await api.post('/admin/cms/media-folders', form.value);
         emit('created');
-        form.value = { name: '', parent_id: null };
+        form.value = { name: '', parent_id: null, is_shared: false };
     } catch (error) {
         console.error('Failed to create folder:', error);
         alert(t('features.media.messages.createFolderFailed'));

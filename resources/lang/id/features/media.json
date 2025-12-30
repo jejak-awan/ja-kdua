@@ -5,6 +5,7 @@
     "search": "Cari media...",
     "folders": "Folder",
     "newFolder": "Folder Baru",
+    "shared": "Bersama",
     "allMedia": "Semua Media",
     "stats": {
         "total": "Total File",
@@ -103,6 +104,8 @@
             "noFolder": "Tidak Ada Folder",
             "type": "Tipe",
             "size": "Ukuran",
+            "isShared": "Aset Bersama",
+            "isSharedHelp": "Aset bersama dapat dilihat oleh semua pengguna",
             "saving": "Menyimpan..."
         },
         "folder": {

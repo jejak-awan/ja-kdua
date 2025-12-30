@@ -16,9 +16,12 @@ class MediaFolderController extends BaseApiController
 
             // Scope logic
             if ($request->user() && !$request->user()->can('manage media')) {
-                $query->where('author_id', $request->user()->id);
+                $query->where(function ($q) use ($request) {
+                    $q->where('author_id', $request->user()->id)
+                        ->orWhere('is_shared', true);
+                });
             } elseif (!$request->user()) {
-                 $query->whereNull('author_id');
+                $query->where('is_shared', true);
             }
 
             // Handle trashed items
@@ -62,7 +65,10 @@ class MediaFolderController extends BaseApiController
                         // If Parent is Global, I might own a child.
                         // If Parent is Global, and Child is Other User's... I shouldn't see child.
                         if ($request->user() && !$request->user()->can('manage media')) {
-                             $q->where('author_id', $request->user()->id);
+                            $q->where(function ($q) use ($request) {
+                                $q->where('author_id', $request->user()->id)
+                                    ->orWhere('is_shared', true);
+                            });
                         }
 
                         $q->orderBy('sort_order')->with('children'); // Eager load sub-children
@@ -85,7 +91,8 @@ class MediaFolderController extends BaseApiController
                         'created_at' => $folder->created_at,
                         'updated_at' => $folder->updated_at,
                         'deleted_at' => $folder->deleted_at,
-                        'author_id' => $folder->author_id, // Expose usage
+                        'author_id' => $folder->author_id,
+                        'is_shared' => $folder->is_shared,
                     ];
                 };
                 
@@ -148,15 +155,17 @@ class MediaFolderController extends BaseApiController
                 'parent_id' => 'nullable|exists:media_folders,id',
                 'sort_order' => 'integer|min:0',
                 'author_id' => 'nullable|exists:users,id',
+                'is_shared' => 'sometimes|boolean',
             ]);
 
             $validated['slug'] = Str::slug($validated['name']);
             
-            // Allow Admin to set author, else force own
+            // Allow Admin to set author and shared status
             if ($request->user()->can('manage media')) {
-                 // can set author_id
+                 // can set author_id and is_shared
             } else {
                  $validated['author_id'] = $request->user()->id;
+                 $validated['is_shared'] = false;
             }
 
             // Ensure slug is unique within the same parent

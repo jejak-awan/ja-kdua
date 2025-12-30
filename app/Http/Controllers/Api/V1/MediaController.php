@@ -23,9 +23,12 @@ class MediaController extends BaseApiController
 
         // Scope logic
         if ($request->user() && !$request->user()->can('manage media')) {
-            $query->where('author_id', $request->user()->id);
+            $query->where(function ($q) use ($request) {
+                $q->where('author_id', $request->user()->id)
+                    ->orWhere('is_shared', true);
+            });
         } elseif (!$request->user()) {
-             $query->whereNull('author_id');
+            $query->where('is_shared', true);
         }
 
         // Handle trashed items
@@ -121,6 +124,7 @@ class MediaController extends BaseApiController
                 'max_width' => 'nullable|integer|min:1',
                 'max_height' => 'nullable|integer|min:1',
                 'author_id' => 'nullable|exists:users,id',
+                'is_shared' => 'sometimes|boolean',
             ]);
 
             // Additional image dimension validation if requested
@@ -151,7 +155,8 @@ class MediaController extends BaseApiController
             $request->file('file'),
             $request->input('folder_id'),
             $request->input('optimize', config('media.optimize', true)),
-            $authorId
+            $authorId,
+            $request->user()->can('manage media') ? $request->boolean('is_shared') : false
         );
 
         return $this->success([
@@ -175,6 +180,7 @@ class MediaController extends BaseApiController
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
                 'author_id' => 'nullable|exists:users,id',
+                'is_shared' => 'sometimes|boolean',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -193,7 +199,13 @@ class MediaController extends BaseApiController
 
         foreach ($files as $file) {
             try {
-                $media = $this->mediaService->upload($file, $folderId, $optimize, $authorId);
+                $media = $this->mediaService->upload(
+                    $file, 
+                    $folderId, 
+                    $optimize, 
+                    $authorId,
+                    $request->user()->can('manage media') ? $request->boolean('is_shared') : false
+                );
                 $uploadedMedia[] = $media->load(['folder', 'usages']);
             } catch (\Exception $e) {
                 \Log::error('Bulk upload failed for a file: ' . $e->getMessage());
@@ -210,7 +222,7 @@ class MediaController extends BaseApiController
     {
         // Scope check
         if (request()->user() && !request()->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== request()->user()->id) {
+             if ($media->author_id !== request()->user()->id && !$media->is_shared) {
                  return $this->forbidden('You do not have permission to view this media');
              }
         }
@@ -241,9 +253,15 @@ class MediaController extends BaseApiController
                 'alt' => 'nullable|string',
                 'description' => 'nullable|string',
                 'author_id' => 'nullable|exists:users,id',
+                'is_shared' => 'sometimes|boolean',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
+        }
+
+        // Protection for is_shared
+        if (isset($validated['is_shared']) && !request()->user()->can('manage media')) {
+            unset($validated['is_shared']);
         }
 
         $media->update($validated);

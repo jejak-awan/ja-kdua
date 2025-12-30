@@ -434,6 +434,10 @@
                                     <p class="mt-3 text-sm font-medium text-foreground truncate w-full text-center px-2" :title="folder.name">
                                         {{ folder.name }}
                                     </p>
+                                    <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-100 text-blue-700 hover:bg-blue-100/80 border-blue-200">
+                                        <Users class="w-3 h-3 mr-1" />
+                                        {{ $t('features.media.shared') }}
+                                    </Badge>
                                 </div>
                                 <!-- Folder Actions Overlay -->
                                 <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -522,7 +526,13 @@
                                 </div>
                                 <div class="p-3 border-t border-border bg-card">
                                     <p class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</p>
-                                    <p class="text-xs text-muted-foreground mt-1">{{ formatFileSize(media.size) }}</p>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <p class="text-xs text-muted-foreground">{{ formatFileSize(media.size) }}</p>
+                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100">
+                                            <Users class="w-2.5 h-2.5 mr-0.5" />
+                                            {{ $t('features.media.shared') }}
+                                        </Badge>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -576,7 +586,12 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-foreground">{{ folder.name }}</div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="text-sm font-medium text-foreground">{{ folder.name }}</div>
+                                                <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
+                                                    {{ $t('features.media.shared') }}
+                                                </Badge>
+                                            </div>
                                             <div class="text-xs text-muted-foreground">{{ $t('features.media.folder') }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -625,7 +640,12 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-foreground">{{ media.name }}</div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="text-sm font-medium text-foreground">{{ media.name }}</div>
+                                                <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
+                                                    {{ $t('features.media.shared') }}
+                                                </Badge>
+                                            </div>
                                             <div v-if="media.alt" class="text-sm text-muted-foreground line-clamp-1">{{ media.alt }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -798,6 +818,7 @@ import {
     Download, 
     Move, 
     Type,
+    Users,
     Image as ImageIcon,
     Video as VideoIcon,
     FileText as FileIcon,

@@ -18,6 +18,11 @@ class MediaFolder extends Model
         'parent_id',
         'sort_order',
         'author_id',
+        'is_shared',
+    ];
+
+    protected $casts = [
+        'is_shared' => 'boolean',
     ];
 
     public function author(): BelongsTo

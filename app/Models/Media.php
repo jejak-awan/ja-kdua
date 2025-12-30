@@ -24,6 +24,7 @@ class Media extends Model
         'description',
         'folder_id',
         'author_id',
+        'is_shared',
     ];
 
     public function author()
@@ -33,6 +34,7 @@ class Media extends Model
 
     protected $casts = [
         'size' => 'integer',
+        'is_shared' => 'boolean',
     ];
 
     protected $appends = ['url', 'thumbnail_url'];

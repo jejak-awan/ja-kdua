@@ -5,6 +5,7 @@
     "search": "Search media...",
     "folders": "Folders",
     "newFolder": "New Folder",
+    "shared": "Shared",
     "allMedia": "All Media",
     "trash": "Trash",
     "emptyTrash": "Empty Trash",
@@ -113,6 +114,8 @@
             "noFolder": "No Folder",
             "type": "Type",
             "size": "Size",
+            "isShared": "Shared Asset",
+            "isSharedHelp": "Shared assets are visible to all users",
             "saving": "Saving..."
         },
         "folder": {
