@@ -224,7 +224,6 @@
         "noPermissionDelete": "You do not have permission to delete this media",
         "noPermissionManage": "You do not have permission to manage this media",
         "mediaInUse": "Media is currently in use"
-    },
     ,
     "confirm": {
         "deleteTitle": "Delete Media",
