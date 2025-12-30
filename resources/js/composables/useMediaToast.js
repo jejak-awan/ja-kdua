@@ -12,6 +12,11 @@ export function useMediaToast() {
         'You do not have permission to delete this media': 'features.media.errors.noPermissionDelete',
         'You do not have permission to manage this media': 'features.media.errors.noPermissionManage',
         'Media is currently in use': 'features.media.errors.mediaInUse',
+        // Common API errors
+        'Unauthorized': 'features.media.apiErrors.unauthorized',
+        'Forbidden': 'features.media.apiErrors.forbidden',
+        'Not Found': 'features.media.apiErrors.notFound',
+        'Server Error': 'features.media.apiErrors.serverError',
     };
 
     const translateMessage = (message) => {

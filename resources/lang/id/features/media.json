@@ -229,3 +229,11 @@
         "cancel": "Batal"
     }
 }
+    },
+    "apiErrors": {
+        "unauthorized": "Anda tidak memiliki otorisasi untuk melakukan tindakan ini",
+        "forbidden": "Tindakan ini dilarang",
+        "notFound": "Media tidak ditemukan",
+        "serverError": "Terjadi kesalahan server"
+    }
+}
