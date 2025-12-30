@@ -1271,9 +1271,13 @@ const deleteMedia = async (media) => {
     }
 
     try {
-        await api.delete(`/admin/cms/media/${media.id}`, {
-            params: { permanent: isPermanent ? 1 : 0 }
-        });
+        if (isPermanent) {
+            // Use force-delete endpoint for permanent deletion
+            await api.delete(`/admin/cms/media/${media.id}/force-delete`);
+        } else {
+            // Regular soft delete
+            await api.delete(`/admin/cms/media/${media.id}`);
+        }
         await fetchMedia();
         fetchStatistics();
     } catch (error) {
