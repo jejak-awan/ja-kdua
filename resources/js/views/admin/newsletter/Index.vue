@@ -28,7 +28,7 @@
                             <SelectValue :placeholder="$t('features.newsletter.filters.allStatus')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
+                            <SelectItem value="all">{{ $t('features.newsletter.filters.allStatus') }}</SelectItem>
                             <SelectItem value="subscribed">{{ $t('features.newsletter.filters.subscribed') }}</SelectItem>
                             <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
                         </SelectContent>
@@ -53,7 +53,7 @@
                         <TableHead>{{ $t('features.newsletter.table.status') }}</TableHead>
                         <TableHead>{{ $t('features.newsletter.table.joinedAt') }}</TableHead>
                         <TableHead>{{ $t('features.newsletter.table.source') }}</TableHead>
-                        <TableHead class="text-right">{{ $t('features.newsletter.table.actions') }}</TableHead>
+                        <TableHead class="text-center">{{ $t('features.newsletter.table.actions') }}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -99,54 +99,34 @@
                         <TableCell class="text-xs text-muted-foreground truncated max-w-[150px]" :title="subscriber.source">
                             {{ subscriber.source }}
                         </TableCell>
-                        <TableCell class="text-right">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                @click="deleteSubscriber(subscriber)"
-                                class="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                                <Trash2 class="w-4 h-4 mr-2" />
-                                {{ $t('features.newsletter.actions.delete') }}
-                            </Button>
+                        <TableCell>
+                            <div class="flex items-center justify-center">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="deleteSubscriber(subscriber)"
+                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    :title="$t('features.newsletter.actions.delete')"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
+                            </div>
                         </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
 
             <!-- Pagination -->
-            <div
+            <Pagination
                 v-if="pagination.total > 0"
-                class="px-4 py-3 border-t border-border flex items-center justify-between sm:px-6"
-            >
-                <div class="flex-1 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ $t('common.pagination.showing', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            @click="changePage(pagination.current_page - 1)"
-                            :disabled="pagination.current_page === 1"
-                        >
-                            <ChevronLeft class="w-4 h-4 mr-1" />
-                            {{ $t('common.pagination.previous') }}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            @click="changePage(pagination.current_page + 1)"
-                            :disabled="pagination.current_page === pagination.last_page"
-                        >
-                            {{ $t('common.pagination.next') }}
-                            <ChevronRight class="w-4 h-4 ml-1" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
+                :current-page="pagination.current_page"
+                :total-items="pagination.total"
+                :per-page="filters.per_page"
+                :show-page-numbers="true"
+                @page-change="changePage"
+                @update:per-page="changePerPage"
+                class="mt-4 px-4 pb-4"
+            />
         </Card>
     </div>
 </template>
@@ -171,10 +151,8 @@ import TableRow from '../../../components/ui/table-row.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
-import { 
-    Download, Search, Trash2, 
-    ChevronLeft, ChevronRight 
-} from 'lucide-vue-next';
+import Pagination from '../../../components/ui/pagination.vue';
+import { Download, Search, Trash2 } from 'lucide-vue-next';
 import _ from 'lodash';
 
 const { t } = useI18n();
@@ -183,15 +161,20 @@ const loading = ref(false);
 const subscribers = ref([]);
 const pagination = ref({});
 const filters = ref({
-    status: '',
+    status: 'all',
     q: '',
     page: 1,
+    per_page: 15,
 });
 
 const fetchSubscribers = async () => {
     loading.value = true;
     try {
         const params = { ...filters.value };
+        // Don't send 'all' status to API
+        if (params.status === 'all') {
+            delete params.status;
+        }
         const response = await api.get('/admin/cms/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
         subscribers.value = data;
@@ -213,6 +196,12 @@ const debounceSearch = _.debounce(() => {
 const changePage = (page) => {
     if (page < 1 || page > pagination.value.last_page) return;
     filters.value.page = page;
+    fetchSubscribers();
+};
+
+const changePerPage = (perPage) => {
+    filters.value.per_page = perPage;
+    filters.value.page = 1;
     fetchSubscribers();
 };
 
