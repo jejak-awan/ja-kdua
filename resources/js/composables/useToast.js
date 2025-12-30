@@ -19,12 +19,20 @@ export function useToast() {
         'Not Found': 'common.messages.error.notFound',
         'Server Error': 'common.messages.error.server',
 
-        // Media Specific Errors
-        'You cannot update global media': 'features.media.errors.cannotUpdateGlobal',
-        'You cannot delete global media': 'features.media.errors.cannotDeleteGlobal',
+        // Media Specific Errors (all variations)
+        'You do not have permission to delete media': 'features.media.errors.noPermissionDelete',
+        'You do not have permission to update media': 'features.media.errors.noPermissionUpdate',
+        'You do not have permission to restore media': 'features.media.errors.noPermissionUpdate',
+        'You do not have permission to permanently delete media': 'features.media.errors.noPermissionDelete',
+        'You do not have permission to edit media': 'features.media.errors.noPermissionUpdate',
+        'You do not have permission to view this media': 'features.media.errors.noPermissionUpdate',
         'You do not have permission to update this media': 'features.media.errors.noPermissionUpdate',
         'You do not have permission to delete this media': 'features.media.errors.noPermissionDelete',
+        'You do not have permission to restore this media': 'features.media.errors.noPermissionUpdate',
         'You do not have permission to manage this media': 'features.media.errors.noPermissionManage',
+        'You cannot update global media': 'features.media.errors.cannotUpdateGlobal',
+        'You cannot delete global media': 'features.media.errors.cannotDeleteGlobal',
+        'You cannot restore global media': 'features.media.errors.cannotDeleteGlobal',
         'Media is currently in use': 'features.media.errors.mediaInUse',
     };
 
