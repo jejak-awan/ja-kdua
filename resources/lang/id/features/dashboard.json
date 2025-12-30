@@ -19,8 +19,14 @@
             "drafts": "Draf",
             "workInProgress": "Dalam pengerjaan",
             "contentStatus": "Distribusi Status Konten",
-            "recentActivity": "Aktivitas Terkini"
+            "recentActivity": "Aktivitas Terkini",
+            "topContent": "Konten Terpopuler"
         }
+    },
+    "table": {
+        "content": "Konten",
+        "views": "Dilihat",
+        "status": "Status"
     },
     "creatorSubtitle": "Berikut performa konten Anda",
     "traffic": {

@@ -19,8 +19,14 @@
             "drafts": "Drafts",
             "workInProgress": "Work in progress",
             "contentStatus": "Content Status Distribution",
-            "recentActivity": "Recent Activity"
+            "recentActivity": "Recent Activity",
+            "topContent": "Top Content"
         }
+    },
+    "table": {
+        "content": "Content",
+        "views": "Views",
+        "status": "Status"
     },
     "creatorSubtitle": "Here is how your content is performing",
     "traffic": {
