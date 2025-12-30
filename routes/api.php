@@ -36,6 +36,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
         Route::get('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'getPreferences']);
         Route::put('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'updatePreferences']);
+        
+        // Dashboard routes
+        Route::get('/dashboard/admin', [App\Http\Controllers\Api\V1\DashboardController::class, 'admin'])->middleware('permission:manage users|manage settings');
+        Route::get('/dashboard/creator', [App\Http\Controllers\Api\V1\DashboardController::class, 'creator'])->middleware('permission:create content|edit content');
+        Route::get('/dashboard/viewer', [App\Http\Controllers\Api\V1\DashboardController::class, 'viewer']);
 
 
         // Two-Factor Authentication Routes
