@@ -6,13 +6,13 @@
                 <p class="text-muted-foreground">{{ $t('features.content.list.description') }}</p>
             </div>
             <div class="flex items-center gap-2">
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild v-if="authStore.hasPermission('manage content')">
                     <router-link :to="{ name: 'content-templates' }" class="flex items-center gap-2">
                         <LayoutTemplate class="w-4 h-4" />
                         {{ $t('features.content.list.templates') }}
                     </router-link>
                 </Button>
-                <Button asChild class="shadow-sm">
+                <Button asChild class="shadow-sm" v-if="authStore.hasPermission('manage content')">
                     <router-link :to="{ name: 'contents.create' }" class="flex items-center gap-2">
                         <Plus class="w-4 h-4" />
                         {{ $t('features.content.list.createNew') }}
@@ -222,20 +222,20 @@
                                     <Button variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10" @click="handlePreview(content)" :title="$t('features.content.form.preview')">
                                         <Eye class="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" @click="handleDuplicate(content)" :title="$t('features.content.actions.duplicate')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" @click="handleDuplicate(content)" :title="$t('features.content.actions.duplicate')" v-if="authStore.hasPermission('manage content')">
                                         <Copy class="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-500/10" asChild :title="$t('features.content.list.revisions')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-500/10" asChild :title="$t('features.content.list.revisions')" v-if="authStore.hasPermission('manage content')">
                                         <router-link :to="{ name: 'contents.revisions', params: { id: content.id } }">
                                             <History class="w-4 h-4" />
                                         </router-link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('manage content')">
                                         <router-link :to="{ name: 'contents.edit', params: { id: content.id } }">
                                             <Edit2 class="w-4 h-4" />
                                         </router-link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleDelete(content)" :title="$t('features.languages.actions.delete')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleDelete(content)" :title="$t('features.languages.actions.delete')" v-if="authStore.hasPermission('manage content')">
                                         <Trash2 class="w-4 h-4" />
                                     </Button>
                                 </div>
@@ -300,6 +300,7 @@ import {
     Clock,
     Archive
 } from 'lucide-vue-next';
+import { useAuthStore } from '../../../stores/auth';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -317,6 +318,7 @@ const stats = ref({
     draft: 0,
     archived: 0
 });
+const authStore = useAuthStore();
 
 const allSelected = computed(() => {
     return contents.value.length > 0 && selectedContents.value.length === contents.value.length;

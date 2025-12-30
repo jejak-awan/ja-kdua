@@ -14,7 +14,7 @@
         </div>
 
         <!-- Row 1: Statistics Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('manage system')">
             <!-- Contents Card -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
@@ -93,7 +93,7 @@
         </div>
 
         <!-- Row 2: Traffic Chart (Full Width) -->
-        <div class="w-full">
+        <div class="w-full" v-if="authStore.hasPermission('view analytics')">
             <Card class="col-span-1">
                 <CardHeader class="flex flex-row items-center justify-between pb-2">
                     <div class="space-y-1">

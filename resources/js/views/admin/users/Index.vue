@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-foreground">{{ $t('features.users.title') }}</h1>
-            <router-link :to="{ name: 'users.create' }">
+            <router-link :to="{ name: 'users.create' }" v-if="authStore.hasPermission('manage users')">
                 <Button>
                     <Plus class="w-5 h-5 mr-2" />
                     {{ $t('features.users.createNew') }}
