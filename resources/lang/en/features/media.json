@@ -17,7 +17,7 @@
         "documents": "Documents",
         "other": "Other",
         "trash": "Trash"
-    ,
+    },
     "filter": {
         "allTypes": "All Types",
         "images": "Images",
@@ -26,7 +26,7 @@
         "allStatus": "All Media",
         "used": "Used",
         "unused": "Unused"
-    ,
+    },
     "actions": {
         "bulk": "Bulk Actions",
         "delete": "Delete",
@@ -42,7 +42,7 @@
         "cancel": "Cancel",
         "close": "Close",
         "save": "Save Changes"
-    ,
+    },
     "loading": "Loading media...",
     "empty": "No media found",
     "table": {
@@ -52,7 +52,7 @@
         "size": "Size",
         "folder": "Folder",
         "actions": "Actions"
-    ,
+    },
     "selected": "{count} selected",
     "messages": {
         "deleteConfirm": "Are you sure you want to delete {count} media file(s)?",
@@ -77,7 +77,7 @@
         "createFolderSuccess": "Folder created successfully",
         "createFolderFailed": "Failed to create folder",
         "fileTooLarge": "File {name} is too large. Maximum size is 10MB."
-    ,
+    },
     "modals": {
         "updateAlt": {
             "title": "Update Alt Text",
@@ -87,11 +87,11 @@
             "cancel": "Cancel",
             "update": "Update",
             "updating": "Updating..."
-    ,
+        },
         "bulk": {
             "processing": "Processing...",
             "wait": "Please wait"
-    ,
+        },
         "upload": {
             "title": "Upload Media",
             "clickToUpload": "Click to upload",
@@ -103,7 +103,7 @@
             "chooseFile": "Choose File",
             "upload": "Upload",
             "uploadedSuccess": "Uploaded successfully!"
-    ,
+        },
         "edit": {
             "title": "Edit Media",
             "name": "Name",
@@ -117,7 +117,7 @@
             "isShared": "Shared Asset",
             "isSharedHelp": "Shared assets are visible to all users",
             "saving": "Saving..."
-    ,
+        },
         "folder": {
             "title": "Create Folder",
             "name": "Folder Name",
@@ -126,11 +126,11 @@
             "noParent": "No Parent",
             "creating": "Creating...",
             "create": "Create Folder"
-    ,
+        },
         "picker": {
             "title": "Select Media",
             "select": "Select"
-    ,
+        },
         "view": {
             "title": "Media Details",
             "preview": "Preview",
@@ -157,7 +157,7 @@
             "thumbnailSuccess": "Thumbnail generated successfully",
             "thumbnailFailed": "Failed to generate thumbnail",
             "close": "Close"
-    ,
+        },
         "resize": {
             "title": "Resize Media",
             "width": "Width (px)",
@@ -169,7 +169,7 @@
             "cancel": "Cancel",
             "success": "Media resized successfully",
             "failed": "Failed to resize media"
-    ,
+        },
         "editor": {
             "title": "Edit Image",
             "transform": "Transform",
@@ -196,7 +196,7 @@
             "success": "Image resized successfully!",
             "failed": "Failed to save image"
         }
-    ,
+    },
     "toast": {
         "titles": {
             "success": "Success",
@@ -205,7 +205,7 @@
             "info": "Info",
             "permissionDenied": "Permission Denied",
             "fileTooLarge": "File Too Large"
-    ,
+        },
         "uploadSuccess": "File uploaded successfully",
         "updateSuccess": "Media updated successfully",
         "deleteSuccess": "Media deleted successfully",
@@ -216,7 +216,7 @@
         "thumbnailSuccess": "Thumbnail generated successfully",
         "fileTooLarge": "File is too large (max 10MB)",
         "permissionDenied": "You don't have permission to perform this action"
-    ,
+    },
     "errors": {
         "cannotUpdateGlobal": "You cannot update global media",
         "cannotDeleteGlobal": "You cannot delete global media",
@@ -224,7 +224,7 @@
         "noPermissionDelete": "You do not have permission to delete this media",
         "noPermissionManage": "You do not have permission to manage this media",
         "mediaInUse": "Media is currently in use"
-    ,
+    },
     "confirm": {
         "deleteTitle": "Delete Media",
         "deleteMessage": "Are you sure you want to delete this media?",
@@ -242,5 +242,5 @@
         "forbidden": "This action is forbidden",
         "notFound": "Media not found",
         "serverError": "Server error occurred"
-    },
+    }
 }
