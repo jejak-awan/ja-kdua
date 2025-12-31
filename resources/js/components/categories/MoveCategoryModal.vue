@@ -66,12 +66,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import api from '../../services/api';
+import DialogFooter from '../ui/dialog-footer.vue';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { moveCategorySchema } from '../../schemas';
 
 const { t } = useI18n();
 const toast = useToast();
-const errors = ref({});
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(moveCategorySchema);
 
 const props = defineProps({
     category: {
@@ -120,17 +122,19 @@ const getCategoryPath = (category) => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod({ parent_id: selectedParentId.value })) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post(`/admin/cms/categories/${props.category.id}/move`, {
             parent_id: selectedParentId.value,
         });
-        toast.success('Category moved successfully');
+        toast.success.default(t('features.categories.messages.moveSuccess'));
         emit('moved');
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

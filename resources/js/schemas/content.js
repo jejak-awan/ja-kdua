@@ -72,3 +72,11 @@ export const tagSchema = z.object({
         .optional()
         .or(z.literal('')),
 });
+
+/**
+     * Move category schema
+     */
+export const moveCategorySchema = z.object({
+    parent_id: z.number().nullable().optional(),
+});
+

@@ -160,6 +160,8 @@ import AlertTitle from '@/components/ui/alert-title.vue';
 import AlertDescription from '@/components/ui/alert-description.vue';
 import { useAutoSave } from '../../../composables/useAutoSave';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { contentSchema } from '../../../schemas';
 
 const route = useRoute();
 const router = useRouter();
@@ -168,6 +170,7 @@ const isSidebarOpen = ref(true);
 const contentId = route.params.id;
 const { t } = useI18n();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const loading = ref(false);
 const categories = ref([]);
@@ -381,7 +384,19 @@ const fetchTags = async () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     loading.value = true;
+    clearErrors();
+    
+    // Optimistic UI update for lock status check
+    const currentLock = lockStatus.value;
+    if (currentLock?.is_locked && currentLock?.locked_by?.id !== authStore.user?.id) {
+        toast.error.default(t('features.content.form.locked'));
+        loading.value = false;
+        return;
+    }
+
     try {
         // Auto-fill SEO fields if empty
         if (!form.value.meta_title && form.value.title) {
@@ -393,30 +408,40 @@ const handleSubmit = async () => {
         if (!form.value.meta_keywords && selectedTags.value.length > 0) {
             form.value.meta_keywords = selectedTags.value.map(t => t.name).join(', ');
         }
-        
-        // Prepare tags: send ids for existing, names for new
+
+        // Prepare tags
         const tagIds = selectedTags.value.filter(t => t.id).map(t => t.id);
         const newTags = selectedTags.value.filter(t => !t.id).map(t => t.name);
-        
+
         const payload = {
             ...form.value,
             tags: tagIds,
             new_tags: newTags,
         };
 
-        await api.put(`/admin/cms/contents/${contentId}`, payload);
+        const response = await api.put(`/admin/cms/contents/${contentId}`, payload);
+        const updatedContent = parseSingleResponse(response);
         
-        // Release lock
-        if (lockInterval.value) {
-            clearInterval(lockInterval.value);
+        if (updatedContent) {
+            form.value = {
+                ...form.value,
+                ...updatedContent,
+            };
+            // Update last saved time
+            if (response.data?.updated_at) {
+                lastSaved.value = new Date(response.data.updated_at);
+            }
         }
-        await handleUnlock();
         
-        toast.success.update();
+        toast.success.update('Content');
         router.push({ name: 'contents' });
     } catch (error) {
-        console.error('Failed to update content:', error);
-        toast.error.update(error);
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors || {});
+        } else {
+            console.error('Failed to update content:', error);
+            toast.error.fromResponse(error);
+        }
     } finally {
         loading.value = false;
     }

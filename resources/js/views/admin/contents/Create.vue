@@ -89,10 +89,13 @@ import ContentMain from '../../../components/content/ContentMain.vue';
 import ContentSidebar from '../../../components/content/ContentSidebar.vue';
 import { useAutoSave } from '../../../composables/useAutoSave';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { contentSchema } from '../../../schemas';
 
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const isSidebarOpen = ref(true);
 
@@ -195,7 +198,10 @@ const fetchTags = async () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     loading.value = true;
+    clearErrors();
     try {
         // Auto-fill SEO fields if empty
         if (!form.value.meta_title && form.value.title) {
@@ -228,11 +234,15 @@ const handleSubmit = async () => {
             ? await api.put(endpoint, payload)
             : await api.post(endpoint, payload);
         
-        toast.success.create();
+        toast.success.create('Content');
         router.push({ name: 'contents' });
     } catch (error) {
-        console.error('Failed to create content:', error);
-        toast.error.create(error);
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors || {});
+        } else {
+            console.error('Failed to create content:', error);
+            toast.error.fromResponse(error);
+        }
     } finally {
         loading.value = false;
     }
