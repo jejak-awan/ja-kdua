@@ -37,16 +37,23 @@
     },
     "contact": {
         "title": "Hubungi Kami",
-        "subtitle": "Hubungi kami melalui formulir di bawah ini",
-        "placeholder": "Ini adalah halaman placeholder. Konten akan segera hadir."
+        "subtitle": "Punya pertanyaan atau masukan? Kami ingin mendengar dari Anda.",
+        "namePlaceholder": "Masukkan nama Anda",
+        "emailPlaceholder": "Masukkan email Anda",
+        "message": "Pesan",
+        "messagePlaceholder": "Tulis pesan Anda di sini...",
+        "submit": "Kirim Pesan",
+        "success": "Pesan terkirim! Kami akan segera menghubungi Anda.",
+        "error": "Gagal mengirim pesan. Silakan coba lagi."
     },
     "newsletter": {
-        "title": "Berlangganan Newsletter",
-        "description": "Dapatkan update terbaru, tips, dan artikel menarik langsung ke email Anda",
-        "placeholder": "Masukkan email Anda",
+        "title": "Tetap Update",
+        "description": "Berlangganan newsletter kami untuk mendapatkan update dan artikel terbaru.",
+        "placeholder": "Alamat email",
         "button": "Berlangganan",
         "processing": "Memproses...",
-        "success": "Terima kasih! Email Anda berhasil didaftarkan.",
+        "success": "Berhasil berlangganan!",
+        "error": "Gagal berlangganan. Silakan coba lagi.",
         "privacy": "Dengan berlangganan, Anda menyetujui",
         "privacyLink": "Kebijakan Privasi"
     },
@@ -93,7 +100,9 @@
             "support": "Dukungan",
             "faq": "FAQ"
         },
-        "copyright": "© {year} JA-CMS. Hak cipta dilindungi undang-undang.",
+        "copyright": "Hak cipta dilindungi undang-undang.",
+        "privacy": "Kebijakan Privasi",
+        "terms": "Ketentuan Layanan",
         "powered": "Ditenagai oleh",
         "system": "Sistem Manajemen Konten Modern"
     },

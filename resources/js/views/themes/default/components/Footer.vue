@@ -8,16 +8,16 @@
                         <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">JA</div>
                         <span class="text-xl font-bold">JA-CMS</span>
                     </div>
-                    <h5 class="font-semibold mb-4 text-foreground">Stay Updated</h5>
+                    <h5 class="font-semibold mb-4 text-foreground">{{ $t('features.frontend.newsletter.title') }}</h5>
                     <p class="text-muted-foreground text-sm mb-4">
-                        Subscribe to our newsletter for the latest updates and articles.
+                        {{ $t('features.frontend.newsletter.description') }}
                     </p>
                     <form class="flex flex-col gap-2" @submit.prevent="submitNewsletter">
                         <div class="flex gap-2">
                             <input 
                                 v-model="email"
                                 type="email" 
-                                placeholder="Email address" 
+                                :placeholder="$t('features.frontend.newsletter.placeholder')" 
                                 class="flex-1 px-4 py-2 rounded-lg bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                                 :class="{ 'border-destructive focus:ring-destructive': errors.email }"
                             >
@@ -39,11 +39,11 @@
 
             <div class="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-muted-foreground text-sm">
-                    &copy; 2024 JA-CMS. All rights reserved.
+                    &copy; 2024 JA-CMS. {{ $t('features.frontend.footer.copyright') }}
                 </p>
                 <div class="flex gap-6">
-                    <a href="#" class="text-muted-foreground hover:text-foreground text-sm transition-colors">Privacy Policy</a>
-                    <a href="#" class="text-muted-foreground hover:text-foreground text-sm transition-colors">Terms of Service</a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground text-sm transition-colors">{{ $t('features.frontend.footer.privacy') }}</a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground text-sm transition-colors">{{ $t('features.frontend.footer.terms') }}</a>
                 </div>
             </div>
         </div>
@@ -52,11 +52,13 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
 import { newsletterSchema } from '../../../../schemas'
 // import api from '../../../services/api' // Uncomment when ready
 
+const { t } = useI18n()
 const toast = useToast()
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
 const loading = ref(false)
@@ -74,13 +76,13 @@ const submitNewsletter = async () => {
         
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        toast.success('Subscribed successfully!')
+        toast.success(t('features.frontend.newsletter.success'))
         email.value = ''
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors)
         } else {
-            toast.error('Subscription failed.')
+            toast.error(t('features.frontend.newsletter.error'))
         }
     } finally {
         loading.value = false

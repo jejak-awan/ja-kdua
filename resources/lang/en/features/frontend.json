@@ -36,17 +36,24 @@
         "readMore": "Read More"
     },
     "contact": {
-        "title": "Contact Us",
-        "subtitle": "Get in touch with us",
-        "placeholder": "This is a placeholder page. Content coming soon."
+        "title": "Get in Touch",
+        "subtitle": "Have questions or feedback? We'd love to hear from you.",
+        "namePlaceholder": "Enter your name",
+        "emailPlaceholder": "Enter your email",
+        "message": "Message",
+        "messagePlaceholder": "Write your message here...",
+        "submit": "Send Message",
+        "success": "Message sent! We will get back to you soon.",
+        "error": "Failed to send message. Please try again."
     },
     "newsletter": {
-        "title": "Subscribe to Newsletter",
-        "description": "Get the latest updates, tips, and articles directly to your inbox",
-        "placeholder": "Enter your email",
+        "title": "Stay Updated",
+        "description": "Subscribe to our newsletter for the latest updates and articles.",
+        "placeholder": "Email address",
         "button": "Subscribe",
         "processing": "Subscribing...",
-        "success": "Thanks! Your email has been registered.",
+        "success": "Subscribed successfully!",
+        "error": "Subscription failed. Please try again.",
         "privacy": "By subscribing, you agree to our",
         "privacyLink": "Privacy Policy"
     },
@@ -93,7 +100,9 @@
             "support": "Support",
             "faq": "FAQ"
         },
-        "copyright": "© {year} JA-CMS. All rights reserved.",
+        "copyright": "All rights reserved.",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
         "powered": "Powered by",
         "system": "Modern Content Management System"
     },
