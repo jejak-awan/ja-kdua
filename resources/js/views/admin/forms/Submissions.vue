@@ -317,7 +317,7 @@ const deleteSubmission = async (submission) => {
         fetchSubmissions();
     } catch (error) {
         console.error('Failed to delete submission:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.submissions.messages.deleteFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -341,7 +341,7 @@ const exportSubmissions = async () => {
         toast.success(t('features.forms.submissions.messages.exportSuccess'));
     } catch (error) {
         console.error('Failed to export submissions:', error);
-        toast.error('Error', t('features.forms.submissions.messages.exportFailed'));
+        toast.error.fromResponse(error);
     }
 };
 

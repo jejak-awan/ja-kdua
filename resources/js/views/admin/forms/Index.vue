@@ -372,7 +372,7 @@ const toggleFormStatus = async (form) => {
         toast.success(t('common.messages.success.updated', { item: 'Form status' }));
     } catch (error) {
         console.error('Error toggling form status:', error);
-        toast.error(t('features.forms.messages.saveFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -392,7 +392,7 @@ const deleteForm = async (form) => {
         fetchForms();
     } catch (error) {
         console.error('Failed to delete form:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.messages.deleteFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -415,7 +415,7 @@ const bulkDelete = async () => {
         fetchForms();
     } catch (error) {
         console.error('Failed to bulk delete forms:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.messages.deleteFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -426,7 +426,7 @@ const duplicateForm = async (form) => {
         fetchForms();
     } catch (error) {
         console.error('Failed to duplicate form:', error);
-        toast.error('Error', error.response?.data?.message || t('features.forms.messages.duplicateFailed'));
+        toast.error.fromResponse(error);
     }
 };
 
