@@ -123,6 +123,8 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { loginSchema } from '../../schemas/auth';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 
@@ -130,6 +132,7 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const { t } = useI18n();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(loginSchema);
 
 const form = reactive({
     email: '',
@@ -137,7 +140,6 @@ const form = reactive({
     remember: false,
 });
 
-const errors = ref({});
 const message = ref('');
 const messageType = ref('');
 const loading = ref(false);
@@ -194,8 +196,13 @@ const startRetryTimer = (initialSeconds) => {
 };
 
 const handleLogin = async () => {
+    // Client-side validation first (instant feedback)
+    if (!validateWithZod(form)) {
+        return;
+    }
+
     loading.value = true;
-    errors.value = {};
+    clearErrors();
     message.value = '';
     messageType.value = '';
     rateLimited.value = false;
@@ -238,9 +245,9 @@ const handleLogin = async () => {
                 message.value = '';
             } else {
                 rateLimited.value = false;
-                // Handle validation errors
+                // Handle validation errors from server
                 if (result.errors && Object.keys(result.errors).length > 0) {
-                    errors.value = result.errors;
+                    setErrors(result.errors);
                     // Don't show general message if we have field-specific errors
                     message.value = '';
                 } else {

@@ -95,12 +95,15 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { registerSchema } from '../../schemas/auth';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(registerSchema);
 
 const form = reactive({
     name: '',
@@ -109,14 +112,18 @@ const form = reactive({
     password_confirmation: '',
 });
 
-const errors = ref({});
 const message = ref('');
 const messageType = ref('');
 const loading = ref(false);
 
 const handleRegister = async () => {
+    // Client-side validation first (instant feedback)
+    if (!validateWithZod(form)) {
+        return;
+    }
+
     loading.value = true;
-    errors.value = {};
+    clearErrors();
     message.value = '';
 
     const result = await authStore.register(form);
@@ -130,7 +137,7 @@ const handleRegister = async () => {
     } else {
         message.value = result.message;
         messageType.value = 'error';
-        errors.value = result.errors || {};
+        setErrors(result.errors || {});
     }
 
     loading.value = false;

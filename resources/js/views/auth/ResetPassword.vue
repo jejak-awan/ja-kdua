@@ -85,6 +85,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { resetPasswordSchema } from '../../schemas/auth';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 
@@ -92,6 +94,7 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const authStore = useAuthStore();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(resetPasswordSchema);
 
 const form = reactive({
     email: '',
@@ -100,7 +103,6 @@ const form = reactive({
     password_confirmation: '',
 });
 
-const errors = ref({});
 const message = ref('');
 const messageType = ref('');
 const loading = ref(false);
@@ -115,8 +117,13 @@ onMounted(() => {
 });
 
 const handleSubmit = async () => {
+    // Client-side validation first
+    if (!validateWithZod(form)) {
+        return;
+    }
+
     loading.value = true;
-    errors.value = {};
+    clearErrors();
     message.value = '';
 
     const result = await authStore.resetPassword(form);
@@ -130,7 +137,7 @@ const handleSubmit = async () => {
     } else {
         message.value = result.message;
         messageType.value = 'error';
-        errors.value = result.errors || {};
+        setErrors(result.errors || {});
     }
 
     loading.value = false;

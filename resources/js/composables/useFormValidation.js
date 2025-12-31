@@ -1,18 +1,20 @@
-import { ref, reactive } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 /**
- * Form validation composable for consistent validation across all forms
- * Supports both synchronous and asynchronous validation rules
+ * Form validation composable with Zod schema support
+ * Provides both client-side (Zod) and server-side (422) error handling
+ * 
+ * @param {Object} zodSchema - Optional Zod schema for client-side validation
  */
-export function useFormValidation() {
+export function useFormValidation(zodSchema = null) {
     const { t } = useI18n();
     const errors = ref({});
     const touched = ref({});
     const validating = ref(false);
 
     /**
-     * Built-in validation rules
+     * Built-in validation rules (legacy support)
      */
     const rules = {
         required: (value) => {
@@ -22,7 +24,7 @@ export function useFormValidation() {
         },
 
         email: (value) => {
-            if (!value) return true; // Skip if empty (use required separately)
+            if (!value) return true;
             const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
             return valid || 'common.validation.email';
         },
@@ -72,31 +74,6 @@ export function useFormValidation() {
             return valid || 'common.validation.confirmed';
         },
 
-        between: (min, max) => (value) => {
-            if (!value) return true;
-            const len = String(value).length;
-            const valid = len >= min && len <= max;
-            return valid || t('common.validation.between', { min, max });
-        },
-
-        in: (allowedValues) => (value) => {
-            if (!value) return true;
-            const valid = allowedValues.includes(value);
-            return valid || 'common.validation.in';
-        },
-
-        alpha: (value) => {
-            if (!value) return true;
-            const valid = /^[a-zA-Z]+$/.test(value);
-            return valid || 'common.validation.alpha';
-        },
-
-        alphaNum: (value) => {
-            if (!value) return true;
-            const valid = /^[a-zA-Z0-9]+$/.test(value);
-            return valid || 'common.validation.alphaNum';
-        },
-
         slug: (value) => {
             if (!value) return true;
             const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
@@ -105,7 +82,88 @@ export function useFormValidation() {
     };
 
     /**
-     * Validate a single field
+     * Format Zod errors to match existing error structure
+     * { fieldName: ['error message 1', 'error message 2'] }
+     */
+    const formatZodErrors = (zodError) => {
+        const formatted = {};
+        for (const issue of zodError.issues) {
+            const path = issue.path.join('.') || '_root';
+            if (!formatted[path]) formatted[path] = [];
+            formatted[path].push(issue.message);
+        }
+        return formatted;
+    };
+
+    /**
+     * Validate form data using Zod schema
+     * @param {Object} formData - Form data to validate
+     * @returns {boolean} - True if valid, false if validation errors
+     */
+    const validateWithZod = (formData) => {
+        if (!zodSchema) {
+            console.warn('useFormValidation: No Zod schema provided');
+            return true;
+        }
+
+        validating.value = true;
+        errors.value = {};
+
+        try {
+            const result = zodSchema.safeParse(formData);
+
+            if (!result.success) {
+                errors.value = formatZodErrors(result.error);
+                validating.value = false;
+                return false;
+            }
+
+            validating.value = false;
+            return true;
+        } catch (error) {
+            console.error('Zod validation error:', error);
+            validating.value = false;
+            return true; // Allow form submission on schema error
+        }
+    };
+
+    /**
+     * Validate a single field using Zod schema
+     * @param {string} fieldName - Field name to validate
+     * @param {any} value - Field value
+     * @param {Object} formData - Full form data (for cross-field validation)
+     */
+    const validateFieldWithZod = (fieldName, value, formData = {}) => {
+        if (!zodSchema) return true;
+
+        // Create partial data for validation
+        const dataToValidate = { ...formData, [fieldName]: value };
+
+        try {
+            const result = zodSchema.safeParse(dataToValidate);
+
+            if (!result.success) {
+                // Only extract errors for this field
+                const fieldErrors = result.error.issues
+                    .filter(issue => issue.path[0] === fieldName)
+                    .map(issue => issue.message);
+
+                if (fieldErrors.length > 0) {
+                    errors.value[fieldName] = fieldErrors;
+                    return false;
+                }
+            }
+
+            // Clear error for this field if valid
+            delete errors.value[fieldName];
+            return true;
+        } catch {
+            return true;
+        }
+    };
+
+    /**
+     * Validate a single field using legacy rules
      */
     const validateField = (fieldName, value, fieldRules, formData = {}) => {
         if (!fieldRules || fieldRules.length === 0) {
@@ -119,13 +177,11 @@ export function useFormValidation() {
             let result;
 
             if (typeof rule === 'string') {
-                // Simple rule name: 'required', 'email', etc.
                 validator = rules[rule];
                 if (validator) {
                     result = validator(value, formData);
                 }
             } else if (typeof rule === 'object') {
-                // Rule with parameters: { min: 8 }, { between: [3, 10] }
                 const ruleName = Object.keys(rule)[0];
                 const ruleParams = rule[ruleName];
                 validator = rules[ruleName];
@@ -138,18 +194,15 @@ export function useFormValidation() {
                     }
                 }
             } else if (typeof rule === 'function') {
-                // Custom validation function
                 result = rule(value, formData);
             }
 
-            // If validation failed, add error
             if (result !== true) {
                 const errorMessage = typeof result === 'string' ? t(result) : result;
                 fieldErrors.push(errorMessage);
             }
         }
 
-        // Update errors for this field
         if (fieldErrors.length > 0) {
             errors.value[fieldName] = fieldErrors;
             return false;
@@ -160,7 +213,7 @@ export function useFormValidation() {
     };
 
     /**
-     * Validate entire form
+     * Validate entire form using legacy rules
      */
     const validate = (formData, validationRules) => {
         validating.value = true;
@@ -201,7 +254,7 @@ export function useFormValidation() {
      * Set errors from backend (422 response)
      */
     const setErrors = (backendErrors) => {
-        errors.value = backendErrors;
+        errors.value = backendErrors || {};
     };
 
     /**
@@ -219,10 +272,12 @@ export function useFormValidation() {
     };
 
     /**
-     * Get error for specific field
+     * Get error for specific field (first error only)
      */
     const getError = (fieldName) => {
-        return errors.value[fieldName]?.[0] || null;
+        const fieldErrors = errors.value[fieldName];
+        if (Array.isArray(fieldErrors)) return fieldErrors[0] || null;
+        return fieldErrors || null;
     };
 
     /**
@@ -233,16 +288,31 @@ export function useFormValidation() {
     };
 
     return {
+        // State
         errors,
         touched,
         validating,
+
+        // Legacy rules
         rules,
+
+        // Zod validation
+        validateWithZod,
+        validateFieldWithZod,
+
+        // Legacy validation
         validate,
         validateField,
+
+        // Error management
         clearErrors,
         clearError,
         setErrors,
+
+        // Touch tracking
         touch,
+
+        // Helpers
         hasErrors,
         hasError,
         getError,

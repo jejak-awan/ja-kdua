@@ -54,11 +54,14 @@
 import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { forgotPasswordSchema } from '../../schemas/auth';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 
 const { t } = useI18n();
 const authStore = useAuthStore();
+const { errors, validateWithZod, clearErrors } = useFormValidation(forgotPasswordSchema);
 
 const form = reactive({
     email: '',
@@ -69,7 +72,13 @@ const messageType = ref('');
 const loading = ref(false);
 
 const handleSubmit = async () => {
+    // Client-side validation first
+    if (!validateWithZod(form)) {
+        return;
+    }
+
     loading.value = true;
+    clearErrors();
     message.value = '';
 
     const result = await authStore.forgotPassword(form.email);
