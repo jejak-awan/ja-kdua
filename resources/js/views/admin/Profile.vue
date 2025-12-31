@@ -82,7 +82,7 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <Button :disabled="saving" @click="updateProfile">
+                            <Button :disabled="saving || !isProfileDirty" @click="updateProfile">
                                 <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
                                 {{ saving ? $t('features.profile.form.saving') : $t('features.profile.form.save') }}
                             </Button>
@@ -116,7 +116,7 @@
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <Button :disabled="changingPassword" @click="updatePassword">
+                            <Button :disabled="changingPassword || !isPasswordValid" @click="updatePassword">
                                 <Loader2 v-if="changingPassword" class="mr-2 h-4 w-4 animate-spin" />
                                 {{ changingPassword ? $t('features.profile.form.changing') : $t('features.profile.form.changePassword') }}
                             </Button>
@@ -154,7 +154,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import toast from '../../services/toast';
@@ -179,7 +179,6 @@ import Input from '../../components/ui/input.vue';
 import Button from '../../components/ui/button.vue';
 import Label from '../../components/ui/label.vue';
 import Textarea from '../../components/ui/textarea.vue';
-// import Separator from '../../components/ui/separator.vue'; // Removed to avoid build error, using div instead if needed
 
 import Avatar from '../../components/ui/avatar.vue';
 import AvatarImage from '../../components/ui/avatar-image.vue';
@@ -209,6 +208,8 @@ const profileForm = ref({
     avatar: null,
 });
 
+const initialProfileForm = ref(null);
+
 const passwordForm = ref({
     current_password: '',
     password: '',
@@ -225,6 +226,18 @@ const getInitials = (name) => {
         .slice(0, 2);
 };
 
+const isProfileDirty = computed(() => {
+    if (!initialProfileForm.value) return false;
+    return JSON.stringify(profileForm.value) !== JSON.stringify(initialProfileForm.value);
+});
+
+const isPasswordValid = computed(() => {
+    return passwordForm.value.current_password && 
+           passwordForm.value.password && 
+           passwordForm.value.password.length >= 8 &&
+           passwordForm.value.password === passwordForm.value.password_confirmation;
+});
+
 const fetchProfile = async () => {
     try {
         const response = await api.get('/profile');
@@ -239,6 +252,7 @@ const fetchProfile = async () => {
                 website: user.website || '',
                 avatar: user.avatar || null,
             };
+            initialProfileForm.value = JSON.parse(JSON.stringify(profileForm.value));
         }
     } catch (error) {
         console.error('Error fetching profile:', error);
@@ -252,7 +266,7 @@ const updateProfile = async () => {
         await api.put('/profile', profileForm.value);
         toast.success(t('features.profile.messages.updateSuccess'));
         await authStore.fetchUser();
-        await fetchProfile();
+        await fetchProfile(); // Re-fetch to update initial state
     } catch (error) {
         const msg = error.response?.data?.message || t('features.profile.messages.updateFailed');
         toast.error(msg);

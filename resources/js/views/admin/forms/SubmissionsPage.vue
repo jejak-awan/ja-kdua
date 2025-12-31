@@ -231,7 +231,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
 import { useConfirm } from '../../../composables/useConfirm';

@@ -78,6 +78,33 @@ class FormController extends BaseApiController
 
         $form->update($validated);
 
+        // Sync fields
+        if ($request->has('fields')) {
+            $existingFieldIds = $form->fields()->pluck('id')->toArray();
+            $requestFieldIds = [];
+
+            foreach ($request->fields as $fieldData) {
+                if (isset($fieldData['id']) && in_array($fieldData['id'], $existingFieldIds)) {
+                    // Update existing
+                    $requestFieldIds[] = $fieldData['id'];
+                    $field = FormField::find($fieldData['id']);
+                    $field->update($fieldData);
+                } else {
+                    // Create new and track ID
+                    // Ensure form_id is set
+                    $fieldData['form_id'] = $form->id;
+                    $newField = $form->fields()->create($fieldData);
+                    $requestFieldIds[] = $newField->id;
+                }
+            }
+
+            // Delete fields not in request
+            $toDelete = array_diff($existingFieldIds, $requestFieldIds);
+            if (!empty($toDelete)) {
+                FormField::whereIn('id', $toDelete)->delete();
+            }
+        }
+
         return $this->success($form->load('fields'), 'Form updated successfully');
     }
 
@@ -214,6 +241,29 @@ class FormController extends BaseApiController
             'form' => $form->name,
             'submission_id' => $submission->id,
         ]);
+    }
+    
+    public function duplicate(Request $request, Form $form)
+    {
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to duplicate this form');
+        }
+
+        $newForm = $form->replicate(['slug', 'name']);
+        $newForm->name = $form->name . ' (Copy)';
+        $newForm->slug = $form->slug . '-copy-' . time();
+        $newForm->is_active = false;
+        $newForm->author_id = $request->user()->id; // Assign to current user
+        $newForm->save();
+
+        // Duplicate fields
+        foreach ($form->fields as $field) {
+            $newField = $field->replicate();
+            $newField->form_id = $newForm->id;
+            $newField->save();
+        }
+
+        return $this->success($newForm->load('fields'), 'Form duplicated successfully', 201);
     }
 
     public function bulkAction(Request $request)

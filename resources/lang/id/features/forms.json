@@ -37,7 +37,17 @@
         "status": "Status",
         "user": "Pengguna",
         "submitted": "Diserahkan",
-        "empty": "Tidak ada submisi ditemukan"
+        "empty": "Tidak ada submisi ditemukan",
+        "actions": {
+            "delete": "Hapus Submisi"
+        },
+        "messages": {
+            "deleteConfirm": "Anda yakin ingin menghapus submisi ini?",
+            "deleteSuccess": "Submisi berhasil dihapus",
+            "deleteFailed": "Gagal menghapus submisi",
+            "exportSuccess": "Submisi berhasil diekspor",
+            "exportFailed": "Gagal mengekspor submisi"
+        }
     },
     "modal": {
         "createTitle": "Buat Formulir Baru",

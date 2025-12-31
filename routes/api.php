@@ -331,6 +331,7 @@ Route::prefix('v1')->group(function () {
 
         // Forms
         Route::post('forms/bulk-action', [App\Http\Controllers\Api\V1\FormController::class, 'bulkAction'])->middleware('permission:manage forms');
+        Route::post('forms/{form}/duplicate', [App\Http\Controllers\Api\V1\FormController::class, 'duplicate'])->middleware('permission:manage forms');
         Route::apiResource('forms', App\Http\Controllers\Api\V1\FormController::class)->middleware('permission:manage forms');
         Route::post('forms/{form}/fields', [App\Http\Controllers\Api\V1\FormController::class, 'addField'])->middleware('permission:manage forms');
         Route::put('forms/{form}/fields/{formField}', [App\Http\Controllers\Api\V1\FormController::class, 'updateField'])->middleware('permission:manage forms');

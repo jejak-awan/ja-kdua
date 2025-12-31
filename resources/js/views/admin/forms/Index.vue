@@ -309,7 +309,8 @@ import {
 const { t } = useI18n();
 const { confirm } = useConfirm();
 
-// State router = useRouter();
+// State
+const router = useRouter();
 const forms = ref([]);
 const loading = ref(true);
 const search = ref('');
@@ -409,7 +410,10 @@ const bulkDelete = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/forms/bulk-delete', { ids: selectedIds.value });
+        await api.post('/admin/cms/forms/bulk-action', { 
+            ids: selectedIds.value,
+            action: 'delete'
+        });
         toast.success(t('features.forms.messages.bulkDeleteSuccess'));
         selectedIds.value = [];
         fetchForms();

@@ -29,7 +29,7 @@
                 <div>
                     <button
                         type="submit"
-                        :disabled="loading"
+                        :disabled="loading || !isValid"
                         class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="loading">{{ t('features.auth.verifyEmail.sending') }}</span>
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
@@ -65,6 +65,10 @@ const { errors, validateWithZod, clearErrors } = useFormValidation(forgotPasswor
 
 const form = reactive({
     email: '',
+});
+
+const isValid = computed(() => {
+    return !!form.email;
 });
 
 const message = ref('');
