@@ -165,8 +165,8 @@ class CaptchaService
 
     protected function createCaptchaImage(string $code): string
     {
-        $width = 180;
-        $height = 60;
+        $width = 140; // Reduced from 180
+        $height = 50; // Reduced from 60
 
         // Create image
         $image = imagecreatetruecolor($width, $height);
@@ -206,13 +206,14 @@ class CaptchaService
         $fontSize = 5; // GD built-in font size (1-5)
         $charWidth = imagefontwidth($fontSize);
         $charHeight = imagefontheight($fontSize);
-        $startX = ($width - strlen($code) * $charWidth * 2) / 2;
+        // Tighter spacing: 1.5x char width instead of 2x
+        $startX = ($width - strlen($code) * $charWidth * 1.5) / 2;
         $startY = ($height - $charHeight) / 2;
 
         for ($i = 0; $i < strlen($code); $i++) {
             $char = $code[$i];
-            $x = $startX + ($i * $charWidth * 2) + rand(-3, 3);
-            $y = $startY + rand(-5, 5);
+            $x = $startX + ($i * $charWidth * 1.5) + rand(-2, 2);
+            $y = $startY + rand(-3, 3);
             $color = $textColors[array_rand($textColors)];
             
             imagestring($image, $fontSize, $x, $y, $char, $color);
