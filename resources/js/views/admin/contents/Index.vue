@@ -188,7 +188,7 @@
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="content in filteredContents" :key="content.id" class="group hover:bg-muted/50 transition-colors border-b border-border">
+                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 transition-colors border-b border-border">
                             <TableCell class="px-6">
                                 <Checkbox
                                     :checked="selectedContents.includes(content.id)"
@@ -282,7 +282,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, parseSingleResponse } from '../../../utils/responseParser';
@@ -330,6 +330,7 @@ import { useToast } from '../../../composables/useToast';
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 const contents = ref([]);
 const loading = ref(false);
@@ -350,24 +351,6 @@ const authStore = useAuthStore();
 
 const allSelected = computed(() => {
     return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
-});
-
-const filteredContents = computed(() => {
-    if (!Array.isArray(contents.value)) {
-        return [];
-    }
-    
-    let filtered = contents.value;
-    
-    if (search.value) {
-        const searchLower = search.value.toLowerCase();
-        filtered = filtered.filter(content => 
-            content?.title?.toLowerCase().includes(searchLower) ||
-            content?.slug?.toLowerCase().includes(searchLower)
-        );
-    }
-    
-    return filtered;
 });
 
 const fetchStats = async () => {
@@ -404,6 +387,11 @@ const fetchContents = async (page = 1) => {
         if (statusFilter.value && statusFilter.value !== 'all') {
             params.status = statusFilter.value;
         }
+
+        if (search.value) {
+            params.search = search.value;
+        }
+
         const response = await api.get('/admin/cms/contents', { params });
         const { data: parsedData, pagination: parsedPagination } = parseResponse(response);
         
@@ -616,6 +604,10 @@ watch([search, statusFilter], () => {
 
 
 onMounted(() => {
+    // Check for search query param from Global Search
+    if (route.query.q) {
+        search.value = route.query.q;
+    }
     fetchContents();
     fetchStats();
 });

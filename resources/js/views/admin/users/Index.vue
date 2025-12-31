@@ -315,7 +315,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { useToast } from '../../../composables/useToast';
@@ -664,7 +664,13 @@ watch([search, roleFilter, verificationFilter, activeStatFilter], () => {
     fetchUsers();
 });
 
+const route = useRoute();
+
 onMounted(() => {
+    // Check for search query param from Global Search
+    if (route.query.q) {
+        search.value = route.query.q;
+    }
     fetchUsers();
     fetchRoles();
     fetchStats();

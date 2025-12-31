@@ -50,5 +50,9 @@
     "system": "System",
     "profile": "Profile",
     "myProfile": "My Profile",
-    "selected": "selected"
+    "selected": "selected",
+    "posts": "Posts",
+    "pages": "Pages",
+    "quickActions": "Quick Actions",
+    "other": "Other"
 }

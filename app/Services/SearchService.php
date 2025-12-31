@@ -14,46 +14,40 @@ class SearchService
                 'results' => [],
                 'total' => 0,
                 'query' => $query,
+                'suggestions' => [],
             ];
         }
 
         $searchQuery = SearchIndex::query();
+        $isLoose = false;
+        $suggestions = [];
 
-        // Full-text search (MySQL/MariaDB)
-        if (config('database.default') === 'mysql' || config('database.default') === 'mariadb') {
-            $searchQuery->whereRaw(
-                'MATCH(title, content) AGAINST(? IN BOOLEAN MODE)',
-                [$this->prepareSearchQuery($query)]
-            );
-        } else {
-            // Fallback for SQLite/PostgreSQL
-            $terms = explode(' ', $query);
-            $searchQuery->where(function ($q) use ($terms) {
-                foreach ($terms as $term) {
-                    $q->where('title', 'like', "%{$term}%")
-                        ->orWhere('content', 'like', "%{$term}%");
-                }
-            });
+        // 1. Try Strict Search (AND)
+        $this->applySearchLogic($searchQuery, $query, true);
+        $this->applyFilters($searchQuery, $filters);
+        
+        $results = $searchQuery->orderByDesc('relevance_score')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+
+        // 2. Fallback to Loose Search (OR) if no results
+        if ($results->isEmpty()) {
+            $isLoose = true;
+            $searchQuery = SearchIndex::query();
+            $this->applySearchLogic($searchQuery, $query, false);
+            $this->applyFilters($searchQuery, $filters);
+            
+            $results = $searchQuery->orderByDesc('relevance_score')
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get();
+
+            // 3. If still empty, get suggestions
+            if ($results->isEmpty()) {
+                $suggestions = $this->getSuggestions($query);
+            }
         }
-
-        // Apply filters
-        if (isset($filters['type'])) {
-            $searchQuery->where('type', $filters['type']);
-        }
-
-        if (isset($filters['date_from'])) {
-            $searchQuery->whereDate('created_at', '>=', $filters['date_from']);
-        }
-
-        if (isset($filters['date_to'])) {
-            $searchQuery->whereDate('created_at', '<=', $filters['date_to']);
-        }
-
-        // Order by relevance
-        $searchQuery->orderByDesc('relevance_score')
-            ->orderByDesc('created_at');
-
-        $results = $searchQuery->limit($limit)->get();
 
         // Log search query
         SearchQuery::log($query, $results->count(), $filters);
@@ -73,7 +67,51 @@ class SearchService
             }),
             'total' => $results->count(),
             'query' => $query,
+            'is_loose' => $isLoose,
+            'suggestions' => $suggestions,
         ];
+    }
+
+    protected function applySearchLogic($queryBuilder, $query, $strict = true)
+    {
+        if (config('database.default') === 'mysql' || config('database.default') === 'mariadb') {
+            $prepared = $this->prepareSearchQuery($query, $strict);
+            if ($prepared) {
+                $queryBuilder->whereRaw(
+                    'MATCH(title, content) AGAINST(? IN BOOLEAN MODE)',
+                    [$prepared]
+                );
+            }
+        } else {
+            // Fallback for SQLite/PostgreSQL
+            $terms = explode(' ', $query);
+            $queryBuilder->where(function ($q) use ($terms, $strict) {
+                foreach ($terms as $term) {
+                    if ($strict) {
+                        $q->where(function ($sub) use ($term) {
+                            $sub->where('title', 'like', "%{$term}%")
+                                ->orWhere('content', 'like', "%{$term}%");
+                        });
+                    } else {
+                        $q->orWhere('title', 'like', "%{$term}%")
+                          ->orWhere('content', 'like', "%{$term}%");
+                    }
+                }
+            });
+        }
+    }
+
+    protected function applyFilters($queryBuilder, $filters)
+    {
+        if (isset($filters['type'])) {
+            $queryBuilder->where('type', $filters['type']);
+        }
+        if (isset($filters['date_from'])) {
+            $queryBuilder->whereDate('created_at', '>=', $filters['date_from']);
+        }
+        if (isset($filters['date_to'])) {
+            $queryBuilder->whereDate('created_at', '<=', $filters['date_to']);
+        }
     }
 
     public function searchByType($query, $type, $limit = 20)
@@ -87,23 +125,34 @@ class SearchService
             return [];
         }
 
-        $suggestions = SearchIndex::where('title', 'like', "%{$query}%")
-            ->orWhere('content', 'like', "%{$query}%")
+        // 1. Try simple substring match
+        $suggestions = SearchIndex::where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('content', 'like', "%{$query}%");
+            })
             ->select('title', 'type')
             ->distinct()
             ->limit($limit)
-            ->get()
-            ->map(function ($index) {
-                return [
-                    'text' => $index->title,
-                    'type' => $index->type,
-                ];
-            });
+            ->get();
 
-        return $suggestions;
+        // 2. If empty, try SOUNDEX (MySQL only) for typo tolerance
+        if ($suggestions->isEmpty() && (config('database.default') === 'mysql' || config('database.default') === 'mariadb')) {
+            $suggestions = SearchIndex::whereRaw('SOUNDEX(title) = SOUNDEX(?)', [$query])
+                ->select('title', 'type')
+                ->distinct()
+                ->limit($limit)
+                ->get();
+        }
+
+        return $suggestions->map(function ($index) {
+            return [
+                'text' => $index->title,
+                'type' => $index->type,
+            ];
+        });
     }
 
-    protected function prepareSearchQuery($query)
+    protected function prepareSearchQuery($query, $strict = true)
     {
         // Prepare query for MySQL FULLTEXT search
         $terms = explode(' ', trim($query));
@@ -111,8 +160,11 @@ class SearchService
 
         foreach ($terms as $term) {
             $term = trim($term);
-            if (strlen($term) >= 3) {
-                $prepared[] = "+{$term}*";
+            if (strlen($term) >= 2) {
+                // Strict: +term* (must contain term)
+                // Loose: term* (optional)
+                $prefix = $strict ? '+' : '';
+                $prepared[] = "{$prefix}{$term}*";
             }
         }
 
