@@ -1,16 +1,23 @@
 <template>
     <div class="space-y-6">
-        <!-- Global Disabled Warning -->
-        <Alert v-if="status.global_enabled === false" variant="destructive">
-            <AlertCircle class="h-4 w-4" />
-            <AlertTitle>{{ $t('features.security.twoFactor.globallyDisabledTitle') || '2FA is Globally Disabled' }}</AlertTitle>
-            <AlertDescription>
-                {{ $t('features.security.twoFactor.globallyDisabledDesc') || 'The administrator has disabled Two-Factor Authentication for the entire system.' }}
-            </AlertDescription>
-        </Alert>
+        <!-- Initial Loading State -->
+        <div v-if="initializing" class="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+            <p class="text-sm text-muted-foreground">{{ $t('common.actions.verifying') || 'Checking status...' }}</p>
+        </div>
 
         <template v-else>
-            <!-- Setup / Enable 2FA Section -->
+            <!-- Global Disabled Warning -->
+            <Alert v-if="status.global_enabled === false" variant="destructive">
+                <AlertCircle class="h-4 w-4" />
+                <AlertTitle>{{ $t('features.security.twoFactor.globallyDisabledTitle') || '2FA is Globally Disabled' }}</AlertTitle>
+                <AlertDescription>
+                    {{ $t('features.security.twoFactor.globallyDisabledDesc') || 'The administrator has disabled Two-Factor Authentication for the entire system.' }}
+                </AlertDescription>
+            </Alert>
+
+            <template v-else>
+                <!-- Setup / Enable 2FA Section -->
             <div v-if="!status.enabled" class="space-y-6">
                 <div class="space-y-2">
                     <h3 class="text-lg font-medium">{{ $t('features.auth.twoFactor.setupTitle') || 'Setup Two-Factor Authentication' }}</h3>
@@ -205,6 +212,7 @@
                 </Dialog>
             </div>
         </template>
+    </template>
     </div>
 </template>
 
@@ -264,6 +272,7 @@ const generating = ref(false);
 const enabling = ref(false);
 const disabling = ref(false);
 const regenerating = ref(false);
+const initializing = ref(true);
 
 const showDisableConfirm = ref(false);
 const showRegenPassword = ref(false);
@@ -278,6 +287,8 @@ const fetchStatus = async () => {
         status.value = data;
     } catch (error) {
         console.error('Error fetching 2FA status:', error);
+    } finally {
+        initializing.value = false;
     }
 };
 
