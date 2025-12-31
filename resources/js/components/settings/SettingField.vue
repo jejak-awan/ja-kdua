@@ -11,6 +11,7 @@
         <Select
             v-if="hasOptions && !isMailPort"
             :model-value="localValue"
+            :disabled="disabled"
             @update:model-value="localValue = $event; updateValue()"
         >
             <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
@@ -31,6 +32,7 @@
         <Select
             v-else-if="isMailPort"
             :model-value="String(localValue)"
+            :disabled="disabled"
             @update:model-value="localValue = Number($event); updateValue()"
         >
             <SelectTrigger :class="{ 'border-destructive focus:ring-destructive': error }">
@@ -51,6 +53,7 @@
         <Input
             v-else-if="(type === 'string' || type === 'password') && !isTextarea"
             v-model="localValue"
+            :disabled="disabled"
             @input="updateValue"
             :type="(isPassword || type === 'password') ? 'password' : 'text'"
             :class="{ 'border-destructive focus-visible:ring-destructive': error }"
@@ -60,6 +63,7 @@
         <Textarea
             v-else-if="isTextarea"
             v-model="localValue"
+            :disabled="disabled"
             @input="updateValue"
             :rows="3"
             :class="{ 'border-destructive focus-visible:ring-destructive': error }"
@@ -69,6 +73,7 @@
         <Input
             v-else-if="type === 'integer'"
             v-model.number="localValue"
+            :disabled="disabled"
             @input="updateValue"
             type="number"
             :class="{ 'border-destructive focus-visible:ring-destructive': error }"
@@ -78,6 +83,7 @@
         <div v-else-if="type === 'boolean'" class="mt-1 flex items-center space-x-2">
             <Switch
                 :checked="localValue"
+                :disabled="disabled"
                 @update:checked="localValue = $event; updateValue()"
             />
             <span class="text-sm text-foreground">
@@ -142,6 +148,10 @@ const props = defineProps({
     error: {
         type: [String, Array],
         default: null
+    },
+    disabled: {
+        type: Boolean,
+        default: false
     }
 })
 

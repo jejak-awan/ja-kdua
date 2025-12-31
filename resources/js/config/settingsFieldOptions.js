@@ -181,6 +181,12 @@ export const twoFactorEnforcedOptions = [
     { value: 'all', labelKey: 'features.settings.options.twoFactorEnforced.all' },
 ]
 
+export const captchaMethodOptions = [
+    { value: 'slider', labelKey: 'features.settings.options.captchaMethod.slider' },
+    { value: 'math', labelKey: 'features.settings.options.captchaMethod.math' },
+    { value: 'image', labelKey: 'features.settings.options.captchaMethod.image' },
+]
+
 // Helper function to get options for a specific field
 export function getFieldOptions(fieldKey) {
     const optionsMap = {
@@ -194,9 +200,11 @@ export function getFieldOptions(fieldKey) {
         thumbnail_width: thumbnailSizeOptions,
         thumbnail_height: thumbnailSizeOptions,
         // Security options
+        // Security options
         password_min_length: passwordMinLengthOptions,
         two_factor_method: twoFactorMethodOptions,
         two_factor_enforced_roles: twoFactorEnforcedOptions,
+        captcha_method: captchaMethodOptions, // Added options for captcha method
         login_attempts_limit: loginAttemptsOptions,
         block_duration_minutes: blockDurationOptions,
         session_lifetime: sessionLifetimeOptions,
