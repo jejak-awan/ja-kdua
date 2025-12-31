@@ -53,16 +53,20 @@
 <script setup>
 import { ref } from 'vue'
 import { useToast } from '../../../../composables/useToast'
+import { useFormValidation } from '../../../../composables/useFormValidation'
+import { newsletterSchema } from '../../../../schemas'
 // import api from '../../../services/api' // Uncomment when ready
 
 const toast = useToast()
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
 const loading = ref(false)
-const errors = ref({})
 const email = ref('')
 
 const submitNewsletter = async () => {
+    if (!validateWithZod({ email: email.value })) return
+
     loading.value = true
-    errors.value = {}
+    clearErrors()
     
     try {
         // Mock API call
@@ -74,7 +78,7 @@ const submitNewsletter = async () => {
         email.value = ''
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors
+            setErrors(error.response.data.errors)
         } else {
             toast.error('Subscription failed.')
         }

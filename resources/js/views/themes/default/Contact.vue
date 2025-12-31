@@ -67,11 +67,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useToast } from '../../../composables/useToast'
+import { useFormValidation } from '../../../composables/useFormValidation'
+import { contactSchema } from '../../../schemas'
 import api from '../../../services/api'
 
 const toast = useToast()
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contactSchema)
 const loading = ref(false)
-const errors = ref({})
 
 const form = ref({
     name: '',
@@ -80,8 +82,10 @@ const form = ref({
 })
 
 const submitContact = async () => {
+    if (!validateWithZod(form.value)) return
+
     loading.value = true
-    errors.value = {}
+    clearErrors()
     
     try {
         // Mock API call or use real one if available
@@ -94,7 +98,7 @@ const submitContact = async () => {
         form.value = { name: '', email: '', message: '' }
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors
+            setErrors(error.response.data.errors)
         } else {
             toast.error('Failed to send message. Please try again.')
         }

@@ -169,6 +169,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { categorySchema } from '../../../schemas';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import { Loader2, X } from 'lucide-vue-next';
 
@@ -193,12 +195,12 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(categorySchema);
 
 const loading = ref(true);
 const saving = ref(false);
 const categories = ref([]);
 const currentCategory = ref(null);
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -286,8 +288,10 @@ const fetchCategory = async () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         const payload = { ...form.value };
         if (payload.parent_id === 'null_value' || !payload.parent_id) {
@@ -298,7 +302,7 @@ const handleSubmit = async () => {
         router.push({ name: 'categories' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

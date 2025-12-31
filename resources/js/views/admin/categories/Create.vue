@@ -169,6 +169,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { categorySchema } from '../../../schemas';
 import MediaPicker from '../../../components/MediaPicker.vue';
 import { Loader2, X } from 'lucide-vue-next';
 
@@ -192,10 +194,10 @@ import SelectValue from '@/components/ui/select-value.vue';
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(categorySchema);
 
 const saving = ref(false);
 const categories = ref([]);
-const errors = ref({});
 
 const flattenedCategories = computed(() => {
     return flattenTree(categories.value);
@@ -257,8 +259,10 @@ const fetchCategories = async () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         const payload = { ...form.value };
         // Handle select returning string 'null_value' or numeric string
@@ -271,7 +275,7 @@ const handleSubmit = async () => {
         router.push({ name: 'categories' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

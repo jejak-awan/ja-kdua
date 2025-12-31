@@ -93,6 +93,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { tagSchema } from '../../../schemas';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import { Loader2 } from 'lucide-vue-next';
 
@@ -111,11 +113,11 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(tagSchema);
 
 const loading = ref(true);
 const saving = ref(false);
 const tagId = route.params.id;
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -160,15 +162,17 @@ const fetchTag = async () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.put(`/admin/cms/tags/${tagId}`, form.value);
         toast.success.update('Tag');
         router.push({ name: 'tags.index' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

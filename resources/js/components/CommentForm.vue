@@ -64,6 +64,8 @@ import Label from './ui/label.vue';
 import Textarea from './ui/textarea.vue';
 import Button from './ui/button.vue';
 import { useToast } from '../composables/useToast';
+import { useFormValidation } from '../composables/useFormValidation';
+import { commentSchema } from '../schemas';
 
 const props = defineProps({
     contentId: {
@@ -80,7 +82,7 @@ const emit = defineEmits(['submitted']);
 const { t } = useI18n();
 const authStore = useAuthStore();
 const toast = useToast();
-const errors = ref({});
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(commentSchema);
 
 const form = ref({
     name: '',
@@ -92,8 +94,10 @@ const form = ref({
 const loading = ref(false);
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     loading.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post(`/cms/contents/${props.contentId}/comments`, form.value);
         
@@ -109,7 +113,7 @@ const handleSubmit = async () => {
         toast.success.create('Comment');
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

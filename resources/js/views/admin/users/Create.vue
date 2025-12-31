@@ -217,6 +217,8 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { createUserSchema } from '../../../schemas';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Textarea from '../../../components/ui/textarea.vue';
@@ -228,13 +230,13 @@ const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(createUserSchema);
 
 const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 
 const saving = ref(false);
 const loadingRoles = ref(false);
 const availableRoles = ref([]);
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -262,13 +264,18 @@ const fetchRoles = async () => {
 };
 
 const handleSubmit = async () => {
+    // Client-side validation first
+    if (!validateWithZod(form.value)) {
+        return;
+    }
+
     if (form.value.roles.length === 0) {
-        errors.value = { roles: [t('features.users.messages.roleRequired')] };
+        setErrors({ roles: [t('features.users.messages.roleRequired')] });
         return;
     }
 
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     
     try {
         await api.post('/admin/cms/users', form.value);
@@ -276,7 +283,7 @@ const handleSubmit = async () => {
         router.push({ name: 'users.index' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

@@ -63,10 +63,12 @@ import Input from '../ui/input.vue';
 import Label from '../ui/label.vue';
 import { Loader2 } from 'lucide-vue-next';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { menuSchema } from '../../schemas';
 
 const { t } = useI18n();
 const toast = useToast();
-const errors = ref({});
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema);
 
 const emit = defineEmits(['close', 'saved']);
 const router = useRouter();
@@ -78,8 +80,10 @@ const form = ref({
 });
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         const response = await api.post('/admin/cms/menus', form.value);
         const menu = response.data.data || response.data;
@@ -88,7 +92,7 @@ const handleSubmit = async () => {
         router.push({ name: 'menus.edit', params: { id: menu.id } });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

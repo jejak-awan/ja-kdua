@@ -89,6 +89,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { tagSchema } from '../../../schemas';
 import { Loader2 } from 'lucide-vue-next';
 
 import Button from '@/components/ui/button.vue';
@@ -105,8 +107,8 @@ import CardFooter from '@/components/ui/card-footer.vue';
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(tagSchema);
 const saving = ref(false);
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -133,15 +135,17 @@ const slugify = (text) => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post('/admin/cms/tags', form.value);
         toast.success.create('Tag');
         router.push({ name: 'tags.index' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }
