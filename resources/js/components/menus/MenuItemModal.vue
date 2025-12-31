@@ -117,6 +117,8 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { menuItemSchema } from '../../schemas';
 
 const { t } = useI18n();
 
@@ -128,8 +130,8 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuItemSchema);
 const saving = ref(false);
-const errors = ref({}); // Add errors ref
 const form = ref({
     label: '',
     type: 'link',
@@ -146,8 +148,12 @@ const handleTypeChange = () => {
 };
 
 const handleSubmit = async () => {
+    // Prepare validation data - adjust label to title for menuItemSchema
+    const validationData = { title: form.value.label, url: form.value.url };
+    if (!validateWithZod(validationData)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         const payload = { ...form.value, menu_id: props.menuId };
         if (props.item) {
@@ -160,7 +166,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
              toast.error.fromResponse(error);
         }

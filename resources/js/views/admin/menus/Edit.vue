@@ -116,6 +116,8 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { menuSchema } from '../../../schemas';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Label from '../../../components/ui/label.vue';
@@ -131,6 +133,7 @@ import {
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema);
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import MenuItemTree from '../../../components/menus/MenuItemTree.vue';
 import MenuItemModal from '../../../components/menus/MenuItemModal.vue';
@@ -145,7 +148,6 @@ const saving = ref(false);
 const showItemModal = ref(false);
 const editingItem = ref(null);
 const nestedItems = ref([]);
-const errors = ref({});
 
 const menuForm = ref({
     name: '',
@@ -200,8 +202,10 @@ const flattenTree = (items, parentId = null) => {
 };
 
 const saveMenu = async () => {
+    if (!validateWithZod(menuForm.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         // Save menu details
         await api.put(`/admin/cms/menus/${menuId}`, menuForm.value);
@@ -214,7 +218,7 @@ const saveMenu = async () => {
         await fetchMenu();
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

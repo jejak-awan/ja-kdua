@@ -113,6 +113,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { roleSchema } from '../../../schemas';
 import Button from '../../../components/ui/button.vue';
 import Input from '../../../components/ui/input.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
@@ -125,11 +127,11 @@ import { ArrowLeft, Check, Loader2 } from 'lucide-vue-next';
 const router = useRouter();
 const { t } = useI18n();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(roleSchema);
 
 const saving = ref(false);
 const loadingPermissions = ref(false);
 const permissions = ref({});
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -196,15 +198,17 @@ const formatPermissionName = (name, category) => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post('/admin/cms/roles', form.value);
         toast.success.create('Role');
         router.push({ name: 'roles' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

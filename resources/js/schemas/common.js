@@ -107,3 +107,71 @@ export const newsletterSchema = z.object({
         .min(1, t('common.validation.required', { field: 'Email' }))
         .email(t('common.validation.email')),
 });
+
+/**
+ * Scheduled task form schema
+ */
+export const taskSchema = z.object({
+    name: z.string()
+        .min(1, t('common.validation.required', { field: 'Name' }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
+    command: z.string()
+        .min(1, t('common.validation.required', { field: 'Command' })),
+    schedule: z.string()
+        .min(1, t('common.validation.required', { field: 'Schedule' })),
+    description: z.string().optional().or(z.literal('')),
+    is_active: z.boolean().optional(),
+});
+
+/**
+ * Folder creation schema
+ */
+export const folderSchema = z.object({
+    name: z.string()
+        .min(1, t('common.validation.required', { field: 'Name' }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 }))
+        .regex(/^[a-zA-Z0-9_\-\s]+$/, t('common.validation.alphanumeric', { field: 'Name' })),
+});
+
+/**
+ * Email template form schema
+ */
+export const emailTemplateSchema = z.object({
+    name: z.string()
+        .min(1, t('common.validation.required', { field: 'Name' }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
+    subject: z.string()
+        .min(1, t('common.validation.required', { field: 'Subject' }))
+        .max(255, t('common.validation.max', { field: 'Subject', max: 255 })),
+    content: z.string()
+        .min(1, t('common.validation.required', { field: 'Content' })),
+    type: z.string().optional().or(z.literal('')),
+    is_active: z.boolean().optional(),
+});
+
+/**
+ * Form builder schema
+ */
+export const formBuilderSchema = z.object({
+    name: z.string()
+        .min(1, t('common.validation.required', { field: 'Name' }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
+    slug: z.string()
+        .min(1, t('common.validation.required', { field: 'Slug' }))
+        .max(255, t('common.validation.max', { field: 'Slug', max: 255 })),
+    description: z.string().optional().or(z.literal('')),
+    success_message: z.string().optional().or(z.literal('')),
+    is_active: z.boolean().optional(),
+});
+
+/**
+ * Content template schema
+ */
+export const contentTemplateSchema = z.object({
+    name: z.string()
+        .min(1, t('common.validation.required', { field: 'Name' }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
+    description: z.string().optional().or(z.literal('')),
+    content: z.string().optional().or(z.literal('')),
+    is_active: z.boolean().optional(),
+});

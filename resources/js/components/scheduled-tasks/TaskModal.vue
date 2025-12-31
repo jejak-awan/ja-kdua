@@ -110,10 +110,12 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { taskSchema } from '../../schemas';
 
 const { t } = useI18n();
 const toast = useToast();
-const errors = ref({});
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(taskSchema);
 
 const props = defineProps({
     task: {
@@ -147,8 +149,10 @@ const loadTask = () => {
 };
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         if (props.task) {
             await api.put(`/admin/cms/scheduled-tasks/${props.task.id}`, form.value);
@@ -160,7 +164,7 @@ const handleSubmit = async () => {
         emit('saved');
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }
