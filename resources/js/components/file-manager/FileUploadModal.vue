@@ -81,9 +81,10 @@ import DialogHeader from '../ui/dialog-header.vue';
 import DialogTitle from '../ui/dialog-title.vue';
 import DialogFooter from '../ui/dialog-footer.vue';
 import { CloudUpload, X, Loader2 } from 'lucide-vue-next';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
 
 const props = defineProps({
     path: {
@@ -134,8 +135,14 @@ const handleUpload = async () => {
         emit('uploaded');
         emit('close');
     } catch (error) {
-        console.error('Failed to upload files:', error);
-        toast.error('Error', t('features.file_manager.messages.uploadFailed'));
+        if (error.response?.status === 422) {
+             // Handle checking specifically for file errors if backend returns them in a specific structure
+             // For now standard fromResponse is better than generic message
+             toast.error.fromResponse(error);
+        } else {
+            console.error('Failed to upload files:', error);
+            toast.error.fromResponse(error);
+        }
     } finally {
         uploading.value = false;
     }
