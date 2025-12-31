@@ -37,8 +37,12 @@
             "description": "Integrasi dengan Google dan alat mesin pencari"
         },
         "authentication": {
-            "title": "Autentikasi & Kata Sandi",
-            "description": "Pengaturan keamanan untuk autentikasi pengguna"
+            "title": "Autentikasi & 2FA",
+            "description": "Pengaturan pendaftaran pengguna dan autentikasi dua faktor"
+        },
+        "password": {
+            "title": "Kebijakan Kata Sandi",
+            "description": "Persyaratan kekuatan dan kompleksitas kata sandi"
         },
         "session": {
             "title": "Manajemen Sesi",

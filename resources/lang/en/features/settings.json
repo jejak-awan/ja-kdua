@@ -37,8 +37,12 @@
             "description": "Integration with Google and search engine tools"
         },
         "authentication": {
-            "title": "Authentication & Password",
-            "description": "Security settings for user authentication"
+            "title": "Authentication & 2FA",
+            "description": "User registration and two-factor authentication settings"
+        },
+        "password": {
+            "title": "Password Policy",
+            "description": "Password strength and complexity requirements"
         },
         "session": {
             "title": "Session Management",
