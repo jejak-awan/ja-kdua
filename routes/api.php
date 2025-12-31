@@ -7,6 +7,10 @@ Route::prefix('v1')->group(function () {
     // Public settings (no auth required - for frontend before login)
     Route::get('/public/settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']);
     
+    // Captcha endpoints (no auth required)
+    Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
+    Route::get('/captcha/settings', [App\Http\Controllers\Api\V1\CaptchaController::class, 'settings']);
+    
     // Public endpoint to clear rate limit (no auth required for emergency)
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
     

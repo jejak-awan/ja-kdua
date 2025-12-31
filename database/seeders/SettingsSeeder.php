@@ -230,6 +230,35 @@ class SettingsSeeder extends Seeder
                 'group' => 'security',
                 'description' => 'Require at least one symbol (!@#$%^&*...) in password',
             ],
+            // Captcha Settings
+            [
+                'key' => 'enable_captcha',
+                'value' => '0',
+                'type' => 'boolean',
+                'group' => 'security',
+                'description' => 'Enable anti-bot captcha verification',
+            ],
+            [
+                'key' => 'captcha_method',
+                'value' => 'slider',
+                'type' => 'string',
+                'group' => 'security',
+                'description' => 'Captcha verification method',
+            ],
+            [
+                'key' => 'captcha_on_login',
+                'value' => '1',
+                'type' => 'boolean',
+                'group' => 'security',
+                'description' => 'Show captcha on login form',
+            ],
+            [
+                'key' => 'captcha_on_register',
+                'value' => '1',
+                'type' => 'boolean',
+                'group' => 'security',
+                'description' => 'Show captcha on registration form',
+            ],
             [
                 'key' => 'login_attempts_limit',
                 'value' => '5',

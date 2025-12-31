@@ -52,6 +52,10 @@
             "title": "Pembatasan Akses",
             "description": "Pengaturan untuk membatasi akses mencurigakan"
         },
+        "captcha": {
+            "title": "Perlindungan Anti-Bot",
+            "description": "Verifikasi captcha untuk mencegah serangan otomatis"
+        },
         "upload": {
             "title": "Pengaturan Unggahan",
             "description": "Batas unggahan file dan tipe file yang diizinkan"
@@ -265,6 +269,11 @@
             "20480": "20 MB",
             "51200": "50 MB",
             "102400": "100 MB"
+        },
+        "captchaMethod": {
+            "slider": "Verifikasi Slider",
+            "math": "Tantangan Matematika",
+            "image": "Kode Gambar"
         }
     },
     "labels": {
@@ -298,6 +307,10 @@
         "password_require_lowercase": "Wajib Huruf Kecil",
         "password_require_number": "Wajib Angka",
         "password_require_symbol": "Wajib Simbol",
+        "enable_captcha": "Aktifkan Captcha",
+        "captcha_method": "Metode Captcha",
+        "captcha_on_login": "Captcha di Login",
+        "captcha_on_register": "Captcha di Pendaftaran",
         "login_attempts_limit": "Batas Percobaan Login",
         "block_duration_minutes": "Durasi Pemblokiran (menit)",
         "enable_2fa": "Aktifkan 2FA",
@@ -352,6 +365,10 @@
         "password_require_lowercase": "Kata sandi harus mengandung minimal satu huruf kecil (a-z)",
         "password_require_number": "Kata sandi harus mengandung minimal satu angka (0-9)",
         "password_require_symbol": "Kata sandi harus mengandung minimal satu simbol (!{'@'}#$%^&*...)",
+        "enable_captcha": "Tampilkan verifikasi captcha di form login dan pendaftaran",
+        "captcha_method": "Pilih tipe tantangan captcha yang digunakan",
+        "captcha_on_login": "Wajib verifikasi captcha di form login",
+        "captcha_on_register": "Wajib verifikasi captcha di form pendaftaran",
         "login_attempts_limit": "Jumlah percobaan login gagal yang diizinkan sebelum penguncian sementara",
         "block_duration_minutes": "Berapa lama IP diblokir setelah melampaui batas login",
         "enable_2fa": "Aktifkan atau nonaktifkan autentikasi dua faktor secara sistem",

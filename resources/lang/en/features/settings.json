@@ -52,6 +52,10 @@
             "title": "Access Restriction",
             "description": "Settings to restrict suspicious access"
         },
+        "captcha": {
+            "title": "Anti-Bot Protection",
+            "description": "Captcha verification to prevent automated attacks"
+        },
         "upload": {
             "title": "Upload Settings",
             "description": "File upload limits and allowed file types"
@@ -274,6 +278,11 @@
             "no": "Optional for all users",
             "admin": "Mandatory for Admins",
             "all": "Mandatory for All Users"
+        },
+        "captchaMethod": {
+            "slider": "Slider Verification",
+            "math": "Math Challenge",
+            "image": "Image Code"
         }
     },
     "labels": {
@@ -307,6 +316,10 @@
         "password_require_lowercase": "Require Lowercase Letter",
         "password_require_number": "Require Number",
         "password_require_symbol": "Require Symbol",
+        "enable_captcha": "Enable Captcha",
+        "captcha_method": "Captcha Method",
+        "captcha_on_login": "Captcha on Login",
+        "captcha_on_register": "Captcha on Registration",
         "login_attempts_limit": "Login Attempts Limit",
         "block_duration_minutes": "Block Duration (minutes)",
         "enable_2fa": "Enable 2FA",
@@ -379,6 +392,10 @@
         "password_require_lowercase": "Passwords must contain at least one lowercase letter (a-z)",
         "password_require_number": "Passwords must contain at least one digit (0-9)",
         "password_require_symbol": "Passwords must contain at least one symbol (!{'@'}#$%^&*...)",
+        "enable_captcha": "Show captcha verification on login and registration forms",
+        "captcha_method": "Choose the type of captcha challenge to use",
+        "captcha_on_login": "Require captcha verification on the login form",
+        "captcha_on_register": "Require captcha verification on the registration form",
         "login_attempts_limit": "Number of failed logins allowed before temporary lockout",
         "block_duration_minutes": "How long an IP is blocked after exceeding login limits",
         "enable_2fa": "Enable or disable two-factor authentication system-wide",
