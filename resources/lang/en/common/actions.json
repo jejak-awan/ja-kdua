@@ -43,5 +43,10 @@
     "bulkAction": "Bulk Action",
     "add": "Add",
     "searchIn": "Search in",
-    "verify": "Verify"
+    "verify": "Verify",
+    "done": "Done",
+    "generating": "Generating...",
+    "verifying": "Verifying...",
+    "disabling": "Disabling...",
+    "regenerating": "Regenerating..."
 }

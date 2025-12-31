@@ -1,265 +1,274 @@
 <template>
-    <div class="bg-card rounded-lg border border-border p-6 space-y-6">
+    <div class="space-y-6">
         <!-- Global Disabled Warning -->
-        <div v-if="status.global_enabled === false" class="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-            <h3 class="text-lg font-medium text-destructive">
-                Two-Factor Authentication is Disabled
-            </h3>
-            <p class="text-sm text-destructive/80 mt-1">
-                The administrator has disabled 2FA for this system.
-            </p>
-        </div>
+        <Alert v-if="status.global_enabled === false" variant="destructive">
+            <AlertCircle class="h-4 w-4" />
+            <AlertTitle>{{ $t('features.security.twoFactor.globallyDisabledTitle') || '2FA is Globally Disabled' }}</AlertTitle>
+            <AlertDescription>
+                {{ $t('features.security.twoFactor.globallyDisabledDesc') || 'The administrator has disabled Two-Factor Authentication for the entire system.' }}
+            </AlertDescription>
+        </Alert>
 
         <template v-else>
-            <!-- Status Header -->
-            <div class="flex items-center justify-between pb-4 border-b border-border">
-                <div>
-                    <h3 class="text-lg font-medium text-foreground">
-                        Two-Factor Authentication
-                    </h3>
-                    <p class="text-sm text-muted-foreground mt-1">
-                        {{ status.enabled ? '2FA is enabled on your account' : (status.required ? 'You are required to set up 2FA' : 'Add an extra layer of security to your account') }}
+            <!-- Setup / Enable 2FA Section -->
+            <div v-if="!status.enabled" class="space-y-6">
+                <div class="space-y-2">
+                    <h3 class="text-lg font-medium">{{ $t('features.auth.twoFactor.setupTitle') || 'Setup Two-Factor Authentication' }}</h3>
+                    <p class="text-sm text-muted-foreground">
+                        {{ $t('features.auth.twoFactor.setupDesc') || 'Add an extra layer of security to your account by requiring a verification code from your authenticator app.' }}
                     </p>
                 </div>
-                <span
-                    :class="[
-                        'px-3 py-1 rounded-full text-sm font-medium',
-                        status.enabled
-                            ? 'bg-green-500/20 text-green-400 dark:bg-green-900 dark:text-green-200'
-                            : (status.required 
-                                ? 'bg-orange-500/20 text-orange-600 dark:bg-orange-900 dark:text-orange-200' 
-                                : 'bg-secondary text-secondary-foreground')
-                    ]"
-                >
-                    {{ status.enabled ? 'Enabled' : (status.required ? 'Setup Required' : 'Disabled') }}
-                </span>
+
+                <Alert v-if="status.required" variant="warning" class="bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400">
+                    <ShieldAlert class="h-4 w-4" />
+                    <AlertTitle>{{ $t('features.auth.twoFactor.requiredTitle') || 'Setup Required' }}</AlertTitle>
+                    <AlertDescription>
+                        {{ $t('features.auth.twoFactor.requiredDesc') || 'Your account security policy requires 2FA to be enabled.' }}
+                    </AlertDescription>
+                </Alert>
+
+                <!-- Generate Flow -->
+                <div v-if="!qrCodeUrl" class="flex flex-col items-center py-8 border-2 border-dashed rounded-xl border-muted">
+                    <div class="bg-primary/10 p-4 rounded-full mb-4">
+                        <Smartphone class="h-8 w-8 text-primary" />
+                    </div>
+                    <Button @click="generateSecret" :disabled="generating">
+                        <Loader2 v-if="generating" class="mr-2 h-4 w-4 animate-spin" />
+                        {{ generating ? $t('common.actions.generating') || 'Generating...' : $t('features.auth.twoFactor.generateQR') || 'Generate QR Code' }}
+                    </Button>
+                </div>
+
+                <!-- QR Code & Verify Flow -->
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="space-y-4 flex flex-col items-center bg-muted/30 p-6 rounded-xl border border-border">
+                        <div class="p-4 bg-white rounded-lg shadow-sm">
+                            <img :src="qrCodeUrl" alt="2FA QR Code" class="w-48 h-48" />
+                        </div>
+                        <div class="text-center space-y-2">
+                            <p class="text-sm font-medium">{{ $t('features.auth.twoFactor.scanQR') || 'Scan this QR code with your app' }}</p>
+                            <div class="flex items-center gap-2 text-xs font-mono bg-background px-3 py-1.5 rounded border border-border">
+                                <span class="truncate max-w-[150px]">{{ secret }}</span>
+                                <Button variant="ghost" size="icon" class="h-6 w-6" @click="copySecret">
+                                    <Copy class="h-3 w-3" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <Label for="verify-code">{{ $t('features.auth.twoFactor.enterCode') || 'Verification Code' }}</Label>
+                            <Input
+                                id="verify-code"
+                                v-model="verificationCode"
+                                type="text"
+                                maxlength="6"
+                                placeholder="000000"
+                                class="text-center text-2xl tracking-[0.5em] font-mono"
+                                @input="verificationCode = verificationCode.replace(/\D/g, '')"
+                            />
+                            <p class="text-xs text-muted-foreground">{{ $t('features.auth.twoFactor.codeHelp') || 'Enter the 6-digit code from your authenticator app.' }}</p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <Button @click="enable2FA" :disabled="!verificationCode || verificationCode.length !== 6 || enabling" class="w-full">
+                                <Loader2 v-if="enabling" class="mr-2 h-4 w-4 animate-spin" />
+                                {{ enabling ? $t('common.actions.verifying') || 'Verifying...' : $t('features.auth.twoFactor.enable') || 'Enable 2FA' }}
+                            </Button>
+                            <Button variant="ghost" @click="qrCodeUrl = null" class="w-full">
+                                {{ $t('common.actions.cancel') }}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Enable 2FA Section -->
-            <div v-if="!status.enabled" class="space-y-4">
-                <div>
-                    <h4 class="text-md font-medium text-foreground mb-2">
-                        {{ status.required ? 'Setup Two-Factor Authentication' : 'Enable Two-Factor Authentication' }}
-                    </h4>
-                    <p class="text-sm text-muted-foreground mb-4">
-                        Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
-                    </p>
-                    <div v-if="status.required" class="mb-4 p-3 bg-orange-500/10 border border-orange-200 dark:border-orange-800 rounded-lg">
-                        <p class="text-sm text-orange-800 dark:text-orange-200">
-                            ⚠️ Security policy requires you to enable Two-Factor Authentication.
+            <!-- Manage / Disable 2FA Section -->
+            <div v-else class="space-y-8">
+                <div class="flex items-start justify-between">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-medium">{{ $t('features.auth.twoFactor.enabledTitle') || '2FA is Enabled' }}</h3>
+                            <Badge variant="success" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                                {{ $t('common.status.active') }}
+                            </Badge>
+                        </div>
+                        <p class="text-sm text-muted-foreground">
+                            {{ $t('features.auth.twoFactor.enabledDesc') || 'Your account is protected with two-factor authentication.' }}
+                        </p>
+                        <p v-if="status.enabled_at" class="text-xs text-muted-foreground">
+                            {{ $t('features.auth.twoFactor.enabledAt') || 'Enabled on' }}: {{ new Date(status.enabled_at).toLocaleString() }}
                         </p>
                     </div>
+                    <Button variant="destructive" ghost @click="showDisableConfirm = true" :disabled="status.required">
+                        <Trash2 class="h-4 w-4 mr-2" />
+                        {{ $t('features.auth.twoFactor.disable') || 'Disable 2FA' }}
+                    </Button>
                 </div>
 
-            <!-- Generate Button -->
-            <div v-if="!qrCodeUrl" class="flex justify-center">
-                <button
-                    @click="generateSecret"
-                    :disabled="generating"
-                    class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 flex items-center gap-2"
-                >
-                    <svg
-                        v-if="generating"
-                        class="animate-spin h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {{ generating ? 'Generating...' : 'Generate QR Code' }}
-                </button>
-            </div>
+                <div class="h-px bg-border w-full" />
 
-            <!-- QR Code Display -->
-            <div v-if="qrCodeUrl" class="flex flex-col items-center space-y-4">
-                <div class="p-4 bg-card rounded-lg border border-border">
-                    <img :src="qrCodeUrl" alt="2FA QR Code" class="w-48 h-48" />
-                </div>
-
-                <!-- Secret Key -->
-                <div v-if="secret" class="w-full bg-yellow-500/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                    <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                        Save this secret key in a safe place:
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <code class="flex-1 px-3 py-2 bg-card border border-yellow-300 dark:border-yellow-700 rounded text-sm font-mono text-yellow-900 dark:text-yellow-100 break-all">
-                            {{ secret }}
-                        </code>
-                        <button
-                            @click="copySecret"
-                            class="px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm whitespace-nowrap"
-                        >
-                            Copy
-                        </button>
+                <!-- Recovery Codes Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <h4 class="text-md font-medium">{{ $t('features.auth.twoFactor.recoveryTitle') || 'Recovery Codes' }}</h4>
+                            <p class="text-sm text-muted-foreground">
+                                {{ $t('features.auth.twoFactor.recoveryDesc') || 'Use these codes if you lose access to your authenticator app.' }}
+                            </p>
+                        </div>
+                        <div v-if="backupCodes.length === 0" class="flex items-center gap-2">
+                             <Badge variant="outline" class="font-mono">{{ status.backup_codes_count }} {{ $t('features.auth.twoFactor.codesRemaining') || 'codes left' }}</Badge>
+                             <Button variant="outline" size="sm" @click="showRegenPassword = true">
+                                <RefreshCcw class="h-3 w-3 mr-2" />
+                                {{ $t('features.auth.twoFactor.regenerate') || 'Regenerate' }}
+                             </Button>
+                        </div>
                     </div>
-                    <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                        Use this code if you cannot access your authenticator app
-                    </p>
+
+                    <!-- codes display -->
+                    <div v-if="backupCodes.length > 0" class="bg-muted/30 border rounded-xl p-6 space-y-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            <div v-for="(code, index) in backupCodes" :key="index" class="bg-background border rounded px-3 py-2 text-center font-mono text-sm">
+                                {{ code }}
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                <AlertTriangle class="h-3 w-3 inline mr-1" />
+                                {{ $t('features.auth.twoFactor.saveWarning') || 'Save these codes now. They will not be shown again.' }}
+                            </p>
+                            <div class="flex gap-2">
+                                <Button variant="outline" size="sm" @click="downloadBackupCodes">
+                                    <Download class="h-3 w-3 mr-2" />
+                                    {{ $t('common.actions.download') }}
+                                </Button>
+                                <Button size="sm" @click="backupCodes = []">
+                                    {{ $t('common.actions.done') }}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Verification Code Input -->
-                <div class="w-full">
-                    <label class="block text-sm font-medium text-foreground mb-2">
-                        Enter verification code from authenticator app *
-                    </label>
-                    <input
-                        v-model="verificationCode"
-                        type="text"
-                        maxlength="6"
-                        placeholder="000000"
-                        class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-2xl tracking-widest"
-                        @input="verificationCode = verificationCode.replace(/\D/g, '')"
-                    />
-                </div>
+                <!-- Password Modals -->
+                <Dialog v-if="showDisableConfirm" :open="showDisableConfirm" @update:open="showDisableConfirm = $event">
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{{ $t('features.auth.twoFactor.disableTitle') || 'Disable 2FA' }}</DialogTitle>
+                            <DialogDescription>
+                                {{ $t('features.auth.twoFactor.disableConfirm') || 'To disable two-factor authentication, please enter your password for confirmation.' }}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form @submit.prevent="disable2FA" class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="disable-password">{{ $t('common.labels.password') }}</Label>
+                                <Input id="disable-password" v-model="passwordConfirm" type="password" required autofocus />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="ghost" @click="showDisableConfirm = false">
+                                    {{ $t('common.actions.cancel') }}
+                                </Button>
+                                <Button type="submit" variant="destructive" :disabled="!passwordConfirm || disabling">
+                                    <Loader2 v-if="disabling" class="mr-2 h-4 w-4 animate-spin" />
+                                    {{ disabling ? $t('common.actions.disabling') || 'Disabling...' : $t('features.auth.twoFactor.confirmDisable') || 'Confirm Disable' }}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
-                <!-- Enable Button -->
-                <div class="w-full flex justify-end">
-                    <button
-                        @click="enable2FA"
-                        :disabled="!verificationCode || verificationCode.length !== 6 || enabling"
-                        class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                        <svg
-                            v-if="enabling"
-                            class="animate-spin h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        {{ enabling ? 'Enabling...' : 'Enable 2FA' }}
-                    </button>
-                </div>
+                <Dialog v-if="showRegenPassword" :open="showRegenPassword" @update:open="showRegenPassword = $event">
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{{ $t('features.auth.twoFactor.regenTitle') || 'Regenerate Backup Codes' }}</DialogTitle>
+                            <DialogDescription>
+                                {{ $t('features.auth.twoFactor.regenDesc') || 'Regenerating codes will invalidate your current ones. Enter password to continue.' }}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form @submit.prevent="regenerateBackupCodes" class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="regen-password">{{ $t('common.labels.password') }}</Label>
+                                <Input id="regen-password" v-model="passwordConfirm" type="password" required autofocus />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="ghost" @click="showRegenPassword = false">
+                                    {{ $t('common.actions.cancel') }}
+                                </Button>
+                                <Button type="submit" :disabled="!passwordConfirm || regenerating">
+                                    <Loader2 v-if="regenerating" class="mr-2 h-4 w-4 animate-spin" />
+                                    {{ regenerating ? $t('common.actions.regenerating') || 'Regenerating...' : $t('features.auth.twoFactor.confirmRegen') || 'Regenerate Codes' }}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
-        </div>
-
-        <!-- Disable 2FA Section -->
-        <div v-else class="space-y-4">
-            <div>
-                <h4 class="text-md font-medium text-foreground mb-2">
-                    Disable Two-Factor Authentication
-                </h4>
-                <p class="text-sm text-muted-foreground mb-4">
-                    To disable 2FA, enter your password
-                </p>
-                <div v-if="status.required" class="mb-4 p-3 bg-yellow-500/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                        ⚠️ Two-factor authentication is required for admin users and cannot be disabled.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Password Input -->
-            <div>
-                <label class="block text-sm font-medium text-foreground mb-2">
-                    Password *
-                </label>
-                <input
-                    v-model="disablePassword"
-                    type="password"
-                    :disabled="status.required"
-                    class="w-full px-4 py-2 border border-input dark:border-gray-700 rounded-md dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
-                />
-            </div>
-
-            <!-- Disable Button -->
-            <div class="flex justify-end">
-                <button
-                    @click="disable2FA"
-                    :disabled="!disablePassword || disabling || status.required"
-                    class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                    <svg
-                        v-if="disabling"
-                        class="animate-spin h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {{ disabling ? 'Disabling...' : 'Disable 2FA' }}
-                </button>
-            </div>
-
-            <!-- Backup Codes Section -->
-            <div v-if="backupCodes.length > 0" class="bg-blue-500/10 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 class="text-md font-medium text-blue-900 dark:text-blue-200 mb-2">
-                    Recovery Codes
-                </h4>
-                <p class="text-sm text-blue-800 dark:text-blue-300 mb-3">
-                    Save these codes in a safe place. Use them if you lose access to your authenticator app.
-                </p>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <code
-                        v-for="(code, index) in backupCodes"
-                        :key="index"
-                        class="px-3 py-2 bg-card border border-blue-300 dark:border-blue-700 rounded text-sm font-mono text-blue-900 dark:text-blue-100 text-center"
-                    >
-                        {{ code }}
-                    </code>
-                </div>
-                <div class="flex gap-2">
-                    <button
-                        @click="downloadBackupCodes"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                    >
-                        Download Codes
-                    </button>
-                    <button
-                        @click="regenerateBackupCodes"
-                        :disabled="regenerating"
-                        class="px-4 py-2 bg-muted text-white rounded hover:bg-muted text-sm disabled:opacity-50"
-                    >
-                        {{ regenerating ? 'Regenerating...' : 'Regenerate Codes' }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- Backup Codes Count -->
-            <div v-else-if="status.backup_codes_count > 0" class="bg-muted rounded-lg p-4">
-                <p class="text-sm text-muted-foreground">
-                    You have <strong>{{ status.backup_codes_count }}</strong> backup code(s) remaining.
-                </p>
-                <button
-                    @click="regenerateBackupCodes"
-                    :disabled="regenerating"
-                    class="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/80 text-sm disabled:opacity-50"
-                >
-                    {{ regenerating ? 'Regenerating...' : 'Regenerate Backup Codes' }}
-                </button>
-            </div>
-        </div>
         </template>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import { parseResponse, parseSingleResponse } from '../../utils/responseParser';
+import { parseSingleResponse } from '../../utils/responseParser';
 import QRCode from 'qrcode';
 import toast from '../../services/toast';
+
+const { t } = useI18n();
 import { useConfirm } from '../../composables/useConfirm';
+
+// Shadcn Components
+import Button from '../ui/button.vue';
+import Input from '../ui/input.vue';
+import Label from '../ui/label.vue';
+import Badge from '../ui/badge.vue';
+import Alert from '../ui/alert.vue';
+import AlertDescription from '../ui/alert-description.vue';
+import AlertTitle from '../ui/alert-title.vue';
+import Dialog from '../ui/dialog.vue';
+import DialogContent from '../ui/dialog-content.vue';
+import DialogDescription from '../ui/dialog-description.vue';
+import DialogFooter from '../ui/dialog-footer.vue';
+import DialogHeader from '../ui/dialog-header.vue';
+import DialogTitle from '../ui/dialog-title.vue';
+
+// Icons
+import { 
+    Loader2, 
+    Smartphone, 
+    Copy, 
+    Trash2, 
+    RefreshCcw, 
+    Download, 
+    AlertCircle, 
+    ShieldAlert,
+    AlertTriangle
+} from 'lucide-vue-next';
 
 const status = ref({
     enabled: false,
     required: false,
     backup_codes_count: 0,
     enabled_at: null,
+    global_enabled: true
 });
 
 const qrCodeUrl = ref(null);
 const secret = ref(null);
 const verificationCode = ref('');
-const disablePassword = ref('');
 const backupCodes = ref([]);
+
 const generating = ref(false);
 const enabling = ref(false);
 const disabling = ref(false);
 const regenerating = ref(false);
+
+const showDisableConfirm = ref(false);
+const showRegenPassword = ref(false);
+const passwordConfirm = ref('');
+
 const { confirm } = useConfirm();
 
 const fetchStatus = async () => {
@@ -284,7 +293,6 @@ const generateSecret = async () => {
         
         secret.value = data.secret;
         
-        // Generate QR code from URL
         if (data.qr_code_url) {
             qrCodeUrl.value = await QRCode.toDataURL(data.qr_code_url, {
                 width: 256,
@@ -292,7 +300,6 @@ const generateSecret = async () => {
             });
         }
 
-        // Store backup codes temporarily (only shown once)
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
         }
@@ -304,7 +311,7 @@ const generateSecret = async () => {
 };
 
 const enable2FA = async () => {
-        if (!verificationCode.value || verificationCode.value.length !== 6) {
+    if (!verificationCode.value || verificationCode.value.length !== 6) {
         toast.error('Validation Error', 'Please enter a 6-digit verification code');
         return;
     }
@@ -314,87 +321,55 @@ const enable2FA = async () => {
         const response = await api.post('/two-factor/verify', {
             code: verificationCode.value,
         });
-        const message = response.data.message;
         
-        toast.success('Success', message || 'Two-factor authentication enabled successfully');
+        toast.success(t('common.status.success'), t('features.auth.twoFactor.messages.enableSuccess'));
         verificationCode.value = '';
         qrCodeUrl.value = null;
         secret.value = null;
         await fetchStatus();
     } catch (error) {
-        toast.error('Error', error.response?.data?.message || 'Failed to enable 2FA');
+        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         enabling.value = false;
     }
 };
 
 const disable2FA = async () => {
-    if (!disablePassword.value) {
-        toast.error('Validation Error', 'Please enter your password');
-        return;
-    }
-
-    const confirmed = await confirm({
-        title: 'Disable 2FA',
-        message: 'Are you sure you want to disable Two-Factor Authentication? This will reduce your account security.',
-        variant: 'danger',
-        confirmText: 'Disable 2FA',
-    });
-
-    if (!confirmed) {
-        return;
-    }
-
     disabling.value = true;
     try {
         const response = await api.post('/two-factor/disable', {
-            password: disablePassword.value,
+            password: passwordConfirm.value,
         });
-        const message = response.data.message;
         
-        toast.success('Success', message || 'Two-factor authentication disabled successfully');
-        disablePassword.value = '';
+        toast.success(t('common.status.success'), t('features.auth.twoFactor.messages.disableSuccess'));
+        passwordConfirm.value = '';
+        showDisableConfirm.value = false;
         backupCodes.value = [];
         await fetchStatus();
     } catch (error) {
-        toast.error('Error', error.response?.data?.message || 'Failed to disable 2FA');
+        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         disabling.value = false;
     }
 };
 
 const regenerateBackupCodes = async () => {
-    const confirmed = await confirm({
-        title: 'Regenerate Backup Codes',
-        message: 'This will invalidate your existing backup codes. Continue?',
-        variant: 'warning',
-        confirmText: 'Regenerate',
-    });
-
-    if (!confirmed) {
-        return;
-    }
-
-    const password = prompt('Please enter your password to regenerate backup codes:');
-    if (!password) {
-        return;
-    }
-
     regenerating.value = true;
     try {
         const response = await api.post('/two-factor/regenerate-backup-codes', {
-            password: password,
+            password: passwordConfirm.value,
         });
         const data = parseSingleResponse(response);
-        const message = response.data.message;
         
         if (data.backup_codes) {
             backupCodes.value = data.backup_codes;
         }
-        toast.success('Success', message || 'Backup codes regenerated successfully');
+        toast.success(t('common.status.success'), t('features.auth.twoFactor.messages.regenerateSuccess'));
+        passwordConfirm.value = '';
+        showRegenPassword.value = false;
         await fetchStatus();
     } catch (error) {
-        toast.error('Error', error.response?.data?.message || 'Failed to regenerate backup codes');
+        toast.error(t('common.status.failed'), error.response?.data?.message || t('features.auth.messages.error'));
     } finally {
         regenerating.value = false;
     }
@@ -402,13 +377,11 @@ const regenerateBackupCodes = async () => {
 
 const copySecret = async () => {
     if (!secret.value) return;
-    
     try {
         await navigator.clipboard.writeText(secret.value);
-        toast.success('Copied', 'Secret key copied to clipboard');
+        toast.success(t('common.status.success'), t('features.auth.twoFactor.messages.copySuccess'));
     } catch (error) {
-        console.error('Error copying secret:', error);
-        toast.error('Error', 'Failed to copy secret key');
+        toast.error(t('common.status.failed'), t('common.messages.error.default'));
     }
 };
 

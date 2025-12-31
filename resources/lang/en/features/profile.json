@@ -21,7 +21,8 @@
         "save": "Save Changes",
         "saving": "Saving...",
         "changePassword": "Change Password",
-        "changing": "Changing..."
+        "changing": "Changing...",
+        "twoFactorDescription": "Secure your account with Two-Factor Authentication."
     },
     "messages": {
         "updateSuccess": "Profile updated successfully",

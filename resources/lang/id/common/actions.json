@@ -43,5 +43,10 @@
     "bulkAction": "Aksi Massal",
     "add": "Tambah",
     "searchIn": "Cari di",
-    "verify": "Verifikasi"
+    "verify": "Verifikasi",
+    "done": "Selesai",
+    "generating": "Memproses...",
+    "verifying": "Memverifikasi...",
+    "disabling": "Menonaktifkan...",
+    "regenerating": "Membuat ulang..."
 }

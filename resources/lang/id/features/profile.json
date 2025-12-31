@@ -21,7 +21,8 @@
         "save": "Simpan Perubahan",
         "saving": "Menyimpan...",
         "changePassword": "Ganti Kata Sandi",
-        "changing": "Mengganti..."
+        "changing": "Mengganti...",
+        "twoFactorDescription": "Amankan akun Anda dengan Autentikasi Dua Faktor."
     },
     "messages": {
         "updateSuccess": "Profil berhasil diperbarui",

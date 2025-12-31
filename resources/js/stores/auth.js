@@ -92,6 +92,17 @@ export const useAuthStore = defineStore('auth', {
                 const response = await api.post('/login', credentials);
                 // Handle different response structures
                 const responseData = response.data?.data || response.data;
+
+                // Handle 2FA requirement
+                if (responseData && responseData.requires_two_factor) {
+                    return {
+                        success: true,
+                        requiresTwoFactor: true,
+                        userId: responseData.user_id,
+                        message: response.data.message
+                    };
+                }
+
                 if (responseData && responseData.user && responseData.token) {
                     this.setAuth(responseData);
                     return { success: true, data: responseData };

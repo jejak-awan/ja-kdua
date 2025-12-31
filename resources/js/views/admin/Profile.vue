@@ -128,12 +128,12 @@
             <TabsContent value="two-factor" class="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{{ $t('features.profile.tabs.two-factor') }}</CardTitle>
+                        <CardTitle>{{ $t('features.profile.tabs.twoFactor') }}</CardTitle>
                         <CardDescription>
-                            {{ $t('features.profile.form.twoFactorDescription') || 'Secure your account with 2FA.' }}
+                            {{ $t('features.profile.form.twoFactorDescription') || 'Secure your account with multi-factor authentication.' }}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="pb-10">
                         <TwoFactorSettings />
                     </CardContent>
                 </Card>

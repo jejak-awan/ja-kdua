@@ -80,8 +80,11 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
-        // Verify Captcha
-        if (\App\Models\Setting::get('enable_captcha', false) && \App\Models\Setting::get('captcha_on_login', true)) {
+        // Verify Captcha - Skip if two_factor_code is present (step 2 of login)
+        // This avoids 422 errors because the captcha token is consumed during the first attempt.
+        if (\App\Models\Setting::get('enable_captcha', false) && 
+            \App\Models\Setting::get('captcha_on_login', true) && 
+            !$request->has('two_factor_code')) {
             $captchaService = new \App\Services\CaptchaService();
             
             $request->validate([

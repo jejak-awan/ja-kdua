@@ -1,109 +1,157 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-muted/40 px-4 py-12 sm:px-6 lg:px-8">
         <Card class="w-full max-w-md">
-            <CardHeader class="space-y-1">
-                <CardTitle class="text-2xl font-bold text-center tracking-tight">
-                    {{ t('features.auth.login.title') }}
-                </CardTitle>
-                <CardDescription class="text-center">
-                    {{ t('features.auth.login.subtitle') || 'Enter your email to sign in to your account' }}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form class="space-y-4" @submit.prevent="handleLogin">
-                    <div class="space-y-2">
-                        <Label for="email">{{ t('common.labels.email') }}</Label>
-                        <Input
-                            id="email"
-                            v-model="form.email"
-                            name="email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
-                            :placeholder="t('features.auth.login.emailPlaceholder')"
+            <!-- 2FA Verification Form -->
+            <div v-if="requiresTwoFactor">
+                <CardHeader class="space-y-1">
+                    <CardTitle class="text-2xl font-bold text-center tracking-tight">
+                        {{ t('features.auth.twoFactor.title') || 'Two-Factor Authentication' }}
+                    </CardTitle>
+                    <CardDescription class="text-center">
+                        {{ t('features.auth.twoFactor.subtitle') || 'Please enter the code from your authenticator app.' }}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form class="space-y-4" @submit.prevent="verifyTwoFactor">
+                        <div class="space-y-2">
+                            <Label for="two-factor-code">{{ t('features.auth.twoFactor.codeLabel') || 'Verification Code' }}</Label>
+                            <Input
+                                id="two-factor-code"
+                                v-model="twoFactorCode"
+                                name="two-factor-code"
+                                type="text"
+                                autocomplete="one-time-code"
+                                required
+                                autofocus
+                                placeholder="000000"
+                                class="text-center text-lg tracking-widest"
+                                maxlength="6"
+                                @input="twoFactorCode = twoFactorCode.replace(/\D/g, '')"
+                            />
+                        </div>
+
+                        <div v-if="message" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                            {{ message }}
+                        </div>
+
+                        <Button type="submit" class="w-full" :disabled="loading || twoFactorCode.length !== 6">
+                            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+                            {{ loading ? t('features.auth.twoFactor.verifying') || 'Verifying...' : t('features.auth.twoFactor.verify') || 'Verify' }}
+                        </Button>
+
+                        <Button type="button" variant="ghost" class="w-full" @click="cancelTwoFactor">
+                            {{ t('common.actions.cancel') }}
+                        </Button>
+                    </form>
+                </CardContent>
+            </div>
+
+            <!-- Standard Login Form -->
+            <div v-else>
+                <CardHeader class="space-y-1">
+                    <CardTitle class="text-2xl font-bold text-center tracking-tight">
+                        {{ t('features.auth.login.title') }}
+                    </CardTitle>
+                    <CardDescription class="text-center">
+                        {{ t('features.auth.login.subtitle') || 'Enter your email to sign in to your account' }}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form class="space-y-4" @submit.prevent="handleLogin">
+                        <div class="space-y-2">
+                            <Label for="email">{{ t('common.labels.email') }}</Label>
+                            <Input
+                                id="email"
+                                v-model="form.email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                required
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
+                                :placeholder="t('features.auth.login.emailPlaceholder')"
+                            />
+                            <p v-if="errors.email" class="text-sm text-destructive font-medium">
+                                {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
+                            </p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <Label for="password">{{ t('common.labels.password') }}</Label>
+                                <router-link
+                                    :to="{ name: 'forgot-password' }"
+                                    class="text-sm font-medium text-primary hover:underline"
+                                >
+                                    {{ t('features.auth.login.forgotPassword') }}
+                                </router-link>
+                            </div>
+                            <Input
+                                id="password"
+                                v-model="form.password"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
+                                :placeholder="t('features.auth.login.passwordPlaceholder')"
+                            />
+                            <p v-if="errors.password" class="text-sm text-destructive font-medium">
+                                {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <Checkbox 
+                                id="remember-me" 
+                                name="remember-me"
+                                :checked="form.remember" 
+                                @update:checked="(v) => form.remember = v"
+                            />
+                            <label for="remember-me" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {{ t('features.auth.login.rememberMe') }}
+                            </label>
+                        </div>
+
+                        <!-- Captcha -->
+                        <CaptchaWrapper 
+                            ref="captchaRef"
+                            action="login"
+                            @verified="onCaptchaVerified"
                         />
-                        <p v-if="errors.email" class="text-sm text-destructive font-medium">
-                            {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
-                        </p>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <Label for="password">{{ t('common.labels.password') }}</Label>
-                            <router-link
-                                :to="{ name: 'forgot-password' }"
-                                class="text-sm font-medium text-primary hover:underline"
-                            >
-                                {{ t('features.auth.login.forgotPassword') }}
+
+                        <div v-if="timeoutMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            {{ timeoutMessage }}
+                        </div>
+
+                        <div v-if="rateLimited" class="rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/20">
+                            <p class="font-semibold">{{ t('features.auth.messages.tooManyAttempts') }}</p>
+                            <p>{{ t('features.auth.messages.retryDetails', { time: formatRetryTime(retryAfter) }) }}</p>
+                        </div>
+
+                        <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                            {{ message }}
+                        </div>
+
+                        <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid || (captchaEnabled && !captchaVerified)">
+                            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+                            <span v-if="loading">{{ t('features.auth.login.submit') }}...</span>
+                            <span v-else-if="rateLimited">{{ t('features.media.modals.bulk.wait') }}...</span>
+                            <span v-else>{{ t('features.auth.login.submit') }}</span>
+                        </Button>
+
+                        <!-- Registration Disabled Info -->
+                        <div v-if="registrationDisabledMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            {{ registrationDisabledMessage }}
+                        </div>
+
+                        <div v-if="registrationEnabled" class="text-center text-sm text-muted-foreground mt-4">
+                            {{ t('features.auth.login.noAccount') }} 
+                            <router-link :to="{ name: 'register' }" class="font-medium text-primary hover:underline">
+                                {{ t('features.auth.login.register') }}
                             </router-link>
                         </div>
-                        <Input
-                            id="password"
-                            v-model="form.password"
-                            name="password"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
-                            :placeholder="t('features.auth.login.passwordPlaceholder')"
-                        />
-                        <p v-if="errors.password" class="text-sm text-destructive font-medium">
-                            {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
-                        </p>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <Checkbox 
-                            id="remember-me" 
-                            name="remember-me"
-                            :checked="form.remember" 
-                            @update:checked="(v) => form.remember = v"
-                        />
-                        <label for="remember-me" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            {{ t('features.auth.login.rememberMe') }}
-                        </label>
-                    </div>
-
-                    <!-- Captcha -->
-                    <CaptchaWrapper 
-                        ref="captchaRef"
-                        action="login"
-                        @verified="onCaptchaVerified"
-                    />
-
-                    <div v-if="timeoutMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {{ timeoutMessage }}
-                    </div>
-
-                    <div v-if="rateLimited" class="rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/20">
-                        <p class="font-semibold">{{ t('features.auth.messages.tooManyAttempts') }}</p>
-                        <p>{{ t('features.auth.messages.retryDetails', { time: formatRetryTime(retryAfter) }) }}</p>
-                    </div>
-
-                    <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
-                        {{ message }}
-                    </div>
-
-                    <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid || (captchaEnabled && !captchaVerified)">
-                        <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                        <span v-if="loading">{{ t('features.auth.login.submit') }}...</span>
-                        <span v-else-if="rateLimited">{{ t('features.media.modals.bulk.wait') }}...</span>
-                        <span v-else>{{ t('features.auth.login.submit') }}</span>
-                    </Button>
-
-                    <!-- Registration Disabled Info -->
-                    <div v-if="registrationDisabledMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {{ registrationDisabledMessage }}
-                    </div>
-
-                    <div v-if="registrationEnabled" class="text-center text-sm text-muted-foreground mt-4">
-                        {{ t('features.auth.login.noAccount') }} 
-                        <router-link :to="{ name: 'register' }" class="font-medium text-primary hover:underline">
-                            {{ t('features.auth.login.register') }}
-                        </router-link>
-                    </div>
-                </form>
-            </CardContent>
+                    </form>
+                </CardContent>
+            </div>
         </Card>
     </div>
 </template>
@@ -141,6 +189,11 @@ const captchaVerified = ref(false);
 const captchaToken = ref('');
 const captchaAnswer = ref('');
 const captchaEnabled = computed(() => captchaRef.value?.enabled || false);
+
+// 2FA State
+const requiresTwoFactor = ref(false);
+const twoFactorUserId = ref(null);
+const twoFactorCode = ref('');
 
 const form = reactive({
     email: '',
@@ -236,6 +289,80 @@ const startRetryTimer = (initialSeconds) => {
     }, 1000);
 };
 
+const cancelTwoFactor = () => {
+    requiresTwoFactor.value = false;
+    twoFactorUserId.value = null;
+    twoFactorCode.value = '';
+    message.value = '';
+    
+    // Clear password for security
+    form.password = '';
+};
+
+const verifyTwoFactor = async () => {
+    if (!twoFactorCode.value || twoFactorCode.value.length !== 6) return;
+    
+    loading.value = true;
+    message.value = '';
+    
+    try {
+        // Optimized: We don't need to call /two-factor/verify-code separately.
+        // The AuthController.login method handles two_factor_code if provided.
+        // This avoids redundant requests and potential 429 Rate Limit errors.
+        
+        const payload = {
+            email: form.email.trim(),
+            password: form.password,
+            remember: form.remember,
+            two_factor_code: twoFactorCode.value,
+        };
+        
+        if (captchaEnabled.value) {
+            payload.captcha_token = captchaToken.value;
+            payload.captcha_answer = captchaAnswer.value;
+        }
+        
+        const result = await authStore.login(payload);
+        
+        if (result.success) {
+            completeLogin();
+        } else {
+             message.value = result.message || t('features.auth.twoFactor.invalidCode');
+             messageType.value = 'error';
+             
+             // Reset code on failure so user can try again easily
+             twoFactorCode.value = '';
+        }
+
+    } catch (e) {
+        console.error('2FA Error:', e);
+        message.value = t('features.auth.messages.error');
+        messageType.value = 'error';
+    } finally {
+        loading.value = false;
+    }
+};
+
+const completeLogin = async () => {
+    message.value = t('features.auth.messages.success');
+    messageType.value = 'success';
+    
+    // Fetch user data to ensure we have the latest info (roles, permissions)
+    await authStore.fetchUser();
+    
+    // Check if there's a redirect query parameter
+    const redirectPath = route.query.redirect;
+    
+    // Use a slightly longer delay to let Pinia/Router fully settled
+    setTimeout(() => {
+        const target = (redirectPath && typeof redirectPath === 'string' && !redirectPath.includes('/login') && !redirectPath.includes('/419')) 
+            ? redirectPath 
+            : { name: 'dashboard' };
+        
+        router.replace(target);
+    }, 600);
+}
+
 const handleLogin = async () => {
     // Client-side validation first (instant feedback)
     if (!validateWithZod(form)) {
@@ -274,24 +401,14 @@ const handleLogin = async () => {
         const result = await authStore.login(payload);
 
         if (result.success) {
-            message.value = t('features.auth.messages.success');
-            messageType.value = 'success';
-            rateLimited.value = false;
-            
-            // Fetch user data to ensure we have the latest info (roles, permissions)
-            await authStore.fetchUser();
-            
-            // Check if there's a redirect query parameter
-            const redirectPath = route.query.redirect;
-            
-            // Use a slightly longer delay to let Pinia/Router fully settled
-            setTimeout(() => {
-                const target = (redirectPath && typeof redirectPath === 'string' && !redirectPath.includes('/login') && !redirectPath.includes('/419')) 
-                    ? redirectPath 
-                    : { name: 'dashboard' };
-                
-                router.replace(target);
-            }, 600);
+            if (result.requiresTwoFactor) {
+                requiresTwoFactor.value = true;
+                twoFactorUserId.value = result.userId;
+                message.value = ''; // Clear any success message
+                // Do not clear password here, we need it for the second attempt!
+            } else {
+                completeLogin();
+            }
         } else {
             // Handle rate limiting
             if (result.rateLimited && result.retryAfter) {
