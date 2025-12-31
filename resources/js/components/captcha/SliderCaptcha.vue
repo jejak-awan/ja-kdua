@@ -14,10 +14,10 @@
                 :style="{ width: `${progress}%` }"
             />
             
-            <!-- Target indicator -->
+            <!-- Target indicator (Box slot) -->
             <div 
-                class="absolute top-1 bottom-1 w-1 bg-primary/30 rounded"
-                :style="{ left: `${targetPosition - 1}%` }"
+                class="absolute top-1 bottom-1 w-12 bg-primary/5 border-2 border-primary/20 border-dashed rounded-md box-border"
+                :style="{ left: `${targetPosition}%` }"
             />
             
             <!-- Slider handle -->
