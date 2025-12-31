@@ -1,16 +1,29 @@
 <template>
-    <div class="space-y-6">
+    <div class="space-y-3">
         <!-- Actions (Mobile/Tablet only - usually sticky on desktop) -->
         <div class="lg:hidden flex items-center gap-2 mb-4">
             <slot name="actions"></slot>
         </div>
 
         <!-- Publish Status -->
-        <Card class="shadow-sm">
-            <CardHeader class="px-4 py-3 border-b flex flex-row items-center justify-between">
-                <CardTitle class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</CardTitle>
-            </CardHeader>
-            <CardContent class="p-4 space-y-4">
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.publishing = !sections.publishing"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500">
+                        <FileCheck class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</span>
+                </div>
+                <ChevronDown 
+                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                    :class="{ 'rotate-180': sections.publishing }"
+                />
+            </button>
+            <div v-show="sections.publishing" class="border-t border-border p-4 space-y-4">
                 <div class="space-y-1.5">
                     <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.status') }}</Label>
                     <Select
@@ -68,7 +81,7 @@
                     </Select>
                 </div>
 
-                <div class="flex items-center justify-between border rounded-md p-3 shadow-sm">
+                <div class="flex items-center justify-between border rounded-md p-3">
                     <div class="space-y-0.5">
                         <Label class="text-xs font-medium">{{ $t('features.content.form.featured') }}</Label>
                         <p class="text-[10px] text-muted-foreground">{{ $t('features.content.form.featuredDesc') }}</p>
@@ -78,15 +91,28 @@
                         @update:checked="(val) => updateField('is_featured', val)"
                     />
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
         <!-- Taxonomy -->
-        <Card class="shadow-sm">
-            <CardHeader class="px-4 py-3 border-b">
-                <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.taxonomy') }}</CardTitle>
-            </CardHeader>
-            <CardContent class="p-4 space-y-4">
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.taxonomy = !sections.taxonomy"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-blue-500/10 text-blue-500">
+                        <Tags class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.taxonomy') }}</span>
+                </div>
+                <ChevronDown 
+                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                    :class="{ 'rotate-180': sections.taxonomy }"
+                />
+            </button>
+            <div v-show="sections.taxonomy" class="border-t border-border p-4 space-y-4">
                 <!-- Category -->
                 <div class="space-y-1.5">
                     <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.category') }}</Label>
@@ -148,25 +174,56 @@
                     </div>
                     <p class="text-[10px] text-muted-foreground/60 italic">{{ $t('features.content.form.tagInputHint') }}</p>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
         <!-- Featured Image -->
-        <Card class="shadow-sm">
-             <CardHeader class="px-4 py-3 border-b">
-                <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.featuredImage') }}</CardTitle>
-            </CardHeader>
-            <CardContent class="p-4">
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.image = !sections.image"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-purple-500/10 text-purple-500">
+                        <ImageIcon class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.featuredImage') }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div v-if="modelValue.featured_image" class="w-6 h-6 rounded overflow-hidden border border-border">
+                        <img :src="modelValue.featured_image" class="w-full h-full object-cover" />
+                    </div>
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.image }"
+                    />
+                </div>
+            </button>
+            <div v-show="sections.image" class="border-t border-border p-4">
                  <FeaturedImage v-model="modelValue.featured_image" @update:modelValue="(val) => updateField('featured_image', val)" />
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
         <!-- Excerpt -->
-        <Card class="shadow-sm">
-            <CardHeader class="px-4 py-3 border-b">
-                 <CardTitle class="text-sm font-semibold">{{ $t('features.content.form.excerpt') }}</CardTitle>
-            </CardHeader>
-             <CardContent class="p-4">
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.excerpt = !sections.excerpt"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
+                        <FileText class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.excerpt') }}</span>
+                </div>
+                <ChevronDown 
+                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                    :class="{ 'rotate-180': sections.excerpt }"
+                />
+            </button>
+            <div v-show="sections.excerpt" class="border-t border-border p-4">
                 <Textarea
                     :model-value="modelValue.excerpt"
                     @update:model-value="(val) => updateField('excerpt', val)"
@@ -174,15 +231,28 @@
                     class="resize-none text-sm"
                     :placeholder="$t('features.content.form.excerptPlaceholder')"
                 />
-            </CardContent>
-        </Card>
+            </div>
+        </div>
 
-        <!-- SEO Settings (Collapsible) -->
-         <Card class="shadow-sm">
-            <CardHeader class="px-4 py-3 border-b">
-                <CardTitle class="text-sm font-semibold">SEO</CardTitle>
-            </CardHeader>
-            <CardContent class="p-4 space-y-4">
+        <!-- SEO Settings -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.seo = !sections.seo"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-red-500/10 text-red-500">
+                        <Search class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">SEO</span>
+                </div>
+                <ChevronDown 
+                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                    :class="{ 'rotate-180': sections.seo }"
+                />
+            </button>
+            <div v-show="sections.seo" class="border-t border-border p-4 space-y-4">
                 <div class="space-y-1.5">
                     <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaTitle') }}</Label>
                     <Input
@@ -229,23 +299,19 @@
                                 </div>
                             </div>
                             <Button v-else variant="outline" size="sm" class="w-full text-xs" @click="open">
-                                <Image class="w-3 h-3 mr-2" /> {{ $t('features.content.form.selectOgImage') }}
+                                <ImageIcon class="w-3 h-3 mr-2" /> {{ $t('features.content.form.selectOgImage') }}
                             </Button>
                          </template>
                     </MediaPicker>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Card from '@/components/ui/card.vue';
-import CardHeader from '@/components/ui/card-header.vue';
-import CardTitle from '@/components/ui/card-title.vue';
-import CardContent from '@/components/ui/card-content.vue';
 import Label from '@/components/ui/label.vue';
 import Input from '@/components/ui/input.vue';
 import Textarea from '@/components/ui/textarea.vue';
@@ -256,12 +322,21 @@ import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import Badge from '@/components/ui/badge.vue';
 import Button from '@/components/ui/button.vue';
-import { X, PanelRightClose, Image } from 'lucide-vue-next';
-import FeaturedImage from './FeaturedImage.vue';
 import Switch from '@/components/ui/switch.vue';
+import { X, ChevronDown, FileCheck, Tags, FileText, Search, Image as ImageIcon } from 'lucide-vue-next';
+import FeaturedImage from './FeaturedImage.vue';
 import MediaPicker from '../MediaPicker.vue';
 
 const { t } = useI18n();
+
+// Collapsible section states
+const sections = ref({
+    publishing: true,
+    taxonomy: true,
+    image: false,
+    excerpt: false,
+    seo: false
+});
 
 // Tag input state
 const tagInput = ref('');
