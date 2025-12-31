@@ -155,6 +155,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { emailTemplateSchema } from '../../../schemas';
 import { parseSingleResponse } from '../../../utils/responseParser';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
 
@@ -176,10 +178,10 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(emailTemplateSchema);
 const saving = ref(false);
 const loading = ref(true);
 const showVariables = ref(false);
-const errors = ref({});
 const templateId = route.params.id;
 
 const form = ref({
@@ -243,15 +245,18 @@ const handleSendTest = async () => {
 };
 
 const handleSubmit = async () => {
+    const validationData = { name: form.value.name, subject: form.value.subject, content: form.value.body };
+    if (!validateWithZod(validationData)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.put(`/admin/cms/email-templates/${templateId}`, form.value);
         toast.success.update('Email Template');
         router.push({ name: 'email-templates' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }
