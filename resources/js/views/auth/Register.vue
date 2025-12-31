@@ -134,7 +134,7 @@ const checkingSettings = ref(true);
 // Check if registration is enabled on mount
 onMounted(async () => {
     try {
-        const response = await api.get('/api/v1/public/settings');
+        const response = await api.get('/public/settings');
         const settings = response.data?.data || response.data;
         
         if (!settings.enable_registration) {

@@ -158,7 +158,7 @@ const timeoutMessage = computed(() => {
 onMounted(async () => {
     // Check if registration is enabled
     try {
-        const response = await api.get('/api/v1/public/settings');
+        const response = await api.get('/public/settings');
         const settings = response.data?.data || response.data;
         registrationEnabled.value = settings.enable_registration === true;
     } catch (error) {
