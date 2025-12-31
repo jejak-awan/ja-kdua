@@ -14,7 +14,7 @@
             <input
                 v-model="answer"
                 type="tel"
-                class="flex h-full w-full px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-mono text-center bg-secondary/10 dark:bg-secondary/20"
+                class="flex h-full w-full px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-mono text-center bg-secondary/20 dark:bg-secondary/20 shadow-inner"
                 :class="{ 'text-green-500 font-bold': verified }"
                 :placeholder="t('features.auth.captcha.answer')"
                 :disabled="verified"
