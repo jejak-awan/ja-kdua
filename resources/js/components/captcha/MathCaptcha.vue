@@ -1,68 +1,77 @@
 <template>
-    <div class="captcha-math">
-        <div class="flex items-center space-x-2">
-            <!-- Question Box -->
-            <div class="flex-none bg-muted rounded-md border border-border px-3 py-2 min-w-[3.5rem] text-center">
-                <span class="text-lg font-mono font-bold text-foreground">{{ question?.replace('=', '') }}</span>
+    <div class="captcha-math w-full">
+        <!-- Unified Input Group -->
+        <div 
+            class="flex items-center w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden h-10 transition-all duration-200"
+            :class="{ 'border-destructive focus-within:ring-destructive': error, 'border-green-500 focus-within:ring-green-500': verified }"
+        >
+            <!-- Question Prefix -->
+            <div class="flex-none bg-muted/50 px-3 py-2 border-r border-border text-sm font-mono font-medium text-muted-foreground select-none flex items-center h-full">
+                {{ question?.replace('=', '') }} =
             </div>
 
-            <!-- Input and Actions wrapper -->
-            <div class="flex-1 flex items-center space-x-2">
-                <div class="relative flex-1">
-                    <Input
-                        v-model="answer"
-                        type="tel"
-                        class="w-full text-center font-mono pr-8"
-                        :placeholder="t('features.auth.captcha.answer')"
-                        :disabled="verified"
-                        @keyup.enter="verify"
-                    />
-                    <div v-if="verified" class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <CheckCircle class="w-4 h-4 text-green-500" />
-                    </div>
+            <!-- Input Field -->
+            <input
+                v-model="answer"
+                type="tel"
+                class="flex h-full w-full bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+                :class="{ 'text-green-500 font-bold': verified }"
+                :placeholder="t('features.auth.captcha.answer')"
+                :disabled="verified"
+                @keyup.enter="verify"
+            />
+
+            <!-- Actions (Right side) -->
+            <div class="flex items-center gap-0.5 pr-1 h-full">
+                <!-- Verified Indicator -->
+                <div v-if="verified" class="px-2 text-green-500 flex items-center animate-in fade-in zoom-in duration-300">
+                    <CheckCircle class="w-4 h-4" />
                 </div>
 
-                <!-- Verify Button (Icon only) -->
-                 <Button 
+                <!-- Verify Button -->
+                <Button 
+                    v-if="!verified"
                     type="button"
-                    :variant="verified ? 'default' : 'secondary'"
+                    variant="ghost" 
                     size="icon"
-                    class="flex-none w-10 h-10"
+                    class="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-transparent"
+                    :class="{ 'text-primary opacity-100': answer, 'opacity-0 w-0 px-0 overflow-hidden': !answer }"
+                    :disabled="!answer"
                     :title="t('common.actions.verify')"
-                    :disabled="!answer || verified"
                     @click="verify"
                 >
-                    <CheckCircle v-if="verified" class="w-4 h-4" />
-                    <span v-else class="text-xs font-bold">GO</span>
+                    <ArrowRight class="w-4 h-4" />
                 </Button>
 
-                <!-- Refresh (only if not verified) -->
+                <!-- Divider -->
+                <div v-if="!verified" class="w-px h-4 bg-border mx-1"></div>
+
+                <!-- Refresh Button -->
                 <Button 
                     v-if="!verified"
                     type="button"
                     variant="ghost"
                     size="icon"
-                    class="flex-none w-8 h-8 text-muted-foreground hover:text-foreground"
+                    class="h-7 w-7 text-muted-foreground hover:text-foreground"
                     :title="t('features.auth.captcha.refresh')"
                     @click="refresh"
                 >
-                    <RefreshCw class="w-4 h-4" />
+                    <RefreshCw class="w-3.5 h-3.5" />
                 </Button>
             </div>
         </div>
         
-        <!-- Error Message -->
-        <p v-if="error" class="text-xs text-destructive mt-1.5 ml-1">{{ error }}</p>
+        <!-- Error Message (Absolute or clearly positioned below) -->
+        <p v-if="error" class="text-[0.8rem] font-medium text-destructive mt-1.5 ml-1 animate-in slide-in-from-top-1">{{ error }}</p>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CheckCircle, RefreshCw } from 'lucide-vue-next'
+import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-vue-next'
 import api from '../../services/api'
 import Button from '../ui/button.vue'
-import Input from '../ui/input.vue'
 
 const { t } = useI18n()
 
