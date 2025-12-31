@@ -86,7 +86,7 @@ class CaptchaService
     protected function generateSliderChallenge(): array
     {
         $token = Str::random(32);
-        $targetPosition = rand(60, 90); // Target position 60-90%
+        $targetPosition = rand(15, 75); // Target position 15-75% to fit within bounds on all screens
 
         Cache::put("captcha:{$token}", [
             'method' => 'slider',
@@ -104,7 +104,7 @@ class CaptchaService
     {
         $userPosition = (int) $answer;
         $target = $stored['target'];
-        $tolerance = 5; // ±5% tolerance
+        $tolerance = 1; // ±1% tolerance (strict)
 
         return abs($userPosition - $target) <= $tolerance;
     }

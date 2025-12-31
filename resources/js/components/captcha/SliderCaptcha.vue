@@ -27,7 +27,7 @@
                     verified ? 'border-green-500 bg-green-50/80 dark:bg-green-950/80' : 'border-primary hover:bg-muted/80',
                     dragging ? 'shadow-lg' : ''
                 ]"
-                :style="{ left: `${Math.min(progress, 100 - 15)}%` }"
+                :style="{ left: `${progress}%` }"
             >
                 <CheckCircle v-if="verified" class="w-5 h-5 text-green-500" />
                 <GripVertical v-else class="w-5 h-5 text-muted-foreground" />
@@ -99,8 +99,18 @@ const onDrag = (e) => {
     if (!dragging.value) return
     
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
-    const deltaX = clientX - startX.value
-    const newProgress = Math.max(0, Math.min(100, (deltaX / trackWidth.value) * 100))
+    // Handle is w-12 (3rem = 48px). We must ensure left + 48px <= trackWidth
+    const handleWidth = 48 
+    const maxLeft = trackWidth.value - handleWidth
+    
+    // Calculate raw delta
+    let deltaX = clientX - startX.value
+    
+    // Clamp deltaX between 0 and maxLeft
+    deltaX = Math.max(0, Math.min(maxLeft, deltaX))
+    
+    // Convert to percentage for width/position
+    const newProgress = (deltaX / trackWidth.value) * 100
     progress.value = newProgress
 }
 
