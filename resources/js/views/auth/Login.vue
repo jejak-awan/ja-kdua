@@ -170,6 +170,7 @@ onMounted(async () => {
     // Check for registration_disabled redirect info
     if (route.query.info === 'registration_disabled') {
         registrationDisabledMessage.value = 'Registration is currently disabled.';
+        registrationEnabled.value = false; // Immediately hide the register link
         // Clear the query param
         setTimeout(() => {
             router.replace({ name: 'login', query: {} });
