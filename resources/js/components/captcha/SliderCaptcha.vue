@@ -104,7 +104,7 @@ const onDrag = (e) => {
     progress.value = newProgress
 }
 
-const endDrag = () => {
+const endDrag = async () => {
     if (!dragging.value) return
     
     dragging.value = false
@@ -113,14 +113,24 @@ const endDrag = () => {
     document.removeEventListener('touchmove', onDrag)
     document.removeEventListener('touchend', endDrag)
     
-    // Check if close enough to target
-    const tolerance = 5
-    if (Math.abs(progress.value - targetPosition.value) <= tolerance) {
+    // Server-side verification
+    try {
+        await api.post('/captcha/verify', {
+            token: token.value,
+            answer: String(Math.round(progress.value))
+        })
+        
         verified.value = true
         emit('verified', { token: token.value, answer: String(Math.round(progress.value)) })
-    } else {
+    } catch (e) {
+        // Just like MathCaptcha, we catch 422 as expected verification failure
         error.value = t('features.auth.captcha.tryAgain')
         progress.value = 0
+        
+        if (e.response?.status !== 422) {
+             console.error('Slider verification failed:', e)
+        }
+        
         // Generate new captcha after failed attempt
         setTimeout(generateCaptcha, 1000)
     }

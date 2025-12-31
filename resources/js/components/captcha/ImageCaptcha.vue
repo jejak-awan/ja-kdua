@@ -89,11 +89,28 @@ const generateCaptcha = async () => {
     }
 }
 
-const verify = () => {
+const verify = async () => {
     if (answer.value.length < 6 || verified.value) return
     
-    verified.value = true
-    emit('verified', { token: token.value, answer: answer.value })
+    try {
+        await api.post('/captcha/verify', {
+            token: token.value,
+            answer: answer.value
+        })
+        
+        verified.value = true
+        error.value = ''
+        emit('verified', { token: token.value, answer: answer.value })
+    } catch (e) {
+        verified.value = false
+        if (e.response && e.response.status === 422) {
+             error.value = t('features.auth.captcha.error') || t('features.auth.captcha.invalid') || 'Invalid code'
+             answer.value = '' // Clear incorrect answer
+        } else {
+             error.value = 'Validation failed'
+             console.error('Image captcha error:', e)
+        }
+    }
 }
 
 const refresh = () => {
