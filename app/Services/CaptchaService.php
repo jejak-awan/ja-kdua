@@ -111,22 +111,12 @@ class CaptchaService
     protected function generateMathChallenge(): array
     {
         $token = Str::random(32);
-        $operations = ['+', '-', '×'];
-        $operation = $operations[array_rand($operations)];
-
-        $a = rand(1, 20);
-        $b = rand(1, 10);
-
-        // Ensure subtraction doesn't result in negative
-        if ($operation === '-' && $b > $a) {
-            [$a, $b] = [$b, $a];
-        }
-
-        $answer = match ($operation) {
-            '+' => $a + $b,
-            '-' => $a - $b,
-            '×' => $a * $b,
-        };
+        
+        // Simplify: only addition, numbers 1-9
+        $a = rand(1, 9);
+        $b = rand(1, 9);
+        
+        $answer = $a + $b;
 
         Cache::put("captcha:{$token}", [
             'method' => 'math',
@@ -136,7 +126,7 @@ class CaptchaService
         return [
             'method' => 'math',
             'token' => $token,
-            'question' => "{$a} {$operation} {$b} = ?",
+            'question' => "{$a} + {$b} = ?",
         ];
     }
 

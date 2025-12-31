@@ -1,43 +1,58 @@
 <template>
     <div class="captcha-math">
-        <p class="text-sm text-muted-foreground mb-2">{{ t('features.auth.captcha.solveQuestion') }}</p>
-        
-        <div class="flex items-center gap-3">
-            <div class="flex-1 bg-muted rounded-lg border border-border p-3 text-center">
-                <span class="text-xl font-mono font-bold text-foreground">{{ question }}</span>
+        <div class="flex items-center space-x-2">
+            <!-- Question Box -->
+            <div class="flex-none bg-muted rounded-md border border-border px-3 py-2 min-w-[3.5rem] text-center">
+                <span class="text-lg font-mono font-bold text-foreground">{{ question?.replace('=', '') }}</span>
             </div>
-            
-            <Input
-                v-model="answer"
-                type="number"
-                class="w-24 text-center text-lg font-mono"
-                :placeholder="t('features.auth.captcha.answer')"
-                :disabled="verified"
-                @keyup.enter="verify"
-            />
-            
-            <Button 
-                type="button"
-                :variant="verified ? 'default' : 'outline'"
-                :disabled="!answer || verified"
-                @click="verify"
-            >
-                <CheckCircle v-if="verified" class="w-4 h-4 text-green-500" />
-                <span v-else>{{ t('common.actions.verify') }}</span>
-            </Button>
+
+            <!-- Input and Actions wrapper -->
+            <div class="flex-1 flex items-center space-x-2">
+                <div class="relative flex-1">
+                    <Input
+                        v-model="answer"
+                        type="tel"
+                        class="w-full text-center font-mono pr-8"
+                        :placeholder="t('features.auth.captcha.answer')"
+                        :disabled="verified"
+                        @keyup.enter="verify"
+                    />
+                    <div v-if="verified" class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <CheckCircle class="w-4 h-4 text-green-500" />
+                    </div>
+                </div>
+
+                <!-- Verify Button (Icon only) -->
+                 <Button 
+                    type="button"
+                    :variant="verified ? 'default' : 'secondary'"
+                    size="icon"
+                    class="flex-none w-10 h-10"
+                    :title="t('common.actions.verify')"
+                    :disabled="!answer || verified"
+                    @click="verify"
+                >
+                    <CheckCircle v-if="verified" class="w-4 h-4" />
+                    <span v-else class="text-xs font-bold">GO</span>
+                </Button>
+
+                <!-- Refresh (only if not verified) -->
+                <Button 
+                    v-if="!verified"
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    class="flex-none w-8 h-8 text-muted-foreground hover:text-foreground"
+                    :title="t('features.auth.captcha.refresh')"
+                    @click="refresh"
+                >
+                    <RefreshCw class="w-4 h-4" />
+                </Button>
+            </div>
         </div>
         
-        <div class="flex items-center justify-between mt-2">
-            <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
-            <button 
-                type="button"
-                class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
-                @click="refresh"
-            >
-                <RefreshCw class="w-3 h-3" />
-                {{ t('features.auth.captcha.newQuestion') }}
-            </button>
-        </div>
+        <!-- Error Message -->
+        <p v-if="error" class="text-xs text-destructive mt-1.5 ml-1">{{ error }}</p>
     </div>
 </template>
 
