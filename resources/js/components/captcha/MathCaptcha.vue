@@ -112,11 +112,16 @@ const verify = async () => {
         emit('verified', { token: token.value, answer: answer.value })
     } catch (e) {
         verified.value = false
-        error.value = t('features.auth.captcha.error') || 'Incorrect answer'
-        
-        // If the token is expired (422 usually), we might want to refresh?
-        // But for now just show error. If it persists, user can click refresh.
-        console.error('Verification failed:', e)
+        // 422 is a validation error (wrong answer or expired token), not a system crash
+        if (e.response && e.response.status === 422) {
+            error.value = t('features.auth.captcha.error') || 'Incorrect answer'
+            // We just log a warning instead of error to avoid alarming developers
+            console.warn('Captcha verification failed:', e.response.data?.message || 'Invalid answer')
+        } else {
+            // Other errors (500, etc)
+            error.value = 'Validation failed'
+            console.error('Captcha system error:', e)
+        }
     }
 }
 
