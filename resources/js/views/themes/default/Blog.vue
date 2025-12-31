@@ -2,8 +2,8 @@
     <div class="min-h-screen bg-background py-12">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">Our Blog</h1>
-                <p class="text-gray-600 max-w-2xl mx-auto">
+                <h1 class="text-4xl font-bold text-foreground mb-4">Our Blog</h1>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
                     Insights, tutorials, and updates from the JA-CMS team.
                 </p>
             </div>
@@ -21,8 +21,8 @@
             </div>
 
             <div v-else class="text-center py-20 bg-card rounded-xl shadow-sm border border-border">
-                <h3 class="text-xl font-medium text-gray-900 mb-2">No posts found</h3>
-                <p class="text-gray-500">Check back later for new content.</p>
+                <h3 class="text-xl font-medium text-foreground mb-2">No posts found</h3>
+                <p class="text-muted-foreground">Check back later for new content.</p>
             </div>
             
             <!-- Pagination (Simple Implementation) -->

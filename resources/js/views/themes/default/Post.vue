@@ -22,21 +22,21 @@
                         <span v-if="post.category" class="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-medium">
                             {{ post.category.name }}
                         </span>
-                        <span class="text-gray-500 text-sm">
+                        <span class="text-muted-foreground text-sm">
                             {{ new Date(post.published_at).toLocaleDateString() }}
                         </span>
                     </div>
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    <h1 class="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
                         {{ post.title }}
                     </h1>
                     <div class="flex items-center justify-center gap-3">
                         <div class="w-10 h-10 bg-muted rounded-full overflow-hidden">
                              <!-- Author Avatar placeholder -->
-                             <svg class="w-full h-full text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                             <svg class="w-full h-full text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                         </div>
                         <div class="text-left">
-                            <p class="text-sm font-medium text-gray-900">{{ post.author?.name || 'Unknown Author' }}</p>
-                            <p class="text-xs text-gray-500">Editor</p>
+                            <p class="text-sm font-medium text-foreground">{{ post.author?.name || 'Unknown Author' }}</p>
+                            <p class="text-xs text-muted-foreground">Editor</p>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                 <div class="prose prose-lg prose-indigo mx-auto" v-html="post.content"></div>
                 
                 <!-- Tags -->
-                <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-gray-100">
+                <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-border">
                     <div class="flex flex-wrap gap-2">
                         <span v-for="tag in post.tags" :key="tag.id" class="text-sm text-muted-foreground px-3 py-1 bg-muted rounded-lg">
                             #{{ tag.name }}
@@ -64,8 +64,8 @@
         
         <!-- Not Found -->
         <div v-else class="text-center py-20">
-            <h1 class="text-2xl font-bold text-gray-900">Post not found</h1>
-            <router-link to="/blog" class="text-indigo-600 hover:text-indigo-700 mt-4 inline-block">Back to Blog</router-link>
+            <h1 class="text-2xl font-bold text-foreground">Post not found</h1>
+            <router-link to="/blog" class="text-primary hover:text-primary/80 mt-4 inline-block">Back to Blog</router-link>
         </div>
     </div>
 </template>

@@ -9,8 +9,8 @@
     <section v-if="featuredPosts.length > 0" class="py-20 bg-background">
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Stories</h2>
-          <div class="w-20 h-1 bg-indigo-600 mx-auto rounded-full"></div>
+          <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">Featured Stories</h2>
+          <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -28,10 +28,10 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-end mb-12">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">Latest Updates</h2>
-            <p class="text-gray-500">Stay up to date with our newest articles</p>
+            <h2 class="text-3xl font-bold text-foreground mb-2">Latest Updates</h2>
+            <p class="text-muted-foreground">Stay up to date with our newest articles</p>
           </div>
-          <router-link to="/blog" class="hidden md:flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700 transition-colors">
+          <router-link to="/blog" class="hidden md:flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors">
             View All Posts
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </router-link>
@@ -46,7 +46,7 @@
         </div>
         
         <div class="mt-12 text-center md:hidden">
-          <router-link to="/blog" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+          <router-link to="/blog" class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
             View All Posts
           </router-link>
         </div>

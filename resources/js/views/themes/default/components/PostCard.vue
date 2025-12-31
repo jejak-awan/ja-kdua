@@ -21,18 +21,18 @@
     <!-- Content -->
     <div class="p-6 flex flex-col flex-1 gap-4">
       <div class="flex-1 space-y-2">
-          <h3 class="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
+          <h3 class="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
             {{ post.title }}
           </h3>
-          <p class="text-gray-500 text-sm line-clamp-3 leading-relaxed">
+          <p class="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
             {{ excerpt }}
           </p>
       </div>
       
       <!-- Meta -->
-      <div class="border-t border-gray-100 pt-4 mt-auto flex items-center justify-between text-xs text-gray-500">
+      <div class="border-t border-border pt-4 mt-auto flex items-center justify-between text-xs text-muted-foreground">
         <div class="flex items-center gap-2">
-             <div class="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+             <div class="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
                 {{ post.author?.name ? post.author.name[0] : 'A' }}
              </div>
              <span>{{ post.author?.name || 'Author' }}</span>
