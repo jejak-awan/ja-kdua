@@ -98,11 +98,26 @@ const generateCaptcha = async () => {
     }
 }
 
-const verify = () => {
+const verify = async () => {
     if (!answer.value || verified.value) return
     
-    verified.value = true
-    emit('verified', { token: token.value, answer: answer.value })
+    try {
+        await api.post('/captcha/verify', {
+            token: token.value,
+            answer: answer.value
+        })
+        
+        verified.value = true
+        error.value = ''
+        emit('verified', { token: token.value, answer: answer.value })
+    } catch (e) {
+        verified.value = false
+        error.value = t('features.auth.captcha.error') || 'Incorrect answer'
+        
+        // If the token is expired (422 usually), we might want to refresh?
+        // But for now just show error. If it persists, user can click refresh.
+        console.error('Verification failed:', e)
+    }
 }
 
 const refresh = () => {

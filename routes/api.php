@@ -9,6 +9,7 @@ Route::prefix('v1')->group(function () {
     
     // Captcha endpoints (no auth required)
     Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
+    Route::post('/captcha/verify', [App\Http\Controllers\Api\V1\CaptchaController::class, 'verify']);
     Route::get('/captcha/settings', [App\Http\Controllers\Api\V1\CaptchaController::class, 'settings']);
     
     // Public endpoint to clear rate limit (no auth required for emergency)

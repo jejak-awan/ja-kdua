@@ -31,7 +31,10 @@ class CaptchaService
     /**
      * Verify the captcha answer.
      */
-    public function verify(string $token, string $answer): bool
+    /**
+     * Verify the captcha answer.
+     */
+    public function verify(string $token, string $answer, bool $consume = true): bool
     {
         $cacheKey = "captcha:{$token}";
         $stored = Cache::get($cacheKey);
@@ -40,8 +43,10 @@ class CaptchaService
             return false;
         }
 
-        // Remove from cache after verification attempt
-        Cache::forget($cacheKey);
+        // Remove from cache after verification attempt if consume is true
+        if ($consume) {
+            Cache::forget($cacheKey);
+        }
 
         return match ($stored['method']) {
             'math' => $this->verifyMath($stored, $answer),

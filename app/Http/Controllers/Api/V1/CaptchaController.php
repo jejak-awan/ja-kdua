@@ -19,6 +19,26 @@ class CaptchaController extends BaseApiController
     }
 
     /**
+     * Verify the captcha token and answer.
+     */
+    public function verify(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'answer' => 'required|string',
+        ]);
+
+        $service = new CaptchaService();
+        $valid = $service->verify($request->token, $request->answer, false); // Don't consume on dry-run verify
+
+        if (!$valid) {
+            return $this->error('Invalid captcha', 422);
+        }
+
+        return $this->success(null, 'Captcha verified');
+    }
+
+    /**
      * Get captcha settings for frontend.
      */
     public function settings(): JsonResponse
