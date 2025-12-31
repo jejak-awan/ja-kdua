@@ -149,8 +149,9 @@ class AuthController extends BaseApiController
             ]);
         }
 
-        // Check if email is verified (required for production)
-        if (! $user->hasVerifiedEmail()) {
+        // Check if email verification is required (based on setting)
+        $requireVerification = \App\Models\Setting::get('require_email_verification', true);
+        if ($requireVerification && !$user->hasVerifiedEmail()) {
             return $this->error(
                 'Please verify your email address before logging in.',
                 403,

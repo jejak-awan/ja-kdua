@@ -67,7 +67,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.authentication.title'),
             description: t('features.settings.groups.authentication.description'),
             icon: ShieldCheckIcon,
-            keys: ['enable_registration', 'require_email_verification', 'enable_2fa', 'two_factor_method', 'two_factor_enforced_roles', 'password_min_length'],
+            keys: ['enable_registration', 'require_email_verification', 'enable_2fa', 'two_factor_method', 'two_factor_enforced_roles', 'password_min_length', 'password_require_uppercase', 'password_require_lowercase', 'password_require_number', 'password_require_symbol'],
             settings: [],
         },
         {
