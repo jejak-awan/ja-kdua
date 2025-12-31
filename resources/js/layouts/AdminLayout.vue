@@ -13,7 +13,7 @@
         <!-- Main Content -->
         <div :class="[
             'transition-all duration-300 ease-in-out',
-            sidebarMinimized ? 'lg:pl-20' : 'lg:pl-64'
+            sidebarMinimized ? 'lg:pl-[68px]' : 'lg:pl-64'
         ]">
             <!-- Top Navbar -->
             <AdminNavbar

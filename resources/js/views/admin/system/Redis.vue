@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto space-y-6">
+  <div class="space-y-6">
     <div class="flex justify-between items-start">
       <div>
         <h1 class="text-2xl font-bold text-foreground">{{ $t('features.redis.title') }}</h1>

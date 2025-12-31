@@ -38,15 +38,15 @@
         "logout": "Logout"
     },
     "sections": {
-        "content": "CONTENT",
-        "media": "MEDIA",
-        "engagement": "ENGAGEMENT",
-        "usersAccess": "USERS & ACCESS",
-        "logs": "LOGS & MONITORING",
-        "appearance": "APPEARANCE",
-        "analyticsSeo": "ANALYTICS & SEO",
-        "system": "SYSTEM",
-        "developer": "DEVELOPER"
+        "content": "Content",
+        "media": "Media",
+        "engagement": "Engagement",
+        "usersAccess": "Users & Access",
+        "logs": "Logs & Monitoring",
+        "appearance": "Appearance",
+        "analyticsSeo": "Analytics & SEO",
+        "system": "System",
+        "developer": "Developer"
     },
     "breadcrumbs": {
         "home": "Home",

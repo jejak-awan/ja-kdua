@@ -38,15 +38,15 @@
         "logout": "Keluar"
     },
     "sections": {
-        "content": "KONTEN",
-        "media": "MEDIA",
-        "engagement": "KETERLIBATAN",
-        "usersAccess": "PENGGUNA & AKSES",
-        "logs": "LOG & MONITORING",
-        "appearance": "TAMPILAN",
-        "analyticsSeo": "ANALITIK & SEO",
-        "system": "SISTEM",
-        "developer": "PENGEMBANG"
+        "content": "Konten",
+        "media": "Media",
+        "engagement": "Keterlibatan",
+        "usersAccess": "Pengguna & Akses",
+        "logs": "Log & Monitoring",
+        "appearance": "Tampilan",
+        "analyticsSeo": "Analitik & SEO",
+        "system": "Sistem",
+        "developer": "Pengembang"
     },
     "breadcrumbs": {
         "home": "Beranda",
