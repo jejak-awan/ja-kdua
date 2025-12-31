@@ -5,8 +5,8 @@
             class="flex items-center w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden h-10 transition-all duration-200"
             :class="{ 'border-destructive focus-within:ring-destructive': error, 'border-green-500 focus-within:ring-green-500': verified }"
         >
-            <!-- Question Prefix -->
-            <div class="flex-none bg-muted/50 px-3 py-2 border-r border-border text-sm font-mono font-medium text-muted-foreground select-none flex items-center h-full">
+            <!-- Question Prefix (Balanced Width) -->
+            <div class="bg-muted/50 px-3 py-2 border-r border-border text-sm font-mono font-medium text-muted-foreground select-none flex items-center justify-center h-full min-w-[40%] text-center">
                 {{ question?.replace('=', '') }} =
             </div>
 
@@ -14,7 +14,7 @@
             <input
                 v-model="answer"
                 type="tel"
-                class="flex h-full w-full bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+                class="flex h-full w-full bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 font-mono text-center"
                 :class="{ 'text-green-500 font-bold': verified }"
                 :placeholder="t('features.auth.captcha.answer')"
                 :disabled="verified"
@@ -22,7 +22,7 @@
             />
 
             <!-- Actions (Right side) -->
-            <div class="flex items-center gap-0.5 pr-1 h-full">
+            <div class="flex items-center gap-0.5 pr-1 h-full flex-none">
                 <!-- Verified Indicator -->
                 <div v-if="verified" class="px-2 text-green-500 flex items-center animate-in fade-in zoom-in duration-300">
                     <CheckCircle class="w-4 h-4" />
@@ -40,7 +40,7 @@
                     :title="t('common.actions.verify')"
                     @click="verify"
                 >
-                    <ArrowRight class="w-4 h-4" />
+                    <Check class="w-4 h-4" />
                 </Button>
 
                 <!-- Divider -->
@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-vue-next'
+import { CheckCircle, RefreshCw, Check } from 'lucide-vue-next'
 import api from '../../services/api'
 import Button from '../ui/button.vue'
 

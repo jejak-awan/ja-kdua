@@ -42,5 +42,6 @@
     "copy": "Copy",
     "bulkAction": "Bulk Action",
     "add": "Add",
-    "searchIn": "Search in"
+    "searchIn": "Search in",
+    "verify": "Verify"
 }
