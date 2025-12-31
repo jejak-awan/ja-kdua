@@ -202,21 +202,41 @@ class CaptchaService
             );
         }
 
-        // Add text with rotation effect
-        $fontSize = 5; // GD built-in font size (1-5)
-        $charWidth = imagefontwidth($fontSize);
-        $charHeight = imagefontheight($fontSize);
-        // Tighter spacing: 1.5x char width instead of 2x
-        $startX = ($width - strlen($code) * $charWidth * 1.5) / 2;
-        $startY = ($height - $charHeight) / 2;
-
+        // Use TrueType font for larger text
+        $fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+        // Fallback if system font not found - normally we'd check file_exists
+        $useTtf = file_exists($fontPath);
+        
+        $fontSize = 24; // Much larger font size
+        
+        // Improve spacing logic for TTF
+        // Calculate approximation of text width
+        $boxWidth = $width * 0.8; 
+        $charPadding = $boxWidth / strlen($code);
+        $startX = ($width - $boxWidth) / 2;
+        
         for ($i = 0; $i < strlen($code); $i++) {
             $char = $code[$i];
-            $x = $startX + ($i * $charWidth * 1.5) + rand(-2, 2);
-            $y = $startY + rand(-3, 3);
+            
+            $angle = rand(-15, 15);
             $color = $textColors[array_rand($textColors)];
             
-            imagestring($image, $fontSize, $x, $y, $char, $color);
+            $x = $startX + ($i * $charPadding) + rand(-2, 2);
+            $y = ($height / 2) + ($fontSize / 2) + rand(-2, 2); // Baseline position
+            
+            if ($useTtf) {
+                imagettftext($image, $fontSize, $angle, $x, $y, $color, $fontPath, $char);
+            } else {
+                // Legacy fallback (should ideally not happen given our search)
+                // Use built-in font scaled up? No, just center it
+                $baseFont = 5;
+                $fw = imagefontwidth($baseFont);
+                $fh = imagefontheight($baseFont);
+                // Center roughly
+                $lx = $x + ($charPadding/2) - ($fw/2);
+                $ly = ($height - $fh) / 2;
+                imagestring($image, $baseFont, $lx, $ly, $char, $color);
+            }
         }
 
         // Output to string
