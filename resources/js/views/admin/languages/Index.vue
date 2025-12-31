@@ -179,23 +179,25 @@
                     <div class="space-y-2">
                         <Label>{{ $t('features.languages.create.code') }}</Label>
                         <Input 
-                            v-model="newLanguage.code"
+                            v-model="form.code"
                             type="text" 
                             placeholder="fr, de, es..."
                         />
+                        <span v-if="errors.code" class="text-xs text-destructive">{{ errors.code[0] }}</span>
                     </div>
 
                     <div class="space-y-2">
                         <Label>{{ $t('features.languages.create.name') }}</Label>
                         <Input 
-                            v-model="newLanguage.name"
+                            v-model="form.name"
                             type="text" 
                             placeholder="French, German..."
                         />
+                        <span v-if="errors.name" class="text-xs text-destructive">{{ errors.name[0] }}</span>
                     </div>
 
                     <div class="flex items-center space-x-2 pt-2">
-                        <Checkbox id="createFromTemplate" v-model:checked="newLanguage.createFromTemplate" />
+                        <Checkbox id="createFromTemplate" v-model:checked="form.create_from_template" />
                         <Label for="createFromTemplate" class="text-sm font-normal cursor-pointer">
                             {{ $t('features.languages.create.fromTemplate') }}
                         </Label>
@@ -208,7 +210,7 @@
                     </Button>
                     <Button 
                         @click="createLanguage" 
-                        :disabled="!newLanguage.code || !newLanguage.name || creating"
+                        :disabled="creating"
                     >
                         <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
                         {{ creating ? $t('common.messages.loading.default') : $t('common.actions.create') }}
@@ -225,6 +227,8 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { languageSchema } from '../../../schemas/common';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -268,10 +272,12 @@ const importing = ref(false);
 const exporting = ref(null);
 const selectedFile = ref(null);
 
-const newLanguage = ref({
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(languageSchema);
+
+const form = ref({
     code: '',
     name: '',
-    createFromTemplate: true,
+    create_from_template: true,
 });
 
 // UI Locale info
@@ -323,20 +329,27 @@ const deleteLanguage = async (lang) => {
 };
 
 const createLanguage = async () => {
+    if (!validateWithZod(form.value)) return;
+    
     creating.value = true;
+    clearErrors();
     try {
         await api.post('/admin/cms/languages', {
-            code: newLanguage.value.code,
-            name: newLanguage.value.name,
-            create_from_template: newLanguage.value.createFromTemplate,
+            code: form.value.code,
+            name: form.value.name,
+            create_from_template: form.value.create_from_template,
             template_locale: 'en',
         });
         showCreateModal.value = false;
-        newLanguage.value = { code: '', name: '', createFromTemplate: true };
+        form.value = { code: '', name: '', create_from_template: true };
         await fetchLanguages();
-        toast.success.create('Language');
+        toast.success.create(t('features.languages.title'));
     } catch (error) {
-        toast.error.create(error, 'Language');
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors);
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         creating.value = false;
     }

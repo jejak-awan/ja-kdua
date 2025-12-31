@@ -237,7 +237,7 @@ Route::prefix('v1')->group(function () {
         })->middleware('permission:manage settings');
 
         Route::post('cache/warm-up', function () {
-            $cacheService = new \App\Services\CacheService;
+            $cacheService = new \App\Services\CacheWarningService;
             $cacheService->warmUp();
 
             return response()->json(['message' => 'Cache warmed up successfully']);
@@ -255,6 +255,7 @@ Route::prefix('v1')->group(function () {
 
         // Security
         Route::get('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
+        Route::delete('security/logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
         Route::post('security/logs/clear', [App\Http\Controllers\Api\V1\SecurityController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');

@@ -11,6 +11,7 @@
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.title') }} <span class="text-red-500">*</span></Label>
                     <Input v-model="form.title" type="text" required />
+                    <span v-if="errors.title" class="text-xs text-destructive">{{ errors.title }}</span>
                 </div>
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.type') }} <span class="text-red-500">*</span></Label>
@@ -26,14 +27,17 @@
                             <SelectItem value="custom">Custom</SelectItem>
                         </SelectContent>
                     </Select>
+                    <span v-if="errors.type" class="text-xs text-destructive">{{ errors.type }}</span>
                 </div>
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.location') }}</Label>
                     <Input v-model="form.location" type="text" :placeholder="$t('features.widgets.modals.widget.positionPlaceholder')" />
+                    <span v-if="errors.location" class="text-xs text-destructive">{{ errors.location }}</span>
                 </div>
                 <div class="space-y-2">
                     <Label>{{ $t('features.widgets.modals.widget.content') }}</Label>
                     <Textarea v-model="form.content" :rows="6" />
+                    <span v-if="errors.content" class="text-xs text-destructive">{{ errors.content }}</span>
                 </div>
                 <div class="flex items-center space-x-2 pt-2">
                     <Checkbox id="is_active" v-model:checked="form.is_active" />
@@ -47,9 +51,9 @@
                 <Button variant="outline" @click="$emit('close')">
                     {{ $t('common.actions.cancel') }}
                 </Button>
-                <Button @click="handleSubmit" :disabled="saving">
-                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ saving ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.actions.update') : $t('common.actions.create')) }}
+                <Button @click="handleSubmit" :disabled="isSubmitting">
+                    <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ isSubmitting ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.actions.update') : $t('common.actions.create')) }}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -57,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Dialog from '../ui/dialog.vue';
@@ -77,23 +81,36 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { widgetSchema } from '../../schemas/common';
 
 const props = defineProps({ widget: { type: Object, default: null } });
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
-const saving = ref(false);
 const toast = useToast();
-const form = ref({ title: '', type: 'text', location: '', content: '', is_active: true });
+const isSubmitting = ref(false);
+
+const { errors, validateWithZod, setErrors } = useFormValidation(widgetSchema);
+
+const form = ref({
+    title: '',
+    type: 'text',
+    location: '',
+    content: '',
+    is_active: true
+});
 
 const loadWidget = () => {
     if (props.widget) {
-        form.value = { ...props.widget };
+        form.value = { ...props.widget, is_active: !!props.widget.is_active };
     }
 };
 
 const handleSubmit = async () => {
-    saving.value = true;
+    if (!validateWithZod(form.value)) return;
+    isSubmitting.value = true;
+
     try {
         if (props.widget) {
             await api.put(`/admin/cms/widgets/${props.widget.id}`, form.value);
@@ -104,10 +121,13 @@ const handleSubmit = async () => {
         }
         emit('saved');
     } catch (error) {
-        console.error('Failed to save widget:', error);
-        toast.error.fromResponse(error);
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors);
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
-        saving.value = false;
+        isSubmitting.value = false;
     }
 };
 

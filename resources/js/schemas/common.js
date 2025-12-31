@@ -175,3 +175,13 @@ export const contentTemplateSchema = z.object({
     content: z.string().optional().or(z.literal('')),
     is_active: z.boolean().optional(),
 });
+
+/**
+ * Language schema
+ */
+export const languageSchema = z.object({
+    code: z.string().min(2, t('common.validation.min', { field: 'Code', min: 2 })),
+    name: z.string().min(1, t('common.validation.required', { field: 'Name' })),
+    create_from_template: z.boolean().default(true),
+});
+

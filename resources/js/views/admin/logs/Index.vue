@@ -114,7 +114,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
 import Button from '../../../components/ui/button.vue';
@@ -122,6 +122,7 @@ import Input from '../../../components/ui/input.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
 const logFiles = ref([]);
 const selectedLogFile = ref(null);
@@ -195,7 +196,7 @@ const downloadLog = async (logFile) => {
         link.remove();
     } catch (error) {
         console.error('Failed to download logs:', error);
-        toast.error('Error', t('features.system.logs.messages.failed_download'));
+        toast.error.fromResponse(error);
     }
 };
 
@@ -212,12 +213,12 @@ const clearLogs = async () => {
     clearing.value = true;
     try {
         await api.delete('/admin/cms/logs');
-        toast.success(t('features.system.logs.messages.cleared'));
+        toast.success.action(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         fetchLogFiles();
     } catch (error) {
         console.error('Failed to clear logs:', error);
-        toast.error('Error', t('features.system.logs.messages.failed_clear'));
+        toast.error.fromResponse(error);
     } finally {
         clearing.value = false;
     }

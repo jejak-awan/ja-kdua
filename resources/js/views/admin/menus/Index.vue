@@ -136,11 +136,11 @@ const deleteMenu = async (menu) => {
 
     try {
         await api.delete(`/admin/cms/menus/${menu.id}`);
-        toast.success(t('features.menus.messages.deleteSuccess'));
+        toast.success.delete(t('features.menus.title'));
         fetchMenus();
     } catch (error) {
         console.error('Error deleting menu:', error);
-        toast.error('Error', error.response?.data?.message || t('features.menus.messages.deleteFailed'));
+        toast.error.delete(error, t('features.menus.title'));
     }
 };
 

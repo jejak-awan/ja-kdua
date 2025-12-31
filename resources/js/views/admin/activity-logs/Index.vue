@@ -237,7 +237,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Button from '../../../components/ui/button.vue';
@@ -252,6 +252,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
 const logs = ref([]);
 const users = ref([]);
@@ -348,11 +349,11 @@ const clearLogs = async () => {
 
     try {
         await api.post('/admin/cms/activity-logs/clear');
-        toast.success(t('features.system.logs.messages.cleared'));
+        toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error) {
         console.error('Failed to clear logs:', error);
-        toast.error('Error', t('features.system.logs.messages.failed_clear'));
+        toast.error.fromResponse(error);
     }
 };
 const exportLogs = async () => {
@@ -377,9 +378,10 @@ const exportLogs = async () => {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+        toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error) {
         console.error('Failed to export activity logs:', error);
-        toast.error('Error', t('features.system.logs.messages.failed_export') || 'Gagal mengekspor log aktivitas');
+        toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
     }

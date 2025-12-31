@@ -295,7 +295,7 @@ const activateTheme = async (theme) => {
         toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error) {
         console.error('Failed to activate theme:', error);
-        toast.error('Error', error.response?.data?.message || t('features.themes.messages.activateFailed'));
+        toast.error.fromResponse(error);
     }
 };
 

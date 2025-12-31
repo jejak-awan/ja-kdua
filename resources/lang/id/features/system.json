@@ -127,6 +127,9 @@
         },
         "confirm": {
             "clear": "Apakah Anda yakin ingin membersihkan semua log? Tindakan ini tidak dapat dibatalkan."
+        },
+        "actions": {
+            "clear": "Bersihkan Log"
         }
     },
     "scheduled_tasks": {

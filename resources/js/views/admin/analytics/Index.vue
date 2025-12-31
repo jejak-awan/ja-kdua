@@ -397,8 +397,10 @@ const exportData = async (type) => {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+        toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error) {
         console.error('Failed to export:', error);
+        toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
     }

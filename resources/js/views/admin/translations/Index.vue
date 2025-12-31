@@ -171,7 +171,7 @@ const handleUpdate = async () => {
         toast.success(t('features.translations.messages.update_success')); // Assuming a success message
     } catch (error) {
         console.error('Failed to update translation:', error);
-        toast.error('Failed to update translation');
+        toast.error.fromResponse(error);
     } finally {
         updating.value = false;
     }

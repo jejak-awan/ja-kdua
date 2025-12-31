@@ -294,10 +294,10 @@ const saveRobotsTxt = async () => {
     savingRobots.value = true;
     try {
         await api.put('/admin/cms/seo/robots-txt', { content: robotsContent.value });
-        toast.success(t('features.seo.robots.saved'));
+        toast.success.save();
     } catch (error) {
         console.error('Failed to save robots.txt:', error);
-        toast.error('Error', t('features.seo.robots.failed'));
+        toast.error.fromResponse(error);
     } finally {
         savingRobots.value = false;
     }
@@ -307,10 +307,10 @@ const generateSitemap = async () => {
     generatingSitemap.value = true;
     try {
         await api.get('/admin/cms/seo/sitemap');
-        toast.success(t('features.seo.sitemap.generated'));
+        toast.success.action(t('features.seo.sitemap.generated'));
     } catch (error) {
         console.error('Failed to generate sitemap:', error);
-        toast.error('Error', t('features.seo.sitemap.failed'));
+        toast.error.fromResponse(error);
     } finally {
         generatingSitemap.value = false;
     }
@@ -341,7 +341,7 @@ const runAnalysis = async () => {
         analysisResults.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to run SEO analysis:', error);
-        toast.error('Error', t('features.seo.analysis.failed'));
+        toast.error.fromResponse(error);
     } finally {
         analyzing.value = false;
     }
@@ -357,7 +357,7 @@ const generateSchema = async () => {
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error) {
         console.error('Failed to generate schema:', error);
-        toast.error('Error', t('features.seo.schema.failed'));
+        toast.error.fromResponse(error);
     } finally {
         generatingSchema.value = false;
     }

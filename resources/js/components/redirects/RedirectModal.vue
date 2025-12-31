@@ -17,6 +17,7 @@
                         required
                         :placeholder="$t('features.redirects.modals.redirect.fromPlaceholder')"
                     />
+                    <span v-if="errors.from_url" class="text-xs text-destructive">{{ errors.from_url[0] }}</span>
                     <p class="text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.fromHint') }}</p>
                 </div>
 
@@ -29,6 +30,7 @@
                         required
                         :placeholder="$t('features.redirects.modals.redirect.toPlaceholder')"
                     />
+                    <span v-if="errors.to_url" class="text-xs text-destructive">{{ errors.to_url[0] }}</span>
                     <p class="text-xs text-muted-foreground">{{ $t('features.redirects.modals.redirect.toHint') }}</p>
                 </div>
 
@@ -69,10 +71,10 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="saving"
+                    :disabled="isSubmitting"
                 >
-                    <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ saving ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
+                    <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ isSubmitting ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -99,6 +101,8 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { redirectSchema } from '../../schemas/common';
 
 const props = defineProps({
     redirect: {
@@ -109,8 +113,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
-const saving = ref(false);
 const toast = useToast();
+const isSubmitting = ref(false);
+
+const { errors, validateWithZod, setErrors } = useFormValidation(redirectSchema);
 
 const form = ref({
     from_url: '',
@@ -131,19 +137,26 @@ const loadRedirect = () => {
 };
 
 const handleSubmit = async () => {
-    saving.value = true;
+    if (!validateWithZod(form.value)) return;
+
+    isSubmitting.value = true;
     try {
         if (props.redirect) {
             await api.put(`/admin/cms/redirects/${props.redirect.id}`, form.value);
+            toast.success.update(t('features.redirects.title'));
         } else {
             await api.post('/admin/cms/redirects', form.value);
+            toast.success.create(t('features.redirects.title'));
         }
         emit('saved');
     } catch (error) {
-        console.error('Failed to save redirect:', error);
-        toast.error.fromResponse(error);
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors);
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
-        saving.value = false;
+        isSubmitting.value = false;
     }
 };
 

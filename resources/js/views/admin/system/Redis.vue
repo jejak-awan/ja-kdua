@@ -620,7 +620,7 @@ const saveSettings = async () => {
       settings: settingsArray
     })
 
-    toast.success('Redis settings saved successfully')
+    toast.success.save();
 
     connectionStatus.value = {
       type: 'success',

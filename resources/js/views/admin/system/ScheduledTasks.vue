@@ -367,7 +367,7 @@ async function saveTask() {
       errors.value = error.response.data.errors || {};
     } else {
         console.error('Failed to save task:', error.response?.data?.message || error.message);
-        toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.save_failed'));
+        toast.error.fromResponse(error);
     }
   } finally {
     saving.value = false;
@@ -388,7 +388,7 @@ async function runTask(task) {
     running.value = task.id;
     const response = await api.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
     
-    toast.success(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
+    toast.success.action(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
 
     // Show output
     selectedTaskOutput.value = response.data.data.output;
@@ -397,7 +397,7 @@ async function runTask(task) {
     await fetchTasks();
   } catch (error) {
     console.error('Failed to run task:', error.response?.data?.message || error.message);
-    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.run_failed'));
+    toast.error.fromResponse(error);
   } finally {
     running.value = null;
   }
@@ -413,6 +413,7 @@ async function toggleActive(task) {
     console.log('Task toggled successfully');
   } catch (error) {
     console.error('Failed to toggle task:', error.message);
+    toast.error.fromResponse(error);
   }
 }
 
@@ -425,7 +426,7 @@ async function confirmDelete(task) {
   const confirmed = await confirm({
     title: t('features.scheduled_tasks.actions.delete'),
     message: t('features.scheduled_tasks.confirm_delete', { name: task.name }),
-    variant: 'danger',
+    variant: 'destructive',
     confirmText: t('common.actions.delete'),
   });
 
@@ -433,11 +434,11 @@ async function confirmDelete(task) {
 
   try {
     await api.delete(`/admin/cms/scheduled-tasks/${task.id}`);
-    toast.success(t('features.scheduled_tasks.messages.deleted') || 'Task deleted successfully');
+    toast.success.delete();
     await fetchTasks();
   } catch (error) {
     console.error('Failed to delete task:', error.message);
-    toast.error('Error', error.response?.data?.message || t('features.scheduled_tasks.messages.delete_failed'));
+    toast.error.fromResponse(error);
   }
 }
 

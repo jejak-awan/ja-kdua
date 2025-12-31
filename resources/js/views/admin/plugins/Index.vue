@@ -39,11 +39,12 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import PluginSettingsModal from '../../../components/plugins/PluginSettingsModal.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
 const { t } = useI18n();
+const toast = useToast();
 
 const plugins = ref([]);
 const loading = ref(false);
@@ -58,7 +59,7 @@ const fetchPlugins = async () => {
         plugins.value = ensureArray(data);
     } catch (error) {
         console.error('Failed to fetch plugins:', error);
-        toast.error(t('features.developer.plugins.messages.failed_fetch'));
+        toast.error(t('features.developer.plugins.messages.failed_fetch')); // Keep generic message or use fromResponse if applicable, but fetch usually generic
     } finally {
         loading.value = false;
     }
@@ -69,19 +70,15 @@ const togglePlugin = async (plugin) => {
         if (plugin.is_active) {
             await api.post(`/admin/cms/plugins/${plugin.id}/deactivate`);
             plugin.is_active = false;
-            toast.success(t('features.developer.plugins.messages.deactivated'));
+            toast.success.action(t('features.developer.plugins.messages.deactivated'));
         } else {
             await api.post(`/admin/cms/plugins/${plugin.id}/activate`);
             plugin.is_active = true;
-            toast.success(t('features.developer.plugins.messages.activated'));
+            toast.success.action(t('features.developer.plugins.messages.activated'));
         }
     } catch (error) {
         console.error('Failed to toggle plugin:', error);
-        toast.error(
-            plugin.is_active
-                ? t('features.developer.plugins.messages.failed_deactivate')
-                : t('features.developer.plugins.messages.failed_activate')
-        );
+        toast.error.fromResponse(error);
     }
 };
 

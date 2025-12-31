@@ -160,6 +160,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
 
 // UI Components - individual imports
 import Button from '@/components/ui/button.vue';
@@ -183,6 +184,7 @@ import { Play, X, Loader2, AlertCircle, Eye } from 'lucide-vue-next';
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
+const toast = useToast();
 
 const selectedCommand = ref('');
 const parameters = ref('');
@@ -212,6 +214,7 @@ async function fetchAllowedCommands() {
     allowedCommands.value = response.data.data.commands;
   } catch (error) {
     console.error('Failed to fetch allowed commands:', error.message);
+    toast.error.fromResponse(error);
   }
 }
 
@@ -263,14 +266,17 @@ async function runCommand() {
 
     if (exitCode.value === 0) {
       console.log('Command executed successfully');
+      toast.success.action(t('features.command_runner.messages.executed'));
     } else {
       console.warn('Command executed with exit code:', exitCode.value);
+      toast.error(t('features.command_runner.messages.failed_exit_code', { code: exitCode.value }));
     }
 
   } catch (error) {
     output.value = error.response?.data?.message || error.message;
     exitCode.value = 1;
     console.error('Failed to execute command:', error.message);
+    toast.error.fromResponse(error);
   } finally {
     executing.value = false;
   }

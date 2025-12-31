@@ -173,7 +173,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
 import Button from '../../../components/ui/button.vue';
 import Pagination from '../../../components/ui/pagination.vue';
@@ -186,6 +186,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
 const history = ref([]);
 const users = ref([]);
@@ -261,7 +262,7 @@ const clearLogs = async () => {
         title: t('features.system.logs.actions.clear'),
         message: t('features.system.logs.confirm.clear') || 'Are you sure you want to clear all logs?',
         variant: 'destructive',
-        confirmText: t('features.system.logs.actions.clear'),
+        confirmText: t('common.actions.clear'),
     });
 
     if (!confirmed) return;
@@ -270,10 +271,10 @@ const clearLogs = async () => {
         await api.post('/admin/cms/login-history/clear');
         await fetchHistory();
         await fetchStatistics();
-        toast.success(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
+        toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
     } catch (error) {
         console.error('Failed to clear logs:', error);
-        toast.error('Error', t('features.system.logs.messages.clearFailed') || 'Failed to clear logs');
+        toast.error.fromResponse(error);
     }
 };
 
@@ -298,9 +299,10 @@ const exportHistory = async () => {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+        toast.success.action(t('features.analytics.export.success') || 'Export started');
     } catch (error) {
         console.error('Failed to export:', error);
-        toast.error('Error', t('features.login_history.export.failed'));
+        toast.error.fromResponse(error);
     } finally {
         exporting.value = false;
     }
