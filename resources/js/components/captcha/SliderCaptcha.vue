@@ -22,9 +22,9 @@
             
             <!-- Slider handle -->
             <div 
-                class="absolute top-1 bottom-1 w-12 bg-background border-2 rounded-md flex items-center justify-center cursor-grab active:cursor-grabbing transition-colors"
+                class="absolute top-1 bottom-1 w-12 bg-background/80 backdrop-blur-sm border-2 rounded-md flex items-center justify-center cursor-grab active:cursor-grabbing transition-colors z-10"
                 :class="[
-                    verified ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'border-primary hover:bg-muted',
+                    verified ? 'border-green-500 bg-green-50/80 dark:bg-green-950/80' : 'border-primary hover:bg-muted/80',
                     dragging ? 'shadow-lg' : ''
                 ]"
                 :style="{ left: `${Math.min(progress, 100 - 15)}%` }"
