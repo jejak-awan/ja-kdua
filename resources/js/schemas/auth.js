@@ -1,18 +1,28 @@
 /**
- * Authentication form validation schemas using Zod
- * These schemas provide instant client-side validation before API calls
+ * Authentication form validation schemas using Zod with i18n support
+ * 
+ * These schemas use translation keys that are resolved at runtime
+ * by useFormValidation.js using i18n's `t()` function.
+ * 
+ * Translation key format: { key: 'translation.key', params: {} }
  */
 import { z } from 'zod';
+
+/**
+ * Helper to create translatable error message
+ * This creates an object that useFormValidation will translate
+ */
+const t = (key, params = {}) => JSON.stringify({ key, params });
 
 /**
  * Login form schema
  */
 export const loginSchema = z.object({
     email: z.string()
-        .min(1, 'Email wajib diisi')
-        .email('Format email tidak valid'),
+        .min(1, t('common.validation.required', { field: 'Email' }))
+        .email(t('common.validation.email')),
     password: z.string()
-        .min(1, 'Password wajib diisi'),
+        .min(1, t('common.validation.required', { field: 'Password' })),
 });
 
 /**
@@ -20,17 +30,17 @@ export const loginSchema = z.object({
  */
 export const registerSchema = z.object({
     name: z.string()
-        .min(2, 'Nama minimal 2 karakter')
-        .max(255, 'Nama maksimal 255 karakter'),
+        .min(2, t('common.validation.min', { field: 'Name', min: 2 }))
+        .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
     email: z.string()
-        .min(1, 'Email wajib diisi')
-        .email('Format email tidak valid'),
+        .min(1, t('common.validation.required', { field: 'Email' }))
+        .email(t('common.validation.email')),
     password: z.string()
-        .min(8, 'Password minimal 8 karakter'),
+        .min(8, t('common.validation.min', { field: 'Password', min: 8 })),
     password_confirmation: z.string()
-        .min(1, 'Konfirmasi password wajib diisi'),
+        .min(1, t('common.validation.required', { field: 'Confirm Password' })),
 }).refine(data => data.password === data.password_confirmation, {
-    message: 'Konfirmasi password tidak cocok',
+    message: t('common.validation.confirmed'),
     path: ['password_confirmation'],
 });
 
@@ -39,8 +49,8 @@ export const registerSchema = z.object({
  */
 export const forgotPasswordSchema = z.object({
     email: z.string()
-        .min(1, 'Email wajib diisi')
-        .email('Format email tidak valid'),
+        .min(1, t('common.validation.required', { field: 'Email' }))
+        .email(t('common.validation.email')),
 });
 
 /**
@@ -48,14 +58,14 @@ export const forgotPasswordSchema = z.object({
  */
 export const resetPasswordSchema = z.object({
     email: z.string()
-        .min(1, 'Email wajib diisi')
-        .email('Format email tidak valid'),
+        .min(1, t('common.validation.required', { field: 'Email' }))
+        .email(t('common.validation.email')),
     password: z.string()
-        .min(8, 'Password minimal 8 karakter'),
+        .min(8, t('common.validation.min', { field: 'Password', min: 8 })),
     password_confirmation: z.string()
-        .min(1, 'Konfirmasi password wajib diisi'),
+        .min(1, t('common.validation.required', { field: 'Confirm Password' })),
     token: z.string().min(1),
 }).refine(data => data.password === data.password_confirmation, {
-    message: 'Konfirmasi password tidak cocok',
+    message: t('common.validation.confirmed'),
     path: ['password_confirmation'],
 });

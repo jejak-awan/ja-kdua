@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 /**
- * Form validation composable with Zod schema support
+ * Form validation composable with Zod schema support and i18n integration
  * Provides both client-side (Zod) and server-side (422) error handling
  * 
  * @param {Object} zodSchema - Optional Zod schema for client-side validation
@@ -82,15 +82,36 @@ export function useFormValidation(zodSchema = null) {
     };
 
     /**
+     * Translate a Zod error message
+     * Zod messages can be:
+     * - JSON string with { key, params } for translation
+     * - Plain string (used as-is)
+     */
+    const translateMessage = (message) => {
+        try {
+            const parsed = JSON.parse(message);
+            if (parsed.key) {
+                return t(parsed.key, parsed.params || {});
+            }
+            return message;
+        } catch {
+            // Not JSON, return as-is
+            return message;
+        }
+    };
+
+    /**
      * Format Zod errors to match existing error structure
-     * { fieldName: ['error message 1', 'error message 2'] }
+     * Translates error messages using i18n
+     * { fieldName: ['translated error message 1', 'error message 2'] }
      */
     const formatZodErrors = (zodError) => {
         const formatted = {};
         for (const issue of zodError.issues) {
             const path = issue.path.join('.') || '_root';
             if (!formatted[path]) formatted[path] = [];
-            formatted[path].push(issue.message);
+            // Translate the message
+            formatted[path].push(translateMessage(issue.message));
         }
         return formatted;
     };
@@ -146,7 +167,7 @@ export function useFormValidation(zodSchema = null) {
                 // Only extract errors for this field
                 const fieldErrors = result.error.issues
                     .filter(issue => issue.path[0] === fieldName)
-                    .map(issue => issue.message);
+                    .map(issue => translateMessage(issue.message));
 
                 if (fieldErrors.length > 0) {
                     errors.value[fieldName] = fieldErrors;
