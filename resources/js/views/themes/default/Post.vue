@@ -49,7 +49,7 @@
 
             <!-- Content -->
             <div class="container mx-auto px-4 max-w-3xl">
-                <div class="prose prose-lg prose-indigo mx-auto" v-html="post.content"></div>
+                <div class="prose prose-lg prose-indigo mx-auto" v-html="post.body"></div>
                 
                 <!-- Tags -->
                 <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-border">

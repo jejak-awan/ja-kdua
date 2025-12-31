@@ -1,13 +1,16 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-muted py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-foreground">
+    <div class="min-h-screen flex items-center justify-center bg-muted/40 px-4 py-12 sm:px-6 lg:px-8">
+        <Card class="w-full max-w-md">
+            <CardHeader class="space-y-1">
+                <CardTitle class="text-2xl font-bold text-center tracking-tight">
                     {{ t('features.auth.resetPassword.title') }}
-                </h2>
-            </div>
-            <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-                <div class="space-y-4">
+                </CardTitle>
+                <CardDescription class="text-center">
+                    Enter your new password below
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form class="space-y-4" @submit.prevent="handleSubmit">
                     <div class="space-y-2">
                         <Label for="email">{{ t('common.labels.email') }}</Label>
                         <Input
@@ -38,7 +41,7 @@
                             required
                             :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
                         />
-                        <p v-if="errors.password" class="text-sm text-destructive">{{ errors.password[0] }}</p>
+                        <p v-if="errors.password" class="text-sm text-destructive font-medium">{{ errors.password[0] }}</p>
                     </div>
                     <div class="space-y-2">
                         <Label for="password_confirmation">{{ t('common.labels.confirmPassword') }}</Label>
@@ -50,33 +53,26 @@
                             required
                         />
                     </div>
-                </div>
 
-                <div v-if="message" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-500/20 text-red-800' : 'bg-green-500/20 text-green-800'">
-                    <p class="text-sm">{{ message }}</p>
-                </div>
+                    <div v-if="message" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                        {{ message }}
+                    </div>
 
-                <div>
-                    <button
-                        type="submit"
-                        :disabled="loading || !isValid"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    <Button type="submit" class="w-full" :disabled="loading || !isValid">
+                        <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                         <span v-if="loading">{{ t('common.messages.loading.processing') }}</span>
                         <span v-else>{{ t('features.auth.resetPassword.submit') }}</span>
-                    </button>
-                </div>
+                    </Button>
 
-                <div class="text-center">
-                    <router-link
-                        :to="{ name: 'login' }"
-                        class="text-sm text-indigo-600 hover:text-indigo-500"
-                    >
-                        {{ t('features.auth.forgotPassword.backToLogin') }}
-                    </router-link>
-                </div>
-            </form>
-        </div>
+                    <div class="text-center text-sm text-muted-foreground mt-4">
+                        <router-link :to="{ name: 'login' }" class="flex items-center justify-center font-medium text-primary hover:underline">
+                            <ArrowLeft class="mr-2 h-4 w-4" />
+                            {{ t('features.auth.forgotPassword.backToLogin') }}
+                        </router-link>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
@@ -87,6 +83,15 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { resetPasswordSchema } from '../../schemas/auth';
+import { Loader2, ArrowLeft } from 'lucide-vue-next';
+
+// Shadcn Components
+import Card from '../../components/ui/card.vue';
+import CardHeader from '../../components/ui/card-header.vue';
+import CardTitle from '../../components/ui/card-title.vue';
+import CardDescription from '../../components/ui/card-description.vue';
+import CardContent from '../../components/ui/card-content.vue';
+import Button from '../../components/ui/button.vue';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 

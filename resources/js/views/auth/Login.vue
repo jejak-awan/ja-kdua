@@ -1,15 +1,18 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-muted py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-foreground">
+    <div class="min-h-screen flex items-center justify-center bg-muted/40 px-4 py-12 sm:px-6 lg:px-8">
+        <Card class="w-full max-w-md">
+            <CardHeader class="space-y-1">
+                <CardTitle class="text-2xl font-bold text-center tracking-tight">
                     {{ t('features.auth.login.title') }}
-                </h2>
-            </div>
-            <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-                <div class="space-y-4">
+                </CardTitle>
+                <CardDescription class="text-center">
+                    {{ t('features.auth.login.subtitle') || 'Enter your email to sign in to your account' }}
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form class="space-y-4" @submit.prevent="handleLogin">
                     <div class="space-y-2">
-                        <Label for="email" class="sr-only">{{ t('features.auth.login.emailPlaceholder') }}</Label>
+                        <Label for="email">{{ t('common.labels.email') }}</Label>
                         <Input
                             id="email"
                             v-model="form.email"
@@ -20,12 +23,20 @@
                             :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
                             :placeholder="t('features.auth.login.emailPlaceholder')"
                         />
-                        <p v-if="errors.email" class="text-sm text-destructive">
+                        <p v-if="errors.email" class="text-sm text-destructive font-medium">
                             {{ Array.isArray(errors.email) ? errors.email[0] : errors.email }}
                         </p>
                     </div>
                     <div class="space-y-2">
-                        <Label for="password" class="sr-only">{{ t('features.auth.login.passwordPlaceholder') }}</Label>
+                        <div class="flex items-center justify-between">
+                            <Label for="password">{{ t('common.labels.password') }}</Label>
+                            <router-link
+                                :to="{ name: 'forgot-password' }"
+                                class="text-sm font-medium text-primary hover:underline"
+                            >
+                                {{ t('features.auth.login.forgotPassword') }}
+                            </router-link>
+                        </div>
                         <Input
                             id="password"
                             v-model="form.password"
@@ -36,85 +47,52 @@
                             :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
                             :placeholder="t('features.auth.login.passwordPlaceholder')"
                         />
-                        <p v-if="errors.password" class="text-sm text-destructive">
+                        <p v-if="errors.password" class="text-sm text-destructive font-medium">
                             {{ Array.isArray(errors.password) ? errors.password[0] : errors.password }}
                         </p>
                     </div>
-                </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input
-                            id="remember-me"
+                    <div class="flex items-center space-x-2">
+                        <Checkbox 
+                            id="remember-me" 
                             name="remember-me"
-                            type="checkbox"
-                            v-model="form.remember"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
-                        >
-                        <label for="remember-me" class="ml-2 block text-sm text-foreground">
+                            :checked="form.remember" 
+                            @update:checked="(v) => form.remember = v"
+                        />
+                        <label for="remember-me" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             {{ t('features.auth.login.rememberMe') }}
                         </label>
                     </div>
 
-                    <div class="text-sm">
-                        <router-link
-                            :to="{ name: 'forgot-password' }"
-                            class="font-medium text-indigo-600 hover:text-indigo-500"
-                        >
-                            {{ t('features.auth.login.forgotPassword') }}
-                        </router-link>
+                    <div v-if="timeoutMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        {{ timeoutMessage }}
                     </div>
-                </div>
 
-                <div v-if="timeoutMessage" class="rounded-md bg-amber-50 p-4 mb-4 border border-amber-200">
-                    <div class="flex">
-                        <svg class="h-5 w-5 text-amber-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-sm text-amber-800">{{ timeoutMessage }}</p>
+                    <div v-if="rateLimited" class="rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/20">
+                        <p class="font-semibold">{{ t('features.auth.messages.tooManyAttempts') }}</p>
+                        <p>{{ t('features.auth.messages.retryDetails', { time: formatRetryTime(retryAfter) }) }}</p>
                     </div>
-                </div>
 
-                <div v-if="rateLimited" class="rounded-md bg-red-500/20 p-4 mb-4 border border-red-200">
-                    <div class="flex">
-                        <svg class="h-5 w-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-red-800 mb-1">{{ t('features.auth.messages.tooManyAttempts') }}</p>
-                            <p class="text-sm text-red-700">
-                                {{ t('features.auth.messages.retryDetails', { time: formatRetryTime(retryAfter) }) }}
-                            </p>
-                        </div>
+                    <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
+                        {{ message }}
                     </div>
-                </div>
 
-                <div v-if="message && !errors.email && !errors.password && !rateLimited" class="rounded-md p-4" :class="messageType === 'error' ? 'bg-red-500/20 text-red-800' : 'bg-green-500/20 text-green-800'">
-                    <p class="text-sm">{{ message }}</p>
-                </div>
-
-                <div>
-                    <button
-                        type="submit"
-                        :disabled="loading || rateLimited || !isValid"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid">
+                        <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                         <span v-if="loading">{{ t('features.auth.login.submit') }}...</span>
                         <span v-else-if="rateLimited">{{ t('features.media.modals.bulk.wait') }}...</span>
                         <span v-else>{{ t('features.auth.login.submit') }}</span>
-                    </button>
-                </div>
+                    </Button>
 
-                <div class="text-center">
-                    <router-link
-                        :to="{ name: 'register' }"
-                        class="text-sm text-indigo-600 hover:text-indigo-500"
-                    >
-                        {{ t('features.auth.login.noAccount') }} {{ t('features.auth.login.register') }}
-                    </router-link>
-                </div>
-            </form>
-        </div>
+                    <div class="text-center text-sm text-muted-foreground mt-4">
+                        {{ t('features.auth.login.noAccount') }} 
+                        <router-link :to="{ name: 'register' }" class="font-medium text-primary hover:underline">
+                            {{ t('features.auth.login.register') }}
+                        </router-link>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
@@ -125,8 +103,18 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { loginSchema } from '../../schemas/auth';
+import { Loader2 } from 'lucide-vue-next';
+
+// Shadcn Components
+import Card from '../../components/ui/card.vue';
+import CardHeader from '../../components/ui/card-header.vue';
+import CardTitle from '../../components/ui/card-title.vue';
+import CardDescription from '../../components/ui/card-description.vue';
+import CardContent from '../../components/ui/card-content.vue';
+import Button from '../../components/ui/button.vue';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
+import Checkbox from '../../components/ui/checkbox.vue';
 
 const router = useRouter();
 const route = useRoute();

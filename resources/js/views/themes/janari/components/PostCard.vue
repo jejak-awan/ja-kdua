@@ -56,8 +56,8 @@ const excerpt = computed(() => {
   if (props.post.excerpt) {
     return props.post.excerpt
   }
-  if (props.post.content) {
-    return props.post.content.substring(0, 150) + '...'
+  if (props.post.body) {
+    return props.post.body.substring(0, 150) + '...'
   }
   return ''
 })

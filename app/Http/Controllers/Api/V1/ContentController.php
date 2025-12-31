@@ -31,18 +31,31 @@ class ContentController extends BaseApiController
         return $this->success($result['data'], 'Contents retrieved successfully');
     }
 
-    public function show($slug)
+    public function show(\Illuminate\Http\Request $request, $slug)
     {
         $content = Content::with(['author', 'category', 'tags', 'comments' => function ($q) {
             $q->where('status', 'approved')->latest();
         }])
             ->where('slug', $slug)
-            ->where('status', 'published')
-            ->where(function ($q) {
-                $q->whereNull('published_at')
-                    ->orWhere('published_at', '<=', Carbon::now());
-            })
             ->firstOrFail();
+
+        // Check if content is published
+        $isPublished = $content->status === 'published' && 
+                       ($content->published_at === null || $content->published_at <= Carbon::now());
+
+        // If not published, verify permissions
+        if (!$isPublished) {
+            $user = auth('sanctum')->user();
+            
+            if (!$user) {
+                abort(404);
+            }
+            
+            // Allow if user has manage/edit permission or is the author
+            if (!$user->can('manage content') && !$user->can('edit content') && $user->id !== $content->author_id) {
+                abort(404);
+            }
+        }
 
         $content->increment('views');
 
@@ -184,18 +197,21 @@ class ContentController extends BaseApiController
     {
         // Check if content is locked by another user
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
-            $lockedBy = $content->lockedBy;
+            // Allow Admins and Super Admins to bypass the lock
+            if (!$request->user()->hasRole('super-admin') && !$request->user()->hasRole('admin')) {
+                $lockedBy = $content->lockedBy;
 
-            return $this->error(
-                'Content is currently being edited by '.$lockedBy->name,
-                423,
-                [],
-                'CONTENT_LOCKED',
-                [
-                    'locked_by' => $lockedBy,
-                    'locked_at' => $content->locked_at,
-                ]
-            );
+                return $this->error(
+                    'Content is currently being edited by '.$lockedBy->name,
+                    423,
+                    [],
+                    'CONTENT_LOCKED',
+                    [
+                        'locked_by' => $lockedBy,
+                        'locked_at' => $content->locked_at,
+                    ]
+                );
+            }
         }
 
         try {
@@ -439,18 +455,21 @@ class ContentController extends BaseApiController
     {
         // ... existing lock code ...
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
-            $lockedBy = $content->lockedBy;
+            // Allow Admins/Super Admins to steal the lock
+            if (!$request->user()->hasRole('super-admin') && !$request->user()->hasRole('admin')) {
+                $lockedBy = $content->lockedBy;
 
-            return $this->error(
-                'Content is currently being edited by ' . $lockedBy->name,
-                423,
-                [],
-                'CONTENT_LOCKED',
-                [
-                    'locked_by' => $lockedBy,
-                    'locked_at' => $content->locked_at,
-                ]
-            );
+                return $this->error(
+                    'Content is currently being edited by ' . $lockedBy->name,
+                    423,
+                    [],
+                    'CONTENT_LOCKED',
+                    [
+                        'locked_by' => $lockedBy,
+                        'locked_at' => $content->locked_at,
+                    ]
+                );
+            }
         }
 
         $this->contentService->lock($content, $request->user()->id);

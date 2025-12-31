@@ -67,8 +67,8 @@ const props = defineProps({
     },
     variant: {
         type: String,
-        default: 'warning', // warning, danger, info, question
-        validator: (value) => ['warning', 'danger', 'info', 'question'].includes(value)
+        default: 'warning',
+        validator: (value) => ['warning', 'danger', 'destructive', 'info', 'question', 'success'].includes(value)
     },
     confirmText: {
         type: String,
@@ -82,22 +82,30 @@ const props = defineProps({
 
 const emit = defineEmits(['confirm', 'cancel', 'update:isOpen']);
 
+import { CheckCircle2 } from 'lucide-vue-next';
+
 const variantIcons = {
     warning: AlertTriangle,
     danger: Trash2,
+    destructive: Trash2,
     info: Info,
-    question: HelpCircle
+    question: HelpCircle,
+    success: CheckCircle2
 };
 
 const variantColors = {
-    warning: 'text-yellow-500',
-    danger: 'text-red-500',
+    warning: 'text-amber-500',
+    danger: 'text-destructive',
+    destructive: 'text-destructive',
     info: 'text-blue-500',
-    question: 'text-gray-500'
+    question: 'text-primary',
+    success: 'text-emerald-500'
 };
 
 const confirmVariant = computed(() => {
-    return props.variant === 'danger' ? 'destructive' : 'default';
+    if (props.variant === 'danger' || props.variant === 'destructive') return 'destructive';
+    if (props.variant === 'success') return 'default'; // Or handled via class if dedicated success variant doesn't exist
+    return 'default';
 });
 
 const handleConfirm = () => {

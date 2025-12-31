@@ -63,7 +63,7 @@ const router = useRouter()
 
 const excerpt = computed(() => {
   if (props.post.excerpt) return props.post.excerpt
-  if (props.post.content) return props.post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...'
+  if (props.post.body) return props.post.body.replace(/<[^>]*>/g, '').substring(0, 150) + '...'
   return ''
 })
 

@@ -455,8 +455,18 @@ const toggleFeatured = async (content) => {
     }
 };
 
+const { confirm } = useConfirm();
+
 const handleApprove = async (content) => {
-    if (!confirm(`Are you sure you want to approve and publish "${content.title}"?`)) return;
+    const confirmed = await confirm({
+        title: t('features.content.actions.approve'),
+        message: t('common.messages.confirm.approve', { item: content.title }),
+        confirmText: t('features.content.actions.approve'),
+        variant: 'success'
+    });
+    
+    if (!confirmed) return;
+    
     try {
         await api.put(`/admin/cms/contents/${content.id}/approve`);
         await fetchContents();
@@ -469,7 +479,15 @@ const handleApprove = async (content) => {
 };
 
 const handleReject = async (content) => {
-    if (!confirm(`Are you sure you want to reject "${content.title}" and move it back to drafts?`)) return;
+    const confirmed = await confirm({
+        title: t('features.content.actions.reject'),
+        message: t('common.messages.confirm.reject', { item: content.title }),
+        confirmText: t('features.content.actions.reject'),
+        variant: 'destructive'
+    });
+
+    if (!confirmed) return;
+
     try {
         await api.put(`/admin/cms/contents/${content.id}/reject`);
         await fetchContents();
@@ -482,9 +500,13 @@ const handleReject = async (content) => {
 };
 
 const handleDuplicate = async (content) => {
-    if (!confirm(`Are you sure you want to duplicate "${content.title}"?`)) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('features.content.actions.duplicate'),
+        message: t('common.messages.confirm.duplicate', { item: content.title }),
+        confirmText: t('features.content.actions.duplicate'),
+    });
+
+    if (!confirmed) return;
 
     try {
         const response = await api.post(`/admin/cms/contents/${content.id}/duplicate`);
@@ -526,16 +548,28 @@ const handleBulkAction = async () => {
     const action = bulkAction.value;
     const count = selectedContents.value.length;
     
+    let confirmConfig = {
+        title: t('features.content.list.bulkActions'),
+        message: t('common.messages.confirm.bulkAction', { action: action, count: count }),
+        confirmText: t('common.actions.confirm'),
+    };
+    
     if (action === 'delete') {
-        if (!confirm(`Are you sure you want to delete ${count} content(s)?`)) {
-            bulkAction.value = '';
-            return;
-        }
-    } else {
-        if (!confirm(`Are you sure you want to ${action} ${count} content(s)?`)) {
-            bulkAction.value = '';
-            return;
-        }
+        confirmConfig.variant = 'destructive';
+        confirmConfig.confirmText = t('common.actions.delete');
+    } else if (action === 'approve') {
+        confirmConfig.variant = 'success';
+        confirmConfig.confirmText = t('features.content.actions.approve');
+    } else if (action === 'reject') {
+        confirmConfig.variant = 'destructive';
+        confirmConfig.confirmText = t('features.content.actions.reject');
+    }
+
+    const confirmed = await confirm(confirmConfig);
+
+    if (!confirmed) {
+        bulkAction.value = '';
+        return;
     }
 
     try {
@@ -554,16 +588,21 @@ const handleBulkAction = async () => {
 };
 
 const handleDelete = async (content) => {
-    if (!confirm(`Are you sure you want to delete "${content.title}"?`)) {
-        return;
-    }
+    const confirmed = await confirm({
+        title: t('common.actions.delete'),
+        message: t('common.messages.confirm.delete', { item: content.title }),
+        confirmText: t('common.actions.delete'),
+        variant: 'destructive'
+    });
+
+    if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/contents/${content.id}`);
         await fetchContents();
     } catch (error) {
         console.error('Failed to delete content:', error);
-        alert('Failed to delete content');
+        toast.error(error);
     }
 };
 

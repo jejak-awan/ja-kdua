@@ -39,7 +39,11 @@
         "deleteMultiple": "Apakah Anda yakin ingin menghapus {count} item?",
         "bulkDelete": "Apakah Anda yakin ingin menghapus {count} item terpilih?",
         "unsaved": "Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?",
-        "action": "Apakah Anda yakin ingin {action} {item} ini?"
+        "action": "Apakah Anda yakin ingin {action} {item} ini?",
+        "approve": "Apakah Anda yakin ingin menyetujui {item} ini?",
+        "reject": "Apakah Anda yakin ingin menolak {item} ini?",
+        "duplicate": "Apakah Anda yakin ingin menduplikasi {item} ini?",
+        "bulkAction": "Apakah Anda yakin ingin {action} {count} item terpilih?"
     },
     "loading": {
         "default": "Memuat...",

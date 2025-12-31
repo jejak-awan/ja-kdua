@@ -39,7 +39,11 @@
         "deleteMultiple": "Are you sure you want to delete {count} items?",
         "bulkDelete": "Are you sure you want to delete {count} selected items?",
         "unsaved": "You have unsaved changes. Are you sure you want to leave?",
-        "action": "Are you sure you want to {action} this {item}?"
+        "action": "Are you sure you want to {action} this {item}?",
+        "approve": "Are you sure you want to approve this {item}?",
+        "reject": "Are you sure you want to reject this {item}?",
+        "duplicate": "Are you sure you want to duplicate this {item}?",
+        "bulkAction": "Are you sure you want to {action} {count} selected items?"
     },
     "loading": {
         "default": "Loading...",
