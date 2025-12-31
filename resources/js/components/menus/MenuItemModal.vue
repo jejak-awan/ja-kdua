@@ -7,7 +7,7 @@
                 </DialogTitle>
             </DialogHeader>
 
-            <form @submit.prevent="handleSubmit" class="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+            <form @submit.prevent="handleSubmit" class="space-y-6 py-4 px-1 max-h-[70vh] overflow-y-auto">
                 <div class="space-y-2">
                     <Label>{{ t('features.menus.form.label') }} <span class="text-red-500">*</span></Label>
                     <Input v-model="form.label" type="text" required :class="{ 'border-destructive focus-visible:ring-destructive': errors.label }" />
@@ -36,37 +36,55 @@
                 </div>
 
                 <div v-else-if="form.type === 'page'" class="space-y-2">
-                    <Label>{{ t('features.menus.form.page') }}</Label>
+                    <Label>{{ t('features.menus.form.page') }} <span class="text-red-500">*</span></Label>
                     <Select v-model="form.target_id">
                         <SelectTrigger>
                             <SelectValue :placeholder="t('features.menus.form.placeholders.selectPage')" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectPage') }}</SelectItem>
+                        <SelectContent class="max-h-[200px]">
+                            <SelectItem 
+                                v-for="page in pages" 
+                                :key="page.id" 
+                                :value="page.id"
+                            >
+                                {{ page.title }}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 <div v-else-if="form.type === 'category'" class="space-y-2">
-                    <Label>{{ t('features.menus.form.category') }}</Label>
+                    <Label>{{ t('features.menus.form.category') }} <span class="text-red-500">*</span></Label>
                     <Select v-model="form.target_id">
                         <SelectTrigger>
                             <SelectValue :placeholder="t('features.menus.form.placeholders.selectCategory')" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectCategory') }}</SelectItem>
+                        <SelectContent class="max-h-[200px]">
+                            <SelectItem 
+                                v-for="cat in categories" 
+                                :key="cat.id" 
+                                :value="cat.id"
+                            >
+                                {{ cat.name }}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 <div v-else-if="form.type === 'content'" class="space-y-2">
-                    <Label>{{ t('features.menus.form.content') }}</Label>
+                    <Label>{{ t('features.menus.form.content') }} <span class="text-red-500">*</span></Label>
                     <Select v-model="form.target_id">
                         <SelectTrigger>
                             <SelectValue :placeholder="t('features.menus.form.placeholders.selectContent')" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem :value="null">{{ t('features.menus.form.placeholders.selectContent') }}</SelectItem>
+                        <SelectContent class="max-h-[200px]">
+                            <SelectItem 
+                                v-for="content in contents" 
+                                :key="content.id" 
+                                :value="content.id"
+                            >
+                                {{ content.title }}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -98,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Dialog from '../ui/dialog.vue';
@@ -129,6 +147,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
+import { parseResponse, ensureArray, parseSingleResponse } from '../../utils/responseParser';
+
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuItemSchema);
 const saving = ref(false);
@@ -137,10 +157,41 @@ const form = ref({
     type: 'link',
     url: '',
     target_id: null,
+    target_type: null,
     css_classes: '',
     open_in_new_tab: false,
     parent_id: null,
 });
+
+const pages = ref([]);
+const categories = ref([]);
+const contents = ref([]);
+const loadingOptions = ref(false);
+
+const fetchOptions = async () => {
+    loadingOptions.value = true;
+    try {
+        const [pagesRes, catsRes, contentsRes] = await Promise.all([
+            api.get('/admin/cms/contents?type=page&per_page=100'),
+            api.get('/admin/cms/categories?per_page=100'),
+            api.get('/admin/cms/contents?type=post&per_page=50')
+        ]);
+
+        const parsedPages = parseResponse(pagesRes);
+        pages.value = ensureArray(parsedPages.data || parsedPages);
+
+        const parsedCats = parseResponse(catsRes);
+        categories.value = ensureArray(parsedCats.data || parsedCats);
+
+        const parsedContents = parseResponse(contentsRes);
+        contents.value = ensureArray(parsedContents.data || parsedContents);
+    } catch (error) {
+        console.error('Failed to fetch menu options:', error);
+        toast.error.default(t('features.menus.messages.fetchOptionsFailed'));
+    } finally {
+        loadingOptions.value = false;
+    }
+};
 
 const initialForm = ref(null);
 
@@ -155,9 +206,10 @@ const isValid = computed(() => {
     return commonValid;
 });
 
-const handleTypeChange = () => {
+const handleTypeChange = (newType) => {
     form.value.url = '';
     form.value.target_id = null;
+    form.value.target_type = null;
 };
 
 const handleSubmit = async () => {
@@ -168,6 +220,15 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
+        // Set target_type based on type
+        if (form.value.type === 'page' || form.value.type === 'content') {
+            form.value.target_type = 'App\\Models\\Content';
+        } else if (form.value.type === 'category') {
+            form.value.target_type = 'App\\Models\\Category';
+        } else {
+            form.value.target_type = null;
+        }
+
         const payload = { ...form.value, menu_id: props.menuId };
         if (props.item) {
             await api.put(`/admin/cms/menu-items/${props.item.id}`, payload);
@@ -191,8 +252,14 @@ const handleSubmit = async () => {
 onMounted(() => {
     if (props.item) {
         form.value = { ...props.item };
+        // Ensure values are not null references if they should be null
+        if (form.value.target_id === undefined) form.value.target_id = null;
+        
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
+    
+    // Fetch options for dropdowns
+    fetchOptions();
 });
 </script>
 

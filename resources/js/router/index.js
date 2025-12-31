@@ -332,11 +332,7 @@ const routes = [
                 component: () => import('../views/admin/menus/Index.vue'),
                 meta: { permission: 'manage menus' },
             },
-            {
-                path: 'menus/:id/edit',
-                name: 'menus.edit',
-                component: () => import('../views/admin/menus/Edit.vue'),
-            },
+
             {
                 path: 'widgets',
                 name: 'widgets',

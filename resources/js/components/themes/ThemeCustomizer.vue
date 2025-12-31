@@ -238,6 +238,22 @@ const expandedSections = ref(['General']); // Default open
 
 const initialSettings = ref(null);
 const initialCss = ref('');
+const availableMenus = ref([]);
+
+const fetchMenus = async () => {
+    try {
+        const response = await api.get('/admin/cms/menus');
+        const data = response.data.data || response.data;
+        availableMenus.value = (Array.isArray(data) ? data : []).map(m => ({
+            value: m.id,
+            label: m.name
+        }));
+        // Add empty option
+        availableMenus.value.unshift({ value: '', label: 'Select a Menu...' });
+    } catch (error) {
+        console.error('Failed to fetch menus:', error);
+    }
+};
 
 const isDirty = computed(() => {
     const settingsChanged = JSON.stringify(formValues.value) !== JSON.stringify(initialSettings.value);
@@ -264,11 +280,10 @@ const fetchThemeDetails = async () => {
 
 // Organize settings into sections by category
 const settingsSections = computed(() => {
-    if (!fullTheme.value.manifest?.settings_schema) return [];
-
-    const schema = fullTheme.value.manifest.settings_schema;
+    const schema = fullTheme.value.manifest?.settings_schema || {};
     const sectionsMap = {};
 
+    // 1. Process regular settings
     Object.keys(schema).forEach(key => {
         const setting = schema[key];
         const category = setting.category || 'General';
@@ -283,6 +298,26 @@ const settingsSections = computed(() => {
         
         sectionsMap[category].settings.push({ key, ...setting });
     });
+
+    // 2. Inject Menu Locations if available
+    if (fullTheme.value.manifest?.menus) {
+        const menuSettings = Object.entries(fullTheme.value.manifest.menus).map(([locKey, locLabel]) => ({
+            key: `menu_location_${locKey}`,
+            label: `${locLabel}`,
+            type: 'select',
+            category: 'Menus',
+            options: availableMenus.value,
+            description: `Assign a menu to the ${locLabel} position`
+        }));
+
+        if (menuSettings.length > 0) {
+            sectionsMap['Menus'] = {
+                id: 'Menus',
+                label: 'Menus',
+                settings: menuSettings
+            };
+        }
+    }
 
     const categoryOrder = ['General', 'Colors', 'Typography', 'Layout', 'Hero Section', 'Footer', 'Social Media'];
     return Object.values(sectionsMap).sort((a, b) => {
@@ -384,6 +419,7 @@ watch(() => props.theme, (newTheme) => {
 
 onMounted(() => {
     fetchThemeDetails();
+    fetchMenus();
 });
 </script>
 

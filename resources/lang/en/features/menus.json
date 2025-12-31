@@ -1,5 +1,6 @@
 {
     "title": "Menus",
+    "subtitle": "Manage your menus and their locations.",
     "actions": {
         "create": "New Menu",
         "createItem": "Add Item",
@@ -11,7 +12,12 @@
         "createAction": "Create",
         "creating": "Creating...",
         "update": "Update",
-        "saving": "Saving..."
+        "saving": "Saving...",
+        "addToMenu": "Add to Menu",
+        "deleteItem": "Delete Item",
+        "or": "or",
+        "selectMenu": "Select a menu to edit",
+        "createFirst": "Create your first menu"
     },
     "headers": {
         "name": "Name",
@@ -29,7 +35,12 @@
         "deleteItemFailed": "Failed to delete menu item",
         "saveFailed": "Failed to save menu",
         "createFailed": "Failed to create menu",
-        "saveItemFailed": "Failed to save menu item"
+        "saveItemFailed": "Failed to save menu item",
+        "dragHelp": "Drag items to reorder or nest",
+        "emptyDescription": "Create your first menu to start organizing your site navigation.",
+        "enterUrlLabel": "Please enter label and URL",
+        "customLinkAdded": "Custom link added",
+        "itemDeleted": "Menu item deleted"
     },
     "form": {
         "name": "Name",
@@ -42,6 +53,10 @@
         "content": "Content",
         "cssClasses": "CSS Classes",
         "openInNewTab": "Open in new tab",
+        "selectMenu": "Select Menu",
+        "parentItem": "Parent Item",
+        "rootItem": "Root Item",
+        "labelPlaceholder": "Label for menu item",
         "settings": "Menu Settings",
         "items": "Menu Items",
         "createTitle": "Create Menu",
@@ -53,12 +68,25 @@
             "location": "header, footer, etc.",
             "selectPage": "Select page...",
             "selectCategory": "Select category...",
-            "selectContent": "Select content..."
+            "selectContent": "Select content...",
+            "none": "- None -",
+            "cssClasses": "e.g. mb-4"
         },
+        "newLink": "New Link",
+        "structure": "Menu Structure",
+        "addItems": "Add Menu Items",
+        "customLink": "Custom Link",
+        "linkText": "Link Text",
+        "noPages": "No pages found",
+        "noPosts": "No posts found",
+        "noCategories": "No categories found",
+        "dragStart": "Drag items from the left sidebar to start building your menu",
+        "dragHelp": "Drag items to reorder or nest",
         "types": {
             "link": "Link",
-            "page": "Page",
-            "category": "Category",
+            "page": "Pages",
+            "post": "Posts",
+            "category": "Categories",
             "content": "Content"
         }
     }

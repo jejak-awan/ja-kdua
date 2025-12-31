@@ -1,5 +1,6 @@
 {
     "title": "Menu",
+    "subtitle": "Kelola menu dan lokasinya.",
     "actions": {
         "create": "Menu Baru",
         "createItem": "Tambah Item",
@@ -11,7 +12,12 @@
         "createAction": "Buat",
         "creating": "Membuat...",
         "update": "Perbarui",
-        "saving": "Menyimpan..."
+        "saving": "Menyimpan...",
+        "addToMenu": "Tambahkan ke Menu",
+        "deleteItem": "Hapus Item",
+        "or": "atau",
+        "selectMenu": "Pilih menu untuk diedit",
+        "createFirst": "Buat menu pertama Anda"
     },
     "headers": {
         "name": "Nama",
@@ -29,7 +35,12 @@
         "deleteItemFailed": "Gagal menghapus item menu",
         "saveFailed": "Gagal menyimpan menu",
         "createFailed": "Gagal membuat menu",
-        "saveItemFailed": "Gagal menyimpan item menu"
+        "saveItemFailed": "Gagal menyimpan item menu",
+        "dragHelp": "Tarik item untuk mengatur ulang atau membuat sub-menu",
+        "emptyDescription": "Buat menu pertama Anda untuk mulai mengatur navigasi situs.",
+        "enterUrlLabel": "Harap masukkan label dan URL",
+        "customLinkAdded": "Tautan kustom ditambahkan",
+        "itemDeleted": "Item menu dihapus"
     },
     "form": {
         "name": "Nama",
@@ -42,6 +53,10 @@
         "content": "Konten",
         "cssClasses": "Kelas CSS",
         "openInNewTab": "Buka di tab baru",
+        "selectMenu": "Pilih Menu",
+        "parentItem": "Item Induk",
+        "rootItem": "Item Akar (Utama)",
+        "labelPlaceholder": "Label untuk item menu",
         "settings": "Pengaturan Menu",
         "items": "Item Menu",
         "createTitle": "Buat Menu",
@@ -53,11 +68,24 @@
             "location": "header, footer, dll.",
             "selectPage": "Pilih halaman...",
             "selectCategory": "Pilih kategori...",
-            "selectContent": "Pilih konten..."
+            "selectContent": "Pilih konten...",
+            "none": "- Tidak ada -",
+            "cssClasses": "misal mb-4"
         },
+        "newLink": "Tautan Baru",
+        "structure": "Struktur Menu",
+        "addItems": "Tambah Item Menu",
+        "customLink": "Tautan Kustom",
+        "linkText": "Teks Tautan",
+        "noPages": "Tidak ada halaman ditemukan",
+        "noPosts": "Tidak ada postingan ditemukan",
+        "noCategories": "Tidak ada kategori ditemukan",
+        "dragStart": "Tarik item dari sidebar kiri untuk mulai membuat menu Anda",
+        "dragHelp": "Tarik item untuk mengatur ulang atau membuat sub-menu",
         "types": {
             "link": "Tautan",
             "page": "Halaman",
+            "post": "Postingan",
             "category": "Kategori",
             "content": "Konten"
         }

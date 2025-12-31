@@ -33,7 +33,7 @@ class ContentController extends BaseApiController
 
     public function show(\Illuminate\Http\Request $request, $slug)
     {
-        $content = Content::with(['author', 'category', 'tags', 'comments' => function ($q) {
+        $content = Content::with(['author', 'category', 'tags', 'menuItems.menu', 'comments' => function ($q) {
             $q->where('status', 'approved')->latest();
         }])
             ->where('slug', $slug)
@@ -99,6 +99,10 @@ class ContentController extends BaseApiController
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
         }
 
         if ($request->has('search')) {
@@ -275,7 +279,40 @@ class ContentController extends BaseApiController
             $revisionNote
         );
 
-        return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField']), 'Content updated successfully');
+        // Handle Menu Item Logic
+        if ($request->has('menu_item')) {
+            $menuData = $request->input('menu_item');
+            if (!empty($menuData['add_to_menu']) && !empty($menuData['menu_id'])) {
+                // Determine title: use provided label or content title
+                $menuTitle = !empty($menuData['title']) ? $menuData['title'] : $content->title;
+                
+                // Check if already exists in this menu
+                $menuItem = \App\Models\MenuItem::where('menu_id', $menuData['menu_id'])
+                    ->where('target_id', $content->id)
+                    ->where('target_type', get_class($content))
+                    ->first();
+
+                if ($menuItem) {
+                    $menuItem->update([
+                        'title' => $menuTitle,
+                        'parent_id' => $menuData['parent_id'] ?? null,
+                    ]);
+                } else {
+                    \App\Models\MenuItem::create([
+                        'menu_id' => $menuData['menu_id'],
+                        'title' => $menuTitle,
+                        'target_id' => $content->id,
+                        'target_type' => get_class($content),
+                        'type' => $content->type === 'post' ? 'post' : 'page', // Map content type to menu item type
+                        'parent_id' => $menuData['parent_id'] ?? null,
+                        'url' => null, // Dynamic
+                        'order' => 99, // Append to end
+                    ]);
+                }
+            }
+        }
+
+        return $this->success($content->load(['author', 'category', 'tags', 'customFields.customField', 'menuItems.menu']), 'Content updated successfully');
     }
 
     public function toggleFeatured(Request $request, Content $content)

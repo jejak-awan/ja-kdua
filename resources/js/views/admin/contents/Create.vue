@@ -64,6 +64,7 @@
                     v-model:selected-tags="selectedTags"
                     :categories="categories"
                     :tags="tags"
+                    :menus="menus"
                 />
             </div>
         </div>
@@ -102,6 +103,7 @@ const isSidebarOpen = ref(true);
 const loading = ref(false);
 const categories = ref([]);
 const tags = ref([]);
+const menus = ref([]);
 const selectedTags = ref([]);
 const contentId = ref(null);
 
@@ -118,7 +120,14 @@ const form = ref({
     meta_title: '',
     meta_description: '',
     meta_keywords: '',
+    meta_keywords: '',
     og_image: null,
+    menu_item: {
+        add_to_menu: false,
+        menu_id: '',
+        parent_id: null,
+        title: ''
+    }
 });
 
 // Auto-generation logic
@@ -201,6 +210,16 @@ const fetchTags = async () => {
     }
 };
 
+const fetchMenus = async () => {
+    try {
+        const response = await api.get('/admin/cms/menus');
+        const { data } = parseResponse(response);
+        menus.value = ensureArray(data);
+    } catch (error) {
+        console.error('Failed to fetch menus:', error);
+    }
+};
+
 const handleSubmit = async () => {
     if (!validateWithZod(form.value)) return;
 
@@ -255,5 +274,6 @@ const handleSubmit = async () => {
 onMounted(() => {
     fetchCategories();
     fetchTags();
+    fetchMenus();
 });
 </script>

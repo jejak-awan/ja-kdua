@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Content extends Model
@@ -116,5 +117,10 @@ class Content extends Model
     {
         // Match visits by URL slug - using where clause
         return AnalyticsVisit::where('url', 'like', '%'.$this->slug.'%');
+    }
+
+    public function menuItems(): MorphMany
+    {
+        return $this->morphMany(MenuItem::class, 'target');
     }
 }

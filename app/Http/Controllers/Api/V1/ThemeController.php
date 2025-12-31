@@ -246,6 +246,24 @@ class ThemeController extends BaseApiController
     // =====================================================
 
     /**
+     * Get active theme menu locations
+     */
+    public function locations(Request $request)
+    {
+        $type = $request->get('type', 'frontend');
+        $theme = $this->themeService->getActiveTheme($type);
+
+        if (!$theme) {
+            return $this->success([], 'No active theme found');
+        }
+
+        $locations = $this->themeService->getMenuLocations($theme);
+
+        return $this->success($locations, 'Menu locations retrieved successfully');
+    }
+
+
+    /**
      * Get Vue components manifest
      */
     public function getComponents(Theme $theme)

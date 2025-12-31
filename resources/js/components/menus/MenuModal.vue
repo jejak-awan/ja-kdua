@@ -21,11 +21,20 @@
                     <Label>
                         {{ t('features.menus.form.location') }}
                     </Label>
-                    <Input
-                        v-model="form.location"
-                        type="text"
-                        :placeholder="t('features.menus.form.placeholders.location')"
-                    />
+                    <Select v-model="form.location">
+                        <SelectTrigger>
+                            <SelectValue :placeholder="t('features.menus.form.placeholders.location')" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem 
+                                v-for="loc in locationOptions" 
+                                :key="loc.value" 
+                                :value="loc.value"
+                            >
+                                {{ loc.label }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </form>
 
@@ -49,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
@@ -61,6 +70,11 @@ import DialogFooter from '../ui/dialog-footer.vue';
 import Button from '../ui/button.vue';
 import Input from '../ui/input.vue';
 import Label from '../ui/label.vue';
+import Select from '../ui/select.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
 import { Loader2 } from 'lucide-vue-next';
 import { useToast } from '../../composables/useToast';
 import { useFormValidation } from '../../composables/useFormValidation';
@@ -77,6 +91,32 @@ const saving = ref(false);
 const form = ref({
     name: '',
     location: '',
+});
+
+const locationOptions = ref([]);
+const loadingLocations = ref(false);
+
+const fetchLocations = async () => {
+    loadingLocations.value = true;
+    try {
+        const response = await api.get('/admin/cms/themes/active/locations');
+        const data = response.data?.data || response.data || {};
+        
+        // Transform { key: label } to [{ value: key, label: label }]
+        locationOptions.value = Object.entries(data).map(([key, label]) => ({
+            value: key,
+            label: label
+        }));
+    } catch (error) {
+        console.error('Failed to fetch menu locations:', error);
+        toast.error.default('Failed to load menu locations');
+    } finally {
+        loadingLocations.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchLocations();
 });
 
 const isValid = computed(() => {

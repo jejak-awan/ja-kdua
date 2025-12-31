@@ -31,6 +31,27 @@ class ThemeService
     }
 
     /**
+     * Get validated menu locations from theme manifest
+     */
+    public function getMenuLocations(Theme $theme): array
+    {
+        $manifest = $theme->getManifest();
+        if ($manifest && isset($manifest['menus'])) {
+            return $manifest['menus'];
+        }
+        
+        // Check parent theme if exists
+        if ($theme->hasParent()) {
+            $parent = $theme->getParent();
+            if ($parent) {
+                return $this->getMenuLocations($parent);
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Activate a theme
      */
     public function activateTheme(Theme $theme): bool

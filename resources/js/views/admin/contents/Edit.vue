@@ -110,6 +110,7 @@
                     v-model:selected-tags="selectedTags"
                     :categories="categories"
                     :tags="tags"
+                    :menus="menus"
                 >
                     <!-- Mobile Actions Slot -->
                      <template #actions>
@@ -175,6 +176,7 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(co
 const loading = ref(false);
 const categories = ref([]);
 const tags = ref([]);
+const menus = ref([]);
 const selectedTags = ref([]);
 const lockStatus = ref(null);
 const lockInterval = ref(null);
@@ -194,6 +196,12 @@ const form = ref({
     meta_description: '',
     meta_keywords: '',
     og_image: null,
+    menu_item: {
+        add_to_menu: false,
+        menu_id: '',
+        parent_id: null,
+        title: ''
+    }
 });
 
 const isDirty = computed(() => {
@@ -275,7 +283,24 @@ const fetchContent = async () => {
             meta_description: content.meta_description || '',
             meta_keywords: content.meta_keywords || '',
             og_image: content.og_image || null,
+            menu_item: {
+                add_to_menu: false,
+                menu_id: '',
+                parent_id: null,
+                title: ''
+            }
         };
+
+        // Handle menu items
+        if (content.menu_items && content.menu_items.length > 0) {
+            const menuItem = content.menu_items[0];
+            form.value.menu_item = {
+                add_to_menu: true,
+                menu_id: menuItem.menu_id,
+                parent_id: menuItem.parent_id,
+                title: menuItem.title
+            };
+        }
 
         // Set selected tags
         if (content.tags && Array.isArray(content.tags)) {
@@ -399,6 +424,16 @@ const fetchTags = async () => {
     }
 };
 
+const fetchMenus = async () => {
+    try {
+        const response = await api.get('/admin/cms/menus');
+        const data = response.data?.data || response.data || [];
+        menus.value = Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Failed to fetch menus:', error);
+    }
+};
+
 const handleSubmit = async () => {
     if (!validateWithZod(form.value)) return;
 
@@ -472,6 +507,7 @@ onMounted(() => {
     fetchContent();
     fetchCategories();
     fetchTags();
+    fetchMenus();
 });
 
 onUnmounted(() => {
