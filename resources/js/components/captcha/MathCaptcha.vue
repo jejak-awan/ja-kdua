@@ -45,9 +45,9 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CheckCircle, RefreshCw } from 'lucide-vue-next'
-import api from '../../../services/api'
-import Button from '../../ui/button.vue'
-import Input from '../../ui/input.vue'
+import api from '../../services/api'
+import Button from '../ui/button.vue'
+import Input from '../ui/input.vue'
 
 const { t } = useI18n()
 

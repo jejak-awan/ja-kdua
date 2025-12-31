@@ -50,7 +50,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { GripVertical, CheckCircle } from 'lucide-vue-next'
-import api from '../../../services/api'
+import api from '../../services/api'
 
 const { t } = useI18n()
 

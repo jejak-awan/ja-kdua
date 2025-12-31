@@ -80,6 +80,20 @@ class AuthController extends BaseApiController
             return $this->validationError($e->errors());
         }
 
+        // Verify Captcha
+        if (\App\Models\Setting::get('enable_captcha', false) && \App\Models\Setting::get('captcha_on_login', true)) {
+            $captchaService = new \App\Services\CaptchaService();
+            
+            $request->validate([
+                'captcha_token' => 'required|string',
+                'captcha_answer' => 'required|string',
+            ]);
+            
+            if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+                return $this->validationError(['captcha' => ['Invalid captcha verification. Please try again.']]);
+            }
+        }
+
         $securityService = new SecurityService;
         // Use IpHelper to get real client IP (handles proxies/CDN properly)
         $ipAddress = \App\Helpers\IpHelper::getClientIp($request);
@@ -321,6 +335,22 @@ class AuthController extends BaseApiController
         }
 
         try {
+            // Verify Captcha
+            if (\App\Models\Setting::get('enable_captcha', false) && \App\Models\Setting::get('captcha_on_register', true)) {
+                $captchaService = new \App\Services\CaptchaService();
+                
+                $request->validate([
+                    'captcha_token' => 'required|string',
+                    'captcha_answer' => 'required|string',
+                ]);
+                
+                if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'captcha' => ['Invalid captcha verification. Please try again.']
+                    ]);
+                }
+            }
+
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',

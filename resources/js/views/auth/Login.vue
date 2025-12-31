@@ -64,6 +64,13 @@
                         </label>
                     </div>
 
+                    <!-- Captcha -->
+                    <CaptchaWrapper 
+                        ref="captchaRef"
+                        action="login"
+                        @verified="onCaptchaVerified"
+                    />
+
                     <div v-if="timeoutMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
                         {{ timeoutMessage }}
                     </div>
@@ -77,7 +84,7 @@
                         {{ message }}
                     </div>
 
-                    <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid">
+                    <Button type="submit" class="w-full" :disabled="loading || rateLimited || !isValid || (captchaEnabled && !captchaVerified)">
                         <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                         <span v-if="loading">{{ t('features.auth.login.submit') }}...</span>
                         <span v-else-if="rateLimited">{{ t('features.media.modals.bulk.wait') }}...</span>
@@ -102,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
@@ -121,6 +128,7 @@ import Button from '../../components/ui/button.vue';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
 import Checkbox from '../../components/ui/checkbox.vue';
+import CaptchaWrapper from '../../components/captcha/CaptchaWrapper.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -128,11 +136,23 @@ const authStore = useAuthStore();
 const { t } = useI18n();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(loginSchema);
 
+const captchaRef = ref(null);
+const captchaVerified = ref(false);
+const captchaToken = ref('');
+const captchaAnswer = ref('');
+const captchaEnabled = computed(() => captchaRef.value?.enabled || false);
+
 const form = reactive({
     email: '',
     password: '',
     remember: false,
 });
+
+const onCaptchaVerified = (payload) => {
+    captchaToken.value = payload.token;
+    captchaAnswer.value = payload.answer;
+    captchaVerified.value = true;
+};
 
 const isValid = computed(() => {
     return !!form.email && !!form.password;
@@ -221,6 +241,12 @@ const handleLogin = async () => {
     if (!validateWithZod(form)) {
         return;
     }
+    
+    if (captchaEnabled.value && !captchaVerified.value) {
+        message.value = t('features.auth.captcha.required');
+        messageType.value = 'error';
+        return;
+    }
 
     loading.value = true;
     clearErrors();
@@ -234,10 +260,18 @@ const handleLogin = async () => {
     }
 
     try {
-        const result = await authStore.login({
+        const payload = {
             email: form.email.trim(),
             password: form.password,
-        });
+            remember: form.remember,
+        };
+        
+        if (captchaEnabled.value) {
+            payload.captcha_token = captchaToken.value;
+            payload.captcha_answer = captchaAnswer.value;
+        }
+        
+        const result = await authStore.login(payload);
 
         if (result.success) {
             message.value = t('features.auth.messages.success');
@@ -271,6 +305,15 @@ const handleLogin = async () => {
                     setErrors(result.errors);
                     // Don't show general message if we have field-specific errors
                     message.value = '';
+                    
+                    // Reset captcha on failure
+                    if (captchaRef.value?.method === 'slider' || captchaRef.value?.method === 'math' || captchaRef.value?.method === 'image') {
+                        captchaVerified.value = false;
+                        captchaToken.value = '';
+                        captchaAnswer.value = '';
+                        // Ideally trigger refresh on component
+                        // captchaRef.value.refresh() // if exposed
+                    }
                 } else {
                     // General error message (no field-specific errors)
                     message.value = result.message || t('features.auth.messages.failed');

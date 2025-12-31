@@ -64,11 +64,18 @@
                         <p v-if="errors.password_confirmation" class="text-sm text-destructive font-medium">{{ errors.password_confirmation[0] }}</p>
                     </div>
 
+                    <!-- Captcha -->
+                    <CaptchaWrapper 
+                        ref="captchaRef"
+                        action="register"
+                        @verified="onCaptchaVerified"
+                    />
+
                     <div v-if="message" class="rounded-md p-3 text-sm border" :class="messageType === 'error' ? 'bg-destructive/15 text-destructive border-destructive/20' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'">
                         {{ message }}
                     </div>
 
-                    <Button type="submit" class="w-full" :disabled="loading || !isValid">
+                    <Button type="submit" class="w-full" :disabled="loading || !isValid || (captchaEnabled && !captchaVerified)">
                         <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                         <span v-if="loading">{{ t('common.messages.loading.processing') }}</span>
                         <span v-else>{{ t('features.auth.register.submit') }}</span>
@@ -105,11 +112,18 @@ import CardContent from '../../components/ui/card-content.vue';
 import Button from '../../components/ui/button.vue';
 import Input from '../../components/ui/input.vue';
 import Label from '../../components/ui/label.vue';
+import CaptchaWrapper from '../../components/captcha/CaptchaWrapper.vue';
 
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(registerSchema);
+
+const captchaRef = ref(null);
+const captchaVerified = ref(false);
+const captchaToken = ref('');
+const captchaAnswer = ref('');
+const captchaEnabled = computed(() => captchaRef.value?.enabled || false);
 
 const form = reactive({
     name: '',
@@ -117,6 +131,12 @@ const form = reactive({
     password: '',
     password_confirmation: '',
 });
+
+const onCaptchaVerified = (payload) => {
+    captchaToken.value = payload.token;
+    captchaAnswer.value = payload.answer;
+    captchaVerified.value = true;
+};
 
 const isValid = computed(() => {
     return !!form.name && 
@@ -155,12 +175,25 @@ const handleRegister = async () => {
     if (!validateWithZod(form)) {
         return;
     }
+    
+    if (captchaEnabled.value && !captchaVerified.value) {
+        message.value = t('features.auth.captcha.required');
+        messageType.value = 'error';
+        return;
+    }
 
     loading.value = true;
     clearErrors();
     message.value = '';
 
-    const result = await authStore.register(form);
+    const payload = { ...form };
+    
+    if (captchaEnabled.value) {
+        payload.captcha_token = captchaToken.value;
+        payload.captcha_answer = captchaAnswer.value;
+    }
+
+    const result = await authStore.register(payload);
 
     if (result.success) {
         message.value = 'Registration successful! Please verify your email.';
@@ -172,6 +205,13 @@ const handleRegister = async () => {
         message.value = result.message;
         messageType.value = 'error';
         setErrors(result.errors || {});
+        
+        // Reset captcha on failure
+        if (captchaRef.value?.method === 'slider' || captchaRef.value?.method === 'math' || captchaRef.value?.method === 'image') {
+            captchaVerified.value = false;
+            captchaToken.value = '';
+            captchaAnswer.value = '';
+        }
     }
 
     loading.value = false;
