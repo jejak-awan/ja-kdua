@@ -144,7 +144,7 @@ const loading = ref(false);
 const rateLimited = ref(false);
 const retryAfter = ref(0);
 let retryTimer = null;
-const registrationEnabled = ref(true);
+const registrationEnabled = ref(false); // Default: hidden until API confirms enabled
 const registrationDisabledMessage = ref('');
 
 // Check for session timeout
@@ -160,11 +160,11 @@ onMounted(async () => {
     try {
         const response = await api.get('/api/v1/public/settings');
         const settings = response.data?.data || response.data;
-        registrationEnabled.value = settings.enable_registration !== false;
+        registrationEnabled.value = settings.enable_registration === true;
     } catch (error) {
         console.error('Failed to fetch public settings:', error);
-        // Default to showing registration link if we can't check
-        registrationEnabled.value = true;
+        // Keep hidden if we can't check (fail-closed for security)
+        registrationEnabled.value = false;
     }
 
     // Check for registration_disabled redirect info
