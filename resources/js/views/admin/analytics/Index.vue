@@ -150,7 +150,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Visits Chart -->
                         <div class="lg:col-span-2">
-                            <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.visitsOverTime') }}</h4>
+                            <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.visitsOverTime') }}</h4>
                             <div class="h-[240px]">
                                 <LineChart v-if="visits.length > 0" :data="visits" :label="$t('features.analytics.charts.visits')" />
                                 <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-lg">
@@ -161,13 +161,13 @@
                         </div>
                         <!-- Top Pages -->
                         <div>
-                            <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.topPages') }}</h4>
+                            <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.topPages') }}</h4>
                             <div class="space-y-3 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
-                                <div v-for="(page, i) in topPages.slice(0, 10)" :key="i" class="flex items-center justify-between group">
+                                <div v-for="(page, i) in filteredTopPages.slice(0, 10)" :key="i" class="flex items-center justify-between group">
                                     <span class="text-sm truncate flex-1 text-foreground/90 group-hover:text-foreground transition-colors">{{ formatUrl(page.url) }}</span>
                                     <Badge variant="secondary" class="ml-2 tabular-nums">{{ page.visits }}</Badge>
                                 </div>
-                                <div v-if="topPages.length === 0" class="h-full flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
+                                <div v-if="filteredTopPages.length === 0" class="h-full flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
                                     <p class="text-xs italic">{{ $t('features.analytics.noData') }}</p>
                                 </div>
                             </div>
@@ -177,8 +177,6 @@
             </Card>
 
             <!-- Technology & Geography Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <!-- Technology -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <!-- Technology -->
                 <Card>
@@ -192,7 +190,7 @@
                         <div class="grid grid-cols-2 gap-8">
                             <!-- Devices -->
                             <div>
-                                <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.devices') }}</h4>
+                                <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.devices') }}</h4>
                                 <div class="h-[160px]">
                                     <DoughnutChart v-if="devices.length > 0" :data="devices" label-key="device_type" value-key="count" />
                                     <div v-else class="h-full flex items-center justify-center text-muted-foreground bg-muted/30 rounded-lg text-xs">{{ $t('features.analytics.noData') }}</div>
@@ -200,7 +198,7 @@
                             </div>
                             <!-- Browsers -->
                             <div>
-                                <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.browsers') }}</h4>
+                                <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.browsers') }}</h4>
                                 <div class="h-[160px]">
                                     <DoughnutChart v-if="browsers.length > 0" :data="browsers" label-key="browser" value-key="count" />
                                     <div v-else class="h-full flex items-center justify-center text-muted-foreground bg-muted/30 rounded-lg text-xs">{{ $t('features.analytics.noData') }}</div>
@@ -222,7 +220,7 @@
                         <div class="grid grid-cols-2 gap-8">
                             <!-- Countries -->
                             <div>
-                                <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.topCountries') }}</h4>
+                                <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.topCountries') }}</h4>
                                 <div class="h-[160px]">
                                     <BarChart v-if="countries.length > 0" :data="countries.slice(0, 5)" label-key="country" value-key="count" :horizontal="true" />
                                     <div v-else class="h-full flex items-center justify-center text-muted-foreground bg-muted/30 rounded-lg text-xs">{{ $t('features.analytics.noData') }}</div>
@@ -230,7 +228,7 @@
                             </div>
                             <!-- Referrers -->
                             <div>
-                                <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h4>
+                                <h4 class="text-xs font-semibold text-muted-foreground capitalize tracking-wide mb-4">{{ $t('features.analytics.charts.topReferrers') }}</h4>
                                 <div class="space-y-2.5 max-h-[160px] overflow-y-auto pr-1 flex flex-col justify-center">
                                     <div v-for="(ref, i) in referrers.slice(0, 5)" :key="i" class="flex items-center justify-between group">
                                         <span class="text-xs truncate flex-1 text-foreground/80 group-hover:text-foreground transition-colors">{{ formatUrl(ref.referer) }}</span>
@@ -244,7 +242,6 @@
                         </div>
                     </CardContent>
                 </Card>
-            </div>
             </div>
 
             <!-- Content Section -->
@@ -322,6 +319,20 @@ const countries = ref([]);
 const referrers = ref([]);
 const realtime = ref({});
 let refreshInterval = null;
+
+// Filter out API routes and error pages from top pages
+const filteredTopPages = computed(() => {
+    const errorPatterns = ['/403', '/404', '/419', '/500', '/503'];
+    return topPages.value.filter(page => {
+        if (!page.url) return true;
+        // Exclude /api/ URLs
+        if (page.url.includes('/api/')) return false;
+        // Exclude error pages
+        const path = page.url.replace(/https?:\/\/[^/]+/, ''); // Get path only
+        if (errorPatterns.some(pattern => path === pattern || path.startsWith(pattern + '?'))) return false;
+        return true;
+    });
+});
 
 // Utility functions
 const formatNumber = (num) => {

@@ -61,7 +61,11 @@ const chartOptions = {
             position: 'bottom',
              labels: {
                 usePointStyle: true,
-                padding: 20,
+                padding: 10,
+                boxWidth: 8,
+                font: {
+                    size: 10
+                }
             }
         },
     },

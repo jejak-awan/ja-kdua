@@ -94,10 +94,10 @@
         <!-- Loading State -->
         <div v-if="loading">
             <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="i in 3" :key="i" class="h-48 rounded-lg bg-muted animate-pulse"></div>
+                <div v-for="i in 3" :key="i" class="h-48 rounded-lg bg-card border border-border animate-pulse"></div>
             </div>
-            <div v-else class="space-y-4">
-                 <div v-for="i in 3" :key="i" class="h-16 rounded-lg bg-muted animate-pulse"></div>
+            <div v-else class="space-y-2">
+                 <div v-for="i in 3" :key="i" class="h-16 rounded-lg bg-card border border-border animate-pulse"></div>
             </div>
         </div>
 
