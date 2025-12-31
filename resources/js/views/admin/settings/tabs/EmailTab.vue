@@ -1,11 +1,12 @@
 <template>
-    <div class="space-y-8">
+    <div class="space-y-4">
         <SettingGroup
             v-for="group in emailSettingsGrouped"
             :key="group.id"
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
+            :color="group.color"
         >
             <SettingField
                 v-for="setting in group.settings"
@@ -120,6 +121,7 @@ const emailSettingsGrouped = computed(() => {
             title: t('features.settings.groups.smtp.title'),
             description: t('features.settings.groups.smtp.description'),
             icon: MailIcon,
+            color: 'indigo',
             keys: [
                 'mail_from_address', 
                 'mail_from_name',

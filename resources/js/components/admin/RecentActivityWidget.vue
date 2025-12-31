@@ -181,7 +181,7 @@ const getActionLabel = (action) => {
 
 onMounted(() => {
     fetchActivities();
-    refreshInterval = setInterval(fetchActivities, 30000);
+    refreshInterval = setInterval(fetchActivities, 120000); // Increased from 30s to 2m
 });
 
 onUnmounted(() => {

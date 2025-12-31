@@ -251,12 +251,15 @@ class AuthController extends BaseApiController
         $maxSessions = \App\Models\Setting::get('max_concurrent_sessions', 0);
 
         if ($singleSession) {
-            // Revoke all previous tokens for this user (single session mode)
-            $revokedCount = $user->tokens()->count();
+            // Revoke all previous tokens (Sanctum)
+            $tokens = $user->tokens();
+            $revokedCount = $tokens->count();
+            
+            \Illuminate\Support\Facades\Log::info("Single Session: User {$user->email} has {$revokedCount} tokens. Revoking...");
+
             if ($revokedCount > 0) {
-                $user->tokens()->delete();
+                $tokens->delete();
                 
-                // Log the session invalidation
                 \App\Models\SecurityLog::log(
                     'session_invalidated',
                     $user,
@@ -264,8 +267,18 @@ class AuthController extends BaseApiController
                     "Previous {$revokedCount} session(s) invalidated due to new login (single session mode)"
                 );
             }
+
+            // Also invalidate previous sessions if using stateful session guards
+            // Note: This requires the AuthenticateSession middleware to be active
+            try {
+                \Illuminate\Support\Facades\Auth::login($user);
+                \Illuminate\Support\Facades\Auth::logoutOtherDevices($request->password);
+                \Illuminate\Support\Facades\Log::info("Single Session: logoutOtherDevices called for {$user->email}");
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Single Session Error: " . $e->getMessage());
+            }
         } elseif ($maxSessions > 0) {
-            // Limit concurrent sessions
+            // Limit concurrent sessions (token based)
             $activeTokens = $user->tokens()->orderBy('created_at', 'asc')->get();
             
             if ($activeTokens->count() >= $maxSessions) {

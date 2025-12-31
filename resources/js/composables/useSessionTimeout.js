@@ -1,7 +1,11 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useSystemError } from '@/composables/useSystemError';
+import { triggerVaporLock } from '@/services/api';
 import api from '@/services/api';
+
+const { showError } = useSystemError();
 
 export function useSessionTimeout() {
     const router = useRouter();
@@ -121,23 +125,25 @@ export function useSessionTimeout() {
 
                 // If it's a session error (401 or 419)
                 if (error.response?.status === 401 || error.response?.status === 419) {
-                    // NUCLEAR SHUTDOWN: Stop everything instantly
-                    if (typeof window.stop === 'function') window.stop();
-                    window.__isSessionTerminated = true;
+                    // Stop everything instantly via Vapor Lock
+                    triggerVaporLock();
 
                     // Stop heartbeat and cleanup locally
                     stopAllTimers();
-                    localStorage.removeItem('auth_token');
-                    localStorage.removeItem('user');
-                    authStore.isAuthenticated = false;
+                    // authStore.logout() will handle local storage and isAuthenticated state
+                    // localStorage.removeItem('auth_token');
+                    // localStorage.removeItem('user');
+                    // authStore.isAuthenticated = false;
 
                     // Logic: Concurrent because it's a heartbeat failure
                     const reason = 'concurrent';
 
-                    // Hard redirect to error page with specific reason
-                    const currentPath = router.currentRoute.value.fullPath;
-                    const redirectUrl = `/419?reason=${reason}&redirect=${encodeURIComponent(currentPath)}`;
-                    window.location.replace(redirectUrl);
+                    // Use modal instead of hard redirect
+                    showError({
+                        code: 419,
+                        reason: reason,
+                        redirect: router.currentRoute.value.fullPath
+                    });
                 }
             }
         }, HEARTBEAT_INTERVAL);
@@ -228,9 +234,8 @@ export function useSessionTimeout() {
     };
 
     const handleTimeout = () => {
-        // NUCLEAR SHUTDOWN: Stop everything
-        if (typeof window.stop === 'function') window.stop();
-        window.__isSessionTerminated = true;
+        // Stop everything via Vapor Lock
+        triggerVaporLock();
         stopAllTimers();
         hideWarning();
 
@@ -239,10 +244,13 @@ export function useSessionTimeout() {
         localStorage.removeItem('user');
         authStore.isAuthenticated = false;
 
-        // Hard redirect to Session Expired page with timeout reason
+        // Use modal instead of hard redirect
         const currentPath = router.currentRoute.value.fullPath;
-        const redirectUrl = `/419?reason=timeout&redirect=${encodeURIComponent(currentPath)}`;
-        window.location.replace(redirectUrl);
+        showError({
+            code: 419,
+            reason: 'timeout',
+            redirect: currentPath !== '/' ? currentPath : '/admin'
+        });
     };
 
     const manualLogout = async () => {

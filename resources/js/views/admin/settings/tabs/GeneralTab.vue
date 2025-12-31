@@ -1,11 +1,13 @@
 <template>
-    <div class="space-y-8">
+    <div class="space-y-4">
         <SettingGroup
             v-for="group in generalSettingsGrouped"
             :key="group.id"
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
+            :color="group.color"
+            :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"
@@ -72,16 +74,20 @@ const generalSettingsGrouped = computed(() => {
             title: t('features.settings.groups.siteInfo.title'),
             description: t('features.settings.groups.siteInfo.description'),
             icon: GlobeIcon,
+            color: 'blue',
             keys: ['site_name', 'site_description', 'site_url', 'admin_email'],
             settings: [],
+            defaultExpanded: true,
         },
         {
             id: 'localization',
             title: t('features.settings.groups.localization.title'),
             description: t('features.settings.groups.localization.description'),
             icon: ClockIcon,
+            color: 'amber',
             keys: ['timezone', 'date_format', 'time_format', 'items_per_page'],
             settings: [],
+            defaultExpanded: false,
         },
     ]
     

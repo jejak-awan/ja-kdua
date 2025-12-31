@@ -417,7 +417,7 @@ onMounted(() => {
                 if (refreshInterval) clearInterval(refreshInterval);
             }
         });
-    }, 30000);
+    }, 60000); // Increased from 30s to 1m
     document.addEventListener('click', handleClickOutside);
 });
 

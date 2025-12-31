@@ -345,7 +345,8 @@ class SystemService
         $enabled = false;
         $size = '0 B';
 
-        if ($driver === 'redis') {
+        // Check if driver is redis or redis_failover (starts with 'redis')
+        if (str_starts_with($driver, 'redis')) {
             try {
                 $redis = \Illuminate\Support\Facades\Redis::connection();
                 $redis->ping();

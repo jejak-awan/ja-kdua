@@ -1,11 +1,12 @@
 <template>
-    <div class="space-y-6">
+    <div class="space-y-4">
         <SettingGroup
             v-for="group in securitySettingsGrouped"
             :key="group.id"
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
+            :color="group.color"
             :default-expanded="group.defaultExpanded"
         >
             <SettingField
@@ -75,6 +76,12 @@ const isSettingDisabled = (key) => {
         // Disable if enable_captcha is falsy (0, false, null)
         return !props.formData['enable_captcha'] || props.formData['enable_captcha'] === '0'
     }
+
+    // Session dependencies: Disable Max Concurrent Sessions if Single Session is enabled
+    if (key === 'max_concurrent_sessions') {
+        return props.formData['single_session_enabled'] === true || props.formData['single_session_enabled'] === '1'
+    }
+
     return false
 }
 
@@ -87,6 +94,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.authentication.title'),
             description: t('features.settings.groups.authentication.description'),
             icon: ShieldCheckIcon,
+            color: 'emerald',
             keys: ['enable_registration', 'require_email_verification', 'enable_2fa', 'two_factor_method', 'two_factor_enforced_roles'],
             settings: [],
             defaultExpanded: true,
@@ -96,6 +104,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.password.title'),
             description: t('features.settings.groups.password.description'),
             icon: KeyIcon,
+            color: 'amber',
             keys: ['password_min_length', 'password_require_uppercase', 'password_require_lowercase', 'password_require_number', 'password_require_symbol'],
             settings: [],
             defaultExpanded: false,
@@ -105,6 +114,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.session.title'),
             description: t('features.settings.groups.session.description'),
             icon: ClockIcon,
+            color: 'blue',
             keys: ['session_lifetime', 'single_session_enabled', 'max_concurrent_sessions', 'log_retention_days'],
             settings: [],
             defaultExpanded: false,
@@ -114,6 +124,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.access.title'),
             description: t('features.settings.groups.access.description'),
             icon: LockIcon,
+            color: 'red',
             keys: ['login_attempts_limit', 'block_duration_minutes'],
             settings: [],
             defaultExpanded: false,
@@ -123,6 +134,7 @@ const securitySettingsGrouped = computed(() => {
             title: t('features.settings.groups.captcha.title'),
             description: t('features.settings.groups.captcha.description'),
             icon: BotIcon,
+            color: 'purple',
             keys: ['enable_captcha', 'captcha_method', 'captcha_on_login', 'captcha_on_register'],
             settings: [],
             defaultExpanded: false,

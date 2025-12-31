@@ -27,6 +27,9 @@
         @confirm="confirmState.onConfirm"
         @cancel="confirmState.onCancel"
     />
+    
+    <!-- Global Error Modal (Session/Auth/Server Errors) -->
+    <GlobalErrorModal />
 </template>
 
 <script setup>
@@ -41,6 +44,7 @@ import SystemOverlay from './components/SystemOverlay.vue';
 import { SystemMonitor } from './services/SystemMonitor';
 import Toast from './components/ui/toast.vue';
 import ConfirmModal from './components/ConfirmModal.vue';
+import GlobalErrorModal from './components/GlobalErrorModal.vue';
 import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();

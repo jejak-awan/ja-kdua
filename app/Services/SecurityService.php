@@ -14,16 +14,17 @@ class SecurityService
     // Cache prefix for all security-related keys
     protected $cachePrefix = 'security:';
 
-    // Failed attempts threshold before blocking
-    protected $maxFailedAttempts = 5;
-
-    // Progressive blocking settings
-    protected $baseBlockMinutes = 1;      // Start with 1 minute block
-    protected $maxBlockMinutes = 60;      // Max 60 minutes block
-    protected $offenseResetHours = 24;    // Reset offense count after 24 hours
-
     // Account lockout settings
     protected $accountLockMinutes = 15;
+
+    public function __construct()
+    {
+        $this->maxFailedAttempts = (int) \App\Models\Setting::get('login_attempts_limit', 5);
+        $this->baseBlockMinutes = (int) \App\Models\Setting::get('block_duration_minutes', 15);
+        // Ensure baseBlockMinutes is at least 1 to avoid math issues or immediate expiry
+        $this->baseBlockMinutes = max(1, $this->baseBlockMinutes);
+        $this->accountLockMinutes = $this->baseBlockMinutes;
+    }
 
     /**
      * Record a failed login attempt.

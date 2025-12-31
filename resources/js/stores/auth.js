@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import axios from 'axios';
 import api, { getCsrfCookie } from '../services/api';
 
 export const ROLE_RANKS = {
@@ -208,8 +209,12 @@ export const useAuthStore = defineStore('auth', {
                 // Skip 401 handler redirect - logout is intentionally ending session
                 await api.post('/logout', {}, { _skipManualRedirect: true });
             } catch (error) {
-                // Ignore 401 errors - session may already be expired
-                if (error.response?.status !== 401) {
+                // Silence session errors (401/419) and cancellations during logout
+                // These are expected if the session is already terminated.
+                const status = error.response?.status;
+                const isSilentError = status === 401 || status === 419 || axios.isCancel(error);
+
+                if (!isSilentError) {
                     console.error('Logout error:', error);
                 }
             } finally {

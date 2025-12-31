@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import frontendRoutes from './frontend';
+import { useSystemError } from '../composables/useSystemError'; // Added import for useSystemError
+
+const { showError } = useSystemError(); // Added initialization for showError
 
 const routes = [
     // Frontend routes (public)
@@ -445,7 +448,15 @@ router.beforeEach((to, from, next) => {
 // Global error handler
 router.onError((error) => {
     console.error('Router error:', error);
-    router.push({ name: 'server-error', state: { errorDetails: error.message } });
+
+    // For runtime router errors, use the modal to avoid full page fallback if possible
+    const { showError } = useSystemError();
+    showError({
+        code: 500,
+        title: 'Application Error',
+        message: error.message || 'A critical error occurred while navigating.',
+        description: 'The application encountered an unexpected error. Please try refreshing or contact support if the issue persists.'
+    });
 });
 
 // Analytics tracking

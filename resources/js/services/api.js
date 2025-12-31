@@ -1,9 +1,13 @@
 import router from '../router';
 import { SystemMonitor } from './SystemMonitor';
+import { useSystemError } from '@/composables/useSystemError';
 
-let isRedirecting = false;
+const { showError } = useSystemError();
 // Global flag to prevent multiple toasts and parallel redirect attempts
 window.__isSessionTerminated = false;
+
+// Vapor Lock: Global controller to cancel all pending requests instantly
+let abortController = new AbortController();
 
 const api = axios.create({
     baseURL: '/api/v1',
@@ -15,6 +19,23 @@ const api = axios.create({
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN',
 });
+
+/**
+ * RESET VAPOR LOCK: Recovers the ability to make requests (used after login/refresh)
+ */
+export const resetLockdown = () => {
+    window.__isSessionTerminated = false;
+    abortController = new AbortController();
+};
+
+/**
+ * TRIGGER VAPOR LOCK: Instantly kills all outgoing and pending requests
+ */
+export const triggerVaporLock = () => {
+    if (window.__isSessionTerminated) return;
+    window.__isSessionTerminated = true;
+    abortController.abort('Vapor Lock: Session Terminated');
+};
 
 // Ensure CSRF cookie is set (call this before first authenticated request)
 export const getCsrfCookie = async () => {
@@ -29,19 +50,23 @@ export const getCsrfCookie = async () => {
 api.interceptors.request.use(
     (config) => {
         // BREAK CIRCUIT: If system is down, block all non-critical requests
-        // But allow 'health' check (which we likely won't call via this instance, but just in case)
         if (SystemMonitor.isRequestBlocked && !config.url?.includes('system/health')) {
             console.debug('Request blocked by Circuit Breaker:', config.url);
             return Promise.reject(new axios.Cancel('System is undergoing maintenance'));
         }
 
         // Whitelist auth-related endpoints so they are NOT blocked even if session is marked as dead
-        const authEndpoints = ['/login', '/register', '/forgot-password', '/reset-password', '/sanctum/csrf-cookie'];
+        const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
         const isAuthRequest = authEndpoints.some(endpoint => config.url?.includes(endpoint));
 
-        // Instantly block any non-auth request if session is already known to be dead
+        // VAPOR LOCK CHECK: Instantly block any non-auth request if session is dead
         if (window.__isSessionTerminated && !isAuthRequest) {
-            return Promise.reject(new Error('Session terminated'));
+            return Promise.reject(new axios.Cancel('Vapor Lock: Request Blocked'));
+        }
+
+        // Attach abort signal to the request (unless it's an auth request we WANT to succeed)
+        if (!isAuthRequest) {
+            config.signal = abortController.signal;
         }
 
         const token = localStorage.getItem('auth_token');
@@ -73,66 +98,83 @@ api.interceptors.response.use(
         }
 
         // Handle 419 CSRF token mismatch / Session Expired
-        // NOTE: We do NOT retry here as it can cause infinite loops
-        // If session is truly expired, retrying won't help
         if (error.response?.status === 419) {
-            if (window.__isSessionTerminated) return Promise.reject(error);
-
+            const url = error.config?.url || '';
+            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
+            const isAuthRequest = authEndpoints.some(endpoint => url.includes(endpoint));
             const currentPath = window.location.pathname;
-            if (!currentPath.includes('/419') && !currentPath.includes('/login')) {
-                // NUCLEAR SHUTDOWN: Stop all pending requests/animations/scripts
-                if (typeof window.stop === 'function') window.stop();
 
-                window.__isSessionTerminated = true;
+            // If it's a 419 on a whitelisted endpoint, don't trigger global lockdown
+            if (isAuthRequest) {
+                if (currentPath.includes('/login')) {
+                    getCsrfCookie(); // Attempt to self-heal CSRF
+                }
+
+                // If LOGOUT fails with 419, it's fine (session is already gone), silence it
+                // We RESOLVE here to bypass the component's catch block entirely
+                if (url.includes('logout')) {
+                    return Promise.resolve({ data: { message: 'Logout Silenced: Session already dead' } });
+                }
+
+                return Promise.reject(error);
+            }
+
+            triggerVaporLock();
+
+            if (!currentPath.includes('/419') && !currentPath.includes('/login')) {
                 localStorage.removeItem('auth_token');
                 localStorage.removeItem('user');
 
-                // Instant hard redirect to clear all zombie states and the termination flag.
-                // We use replace to prevent back-button loops.
-                const redirectUrl = `/419?reason=concurrent&redirect=${encodeURIComponent(currentPath !== '/' ? currentPath : '/admin')}`;
-                window.location.replace(redirectUrl);
+                showError({
+                    code: 419,
+                    reason: 'concurrent',
+                    redirect: currentPath !== '/' ? currentPath : '/admin'
+                });
             }
+
+            // Return silent rejection to avoid component catch blocks logging "419" after lockdown
+            return Promise.reject(new axios.Cancel('Vapor Lock: 419 Silenced'));
         }
 
         // Handle 401 Unauthorized (session expired from Sanctum)
         if (error.response?.status === 401) {
-            if (window.__isSessionTerminated) return Promise.reject(error);
-
             const url = error.config?.url || '';
-            const responseData = error.response?.data || {};
+            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
+            const isAuthRequest = authEndpoints.some(endpoint => url.includes(endpoint));
+
+            // Whitelist check
+            if (isAuthRequest) {
+                // If LOGOUT fails with 401, it's fine (session is already gone), silence it
+                // We RESOLVE here to bypass the component's catch block entirely
+                if (url.includes('logout')) {
+                    return Promise.resolve({ data: { message: 'Logout Silenced: Already unauthorized' } });
+                }
+                return Promise.reject(error);
+            }
+
+            triggerVaporLock();
 
             // Public endpoints are frontend routes that don't require session termination on 401
-            // We use anchored paths to avoid matching '/admin/cms/...'
-            const publicEndpoints = [
-                '/api/v1/cms/',
-                '/api/v1/cms/contents',
-                '/api/v1/cms/categories',
-                '/api/v1/cms/tags',
-                '/api/v1/cms/themes/active',
-                '/api/v1/cms/search',
-                '/api/v1/cms/languages',
-            ];
-
+            const publicEndpoints = ['/api/v1/cms/', '/api/v1/cms/contents', '/api/v1/cms/categories', '/api/v1/cms/tags', '/api/v1/cms/themes/active', '/api/v1/cms/search', '/api/v1/cms/languages'];
             const isPublicEndpoint = publicEndpoints.some(endpoint => url.startsWith(endpoint));
             const hasAuthHeader = !!error.config?.headers?.Authorization;
 
-            // If it has an auth header, it was intended to be authenticated, 
-            // so a 401 is always a session termination event.
             if (hasAuthHeader || !isPublicEndpoint) {
                 const currentPath = window.location.pathname;
-
                 if (!currentPath.includes('/login') && !currentPath.includes('/419')) {
-                    // NUCLEAR SHUTDOWN: Stop everything
-                    if (typeof window.stop === 'function') window.stop();
-
-                    window.__isSessionTerminated = true;
                     localStorage.removeItem('auth_token');
                     localStorage.removeItem('user');
 
-                    // Instant hard redirect to ensure clean state
-                    window.location.replace(`/419?reason=concurrent&redirect=${encodeURIComponent(currentPath)}`);
+                    showError({
+                        code: 401,
+                        reason: 'concurrent',
+                        redirect: currentPath
+                    });
                 }
             }
+
+            // Return silent rejection
+            return Promise.reject(new axios.Cancel('Vapor Lock: 401 Silenced'));
         }
 
         // Handle 403 Forbidden - DON'T auto-redirect, let components handle it
@@ -154,19 +196,15 @@ api.interceptors.response.use(
             }
         }
 
-        // Handle 500 Server Error - use router instead of hard redirect
+        // Handle 500 Server Error - use modal instead of redirect
         if (error.response?.status === 500) {
+            triggerVaporLock();
             const currentPath = window.location.pathname;
-            // Only redirect if not already on error page
-            if (!currentPath.includes('/500')) {
-                router.push({
-                    name: 'server-error',
-                    state: { errorDetails: error.response?.data?.message || error.message }
-                }).catch(() => {
-                    // Fallback to hard redirect if router fails
-                    window.location.href = '/500';
-                });
-            }
+            showError({
+                code: 500,
+                message: error.response?.data?.message || error.message,
+                redirect: currentPath
+            });
         }
 
         return Promise.reject(error);

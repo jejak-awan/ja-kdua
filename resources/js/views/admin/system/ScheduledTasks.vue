@@ -224,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import api from '@/services/api';
@@ -254,7 +254,7 @@ import SelectValue from '@/components/ui/select-value.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
 
-import { Plus, Play, Pencil, Trash2, FileText, Loader2 } from 'lucide-vue-next';
+import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar } from 'lucide-vue-next';
 
 const { t } = useI18n();
 

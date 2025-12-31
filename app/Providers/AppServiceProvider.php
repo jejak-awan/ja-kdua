@@ -36,18 +36,31 @@ class AppServiceProvider extends ServiceProvider
         
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
-                // Load Cache Driver
-                $cacheDriver = \App\Models\Setting::where('key', 'cache_driver')->value('value');
-                if ($cacheDriver) {
-                    config(['cache.default' => $cacheDriver]);
+                // Load Performance Settings
+                $performanceSettings = \App\Models\Setting::where('group', 'performance')
+                    ->whereIn('key', [
+                        'enable_cache', 'cache_driver', 'cache_ttl',
+                        'enable_cdn', 'cdn_url', 'cdn_preset', 'cdn_included_dirs', 'cdn_excluded_extensions',
+                        'enable_image_optimization', 'enable_lazy_loading'
+                    ])
+                    ->get()
+                    ->flatMap(function ($setting) {
+                        return [$setting->key => $setting->value];
+                    });
+
+                // Apply Cache Driver Strategy
+                if (isset($performanceSettings['enable_cache']) && 
+                    !filter_var($performanceSettings['enable_cache'], FILTER_VALIDATE_BOOLEAN)) {
+                    config(['cache.default' => 'array']); // Force disable if explicitly off
+                } elseif (isset($performanceSettings['cache_driver'])) {
+                    config(['cache.default' => $performanceSettings['cache_driver']]);
                 }
 
-                // Load CDN and Performance Settings
-                $perfSettings = \App\Models\Setting::where('group', 'performance')
-                    ->whereIn('key', [
-                        'enable_cdn', 'cdn_url', 'cdn_preset', 'cdn_included_dirs', 'cdn_excluded_extensions',
-                        'optimize_images', 'lazy_loading'
-                    ]);
+                // Load Session Lifetime
+                $sessionLifetime = \App\Models\Setting::where('key', 'session_lifetime')->value('value');
+                if ($sessionLifetime) {
+                    config(['session.lifetime' => (int) $sessionLifetime]);
+                }
 
                 // Load Media Settings (Storage Driver + AWS)
                 $mediaSettings = \App\Models\Setting::where('group', 'media')
@@ -63,8 +76,8 @@ class AppServiceProvider extends ServiceProvider
                         return [$setting->key => $setting->value];
                     });
                 
-                // Merge all settings
-                $allSettings = $perfSettings->merge($mediaSettings);
+                // Merge all settings for easier access
+                $allSettings = $performanceSettings->merge($mediaSettings);
 
                 if ($allSettings->isNotEmpty()) {
                     config([
@@ -76,8 +89,8 @@ class AppServiceProvider extends ServiceProvider
                         'cdn.excluded_extensions' => $allSettings['cdn_excluded_extensions'] ?? '.php,.json',
                         
                         // Performance
-                        'media.optimize' => filter_var($allSettings['optimize_images'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                        'view.lazy_loading' => filter_var($allSettings['lazy_loading'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                        'media.optimize' => filter_var($allSettings['enable_image_optimization'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                        'view.lazy_loading' => filter_var($allSettings['enable_lazy_loading'] ?? true, FILTER_VALIDATE_BOOLEAN),
                     ]);
 
                     // Apply Storage Settings

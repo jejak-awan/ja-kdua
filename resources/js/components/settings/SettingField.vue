@@ -1,5 +1,5 @@
 <template>
-    <div class="p-4 bg-card rounded-lg border border-border">
+    <div>
         <label class="block text-sm font-medium text-foreground mb-1">
             {{ label }}
         </label>

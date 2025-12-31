@@ -50,6 +50,11 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
 // Frontend Routes - All handled by Vue SPA now
 // Vue Router will handle: /, /blog, /blog/:slug, /about, /contact, /search
 
+// Specific login route for Laravel middleware compatibility
+Route::get('/login', function () {
+    return view('app');
+})->name('login');
+
 // SPA Route - All routes handled by Vue Router
 Route::get('/{any?}', function () {
     return view('app');

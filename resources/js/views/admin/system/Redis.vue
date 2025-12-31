@@ -172,7 +172,7 @@
       <!-- Settings Tab -->
       <TabsContent value="settings" class="space-y-6">
         <!-- Global Driver Warning -->
-        <Card v-if="cacheDriver !== 'redis'" class="border-amber-500/40 bg-amber-500/5">
+        <Card v-if="cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'" class="border-amber-500/40 bg-amber-500/5">
           <CardContent class="pt-6">
             <div class="flex items-start gap-4">
               <div class="p-2 rounded-full bg-amber-500/20 text-amber-600">
@@ -185,15 +185,15 @@
                   <router-link to="/admin/settings?tab=performance" class="underline font-semibold hover:text-amber-900 inline-flex items-center gap-1">
                     Settings <ArrowRight class="w-3 h-3" /> Performance
                   </router-link>
-                  and select "Redis" as the Cache Driver.
+                  and select "Redis" or "Redis + Failover" as the Cache Driver.
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis'">
-          <Card :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis'}">
+        <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'">
+          <Card :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'}">
             <CardContent class="p-0">
               <div v-for="(group, index) in groupedSettings" :key="group.name" class="space-y-0">
                 <!-- Group Header -->

@@ -1,11 +1,13 @@
 <template>
-    <div class="space-y-8">
+    <div class="space-y-4">
         <SettingGroup
             v-for="group in seoSettingsGrouped"
             :key="group.id"
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
+            :color="group.color"
+            :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"
@@ -63,16 +65,20 @@ const seoSettingsGrouped = computed(() => {
             title: t('features.settings.groups.meta.title'),
             description: t('features.settings.groups.meta.description'),
             icon: TagIcon,
+            color: 'orange',
             keys: ['meta_title', 'meta_description', 'meta_keywords'],
             settings: [],
+            defaultExpanded: true,
         },
         {
             id: 'search_engines',
             title: t('features.settings.groups.searchEngines.title'),
             description: t('features.settings.groups.searchEngines.description'),
             icon: SearchIcon,
+            color: 'emerald',
             keys: ['google_analytics_id', 'google_search_console', 'enable_sitemap', 'enable_robots_txt'],
             settings: [],
+            defaultExpanded: false,
         },
     ]
     

@@ -369,7 +369,7 @@ const handleClickOutside = (event) => {
 watch(() => props.isAuthenticated, (isAuth) => {
     if (isAuth) {
         fetchNotifications();
-        notificationInterval.value = setInterval(fetchNotifications, 30000);
+        notificationInterval.value = setInterval(fetchNotifications, 120000); // Increased from 30s to 2m
     } else {
         if (notificationInterval.value) {
             clearInterval(notificationInterval.value);
@@ -380,7 +380,7 @@ watch(() => props.isAuthenticated, (isAuth) => {
 onMounted(() => {
     if (props.isAuthenticated) {
         fetchNotifications();
-        notificationInterval.value = setInterval(fetchNotifications, 30000);
+        notificationInterval.value = setInterval(fetchNotifications, 120000); // Increased from 30s to 2m
     }
     document.addEventListener('click', handleClickOutside);
 });

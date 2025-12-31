@@ -63,8 +63,10 @@ const mediaSettingsGrouped = computed(() => {
             title: t('features.settings.groups.upload.title'),
             description: t('features.settings.groups.upload.description'),
             icon: UploadIcon,
+            color: 'blue',
             keys: ['max_upload_size', 'allowed_image_types', 'allowed_file_types', 'storage_driver'],
             settings: [],
+            defaultExpanded: true,
         },
     ]
 
@@ -75,9 +77,11 @@ const mediaSettingsGrouped = computed(() => {
             title: 'S3 Configuration',
             description: 'Configure S3 bucket connection details',
             icon: CloudIcon,
+            color: 'orange',
             keys: ['aws_access_key_id', 'aws_secret_access_key', 'aws_default_region', 'aws_bucket', 'aws_endpoint'],
             settings: [],
-            isExternal: true
+            isExternal: true,
+            defaultExpanded: true,
         });
     }
 
@@ -88,9 +92,11 @@ const mediaSettingsGrouped = computed(() => {
             title: 'Google Drive Configuration',
             description: 'Configure Google Drive API details',
             icon: CloudIcon,
+            color: 'red',
             keys: ['google_client_id', 'google_client_secret', 'google_refresh_token', 'google_folder_id'],
             settings: [],
-            isExternal: true
+            isExternal: true,
+            defaultExpanded: true,
         });
     }
 
@@ -101,9 +107,11 @@ const mediaSettingsGrouped = computed(() => {
             title: 'FTP Configuration',
             description: 'Configure FTP server details',
             icon: ServerIcon,
+            color: 'purple',
             keys: ['ftp_host', 'ftp_username', 'ftp_password', 'ftp_root', 'ftp_port', 'ftp_ssl'],
             settings: [],
-            isExternal: true
+            isExternal: true,
+            defaultExpanded: true,
         });
     }
 
@@ -114,9 +122,11 @@ const mediaSettingsGrouped = computed(() => {
             title: 'Dropbox Configuration',
             description: 'Configure Dropbox API token',
             icon: CloudIcon,
+            color: 'indigo',
             keys: ['dropbox_authorization_token'],
             settings: [],
-            isExternal: true
+            isExternal: true,
+            defaultExpanded: true,
         });
     }
 
@@ -126,8 +136,10 @@ const mediaSettingsGrouped = computed(() => {
         title: t('features.settings.groups.imageProcessing.title'),
         description: t('features.settings.groups.imageProcessing.description'),
         icon: ImageIcon,
+        color: 'pink',
         keys: ['thumbnail_width', 'thumbnail_height', 'enable_watermark', 'watermark_text'],
         settings: [],
+        defaultExpanded: false,
     })
     
     
@@ -244,13 +256,15 @@ const handleStopMigration = () => {
 </script>
 
 <template>
-    <div class="space-y-8">
+    <div class="space-y-4">
         <SettingGroup
             v-for="group in mediaSettingsGrouped"
             :key="group.id"
             :title="group.title"
             :description="group.description"
             :icon="group.icon"
+            :color="group.color"
+            :default-expanded="group.defaultExpanded"
         >
             <SettingField
                 v-for="setting in group.settings"

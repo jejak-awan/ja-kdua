@@ -18,11 +18,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Enable Sanctum stateful API for SPA
         $middleware->statefulApi();
 
+        // Ensure guests are redirected to the named 'login' route (SPA)
+        $middleware->redirectGuestsTo(fn () => route('login'));
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleRedirects::class,
-            // LoadTheme middleware removed - Vue SPA handles theme loading via API
+            \Illuminate\Session\Middleware\AuthenticateSession::class,
             \App\Http\Middleware\SecurityHeaders::class,
-            \App\Http\Middleware\TrackAnalytics::class, // Track page visits for analytics
+            \App\Http\Middleware\TrackAnalytics::class,
         ]);
 
         // Register permission middleware alias

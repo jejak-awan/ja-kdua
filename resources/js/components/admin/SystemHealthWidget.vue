@@ -258,7 +258,7 @@ const formatTime = (date) => {
 
 onMounted(() => {
   fetchHealth();
-  refreshInterval = setInterval(fetchHealth, 30000);
+  refreshInterval = setInterval(fetchHealth, 120000); // Increased from 30s to 2m
 });
 
 onUnmounted(() => {
