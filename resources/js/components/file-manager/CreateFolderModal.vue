@@ -51,9 +51,11 @@ import DialogContent from '../ui/dialog-content.vue';
 import DialogHeader from '../ui/dialog-header.vue';
 import DialogTitle from '../ui/dialog-title.vue';
 import DialogFooter from '../ui/dialog-footer.vue';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
+const errors = ref({});
 
 const props = defineProps({
     path: {
@@ -71,16 +73,21 @@ const handleSubmit = async () => {
     if (!folderName.value) return;
 
     creating.value = true;
+    errors.value = {};
     try {
         await api.post('/admin/cms/file-manager/folder', {
             name: folderName.value,
             path: props.path,
         });
+        toast.success.create('Folder');
         emit('created');
         emit('close');
     } catch (error) {
-        console.error('Failed to create folder:', error);
-        toast.error('Error', t('features.file_manager.messages.createFolderFailed'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         creating.value = false;
     }

@@ -62,9 +62,11 @@ import Button from '../ui/button.vue';
 import Input from '../ui/input.vue';
 import Label from '../ui/label.vue';
 import { Loader2 } from 'lucide-vue-next';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
+const errors = ref({});
 
 const emit = defineEmits(['close', 'saved']);
 const router = useRouter();
@@ -77,14 +79,19 @@ const form = ref({
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         const response = await api.post('/admin/cms/menus', form.value);
         const menu = response.data.data || response.data;
+        toast.success.create('Menu');
         emit('saved');
         router.push({ name: 'menus.edit', params: { id: menu.id } });
     } catch (error) {
-        console.error('Failed to create menu:', error);
-        toast.error('Error', t('features.menus.messages.createFailed'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

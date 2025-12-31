@@ -66,11 +66,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
+const errors = ref({});
 
 const props = defineProps({
     category: {
@@ -120,14 +121,19 @@ const getCategoryPath = (category) => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         await api.post(`/admin/cms/categories/${props.category.id}/move`, {
             parent_id: selectedParentId.value,
         });
+        toast.success('Category moved successfully');
         emit('moved');
     } catch (error) {
-        console.error('Failed to move category:', error);
-        toast.error('Error', error.response?.data?.message || t('features.categories.move.error'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }

@@ -63,8 +63,7 @@ import Input from './ui/input.vue';
 import Label from './ui/label.vue';
 import Textarea from './ui/textarea.vue';
 import Button from './ui/button.vue';
-import Button from './ui/button.vue';
-import toast from '../services/toast';
+import { useToast } from '../composables/useToast';
 
 const props = defineProps({
     contentId: {
@@ -80,6 +79,8 @@ const props = defineProps({
 const emit = defineEmits(['submitted']);
 const { t } = useI18n();
 const authStore = useAuthStore();
+const toast = useToast();
+const errors = ref({});
 
 const form = ref({
     name: '',
@@ -92,6 +93,7 @@ const loading = ref(false);
 
 const handleSubmit = async () => {
     loading.value = true;
+    errors.value = {};
     try {
         await api.post(`/cms/contents/${props.contentId}/comments`, form.value);
         
@@ -104,10 +106,13 @@ const handleSubmit = async () => {
         };
 
         emit('submitted');
-        toast.success(t('common.messages.success.created', { item: 'Comment' }));
+        toast.success.create('Comment');
     } catch (error) {
-        console.error('Error posting comment:', error);
-        toast.error('Error', t('features.comments.error'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         loading.value = false;
     }

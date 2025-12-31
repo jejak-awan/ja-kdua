@@ -108,11 +108,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import toast from '../../services/toast';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
+const errors = ref({});
 
 const props = defineProps({
     task: {
@@ -147,16 +148,22 @@ const loadTask = () => {
 
 const handleSubmit = async () => {
     saving.value = true;
+    errors.value = {};
     try {
         if (props.task) {
             await api.put(`/admin/cms/scheduled-tasks/${props.task.id}`, form.value);
+            toast.success.update('Scheduled Task');
         } else {
             await api.post('/admin/cms/scheduled-tasks', form.value);
+            toast.success.create('Scheduled Task');
         }
         emit('saved');
     } catch (error) {
-        console.error('Failed to save task:', error);
-        toast.error('Error', error.response?.data?.message || t('features.system.scheduled_tasks.messages.failed_save'));
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};
+        } else {
+            toast.error.fromResponse(error);
+        }
     } finally {
         saving.value = false;
     }
