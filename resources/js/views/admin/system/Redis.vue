@@ -633,7 +633,6 @@ const saveSettings = async () => {
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {}
-      toast.error('Validation Error', 'Please check the form for errors.')
     } else {
       toast.error.fromResponse(error)
       connectionStatus.value = {

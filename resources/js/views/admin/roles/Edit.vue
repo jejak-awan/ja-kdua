@@ -227,9 +227,6 @@ const handleSubmit = async () => {
     } catch (error) {
         if (error.response?.status === 422) {
             errors.value = error.response.data.errors || {};
-             if (!errors.value.name && !errors.value.permissions) {
-                 toast.error.fromResponse(error);
-            }
         } else {
             toast.error.fromResponse(error);
         }
