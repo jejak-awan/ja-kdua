@@ -84,7 +84,12 @@
                         <span v-else>{{ t('features.auth.login.submit') }}</span>
                     </Button>
 
-                    <div class="text-center text-sm text-muted-foreground mt-4">
+                    <!-- Registration Disabled Info -->
+                    <div v-if="registrationDisabledMessage" class="rounded-md bg-amber-500/15 p-3 text-sm text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        {{ registrationDisabledMessage }}
+                    </div>
+
+                    <div v-if="registrationEnabled" class="text-center text-sm text-muted-foreground mt-4">
                         {{ t('features.auth.login.noAccount') }} 
                         <router-link :to="{ name: 'register' }" class="font-medium text-primary hover:underline">
                             {{ t('features.auth.login.register') }}
@@ -104,6 +109,7 @@ import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { loginSchema } from '../../schemas/auth';
 import { Loader2 } from 'lucide-vue-next';
+import api from '../../services/api';
 
 // Shadcn Components
 import Card from '../../components/ui/card.vue';
@@ -138,6 +144,8 @@ const loading = ref(false);
 const rateLimited = ref(false);
 const retryAfter = ref(0);
 let retryTimer = null;
+const registrationEnabled = ref(true);
+const registrationDisabledMessage = ref('');
 
 // Check for session timeout
 const timeoutMessage = computed(() => {
@@ -147,7 +155,27 @@ const timeoutMessage = computed(() => {
     return null;
 });
 
-onMounted(() => {
+onMounted(async () => {
+    // Check if registration is enabled
+    try {
+        const response = await api.get('/api/v1/public/settings');
+        const settings = response.data?.data || response.data;
+        registrationEnabled.value = settings.enable_registration !== false;
+    } catch (error) {
+        console.error('Failed to fetch public settings:', error);
+        // Default to showing registration link if we can't check
+        registrationEnabled.value = true;
+    }
+
+    // Check for registration_disabled redirect info
+    if (route.query.info === 'registration_disabled') {
+        registrationDisabledMessage.value = 'Registration is currently disabled.';
+        // Clear the query param
+        setTimeout(() => {
+            router.replace({ name: 'login', query: {} });
+        }, 5000);
+    }
+
     // Clear timeout query param after displaying message
     if (route.query.timeout) {
         setTimeout(() => {

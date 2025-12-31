@@ -313,6 +313,12 @@ class AuthController extends BaseApiController
      */
     public function register(Request $request)
     {
+        // Check if registration is enabled in settings
+        $registrationEnabled = \App\Models\Setting::get('enable_registration', true);
+        if (!$registrationEnabled) {
+            return $this->error('Registration is currently disabled.', 403, [], 'REGISTRATION_DISABLED');
+        }
+
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',

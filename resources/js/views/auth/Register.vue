@@ -87,13 +87,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { registerSchema } from '../../schemas/auth';
 import { Loader2 } from 'lucide-vue-next';
+import api from '../../services/api';
 
 // Shadcn Components
 import Card from '../../components/ui/card.vue';
@@ -128,6 +129,26 @@ const isValid = computed(() => {
 const message = ref('');
 const messageType = ref('');
 const loading = ref(false);
+const checkingSettings = ref(true);
+
+// Check if registration is enabled on mount
+onMounted(async () => {
+    try {
+        const response = await api.get('/api/v1/public/settings');
+        const settings = response.data?.data || response.data;
+        
+        if (!settings.enable_registration) {
+            // Redirect to login with info message
+            router.replace({ name: 'login', query: { info: 'registration_disabled' } });
+            return;
+        }
+    } catch (error) {
+        console.error('Failed to check registration status:', error);
+        // Allow registration if we can't check settings (fail-open)
+    } finally {
+        checkingSettings.value = false;
+    }
+});
 
 const handleRegister = async () => {
     // Client-side validation first (instant feedback)
