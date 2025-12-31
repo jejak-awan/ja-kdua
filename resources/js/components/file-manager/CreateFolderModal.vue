@@ -52,10 +52,12 @@ import DialogHeader from '../ui/dialog-header.vue';
 import DialogTitle from '../ui/dialog-title.vue';
 import DialogFooter from '../ui/dialog-footer.vue';
 import { useToast } from '../../composables/useToast';
+import { useFormValidation } from '../../composables/useFormValidation';
+import { folderSchema } from '../../schemas';
 
 const { t } = useI18n();
 const toast = useToast();
-const errors = ref({});
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(folderSchema);
 
 const props = defineProps({
     path: {
@@ -70,10 +72,10 @@ const folderName = ref('');
 const creating = ref(false);
 
 const handleSubmit = async () => {
-    if (!folderName.value) return;
+    if (!validateWithZod({ name: folderName.value })) return;
 
     creating.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post('/admin/cms/file-manager/folder', {
             name: folderName.value,
@@ -84,7 +86,7 @@ const handleSubmit = async () => {
         emit('close');
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

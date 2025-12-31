@@ -132,6 +132,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { contentTemplateSchema } from '../../../schemas';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardTitle from '../../../components/ui/card-title.vue';
@@ -155,8 +157,8 @@ import {
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentTemplateSchema);
 const saving = ref(false);
-const errors = ref({});
 
 const form = ref({
     name: '',
@@ -168,15 +170,17 @@ const form = ref({
 });
 
 const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         await api.post('/admin/cms/content-templates', form.value);
         toast.success.create('Template');
         router.push({ name: 'content-templates' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }

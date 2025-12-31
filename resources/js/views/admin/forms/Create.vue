@@ -165,6 +165,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { formBuilderSchema } from '../../../schemas';
 import FieldBuilder from '../../../components/forms/FieldBuilder.vue';
 import FieldModal from '../../../components/forms/FieldModal.vue';
 import Button from '../../../components/ui/button.vue';
@@ -175,11 +177,11 @@ import Checkbox from '../../../components/ui/checkbox.vue';
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(formBuilderSchema);
 
 const saving = ref(false);
 const showFieldModal = ref(false);
 const editingField = ref(null);
-const errors = ref({});
 
 const formData = reactive({
     name: '',
@@ -210,8 +212,11 @@ const slugify = (text) => {
 };
 
 const handleSubmit = async () => {
+    const validationData = { name: formData.name, slug: formData.slug };
+    if (!validateWithZod(validationData)) return;
+
     saving.value = true;
-    errors.value = {};
+    clearErrors();
     try {
         const payload = {
             name: formData.name,
@@ -236,7 +241,7 @@ const handleSubmit = async () => {
         router.push({ name: 'forms.index' });
     } catch (error) {
         if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
+            setErrors(error.response.data.errors || {});
         } else {
             toast.error.fromResponse(error);
         }
