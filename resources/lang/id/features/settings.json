@@ -347,7 +347,7 @@
         "password_require_uppercase": "Kata sandi harus mengandung minimal satu huruf besar (A-Z)",
         "password_require_lowercase": "Kata sandi harus mengandung minimal satu huruf kecil (a-z)",
         "password_require_number": "Kata sandi harus mengandung minimal satu angka (0-9)",
-        "password_require_symbol": "Kata sandi harus mengandung minimal satu simbol (!@#$%^&*...)",
+        "password_require_symbol": "Kata sandi harus mengandung minimal satu simbol (!{'@'}#$%^&*...)",
         "login_attempts_limit": "Jumlah percobaan login gagal yang diizinkan sebelum penguncian sementara",
         "block_duration_minutes": "Berapa lama IP diblokir setelah melampaui batas login",
         "enable_2fa": "Aktifkan atau nonaktifkan autentikasi dua faktor secara sistem",

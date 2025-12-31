@@ -374,7 +374,7 @@
         "password_require_uppercase": "Passwords must contain at least one uppercase letter (A-Z)",
         "password_require_lowercase": "Passwords must contain at least one lowercase letter (a-z)",
         "password_require_number": "Passwords must contain at least one digit (0-9)",
-        "password_require_symbol": "Passwords must contain at least one symbol (!@#$%^&*...)",
+        "password_require_symbol": "Passwords must contain at least one symbol (!{'@'}#$%^&*...)",
         "login_attempts_limit": "Number of failed logins allowed before temporary lockout",
         "block_duration_minutes": "How long an IP is blocked after exceeding login limits",
         "enable_2fa": "Enable or disable two-factor authentication system-wide",
