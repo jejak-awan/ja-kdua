@@ -141,7 +141,7 @@
                     </router-link>
                     <Button
                         type="submit"
-                        :disabled="saving"
+                        :disabled="saving || !isDirty"
                     >
                         <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
@@ -200,6 +200,13 @@ const formData = reactive({
     fields: []
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(formData) !== JSON.stringify(initialForm.value);
+});
+
 const fetchForm = async () => {
     loading.value = true;
     try {
@@ -215,6 +222,7 @@ const fetchForm = async () => {
             is_active: data.is_active,
             fields: data.fields || []
         });
+        initialForm.value = JSON.parse(JSON.stringify(formData));
     } catch (error) {
         console.error('Failed to fetch form:', error);
         toast.error('Error', t('features.forms.messages.loadFailed'));
@@ -251,6 +259,7 @@ const handleSubmit = async () => {
             }))
         };
         await api.put(`/admin/cms/forms/${route.params.id}`, payload);
+        initialForm.value = JSON.parse(JSON.stringify(formData));
         toast.success.update('Form');
         router.push({ name: 'forms.index' });
     } catch (error) {

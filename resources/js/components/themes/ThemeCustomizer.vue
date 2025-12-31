@@ -189,7 +189,7 @@
             <div class="p-4 border-t bg-muted/30 shrink-0">
                 <button
                     @click="saveSettings"
-                    :disabled="saving"
+                    :disabled="saving || !isDirty"
                     class="w-full h-10 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -235,6 +235,15 @@ const saving = ref(false);
 const loading = ref(true);
 const previewTheme = ref({});
 const expandedSections = ref(['General']); // Default open
+
+const initialSettings = ref(null);
+const initialCss = ref('');
+
+const isDirty = computed(() => {
+    const settingsChanged = JSON.stringify(formValues.value) !== JSON.stringify(initialSettings.value);
+    const cssChanged = customCss.value !== initialCss.value;
+    return settingsChanged || cssChanged;
+});
 
 // Fetch full theme details including manifest
 const fetchThemeDetails = async () => {
@@ -302,7 +311,11 @@ const loadSettings = () => {
 
     // 2. Override with saved settings
     formValues.value = { ...defaults, ...(fullTheme.value.settings || {}) };
+    initialSettings.value = JSON.parse(JSON.stringify(formValues.value));
+    
     customCss.value = fullTheme.value.custom_css || '';
+    initialCss.value = customCss.value;
+    
     updatePreviewTheme();
 };
 
@@ -351,6 +364,8 @@ const saveSettings = async () => {
             await api.put(`/admin/cms/themes/${props.theme.id}/custom-css`, { custom_css: customCss.value });
         }
         toast.success('Success', 'Theme settings saved successfully.');
+        initialSettings.value = JSON.parse(JSON.stringify(formValues.value));
+        initialCss.value = customCss.value;
         emit('saved');
     } catch (error) {
         console.error('Failed to save settings:', error);

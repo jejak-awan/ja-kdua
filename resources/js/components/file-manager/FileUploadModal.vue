@@ -59,7 +59,7 @@
                 </Button>
                 <Button
                     @click="handleUpload"
-                    :disabled="uploading || selectedFiles.length === 0"
+                    :disabled="uploading || !isValid"
                     type="submit"
                 >
                     <Loader2 v-if="uploading" class="mr-2 h-4 w-4 animate-spin" />
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
@@ -98,6 +98,10 @@ const emit = defineEmits(['close', 'uploaded']);
 const fileInput = ref(null);
 const selectedFiles = ref([]);
 const uploading = ref(false);
+
+const isValid = computed(() => {
+    return selectedFiles.value.length > 0;
+});
 
 const handleFileSelect = (event) => {
     if (event.target.files) {

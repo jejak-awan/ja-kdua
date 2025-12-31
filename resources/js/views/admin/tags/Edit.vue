@@ -77,7 +77,7 @@
                     <Button variant="outline" type="button" @click="router.push({ name: 'tags' })">
                         {{ $t('common.actions.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="saving">
+                    <Button type="submit" :disabled="saving || !isDirty">
                         <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.update') }}
                     </Button>
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../../../services/api';
@@ -118,11 +118,17 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(ta
 const loading = ref(true);
 const saving = ref(false);
 const tagId = route.params.id;
+const initialForm = ref(null);
 
 const form = ref({
     name: '',
     slug: '',
     description: '',
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
 });
 
 const generateSlug = () => {
@@ -152,6 +158,7 @@ const fetchTag = async () => {
             slug: data.slug || '',
             description: data.description || '',
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch tag:', error);
         toast.error.load(error);
@@ -168,6 +175,8 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         await api.put(`/admin/cms/tags/${tagId}`, form.value);
+        
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Tag');
         router.push({ name: 'tags.index' });
     } catch (error) {

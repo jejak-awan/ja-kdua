@@ -74,7 +74,7 @@
                     </Button>
                     <Button
                         @click="handleResize"
-                        :disabled="resizing || !width || !height"
+                        :disabled="resizing || !isValid"
                     >
                         {{ resizing ? $t('features.media.modals.resize.resizing') : $t('features.media.modals.resize.resize') }}
                     </Button>
@@ -113,6 +113,10 @@ const originalAspectRatio = computed(() => {
         return originalDimensions.value.width / originalDimensions.value.height;
     }
     return null;
+});
+
+const isValid = computed(() => {
+    return !!width.value && !!height.value;
 });
 
 const onImageLoad = (e) => {

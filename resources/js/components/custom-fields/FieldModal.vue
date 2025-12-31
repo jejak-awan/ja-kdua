@@ -141,7 +141,7 @@
                 <Button variant="outline" type="button" @click="$emit('close')">
                     {{ t('features.developer.custom_fields.fields.modal.cancel') }}
                 </Button>
-                <Button type="submit" :disabled="saving" @click="handleSubmit">
+                <Button type="submit" :disabled="saving || !isValid || (field && !isDirty)" @click="handleSubmit">
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? t('features.developer.custom_fields.fields.modal.saving') : (field ? t('features.developer.custom_fields.fields.modal.update') : t('features.developer.custom_fields.fields.modal.create')) }}
                 </Button>
@@ -151,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import { useToast } from '../../composables/useToast';
@@ -219,6 +219,17 @@ const slugify = (text) => {
         .replace(/_+$/, '');
 };
 
+const initialForm = ref(null);
+
+const isValid = computed(() => {
+    return !!form.value.label?.trim() && !!form.value.name?.trim() && !!form.value.type;
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return true;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const loadField = () => {
     if (props.field) {
         form.value = {
@@ -232,7 +243,20 @@ const loadField = () => {
             is_required: props.field.is_required || false,
             is_searchable: props.field.is_searchable || false,
         };
+    } else {
+        form.value = {
+            label: '',
+            name: '',
+            type: 'text',
+            field_group_id: null,
+            default_value: '',
+            options: '',
+            instructions: '',
+            is_required: false,
+            is_searchable: false,
+        };
     }
+    initialForm.value = JSON.parse(JSON.stringify(form.value));
 };
 
 const toast = useToast();

@@ -135,7 +135,7 @@
                     </Button>
                     <Button
                         @click="handleSubmit"
-                        :disabled="saving"
+                        :disabled="saving || !isDirty"
                     >
                         {{ saving ? $t('features.media.modals.edit.saving') : $t('features.media.actions.save') }}
                     </Button>
@@ -146,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast.js';
 import { X, FileText as FileIcon } from 'lucide-vue-next';
@@ -189,6 +189,13 @@ const form = ref({
     is_shared: false,
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const canManageMedia = authStore.hasPermission('manage media');
 
 const fetchFolders = async () => {
@@ -213,6 +220,7 @@ const loadMedia = () => {
             size: props.media.size || 0,
             is_shared: props.media.is_shared || false,
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 };
 
@@ -227,6 +235,7 @@ const handleSubmit = async () => {
             is_shared: form.value.is_shared,
         });
         
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         emit('updated');
     } catch (error) {
         // console.error('Failed to update media:', error);

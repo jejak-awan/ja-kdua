@@ -98,7 +98,7 @@
                     </button>
                     <button
                         @click="handleSubmit"
-                        :disabled="saving"
+                        :disabled="saving || !isValid || (webhook && !isDirty)"
                         class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
                     >
                         {{ saving ? t('features.developer.webhooks.modal.saving') : (webhook ? t('features.developer.webhooks.modal.update') : t('features.developer.webhooks.modal.create')) }}
@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import { useToast } from '../../composables/useToast';
@@ -146,6 +146,17 @@ const form = ref({
     is_active: true,
 });
 
+const initialForm = ref(null);
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim() && !!form.value.url?.trim() && form.value.events.length > 0;
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return true;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const loadWebhook = () => {
     if (props.webhook) {
         form.value = {
@@ -155,7 +166,16 @@ const loadWebhook = () => {
             secret: props.webhook.secret || '',
             is_active: props.webhook.is_active !== undefined ? props.webhook.is_active : true,
         };
+    } else {
+        form.value = {
+            name: '',
+            url: '',
+            events: [],
+            secret: '',
+            is_active: true,
+        };
     }
+    initialForm.value = JSON.parse(JSON.stringify(form.value));
 };
 
 const toast = useToast();

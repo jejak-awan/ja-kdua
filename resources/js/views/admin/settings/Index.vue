@@ -115,7 +115,7 @@
                         </Button>
                         <Button
                             type="submit"
-                            :disabled="saving"
+                            :disabled="saving || !isDirty"
                         >
                             {{ saving ? $t('features.settings.saving') : $t('features.settings.save') }}
                         </Button>
@@ -162,7 +162,19 @@ const initialTab = validTabs.includes(route.query.tab) ? route.query.tab : 'gene
 const activeTab = ref(initialTab);
 const settings = ref([]);
 const formData = ref({});
+const initialFormData = ref({}); // Track initial state
 const errors = ref({});
+
+const isDirty = computed(() => {
+    // Compare only keys present in currentSettings to handle tab switching correctly
+    const currentKeys = currentSettings.value.map(s => s.key);
+    for (const key of currentKeys) {
+        if (JSON.stringify(formData.value[key]) !== JSON.stringify(initialFormData.value[key])) {
+            return true;
+        }
+    }
+    return false;
+});
 
 // Email testing state
 const validatingConfig = ref(false);
@@ -287,6 +299,7 @@ const initializeFormData = () => {
         
         formData.value[setting.key] = value;
     });
+    initialFormData.value = JSON.parse(JSON.stringify(formData.value));
 };
 
 const resetForm = () => {
@@ -340,6 +353,7 @@ const handleSubmit = async () => {
         if (activeTab.value === 'performance') {
             getCacheStatus();
         }
+        initialFormData.value = JSON.parse(JSON.stringify(formData.value));
     } catch (error) {
         if (error.response?.status === 422) {
              errors.value = error.response.data.errors || {};

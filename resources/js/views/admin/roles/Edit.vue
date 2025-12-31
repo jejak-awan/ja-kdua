@@ -101,7 +101,7 @@
                 </Button>
                 <Button
                     type="submit"
-                    :disabled="saving"
+                    :disabled="saving || !isDirty"
                     class="min-w-[100px]"
                 >
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
@@ -144,6 +144,16 @@ const form = ref({
     permissions: []
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    // For roles, we need to compare name and permissions array
+    const nameChanged = form.value.name !== initialForm.value.name;
+    const permsChanged = JSON.stringify(form.value.permissions.sort()) !== JSON.stringify(initialForm.value.permissions.sort());
+    return nameChanged || permsChanged;
+});
+
 const protectedRoles = ['super-admin'];
 const isProtectedRole = (name) => protectedRoles.includes(name);
 
@@ -168,6 +178,7 @@ const fetchRole = async () => {
             name: role.name,
             permissions: (role.permissions || []).map(p => p.name)
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch role:', error);
         toast.error(t('features.roles.messages.fetchFailed'));
@@ -226,6 +237,7 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         await api.put(`/admin/cms/roles/${route.params.id}`, form.value);
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Role');
         router.push({ name: 'roles' });
     } catch (error) {

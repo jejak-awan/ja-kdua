@@ -219,7 +219,7 @@
                 </Button>
                 <Button
                     type="submit"
-                    :disabled="saving"
+                    :disabled="saving || !isDirty"
                 >
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.save') }}
@@ -271,6 +271,13 @@ const form = ref({
     is_verified: false,
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 
 const fetchRoles = async () => {
@@ -314,6 +321,7 @@ const fetchUser = async () => {
             roles: data.roles?.map(r => r.id) || [],
             is_verified: !!data.email_verified_at,
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch user:', error);
         toast.error.load();
@@ -349,6 +357,7 @@ const handleSubmit = async () => {
         }
 
         toast.success.update('User');
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         router.push({ name: 'users.index' });
     } catch (error) {
         if (error.response?.status === 422) {

@@ -137,7 +137,7 @@
                     </router-link>
                     <Button
                         type="submit"
-                        :disabled="saving"
+                        :disabled="saving || !isValid"
                     >
                         <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -160,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../../../services/api';
@@ -191,6 +191,10 @@ const formData = reactive({
     redirect_url: '',
     is_active: true,
     fields: []
+});
+
+const isValid = computed(() => {
+    return !!formData.name?.trim() && !!formData.slug?.trim();
 });
 
 const generateSlug = () => {

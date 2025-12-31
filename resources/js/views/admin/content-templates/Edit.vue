@@ -119,7 +119,7 @@
                                 {{ t('features.content_templates.form.cancel') }}
                             </router-link>
                         </Button>
-                        <Button type="submit" :disabled="saving">
+                        <Button type="submit" :disabled="saving || !isDirty">
                             <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                             <Save v-else class="w-4 h-4 mr-2" />
                             {{ saving ? t('features.content_templates.form.updating') : t('features.content_templates.form.update') }}
@@ -132,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -169,6 +169,7 @@ const templateId = route.params.id;
 
 const loading = ref(false);
 const saving = ref(false);
+const initialForm = ref(null);
 
 const form = ref({
     name: '',
@@ -177,6 +178,11 @@ const form = ref({
     title: '',
     body: '',
     excerpt: '',
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
 });
 
 const fetchTemplate = async () => {
@@ -193,6 +199,9 @@ const fetchTemplate = async () => {
             body: template.body || '',
             excerpt: template.excerpt || '',
         };
+        
+        // Save initial state for dirty checking
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch template:', error);
         toast.error.load(error);
@@ -210,7 +219,9 @@ const handleSubmit = async () => {
     try {
         await api.put(`/admin/cms/content-templates/${templateId}`, form.value);
         toast.success.update('Template');
-        router.push({ name: 'content-templates' });
+        
+        // Update initial form after successful save
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});

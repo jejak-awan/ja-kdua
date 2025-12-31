@@ -71,7 +71,7 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || !isValid || (redirect && !isDirty)"
                 >
                     <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
                     {{ isSubmitting ? $t('features.redirects.modals.redirect.saving') : (redirect ? $t('common.actions.update') : $t('common.actions.create')) }}
@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Dialog from '../ui/dialog.vue';
@@ -125,6 +125,17 @@ const form = ref({
     is_active: true,
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!props.redirect || !initialForm.value) return true; // Always true for create or if init not set
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
+const isValid = computed(() => {
+    return !!form.value.from_url?.trim() && !!form.value.to_url?.trim() && !!form.value.status_code;
+});
+
 const loadRedirect = () => {
     if (props.redirect) {
         form.value = {
@@ -133,6 +144,7 @@ const loadRedirect = () => {
             status_code: props.redirect.status_code || 301,
             is_active: props.redirect.is_active !== undefined ? props.redirect.is_active : true,
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 };
 

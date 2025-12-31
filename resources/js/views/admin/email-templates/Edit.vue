@@ -138,7 +138,7 @@
                         <Button variant="outline" type="button" @click="router.push({ name: 'email-templates' })">
                             {{ $t('common.actions.cancel') }}
                         </Button>
-                        <Button type="submit" :disabled="saving">
+                        <Button type="submit" :disabled="saving || !isDirty">
                             <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                             {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.save') }}
                         </Button>
@@ -150,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -191,6 +191,13 @@ const form = ref({
     body: '',
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const variables = ref([
     'user_name',
     'user_email',
@@ -212,6 +219,7 @@ const fetchTemplate = async () => {
             type: template.type || 'custom',
             body: template.body || '',
         };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch template:', error);
         toast.error.load(error);
@@ -252,6 +260,7 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         await api.put(`/admin/cms/email-templates/${templateId}`, form.value);
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Email Template');
         router.push({ name: 'email-templates' });
     } catch (error) {

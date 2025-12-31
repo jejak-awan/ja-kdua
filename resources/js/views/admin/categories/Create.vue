@@ -153,7 +153,7 @@
                     <Button variant="outline" type="button" @click="router.push({ name: 'categories' })">
                         {{ $t('common.actions.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="saving">
+                    <Button type="submit" :disabled="saving || !isValid">
                         <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? $t('common.messages.loading.creating') : $t('common.actions.create') }}
                     </Button>
@@ -227,8 +227,11 @@ const form = ref({
     description: '',
     image: null,
     parent_id: null, // Select returns string, handle conversion
-    sort_order: 0,
     is_active: true,
+});
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim();
 });
 
 const generateSlug = () => {

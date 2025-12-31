@@ -51,7 +51,7 @@
                 <Button variant="outline" @click="$emit('close')">
                     {{ $t('common.actions.cancel') }}
                 </Button>
-                <Button @click="handleSubmit" :disabled="isSubmitting">
+                <Button @click="handleSubmit" :disabled="isSubmitting || !isValid || (widget && !isDirty)">
                     <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
                     {{ isSubmitting ? $t('features.widgets.modals.widget.saving') : (widget ? $t('common.actions.update') : $t('common.actions.create')) }}
                 </Button>
@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Dialog from '../ui/dialog.vue';
@@ -101,9 +101,21 @@ const form = ref({
     is_active: true
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!props.widget || !initialForm.value) return true;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
+const isValid = computed(() => {
+    return !!form.value.title?.trim() && !!form.value.type;
+});
+
 const loadWidget = () => {
     if (props.widget) {
         form.value = { ...props.widget, is_active: !!props.widget.is_active };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 };
 

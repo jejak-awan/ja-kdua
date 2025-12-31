@@ -19,7 +19,7 @@ export const contentSchema = z.object({
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, t('common.validation.slug'))
         .optional()
         .or(z.literal('')),
-    content: z.string().optional(),
+    body: z.string().optional(),
     excerpt: z.string()
         .max(500, t('common.validation.max', { field: 'Excerpt', max: 500 }))
         .optional()

@@ -53,7 +53,7 @@
                     <Button variant="outline" type="button" @click="$emit('close')">
                         {{ t('features.developer.custom_fields.groups.modal.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="saving">
+                    <Button type="submit" :disabled="saving || !isValid || (fieldGroup && !isDirty)">
                         <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? t('features.developer.custom_fields.groups.modal.saving') : (fieldGroup ? t('features.developer.custom_fields.groups.modal.update') : t('features.developer.custom_fields.groups.modal.create')) }}
                     </Button>
@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import { useToast } from '../../composables/useToast';
@@ -103,6 +103,17 @@ const form = ref({
     attachable_type: null,
 });
 
+const initialForm = ref(null);
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim();
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return true;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
 const loadFieldGroup = () => {
     if (props.fieldGroup) {
         form.value = {
@@ -110,7 +121,14 @@ const loadFieldGroup = () => {
             description: props.fieldGroup.description || '',
             attachable_type: props.fieldGroup.attachable_type || null,
         };
+    } else {
+        form.value = {
+            name: '',
+            description: '',
+            attachable_type: null,
+        };
     }
+    initialForm.value = JSON.parse(JSON.stringify(form.value));
 };
 
 const toast = useToast();

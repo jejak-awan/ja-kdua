@@ -28,7 +28,7 @@
                         <X class="w-4 h-4 mr-2" />
                         {{ t('common.actions.cancel') }}
                     </Button>
-                    <Button size="sm" @click="saveImage" :disabled="saving" class="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]">
+                    <Button size="sm" @click="saveImage" :disabled="saving || !hasChanges" class="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]">
                         <Save class="w-4 h-4 mr-2" v-if="!saving" />
                         <span v-else class="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                         {{ t('common.actions.save') }}
@@ -299,6 +299,19 @@ const filterStyle = computed(() => {
     return {
         filter: `brightness(${filters.value.brightness}%) contrast(${filters.value.contrast}%) saturate(${filters.value.saturation}%)`
     };
+});
+
+const hasChanges = computed(() => {
+    // If image source changed (e.g. it's now a data URL from crop/resize/filter)
+    const isSourceChanged = currentImageSrc.value !== props.media.url;
+    
+    // If we have pending filter changes in adjust mode
+    const pendingFilters = activeMode.value === 'adjust' && isFilterDirty();
+    
+    // If Save As New is toggled
+    const isSaveAsNew = saveAsNew.value;
+
+    return isSourceChanged || pendingFilters || isSaveAsNew;
 });
 
 // --- Methods ---

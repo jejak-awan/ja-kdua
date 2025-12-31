@@ -114,6 +114,7 @@
                                 <Button
                                     variant="destructive"
                                     @click="blockIP"
+                                    :disabled="!isValidBlockIp"
                                 >
                                     {{ $t('features.security.ipManagement.block.button') }}
                                 </Button>
@@ -131,6 +132,7 @@
                                 />
                                 <Button
                                     @click="checkIPStatus"
+                                    :disabled="!isValidCheckIp"
                                 >
                                     {{ $t('features.security.ipManagement.check.button') }}
                                 </Button>
@@ -435,6 +437,7 @@
                             />
                             <Button
                                 @click="addToWhitelist(ipToWhitelist)"
+                                :disabled="!isValidWhitelistIp"
                             >
                                 <Plus class="w-4 h-4 mr-2" />
                                 {{ $t('common.actions.add') }}
@@ -596,6 +599,11 @@ watch(blocklistPerPage, () => {
 watch(whitelistPerPage, () => {
     whitelistCurrentPage.value = 1;
 });
+
+// Validation
+const isValidBlockIp = computed(() => !!ipToBlock.value?.trim());
+const isValidCheckIp = computed(() => !!ipToCheck.value?.trim());
+const isValidWhitelistIp = computed(() => !!ipToWhitelist.value?.trim());
 
 // Tabs
 const tabs = computed(() => [

@@ -201,7 +201,7 @@
             <Button type="button" variant="outline" @click="dialogOpen = false">
               {{ $t('common.actions.cancel') }}
             </Button>
-            <Button type="submit" :disabled="saving">
+            <Button type="submit" :disabled="saving || !isValid || (editingTask && !isDirty)">
               {{ saving ? $t('common.actions.save') + '...' : $t('common.actions.save') }}
             </Button>
           </DialogFooter>
@@ -281,12 +281,23 @@ const form = ref({
   is_active: true
 });
 
+const initialForm = ref(null);
+
 const cronPresets = {
   hourly: '0 * * * *',
   daily: '0 0 * * *',
   weekly: '0 0 * * 0',
   monthly: '0 0 1 * *'
 };
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim() && !!form.value.command && !!form.value.schedule?.trim();
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return true; // Default to true if init not set
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
 
 onMounted(async () => {
   await Promise.all([
@@ -327,6 +338,7 @@ function openCreateDialog() {
   };
   cronPreset.value = '';
   errors.value = {};
+  initialForm.value = JSON.parse(JSON.stringify(form.value));
   dialogOpen.value = true;
 }
 
@@ -340,6 +352,7 @@ function editTask(task) {
     description: task.description || '',
     is_active: task.is_active
   };
+  initialForm.value = JSON.parse(JSON.stringify(form.value));
   dialogOpen.value = true;
 }
 

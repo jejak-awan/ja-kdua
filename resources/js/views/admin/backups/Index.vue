@@ -83,7 +83,7 @@
                 <Button
                     variant="ghost"
                     size="sm"
-                    @click="showScheduleModal = true"
+                    @click="openScheduleModal"
                     class="h-8 text-primary hover:text-primary hover:bg-primary/10"
                 >
                     <Settings class="w-4 h-4 mr-2" />
@@ -255,7 +255,7 @@
                     <Button variant="outline" @click="showScheduleModal = false">
                         {{ t('features.system.backups.schedule.modal.cancel') }}
                     </Button>
-                    <Button @click="saveSchedule" :disabled="savingSchedule">
+                    <Button @click="saveSchedule" :disabled="savingSchedule || !isScheduleDirty">
                         <Loader2 v-if="savingSchedule" class="w-4 h-4 mr-2 animate-spin" />
                         {{ savingSchedule ? t('features.system.backups.schedule.modal.saving') : t('features.system.backups.schedule.modal.save') }}
                     </Button>
@@ -328,6 +328,12 @@ const scheduleForm = ref({
     backup_schedule_time: '02:00',
     backup_retention_days: 30,
     backup_max_count: 10
+});
+const initialScheduleForm = ref(null);
+
+const isScheduleDirty = computed(() => {
+    if (!initialScheduleForm.value) return false;
+    return JSON.stringify(scheduleForm.value) !== JSON.stringify(initialScheduleForm.value);
 });
 
 const filteredBackups = computed(() => {
@@ -470,6 +476,21 @@ const saveSchedule = async () => {
     } finally {
         savingSchedule.value = false;
     }
+};
+
+const openScheduleModal = () => {
+    // Populate form from statistics
+    if (statistics.value && statistics.value.schedule) {
+        scheduleForm.value = {
+            backup_schedule_enabled: Boolean(statistics.value.schedule.enabled),
+            backup_schedule_frequency: statistics.value.schedule.frequency || 'daily',
+            backup_schedule_time: statistics.value.schedule.time || '02:00',
+            backup_retention_days: Number(statistics.value.schedule.retention_days) || 30,
+            backup_max_count: Number(statistics.value.schedule.max_count) || 10
+        };
+    }
+    initialScheduleForm.value = JSON.parse(JSON.stringify(scheduleForm.value));
+    showScheduleModal.value = true;
 };
 
 const formatDate = (date) => {

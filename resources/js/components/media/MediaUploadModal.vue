@@ -86,7 +86,7 @@
                 </Button>
                 <Button
                     @click="handleUpload"
-                    :disabled="selectedFiles.length === 0 || uploading"
+                    :disabled="uploading || !isValid"
                 >
                     <Loader2 v-if="uploading" class="mr-2 h-4 w-4 animate-spin" />
                     {{ uploading ? $t('features.media.modals.upload.uploading') : $t('features.media.modals.upload.uploadAction', { count: selectedFiles.length }) }}
@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast.js';
 import { CloudUpload, Trash2, Loader2 } from 'lucide-vue-next';
@@ -127,6 +127,10 @@ const selectedFiles = ref([]);
 const uploading = ref(false);
 const uploadProgress = ref(0);
 const isDragging = ref(false);
+
+const isValid = computed(() => {
+    return selectedFiles.value.length > 0;
+});
 
 const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);

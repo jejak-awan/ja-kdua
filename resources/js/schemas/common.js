@@ -171,8 +171,11 @@ export const contentTemplateSchema = z.object({
     name: z.string()
         .min(1, t('common.validation.required', { field: 'Name' }))
         .max(255, t('common.validation.max', { field: 'Name', max: 255 })),
+    title: z.string().optional().or(z.literal('')),
+    body: z.string().optional().or(z.literal('')),
+    excerpt: z.string().optional().or(z.literal('')),
     description: z.string().optional().or(z.literal('')),
-    content: z.string().optional().or(z.literal('')),
+    type: z.enum(['post', 'page', 'custom'], { required_error: t('common.validation.required', { field: 'Type' }) }),
     is_active: z.boolean().optional(),
 });
 

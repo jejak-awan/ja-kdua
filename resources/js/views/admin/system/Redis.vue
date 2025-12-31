@@ -285,7 +285,7 @@
             </Button>
             <Button 
               type="submit" 
-              :disabled="saving"
+              :disabled="saving || !isDirty"
               class="min-w-[140px]"
             >
               <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
@@ -544,9 +544,14 @@ const tabs = [
 
 // Settings
 const settings = ref({})
-const settingsForm = ref({})
+const settingsForm = ref({});
+const initialSettingsForm = ref({}); // Track initial state
 const errors = ref({})
 const cacheDriver = ref(null) // Global cache driver status
+
+const isDirty = computed(() => {
+    return JSON.stringify(settingsForm.value) !== JSON.stringify(initialSettingsForm.value);
+});
 
 const groupedSettings = computed(() => {
   const groups = {}
@@ -602,6 +607,7 @@ const loadSettings = async () => {
         settingsForm.value[item.key] = item.value
       })
     })
+    initialSettingsForm.value = JSON.parse(JSON.stringify(settingsForm.value));
   } catch (error) {
     console.error('Failed to load Redis settings:', error)
   }

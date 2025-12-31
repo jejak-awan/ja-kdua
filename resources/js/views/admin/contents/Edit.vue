@@ -66,7 +66,7 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="loading || (lockStatus?.locked_by && lockStatus.locked_by.id !== authStore.user?.id)"
+                    :disabled="loading || (lockStatus?.locked_by && lockStatus.locked_by.id !== authStore.user?.id) || !isDirty"
                     class="min-w-[120px] shadow-sm"
                 >
                     <template v-if="loading">
@@ -178,6 +178,7 @@ const tags = ref([]);
 const selectedTags = ref([]);
 const lockStatus = ref(null);
 const lockInterval = ref(null);
+const initialForm = ref(null);
 
 const form = ref({
     title: '',
@@ -193,6 +194,15 @@ const form = ref({
     meta_description: '',
     meta_keywords: '',
     og_image: null,
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    const currentForm = {
+        ...form.value,
+        tags: selectedTags.value.map(t => t.id),
+    };
+    return JSON.stringify(currentForm) !== JSON.stringify(initialForm.value);
 });
 
 // Auto-generation logic (Similar to Create but cautious about overwriting existing data)
@@ -271,6 +281,12 @@ const fetchContent = async () => {
         if (content.tags && Array.isArray(content.tags)) {
             selectedTags.value = content.tags;
         }
+        
+        // Save initial state for dirty checking (including tags)
+        initialForm.value = JSON.parse(JSON.stringify({
+            ...form.value,
+            tags: selectedTags.value.map(t => t.id),
+        }));
         
         // Enable auto-save after content is loaded
         autoSaveEnabled.value = true;
@@ -427,11 +443,16 @@ const handleSubmit = async () => {
                 ...form.value,
                 ...updatedContent,
             };
-            // Update last saved time
             if (response.data?.updated_at) {
                 lastSaved.value = new Date(response.data.updated_at);
             }
         }
+        
+        // Update initial form after successful save
+        initialForm.value = JSON.parse(JSON.stringify({
+            ...form.value,
+            tags: selectedTags.value.map(t => t.id),
+        }));
         
         toast.success.update('Content');
         router.push({ name: 'contents' });

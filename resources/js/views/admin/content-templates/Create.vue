@@ -114,7 +114,7 @@
                                 {{ t('features.content_templates.form.cancel') }}
                             </router-link>
                         </Button>
-                        <Button type="submit" :disabled="saving">
+                        <Button type="submit" :disabled="saving || !isValid">
                             <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                             <Save v-else class="w-4 h-4 mr-2" />
                             {{ saving ? t('features.content_templates.form.saving') : t('features.content_templates.form.save') }}
@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
@@ -167,6 +167,10 @@ const form = ref({
     title: '',
     body: '',
     excerpt: '',
+});
+
+const isValid = computed(() => {
+    return form.value.name?.trim() && form.value.type;
 });
 
 const handleSubmit = async () => {

@@ -84,7 +84,7 @@
                             <div class="flex gap-3">
                                 <Button
                                     @click="saveRobotsTxt"
-                                    :disabled="savingRobots"
+                                    :disabled="savingRobots || !isDirty"
                                 >
                                     <Loader2 v-if="savingRobots" class="w-4 h-4 mr-2 animate-spin" />
                                     <Save v-else class="w-4 h-4 mr-2" />
@@ -93,6 +93,7 @@
                                 <Button
                                     variant="outline"
                                     @click="fetchRobotsTxt"
+                                    :disabled="!isDirty && !!robotsContent"
                                 >
                                     <RotateCcw class="w-4 h-4 mr-2" />
                                     {{ $t('features.seo.robots.reload') }}
@@ -279,12 +280,18 @@ const analysisResults = ref(null);
 const selectedContentForSchema = ref(null);
 const generatingSchema = ref(false);
 const schemaJson = ref(null);
+const initialRobotsContent = ref('');
+
+const isDirty = computed(() => {
+    return robotsContent.value !== initialRobotsContent.value;
+});
 
 const fetchRobotsTxt = async () => {
     try {
         const response = await api.get('/admin/cms/seo/robots-txt');
         const data = parseSingleResponse(response) || {};
         robotsContent.value = data.content || '';
+        initialRobotsContent.value = robotsContent.value;
     } catch (error) {
         console.error('Failed to fetch robots.txt:', error);
     }
@@ -294,6 +301,7 @@ const saveRobotsTxt = async () => {
     savingRobots.value = true;
     try {
         await api.put('/admin/cms/seo/robots-txt', { content: robotsContent.value });
+        initialRobotsContent.value = robotsContent.value;
         toast.success.save();
     } catch (error) {
         console.error('Failed to save robots.txt:', error);

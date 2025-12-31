@@ -34,7 +34,7 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="loading"
+                    :disabled="loading || !isValid"
                     class="min-w-[120px] shadow-sm"
                 >
                     <template v-if="loading">
@@ -158,6 +158,10 @@ const formWithTags = computed(() => ({
     ...form.value,
     tags: selectedTags.value.map(t => t.id),
 }));
+
+const isValid = computed(() => {
+    return !!form.value.title?.trim();
+});
 
 // Auto-save setup
 const {

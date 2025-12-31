@@ -78,7 +78,7 @@
                     </Button>
                     <Button
                         @click="handleSubmit"
-                        :disabled="saving"
+                        :disabled="saving || !isValid"
                     >
                         {{ saving ? $t('features.media.modals.folder.creating') : $t('features.media.modals.folder.create') }}
                     </Button>
@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/composables/useToast.js';
 import { X } from 'lucide-vue-next';
@@ -117,6 +117,10 @@ const form = ref({
     name: '',
     parent_id: null,
     is_shared: false,
+});
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim();
 });
 
 const canManageMedia = authStore.hasPermission('manage media');

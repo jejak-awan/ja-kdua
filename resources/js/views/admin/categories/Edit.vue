@@ -153,7 +153,7 @@
                     <Button variant="outline" type="button" @click="router.push({ name: 'categories' })">
                         {{ $t('common.actions.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="saving">
+                    <Button type="submit" :disabled="saving || !isDirty">
                         <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                         {{ saving ? $t('common.messages.loading.saving') : $t('common.actions.save') }}
                     </Button>
@@ -201,6 +201,7 @@ const loading = ref(true);
 const saving = ref(false);
 const categories = ref([]);
 const currentCategory = ref(null);
+const initialForm = ref(null);
 
 const form = ref({
     name: '',
@@ -210,6 +211,11 @@ const form = ref({
     parent_id: null,
     sort_order: 0,
     is_active: true,
+});
+
+const isDirty = computed(() => {
+    if (!initialForm.value) return false;
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
 });
 
 const flattenedCategories = computed(() => {
@@ -280,6 +286,8 @@ const fetchCategory = async () => {
             sort_order: data.sort_order || 0,
             is_active: data.is_active !== undefined ? data.is_active : true,
         };
+        
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch category:', error);
         toast.error.load(error);
@@ -298,6 +306,8 @@ const handleSubmit = async () => {
             payload.parent_id = null;
         }
         await api.put(`/admin/cms/categories/${route.params.id}`, payload);
+        
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Category');
         router.push({ name: 'categories' });
     } catch (error) {

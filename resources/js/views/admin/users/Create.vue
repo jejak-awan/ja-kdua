@@ -200,7 +200,7 @@
                 </Button>
                 <Button
                     type="submit"
-                    :disabled="saving"
+                    :disabled="saving || !isValid"
                 >
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? $t('common.messages.loading.creating') : $t('common.actions.create') }}
@@ -248,6 +248,13 @@ const form = ref({
     location: '',
     avatar: null,
     roles: [],
+});
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim() && 
+           !!form.value.email?.trim() && 
+           !!form.value.password?.trim() &&
+           form.value.roles.length > 0;
 });
 
 const fetchRoles = async () => {

@@ -88,7 +88,7 @@
                 <Button variant="outline" @click="$emit('close')">
                     {{ t('features.menus.actions.cancel') }}
                 </Button>
-                <Button @click="handleSubmit" :disabled="saving">
+                <Button @click="handleSubmit" :disabled="saving || !isValid || (item && !isDirty)">
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
                     {{ saving ? t('features.menus.actions.saving') : (item ? t('features.menus.actions.update') : t('features.menus.actions.createAction')) }}
                 </Button>
@@ -142,6 +142,19 @@ const form = ref({
     parent_id: null,
 });
 
+const initialForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!props.item || !initialForm.value) return true; // Always true for create or if init not set
+    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
+const isValid = computed(() => {
+    const commonValid = !!form.value.label?.trim();
+    if (form.value.type === 'link') return commonValid && !!form.value.url?.trim();
+    return commonValid;
+});
+
 const handleTypeChange = () => {
     form.value.url = '';
     form.value.target_id = null;
@@ -178,6 +191,7 @@ const handleSubmit = async () => {
 onMounted(() => {
     if (props.item) {
         form.value = { ...props.item };
+        initialForm.value = JSON.parse(JSON.stringify(form.value));
     }
 });
 </script>

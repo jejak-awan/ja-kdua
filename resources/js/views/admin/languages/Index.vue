@@ -210,7 +210,7 @@
                     </Button>
                     <Button 
                         @click="createLanguage" 
-                        :disabled="creating"
+                        :disabled="creating || !isValid"
                     >
                         <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
                         {{ creating ? $t('common.messages.loading.default') : $t('common.actions.create') }}
@@ -222,7 +222,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import { useToast } from '../../../composables/useToast';
@@ -278,6 +278,10 @@ const form = ref({
     code: '',
     name: '',
     create_from_template: true,
+});
+
+const isValid = computed(() => {
+    return !!form.value.code?.trim() && !!form.value.name?.trim();
 });
 
 // UI Locale info

@@ -85,7 +85,7 @@
                             </div>
                             <Button
                                 type="submit"
-                                :disabled="saving"
+                                :disabled="saving || !isDirty"
                                 class="w-full mt-4"
                             >
                                 <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
@@ -154,6 +154,13 @@ const menuForm = ref({
     location: '',
 });
 
+const initialMenuForm = ref(null);
+
+const isDirty = computed(() => {
+    if (!initialMenuForm.value) return false;
+    return JSON.stringify(menuForm.value) !== JSON.stringify(initialMenuForm.value);
+});
+
 const fetchMenu = async () => {
     loading.value = true;
     try {
@@ -163,6 +170,7 @@ const fetchMenu = async () => {
             name: menu.value.name || '',
             location: menu.value.location || '',
         };
+        initialMenuForm.value = JSON.parse(JSON.stringify(menuForm.value));
         
         // Fetch menu items and build tree
         const itemsResponse = await api.get(`/admin/cms/menus/${menuId}/items`);
@@ -214,6 +222,7 @@ const saveMenu = async () => {
         const reordered = flattenTree(nestedItems.value);
         await api.post(`/admin/cms/menus/${menuId}/reorder`, { items: reordered });
         
+        initialMenuForm.value = JSON.parse(JSON.stringify(menuForm.value));
         toast.success.update('Menu');
         await fetchMenu();
     } catch (error) {

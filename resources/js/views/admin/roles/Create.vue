@@ -96,7 +96,7 @@
                 </Button>
                 <Button
                     type="submit"
-                    :disabled="saving"
+                    :disabled="saving || !isValid"
                     class="min-w-[100px]"
                 >
                     <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
@@ -136,6 +136,10 @@ const permissions = ref({});
 const form = ref({
     name: '',
     permissions: []
+});
+
+const isValid = computed(() => {
+    return !!form.value.name?.trim();
 });
 
 const groupedPermissions = computed(() => permissions.value);

@@ -30,7 +30,7 @@
                 </Button>
                 <Button
                     @click="handleSubmit"
-                    :disabled="creating || !folderName"
+                    :disabled="creating || !isValid"
                     type="submit"
                 >
                     {{ creating ? $t('features.file_manager.actions.creating') : $t('features.file_manager.actions.create') }}
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Button from '../ui/button.vue';
@@ -70,6 +70,10 @@ const emit = defineEmits(['close', 'created']);
 
 const folderName = ref('');
 const creating = ref(false);
+
+const isValid = computed(() => {
+    return !!folderName.value?.trim();
+});
 
 const handleSubmit = async () => {
     if (!validateWithZod({ name: folderName.value })) return;
