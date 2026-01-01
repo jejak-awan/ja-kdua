@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-foreground">{{ $t('features.scheduled_tasks.title') }}</h1>
-        <p class="text-muted-foreground mt-1">{{ $t('features.scheduled_tasks.description') }}</p>
+        <p class="text-muted-foreground mt-1 text-sm">{{ $t('features.scheduled_tasks.description') }}</p>
       </div>
       <Button @click="openCreateDialog">
         <Plus class="w-4 h-4 mr-2" />
@@ -12,117 +12,203 @@
       </Button>
     </div>
 
-    <!-- Tasks Table -->
-    <Card>
-      <CardContent class="p-0">
+    <!-- Filter Bar -->
+    <div class="bg-card border border-border rounded-lg p-4 sticky top-0 z-10 shadow-sm backdrop-blur-xl bg-card/80">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <!-- Search -->
+        <div class="flex items-center gap-3 flex-1 w-full md:w-auto">
+          <div class="relative flex-1 md:max-w-xs">
+            <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              v-model="search"
+              :placeholder="$t('common.actions.search')"
+              class="pl-9 h-9 w-full md:w-[280px]"
+              @input="debouncedSearch"
+            />
+          </div>
+        </div>
+
+        <!-- Bulk Actions & View Toggle -->
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+          >
+            <div v-if="selectedTasks.length > 0" class="flex items-center gap-2">
+              <span class="text-sm text-muted-foreground hidden sm:inline-block">
+                {{ selectedTasks.length }} selected
+              </span>
+              <Select v-model="bulkActionSelection" @update:modelValue="handleBulkAction">
+                <SelectTrigger class="w-[140px] h-9 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 transition-colors">
+                  <SelectValue :placeholder="$t('common.actions.bulkAction')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="delete" class="text-destructive focus:text-destructive">
+                    <div class="flex items-center">
+                      <Trash2 class="w-4 h-4 mr-2" />
+                      {{ $t('common.actions.delete') }}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="space-y-2">
+        <div v-for="i in 3" :key="i" class="h-16 rounded-lg bg-card border border-border animate-pulse"></div>
+    </div>
+
+    <!-- No Tasks State -->
+    <div v-else-if="tasks.length === 0" class="text-center py-12 bg-card border border-border rounded-lg">
+      <div class="p-4 rounded-full bg-muted w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+        <Calendar class="w-8 h-8 text-muted-foreground" />
+      </div>
+      <h3 class="text-lg font-medium text-foreground mb-1">{{ $t('features.scheduled_tasks.no_tasks') }}</h3>
+      <p class="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+        {{ search ? $t('common.messages.empty.search', { query: search }) : $t('features.scheduled_tasks.description') }}
+      </p>
+      <Button v-if="search" variant="outline" @click="search = ''; fetchTasks()">
+        {{ $t('common.actions.clear') }}
+      </Button>
+      <Button v-else @click="openCreateDialog">
+        <Plus class="w-4 h-4 mr-2" />
+        {{ $t('features.scheduled_tasks.create') }}
+      </Button>
+    </div>
+
+    <!-- Tasks List -->
+    <div v-else class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
         <Table>
-          <TableHeader>
+          <TableHeader class="bg-muted/50 border-b">
             <TableRow>
-              <TableHead>{{ $t('features.scheduled_tasks.table.name') }}</TableHead>
-              <TableHead>{{ $t('features.scheduled_tasks.table.command') }}</TableHead>
-              <TableHead>{{ $t('features.scheduled_tasks.table.schedule') }}</TableHead>
-              <TableHead>{{ $t('features.scheduled_tasks.table.last_run') }}</TableHead>
-              <TableHead>{{ $t('features.scheduled_tasks.table.status') }}</TableHead>
-              <TableHead>{{ $t('features.scheduled_tasks.table.active') }}</TableHead>
-              <TableHead class="text-right">{{ $t('features.scheduled_tasks.table.actions') }}</TableHead>
+              <TableHead class="w-10 px-6 py-3">
+                <Checkbox 
+                  :checked="isAllSelected"
+                  @update:checked="toggleSelectAll"
+                />
+              </TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.name') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.command') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.schedule') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.last_run') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.status') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.active') }}</TableHead>
+              <TableHead class="px-6 py-3 font-medium text-right text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.table.actions') }}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            <TableRow v-if="loading">
-              <TableCell colspan="7" class="text-center py-12">
-                <Loader2 class="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-                <p class="text-sm text-muted-foreground mt-2">Loading tasks...</p>
+          <TableBody class="divide-y divide-border">
+            <TableRow 
+              v-for="task in tasks" 
+              :key="task.id" 
+              class="group hover:bg-muted/50 transition-colors"
+              :class="{ 'bg-muted/30': selectedTasks.includes(task.id) }"
+            >
+              <TableCell class="px-6 py-4">
+                <Checkbox 
+                  :checked="selectedTasks.includes(task.id)"
+                  @update:checked="(checked) => toggleSelection(task.id)"
+                />
               </TableCell>
-            </TableRow>
-            <TableRow v-else-if="tasks.length === 0">
-              <TableCell colspan="7" class="text-center py-12">
-                 <Calendar class="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
-                 <p class="text-muted-foreground font-medium">{{ $t('features.scheduled_tasks.no_tasks') }}</p>
+              <TableCell class="px-6 py-4 font-semibold">{{ task.name }}</TableCell>
+              <TableCell class="px-6 py-4">
+                <code class="text-[11px] bg-muted px-2 py-0.5 rounded border border-border group-hover:bg-background transition-colors">{{ task.command }}</code>
               </TableCell>
-            </TableRow>
-            <template v-else>
-              <TableRow v-for="task in tasks" :key="task.id" class="hover:bg-muted/50 group transition-colors">
-                <TableCell class="font-semibold">{{ task.name }}</TableCell>
-                <TableCell>
-                  <code class="text-[11px] bg-muted px-2 py-0.5 rounded border border-border group-hover:bg-background transition-colors">{{ task.command }}</code>
-                </TableCell>
-                <TableCell>
-                  <code class="text-[11px] font-mono font-bold text-primary">{{ task.schedule }}</code>
-                </TableCell>
-                <TableCell>
-                  <div v-if="task.last_run_at" class="flex flex-col">
-                    <span class="text-sm font-medium">{{ formatDate(task.last_run_at) }}</span>
-                    <span class="text-[10px] text-muted-foreground tabular-nums">{{ task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '' }}</span>
-                  </div>
-                  <span v-else class="text-muted-foreground text-sm italic">{{ $t('common.labels.never') }}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    :variant="getStatusVariant(task.status)"
-                    class="capitalize text-[10px] px-2 py-0"
-                  >
-                    {{ $t('features.scheduled_tasks.status.' + (task.status || 'pending')) }}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button 
+              <TableCell class="px-6 py-4">
+                <code class="text-[11px] font-mono font-bold text-primary">{{ task.schedule }}</code>
+              </TableCell>
+              <TableCell class="px-6 py-4">
+                <div v-if="task.last_run_at" class="flex flex-col">
+                  <span class="text-sm font-medium">{{ formatDate(task.last_run_at) }}</span>
+                  <span class="text-[10px] text-muted-foreground tabular-nums">{{ task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '' }}</span>
+                </div>
+                <span v-else class="text-muted-foreground text-sm italic">{{ $t('common.labels.never') }}</span>
+              </TableCell>
+              <TableCell class="px-6 py-4">
+                <Badge 
+                  :variant="getStatusVariant(task.status)"
+                  class="capitalize text-[10px] px-2 py-0"
+                >
+                  {{ $t('features.scheduled_tasks.status.' + (task.status || 'pending')) }}
+                </Badge>
+              </TableCell>
+              <TableCell class="px-6 py-4">
+                 <Button 
                     size="sm" 
                     :variant="task.is_active ? 'default' : 'secondary'"
                     @click="toggleActive(task)"
-                    class="h-7 text-[10px] font-bold uppercase tracking-wider px-3"
+                    class="h-6 text-[10px] font-bold px-2"
                   >
                     {{ task.is_active ? $t('common.labels.active') : $t('common.labels.inactive') }}
                   </Button>
-                </TableCell>
-                <TableCell class="text-right">
-                  <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      size="icon" 
-                      variant="ghost"
-                      @click="runTask(task)"
-                      :disabled="running === task.id"
-                      :title="$t('common.actions.run')"
-                      class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                    >
-                      <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
-                      <Play v-else class="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="ghost"
-                      @click="viewOutput(task)"
-                      v-if="task.output"
-                      :title="$t('features.scheduled_tasks.output.title')"
-                      class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    >
-                      <FileText class="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="ghost"
-                      @click="editTask(task)"
-                      :title="$t('common.actions.edit')"
-                      class="h-8 w-8 hover:bg-muted"
-                    >
-                      <Pencil class="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="ghost"
-                      @click="confirmDelete(task)"
-                      :title="$t('common.actions.delete')"
-                      class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 class="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </template>
+              </TableCell>
+              <TableCell class="px-6 py-4 text-right">
+                <div class="flex justify-end gap-1">
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    @click="runTask(task)"
+                    :disabled="running === task.id"
+                    :title="$t('common.actions.run')"
+                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                  >
+                    <Loader2 v-if="running === task.id" class="w-4 h-4 animate-spin" />
+                    <Play v-else class="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    @click="viewOutput(task)"
+                    v-if="task.output"
+                    :title="$t('features.scheduled_tasks.output.title')"
+                    class="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  >
+                    <FileText class="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    @click="editTask(task)"
+                    :title="$t('common.actions.edit')"
+                    class="h-8 w-8 hover:bg-muted"
+                  >
+                    <Pencil class="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    @click="confirmDelete(task)"
+                    :title="$t('common.actions.delete')"
+                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="mt-6">
+        <Pagination
+            v-if="pagination.total > 0"
+            :total="pagination.total"
+            :per-page="pagination.per_page"
+            :current-page="pagination.current_page"
+            @page-change="changePage"
+        />
+    </div>
 
     <!-- Create/Edit Dialog -->
     <Dialog v-model:open="dialogOpen">
@@ -224,14 +310,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { debounce } from 'lodash';
 
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 
-// UI Components - individual imports
+// UI Components
+import Card from '@/components/ui/card.vue';
+import CardContent from '@/components/ui/card-content.vue';
 import Table from '@/components/ui/table.vue';
 import TableBody from '@/components/ui/table-body.vue';
 import TableCell from '@/components/ui/table-cell.vue';
@@ -253,16 +342,18 @@ import SelectTrigger from '@/components/ui/select-trigger.vue';
 import SelectValue from '@/components/ui/select-value.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
+import Pagination from '@/components/ui/pagination.vue';
+import Checkbox from '@/components/ui/checkbox.vue';
 
-import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar } from 'lucide-vue-next';
+import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar, Search } from 'lucide-vue-next';
 
 const { t } = useI18n();
-
 const { confirm } = useConfirm();
 const toast = useToast();
 
 const tasks = ref([]);
 const loading = ref(true);
+const search = ref('');
 const dialogOpen = ref(false);
 const outputDialogOpen = ref(false);
 const selectedTaskOutput = ref('');
@@ -272,6 +363,17 @@ const running = ref(null);
 const allowedCommands = ref([]);
 const cronPreset = ref('');
 const errors = ref({});
+
+// Selection & Bulk Actions
+const selectedTasks = ref([]);
+const bulkActionSelection = ref('');
+
+const pagination = ref({
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    total: 0
+});
 
 const form = ref({
   name: '',
@@ -295,8 +397,12 @@ const isValid = computed(() => {
 });
 
 const isDirty = computed(() => {
-    if (!initialForm.value) return true; // Default to true if init not set
+    if (!initialForm.value) return true;
     return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+});
+
+const isAllSelected = computed(() => {
+    return tasks.value.length > 0 && selectedTasks.value.length === tasks.value.length;
 });
 
 onMounted(async () => {
@@ -306,13 +412,37 @@ onMounted(async () => {
   ]);
 });
 
-async function fetchTasks() {
+async function fetchTasks(page = 1) {
   try {
     loading.value = true;
-    const response = await api.get('/admin/cms/scheduled-tasks');
-    tasks.value = response.data.data;
+    const params = {
+        page,
+        search: search.value,
+        limit: 10
+    }
+    const response = await api.get('/admin/cms/scheduled-tasks', { params });
+    
+    // Handle both paginated and non-paginated responses for compatibility
+    if (response.data?.meta) {
+        tasks.value = response.data.data;
+        pagination.value = {
+            current_page: response.data.meta.current_page,
+            last_page: response.data.meta.last_page,
+            per_page: response.data.meta.per_page,
+            total: response.data.meta.total
+        };
+    } else if (response.data?.data) {
+        // If API returns plain list, handle client-side if needed or just display all
+        tasks.value = response.data.data;
+        pagination.value.total = tasks.value.length;
+    } else {
+        tasks.value = [];
+    }
+    
+    selectedTasks.value = [];
   } catch (error) {
     console.error('Failed to fetch tasks:', error.message);
+    toast.error.load(error);
   } finally {
     loading.value = false;
   }
@@ -326,6 +456,72 @@ async function fetchAllowedCommands() {
     console.error('Failed to fetch allowed commands:', error);
   }
 }
+
+const debouncedSearch = debounce(() => {
+    fetchTasks(1);
+}, 300);
+
+const changePage = (page) => {
+    fetchTasks(page);
+};
+
+// Selection Logic
+const toggleSelection = (id) => {
+    if (selectedTasks.value.includes(id)) {
+        selectedTasks.value = selectedTasks.value.filter(taskId => taskId !== id);
+    } else {
+        selectedTasks.value.push(id);
+    }
+};
+
+const toggleSelectAll = (checked) => {
+    if (checked) {
+        selectedTasks.value = tasks.value.map(t => t.id);
+    } else {
+        selectedTasks.value = [];
+    }
+};
+
+// Bulk Actions
+const handleBulkAction = async (action) => {
+    if (!action) return;
+
+    if (action === 'delete') {
+        if (!selectedTasks.value.length) return;
+
+        const confirmed = await confirm({
+            title: t('common.messages.confirm.title'),
+            message: t('common.messages.confirm.bulkDelete'),
+            variant: 'destructive',
+            confirmText: t('common.actions.delete'),
+        });
+
+        if (!confirmed) {
+            bulkActionSelection.value = '';
+            return;
+        }
+
+        try {
+            // Check if backend supports bulk action, otherwise loop
+            // Assuming we might not have a bulk endpoint, we can loop for now or try common pattern
+            // Ideally: await api.post('/admin/cms/scheduled-tasks/bulk-action', { action: 'delete', ids: selectedTasks.value });
+            
+            // Implementing Client-Side Loop fallback if needed, but best to assume we need a bulk endpoint or add it.
+            // For now, let's try parallel deletion to be safe without backend changes if possible
+            const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/cms/scheduled-tasks/${id}`));
+            await Promise.all(deletePromises);
+            
+            toast.success.delete(`${selectedTasks.value.length} Tasks`);
+            selectedTasks.value = [];
+            bulkActionSelection.value = '';
+            fetchTasks(pagination.value.current_page);
+        } catch (error) {
+            console.error('Bulk action failed:', error);
+            toast.error.action(error);
+        }
+    }
+};
+
 
 function openCreateDialog() {
   editingTask.value = null;
@@ -374,7 +570,7 @@ async function saveTask() {
     }
     
     dialogOpen.value = false;
-    await fetchTasks();
+    await fetchTasks(pagination.value.current_page);
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors || {};
@@ -403,11 +599,10 @@ async function runTask(task) {
     
     toast.success.action(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
 
-    // Show output
     selectedTaskOutput.value = response.data.data.output;
     outputDialogOpen.value = true;
     
-    await fetchTasks();
+    await fetchTasks(pagination.value.current_page);
   } catch (error) {
     console.error('Failed to run task:', error.response?.data?.message || error.message);
     toast.error.fromResponse(error);
@@ -422,8 +617,7 @@ async function toggleActive(task) {
       is_active: !task.is_active
     });
     
-    await fetchTasks();
-    console.log('Task toggled successfully');
+    await fetchTasks(pagination.value.current_page);
   } catch (error) {
     console.error('Failed to toggle task:', error.message);
     toast.error.fromResponse(error);
@@ -448,7 +642,7 @@ async function confirmDelete(task) {
   try {
     await api.delete(`/admin/cms/scheduled-tasks/${task.id}`);
     toast.success.delete();
-    await fetchTasks();
+    await fetchTasks(pagination.value.current_page);
   } catch (error) {
     console.error('Failed to delete task:', error.message);
     toast.error.fromResponse(error);

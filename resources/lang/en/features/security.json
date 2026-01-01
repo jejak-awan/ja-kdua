@@ -137,6 +137,10 @@
         "bulkRemoveSuccess": "{count} IP addresses removed",
         "cannotBlockWhitelisted": "Cannot block whitelisted IP address"
     },
+    "twoFactor": {
+        "globallyDisabledTitle": "2FA is Globally Disabled",
+        "globallyDisabledDesc": "The administrator has disabled Two-Factor Authentication for the entire system."
+    },
     "cspReports": {
         "title": "CSP Violation Reports",
         "description": "Monitor Content Security Policy violations from browser reports",

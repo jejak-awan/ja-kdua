@@ -215,12 +215,12 @@
                                             @update:checked="toggleAllLogs"
                                         />
                                     </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.event') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.ip') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.user') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.details') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.date') }}</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.logs.table.actions') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.event') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.ip') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.user') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.details') }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.date') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.security.logs.table.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-border">
@@ -328,11 +328,11 @@
                                                 @update:checked="toggleAllBlocklist"
                                             />
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.ip') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.reason') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.createdBy') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.date') }}</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.blocklist.table.actions') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.blocklist.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.blocklist.table.reason') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.blocklist.table.createdBy') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.blocklist.table.date') }}</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.security.blocklist.table.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -458,11 +458,11 @@
                                                 @update:checked="toggleAllWhitelist"
                                             />
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.ip') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.reason') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.createdBy') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.date') }}</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.whitelist.table.actions') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.whitelist.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.whitelist.table.reason') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.whitelist.table.createdBy') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.whitelist.table.date') }}</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">{{ $t('features.security.whitelist.table.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -609,12 +609,12 @@
                                                 @update:checked="toggleAllCspReports"
                                             />
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.directive') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.blockedUri') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.documentUri') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.ip') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.status') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.date') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.directive') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.blockedUri') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.documentUri') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.cspReports.table.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -729,11 +729,11 @@
                             <table class="w-full divide-y divide-border">
                                 <thead class="bg-muted/50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.route') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.duration') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.user') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.query') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.date') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.slowQueries.table.route') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.slowQueries.table.duration') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.slowQueries.table.user') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.slowQueries.table.query') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.slowQueries.table.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">
@@ -883,13 +883,13 @@
                             <table class="w-full divide-y divide-border">
                                 <thead class="bg-muted/50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.package') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.version') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.severity') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.cve') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.source') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.status') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.actions') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.package') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.version') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.severity') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.cve') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.source') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{{ $t('features.security.vulnerabilities.table.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border">

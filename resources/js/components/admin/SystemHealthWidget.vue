@@ -21,7 +21,7 @@
       <!-- Overall Status -->
       <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/40">
         <span class="text-sm font-semibold text-foreground">{{ $t('features.dashboard.widgets.systemHealth.overallStatus') }}</span>
-        <Badge :class="overallStatusBadgeClass" variant="outline" class="border-none font-bold uppercase tracking-wider text-[10px]">
+        <Badge :class="overallStatusBadgeClass" variant="outline" class="border-none font-bold text-[10px]">
           {{ overallStatusText }}
         </Badge>
       </div>
@@ -31,7 +31,7 @@
         <!-- CPU -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
+            <span class="text-xs font-bold text-muted-foreground flex items-center gap-1.5 ">
               <Cpu class="w-3.5 h-3.5" />
               {{ $t('features.dashboard.widgets.systemHealth.cpu') }}
             </span>
@@ -54,7 +54,7 @@
         <!-- Memory -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
+            <span class="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
               <Layers class="w-3.5 h-3.5" />
               {{ $t('features.dashboard.widgets.systemHealth.memory') }}
             </span>
@@ -84,7 +84,7 @@
                         {{ health.disk?.percent || 0 }}%
                     </span>
                 </div>
-                <p class="text-[10px] font-bold text-foreground truncate uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.disk') }}</p>
+                <p class="text-[10px] font-bold text-foreground truncate opacity-60">{{ $t('features.dashboard.widgets.systemHealth.disk') }}</p>
                 <div class="h-1 w-full bg-muted rounded-full overflow-hidden">
                     <div
                         :class="getProgressBarClass(health.disk?.status)"
@@ -103,7 +103,7 @@
                         <AlertCircle v-else class="w-3.5 h-3.5" />
                     </Badge>
                 </div>
-                <p class="text-[10px] font-bold text-foreground truncate uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.database') }}</p>
+                <p class="text-[10px] font-bold text-foreground truncate opacity-60">{{ $t('features.dashboard.widgets.systemHealth.database') }}</p>
                 <p class="text-[10px] text-muted-foreground truncate italic">
                     {{ health.database?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : $t('features.dashboard.widgets.systemHealth.status.error') }}
                 </p>
@@ -117,13 +117,13 @@
                     <Zap class="w-4 h-4" />
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-foreground uppercase opacity-60">{{ $t('features.dashboard.widgets.systemHealth.redis') }}</p>
+                    <p class="text-[10px] font-bold text-foreground opacity-60">{{ $t('features.dashboard.widgets.systemHealth.redis') }}</p>
                     <p class="text-[10px] text-muted-foreground truncate italic max-w-[120px]">
                         {{ health.redis?.message || $t('features.dashboard.widgets.systemHealth.status.unknown') }}
                     </p>
                 </div>
             </div>
-            <Badge :class="getStatusClass(health.redis?.status)" variant="outline" class="border-none font-bold uppercase tracking-wider text-[10px]">
+            <Badge :class="getStatusClass(health.redis?.status)" variant="outline" class="border-none font-bold text-[10px]">
                 {{ health.redis?.status === 'ok' ? $t('features.dashboard.widgets.systemHealth.status.ok') : health.redis?.status === 'disabled' ? $t('features.dashboard.widgets.systemHealth.status.disabled') : $t('features.dashboard.widgets.systemHealth.status.error') }}
             </Badge>
         </div>
@@ -131,7 +131,7 @@
     </CardContent>
 
     <CardFooter v-if="lastUpdated" class="pb-4 pt-0 justify-center">
-      <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-60">
+      <div class="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium opacity-60">
         <Clock class="w-3 h-3" />
         {{ $t('features.dashboard.widgets.systemHealth.lastUpdated', { time: formatTime(lastUpdated) }) }}
       </div>

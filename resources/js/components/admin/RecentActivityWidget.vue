@@ -12,7 +12,7 @@
             </div>
             <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-xs font-medium uppercase tracking-wider">{{ $t('features.dashboard.widgets.recentActivity.live') }}</span>
+                <span class="text-xs font-medium">{{ $t('features.dashboard.widgets.recentActivity.live') }}</span>
             </div>
         </CardHeader>
 
@@ -52,7 +52,7 @@
                             <p class="text-sm text-muted-foreground flex items-center flex-wrap gap-2">
                                 <Badge 
                                     variant="outline"
-                                    class="h-5 px-1.5 text-[10px] font-bold uppercase tracking-wider border-none"
+                                    class="h-5 px-1.5 text-[10px] font-bold border-none"
                                     :class="getActionBadgeClass(activity.action || activity.type)"
                                 >
                                     {{ getActionLabel(activity.action || activity.type) }}

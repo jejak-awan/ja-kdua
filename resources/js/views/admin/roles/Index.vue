@@ -171,7 +171,7 @@
                         </div>
                         
                         <div class="space-y-2.5">
-                            <div class="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                            <div class="text-[10px] font-semibold text-muted-foreground">
                                 {{ $t('features.roles.permissions') }}
                             </div>
                             <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -238,7 +238,7 @@
             <div v-else class="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-muted-foreground uppercase bg-muted/50 border-b">
+                        <thead class="text-xs text-muted-foreground bg-muted/50 border-b">
                             <tr>
                                 <th class="w-10 px-6 py-3">
                                     <Checkbox 

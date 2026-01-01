@@ -449,11 +449,19 @@ router.beforeEach((to, from, next) => {
         return;
     }
 
-    // NOTE: Permission checks are now handled by individual components
-    // This prevents race conditions during page refresh where auth state
-    // may not be fully initialized yet. Components should use:
-    // - authStore.hasPermission() for conditional rendering
-    // - API responses (403) for access control validation
+    // Check for specific permissions
+    if (to.meta.permission) {
+        if (!authStore.hasPermission(to.meta.permission)) {
+            next({ name: 'forbidden' });
+            return;
+        }
+    }
+
+    // Check for super admin requirement
+    if (to.meta.requiresSuperAdmin && !authStore.isAtLeastRole('super-admin')) {
+        next({ name: 'forbidden' });
+        return;
+    }
 
     // Allow navigation
     next();

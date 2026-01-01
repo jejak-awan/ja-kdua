@@ -116,8 +116,7 @@
                     </div>
                 </div>
 
-                <!-- Language Switcher -->
-                <LanguageSwitcher />
+
 
                 <!-- Dark Mode Toggle -->
                 <DarkModeToggle />
@@ -160,6 +159,24 @@
                             <p class="text-sm font-semibold text-foreground">{{ user?.name || t('common.labels.user') }}</p>
                             <p class="text-xs text-muted-foreground truncate">{{ user?.email || '' }}</p>
                         </div>
+
+                        <!-- Language Selection -->
+                        <div class="p-2 border-b border-border">
+                            <p class="px-2 text-xs font-semibold text-muted-foreground mb-1">{{ t('common.labels.language') || 'Language' }}</p>
+                            <div class="space-y-1">
+                                <button
+                                    v-for="lang in languages"
+                                    :key="lang.id"
+                                    @click="selectLanguage(lang)"
+                                    class="flex items-center w-full px-2 py-1.5 text-sm rounded-md transition-colors"
+                                    :class="currentLanguage?.code === lang.code ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
+                                >
+                                    <span class="mr-2 text-base leading-none">{{ getLanguageFlag(lang) }}</span>
+                                    <span class="flex-1 text-left">{{ lang.native_name }}</span>
+                                    <Check v-if="currentLanguage?.code === lang.code" class="ml-auto w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
                         <div class="py-1">
                             <router-link
                                 :to="{ name: 'profile' }"
@@ -172,6 +189,7 @@
                                 {{ t('common.labels.myProfile') }}
                             </router-link>
                             <router-link
+                                v-if="authStore.hasPermission('manage settings')"
                                 :to="{ name: 'settings' }"
                                 @click="showUserMenu = false"
                                 class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent"
@@ -210,14 +228,32 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '../../stores/auth';
+import { useLanguage } from '../../composables/useLanguage'; // Added
 import api from '../../services/api';
 import Breadcrumbs from '../Breadcrumbs.vue';
 import DarkModeToggle from '../DarkModeToggle.vue';
-import LanguageSwitcher from '../LanguageSwitcher.vue';
 import GlobalSearch from '../GlobalSearch.vue';
+import { Check } from 'lucide-vue-next'; // Added Check icon
 
 const router = useRouter();
+const authStore = useAuthStore();
 const { t, te } = useI18n();
+
+// Language Composable
+const {
+    currentLanguage,
+    languages,
+    setLanguage,
+    getLanguageFlag,
+    initializeLanguage,
+} = useLanguage();
+
+const selectLanguage = async (lang) => {
+    await setLanguage(lang.code);
+    // Optional: showUserMenu.value = false; // Keep open or close? Usually keep open or close is fine. Let's close for "action complete" feel.
+    showUserMenu.value = false;
+};
 const props = defineProps({
     isAuthenticated: {
         type: Boolean,
@@ -382,6 +418,7 @@ onMounted(() => {
         fetchNotifications();
         notificationInterval.value = setInterval(fetchNotifications, 120000); // Increased from 30s to 2m
     }
+    initializeLanguage();
     document.addEventListener('click', handleClickOutside);
 });
 

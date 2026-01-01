@@ -132,7 +132,7 @@
       
       <!-- Recent Actions -->
       <div v-if="showRecent && recentActions.length > 0" class="mt-6 pt-4 border-t border-border/40">
-        <h4 class="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">{{ $t('features.dashboard.widgets.quickActions.recentActions') }}</h4>
+        <h4 class="text-xs font-bold text-muted-foreground mb-3">{{ $t('features.dashboard.widgets.quickActions.recentActions') }}</h4>
         <div class="space-y-1">
           <div
             v-for="action in recentActions.slice(0, 3)"

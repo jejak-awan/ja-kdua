@@ -137,6 +137,10 @@
         "bulkRemoveSuccess": "{count} alamat IP dihapus",
         "cannotBlockWhitelisted": "Tidak dapat memblokir alamat IP yang ada di daftar putih"
     },
+    "twoFactor": {
+        "globallyDisabledTitle": "2FA Dinonaktifkan Secara Global",
+        "globallyDisabledDesc": "Administrator telah menonaktifkan Autentikasi Dua Faktor untuk seluruh sistem."
+    },
     "cspReports": {
         "title": "Laporan Pelanggaran CSP",
         "description": "Pantau pelanggaran Content Security Policy dari laporan browser",

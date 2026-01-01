@@ -59,7 +59,7 @@
                 >
                     <component :is="item.icon" class="mr-2 h-4 w-4" />
                     <span>{{ item.title }}</span>
-                    <span v-if="item.shortcut" class="ml-auto text-xs tracking-widest text-muted-foreground">
+                    <span v-if="item.shortcut" class="ml-auto text-xs text-muted-foreground">
                         {{ item.shortcut }}
                     </span>
                 </div>
@@ -88,7 +88,7 @@
 
         <!-- Dynamic Results -->
         <template v-for="(group, groupName) in groupedResults" :key="groupName">
-             <div class="px-2 pt-2 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+             <div class="px-2 pt-2 pb-1 text-xs font-semibold text-muted-foreground">
                 {{ groupLabel(groupName) }}
              </div>
              <div class="px-2">

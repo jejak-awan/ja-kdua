@@ -77,11 +77,11 @@
         <table class="w-full">
           <thead class="bg-muted/50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Route</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Duration</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">User</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Query</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Date</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Route</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Duration</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">User</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Query</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Date</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border">

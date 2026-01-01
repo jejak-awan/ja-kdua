@@ -103,13 +103,13 @@
         <table class="w-full">
           <thead class="bg-muted/50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Package</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Version</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Severity</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">CVE</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Source</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Actions</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Package</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Version</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Severity</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">CVE</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Source</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border">

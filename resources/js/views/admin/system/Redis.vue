@@ -179,7 +179,7 @@
                 <AlertTriangle class="w-6 h-6" />
               </div>
               <div class="space-y-1">
-                <h4 class="font-bold text-amber-800 dark:text-amber-200 uppercase tracking-wider text-sm">Redis Disabled</h4>
+                <h4 class="font-bold text-amber-800 dark:text-amber-200 text-sm">Redis Disabled</h4>
                 <p class="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
                   Redis is currently disabled in system settings. To enable it, go to 
                   <router-link to="/admin/settings?tab=performance" class="underline font-semibold hover:text-amber-900 inline-flex items-center gap-1">
@@ -456,14 +456,14 @@
             </div>
 
             <div v-if="cacheStats.top_keys?.length" class="space-y-4">
-              <h4 class="font-bold text-sm uppercase tracking-wider text-muted-foreground">{{ $t('features.redis.cache.stats.topKeys') }}</h4>
+              <h4 class="font-bold text-sm text-muted-foreground">{{ $t('features.redis.cache.stats.topKeys') }}</h4>
               <div class="rounded-lg border border-border/50 overflow-hidden shadow-sm">
                 <table class="w-full divide-y divide-border/50">
                   <thead class="bg-muted/50">
                     <tr>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{{ $t('features.redis.cache.stats.table.key') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{{ $t('features.redis.cache.stats.table.size') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{{ $t('features.redis.cache.stats.table.ttl') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.key') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.size') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.ttl') }}</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border/50 bg-card">
