@@ -6,10 +6,16 @@
         <h1 class="text-2xl font-bold text-foreground">{{ $t('features.scheduled_tasks.title') }}</h1>
         <p class="text-muted-foreground mt-1 text-sm">{{ $t('features.scheduled_tasks.description') }}</p>
       </div>
-      <Button @click="openCreateDialog">
-        <Plus class="w-4 h-4 mr-2" />
-        {{ $t('features.scheduled_tasks.create') }}
-      </Button>
+      <div class="flex gap-2">
+        <Button v-if="isSuperAdmin" variant="outline" @click="openRunCommandDialog">
+          <Terminal class="w-4 h-4 mr-2" />
+          {{ $t('features.command_runner.run') }}
+        </Button>
+        <Button @click="openCreateDialog">
+          <Plus class="w-4 h-4 mr-2" />
+          {{ $t('features.scheduled_tasks.create') }}
+        </Button>
+      </div>
     </div>
 
     <!-- Filter Bar -->
@@ -295,6 +301,68 @@
       </DialogContent>
     </Dialog>
 
+    <!-- Run Command Dialog (New) -->
+    <Dialog v-model:open="runCommandDialogOpen">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{{ $t('features.command_runner.title') }}</DialogTitle>
+        </DialogHeader>
+        
+        <div class="grid gap-4 py-4">
+          <div class="grid gap-2">
+            <Label>{{ $t('features.command_runner.select_command') }}</Label>
+            <Select v-model="adhocCommand.command">
+              <SelectTrigger>
+                <SelectValue :placeholder="$t('features.command_runner.select_placeholder')" />
+              </SelectTrigger>
+              <SelectContent>
+                 <SelectItem 
+                  v-for="cmd in allowedCommands" 
+                  :key="cmd.value" 
+                  :value="cmd.value"
+                >
+                  {{ cmd.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div class="grid gap-2">
+            <Label>{{ $t('features.command_runner.parameters') }}</Label>
+            <Input 
+              v-model="adhocCommand.parameters" 
+              :placeholder="$t('features.command_runner.parameters_placeholder')" 
+            />
+          </div>
+
+          <div v-if="adhocOutput" class="mt-4">
+             <Label class="mb-2 block">Output</Label>
+             <div class="bg-black text-green-400 p-4 rounded-md font-mono text-sm overflow-auto max-h-[300px] border border-border">
+                <div v-if="adhocExecuting" class="flex items-center gap-2">
+                  <Loader2 class="w-4 h-4 animate-spin" />
+                  <span>{{ $t('features.command_runner.executing') }}</span>
+                </div>
+                <pre v-else class="whitespace-pre-wrap break-words">{{ adhocOutput }}</pre>
+             </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="runCommandDialogOpen = false">
+            {{ $t('common.actions.close') }}
+          </Button>
+          <Button 
+            @click="runAdhocCommand" 
+            :disabled="!adhocCommand.command || adhocExecuting"
+          >
+            <Loader2 v-if="adhocExecuting" class="w-4 h-4 mr-2 animate-spin" />
+            <Play v-else class="w-4 h-4 mr-2" />
+            {{ adhocExecuting ? $t('features.command_runner.running') : $t('features.command_runner.run') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     <!-- Output Dialog -->
     <Dialog v-model:open="outputDialogOpen">
       <DialogContent class="max-w-3xl">
@@ -317,6 +385,7 @@ import { debounce } from 'lodash';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
+import { useAuthStore } from '@/stores/auth'; // Import useAuthStore
 
 // UI Components
 import Card from '@/components/ui/card.vue';
@@ -345,17 +414,19 @@ import SelectItem from '@/components/ui/select-item.vue';
 import Pagination from '@/components/ui/pagination.vue';
 import Checkbox from '@/components/ui/checkbox.vue';
 
-import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar, Search } from 'lucide-vue-next';
+import { Plus, Play, Pencil, Trash2, FileText, Loader2, Calendar, Search, Terminal } from 'lucide-vue-next'; // Add Terminal
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
+const authStore = useAuthStore(); // Use authStore
 
 const tasks = ref([]);
 const loading = ref(true);
 const search = ref('');
 const dialogOpen = ref(false);
 const outputDialogOpen = ref(false);
+const runCommandDialogOpen = ref(false); // New state
 const selectedTaskOutput = ref('');
 const editingTask = ref(null);
 const saving = ref(false);
@@ -363,6 +434,11 @@ const running = ref(null);
 const allowedCommands = ref([]);
 const cronPreset = ref('');
 const errors = ref({});
+
+// Ad-hoc Command State
+const adhocCommand = ref({ command: '', parameters: '' });
+const adhocOutput = ref('');
+const adhocExecuting = ref(false);
 
 // Selection & Bulk Actions
 const selectedTasks = ref([]);
@@ -403,6 +479,10 @@ const isDirty = computed(() => {
 
 const isAllSelected = computed(() => {
     return tasks.value.length > 0 && selectedTasks.value.length === tasks.value.length;
+});
+
+const isSuperAdmin = computed(() => {
+  return authStore.user?.roles?.some(role => role.name === 'super-admin');
 });
 
 onMounted(async () => {
@@ -662,6 +742,53 @@ function getStatusVariant(status) {
 function formatDate(dateString) {
   return new Date(dateString).toLocaleString();
 }
+
+function openRunCommandDialog() {
+  adhocCommand.value = { command: '', parameters: '' };
+  adhocOutput.value = '';
+  runCommandDialogOpen.value = true;
+}
+
+async function runAdhocCommand() {
+  if (!adhocCommand.value.command) return;
+
+  const fullCommand = adhocCommand.value.parameters 
+    ? `${adhocCommand.value.command} ${adhocCommand.value.parameters}`
+    : adhocCommand.value.command;
+
+  try {
+    adhocExecuting.value = true;
+    adhocOutput.value = '';
+
+    // Create a temporary task
+    const createResponse = await api.post('/admin/cms/scheduled-tasks', {
+      name: `Temp Command - ${Date.now()}`,
+      command: fullCommand,
+      schedule: '0 0 1 1 *', // Default invalid schedule
+      description: 'Temporary task created by command runner',
+      is_active: false
+    });
+
+    const taskId = createResponse.data.data.id;
+
+    // Run the task
+    const runResponse = await api.post(`/admin/cms/scheduled-tasks/${taskId}/run`);
+
+    adhocOutput.value = runResponse.data.data.output || 'No output';
+    
+    // Delete temporary task
+    await api.delete(`/admin/cms/scheduled-tasks/${taskId}`);
+    
+    // Check exit code if available, but for now just show output
+    if(runResponse.data.data.exit_code !== 0) {
+         // handle error visual if needed, but text is likely enough
+    }
+
+  } catch (error) {
+    adhocOutput.value = error.response?.data?.message || error.message;
+    console.error('Failed to execute command:', error.message);
+  } finally {
+    adhocExecuting.value = false;
+  }
+}
 </script>
-
-

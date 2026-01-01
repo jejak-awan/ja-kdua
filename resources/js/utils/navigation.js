@@ -59,7 +59,7 @@ export const navigationGroups = {
         { name: 'backups', to: '/admin/backups', label: 'Backups', permission: 'view backups' },
         { name: 'redis', to: '/admin/redis', label: 'Redis Cache', permission: 'manage settings' },
         { name: 'scheduled-tasks', to: '/admin/scheduled-tasks', label: 'Scheduled Tasks', permission: 'view scheduled tasks' },
-        { name: 'command-runner', to: '/admin/command-runner', label: 'Command Runner', permission: 'manage system' },
+
     ],
 
     // Developer (3 items)

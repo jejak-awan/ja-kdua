@@ -212,7 +212,6 @@
                   <Button 
                     v-if="group.name === 'Connection'"
                     size="sm"
-                    variant="outline"
                     type="button"
                     @click="testConnection" 
                     :disabled="testing"
@@ -227,7 +226,7 @@
                 <div v-if="group.name === 'Connection' && connectionStatus" class="px-6 pt-4">
                   <div :class="cn('rounded-lg p-4 text-sm border border-border/50 flex items-center gap-3', connectionStatus.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border-destructive/20 text-destructive')">
                     <div :class="cn('p-1 rounded-full', connectionStatus.type === 'success' ? 'bg-emerald-500/20' : 'bg-destructive/20')">
-                      <zap v-if="connectionStatus.type === 'success'" class="w-4 h-4" />
+                      <Zap v-if="connectionStatus.type === 'success'" class="w-4 h-4" />
                       <AlertTriangle v-else class="w-4 h-4" />
                     </div>
                     <span>{{ connectionStatus.message }}</span>
@@ -298,186 +297,186 @@
 
       <!-- Cache Tab -->
       <TabsContent value="cache" class="space-y-6">
-        <Card>
-          <CardHeader class="px-6 py-4 border-b border-border/50 bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2">
-              <Eraser class="w-5 h-5 text-primary" />
-              {{ $t('features.redis.cache.title') }}
-            </CardTitle>
-            <CardDescription>Flush or warm up specific cache categories</CardDescription>
-          </CardHeader>
-          <CardContent class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <!-- Actions -->
-              <Card class="border-2 border-primary/10 bg-primary/5 hover:border-primary/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Flame class="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.warm.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.warm.desc') }}</p>
-                  </div>
-                  <Button 
-                    @click="warmCache" 
-                    :disabled="warming" 
-                    class="w-full"
-                  >
-                    <Loader2 v-if="warming" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ warming ? $t('features.redis.cache.actions.warm.warming') : $t('features.redis.cache.actions.warm.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
+        <!-- 1. Cache Stats Cards (Top) -->
+        <div v-if="cacheStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card class="bg-muted/20 border-none shadow-none">
+            <CardContent class="p-6 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redis.cache.stats.keys') }}</p>
+                <h4 class="text-2xl font-bold mt-2">{{ formatNumber(cacheStats.total_keys) }}</h4>
+              </div>
+              <div class="p-3 bg-primary/10 text-primary rounded-lg">
+                <Database class="w-6 h-6" />
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card class="border-destructive/10 bg-destructive/5 hover:border-destructive/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Trash2 class="w-6 h-6" />
+          <Card class="bg-muted/20 border-none shadow-none">
+            <CardContent class="p-6 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redis.cache.stats.size') }}</p>
+                <h4 class="text-2xl font-bold mt-2 text-blue-600">{{ cacheStats.cache_size || '-' }}</h4>
+              </div>
+              <div class="p-3 bg-blue-500/10 text-blue-500 rounded-lg">
+                <HardDrive class="w-6 h-6" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card class="bg-muted/20 border-none shadow-none">
+            <CardContent class="p-6 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-muted-foreground">{{ $t('features.redis.cache.stats.expired') }}</p>
+                <h4 class="text-2xl font-bold mt-2">{{ formatNumber(cacheStats.expired_keys) }}</h4>
+              </div>
+              <div class="p-3 bg-orange-500/10 text-orange-500 rounded-lg">
+                <Clock class="w-6 h-6" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <!-- 2. Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Top Keys Table (Wide - Left) -->
+          <Card class="lg:col-span-2 flex flex-col h-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <CardHeader class="px-6 py-4 border-b border-border/50 bg-muted/20">
+              <CardTitle class="text-lg flex items-center gap-2">
+                <BarChart3 class="w-5 h-5 text-primary" />
+                {{ $t('features.redis.cache.stats.topKeys') }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="p-0 flex-1">
+              <div v-if="cacheStats && cacheStats.top_keys?.length" class="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow class="bg-muted/50 hover:bg-muted/50">
+                      <TableHead class="w-full">{{ $t('features.redis.cache.stats.table.key') }}</TableHead>
+                      <TableHead class="whitespace-nowrap">{{ $t('features.redis.cache.stats.table.size') }}</TableHead>
+                      <TableHead class="whitespace-nowrap text-right">{{ $t('features.redis.cache.stats.table.ttl') }}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow v-for="(key, index) in cacheStats.top_keys" :key="index" class="hover:bg-muted/50 transition-colors">
+                      <TableCell class="font-mono text-xs break-all py-3">
+                        {{ key.key }}
+                      </TableCell>
+                      <TableCell class="text-sm font-medium text-blue-600 whitespace-nowrap py-3">
+                        {{ key.size }}
+                      </TableCell>
+                      <TableCell class="text-sm text-muted-foreground whitespace-nowrap text-right py-3">
+                        {{ key.ttl }}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              <div v-else class="p-8 text-center text-muted-foreground flex flex-col items-center gap-3">
+                <Database class="w-10 h-10 opacity-20" />
+                <p>{{ $t('common.placeholders.noData') }}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Quick Actions (Narrow - Right) -->
+          <Card class="h-full flex flex-col">
+            <CardHeader class="px-6 py-4 border-b border-border/50 bg-muted/20">
+              <CardTitle class="text-lg flex items-center gap-2">
+                <Zap class="w-5 h-5 text-amber-500" />
+                {{ $t('common.actions.title') }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="p-6">
+              <div class="grid grid-cols-2 gap-3">
+                <!-- Warm Cache -->
+                <button
+                  @click="warmCache"
+                  :disabled="warming"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                     <Loader2 v-if="warming" class="w-5 h-5 animate-spin" />
+                     <Flame v-else class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.all.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.all.desc') }}</p>
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
+                    {{ $t('features.redis.cache.actions.warm.button') }}
+                  </span>
+                </button>
+
+                <!-- Flush All -->
+                <button
+                  @click="flushCache('all')"
+                  :disabled="flushing"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-destructive/50 hover:bg-destructive/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-destructive/10 text-destructive group-hover:scale-110 transition-transform">
+                    <Trash2 class="w-5 h-5" />
                   </div>
-                  <Button 
-                    variant="destructive"
-                    @click="flushCache('all')" 
-                    :disabled="flushing" 
-                    class="w-full"
-                  >
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
                     {{ $t('features.redis.cache.actions.all.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </span>
+                </button>
 
-              <Card class="border-orange-500/10 bg-orange-500/5 hover:border-orange-500/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <HardDrive class="w-6 h-6" />
+                <!-- Flush App Cache -->
+                <button
+                  @click="flushCache('cache')"
+                  :disabled="flushing"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-orange-500/50 hover:bg-orange-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+                    <HardDrive class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.cache.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.cache.desc') }}</p>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    class="w-full border-orange-500/20 text-orange-600 hover:bg-orange-500 hover:text-white"
-                    @click="flushCache('cache')" 
-                    :disabled="flushing" 
-                  >
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
                     {{ $t('features.redis.cache.actions.cache.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </span>
+                </button>
 
-              <Card class="border-indigo-500/10 bg-indigo-500/5 hover:border-indigo-500/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Settings class="w-6 h-6" />
+                <!-- Flush Config -->
+                <button
+                  @click="flushCache('config')"
+                  :disabled="flushing"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-500/10 text-indigo-500 group-hover:scale-110 transition-transform">
+                    <Settings class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.config.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.config.desc') }}</p>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    class="w-full border-indigo-500/20 text-indigo-600 hover:bg-indigo-500 hover:text-white"
-                    @click="flushCache('config')" 
-                    :disabled="flushing" 
-                  >
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
                     {{ $t('features.redis.cache.actions.config.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </span>
+                </button>
 
-              <Card class="border-emerald-500/10 bg-emerald-500/5 hover:border-emerald-500/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Route class="w-6 h-6" />
+                <!-- Flush Route -->
+                <button
+                  @click="flushCache('route')"
+                  :disabled="flushing"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                    <Route class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.route.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.route.desc') }}</p>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    class="w-full border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white"
-                    @click="flushCache('route')" 
-                    :disabled="flushing" 
-                  >
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
                     {{ $t('features.redis.cache.actions.route.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </span>
+                </button>
 
-              <Card class="border-blue-500/10 bg-blue-500/5 hover:border-blue-500/30 transition-all cursor-default group shadow-none">
-                <CardContent class="pt-6 text-center space-y-4">
-                   <div class="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                    <Eye class="w-6 h-6" />
+                <!-- Flush View -->
+                <button
+                  @click="flushCache('view')"
+                  :disabled="flushing"
+                  class="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+                    <Eye class="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 class="font-bold text-foreground">{{ $t('features.redis.cache.actions.view.title') }}</h4>
-                    <p class="text-xs text-muted-foreground px-2">{{ $t('features.redis.cache.actions.view.desc') }}</p>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    class="w-full border-blue-500/20 text-blue-600 hover:bg-blue-500 hover:text-white"
-                    @click="flushCache('view')" 
-                    :disabled="flushing" 
-                  >
+                  <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
                     {{ $t('features.redis.cache.actions.view.button') }}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card v-if="cacheStats">
-          <CardHeader class="px-6 py-4 border-b border-border/50 bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2">
-              <BarChart3 class="w-5 h-5 text-primary" />
-              {{ $t('features.redis.cache.stats.title') }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="flex justify-between items-center p-4 bg-muted/30 rounded-lg border border-border/50 shadow-sm">
-                <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.keys') }}</span>
-                <span class="font-bold">{{ cacheStats.total_keys || 0 }}</span>
+                  </span>
+                </button>
               </div>
-              <div class="flex justify-between items-center p-4 bg-muted/30 rounded-lg border border-border/50 shadow-sm">
-                <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.size') }}</span>
-                <span class="font-bold text-blue-600">{{ cacheStats.cache_size || '-' }}</span>
-              </div>
-              <div class="flex justify-between items-center p-4 bg-muted/30 rounded-lg border border-border/50 shadow-sm">
-                <span class="font-medium text-foreground">{{ $t('features.redis.cache.stats.expired') }}</span>
-                <span class="font-bold">{{ cacheStats.expired_keys || 0 }}</span>
-              </div>
-            </div>
-
-            <div v-if="cacheStats.top_keys?.length" class="space-y-4">
-              <h4 class="font-bold text-sm text-muted-foreground">{{ $t('features.redis.cache.stats.topKeys') }}</h4>
-              <div class="rounded-lg border border-border/50 overflow-hidden shadow-sm">
-                <table class="w-full divide-y divide-border/50">
-                  <thead class="bg-muted/50">
-                    <tr>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.key') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.size') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">{{ $t('features.redis.cache.stats.table.ttl') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-border/50 bg-card">
-                    <tr v-for="(key, index) in cacheStats.top_keys" :key="index" class="hover:bg-muted/30 transition-colors">
-                      <td class="px-4 py-3 font-mono text-xs break-all">{{ key.key }}</td>
-                      <td class="px-4 py-3 text-sm text-blue-600 font-medium whitespace-nowrap">{{ key.size }}</td>
-                      <td class="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{{ key.ttl }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </TabsContent>
     </Tabs>
   </div>
@@ -509,6 +508,12 @@ import SelectContent from '@/components/ui/select-content.vue'
 import SelectItem from '@/components/ui/select-item.vue'
 import SelectTrigger from '@/components/ui/select-trigger.vue'
 import SelectValue from '@/components/ui/select-value.vue'
+import Table from '@/components/ui/table.vue'
+import TableHeader from '@/components/ui/table-header.vue'
+import TableBody from '@/components/ui/table-body.vue'
+import TableHead from '@/components/ui/table-head.vue'
+import TableRow from '@/components/ui/table-row.vue'
+import TableCell from '@/components/ui/table-cell.vue'
 import {
   RefreshCw,
   Activity,
@@ -661,6 +666,12 @@ const testConnection = async () => {
       type: 'success',
       message: `✅ ${response.data.data.message || t('features.redis.messages.testSuccess')} (${response.data.data.response_time})`
     }
+    
+    // Auto clear after 3 seconds
+    setTimeout(() => {
+      connectionStatus.value = null;
+    }, 3000);
+
   } catch (error) {
     connectionStatus.value = {
       type: 'error',

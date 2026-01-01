@@ -307,12 +307,7 @@ const routes = [
                 component: () => import('../views/admin/system/ScheduledTasks.vue'),
                 meta: { permission: 'manage scheduled tasks' },
             },
-            {
-                path: 'command-runner',
-                name: 'command-runner',
-                component: () => import('../views/admin/system/CommandRunner.vue'),
-                meta: { requiresSuperAdmin: true },
-            },
+
             {
                 path: 'logs',
                 name: 'logs',
