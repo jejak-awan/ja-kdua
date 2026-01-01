@@ -271,7 +271,12 @@ class AuthController extends BaseApiController
             // Also invalidate previous sessions if using stateful session guards
             // Note: This requires the AuthenticateSession middleware to be active
             try {
+                // Create web session for Sanctum SPA (stateful)
                 \Illuminate\Support\Facades\Auth::login($user);
+                
+                // Set tiered session lifetime based on user role
+                \App\Services\SessionManager::setLifetimeForUser($user);
+
                 \Illuminate\Support\Facades\Auth::logoutOtherDevices($request->password);
                 \Illuminate\Support\Facades\Log::info("Single Session: logoutOtherDevices called for {$user->email}");
             } catch (\Exception $e) {

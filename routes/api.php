@@ -15,6 +15,10 @@ Route::prefix('v1')->group(function () {
     // Public endpoint to clear rate limit (no auth required for emergency)
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
     
+    // CSP Violation Reporting (public, no auth, rate-limited)
+    Route::post('/security/csp-report', [App\Http\Controllers\Api\V1\CspReportController::class, 'store'])
+        ->middleware('throttle:100,1'); // 100 reports per minute max
+    
     // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
         ->middleware('throttle:60,1'); // Increase Laravel throttle to avoid conflict with SecurityService
@@ -427,9 +431,16 @@ Route::prefix('v1')->group(function () {
         // Content Preview
         Route::get('contents/{content}/preview', [App\Http\Controllers\Api\V1\ContentController::class, 'preview'])->middleware('permission:edit content');
 
+        // Security Monitoring
+        Route::prefix('security')->group(function () {
+            Route::get('csp-reports', [App\Http\Controllers\Api\V1\CspReportController::class, 'index'])->middleware('permission:manage settings');
+            Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\V1\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
+            Route::get('csp-reports/statistics', [App\Http\Controllers\Api\V1\CspReportController::class, 'statistics'])->middleware('permission:manage settings');
+        });
+        
         // Scheduled Tasks
         Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage scheduled tasks');
-        Route::get('scheduled-tasks/meta/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
+        Route::get('scheduled-tasks/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage scheduled tasks');
 
         // File Manager (Admin-level file system access)

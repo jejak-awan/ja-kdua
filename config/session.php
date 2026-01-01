@@ -32,7 +32,20 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => env('SESSION_LIFETIME', 480),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tiered Session Lifetimes
+    |--------------------------------------------------------------------------
+    |
+    | Different session lifetimes for different user roles.
+    | Admins have shorter sessions for better security.
+    |
+    */
+
+    'admin_lifetime' => env('SESSION_LIFETIME_ADMIN', 120),  // 2 hours
+    'user_lifetime' => env('SESSION_LIFETIME_USER', 480),   // 8 hours
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 

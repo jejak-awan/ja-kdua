@@ -57,6 +57,11 @@ class ScheduledTask extends Model
         // Security
         'security:clear-blocked-ips',
         'security:clear-rate-limit',
+        'security:audit-dependencies',
+        
+        // Maintenance & Cleanup
+        'logs:cleanup-slow-queries',
+        'logs:cleanup-csp-reports',
     ];
 
     /**

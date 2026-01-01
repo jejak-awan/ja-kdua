@@ -45,6 +45,7 @@ class LogSlowQueries
                 });
 
                 if (!empty($slowQueries)) {
+                    // Log to file
                     Log::warning('Slow queries detected', [
                         'url' => $request->fullUrl(),
                         'method' => $request->method(),
@@ -58,6 +59,19 @@ class LogSlowQueries
                             ];
                         }, $slowQueries),
                     ]);
+                    
+                    // Store in database for analytics
+                    if (config('database.store_slow_queries', true)) {
+                        foreach ($slowQueries as $query) {
+                            \App\Models\SlowQuery::create([
+                                'query' => $query['query'],
+                                'bindings' => $query['bindings'] ?? [],
+                                'duration' => (int) ($query['time'] ?? 0),
+                                'route' => $request->path(),
+                                'user_id' => auth()->id(),
+                            ]);
+                        }
+                    }
                 }
             }
 
