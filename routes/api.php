@@ -443,6 +443,7 @@ Route::prefix('v1')->group(function () {
             
             // Dependency Vulnerabilities
             Route::get('dependency-vulnerabilities', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'index'])->middleware('permission:manage settings');
+            Route::get('dependency-vulnerabilities/statistics', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'statistics'])->middleware('permission:manage settings');
             Route::put('dependency-vulnerabilities/{id}', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'update'])->middleware('permission:manage settings');
             Route::post('run-dependency-audit', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'runAudit'])->middleware('permission:manage settings');
         });

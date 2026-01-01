@@ -1646,16 +1646,22 @@ const auditRunning = ref(false);
 const vulnFilters = ref({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
 const vulnPagination = ref({ total: 0, current_page: 1, last_page: 1 });
 
-const vulnStats = computed(() => {
-    const all = vulnerabilities.value;
-    return {
-        total: vulnPagination.value.total,
-        critical: all.filter(v => v.severity === 'critical').length,
-        high: all.filter(v => v.severity === 'high').length,
-        medium: all.filter(v => v.severity === 'medium').length,
-        low: all.filter(v => v.severity === 'low').length,
-    };
+const vulnStats = ref({
+    total: 0,
+    critical: 0,
+    high: 0,
+    medium: 0,
+    low: 0
 });
+
+const fetchVulnStats = async () => {
+    try {
+        const response = await api.get('/admin/cms/security/dependency-vulnerabilities/statistics');
+        vulnStats.value = response.data?.data || {};
+    } catch (error) {
+        console.error('Failed to fetch vulnerability stats:', error);
+    }
+};
 
 const fetchVulnerabilities = async () => {
     vulnLoading.value = true;
@@ -1686,6 +1692,7 @@ const runDependencyAudit = async () => {
         await api.post('/admin/cms/security/run-dependency-audit');
         toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
         fetchVulnerabilities();
+        fetchVulnStats();
     } catch (error) {
         toast.error.fromResponse(error);
     } finally {
@@ -1726,6 +1733,7 @@ watch(activeTab, (newTab) => {
         fetchSlowQueryStats();
     } else if (newTab === 'vulnerabilities' && vulnerabilities.value.length === 0) {
         fetchVulnerabilities();
+        fetchVulnStats();
     }
 });
 </script>
