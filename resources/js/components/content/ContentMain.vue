@@ -51,7 +51,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TiptapEditor from '../TiptapEditor.vue';
-import Builder from '../admin/builder/Builder.vue';
+import Builder from '../builder/Builder.vue';
 import Button from '@/components/ui/button.vue';
 import { Type, Layout } from 'lucide-vue-next';
 

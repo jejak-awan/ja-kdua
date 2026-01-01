@@ -5,8 +5,11 @@
                 <!-- Brand -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">JA</div>
-                        <span class="text-xl font-bold">JA-CMS</span>
+                        <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'JA-CMS')">
+                        <template v-else>
+                            <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">JA</div>
+                            <span class="text-xl font-bold">{{ getSetting('site_title', 'JA-CMS') }}</span>
+                        </template>
                     </div>
                     <h5 class="font-semibold mb-4 text-foreground">{{ $t('features.frontend.newsletter.title') }}</h5>
                     <p class="text-muted-foreground text-sm mb-4">
@@ -39,7 +42,7 @@
 
             <div class="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-muted-foreground text-sm">
-                    &copy; 2024 JA-CMS. {{ $t('features.frontend.footer.copyright') }}
+                    {{ getSetting('footer_text', `© ${new Date().getFullYear()} JA-CMS. All rights reserved.`) }}
                 </p>
                 <div class="flex gap-6">
                     <a href="#" class="text-muted-foreground hover:text-foreground text-sm transition-colors">{{ $t('features.frontend.footer.privacy') }}</a>
@@ -53,12 +56,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTheme } from '../../../../composables/useTheme'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
 import { newsletterSchema } from '../../../../schemas'
-// import api from '../../../services/api' // Uncomment when ready
 
 const { t } = useI18n()
+const { getSetting } = useTheme()
 const toast = useToast()
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
 const loading = ref(false)
@@ -71,9 +75,7 @@ const submitNewsletter = async () => {
     clearErrors()
     
     try {
-        // Mock API call
-        // await api.post('/newsletter/subscribe', { email: email.value })
-        
+        // Mock API call - in a real app this would call the newsletter endpoint
         await new Promise(resolve => setTimeout(resolve, 1000))
         
         toast.success(t('features.frontend.newsletter.success'))

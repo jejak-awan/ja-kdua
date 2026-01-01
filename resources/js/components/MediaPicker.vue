@@ -12,217 +12,224 @@
             </Button>
         </slot>
 
-        <!-- Media Picker Modal -->
-        <div
-            v-if="showModal"
-            class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm"
-            @click.self="handleBackdropClick"
-        >
-            <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="bg-card border border-border shadow-2xl rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
-                    <div class="flex items-center justify-between p-4 border-b border-border">
+
+        <Teleport to="body">
+            <div
+                v-if="showModal"
+                class="fixed inset-0 z-[9999] pointer-events-none"
+            >
+                <!-- Removed centering wrapper to allow free movement -->
+                <div 
+                    ref="modalRef"
+                    class="bg-card border border-border shadow-2xl rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col pointer-events-auto absolute top-1/2 left-1/2"
+                    :style="{ transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))` }"
+                >
+                    <div 
+                        class="flex items-center justify-between p-4 border-b border-border cursor-move select-none active:cursor-grabbing"
+                        @mousedown="startDrag"
+                    >
                         <h3 class="text-lg font-semibold">{{ $t('features.media.modals.picker.title') }}</h3>
                         <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            @click="showModal = false"
-                        >
-                            <X class="w-5 h-5" />
-                        </Button>
-                    </div>
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                @click="showModal = false"
+                            >
+                                <X class="w-5 h-5" />
+                            </Button>
+                        </div>
 
-                    <!-- Content -->
-                    <div class="flex-1 overflow-hidden flex flex-col">
-                        <!-- Toolbar -->
-                        <div class="px-4 py-2 bg-muted/10 flex items-center justify-between gap-4">
-                            <!-- Breadcrumbs -->
-                            <div class="flex items-center text-sm overflow-hidden whitespace-nowrap">
-                                <Button 
-                                    @click="navigateToBreadcrumb(-1)"
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    class="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                >
-                                    <Home class="w-4 h-4" />
-                                </Button>
-                                <template v-for="(crumb, index) in breadcrumbs" :key="crumb.id">
-                                    <ChevronRight class="w-4 h-4 text-muted-foreground mx-0.5" />
+                        <!-- Content -->
+                        <div class="flex-1 overflow-hidden flex flex-col">
+                            <!-- Toolbar -->
+                            <div class="px-4 py-2 bg-muted/10 flex items-center justify-between gap-4">
+                                <!-- Breadcrumbs -->
+                                <div class="flex items-center text-sm overflow-hidden whitespace-nowrap">
                                     <Button 
-                                        @click="navigateToBreadcrumb(index)"
+                                        @click="navigateToBreadcrumb(-1)"
                                         type="button"
                                         variant="ghost"
-                                        size="sm"
-                                        class="h-8 px-2 text-foreground font-medium truncate max-w-[120px]"
+                                        size="icon"
+                                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
                                     >
-                                        {{ crumb.name }}
+                                        <Home class="w-4 h-4" />
                                     </Button>
-                                </template>
-                            </div>
-
-                            <div class="flex items-center gap-1 bg-muted/20 p-1 rounded-md">
-                                <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'grid'" :class="{ 'bg-background shadow-sm': viewMode === 'grid', 'text-muted-foreground': viewMode !== 'grid' }">
-                                    <Grid class="w-4 h-4" />
-                                </Button>
-                                <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'list'" :class="{ 'bg-background shadow-sm': viewMode === 'list', 'text-muted-foreground': viewMode !== 'list' }">
-                                    <ListIcon class="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </div>
-
-                        <!-- Main Area -->
-                        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                           <div v-if="loading" class="flex flex-col items-center justify-center h-full py-12">
-                                <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                                <p class="mt-4 text-xs text-muted-foreground">{{ $t('features.media.loading') }}</p>
-                            </div>
-
-                            <div v-else-if="folders.length === 0 && mediaList.length === 0" class="flex flex-col items-center justify-center h-full py-12 text-muted-foreground">
-                                <div class="bg-muted/50 p-4 rounded-full mb-3">
-                                    <Folder class="w-8 h-8 opacity-50" />
+                                    <template v-for="(crumb, index) in breadcrumbs" :key="crumb.id">
+                                        <ChevronRight class="w-4 h-4 text-muted-foreground mx-0.5" />
+                                        <Button 
+                                            @click="navigateToBreadcrumb(index)"
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            class="h-8 px-2 text-foreground font-medium truncate max-w-[120px]"
+                                        >
+                                            {{ crumb.name }}
+                                        </Button>
+                                    </template>
                                 </div>
-                                <p class="text-sm font-medium">{{ $t('features.media.empty') }}</p>
+
+                                <div class="flex items-center gap-1 bg-muted/20 p-1 rounded-md">
+                                    <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'grid'" :class="{ 'bg-background shadow-sm': viewMode === 'grid', 'text-muted-foreground': viewMode !== 'grid' }">
+                                        <Grid class="w-4 h-4" />
+                                    </Button>
+                                    <Button type="button" variant="ghost" size="icon" class="h-7 w-7" @click="viewMode = 'list'" :class="{ 'bg-background shadow-sm': viewMode === 'list', 'text-muted-foreground': viewMode !== 'list' }">
+                                        <ListIcon class="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
 
-                            <div v-else>
-                                <!-- Grid View -->
-                                <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-                                    <!-- Folders -->
-                                    <div
-                                        v-for="folder in folders"
-                                        :key="'folder-' + folder.id"
-                                        @dblclick="navigateToFolder(folder)"
-                                        class="group cursor-pointer flex flex-col items-center p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
-                                    >
-                                        <div class="w-full aspect-square bg-blue-500/10 text-blue-500 rounded-md flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                                            <Folder class="w-8 h-8 fill-current" />
-                                        </div>
-                                        <span class="text-xs font-medium text-center truncate w-full px-1">{{ folder.name }}</span>
-                                    </div>
+                            <!-- Main Area -->
+                            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                               <div v-if="loading" class="flex flex-col items-center justify-center h-full py-12">
+                                    <div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                                    <p class="mt-4 text-xs text-muted-foreground">{{ $t('features.media.loading') }}</p>
+                                </div>
 
-                                    <!-- Files -->
-                                    <div
-                                        v-for="media in mediaList"
-                                        :key="'media-' + media.id"
-                                        @click="selectMedia(media)"
-                                        class="group cursor-pointer relative border border-transparent rounded-lg overflow-hidden transition-all hover:bg-muted/30"
-                                        :class="selectedMediaId === media.id ? 'ring-2 ring-primary ring-offset-2 bg-muted/30' : ''"
-                                    >
-                                        <div class="aspect-square bg-muted/20 relative overflow-hidden rounded-md m-1.5">
-                                            <img
-                                                v-if="media.mime_type?.startsWith('image/')"
-                                                :src="media.url"
-                                                :alt="media.name"
-                                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                            >
-                                            <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                                                <File class="w-8 h-8" />
+                                <div v-else-if="folders.length === 0 && mediaList.length === 0" class="flex flex-col items-center justify-center h-full py-12 text-muted-foreground">
+                                    <div class="bg-muted/50 p-4 rounded-full mb-3">
+                                        <Folder class="w-8 h-8 opacity-50" />
+                                    </div>
+                                    <p class="text-sm font-medium">{{ $t('features.media.empty') }}</p>
+                                </div>
+
+                                <div v-else>
+                                    <!-- Grid View -->
+                                    <div v-if="viewMode === 'grid'" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                                        <!-- Folders -->
+                                        <div
+                                            v-for="folder in folders"
+                                            :key="'folder-' + folder.id"
+                                            @dblclick="navigateToFolder(folder)"
+                                            class="group cursor-pointer flex flex-col items-center p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                                        >
+                                            <div class="w-full aspect-square bg-blue-500/10 text-blue-500 rounded-md flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                                                <Folder class="w-8 h-8 fill-current" />
+                                            </div>
+                                            <span class="text-xs font-medium text-center truncate w-full px-1">{{ folder.name }}</span>
+                                        </div>
+
+                                        <!-- Files -->
+                                        <div
+                                            v-for="media in mediaList"
+                                            :key="'media-' + media.id"
+                                            @click="selectMedia(media)"
+                                            class="group cursor-pointer relative border border-transparent rounded-lg overflow-hidden transition-all hover:bg-muted/30"
+                                            :class="selectedMediaId === media.id ? 'ring-2 ring-primary ring-offset-2 bg-muted/30' : ''"
+                                        >
+                                            <div class="aspect-square bg-muted/20 relative overflow-hidden rounded-md m-1.5">
+                                                <img
+                                                    v-if="media.mime_type?.startsWith('image/')"
+                                                    :src="media.url"
+                                                    :alt="media.name"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                >
+                                                <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
+                                                    <File class="w-8 h-8" />
+                                                </div>
+                                            </div>
+                                            <div class="px-2 pb-2 text-center">
+                                                <p class="text-[10px] font-medium truncate mb-0.5">{{ media.name }}</p>
+                                                <p class="text-[9px] text-muted-foreground truncate">{{ formatSize(media.size) }}</p>
                                             </div>
                                         </div>
-                                        <div class="px-2 pb-2 text-center">
-                                            <p class="text-[10px] font-medium truncate mb-0.5">{{ media.name }}</p>
-                                            <p class="text-[9px] text-muted-foreground truncate">{{ formatSize(media.size) }}</p>
-                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- List View -->
-                                <div v-else class="min-w-full inline-block align-middle">
-                                    <div class="border border-border rounded-lg overflow-hidden">
-                                        <table class="min-w-full">
-                                            <thead class="bg-muted/30 border-b border-border">
-                                                <tr>
-                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Name</th>
-                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Size</th>
-                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Type</th>
-                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Modified</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="divide-y divide-border/50 bg-background">
-                                                 <!-- Folders -->
-                                                <tr 
-                                                    v-for="folder in folders" 
-                                                    :key="'folder-' + folder.id"
-                                                    @dblclick="navigateToFolder(folder)"
-                                                    class="hover:bg-muted/30 cursor-pointer group"
-                                                >
-                                                    <td class="px-4 py-2.5 whitespace-nowrap">
-                                                        <div class="flex items-center gap-3">
-                                                            <Folder class="w-4 h-4 text-blue-500 fill-current" />
-                                                            <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{{ folder.name }}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">-</td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">Folder</td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatDate(folder.updated_at) }}</td>
-                                                </tr>
-                                                <!-- Files -->
-                                                <tr 
-                                                    v-for="media in mediaList" 
-                                                    :key="'media-' + media.id"
-                                                    @click="selectMedia(media)"
-                                                    class="hover:bg-muted/30 cursor-pointer transition-colors"
-                                                    :class="selectedMediaId === media.id ? 'bg-primary/5' : ''"
-                                                >
-                                                    <td class="px-4 py-2.5 whitespace-nowrap">
-                                                        <div class="flex items-center gap-3">
-                                                            <div class="w-8 h-8 rounded bg-muted/20 overflow-hidden flex-shrink-0 border border-border/50">
-                                                                <img
-                                                                    v-if="media.mime_type?.startsWith('image/')"
-                                                                    :src="media.url"
-                                                                    class="w-full h-full object-cover"
-                                                                >
-                                                                <File v-else class="w-full h-full p-1.5 text-muted-foreground" />
+                                    <!-- List View -->
+                                    <div v-else class="min-w-full inline-block align-middle">
+                                        <div class="border border-border rounded-lg overflow-hidden">
+                                            <table class="min-w-full">
+                                                <thead class="bg-muted/30 border-b border-border">
+                                                    <tr>
+                                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Name</th>
+                                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Size</th>
+                                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Type</th>
+                                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Modified</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-border/50 bg-background">
+                                                     <!-- Folders -->
+                                                    <tr 
+                                                        v-for="folder in folders" 
+                                                        :key="'folder-' + folder.id"
+                                                        @dblclick="navigateToFolder(folder)"
+                                                        class="hover:bg-muted/30 cursor-pointer group"
+                                                    >
+                                                        <td class="px-4 py-2.5 whitespace-nowrap">
+                                                            <div class="flex items-center gap-3">
+                                                                <Folder class="w-4 h-4 text-blue-500 fill-current" />
+                                                                <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{{ folder.name }}</span>
                                                             </div>
-                                                            <span class="text-sm truncate max-w-[200px]" :class="selectedMediaId === media.id ? 'text-primary font-medium' : 'text-foreground'">{{ media.name }}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatSize(media.size) }}</td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ media.extension || 'File' }}</td>
-                                                    <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatDate(media.updated_at) }}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                        </td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">-</td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">Folder</td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatDate(folder.updated_at) }}</td>
+                                                    </tr>
+                                                    <!-- Files -->
+                                                    <tr 
+                                                        v-for="media in mediaList" 
+                                                        :key="'media-' + media.id"
+                                                        @click="selectMedia(media)"
+                                                        class="hover:bg-muted/30 cursor-pointer transition-colors"
+                                                        :class="selectedMediaId === media.id ? 'bg-primary/5' : ''"
+                                                    >
+                                                        <td class="px-4 py-2.5 whitespace-nowrap">
+                                                            <div class="flex items-center gap-3">
+                                                                <div class="w-8 h-8 rounded bg-muted/20 overflow-hidden flex-shrink-0 border border-border/50">
+                                                                    <img
+                                                                        v-if="media.mime_type?.startsWith('image/')"
+                                                                        :src="media.url"
+                                                                        class="w-full h-full object-cover"
+                                                                    >
+                                                                    <File v-else class="w-full h-full p-1.5 text-muted-foreground" />
+                                                                </div>
+                                                                <span class="text-sm truncate max-w-[200px]" :class="selectedMediaId === media.id ? 'text-primary font-medium' : 'text-foreground'">{{ media.name }}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatSize(media.size) }}</td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ media.extension || 'File' }}</td>
+                                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">{{ formatDate(media.updated_at) }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Footer -->
-                    <div class="flex items-center justify-between p-4 border-t border-border bg-muted/20">
-                        <Button
-                            @click="showUpload = true"
-                            type="button"
-                            variant="default"
-                            size="sm"
-                        >
-                            {{ $t('features.media.actions.uploadNew') }}
-                        </Button>
-                        <div class="flex space-x-2">
+                        <!-- Footer -->
+                        <div class="flex items-center justify-between p-4 border-t border-border bg-muted/20">
                             <Button
-                                @click="showModal = false"
+                                @click="showUpload = true"
                                 type="button"
-                                variant="outline"
-                                size="sm"
-                            >
-                                {{ $t('features.media.actions.cancel') }}
-                            </Button>
-                            <Button
-                                @click="confirmSelection"
-                                type="button"
-                                :disabled="!selectedMediaId"
                                 variant="default"
                                 size="sm"
                             >
-                                {{ $t('features.media.actions.select') }}
+                                {{ $t('features.media.actions.uploadNew') }}
                             </Button>
+                            <div class="flex space-x-2">
+                                <Button
+                                    @click="showModal = false"
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                >
+                                    {{ $t('features.media.actions.cancel') }}
+                                </Button>
+                                <Button
+                                    @click="confirmSelection"
+                                    type="button"
+                                    :disabled="!selectedMediaId"
+                                    variant="default"
+                                    size="sm"
+                                >
+                                    {{ $t('features.media.actions.select') }}
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
             </div>
-        </div>
+        </Teleport>
 
         <!-- Upload Modal -->
         <div
@@ -281,17 +288,72 @@ const props = defineProps({
             maxSize: 10240,
             minWidth: null,
             minHeight: null,
-            maxWidth: null,
             maxHeight: null
         })
+    },
+    open: {
+        type: Boolean,
+        default: undefined
     }
 });
 
-const emit = defineEmits(['selected']);
+const emit = defineEmits(['selected', 'update:open']);
 
 const showModal = ref(false);
+
+// Sync prop 'open' to internal state
+watch(() => props.open, (newVal) => {
+    if (newVal !== undefined) {
+        showModal.value = newVal;
+    }
+}, { immediate: true });
+
+// Sync internal state to prop 'open'
+watch(showModal, (newVal) => {
+    emit('update:open', newVal);
+});
 const showUpload = ref(false);
 const loading = ref(false);
+
+
+const modalRef = ref(null);
+const position = ref({ x: 0, y: 0 });
+let isDragging = false;
+let startPos = { x: 0, y: 0 };
+let startMouse = { x: 0, y: 0 };
+
+const startDrag = (e) => {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return; // Don't drag if clicking buttons
+    isDragging = true;
+    startMouse = { x: e.clientX, y: e.clientY };
+    startPos = { ...position.value };
+    
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+};
+
+const onDrag = (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startMouse.x;
+    const dy = e.clientY - startMouse.y;
+    position.value = {
+        x: startPos.x + dx,
+        y: startPos.y + dy
+    };
+};
+
+const stopDrag = () => {
+    isDragging = false;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+};
+
+// Reset position when re-opened
+watch(showModal, (val) => {
+    if (val) {
+        position.value = { x: 0, y: 0 };
+    }
+});
 
 // State
 const viewMode = ref('grid'); // 'grid' | 'list'

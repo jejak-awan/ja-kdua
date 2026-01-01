@@ -4,24 +4,27 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <router-link to="/" class="flex items-center gap-2 group">
-                    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:bg-primary/90 transition-colors">
-                        JA
-                    </div>
-                    <span class="text-xl font-bold text-foreground">
-                        CMS
-                    </span>
+                    <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'JA-CMS')">
+                    <template v-else>
+                        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:bg-primary/90 transition-colors">
+                            JA
+                        </div>
+                        <span class="text-xl font-bold text-foreground">
+                            CMS
+                        </span>
+                    </template>
                 </router-link>
 
                 <!-- Desktop Nav -->
                 <nav class="hidden md:flex items-center gap-8">
                     <router-link 
                         v-for="item in navItems" 
-                        :key="item.path" 
-                        :to="item.path"
+                        :key="item.id" 
+                        :to="item.url || '/'"
                         class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group py-2"
                         active-class="text-primary"
                     >
-                        {{ item.label }}
+                        {{ item.title }}
                         <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                     </router-link>
                 </nav>
@@ -70,13 +73,13 @@
                 <div class="container mx-auto px-4 py-4 space-y-2">
                     <router-link 
                         v-for="item in navItems" 
-                        :key="item.path" 
-                        :to="item.path"
+                        :key="item.id" 
+                        :to="item.url || '/'"
                         class="block px-4 py-2.5 text-base font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
                         active-class="text-primary bg-accent"
                         @click="isOpen = false"
                     >
-                        {{ item.label }}
+                        {{ item.title }}
                     </router-link>
                     <div class="h-px bg-border my-4"></div>
                     <div class="flex flex-col gap-2">
@@ -100,14 +103,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useTheme } from '../../../../composables/useTheme';
+import { useMenu } from '../../../../composables/useMenu';
+
+const { getSetting } = useTheme();
+const { menus, fetchMenuByLocation } = useMenu();
 
 const isOpen = ref(false);
 
-const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Blog', path: '/blog' },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' },
-];
+onMounted(() => {
+    fetchMenuByLocation('header');
+});
+
+const navItems = computed(() => menus.value['header']?.items || []);
 </script>

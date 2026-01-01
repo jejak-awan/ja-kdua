@@ -102,6 +102,9 @@ Route::prefix('v1')->group(function () {
 
         // Languages (public)
         Route::get('/languages', [App\Http\Controllers\Api\V1\LanguageController::class, 'index']);
+
+        // Menus (public)
+        Route::get('/menus/location/{location}', [App\Http\Controllers\Api\V1\MenuController::class, 'getByLocation']);
     });
 
     // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)

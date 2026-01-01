@@ -77,10 +77,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
-import BlockRenderer from '@/components/blocks/BlockRenderer.vue';
+import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue';
 
 const route = useRoute();
 const post = ref(null);

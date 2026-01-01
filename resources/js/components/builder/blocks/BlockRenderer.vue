@@ -1,12 +1,15 @@
 <template>
     <div class="block-renderer w-full">
         <template v-for="block in blocks" :key="block.id">
-            <div :class="getVisibilityClasses(block.settings.visibility)">
+            <div v-if="block && block.settings" :class="getVisibilityClasses(block.settings.visibility)">
                 <component 
                     :is="getBlockComponent(block.type)" 
                     v-bind="block.settings"
                     class="block-item"
                 />
+            </div>
+            <div v-else-if="block" class="p-4 border border-dashed rounded-lg bg-muted/20 text-xs text-muted-foreground text-center">
+                Invalid Block: {{ block.type || 'Unknown' }}
             </div>
         </template>
     </div>
@@ -14,6 +17,9 @@
 
 <script setup>
 import { defineAsyncComponent } from 'vue';
+
+// Import all blocks dynamically from the builder/blocks directory
+const blockModules = import.meta.glob('@/components/builder/blocks/*.vue', { eager: true });
 
 const props = defineProps({
     blocks: {
@@ -64,7 +70,7 @@ const getBlockComponent = (type) => {
             return defineAsyncComponent(() => import('./PricingBlock.vue'));
         case 'accordion':
             return defineAsyncComponent(() => import('./AccordionBlock.vue'));
-        case 'testimonials':
+        case 'testimonial':
             return defineAsyncComponent(() => import('./TestimonialBlock.vue'));
         default:
             return null;

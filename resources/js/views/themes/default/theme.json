@@ -6,16 +6,20 @@
     "description": "JA-CMS Default Theme - A clean, modern, and professional Vue-based theme with extensive features.",
     "author": "Jejakawan",
     "settings_schema": {
-        "brand_logo": {
-            "label": "Logo URL",
+        "site_title": {
+            "label": "Site Title",
             "type": "text",
-            "placeholder": "/images/logo.png",
+            "default": "JA-CMS",
+            "category": "General"
+        },
+        "brand_logo": {
+            "label": "Logo",
+            "type": "media",
             "category": "General"
         },
         "brand_favicon": {
-            "label": "Favicon URL",
-            "type": "text",
-            "placeholder": "/favicon.ico",
+            "label": "Favicon",
+            "type": "media",
             "category": "General"
         },
         "color_primary": {

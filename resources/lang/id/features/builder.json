@@ -1,0 +1,53 @@
+{
+    "sidebar": {
+        "title": "Widgets",
+        "elements": "Elements",
+        "searchPlaceholder": "Search widgets...",
+        "layoutLibrary": "Layout Library"
+    },
+    "canvas": {
+        "empty": {
+            "title": "Build your masterpiece",
+            "description": "Drag widgets from the left library and drop them here to start building your page."
+        },
+        "toolbar": {
+            "mobile": "Mobile View",
+            "tablet": "Tablet View",
+            "desktop": "Desktop View",
+            "openSidebar": "Open Sidebar"
+        },
+        "hints": {
+            "edit": "Click to Edit",
+            "reorder": "Drag to Reorder",
+            "add": "Drop to Add"
+        }
+    },
+    "properties": {
+        "settings": "Settings",
+        "id": "ID",
+        "tabs": {
+            "content": "Content",
+            "style": "Style",
+            "advanced": "Advanced"
+        },
+        "noSelection": "Select a block to edit settings",
+        "confirm": "Confirm & Close",
+        "fields": {
+            "backgroundColor": "Background Color",
+            "backgroundImage": "Background Image",
+            "contentAlignment": "Content Alignment",
+            "verticalPadding": "Vertical Padding",
+            "padding": {
+                "none": "None",
+                "medium": "Medium",
+                "large": "Large"
+            }
+        }
+    },
+    "templates": {
+        "title": "Template Library",
+        "description": "Choose a professionally designed block or full layout template.",
+        "insert": "Insert Template",
+        "close": "Close"
+    }
+}

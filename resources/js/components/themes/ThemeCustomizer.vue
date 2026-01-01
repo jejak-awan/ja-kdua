@@ -144,6 +144,29 @@
                                     <span class="text-sm font-medium text-foreground select-none">{{ formValues[setting.key] ? 'Enabled' : 'Disabled' }}</span>
                                 </label>
 
+                                <!-- Media Picker -->
+                                <div v-else-if="setting.type === 'media'" class="space-y-2">
+                                    <div v-if="formValues[setting.key]" class="relative group aspect-video bg-muted rounded-lg overflow-hidden border shadow-sm">
+                                        <img :src="formValues[setting.key]" class="w-full h-full object-contain" alt="Preview">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <button @click="openMediaPicker(setting.key)" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors" title="Change Image">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                            </button>
+                                            <button @click="updateSetting(setting.key, '')" class="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors" title="Remove">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        v-else
+                                        @click="openMediaPicker(setting.key)"
+                                        class="w-full h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary hover:border-primary/50 transition-all bg-muted/10 hover:bg-muted/20"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        <span class="text-[10px] font-medium uppercase tracking-wider">Select Media</span>
+                                    </button>
+                                </div>
+
                                 <!-- Default Input (Text/URL/etc) -->
                                 <input
                                     v-else
@@ -210,6 +233,14 @@
                 />
             </div>
         </div>
+
+        <!-- Media Picker Modal -->
+        <MediaPicker
+            v-model:open="showMediaPicker"
+            @selected="handleMediaSelect"
+        >
+            <template #trigger><span class="hidden"></span></template>
+        </MediaPicker>
     </div>
 </template>
 
@@ -217,6 +248,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import api from '../../services/api';
 import ThemePreview from './ThemePreview.vue';
+import MediaPicker from '../MediaPicker.vue';
 import { toast } from '../../services/toast';
 import { useConfirm } from '../../composables/useConfirm';
 
@@ -236,9 +268,25 @@ const loading = ref(true);
 const previewTheme = ref({});
 const expandedSections = ref(['General']); // Default open
 
+const showMediaPicker = ref(false);
+const activeMediaField = ref(null);
+
 const initialSettings = ref(null);
 const initialCss = ref('');
 const availableMenus = ref([]);
+
+const openMediaPicker = (fieldKey) => {
+    activeMediaField.value = fieldKey;
+    showMediaPicker.value = true;
+};
+
+const handleMediaSelect = (media) => {
+    if (activeMediaField.value) {
+        updateSetting(activeMediaField.value, media.url);
+    }
+    showMediaPicker.value = false;
+    activeMediaField.value = null;
+};
 
 const fetchMenus = async () => {
     try {
