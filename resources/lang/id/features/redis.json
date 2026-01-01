@@ -1,101 +1,103 @@
 {
-    "title": "Manajemen Redis",
-    "description": "Kelola konfigurasi server Redis dan monitor performa cache",
-    "tabs": {
-        "statistics": "Statistik",
-        "settings": "Pengaturan",
-        "cache": "Manajemen Cache"
+  "title": "Manajemen Redis",
+  "description": "Kelola konfigurasi server Redis dan monitor performa cache",
+  "tabs": {
+    "statistics": "Statistik",
+    "settings": "Pengaturan",
+    "cache": "Manajemen Cache"
+  },
+  "settings": {
+    "connection": "Pengaturan Koneksi",
+    "test": "Uji Koneksi",
+    "testing": "Menguji...",
+    "save": "Simpan Pengaturan",
+    "saving": "Menyimpan...",
+    "cancel": "Reset",
+    "select": "Pilih...",
+    "enabled": "Diaktifkan",
+    "disabled": "Dinonaktifkan"
+  },
+  "statistics": {
+    "grid": {
+      "version": "Versi Redis",
+      "memory": "Memori Digunakan",
+      "keys": "Total Key",
+      "uptime": "Uptime",
+      "clients": "Klien Terhubung",
+      "hitRate": "Hit Rate",
+      "ops": "Operasi/Detik",
+      "commands": "Total Perintah"
     },
-    "settings": {
-        "connection": "Pengaturan Koneksi",
-        "test": "Uji Koneksi",
-        "testing": "Menguji...",
-        "save": "Simpan Pengaturan",
-        "saving": "Menyimpan...",
-        "cancel": "Reset",
-        "select": "Pilih...",
-        "enabled": "Diaktifkan",
-        "disabled": "Dinonaktifkan"
+    "hitMiss": {
+      "title": "Statistik Cache Hit/Miss",
+      "hits": "Cache Hit",
+      "misses": "Cache Miss",
+      "hitRate": "Hit Rate"
     },
-    "statistics": {
-        "grid": {
-            "version": "Versi Redis",
-            "memory": "Memori Digunakan",
-            "keys": "Total Key",
-            "uptime": "Uptime",
-            "clients": "Klien Terhubung",
-            "hitRate": "Hit Rate",
-            "ops": "Operasi/Detik",
-            "commands": "Total Perintah"
-        },
-        "hitMiss": {
-            "title": "Statistik Cache Hit/Miss",
-            "hits": "Cache Hit",
-            "misses": "Cache Miss",
-            "hitRate": "Hit Rate"
-        },
-        "refresh": "Segarkan Statistik",
-        "autoRefresh": "Segarkan otomatis setiap 30 detik"
+    "refresh": "Segarkan Statistik",
+    "autoRefresh": "Segarkan otomatis setiap 30 detik"
+  },
+  "cache": {
+    "title": "Manajemen Cache",
+    "actions": {
+      "warm": {
+        "title": "Warm Cache",
+        "desc": "Regenerasi file cache yang dioptimalkan",
+        "button": "Warm Cache",
+        "warming": "Memproses..."
+      },
+      "all": {
+        "title": "Bersihkan Semua Cache",
+        "desc": "Bersihkan semua data cache termasuk config, route, dan view",
+        "button": "Bersihkan Semua"
+      },
+      "cache": {
+        "title": "Cache Aplikasi",
+        "desc": "Bersihkan cache aplikasi saja",
+        "button": "Bersihkan Cache"
+      },
+      "config": {
+        "title": "Cache Konfigurasi",
+        "desc": "Bersihkan cache konfigurasi",
+        "button": "Bersihkan Config"
+      },
+      "route": {
+        "title": "Cache Route",
+        "desc": "Bersihkan cache route",
+        "button": "Bersihkan Route"
+      },
+      "view": {
+        "title": "Cache View",
+        "desc": "Bersihkan template view yang dikompilasi",
+        "button": "Bersihkan View"
+      }
     },
-    "cache": {
-        "title": "Manajemen Cache",
-        "actions": {
-            "warm": {
-                "title": "Warm Cache",
-                "desc": "Regenerasi file cache yang dioptimalkan",
-                "button": "Warm Cache",
-                "warming": "Memproses..."
-            },
-            "all": {
-                "title": "Bersihkan Semua Cache",
-                "desc": "Bersihkan semua data cache termasuk config, route, dan view",
-                "button": "Bersihkan Semua"
-            },
-            "cache": {
-                "title": "Cache Aplikasi",
-                "desc": "Bersihkan cache aplikasi saja",
-                "button": "Bersihkan Cache"
-            },
-            "config": {
-                "title": "Cache Konfigurasi",
-                "desc": "Bersihkan cache konfigurasi",
-                "button": "Bersihkan Config"
-            },
-            "route": {
-                "title": "Cache Route",
-                "desc": "Bersihkan cache route",
-                "button": "Bersihkan Route"
-            },
-            "view": {
-                "title": "Cache View",
-                "desc": "Bersihkan template view yang dikompilasi",
-                "button": "Bersihkan View"
-            }
-        },
-        "stats": {
-            "title": "Statistik Cache",
-            "keys": "Total Key",
-            "size": "Ukuran Cache",
-            "expired": "Key Kedaluwarsa",
-            "topKeys": "Key Teratas berdasarkan Ukuran",
-            "table": {
-                "key": "Key",
-                "size": "Ukuran",
-                "ttl": "TTL"
-            }
-        }
-    },
-    "messages": {
-        "saveSuccess": "Pengaturan berhasil disimpan!",
-        "saveFailed": "Gagal menyimpan pengaturan",
-        "testSuccess": "Koneksi berhasil",
-        "testFailed": "Koneksi gagal",
-        "flushConfirm": "Apakah Anda yakin ingin membersihkan cache {type}?",
-        "flushSuccess": "Cache {type} berhasil dibersihkan!",
-        "flushFailed": "Gagal membersihkan cache",
-        "warmConfirm": "Apakah Anda yakin ingin melakukan warm cache? Ini akan meregenerasi cache config, route, dan view.",
-        "warmSuccess": "Cache berhasil di-warm!",
-        "warmFailed": "Gagal melakukan warm cache",
-        "loading": "Memuat..."
+    "stats": {
+      "title": "Statistik Cache",
+      "keys": "Total Key",
+      "size": "Ukuran Cache",
+      "expired": "Key Kedaluwarsa",
+      "topKeys": "Key Teratas berdasarkan Ukuran",
+      "table": {
+        "key": "Key",
+        "size": "Ukuran",
+        "ttl": "TTL"
+      }
     }
+  },
+  "messages": {
+    "saveSuccess": "Pengaturan berhasil disimpan!",
+    "saveFailed": "Gagal menyimpan pengaturan",
+    "testSuccess": "Koneksi berhasil",
+    "testFailed": "Koneksi gagal",
+    "flushConfirm": "Apakah Anda yakin ingin menghapus cache {type}?",
+    "flushSuccess": "Cache {type} berhasil dibersihkan!",
+    "flushFailed": "Gagal membersihkan cache",
+    "warmConfirm": "Apakah Anda yakin ingin memanaskan ulang cache? Ini akan meregenerasi cache konfigurasi, route, dan view.",
+    "warmSuccess": "Cache berhasil di-warm!",
+    "warmFailed": "Gagal melakukan warm cache",
+    "loading": "Memuat...",
+    "flushConfirmLogout": "Peringatan: Menghapus semua cache juga akan menghapus sesi pengguna. Anda akan segera logout. Apakah Anda yakin ingin melanjutkan?",
+    "warmConfirmLogout": "Peringatan: Memanaskan ulang cache memerlukan penghapusan terlebih dahulu, yang akan menghapus sesi pengguna. Anda akan segera logout. Apakah Anda yakin ingin melanjutkan?"
+  }
 }

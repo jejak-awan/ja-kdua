@@ -193,86 +193,88 @@
         </Card>
 
         <form @submit.prevent="saveSettings" :inert="cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'">
-          <Card :class="{'opacity-50 pointer-events-none': cacheDriver !== 'redis' && cacheDriver !== 'redis_failover'}">
-            <CardContent class="p-0">
-              <div v-for="(group, index) in groupedSettings" :key="group.name" class="space-y-0">
-                <!-- Group Header -->
-                <div class="px-6 py-4 border-b border-border/50 bg-muted/20 flex items-center justify-between">
-                  <div class="flex items-center gap-3">
+          
+            <Accordion type="multiple" class="w-full space-y-4" :default-value="['Connection', 'Session & Queue']">
+              <AccordionItem v-for="group in groupedSettings" :key="group.name" :value="group.name" class="border border-border rounded-lg bg-card px-2">
+                <AccordionTrigger class="px-4 hover:no-underline">
+                  <div class="flex items-center gap-3 text-left">
                     <div class="p-2 rounded-lg bg-primary/10 text-primary">
                       <component :is="getGroupIcon(group.name)" class="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 class="text-base font-semibold text-foreground">{{ group.name }}</h3>
-                      <p class="text-xs text-muted-foreground">{{ getGroupDescription(group.name) }}</p>
+                      <h3 class="text-lg font-semibold text-foreground">{{ group.name }}</h3>
+                      <p class="text-sm text-muted-foreground font-normal">{{ getGroupDescription(group.name) }}</p>
                     </div>
                   </div>
-                  
-                  <!-- Connection Test Button (only for Connection group) -->
-                  <Button 
-                    v-if="group.name === 'Connection'"
-                    size="sm"
-                    type="button"
-                    @click="testConnection" 
-                    :disabled="testing"
-                    class="h-8"
-                  >
-                    <Loader2 v-if="testing" class="w-4 h-4 mr-2 animate-spin" />
-                    {{ testing ? $t('features.redis.settings.testing') : $t('features.redis.settings.test') }}
-                  </Button>
-                </div>
+                </AccordionTrigger>
+                
+                <AccordionContent class="px-4 pb-4 pt-2 border-t border-border/50 mt-2">
+                   <!-- Connection Group Extras -->
+                   <div v-if="group.name === 'Connection'" class="mb-6 space-y-4">
+                      <!-- Connection Actions -->
+                      <div class="flex items-center justify-between bg-muted/30 p-4 rounded-lg border border-border/50">
+                          <div class="text-sm text-muted-foreground">
+                              {{ $t('features.redis.settings.testDescription', 'Test your Redis connection settings.') }}
+                          </div>
+                          <Button 
+                            size="sm"
+                            type="button"
+                            @click="testConnection" 
+                            :disabled="testing"
+                          >
+                            <Loader2 v-if="testing" class="w-4 h-4 mr-2 animate-spin" />
+                            <Zap v-else class="w-4 h-4 mr-2" />
+                            {{ testing ? $t('features.redis.settings.testing') : $t('features.redis.settings.test') }}
+                          </Button>
+                      </div>
 
-                <!-- Connection Status Alert (only for Connection group) -->
-                <div v-if="group.name === 'Connection' && connectionStatus" class="px-6 pt-4">
-                  <div :class="cn('rounded-lg p-4 text-sm border border-border/50 flex items-center gap-3', connectionStatus.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border-destructive/20 text-destructive')">
-                    <div :class="cn('p-1 rounded-full', connectionStatus.type === 'success' ? 'bg-emerald-500/20' : 'bg-destructive/20')">
-                      <Zap v-if="connectionStatus.type === 'success'" class="w-4 h-4" />
-                      <AlertTriangle v-else class="w-4 h-4" />
-                    </div>
-                    <span>{{ connectionStatus.message }}</span>
-                  </div>
-                </div>
+                      <!-- Connection Status -->
+                      <div v-if="connectionStatus" :class="cn('rounded-lg p-4 text-sm border border-border/50 flex items-center gap-3', connectionStatus.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border-destructive/20 text-destructive')">
+                        <div :class="cn('p-1 rounded-full', connectionStatus.type === 'success' ? 'bg-emerald-500/20' : 'bg-destructive/20')">
+                          <Zap v-if="connectionStatus.type === 'success'" class="w-4 h-4" />
+                          <AlertTriangle v-else class="w-4 h-4" />
+                        </div>
+                        <span>{{ connectionStatus.message }}</span>
+                      </div>
+                   </div>
 
-                <!-- Settings Grid -->
-                <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  <div v-for="setting in group.items" :key="setting.key" class="space-y-2">
-                    <Label :for="setting.key" class="text-sm font-semibold text-foreground">
-                      {{ formatLabel(setting.key) }}
-                    </Label>
-                    <p v-if="setting.description" class="text-xs text-muted-foreground">{{ setting.description }}</p>
+                   <!-- Settings Grid -->
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div v-for="setting in group.items" :key="setting.key" class="space-y-2">
+                        <Label :for="setting.key" class="text-sm font-semibold text-foreground">
+                          {{ formatLabel(setting.key) }}
+                        </Label>
+                        <p v-if="setting.description" class="text-xs text-muted-foreground">{{ setting.description }}</p>
 
-                    <Input
-                      v-if="setting.type === 'string' || setting.type === 'integer'"
-                      :id="setting.key"
-                      :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
-                      v-model="settingsForm[setting.key]"
-                      :class="{ 'border-destructive focus-visible:ring-destructive': errors[setting.key] }"
-                    />
-                    <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
+                        <Input
+                          v-if="setting.type === 'string' || setting.type === 'integer'"
+                          :id="setting.key"
+                          :type="setting.type === 'integer' ? 'number' : (setting.is_encrypted ? 'password' : 'text')"
+                          v-model="settingsForm[setting.key]"
+                          :class="{ 'border-destructive focus-visible:ring-destructive': errors[setting.key] }"
+                        />
+                        <p v-if="errors[setting.key]" class="text-sm text-destructive mt-1">{{ Array.isArray(errors[setting.key]) ? errors[setting.key][0] : errors[setting.key] }}</p>
 
-                    <Select
-                      v-else-if="setting.type === 'boolean'"
-                      :model-value="String(settingsForm[setting.key])"
-                      @update:model-value="(val) => settingsForm[setting.key] = val === 'true'"
-                    >
-                      <SelectTrigger class="w-full">
-                        <SelectValue :placeholder="$t('features.redis.settings.select')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">{{ $t('features.redis.settings.enabled') }}</SelectItem>
-                        <SelectItem value="false">{{ $t('features.redis.settings.disabled') }}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                        <Select
+                          v-else-if="setting.type === 'boolean'"
+                          :model-value="String(settingsForm[setting.key])"
+                          @update:model-value="(val) => settingsForm[setting.key] = val === 'true'"
+                        >
+                          <SelectTrigger class="w-full">
+                            <SelectValue :placeholder="$t('features.redis.settings.select')" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">{{ $t('features.redis.settings.enabled') }}</SelectItem>
+                            <SelectItem value="false">{{ $t('features.redis.settings.disabled') }}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                   </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
-                <!-- Divider between groups (except last) -->
-                <div v-if="index < groupedSettings.length - 1" class="h-px bg-border/40"></div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <!-- Action Buttons / Footer (Clean version) -->
+          <!-- Action Buttons / Footer -->
           <div class="mt-6 flex justify-end items-center gap-3">
             <Button
                 variant="ghost"
@@ -485,6 +487,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
 
 import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
@@ -494,6 +497,10 @@ import Tabs from '@/components/ui/tabs.vue'
 import TabsList from '@/components/ui/tabs-list.vue'
 import TabsTrigger from '@/components/ui/tabs-trigger.vue'
 import TabsContent from '@/components/ui/tabs-content.vue'
+import Accordion from '@/components/ui/accordion.vue'
+import AccordionContent from '@/components/ui/accordion-content.vue'
+import AccordionItem from '@/components/ui/accordion-item.vue'
+import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
 import Card from '@/components/ui/card.vue'
 import CardHeader from '@/components/ui/card-header.vue'
 import CardTitle from '@/components/ui/card-title.vue'
@@ -537,6 +544,7 @@ import {
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const { confirm } = useConfirm()
 const toast = useToast()
@@ -714,9 +722,13 @@ const getCacheStatus = async () => {
 }
 
 const flushCache = async (type) => {
+  const isDestructive = type === 'all'
+  
   const confirmed = await confirm({
     title: t('features.redis.messages.flushTitle', 'Flush Cache'),
-    message: t('features.redis.messages.flushConfirm', { type }),
+    message: isDestructive 
+      ? t('features.redis.messages.flushConfirmLogout', 'Warning: Clearing all cache will also clear user sessions. You will be logged out immediately. Are you sure you want to proceed?')
+      : t('features.redis.messages.flushConfirm', { type }),
     variant: 'destructive',
     confirmText: t('features.redis.messages.flushAction', 'Flush'),
   })
@@ -725,12 +737,32 @@ const flushCache = async (type) => {
     return
   }
 
+  // Stop polling if we are about to destroy session
+  if (isDestructive && statsInterval.value) {
+    clearInterval(statsInterval.value)
+    statsInterval.value = null
+  }
+
   flushing.value = true
   try {
     await api.post('/admin/cms/redis/flush-cache', { type })
     toast.success.action(t('features.redis.messages.flushSuccess', { type }))
+    
+    if (isDestructive) {
+      // Force logout handling
+      authStore.clearAuth()
+      window.location.href = '/login?message=session_cleared'
+      return
+    }
+
     loadCacheStats()
   } catch (error) {
+    // If it's a 401, we know what happened
+    if (error.response?.status === 401 && isDestructive) {
+       authStore.clearAuth()
+       window.location.href = '/login?message=session_cleared'
+       return
+    }
     toast.error.fromResponse(error)
   } finally {
     flushing.value = false
@@ -740,22 +772,36 @@ const flushCache = async (type) => {
 const warmCache = async () => {
   const confirmed = await confirm({
     title: t('features.redis.messages.warmTitle', 'Warm Cache'),
-    message: t('features.redis.messages.warmConfirm'),
-    variant: 'default',
+    message: t('features.redis.messages.warmConfirmLogout', 'Warning: Warming the cache requires clearing it first, which will clear user sessions. You will be logged out immediately. Are you sure you want to proceed?'),
+    variant: 'destructive',
     confirmText: t('features.redis.messages.warmAction', 'Warm Up'),
   })
 
   if (!confirmed) {
     return
   }
+  
+  // Stop polling
+  if (statsInterval.value) {
+    clearInterval(statsInterval.value)
+    statsInterval.value = null
+  }
 
   warming.value = true
   try {
     await api.post('/admin/cms/redis/warm-cache')
     toast.success.action(t('features.redis.messages.warmSuccess'))
-    loadCacheStats()
-    loadStats()
+    
+    // Force logout handling - warm cache typically clears everything first
+    authStore.clearAuth()
+    window.location.href = '/login?message=session_cleared'
+    
   } catch (error) {
+     if (error.response?.status === 401) {
+       authStore.clearAuth()
+       window.location.href = '/login?message=session_cleared'
+       return
+    }
     toast.error.fromResponse(error)
   } finally {
     warming.value = false
