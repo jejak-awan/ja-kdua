@@ -13,6 +13,12 @@
         "active": "Aktif",
         "actions": "Aksi"
     },
+    "status": {
+        "pending": "Menunggu",
+        "running": "Berjalan",
+        "completed": "Selesai",
+        "failed": "Gagal"
+    },
     "form": {
         "name": "Nama Tugas",
         "command": "Perintah",
@@ -25,6 +31,10 @@
     },
     "output": {
         "title": "Output Tugas"
+    },
+    "actions": {
+        "run": "Jalankan Tugas",
+        "delete": "Hapus Tugas"
     },
     "confirm_run": "Yakin ingin menjalankan tugas \"{name}\"?",
     "confirm_delete": "Yakin ingin menghapus tugas \"{name}\"?",

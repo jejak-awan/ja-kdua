@@ -30,6 +30,7 @@
     "no": "No",
     "all": "All",
     "none": "None",
+    "never": "Never",
     "role": "Role",
     "roles": "Roles",
     "permission": "Permission",

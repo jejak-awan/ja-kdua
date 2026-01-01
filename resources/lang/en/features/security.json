@@ -3,7 +3,10 @@
     "tabs": {
         "overview": "Overview",
         "blocklist": "Blocklist",
-        "whitelist": "Whitelist"
+        "whitelist": "Whitelist",
+        "cspReports": "CSP Reports",
+        "slowQueries": "Slow Queries",
+        "vulnerabilities": "Vulnerabilities"
     },
     "statistics": {
         "events": "Security Events",
@@ -133,5 +136,110 @@
         "bulkWhitelistSuccess": "{count} IP addresses added to whitelist",
         "bulkRemoveSuccess": "{count} IP addresses removed",
         "cannotBlockWhitelisted": "Cannot block whitelisted IP address"
+    },
+    "cspReports": {
+        "title": "CSP Violation Reports",
+        "description": "Monitor Content Security Policy violations from browser reports",
+        "empty": "No CSP violation reports found. Your security policies are holding strong! 🛡️",
+        "confirmBulkAction": "Are you sure you want to {action} {count} report(s)?",
+        "stats": {
+            "total": "Total Reports",
+            "new": "New",
+            "topViolation": "Top Violation",
+            "last24h": "Last 24h"
+        },
+        "filters": {
+            "status": "Status",
+            "directive": "Directive",
+            "dateFrom": "Date From",
+            "dateTo": "Date To"
+        },
+        "status": {
+            "new": "New",
+            "reviewed": "Reviewed",
+            "falsePositive": "False Positive"
+        },
+        "table": {
+            "directive": "Directive",
+            "blockedUri": "Blocked URI",
+            "documentUri": "Document URI",
+            "ip": "IP Address",
+            "status": "Status",
+            "date": "Date"
+        },
+        "actions": {
+            "markReviewed": "Mark Reviewed",
+            "markFalsePositive": "Mark False Positive"
+        }
+    },
+    "slowQueries": {
+        "title": "Slow Query Analysis",
+        "description": "Monitor database queries that exceed performance thresholds",
+        "empty": "No slow queries found. Database performance is optimal! 🚀",
+        "stats": {
+            "total": "Total Logged",
+            "avgDuration": "Avg Duration",
+            "maxDuration": "Max Duration",
+            "today": "Today"
+        },
+        "filters": {
+            "route": "Route",
+            "minDuration": "Min Duration (ms)",
+            "dateFrom": "Date From",
+            "dateTo": "Date To"
+        },
+        "table": {
+            "route": "Route",
+            "duration": "Duration",
+            "user": "User",
+            "query": "Query",
+            "date": "Date"
+        }
+    },
+    "vulnerabilities": {
+        "title": "Dependency Vulnerabilities",
+        "description": "Security audit results for Composer and NPM packages",
+        "empty": "No vulnerabilities found. Your dependencies are secure! 🛡️",
+        "runAudit": "Run Audit",
+        "auditCompleted": "Dependency audit completed successfully",
+        "stats": {
+            "total": "Total",
+            "critical": "Critical",
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low"
+        },
+        "filters": {
+            "source": "Source",
+            "severity": "Severity",
+            "status": "Status",
+            "package": "Package",
+            "searchPackage": "Search package..."
+        },
+        "table": {
+            "package": "Package",
+            "version": "Version",
+            "severity": "Severity",
+            "cve": "CVE",
+            "source": "Source",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "source": {
+            "composer": "Composer",
+            "npm": "NPM"
+        },
+        "severity": {
+            "critical": "Critical",
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low"
+        },
+        "status": {
+            "new": "New",
+            "acknowledged": "Acknowledged",
+            "patched": "Patched",
+            "ignored": "Ignored"
+        }
     }
 }

@@ -34,6 +34,9 @@
                 <TabsTrigger value="overview">{{ $t('features.security.tabs.overview') }}</TabsTrigger>
                 <TabsTrigger value="blocklist">{{ $t('features.security.tabs.blocklist') }}</TabsTrigger>
                 <TabsTrigger value="whitelist">{{ $t('features.security.tabs.whitelist') }}</TabsTrigger>
+                <TabsTrigger value="csp-reports">{{ $t('features.security.tabs.cspReports') }}</TabsTrigger>
+                <TabsTrigger value="slow-queries">{{ $t('features.security.tabs.slowQueries') }}</TabsTrigger>
+                <TabsTrigger value="vulnerabilities">{{ $t('features.security.tabs.vulnerabilities') }}</TabsTrigger>
             </TabsList>
 
             <!-- Overview Tab -->
@@ -93,44 +96,6 @@
                     </CardContent>
                 </Card>
             </div>
-
-            <!-- Quick Links -->
-            <Card class="mb-6">
-                <CardHeader>
-                    <CardTitle class="text-lg">{{ $t('features.security.quickLinks.title') }}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
-                            <router-link to="/admin/security/csp-reports">
-                                <div class="flex items-center mb-2">
-                                    <ShieldAlert class="w-5 h-5 mr-2 text-orange-600" />
-                                    <span class="font-semibold">CSP Violation Reports</span>
-                                </div>
-                                <p class="text-xs text-muted-foreground text-left">Monitor XSS attacks and security policy violations</p>
-                            </router-link>
-                        </Button>
-                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
-                            <router-link to="/admin/security/slow-queries">
-                                <div class="flex items-center mb-2">
-                                    <Search class="w-5 h-5 mr-2 text-blue-600" />
-                                    <span class="font-semibold">Slow Query Analysis</span>
-                                </div>
-                                <p class="text-xs text-muted-foreground text-left">Monitor database performance bottlenecks</p>
-                            </router-link>
-                        </Button>
-                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
-                            <router-link to="/admin/security/dependency-vulnerabilities">
-                                <div class="flex items-center mb-2">
-                                    <ShieldCheck class="w-5 h-5 mr-2 text-green-600" />
-                                    <span class="font-semibold">Dependency Vulnerabilities</span>
-                                </div>
-                                <p class="text-xs text-muted-foreground text-left">Track security vulnerabilities in packages</p>
-                            </router-link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
 
             <!-- IP Management - Single Row -->
             <Card class="mb-6">
@@ -542,6 +507,444 @@
                         :per-page="Number(whitelistPerPage)"
                         @page-change="(val) => whitelistCurrentPage = val"
                         @update:per-page="(val) => { whitelistPerPage = val; whitelistCurrentPage = 1; }"
+                        class="border-none shadow-none px-6 py-4"
+                    />
+                </Card>
+            </TabsContent>
+
+            <!-- CSP Reports Tab -->
+            <TabsContent value="csp-reports">
+                <Card>
+                    <CardHeader class="flex flex-row items-center justify-between pb-4">
+                        <div>
+                            <CardTitle class="text-lg">{{ $t('features.security.cspReports.title') }}</CardTitle>
+                            <CardDescription>{{ $t('features.security.cspReports.description') }}</CardDescription>
+                        </div>
+                        <Button @click="fetchCspReports" variant="outline" size="sm" :disabled="cspLoading">
+                            <Loader2 v-if="cspLoading" class="w-4 h-4 mr-2 animate-spin" />
+                            <RefreshCw v-else class="w-4 h-4 mr-2" />
+                            {{ $t('common.actions.refresh') }}
+                        </Button>
+                    </CardHeader>
+
+                    <!-- CSP Statistics -->
+                    <div class="px-6 pb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.total') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ cspStats.total || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.new') }}</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ cspStats.new || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.topViolation') }}</p>
+                            <p class="text-sm font-medium text-foreground truncate">{{ cspTopViolation || 'None' }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.last24h') }}</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ cspRecentCount }}</p>
+                        </div>
+                    </div>
+
+                    <!-- CSP Filters -->
+                    <div class="px-6 pb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.cspReports.filters.status') }}</Label>
+                                <Select v-model="cspFilters.status">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('common.labels.all')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{{ $t('common.labels.all') }}</SelectItem>
+                                        <SelectItem value="new">{{ $t('features.security.cspReports.status.new') }}</SelectItem>
+                                        <SelectItem value="reviewed">{{ $t('features.security.cspReports.status.reviewed') }}</SelectItem>
+                                        <SelectItem value="false_positive">{{ $t('features.security.cspReports.status.falsePositive') }}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.cspReports.filters.directive') }}</Label>
+                                <Input v-model="cspFilters.directive" placeholder="e.g. script-src" />
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.cspReports.filters.dateFrom') }}</Label>
+                                <Input v-model="cspFilters.date_from" type="date" />
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.cspReports.filters.dateTo') }}</Label>
+                                <Input v-model="cspFilters.date_to" type="date" />
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-4">
+                            <Button @click="applyCspFilters" size="sm">{{ $t('common.actions.apply') }}</Button>
+                            <Button @click="resetCspFilters" variant="outline" size="sm">{{ $t('common.actions.reset') }}</Button>
+                        </div>
+                    </div>
+
+                    <!-- CSP Bulk Actions -->
+                    <div v-if="selectedCspReports.length > 0" class="px-6 pb-4">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center justify-between">
+                            <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                {{ $t('features.security.bulkActions.selected', { count: selectedCspReports.length }) }}
+                            </span>
+                            <div class="flex gap-2">
+                                <Button @click="cspBulkAction('mark_reviewed')" variant="outline" size="sm">{{ $t('features.security.cspReports.actions.markReviewed') }}</Button>
+                                <Button @click="cspBulkAction('mark_false_positive')" variant="outline" size="sm">{{ $t('features.security.cspReports.actions.markFalsePositive') }}</Button>
+                                <Button @click="cspBulkAction('delete')" variant="destructive" size="sm">{{ $t('common.actions.delete') }}</Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CSP Table -->
+                    <CardContent class="p-0">
+                        <div class="relative w-full overflow-auto">
+                            <table class="w-full divide-y divide-border">
+                                <thead class="bg-muted/50">
+                                    <tr>
+                                        <th class="w-12 px-4 py-3 text-left">
+                                            <Checkbox 
+                                                :checked="selectedCspReports.length === cspReports.length && cspReports.length > 0"
+                                                @update:checked="toggleAllCspReports"
+                                            />
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.directive') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.blockedUri') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.documentUri') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.ip') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.cspReports.table.date') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <tr v-if="cspLoading">
+                                        <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                            <Loader2 class="w-6 h-6 animate-spin mx-auto mb-2" />
+                                            {{ $t('common.labels.loading') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="cspReports.length === 0">
+                                        <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                            {{ $t('features.security.cspReports.empty') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-for="report in cspReports" :key="report.id" class="hover:bg-muted/50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <Checkbox 
+                                                :checked="selectedCspReports.includes(report.id)"
+                                                @update:checked="(checked) => handleSelectCspReport(checked, report.id)"
+                                            />
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <Badge variant="destructive">{{ report.violated_directive }}</Badge>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm max-w-xs truncate" :title="report.blocked_uri">{{ report.blocked_uri || 'N/A' }}</td>
+                                        <td class="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate" :title="report.document_uri">{{ report.document_uri }}</td>
+                                        <td class="px-4 py-3 font-mono text-sm">{{ report.ip_address }}</td>
+                                        <td class="px-4 py-3">
+                                            <Badge :variant="getCspStatusVariant(report.status)">{{ getCspStatusLabel(report.status) }}</Badge>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{{ formatDate(report.created_at) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                    <Pagination
+                        v-if="cspPagination.total > 0"
+                        :current-page="cspPagination.current_page"
+                        :total-items="cspPagination.total"
+                        :per-page="cspFilters.per_page"
+                        @page-change="(val) => { cspFilters.page = val; fetchCspReports(); }"
+                        class="border-none shadow-none px-6 py-4"
+                    />
+                </Card>
+            </TabsContent>
+
+            <!-- Slow Queries Tab -->
+            <TabsContent value="slow-queries">
+                <Card>
+                    <CardHeader class="flex flex-row items-center justify-between pb-4">
+                        <div>
+                            <CardTitle class="text-lg">{{ $t('features.security.slowQueries.title') }}</CardTitle>
+                            <CardDescription>{{ $t('features.security.slowQueries.description') }}</CardDescription>
+                        </div>
+                        <Button @click="fetchSlowQueries" variant="outline" size="sm" :disabled="slowQueryLoading">
+                            <Loader2 v-if="slowQueryLoading" class="w-4 h-4 mr-2 animate-spin" />
+                            <RefreshCw v-else class="w-4 h-4 mr-2" />
+                            {{ $t('common.actions.refresh') }}
+                        </Button>
+                    </CardHeader>
+
+                    <!-- Slow Query Statistics -->
+                    <div class="px-6 pb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.total') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ slowQueryStats.total || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.avgDuration') }}</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ slowQueryStats.avg_duration || 0 }}ms</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.maxDuration') }}</p>
+                            <p class="text-2xl font-bold text-red-600">{{ slowQueryStats.max_duration || 0 }}ms</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.slowQueries.stats.today') }}</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ slowQueryStats.today || 0 }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Slow Query Filters -->
+                    <div class="px-6 pb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.slowQueries.filters.route') }}</Label>
+                                <Input v-model="slowQueryFilters.route" placeholder="e.g. api/v1/contents" />
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.slowQueries.filters.minDuration') }}</Label>
+                                <Input v-model.number="slowQueryFilters.min_duration" type="number" placeholder="1000" />
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.slowQueries.filters.dateFrom') }}</Label>
+                                <Input v-model="slowQueryFilters.date_from" type="date" />
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.slowQueries.filters.dateTo') }}</Label>
+                                <Input v-model="slowQueryFilters.date_to" type="date" />
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-4">
+                            <Button @click="applySlowQueryFilters" size="sm">{{ $t('common.actions.apply') }}</Button>
+                            <Button @click="resetSlowQueryFilters" variant="outline" size="sm">{{ $t('common.actions.reset') }}</Button>
+                        </div>
+                    </div>
+
+                    <!-- Slow Query Table -->
+                    <CardContent class="p-0">
+                        <div class="relative w-full overflow-auto">
+                            <table class="w-full divide-y divide-border">
+                                <thead class="bg-muted/50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.route') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.duration') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.user') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.query') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.slowQueries.table.date') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <tr v-if="slowQueryLoading">
+                                        <td colspan="5" class="h-24 text-center text-muted-foreground">
+                                            <Loader2 class="w-6 h-6 animate-spin mx-auto mb-2" />
+                                            {{ $t('common.labels.loading') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="slowQueries.length === 0">
+                                        <td colspan="5" class="h-24 text-center text-muted-foreground">
+                                            <ShieldCheck class="w-12 h-12 mx-auto mb-2 text-green-500" />
+                                            {{ $t('features.security.slowQueries.empty') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-for="query in slowQueries" :key="query.id" class="hover:bg-muted/50 transition-colors">
+                                        <td class="px-4 py-3 font-mono text-sm">{{ query.route || 'N/A' }}</td>
+                                        <td class="px-4 py-3">
+                                            <Badge :variant="getSlowQueryDurationVariant(query.duration)">{{ query.duration }}ms</Badge>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm">{{ query.user?.name || 'Guest' }}</td>
+                                        <td class="px-4 py-3">
+                                            <code class="text-xs bg-muted px-2 py-1 rounded block truncate max-w-md" :title="query.query">{{ query.query }}</code>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{{ formatDate(query.created_at) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                    <Pagination
+                        v-if="slowQueryPagination.total > 0"
+                        :current-page="slowQueryPagination.current_page"
+                        :total-items="slowQueryPagination.total"
+                        :per-page="slowQueryFilters.per_page"
+                        @page-change="(val) => { slowQueryFilters.page = val; fetchSlowQueries(); }"
+                        class="border-none shadow-none px-6 py-4"
+                    />
+                </Card>
+            </TabsContent>
+
+            <!-- Dependency Vulnerabilities Tab -->
+            <TabsContent value="vulnerabilities">
+                <Card>
+                    <CardHeader class="flex flex-row items-center justify-between pb-4">
+                        <div>
+                            <CardTitle class="text-lg">{{ $t('features.security.vulnerabilities.title') }}</CardTitle>
+                            <CardDescription>{{ $t('features.security.vulnerabilities.description') }}</CardDescription>
+                        </div>
+                        <div class="flex gap-2">
+                            <Button @click="runDependencyAudit" variant="default" size="sm" :disabled="auditRunning">
+                                <Loader2 v-if="auditRunning" class="w-4 h-4 mr-2 animate-spin" />
+                                <ShieldAlert v-else class="w-4 h-4 mr-2" />
+                                {{ $t('features.security.vulnerabilities.runAudit') }}
+                            </Button>
+                            <Button @click="fetchVulnerabilities" variant="outline" size="sm" :disabled="vulnLoading">
+                                <RefreshCw class="w-4 h-4 mr-2" />
+                                {{ $t('common.actions.refresh') }}
+                            </Button>
+                        </div>
+                    </CardHeader>
+
+                    <!-- Vulnerability Statistics -->
+                    <div class="px-6 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.total') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ vulnStats.total || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.critical') }}</p>
+                            <p class="text-2xl font-bold text-red-600">{{ vulnStats.critical || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.high') }}</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ vulnStats.high || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.medium') }}</p>
+                            <p class="text-2xl font-bold text-yellow-600">{{ vulnStats.medium || 0 }}</p>
+                        </div>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.low') }}</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ vulnStats.low || 0 }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Vulnerability Filters -->
+                    <div class="px-6 pb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.vulnerabilities.filters.source') }}</Label>
+                                <Select v-model="vulnFilters.source">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('common.labels.all')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{{ $t('common.labels.all') }}</SelectItem>
+                                        <SelectItem value="composer">{{ $t('features.security.vulnerabilities.source.composer') }}</SelectItem>
+                                        <SelectItem value="npm">{{ $t('features.security.vulnerabilities.source.npm') }}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.vulnerabilities.filters.severity') }}</Label>
+                                <Select v-model="vulnFilters.severity">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('common.labels.all')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{{ $t('common.labels.all') }}</SelectItem>
+                                        <SelectItem value="critical">{{ $t('features.security.vulnerabilities.severity.critical') }}</SelectItem>
+                                        <SelectItem value="high">{{ $t('features.security.vulnerabilities.severity.high') }}</SelectItem>
+                                        <SelectItem value="medium">{{ $t('features.security.vulnerabilities.severity.medium') }}</SelectItem>
+                                        <SelectItem value="low">{{ $t('features.security.vulnerabilities.severity.low') }}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.vulnerabilities.filters.status') }}</Label>
+                                <Select v-model="vulnFilters.status">
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder="$t('common.labels.all')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{{ $t('common.labels.all') }}</SelectItem>
+                                        <SelectItem value="new">{{ $t('features.security.vulnerabilities.status.new') }}</SelectItem>
+                                        <SelectItem value="acknowledged">{{ $t('features.security.vulnerabilities.status.acknowledged') }}</SelectItem>
+                                        <SelectItem value="patched">{{ $t('features.security.vulnerabilities.status.patched') }}</SelectItem>
+                                        <SelectItem value="ignored">{{ $t('features.security.vulnerabilities.status.ignored') }}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label class="mb-2 block">{{ $t('features.security.vulnerabilities.filters.package') }}</Label>
+                                <Input v-model="vulnFilters.package" :placeholder="$t('features.security.vulnerabilities.filters.searchPackage')" />
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-4">
+                            <Button @click="applyVulnFilters" size="sm">{{ $t('common.actions.apply') }}</Button>
+                            <Button @click="resetVulnFilters" variant="outline" size="sm">{{ $t('common.actions.reset') }}</Button>
+                        </div>
+                    </div>
+
+                    <!-- Vulnerability Table -->
+                    <CardContent class="p-0">
+                        <div class="relative w-full overflow-auto">
+                            <table class="w-full divide-y divide-border">
+                                <thead class="bg-muted/50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.package') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.version') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.severity') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.cve') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.source') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.status') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('features.security.vulnerabilities.table.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <tr v-if="vulnLoading">
+                                        <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                            <Loader2 class="w-6 h-6 animate-spin mx-auto mb-2" />
+                                            {{ $t('common.labels.loading') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="vulnerabilities.length === 0">
+                                        <td colspan="7" class="h-24 text-center text-muted-foreground">
+                                            <ShieldCheck class="w-12 h-12 mx-auto mb-2 text-green-500" />
+                                            {{ $t('features.security.vulnerabilities.empty') }}
+                                        </td>
+                                    </tr>
+                                    <tr v-for="vuln in vulnerabilities" :key="vuln.id" class="hover:bg-muted/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium">{{ vuln.package_name }}</td>
+                                        <td class="px-4 py-3 font-mono text-sm">{{ vuln.version }}</td>
+                                        <td class="px-4 py-3">
+                                            <Badge :variant="getVulnSeverityVariant(vuln.severity)">{{ $t('features.security.vulnerabilities.severity.' + vuln.severity) }}</Badge>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <a v-if="vuln.cve" :href="`https://nvd.nist.gov/vuln/detail/${vuln.cve}`" target="_blank" class="text-blue-600 hover:underline text-sm">{{ vuln.cve }}</a>
+                                            <span v-else class="text-muted-foreground">-</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <Badge variant="outline">{{ $t('features.security.vulnerabilities.source.' + vuln.source) }}</Badge>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <Badge :variant="getVulnStatusVariant(vuln.status)">{{ $t('features.security.vulnerabilities.status.' + vuln.status) }}</Badge>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <Select @update:model-value="(value) => updateVulnStatus(vuln, value)" :model-value="vuln.status">
+                                                <SelectTrigger class="w-32 h-8">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="new">{{ $t('features.security.vulnerabilities.status.new') }}</SelectItem>
+                                                    <SelectItem value="acknowledged">{{ $t('features.security.vulnerabilities.status.acknowledged') }}</SelectItem>
+                                                    <SelectItem value="patched">{{ $t('features.security.vulnerabilities.status.patched') }}</SelectItem>
+                                                    <SelectItem value="ignored">{{ $t('features.security.vulnerabilities.status.ignored') }}</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                    <Pagination
+                        v-if="vulnPagination.total > 0"
+                        :current-page="vulnPagination.current_page"
+                        :total-items="vulnPagination.total"
+                        :per-page="vulnFilters.per_page"
+                        @page-change="(val) => { vulnFilters.page = val; fetchVulnerabilities(); }"
                         class="border-none shadow-none px-6 py-4"
                     />
                 </Card>
@@ -1092,5 +1495,237 @@ onMounted(() => {
     fetchStats();
     fetchBlocklist();
     fetchWhitelist();
+});
+
+// ========================================
+// CSP REPORTS TAB
+// ========================================
+const cspReports = ref([]);
+const cspStats = ref({});
+const cspLoading = ref(false);
+const selectedCspReports = ref([]);
+const cspFilters = ref({ status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const cspPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+
+const cspTopViolation = computed(() => {
+    if (!cspStats.value.by_directive || cspStats.value.by_directive.length === 0) return 'None';
+    return cspStats.value.by_directive[0].violated_directive;
+});
+
+const cspRecentCount = computed(() => {
+    if (!cspStats.value.recent_trend) return 0;
+    const lastDay = cspStats.value.recent_trend[cspStats.value.recent_trend.length - 1];
+    return lastDay ? lastDay.count : 0;
+});
+
+const fetchCspReports = async () => {
+    cspLoading.value = true;
+    try {
+        const params = { ...cspFilters.value };
+        if (params.status === 'all') params.status = '';
+        
+        const response = await api.get('/admin/cms/security/csp-reports', { params });
+        const result = response.data?.data ? response.data.data : response.data;
+        cspReports.value = result.data || [];
+        cspPagination.value = {
+            total: result.total || 0,
+            current_page: result.current_page || 1,
+            last_page: result.last_page || 1,
+        };
+    } catch (error) {
+        console.error('Failed to fetch CSP reports:', error);
+    } finally {
+        cspLoading.value = false;
+    }
+};
+
+const fetchCspStats = async () => {
+    try {
+        const response = await api.get('/admin/cms/security/csp-reports/statistics');
+        cspStats.value = response.data?.data || {};
+    } catch (error) {
+        console.error('Failed to fetch CSP stats:', error);
+    }
+};
+
+const applyCspFilters = () => { cspFilters.value.page = 1; fetchCspReports(); };
+const resetCspFilters = () => { cspFilters.value = { status: 'all', directive: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchCspReports(); };
+
+const toggleAllCspReports = (checked) => {
+    selectedCspReports.value = checked ? cspReports.value.map(r => r.id) : [];
+};
+
+const handleSelectCspReport = (checked, id) => {
+    if (checked) {
+        selectedCspReports.value.push(id);
+    } else {
+        selectedCspReports.value = selectedCspReports.value.filter(i => i !== id);
+    }
+};
+
+const cspBulkAction = async (action) => {
+    if (selectedCspReports.value.length === 0) return;
+    const confirmed = await confirm({
+        title: t('common.actions.confirm'),
+        message: t('features.security.cspReports.confirmBulkAction', { count: selectedCspReports.value.length, action: action.replace('_', ' ') }),
+        variant: 'danger',
+        confirmText: t('common.actions.confirm'),
+    });
+    if (!confirmed) return;
+    try {
+        await api.post('/admin/cms/security/csp-reports/bulk-action', { ids: selectedCspReports.value, action });
+        toast.success.action(t('common.messages.success.actionSuccess', { item: 'Reports', action: action.replace('_', ' ') }));
+        selectedCspReports.value = [];
+        fetchCspReports();
+        fetchCspStats();
+    } catch (error) {
+        toast.error.fromResponse(error);
+    }
+};
+
+const getCspStatusVariant = (status) => {
+    const variants = { new: 'warning', reviewed: 'secondary', false_positive: 'outline' };
+    return variants[status] || 'secondary';
+};
+
+const getCspStatusLabel = (status) => {
+    const labels = { new: t('features.security.cspReports.status.new'), reviewed: t('features.security.cspReports.status.reviewed'), false_positive: t('features.security.cspReports.status.falsePositive') };
+    return labels[status] || status;
+};
+
+// ========================================
+// SLOW QUERIES TAB
+// ========================================
+const slowQueries = ref([]);
+const slowQueryStats = ref({});
+const slowQueryLoading = ref(false);
+const slowQueryFilters = ref({ route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 });
+const slowQueryPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+
+const fetchSlowQueries = async () => {
+    slowQueryLoading.value = true;
+    try {
+        const response = await api.get('/admin/cms/security/slow-queries', { params: slowQueryFilters.value });
+        slowQueries.value = response.data?.data?.data || [];
+        slowQueryPagination.value = {
+            total: response.data?.data?.total || 0,
+            current_page: response.data?.data?.current_page || 1,
+            last_page: response.data?.data?.last_page || 1,
+        };
+    } catch (error) {
+        console.error('Failed to fetch slow queries:', error);
+    } finally {
+        slowQueryLoading.value = false;
+    }
+};
+
+const fetchSlowQueryStats = async () => {
+    try {
+        const response = await api.get('/admin/cms/security/slow-queries/statistics');
+        slowQueryStats.value = response.data?.data || {};
+    } catch (error) {
+        console.error('Failed to fetch slow query stats:', error);
+    }
+};
+
+const applySlowQueryFilters = () => { slowQueryFilters.value.page = 1; fetchSlowQueries(); };
+const resetSlowQueryFilters = () => { slowQueryFilters.value = { route: '', min_duration: '', date_from: '', date_to: '', page: 1, per_page: 50 }; fetchSlowQueries(); };
+
+const getSlowQueryDurationVariant = (duration) => {
+    if (duration >= 5000) return 'destructive';
+    if (duration >= 2000) return 'warning';
+    return 'secondary';
+};
+
+// ========================================
+// DEPENDENCY VULNERABILITIES TAB
+// ========================================
+const vulnerabilities = ref([]);
+const vulnLoading = ref(false);
+const auditRunning = ref(false);
+const vulnFilters = ref({ source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 });
+const vulnPagination = ref({ total: 0, current_page: 1, last_page: 1 });
+
+const vulnStats = computed(() => {
+    const all = vulnerabilities.value;
+    return {
+        total: vulnPagination.value.total,
+        critical: all.filter(v => v.severity === 'critical').length,
+        high: all.filter(v => v.severity === 'high').length,
+        medium: all.filter(v => v.severity === 'medium').length,
+        low: all.filter(v => v.severity === 'low').length,
+    };
+});
+
+const fetchVulnerabilities = async () => {
+    vulnLoading.value = true;
+    try {
+        const params = { ...vulnFilters.value };
+        if (params.source === 'all') params.source = '';
+        if (params.severity === 'all') params.severity = '';
+        if (params.status === 'all') params.status = '';
+
+        const response = await api.get('/admin/cms/security/dependency-vulnerabilities', { params });
+        const result = response.data?.data ? response.data.data : response.data;
+        vulnerabilities.value = result.data || [];
+        vulnPagination.value = {
+            total: result.total || 0,
+            current_page: result.current_page || 1,
+            last_page: result.last_page || 1,
+        };
+    } catch (error) {
+        console.error('Failed to fetch vulnerabilities:', error);
+    } finally {
+        vulnLoading.value = false;
+    }
+};
+
+const runDependencyAudit = async () => {
+    auditRunning.value = true;
+    try {
+        await api.post('/admin/cms/security/run-dependency-audit');
+        toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
+        fetchVulnerabilities();
+    } catch (error) {
+        toast.error.fromResponse(error);
+    } finally {
+        auditRunning.value = false;
+    }
+};
+
+const updateVulnStatus = async (vuln, status) => {
+    try {
+        await api.put(`/admin/cms/security/dependency-vulnerabilities/${vuln.id}`, { status });
+        vuln.status = status;
+        toast.success.action(t('common.messages.success.updated', { item: 'Status' }));
+    } catch (error) {
+        toast.error.fromResponse(error);
+    }
+};
+
+const applyVulnFilters = () => { vulnFilters.value.page = 1; fetchVulnerabilities(); };
+const resetVulnFilters = () => { vulnFilters.value = { source: 'all', severity: 'all', status: 'all', package: '', page: 1, per_page: 50 }; fetchVulnerabilities(); };
+
+const getVulnSeverityVariant = (severity) => {
+    const variants = { critical: 'destructive', high: 'warning', medium: 'secondary', low: 'outline' };
+    return variants[severity] || 'secondary';
+};
+
+const getVulnStatusVariant = (status) => {
+    const variants = { new: 'destructive', acknowledged: 'warning', patched: 'secondary', ignored: 'outline' };
+    return variants[status] || 'secondary';
+};
+
+// Watch for tab changes to load data on demand
+watch(activeTab, (newTab) => {
+    if (newTab === 'csp-reports' && cspReports.value.length === 0) {
+        fetchCspReports();
+        fetchCspStats();
+    } else if (newTab === 'slow-queries' && slowQueries.value.length === 0) {
+        fetchSlowQueries();
+        fetchSlowQueryStats();
+    } else if (newTab === 'vulnerabilities' && vulnerabilities.value.length === 0) {
+        fetchVulnerabilities();
+    }
 });
 </script>

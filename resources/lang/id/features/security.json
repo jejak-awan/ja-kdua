@@ -3,7 +3,10 @@
     "tabs": {
         "overview": "Ringkasan",
         "blocklist": "Daftar Blokir",
-        "whitelist": "Daftar Putih"
+        "whitelist": "Daftar Putih",
+        "cspReports": "Laporan CSP",
+        "slowQueries": "Query Lambat",
+        "vulnerabilities": "Kerentanan"
     },
     "statistics": {
         "events": "Event Keamanan",
@@ -133,5 +136,110 @@
         "bulkWhitelistSuccess": "{count} alamat IP ditambahkan ke daftar putih",
         "bulkRemoveSuccess": "{count} alamat IP dihapus",
         "cannotBlockWhitelisted": "Tidak dapat memblokir alamat IP yang ada di daftar putih"
+    },
+    "cspReports": {
+        "title": "Laporan Pelanggaran CSP",
+        "description": "Pantau pelanggaran Content Security Policy dari laporan browser",
+        "empty": "Tidak ada laporan pelanggaran CSP. Kebijakan keamanan Anda kuat! 🛡️",
+        "confirmBulkAction": "Apakah Anda yakin ingin {action} {count} laporan?",
+        "stats": {
+            "total": "Total Laporan",
+            "new": "Baru",
+            "topViolation": "Pelanggaran Teratas",
+            "last24h": "24 Jam Terakhir"
+        },
+        "filters": {
+            "status": "Status",
+            "directive": "Direktif",
+            "dateFrom": "Dari Tanggal",
+            "dateTo": "Sampai Tanggal"
+        },
+        "status": {
+            "new": "Baru",
+            "reviewed": "Ditinjau",
+            "falsePositive": "False Positive"
+        },
+        "table": {
+            "directive": "Direktif",
+            "blockedUri": "URI Diblokir",
+            "documentUri": "URI Dokumen",
+            "ip": "Alamat IP",
+            "status": "Status",
+            "date": "Tanggal"
+        },
+        "actions": {
+            "markReviewed": "Tandai Ditinjau",
+            "markFalsePositive": "Tandai False Positive"
+        }
+    },
+    "slowQueries": {
+        "title": "Analisis Query Lambat",
+        "description": "Pantau query database yang melebihi batas performa",
+        "empty": "Tidak ada query lambat. Performa database optimal! 🚀",
+        "stats": {
+            "total": "Total Tercatat",
+            "avgDuration": "Durasi Rata-rata",
+            "maxDuration": "Durasi Maksimum",
+            "today": "Hari Ini"
+        },
+        "filters": {
+            "route": "Route",
+            "minDuration": "Durasi Min (ms)",
+            "dateFrom": "Dari Tanggal",
+            "dateTo": "Sampai Tanggal"
+        },
+        "table": {
+            "route": "Route",
+            "duration": "Durasi",
+            "user": "Pengguna",
+            "query": "Query",
+            "date": "Tanggal"
+        }
+    },
+    "vulnerabilities": {
+        "title": "Kerentanan Dependensi",
+        "description": "Hasil audit keamanan untuk paket Composer dan NPM",
+        "empty": "Tidak ada kerentanan ditemukan. Dependensi Anda aman! 🛡️",
+        "runAudit": "Jalankan Audit",
+        "auditCompleted": "Audit dependensi berhasil diselesaikan",
+        "stats": {
+            "total": "Total",
+            "critical": "Kritis",
+            "high": "Tinggi",
+            "medium": "Sedang",
+            "low": "Rendah"
+        },
+        "filters": {
+            "source": "Sumber",
+            "severity": "Tingkat Keparahan",
+            "status": "Status",
+            "package": "Paket",
+            "searchPackage": "Cari paket..."
+        },
+        "table": {
+            "package": "Paket",
+            "version": "Versi",
+            "severity": "Tingkat Keparahan",
+            "cve": "CVE",
+            "source": "Sumber",
+            "status": "Status",
+            "actions": "Aksi"
+        },
+        "source": {
+            "composer": "Composer",
+            "npm": "NPM"
+        },
+        "severity": {
+            "critical": "Kritis",
+            "high": "Tinggi",
+            "medium": "Sedang",
+            "low": "Rendah"
+        },
+        "status": {
+            "new": "Baru",
+            "acknowledged": "Diketahui",
+            "patched": "Diperbaiki",
+            "ignored": "Diabaikan"
+        }
     }
 }

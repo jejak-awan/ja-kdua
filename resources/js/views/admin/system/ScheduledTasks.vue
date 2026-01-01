@@ -54,14 +54,14 @@
                     <span class="text-sm font-medium">{{ formatDate(task.last_run_at) }}</span>
                     <span class="text-[10px] text-muted-foreground tabular-nums">{{ task.last_run_duration ? (task.last_run_duration / 1000).toFixed(2) + 's' : '' }}</span>
                   </div>
-                  <span v-else class="text-muted-foreground text-sm italic">Never</span>
+                  <span v-else class="text-muted-foreground text-sm italic">{{ $t('common.labels.never') }}</span>
                 </TableCell>
                 <TableCell>
                   <Badge 
                     :variant="getStatusVariant(task.status)"
                     class="capitalize text-[10px] px-2 py-0"
                   >
-                    {{ task.status || 'pending' }}
+                    {{ $t('features.scheduled_tasks.status.' + (task.status || 'pending')) }}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -71,7 +71,7 @@
                     @click="toggleActive(task)"
                     class="h-7 text-[10px] font-bold uppercase tracking-wider px-3"
                   >
-                    {{ task.is_active ? 'Active' : 'Inactive' }}
+                    {{ task.is_active ? $t('common.labels.active') : $t('common.labels.inactive') }}
                   </Button>
                 </TableCell>
                 <TableCell class="text-right">

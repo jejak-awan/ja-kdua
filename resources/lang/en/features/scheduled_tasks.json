@@ -13,6 +13,12 @@
         "active": "Active",
         "actions": "Actions"
     },
+    "status": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+    },
     "form": {
         "name": "Task Name",
         "command": "Command",
@@ -25,6 +31,10 @@
     },
     "output": {
         "title": "Task Output"
+    },
+    "actions": {
+        "run": "Run Task",
+        "delete": "Delete Task"
     },
     "confirm_run": "Are you sure you want to run task \"{name}\"?",
     "confirm_delete": "Are you sure you want to delete task \"{name}\"?",
