@@ -68,11 +68,16 @@
             "sending": "Sending...",
             "revoke": "Revoke Broadcast",
             "revoking": "Revoking...",
+            "process_async": "Process in Background (Queue)",
             "targets": {
                 "all": "All Users",
                 "role": "Specific Role",
                 "user": "Specific User"
             }
+        },
+        "queue": {
+            "inactive_title": "Queue Inactive",
+            "inactive_message": "No worker detected. Notifications will be queued but not delivered until a worker is running. Disable this option to send immediately."
         },
         "table": {
             "title": "Title",

@@ -1,17 +1,17 @@
 <template>
-    <Card class="flex flex-col h-full overflow-hidden hover:shadow-md transition-all duration-300">
+    <Card class="flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow duration-300">
         <CardHeader class="flex flex-row items-center justify-between pb-4 space-y-0">
             <div class="space-y-1">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
-                    <History class="w-5 h-5 text-indigo-500" />
+                    <History class="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                     {{ $t('features.dashboard.widgets.recentActivity.title') }}
                 </CardTitle>
                 <CardDescription v-if="activities.length > 0">
                     {{ $t('features.dashboard.widgets.recentActivity.description') || 'Latest system events' }}
                 </CardDescription>
             </div>
-            <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></div>
                 <span class="text-xs font-medium">{{ $t('features.dashboard.widgets.recentActivity.live') }}</span>
             </div>
         </CardHeader>
@@ -66,7 +66,7 @@
         </CardContent>
         
         <div class="p-3 bg-muted/10 border-t border-border/40">
-            <Button variant="ghost" size="sm" class="w-full text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/5 group" asChild>
+            <Button variant="ghost" size="sm" class="w-full text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-500/10 group" asChild>
                 <router-link :to="{ name: 'activity-logs' }" class="flex items-center justify-center">
                     {{ $t('features.dashboard.widgets.recentActivity.viewAll') }}
                     <ArrowRight class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />

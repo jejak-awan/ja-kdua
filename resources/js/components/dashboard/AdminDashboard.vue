@@ -16,18 +16,18 @@
         <!-- Row 1: Statistics Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" v-if="authStore.hasPermission('view content')">
             <!-- Contents Card -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.totalContents') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.contents?.total || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-indigo-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium">
                                 <FileText class="w-3 h-3" />
                                 <span>{{ stats.contents?.published || 0 }} {{ $t('features.dashboard.stats.published') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500">
+                        <div class="p-2.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
                             <Library class="w-5 h-5" />
                         </div>
                     </div>
@@ -35,18 +35,18 @@
             </Card>
 
             <!-- Media Card -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.mediaFiles') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.media?.total || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                                 <Image class="w-3 h-3" />
                                 <span>{{ $t('common.status.online') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+                        <div class="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                             <FolderOpen class="w-5 h-5" />
                         </div>
                     </div>
@@ -54,18 +54,18 @@
             </Card>
 
             <!-- Users Card -->
-            <Card class="hover:shadow-md transition-all duration-300" v-if="authStore.hasPermission('manage users')">
+            <Card class="hover:shadow-md transition-shadow duration-300" v-if="authStore.hasPermission('manage users')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.totalUsers') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.users?.total || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-purple-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium">
                                 <Users class="w-3 h-3" />
                                 <span>{{ $t('features.dashboard.stats.activeUsers') || 'Active now' }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-purple-500/10 text-purple-500">
+                        <div class="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400">
                             <UserCheck class="w-5 h-5" />
                         </div>
                     </div>
@@ -73,18 +73,18 @@
             </Card>
 
             <!-- Pending Card -->
-            <Card class="hover:shadow-md transition-all duration-300" v-if="authStore.hasPermission('approve content')">
+            <Card class="hover:shadow-md transition-shadow duration-300" v-if="authStore.hasPermission('approve content')">
                 <CardContent class="p-6">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
                             <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.pendingContent') }}</p>
                             <p class="text-3xl font-bold text-foreground">{{ stats.contents?.pending || 0 }}</p>
-                            <div class="flex items-center gap-1.5 text-xs text-amber-500 font-medium">
+                            <div class="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
                                 <AlertCircle class="w-3 h-3" />
                                 <span>{{ $t('features.dashboard.stats.requiresReview') }}</span>
                             </div>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
+                        <div class="p-2.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">
                             <Clock3 class="w-5 h-5" />
                         </div>
                     </div>

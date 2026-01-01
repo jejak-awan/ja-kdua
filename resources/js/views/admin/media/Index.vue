@@ -89,7 +89,7 @@
             <div
                 :class="[
                     'bg-card border border-border rounded-lg h-fit',
-                    isReady ? 'transition-all duration-300' : '',
+                    isReady ? 'transition-[width,padding] duration-300 ease-in-out' : '',
                     sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
                 ]"
             >
@@ -114,7 +114,7 @@
                         <button
                             @click="selectFolder(null)"
                             :class="[
-                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-all',
+                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-colors',
                                 (selectedFolder === null && !isTrashMode) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                             ]"
                         >
@@ -129,7 +129,7 @@
                                 <div 
                                     v-if="!folder.is_trashed"
                                     :class="[
-                                        'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-all cursor-pointer',
+                                        'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
                                         selectedFolder === folder.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                     ]"
                                     @click="selectFolder(folder.id)"
@@ -166,7 +166,7 @@
                                         <div 
                                             v-if="!child.is_trashed"
                                             :class="[
-                                                'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-all cursor-pointer',
+                                                'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
                                                 selectedFolder === child.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                             ]"
                                             @click="selectFolder(child.id)"
@@ -204,7 +204,7 @@
                                                 :key="subChild.id"
                                                 v-show="!subChild.is_trashed"
                                                 :class="[
-                                                    'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-all cursor-pointer',
+                                                    'group w-full flex items-center gap-1 text-sm h-9 px-2 rounded-md transition-colors cursor-pointer',
                                                     selectedFolder === subChild.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'
                                                 ]"
                                                 @click="selectFolder(subChild.id)"
@@ -237,7 +237,7 @@
                         <button
                             @click="toggleTrashMode"
                             :class="[
-                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-all',
+                                'w-full flex items-center gap-2 text-sm h-9 px-3 rounded-md transition-colors',
                                 isTrashMode ? 'bg-destructive/10 text-destructive' : 'text-muted-foreground hover:bg-accent'
                             ]"
                         >
@@ -422,9 +422,9 @@
                                 v-for="folder in currentFolders"
                                 :key="'folder-' + folder.id"
                                 @click="selectFolder(folder.id)"
-                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-sm"
+                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-shadow hover:border-primary/50 shadow-sm"
                             >
-                                <div class="aspect-square bg-blue-50/30 flex flex-col items-center justify-center p-4">
+                                <div class="aspect-square bg-blue-50/30 dark:bg-blue-900/10 flex flex-col items-center justify-center p-4">
                                     <div class="relative">
                                         <Folder class="w-16 h-16 text-blue-400 fill-blue-400/10 transition-transform group-hover:scale-110" />
                                         <div v-if="folder.children_count > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
@@ -434,7 +434,7 @@
                                     <p class="mt-3 text-sm font-medium text-foreground truncate w-full text-center px-2" :title="folder.name">
                                         {{ folder.name }}
                                     </p>
-                                    <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-100 text-blue-700 hover:bg-blue-100/80 border-blue-200">
+                                    <Badge v-if="folder.is_shared" variant="secondary" class="mt-1 bg-blue-100 text-blue-700 hover:bg-blue-100/80 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                         <Users class="w-3 h-3 mr-1" />
                                         {{ $t('features.media.shared') }}
                                     </Badge>
@@ -452,7 +452,7 @@
                                 v-for="media in mediaList"
                                 :key="media.id"
                                 @click="toggleMediaSelection(media)"
-                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-all hover:border-primary/50 shadow-sm"
+                                class="group relative bg-background border border-border rounded-lg overflow-hidden cursor-pointer transition-shadow hover:border-primary/50 shadow-sm"
                                 :class="isMediaSelected(media.id) ? 'ring-2 ring-indigo-500 border-indigo-500' : ''"
                             >
                                 <!-- Checkbox -->
@@ -528,7 +528,7 @@
                                     <p class="text-sm font-medium text-foreground truncate" :title="media.name">{{ media.name }}</p>
                                     <div class="flex items-center justify-between mt-1">
                                         <p class="text-xs text-muted-foreground">{{ formatFileSize(media.size) }}</p>
-                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100">
+                                        <Badge v-if="media.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 hover:bg-blue-50/80 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                             <Users class="w-2.5 h-2.5 mr-0.5" />
                                             {{ $t('features.media.shared') }}
                                         </Badge>
@@ -581,21 +581,21 @@
                                             <!-- Folders cannot be selected for bulk media actions for now -->
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="w-16 h-16 bg-blue-50/50 rounded flex items-center justify-center p-1">
+                                            <div class="w-16 h-16 bg-blue-50/50 dark:bg-blue-900/10 rounded flex items-center justify-center p-1">
                                                 <Folder class="w-8 h-8 text-blue-400" />
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
                                                 <div class="text-sm font-medium text-foreground">{{ folder.name }}</div>
-                                                <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100">
+                                                <Badge v-if="folder.is_shared" variant="secondary" class="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
                                                     {{ $t('features.media.shared') }}
                                                 </Badge>
                                             </div>
                                             <div class="text-xs text-muted-foreground">{{ $t('features.media.folder') }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <Badge variant="outline" class="font-normal border-blue-200 text-blue-600 bg-blue-50/50">
+                                            <Badge variant="outline" class="font-normal border-blue-200 text-blue-600 bg-blue-50/50 dark:bg-blue-900/10 dark:text-blue-300 dark:border-blue-800">
                                                 FOLDER
                                             </Badge>
                                         </td>

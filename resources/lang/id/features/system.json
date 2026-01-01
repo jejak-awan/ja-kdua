@@ -68,16 +68,23 @@
             "sending": "Mengirim...",
             "revoke": "Tarik Notifikasi",
             "revoking": "Menarik...",
+            "process_async": "Proses di Background (Queue)",
             "targets": {
                 "all": "Semua Pengguna",
                 "role": "Role Spesifik",
                 "user": "Pengguna Spesifik"
             }
         },
+        "queue": {
+            "inactive_title": "Antrean Tidak Aktif",
+            "inactive_message": "Worker tidak terdeteksi. Notifikasi akan masuk antrean tapi tidak akan terkirim sampai worker dijalankan. Matikan opsi ini untuk kirim langsung."
+        },
         "table": {
             "title": "Judul",
             "message": "Pesan",
             "type": "Tipe",
+            "recipients": "Penerima",
+            "sent_at": "Dikirim Pada",
             "send": "Kirim Notifikasi",
             "sending": "Mengirim..."
         },

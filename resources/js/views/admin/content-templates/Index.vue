@@ -44,7 +44,7 @@
                         </Select>
                     </div>
 
-                    <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1">
+                    <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1">
                         <span class="text-sm font-medium text-primary">
                             {{ selectedTemplates.length }} selected
                         </span>
@@ -92,7 +92,7 @@
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="template in templates" :key="template.id" class="hover:bg-muted/50 transition-colors group border-b-0 [&>td]:border-b-0 text-muted-foreground">
+                            <TableRow v-for="template in templates" :key="template.id" class="hover:bg-muted/50 group border-b-0 [&>td]:border-b-0 text-muted-foreground">
                                 <TableCell class="px-6">
                                     <Checkbox
                                         :checked="selectedTemplates.includes(template.id)"
@@ -122,7 +122,7 @@
                                             size="icon"
                                             @click="createFromTemplate(template)"
                                             :title="t('features.content_templates.actions.createContent')"
-                                            class="h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                                            class="h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-500/10"
                                         >
                                             <CopyPlus class="w-4 h-4" />
                                         </Button>
@@ -130,7 +130,7 @@
                                             variant="ghost"
                                             size="icon"
                                             as-child
-                                            class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
+                                            class="h-8 w-8 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-500/10"
                                         >
                                             <router-link :to="{ name: 'content-templates.edit', params: { id: template.id } }">
                                                 <Pencil class="w-4 h-4" />

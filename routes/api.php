@@ -437,6 +437,7 @@ Route::prefix('v1')->group(function () {
 
         // Security Monitoring
         Route::prefix('security')->group(function () {
+            Route::get('logs', [App\Http\Controllers\Api\V1\SecurityController::class, 'index'])->middleware('permission:manage settings');
             Route::get('csp-reports', [App\Http\Controllers\Api\V1\CspReportController::class, 'index'])->middleware('permission:manage settings');
             Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\V1\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
             Route::get('csp-reports/statistics', [App\Http\Controllers\Api\V1\CspReportController::class, 'statistics'])->middleware('permission:manage settings');

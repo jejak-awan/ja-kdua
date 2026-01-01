@@ -24,7 +24,7 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
             <!-- Total Contents -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
@@ -39,14 +39,14 @@
             </Card>
 
             <!-- Published -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.published') }}</p>
                             <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.published }}</p>
                         </div>
-                        <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+                        <div class="p-2.5 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 class="w-5 h-5" />
                         </div>
                     </div>
@@ -54,14 +54,14 @@
             </Card>
 
             <!-- Pending Review -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.pending') }}</p>
                             <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.pending || 0 }}</p>
                         </div>
-                        <div class="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400">
+                        <div class="p-2.5 bg-amber-500/10 dark:bg-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
                             <Clock3 class="w-5 h-5" />
                         </div>
                     </div>
@@ -69,14 +69,14 @@
             </Card>
 
             <!-- Drafts -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.draft') }}</p>
                             <p class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ stats.draft }}</p>
                         </div>
-                        <div class="p-2.5 bg-slate-500/10 rounded-xl text-slate-600 dark:text-slate-400">
+                        <div class="p-2.5 bg-slate-500/10 dark:bg-slate-500/20 rounded-xl text-slate-600 dark:text-slate-400">
                             <FileEdit class="w-5 h-5" />
                         </div>
                     </div>
@@ -84,14 +84,14 @@
             </Card>
 
             <!-- Archived -->
-            <Card class="hover:shadow-md transition-all duration-300">
+            <Card class="hover:shadow-md transition-shadow duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
                             <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.archived') }}</p>
                             <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ stats.archived }}</p>
                         </div>
-                        <div class="p-2.5 bg-rose-500/10 rounded-xl text-rose-600 dark:text-rose-400">
+                        <div class="p-2.5 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400">
                             <Archive class="w-5 h-5" />
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 transition-colors border-b border-border">
+                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 border-b border-border">
                             <TableCell class="px-6">
                                 <Checkbox
                                     :checked="selectedContents.includes(content.id)"
@@ -244,24 +244,24 @@
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-1">
-                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10" @click="handleApprove(content)" :title="$t('features.content.actions.approve')">
+                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-500/10" @click="handleApprove(content)" :title="$t('features.content.actions.approve')">
                                         <CheckCircle2 class="w-4 h-4" />
                                     </Button>
-                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" @click="handleReject(content)" :title="$t('features.content.actions.reject')">
+                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10" @click="handleReject(content)" :title="$t('features.content.actions.reject')">
                                         <XCircle class="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10" @click="handlePreview(content)" :title="$t('features.content.form.preview')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-500/10" @click="handlePreview(content)" :title="$t('features.content.form.preview')">
                                         <Eye class="w-4 h-4" />
                                     </Button>
                                     <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" @click="handleDuplicate(content)" :title="$t('features.content.actions.duplicate')" v-if="authStore.hasPermission('create content')">
                                         <Copy class="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-500/10" asChild :title="$t('features.content.list.revisions')" v-if="authStore.hasPermission('edit content')">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-500/10" asChild :title="$t('features.content.list.revisions')" v-if="authStore.hasPermission('edit content')">
                                         <router-link :to="{ name: 'contents.revisions', params: { id: content.id } }">
                                             <History class="w-4 h-4" />
                                         </router-link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('edit content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('edit content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
                                         <router-link :to="{ name: 'contents.edit', params: { id: content.id } }">
                                             <Edit2 class="w-4 h-4" />
                                         </router-link>
@@ -417,9 +417,9 @@ const fetchContents = async (page = 1) => {
 
 const getStatusBadgeClass = (status) => {
     const s = status?.toLowerCase();
-    if (s === 'published') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-    if (s === 'pending') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
-    if (s === 'draft') return 'bg-slate-500/10 text-slate-600 dark:text-slate-400';
+    if (s === 'published') return 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400';
+    if (s === 'pending') return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400';
+    if (s === 'draft') return 'bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400';
     if (s === 'archived') return 'bg-muted text-muted-foreground';
     return 'bg-secondary text-secondary-foreground';
 };

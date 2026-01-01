@@ -79,7 +79,7 @@
                                                 class="space-y-2"
                                             >
                                                 <template #item="{ element }">
-                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-primary/50 hover:shadow-sm transition-all group">
+                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-primary/50 hover:shadow-sm transition-shadow group">
                                                         <GripVertical class="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                                                         <span class="font-medium truncate">{{ element.title }}</span>
                                                     </div>
@@ -111,7 +111,7 @@
                                                 class="space-y-2"
                                             >
                                                 <template #item="{ element }">
-                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-orange-500/50 hover:shadow-sm transition-all group">
+                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-orange-500/50 dark:hover:border-orange-500/30 hover:shadow-sm transition-shadow group">
                                                         <GripVertical class="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                                                         <span class="font-medium truncate">{{ element.title }}</span>
                                                     </div>
@@ -143,7 +143,7 @@
                                                 class="space-y-2"
                                             >
                                                 <template #item="{ element }">
-                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-blue-500/50 hover:shadow-sm transition-all group">
+                                                    <div class="flex items-center gap-3 p-3 text-sm bg-card border border-border rounded-md cursor-move hover:border-blue-500/50 dark:hover:border-blue-500/30 hover:shadow-sm transition-shadow group">
                                                         <GripVertical class="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                                                         <span class="font-medium truncate">{{ element.name }}</span>
                                                     </div>

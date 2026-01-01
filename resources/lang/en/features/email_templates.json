@@ -1,0 +1,31 @@
+{
+    "form": {
+        "createTitle": "Create Email Template",
+        "content": "Content",
+        "showVariables": "Show Variables",
+        "hideVariables": "Hide Variables",
+        "previewFailed": "Failed to preview template",
+        "availableVariables": "Available Variables",
+        "subject": "Subject",
+        "subjectPlaceholder": "Enter email subject...",
+        "body": "Body",
+        "bodyPlaceholder": "Enter email body (HTML supported)...",
+        "details": "Template Details",
+        "name": "Template Name",
+        "namePlaceholder": "e.g., Welcome Email",
+        "type": "Type"
+    },
+    "list": {
+        "title": "Email Templates",
+        "create": "New Template",
+        "search": "Search templates...",
+        "empty": "No templates found"
+    },
+    "table": {
+        "name": "Name",
+        "subject": "Subject",
+        "type": "Type",
+        "updated": "Updated",
+        "actions": "Actions"
+    }
+}

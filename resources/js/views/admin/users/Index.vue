@@ -14,7 +14,7 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             <Card
-                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-primary/50"
                 :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'all' && !activeStatFilter }"
                 @click="clearFilters"
             >
@@ -27,7 +27,7 @@
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-primary/50"
                 :class="{ 'border-primary ring-2 ring-primary/20': verificationFilter === 'verified' }"
                 @click="setVerificationFilter('verified')"
             >
@@ -40,42 +40,42 @@
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-amber-500/50"
-                :class="{ 'border-amber-500 ring-2 ring-amber-500/20': verificationFilter === 'unverified' }"
+                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/30"
+                :class="{ 'border-amber-500 dark:border-amber-500/50 ring-2 ring-amber-500/20': verificationFilter === 'unverified' }"
                 @click="setVerificationFilter('unverified')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.unverified') }}</p>
-                        <p class="text-2xl font-bold text-amber-500">{{ stats.unverified }}</p>
+                        <p class="text-2xl font-bold text-amber-500 dark:text-amber-400">{{ stats.unverified }}</p>
                     </div>
-                    <AlertCircle class="w-8 h-8 text-amber-500 opacity-80" />
+                    <AlertCircle class="w-8 h-8 text-amber-500 dark:text-amber-400 opacity-80" />
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-emerald-500/50"
-                :class="{ 'border-emerald-500 ring-2 ring-emerald-500/20': activeStatFilter === 'recent' }"
+                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-emerald-500/50 dark:hover:border-emerald-500/30"
+                :class="{ 'border-emerald-500 dark:border-emerald-500/50 ring-2 ring-emerald-500/20': activeStatFilter === 'recent' }"
                 @click="setStatFilter('recent')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.recent') }}</p>
-                        <p class="text-2xl font-bold text-emerald-500">{{ stats.recent }}</p>
+                        <p class="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{{ stats.recent }}</p>
                     </div>
-                    <UserPlus class="w-8 h-8 text-emerald-500 opacity-80" />
+                    <UserPlus class="w-8 h-8 text-emerald-500 dark:text-emerald-400 opacity-80" />
                 </div>
             </Card>
             <Card
-                class="p-4 cursor-pointer transition-all hover:shadow-md hover:border-blue-500/50"
-                :class="{ 'border-blue-500 ring-2 ring-blue-500/20': activeStatFilter === 'active' }"
+                class="p-4 cursor-pointer transition-shadow hover:shadow-md hover:border-blue-500/50 dark:hover:border-blue-500/30"
+                :class="{ 'border-blue-500 dark:border-blue-500/50 ring-2 ring-blue-500/20': activeStatFilter === 'active' }"
                 @click="setStatFilter('active')"
             >
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground">{{ $t('features.users.stats.active') }}</p>
-                        <p class="text-2xl font-bold text-blue-500">{{ stats.active }}</p>
+                        <p class="text-2xl font-bold text-blue-500 dark:text-blue-400">{{ stats.active }}</p>
                     </div>
-                    <Activity class="w-8 h-8 text-blue-500 opacity-80" />
+                    <Activity class="w-8 h-8 text-blue-500 dark:text-blue-400 opacity-80" />
                 </div>
             </Card>
         </div>
@@ -261,7 +261,7 @@
                                     variant="ghost"
                                     size="icon"
                                     @click="forceLogoutUser(user)"
-                                    class="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
+                                    class="h-8 w-8 text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-amber-500/10"
                                     :title="$t('features.users.actions.forceLogout')"
                                     :disabled="!canManage(user)"
                                 >
@@ -272,7 +272,7 @@
                                     variant="ghost"
                                     size="icon"
                                     @click="editUser(user)"
-                                    class="h-8 w-8 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10"
+                                    class="h-8 w-8 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-500/10"
                                     :title="$t('common.actions.edit')"
                                     :disabled="!canManage(user)"
                                 >

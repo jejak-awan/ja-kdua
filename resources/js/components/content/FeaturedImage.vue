@@ -39,7 +39,7 @@
                             <Button 
                                 type="button" 
                                 variant="outline" 
-                                class="gap-2 border-2 border-dashed h-12 hover:border-primary transition-all" 
+                                class="gap-2 border-2 border-dashed h-12 hover:border-primary transition-colors" 
                                 @click="open"
                             >
                                 <Plus class="w-4 h-4" />

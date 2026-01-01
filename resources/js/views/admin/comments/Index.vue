@@ -11,7 +11,7 @@
         <!-- Statistics Cards -->
         <div v-if="statistics" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <Card 
-                class="p-4 cursor-pointer hover:bg-primary/5 transition-colors" 
+                class="p-4 cursor-pointer hover:shadow-md transition-shadow" 
                 @click="statusFilter = 'all'"
                 :class="{ 'ring-2 ring-primary/50': statusFilter === 'all' }"
             >
@@ -19,31 +19,31 @@
                 <p class="text-xs text-muted-foreground">{{ $t('features.comments.stats.total') }}</p>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-yellow-500/5 transition-colors border-yellow-500/20" 
+                class="p-4 cursor-pointer hover:shadow-md transition-shadow border-yellow-500/20 dark:border-yellow-500/10" 
                 @click="statusFilter = 'pending'"
                 :class="{ 'ring-2 ring-yellow-500/50': statusFilter === 'pending' }"
             >
-                <p class="text-2xl font-bold text-yellow-500">{{ statistics.pending }}</p>
-                <p class="text-xs text-yellow-500/70">{{ $t('features.comments.stats.pending') }}</p>
+                <p class="text-2xl font-bold text-yellow-500 dark:text-yellow-400">{{ statistics.pending }}</p>
+                <p class="text-xs text-yellow-500/70 dark:text-yellow-400/70">{{ $t('features.comments.stats.pending') }}</p>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-green-500/5 transition-colors border-green-500/20" 
+                class="p-4 cursor-pointer hover:shadow-md transition-shadow border-green-500/20 dark:border-green-500/10" 
                 @click="statusFilter = 'approved'"
                 :class="{ 'ring-2 ring-green-500/50': statusFilter === 'approved' }"
             >
-                <p class="text-2xl font-bold text-green-500">{{ statistics.approved }}</p>
-                <p class="text-xs text-green-500/70">{{ $t('features.comments.stats.approved') }}</p>
+                <p class="text-2xl font-bold text-green-500 dark:text-green-400">{{ statistics.approved }}</p>
+                <p class="text-xs text-green-500/70 dark:text-green-400/70">{{ $t('features.comments.stats.approved') }}</p>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-red-500/5 transition-colors border-red-500/20" 
+                class="p-4 cursor-pointer hover:shadow-md transition-shadow border-red-500/20 dark:border-red-500/10" 
                 @click="statusFilter = 'rejected'"
                 :class="{ 'ring-2 ring-red-500/50': statusFilter === 'rejected' }"
             >
-                <p class="text-2xl font-bold text-red-500">{{ statistics.rejected }}</p>
-                <p class="text-xs text-red-500/70">{{ $t('features.comments.stats.rejected') }}</p>
+                <p class="text-2xl font-bold text-red-500 dark:text-red-400">{{ statistics.rejected }}</p>
+                <p class="text-xs text-red-500/70 dark:text-red-400/70">{{ $t('features.comments.stats.rejected') }}</p>
             </Card>
             <Card 
-                class="p-4 cursor-pointer hover:bg-muted/50 transition-colors" 
+                class="p-4 cursor-pointer hover:shadow-md transition-shadow" 
                 @click="statusFilter = 'spam'"
                 :class="{ 'ring-2 ring-muted-foreground/50': statusFilter === 'spam' }"
             >
@@ -77,7 +77,7 @@
                 </Select>
 
                 <!-- Bulk Actions -->
-                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
+                <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1 ml-auto">
                     <span class="text-sm font-medium text-primary">
                         {{ selectedIds.length }} selected
                     </span>
@@ -179,7 +179,7 @@
                                 variant="ghost"
                                 size="sm"
                                 @click="approveComment(comment)"
-                                class="h-8 text-green-600 hover:text-green-600 hover:bg-green-500/10"
+                                class="h-8 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-500/10"
                             >
                                 <Check class="w-4 h-4 mr-1" />
                                 {{ $t('features.comments.actions.approve') }}
@@ -189,7 +189,7 @@
                                 variant="ghost"
                                 size="sm"
                                 @click="rejectComment(comment)"
-                                class="h-8 text-yellow-600 hover:text-yellow-600 hover:bg-yellow-500/10"
+                                class="h-8 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 hover:bg-yellow-500/10"
                             >
                                 <X class="w-4 h-4 mr-1" />
                                 {{ $t('features.comments.actions.reject') }}
@@ -287,7 +287,7 @@
                                     v-if="reply.status === 'pending'"
                                     variant="ghost"
                                     size="icon"
-                                    class="w-6 h-6 text-green-600"
+                                    class="w-6 h-6 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-500/10"
                                     @click="approveComment(reply)"
                                 >
                                     <Check class="w-3 h-3" />
@@ -296,7 +296,7 @@
                                     v-if="reply.status === 'pending'"
                                     variant="ghost"
                                     size="icon"
-                                    class="w-6 h-6 text-yellow-600"
+                                    class="w-6 h-6 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 hover:bg-yellow-500/10"
                                     @click="rejectComment(reply)"
                                 >
                                     <X class="w-3 h-3" />

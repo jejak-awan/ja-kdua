@@ -1,5 +1,5 @@
 <template>
-  <Card class="email-status-widget h-full flex flex-col overflow-hidden hover:shadow-md transition-all duration-300">
+  <Card class="email-status-widget h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-300">
     <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
       <CardTitle class="text-xl font-bold flex items-center gap-2">
         <Mail class="w-5 h-5 text-primary" />
@@ -19,11 +19,11 @@
     <CardContent class="flex-1 space-y-4 pt-2 overflow-y-auto">
       <!-- Top Stats Row -->
       <div class="grid grid-cols-2 gap-3">
-        <div class="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 space-y-1">
+        <div class="p-3 rounded-xl bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/10 dark:border-orange-500/20 space-y-1">
           <p class="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">{{ t('features.dashboard.widgets.emailStatus.templates', 'Templates') }}</p>
           <p class="text-2xl font-bold text-foreground tabular-nums">{{ stats.templates || 0 }}</p>
         </div>
-        <div class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 space-y-1">
+        <div class="p-3 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 dark:border-blue-500/20 space-y-1">
           <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{{ t('features.dashboard.widgets.emailStatus.subscribers', 'Subscribers') }}</p>
           <p class="text-2xl font-bold text-foreground tabular-nums">{{ stats.subscribers || 0 }}</p>
         </div>
@@ -32,7 +32,7 @@
       <!-- Connection Status -->
       <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/40">
         <div class="flex items-center gap-2">
-          <Zap class="w-4 h-4 text-amber-500" />
+          <Zap class="w-4 h-4 text-amber-500 dark:text-amber-400" />
           <span class="text-sm font-semibold text-foreground">{{ t('features.dashboard.widgets.emailStatus.smtpStatus', 'SMTP Connection') }}</span>
         </div>
         <Badge :class="statusBadgeClass" variant="outline" class="border-none font-bold text-[10px]">
@@ -106,7 +106,7 @@ const statusBadgeClass = computed(() => {
   if (status === 'active' || status === 'healthy' || status === 'sent') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
   if (status === 'warning') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
   if (status === 'critical' || status === 'error' || status === 'failed') return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-  return 'bg-muted text-muted-foreground';
+  return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
 });
 
 const fetchStats = async () => {

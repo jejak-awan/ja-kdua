@@ -1,5 +1,5 @@
 <template>
-  <Card class="system-health-widget h-full flex flex-col overflow-hidden hover:shadow-md transition-all duration-300">
+  <Card class="system-health-widget h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-300">
     <CardHeader class="flex flex-row items-center justify-between pb-2 space-y-0">
       <CardTitle class="text-xl font-bold flex items-center gap-2">
         <Activity class="w-5 h-5" :class="overallStatusClass" />

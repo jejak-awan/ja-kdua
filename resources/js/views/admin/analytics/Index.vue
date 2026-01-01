@@ -59,8 +59,8 @@
                 <Card>
                     <CardContent class="p-6">
                         <div class="flex items-center gap-4">
-                            <div class="p-2.5 bg-indigo-500/10 rounded-xl">
-                                <Eye class="h-5 w-5 text-indigo-500" />
+                            <div class="p-2.5 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-xl">
+                                <Eye class="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-muted-foreground">{{ $t('features.analytics.overview.totalVisits') }}</p>
@@ -72,8 +72,8 @@
                 <Card>
                     <CardContent class="p-6">
                         <div class="flex items-center gap-4">
-                            <div class="p-2.5 bg-emerald-500/10 rounded-xl">
-                                <Users class="h-5 w-5 text-emerald-500" />
+                            <div class="p-2.5 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl">
+                                <Users class="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-muted-foreground">{{ $t('features.analytics.overview.uniqueVisitors') }}</p>
@@ -85,8 +85,8 @@
                 <Card>
                     <CardContent class="p-6">
                         <div class="flex items-center gap-4">
-                            <div class="p-2.5 bg-blue-500/10 rounded-xl">
-                                <BarChart3 class="h-5 w-5 text-blue-500" />
+                            <div class="p-2.5 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl">
+                                <BarChart3 class="h-5 w-5 text-blue-500 dark:text-blue-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-muted-foreground">{{ $t('features.analytics.overview.totalSessions') }}</p>
@@ -98,8 +98,8 @@
                 <Card>
                     <CardContent class="p-6">
                         <div class="flex items-center gap-4">
-                            <div class="p-2.5 bg-purple-500/10 rounded-xl">
-                                <TrendingUp class="h-5 w-5 text-purple-500" />
+                            <div class="p-2.5 bg-purple-500/10 dark:bg-purple-500/20 rounded-xl">
+                                <TrendingUp class="h-5 w-5 text-purple-500 dark:text-purple-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-muted-foreground">{{ $t('features.analytics.overview.bounceRate') }}</p>
@@ -111,7 +111,7 @@
             </div>
 
             <!-- Real-time Activity - Compact -->
-            <Card class="bg-gradient-to-r from-indigo-500/5 via-emerald-500/5 to-blue-500/5 border border-indigo-500/10 shadow-none">
+            <Card class="bg-gradient-to-r from-indigo-500/5 via-emerald-500/5 to-blue-500/5 border border-indigo-500/10 dark:border-indigo-500/20 shadow-none">
                 <CardContent class="p-5">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div class="flex items-center gap-3">
@@ -122,15 +122,15 @@
                         </div>
                         <div class="flex items-center gap-8">
                             <div class="text-center">
-                                <span class="text-xl font-bold text-indigo-500">{{ realtime.active_sessions || 0 }}</span>
+                                <span class="text-xl font-bold text-indigo-500 dark:text-indigo-400">{{ realtime.active_sessions || 0 }}</span>
                                 <span class="text-xs font-medium text-muted-foreground ml-1.5 uppercase tracking-wider">{{ $t('features.analytics.realtime.activeSessions') }}</span>
                             </div>
                             <div class="text-center">
-                                <span class="text-xl font-bold text-emerald-500">{{ formatNumber(realtime.visits_last_hour || 0) }}</span>
+                                <span class="text-xl font-bold text-emerald-500 dark:text-emerald-400">{{ formatNumber(realtime.visits_last_hour || 0) }}</span>
                                 <span class="text-xs font-medium text-muted-foreground ml-1.5 uppercase tracking-wider">{{ $t('features.analytics.realtime.visitsLastHour') }}</span>
                             </div>
                             <div class="text-center">
-                                <span class="text-xl font-bold text-blue-500">{{ realtime.top_pages_now?.length || 0 }}</span>
+                                <span class="text-xl font-bold text-blue-500 dark:text-blue-400">{{ realtime.top_pages_now?.length || 0 }}</span>
                                 <span class="text-xs font-medium text-muted-foreground ml-1.5 uppercase tracking-wider">{{ $t('features.analytics.realtime.activePages') }}</span>
                             </div>
                         </div>

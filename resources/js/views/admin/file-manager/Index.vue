@@ -126,7 +126,7 @@
                             size="sm"
                             @click="viewMode = 'grid'"
                             :class="[
-                                'h-8 w-8 p-0 rounded-sm transition-all',
+                                'h-8 w-8 p-0 rounded-sm transition-colors',
                                 viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
                             ]"
                         >
@@ -137,7 +137,7 @@
                             size="sm"
                             @click="viewMode = 'list'"
                             :class="[
-                                'h-8 w-8 p-0 rounded-sm transition-all',
+                                'h-8 w-8 p-0 rounded-sm transition-colors',
                                 viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
                             ]"
                         >
@@ -257,7 +257,7 @@
             <div 
                 :class="[
                     'bg-card border border-border rounded-lg h-fit',
-                    isReady ? 'transition-all duration-300' : '',
+                    isReady ? 'transition-[width,padding] duration-300 ease-in-out' : '',
                     sidebarCollapsed ? 'w-12 p-2' : 'w-64 p-4'
                 ]"
             >
@@ -287,7 +287,7 @@
                         <button
                             @click="navigateToPath('/')"
                             :class="[
-                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
                                 currentPath === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
                                 dropTarget === '/' ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
                             ]"
@@ -315,7 +315,7 @@
                                 @click="navigateToFolder(folder.path)"
                                 @contextmenu.prevent="(e) => showContextMenu(e, folder, 'folder')"
                                 :class="[
-                                    'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                    'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
                                     currentPath === folder.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
                                     dropTarget === folder.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
                                 ]"
@@ -351,7 +351,7 @@
                                         @click="navigateToFolder(child.path)"
                                         @contextmenu.prevent="(e) => showContextMenu(e, child, 'folder')"
                                         :class="[
-                                            'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                            'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
                                             currentPath === child.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
                                             dropTarget === child.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
                                         ]"
@@ -388,7 +388,7 @@
                                             @click="navigateToFolder(grandChild.path)"
                                             @contextmenu.prevent="(e) => showContextMenu(e, grandChild, 'folder')"
                                             :class="[
-                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-all',
+                                                'w-full flex items-center gap-1 text-sm h-8 px-2 rounded-md transition-colors',
                                                 currentPath === grandChild.path ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent',
                                                 dropTarget === grandChild.path ? 'bg-green-500/20 text-green-500 ring-1 ring-green-500' : ''
                                             ]"
@@ -452,7 +452,7 @@
                             <div
                                 v-for="folder in paginatedFolders"
                                 :key="folder.path"
-                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-all cursor-pointer overflow-hidden"
+                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-shadow cursor-pointer overflow-hidden shadow-sm"
                                 :class="{ 
                                     'ring-2 ring-primary border-primary': isSelected(folder.path),
                                     'ring-2 ring-green-500 border-green-500 bg-green-500/10': dropTarget === folder.path
@@ -486,7 +486,7 @@
                             <div
                                 v-for="file in paginatedFiles"
                                 :key="file.path"
-                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-all cursor-pointer overflow-hidden"
+                                class="group relative bg-background border border-border rounded-lg hover:border-primary/50 transition-shadow cursor-pointer overflow-hidden shadow-sm"
                                 :class="{ 'ring-2 ring-primary border-primary': isSelected(file.path) }"
                                 draggable="true"
                                 @click="viewFile(file)"

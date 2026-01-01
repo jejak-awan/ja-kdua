@@ -1,15 +1,15 @@
 <template>
     <div>
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">Email Templates</h1>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.email_templates.list.title') }}</h1>
             <router-link
                 :to="{ name: 'email-templates.create' }"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/80 transition-colors"
             >
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                New Template
+                {{ $t('features.email_templates.list.create') }}
             </router-link>
         </div>
 
@@ -19,8 +19,8 @@
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Search templates..."
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        :placeholder="$t('features.email_templates.list.search')"
+                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                     >
                 </div>
             </div>
@@ -30,31 +30,31 @@
             </div>
 
             <div v-else-if="filteredTemplates.length === 0" class="p-6 text-center">
-                <p class="text-muted-foreground">No templates found</p>
+                <p class="text-muted-foreground">{{ $t('features.email_templates.list.empty') }}</p>
             </div>
 
             <table v-else class="min-w-full divide-y divide-border">
                 <thead class="bg-muted">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Name
+                            {{ $t('features.email_templates.table.name') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Subject
+                            {{ $t('features.email_templates.table.subject') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Type
+                            {{ $t('features.email_templates.table.type') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider">
-                            Updated
+                            {{ $t('features.email_templates.table.updated') }}
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider">
-                            Actions
+                            {{ $t('features.email_templates.table.actions') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-card divide-y divide-border">
-                    <tr v-for="template in filteredTemplates" :key="template.id" class="hover:bg-muted">
+                    <tr v-for="template in filteredTemplates" :key="template.id" class="hover:bg-muted/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-foreground">{{ template.name }}</div>
                         </td>
@@ -62,7 +62,7 @@
                             <div class="text-sm text-foreground">{{ template.subject || '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/20 text-blue-400">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                                 {{ template.type || 'custom' }}
                             </span>
                         </td>
@@ -73,27 +73,27 @@
                             <div class="flex justify-end space-x-2">
                                 <button
                                     @click="previewTemplate(template)"
-                                    class="text-blue-600 hover:text-blue-900"
+                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
                                 >
-                                    Preview
+                                    {{ $t('common.actions.preview') }}
                                 </button>
                                 <button
                                     @click="sendTestEmail(template)"
-                                    class="text-green-600 hover:text-green-900"
+                                    class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors"
                                 >
                                     Test
                                 </button>
                                 <router-link
                                     :to="{ name: 'email-templates.edit', params: { id: template.id } }"
-                                    class="text-indigo-600 hover:text-indigo-900"
+                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors"
                                 >
-                                    Edit
+                                    {{ $t('common.actions.edit') }}
                                 </router-link>
                                 <button
                                     @click="handleDelete(template)"
-                                    class="text-red-600 hover:text-red-900"
+                                    class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                                 >
-                                    Delete
+                                    {{ $t('common.actions.delete') }}
                                 </button>
                             </div>
                         </td>

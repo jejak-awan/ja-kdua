@@ -10,11 +10,11 @@
             <!-- Activity Logs Card -->
             <router-link 
                 to="/admin/activity-logs" 
-                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-md transition-shadow group"
             >
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 rounded-full bg-indigo-500/20 dark:bg-indigo-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
@@ -33,11 +33,11 @@
             <!-- Security Logs Card -->
             <router-link 
                 to="/admin/security" 
-                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-md transition-shadow group"
             >
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 rounded-full bg-red-500/20 dark:bg-red-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
@@ -56,11 +56,11 @@
             <!-- Login History Card -->
             <router-link 
                 to="/admin/login-history" 
-                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-md transition-shadow group"
             >
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 rounded-full bg-green-500/20 dark:bg-green-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
@@ -79,11 +79,11 @@
             <!-- System Logs Card -->
             <router-link 
                 to="/admin/logs" 
-                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+                class="bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-md transition-shadow group"
             >
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 dark:bg-yellow-500/10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                         </svg>
                     </div>
@@ -202,23 +202,23 @@ const fetchRecentLogs = async () => {
 
 const getActionBadgeClass = (action) => {
     const classes = {
-        created: 'bg-green-500/20 text-green-500',
-        updated: 'bg-blue-500/20 text-blue-500',
-        deleted: 'bg-red-500/20 text-red-500',
-        login: 'bg-indigo-500/20 text-indigo-500',
-        logout: 'bg-gray-500/20 text-gray-500',
+        created: 'bg-green-500/20 dark:bg-green-500/10 text-green-500 dark:text-green-400',
+        updated: 'bg-blue-500/20 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400',
+        deleted: 'bg-red-500/20 dark:bg-red-500/10 text-red-500 dark:text-red-400',
+        login: 'bg-indigo-500/20 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400',
+        logout: 'bg-gray-500/20 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400',
     };
-    return classes[action] || 'bg-gray-500/20 text-gray-500';
+    return classes[action] || 'bg-gray-500/20 dark:bg-gray-500/10 text-gray-500 dark:text-gray-400';
 };
 
 const getSecurityBadgeClass = (eventType) => {
     if (eventType?.includes('failed') || eventType?.includes('blocked')) {
-        return 'bg-red-500/20 text-red-500';
+        return 'bg-red-500/20 dark:bg-red-500/10 text-red-500 dark:text-red-400';
     }
     if (eventType?.includes('success')) {
-        return 'bg-green-500/20 text-green-500';
+        return 'bg-green-500/20 dark:bg-green-500/10 text-green-500 dark:text-green-400';
     }
-    return 'bg-yellow-500/20 text-yellow-500';
+    return 'bg-yellow-500/20 dark:bg-yellow-500/10 text-yellow-500 dark:text-yellow-400';
 };
 
 const getActionLabel = (action) => {

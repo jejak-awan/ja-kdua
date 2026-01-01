@@ -4,13 +4,18 @@
             <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.system.notifications.title') }}</h1>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Send Notification Form -->
-            <div class="lg:col-span-1">
+            <div v-show="!sidebarCollapsed" class="lg:col-span-4 transition-all duration-300">
                 <Card>
-                    <CardHeader>
+                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>{{ $t('features.system.notifications.create.title') }}</CardTitle>
-                        <div v-if="queueHealth" class="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="sidebarCollapsed = true">
+                            <ChevronLeft class="h-4 w-4" />
+                        </Button>
+                    </CardHeader>
+                    <div class="px-6 pb-2" v-if="queueHealth">
+                         <div class="flex items-center gap-2">
                             <div :class="[
                                 'h-2 w-2 rounded-full',
                                 queueHealth.is_active ? 'bg-green-500' : 'bg-yellow-500'
@@ -19,8 +24,8 @@
                                 {{ queueHealth.message }} ({{ queueHealth.driver }})
                             </span>
                         </div>
-                    </CardHeader>
-                    <CardContent class="space-y-4">
+                    </div>
+                    <CardContent class="space-y-4 pt-2">
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                 {{ $t('features.system.notifications.form.target_type') }}
@@ -87,14 +92,13 @@
 
                         <!-- Async Toggle -->
                         <div class="flex items-center gap-2 py-2">
-                            <input 
-                                type="checkbox" 
+                            <Checkbox 
                                 id="is_async"
-                                v-model="form.is_async"
-                                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                :checked="form.is_async"
+                                @update:checked="form.is_async = $event"
                             />
                             <label for="is_async" class="text-sm font-medium leading-none cursor-pointer">
-                                Proses di Background (Queue)
+                                {{ $t('features.system.notifications.form.process_async') }}
                             </label>
                         </div>
 
@@ -102,8 +106,8 @@
                         <div v-if="form.is_async && queueHealth && !queueHealth.is_active" class="flex items-start gap-2 p-3 rounded-md bg-amber-500/10 text-amber-500 text-xs border border-amber-500/20">
                             <AlertTriangle class="h-4 w-4 shrink-0" />
                             <div>
-                                <p class="font-semibold">Antrean Tidak Aktif</p>
-                                <p>Worker tidak terdeteksi. Notifikasi akan masuk antrean tapi tidak akan terkirim sampai worker dijalankan. Matikan opsi ini untuk kirim langsung.</p>
+                                <p class="font-semibold">{{ $t('features.system.notifications.queue.inactive_title') }}</p>
+                                <p>{{ $t('features.system.notifications.queue.inactive_message') }}</p>
                             </div>
                         </div>
 
@@ -121,7 +125,7 @@
                             ></textarea>
                         </div>
 
-                        <Button class="w-full" @click="handleSend" :disabled="sending">
+                        <Button class="w-full" @click="handleSend" :disabled="sending || !isFormValid">
                             <Send class="mr-2 h-4 w-4" v-if="!sending" />
                             <Loader2 class="mr-2 h-4 w-4 animate-spin" v-else />
                             {{ sending ? $t('features.system.notifications.form.sending') : $t('features.system.notifications.form.send') }}
@@ -131,10 +135,16 @@
             </div>
 
             <!-- History Table -->
-            <div class="lg:col-span-2">
+            <div :class="[sidebarCollapsed ? 'lg:col-span-12' : 'lg:col-span-8', 'transition-all duration-300']">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0">
-                        <CardTitle>{{ $t('features.system.notifications.history.title') }}</CardTitle>
+                        <div class="flex items-center gap-4">
+                            <Button v-if="sidebarCollapsed" variant="outline" size="sm" @click="sidebarCollapsed = false">
+                                <Plus class="mr-2 h-4 w-4" />
+                                {{ $t('features.system.notifications.create.title') }}
+                            </Button>
+                            <CardTitle>{{ $t('features.system.notifications.history.title') }}</CardTitle>
+                        </div>
                         <div v-if="selectedItems.length > 0" class="flex items-center gap-2">
                              <span class="text-sm text-muted-foreground mr-2">{{ selectedItems.length }} selected</span>
                              <Button 
@@ -155,11 +165,9 @@
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead class="w-[40px]">
-                                            <input 
-                                                type="checkbox" 
-                                                @change="toggleSelectAll" 
-                                                :checked="isAllSelected"
-                                                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                            <Checkbox 
+                                                :checked="isAllSelected" 
+                                                @update:checked="toggleSelectAll"
                                             />
                                         </TableHead>
                                         <TableHead>{{ $t('features.system.notifications.table.title') }}</TableHead>
@@ -173,11 +181,9 @@
                                     <template v-if="history && history.length">
                                         <TableRow v-for="notification in history" :key="notification.id" :class="{ 'bg-muted/50': isSelected(notification) }">
                                             <TableCell>
-                                                <input 
-                                                    type="checkbox" 
+                                                <Checkbox 
                                                     :checked="isSelected(notification)"
-                                                    @change="toggleSelect(notification)"
-                                                    class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                    @update:checked="toggleSelect(notification)"
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -256,7 +262,7 @@ import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
 import { useConfirm } from '../../../composables/useConfirm';
-import { Send, Loader2, Trash2, Activity, Info, AlertTriangle, CheckCircle2 } from 'lucide-vue-next';
+import { Send, Loader2, Trash2, Activity, Info, AlertTriangle, CheckCircle2, ChevronLeft, Plus } from 'lucide-vue-next';
 import { parseResponse } from '../../../utils/responseParser';
 
 // UI Components
@@ -278,6 +284,7 @@ import TableCell from '../../../components/ui/table-cell.vue';
 import TableHead from '../../../components/ui/table-head.vue';
 import TableHeader from '../../../components/ui/table-header.vue';
 import TableRow from '../../../components/ui/table-row.vue';
+import Checkbox from '../../../components/ui/checkbox.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -291,6 +298,7 @@ const revoking = ref(null);
 const selectedItems = ref([]);
 const bulkRevoking = ref(false);
 const queueHealth = ref(null);
+const sidebarCollapsed = ref(false);
 
 const form = reactive({
     target_type: 'all',
@@ -304,6 +312,19 @@ const form = reactive({
 // Reset target_id when target_type changes to prevent invalid selections
 watch(() => form.target_type, () => {
     form.target_id = '';
+});
+
+// Form validation
+const isFormValid = computed(() => {
+    // Title and message are always required
+    if (!form.title?.trim() || !form.message?.trim()) {
+        return false;
+    }
+    // target_id is required when target_type is 'role' or 'user'
+    if ((form.target_type === 'role' || form.target_type === 'user') && !form.target_id) {
+        return false;
+    }
+    return true;
 });
 
 const getBadgeVariant = (type) => {

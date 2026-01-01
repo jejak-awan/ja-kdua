@@ -126,7 +126,7 @@
               </TableCell>
               <TableCell class="px-6 py-4 font-semibold">{{ task.name }}</TableCell>
               <TableCell class="px-6 py-4">
-                <code class="text-[11px] bg-muted px-2 py-0.5 rounded border border-border group-hover:bg-background transition-colors">{{ task.command }}</code>
+                <code class="text-[11px] bg-muted/50 px-2 py-0.5 rounded border border-border dark:bg-muted/20">{{ task.command }}</code>
               </TableCell>
               <TableCell class="px-6 py-4">
                 <code class="text-[11px] font-mono font-bold text-primary">{{ task.schedule }}</code>
@@ -184,7 +184,7 @@
                     variant="ghost"
                     @click="editTask(task)"
                     :title="$t('common.actions.edit')"
-                    class="h-8 w-8 hover:bg-muted"
+                    class="h-8 w-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   >
                     <Pencil class="w-4 h-4" />
                   </Button>

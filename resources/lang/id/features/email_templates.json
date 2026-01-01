@@ -1,0 +1,31 @@
+{
+    "form": {
+        "createTitle": "Buat Template Email",
+        "content": "Konten",
+        "showVariables": "Tampilkan Variabel",
+        "hideVariables": "Sembunyikan Variabel",
+        "previewFailed": "Gagal melihat pratinjau",
+        "availableVariables": "Variabel Tersedia",
+        "subject": "Subjek",
+        "subjectPlaceholder": "Masukkan subjek email...",
+        "body": "Isi Email",
+        "bodyPlaceholder": "Masukkan isi email (mendukung HTML)...",
+        "details": "Detail Template",
+        "name": "Nama Template",
+        "namePlaceholder": "contoh: Email Selamat Datang",
+        "type": "Tipe"
+    },
+    "list": {
+        "title": "Template Email",
+        "create": "Template Baru",
+        "search": "Cari template...",
+        "empty": "Tidak ada template ditemukan"
+    },
+    "table": {
+        "name": "Nama",
+        "subject": "Subjek",
+        "type": "Tipe",
+        "updated": "Diperbarui",
+        "actions": "Aksi"
+    }
+}
