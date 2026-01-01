@@ -179,7 +179,7 @@ import Button from '@/components/ui/button.vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 
-const { toast } = useToast();
+const toast = useToast();
 
 const reports = ref([]);
 const stats = ref({});
@@ -233,7 +233,7 @@ async function fetchReports() {
       to: response.data.data.to,
     };
   } catch (error) {
-    toast.error('Failed to load CSP reports');
+    toast.error.fromResponse(error);
     console.error(error);
   } finally {
     loading.value = false;
@@ -290,12 +290,12 @@ async function bulkAction(action) {
       ids: selectedReports.value,
       action,
     });
-    toast.success(`Bulk action completed successfully`);
+    toast.success.action('Bulk action completed');
     selectedReports.value = [];
     fetchReports();
     fetchStatistics();
   } catch (error) {
-    toast.error('Failed to perform bulk action');
+    toast.error.fromResponse(error);
     console.error(error);
   }
 }

@@ -48,19 +48,19 @@ class CspReportController extends BaseApiController
     {
         $query = CspReport::query();
         
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         
-        if ($request->has('directive')) {
+        if ($request->filled('directive')) {
             $query->where('violated_directive', 'like', "%{$request->directive}%");
         }
         
-        if ($request->has('date_from')) {
+        if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
         
-        if ($request->has('date_to')) {
+        if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
         
