@@ -172,16 +172,13 @@ class UserController extends BaseApiController
     {
         $user = $request->user();
         
-        $limit = $request->get('limit', 20);
-        $offset = $request->get('offset', 0);
+        $perPage = min(max((int) $request->input('per_page', 10), 1), 100);
         
         $history = \App\Models\LoginHistory::where('user_id', $user->id)
             ->orderBy('login_at', 'desc')
-            ->skip($offset)
-            ->take($limit)
-            ->get();
+            ->paginate($perPage);
 
-        return $this->success($history, 'Login history retrieved successfully');
+        return $this->paginated($history, 'Login history retrieved successfully');
     }
 
     public function updateProfile(Request $request)

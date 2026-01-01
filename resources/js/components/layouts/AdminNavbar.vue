@@ -160,24 +160,7 @@
                             <p class="text-xs text-muted-foreground truncate">{{ user?.email || '' }}</p>
                         </div>
 
-                        <!-- Language Selection -->
-                        <div class="p-2 border-b border-border">
-                            <p class="px-2 text-xs font-semibold text-muted-foreground mb-1">{{ t('common.labels.language') || 'Language' }}</p>
-                            <div class="space-y-1">
-                                <button
-                                    v-for="lang in languages"
-                                    :key="lang.id"
-                                    @click="selectLanguage(lang)"
-                                    class="flex items-center w-full px-2 py-1.5 text-sm rounded-md transition-colors"
-                                    :class="currentLanguage?.code === lang.code ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
-                                >
-                                    <span class="mr-2 text-base leading-none">{{ getLanguageFlag(lang) }}</span>
-                                    <span class="flex-1 text-left">{{ lang.native_name }}</span>
-                                    <Check v-if="currentLanguage?.code === lang.code" class="ml-auto w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                        <div class="py-1">
+        <div class="py-1">
                             <router-link
                                 :to="{ name: 'profile' }"
                                 @click="showUserMenu = false"
@@ -200,6 +183,21 @@
                                 </svg>
                                 {{ t('common.labels.settings') }}
                             </router-link>
+                        </div>
+                        
+                        <!-- Language Selection -->
+                        <div class="p-1 border-t border-border">
+                            <button
+                                v-for="lang in languages"
+                                :key="lang.id"
+                                @click="selectLanguage(lang)"
+                                class="flex items-center w-full px-4 py-2 text-sm transition-colors hover:bg-accent"
+                                :class="currentLanguage?.code === lang.code ? 'text-primary font-medium' : 'text-foreground'"
+                            >
+                                <span class="mr-3 text-base leading-none">{{ getLanguageFlag(lang) }}</span>
+                                <span class="flex-1 text-left">{{ lang.native_name }}</span>
+                                <Check v-if="currentLanguage?.code === lang.code" class="ml-auto w-4 h-4 text-primary" />
+                            </button>
                         </div>
                         <div class="border-t border-border">
                             <button

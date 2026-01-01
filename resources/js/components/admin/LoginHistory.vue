@@ -1,12 +1,7 @@
 <template>
     <div class="bg-card rounded-lg shadow">
-        <div class="p-6 border-b border-border">
-            <h2 class="text-lg font-semibold text-foreground">Login History</h2>
-            <p class="text-sm text-muted-foreground mt-1">Recent login attempts and sessions</p>
-        </div>
-
         <div class="p-6">
-            <div v-if="loading" class="flex justify-center py-8">
+            <div v-if="loading && !history.length" class="flex justify-center py-8">
                 <Spinner />
             </div>
 
@@ -102,14 +97,15 @@
                 </div>
             </div>
 
-            <div v-if="history.length > 0" class="mt-6 text-center">
-                <button
-                    @click="loadMore"
-                    :disabled="loading || !hasMore"
-                    class="px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {{ hasMore ? 'Load More' : 'No more history' }}
-                </button>
+            <div v-if="totalItems > 0" class="mt-6">
+                <Pagination
+                    :current-page="currentPage"
+                    :total-items="totalItems"
+                    :per-page="Number(perPage)"
+                    :show-page-numbers="true"
+                    @page-change="handlePageChange"
+                    @update:per-page="handlePerPageChange"
+                />
             </div>
         </div>
     </div>
@@ -119,36 +115,35 @@
 import { ref, onMounted } from 'vue';
 import api from '../../services/api';
 import Spinner from '../Spinner.vue';
+import Pagination from '../ui/pagination.vue';
 
 const history = ref([]);
 const loading = ref(false);
-const hasMore = ref(true);
-const limit = ref(20);
-const offset = ref(0);
+const currentPage = ref(1);
+const totalItems = ref(0);
+const perPage = ref(10); // Default to 10 as requested
 
-const fetchHistory = async (loadMore = false) => {
-    if (loading.value) return;
-    
+const fetchHistory = async () => {
     loading.value = true;
     try {
         const response = await api.get('/profile/login-history', {
             params: {
-                limit: limit.value,
-                offset: loadMore ? offset.value : 0,
+                per_page: perPage.value,
+                page: currentPage.value,
             },
         });
 
         if (response.data?.success) {
-            const newHistory = response.data.data || [];
+            // Check BaseApiController paginated structure:
+            // response.data.data = { data: [...], current_page: 1, total: 100, ... }
+            const paginatedData = response.data.data;
             
-            if (loadMore) {
-                history.value = [...history.value, ...newHistory];
-            } else {
-                history.value = newHistory;
+            if (paginatedData) {
+                history.value = paginatedData.data || [];
+                totalItems.value = paginatedData.total || 0;
+                currentPage.value = paginatedData.current_page || 1;
+                perPage.value = parseInt(paginatedData.per_page) || 10;
             }
-
-            hasMore.value = newHistory.length === limit.value;
-            offset.value = history.value.length;
         }
     } catch (error) {
         console.error('Failed to fetch login history:', error);
@@ -157,8 +152,15 @@ const fetchHistory = async (loadMore = false) => {
     }
 };
 
-const loadMore = () => {
-    fetchHistory(true);
+const handlePageChange = (page) => {
+    currentPage.value = page;
+    fetchHistory();
+};
+
+const handlePerPageChange = (newPerPage) => {
+    perPage.value = newPerPage;
+    currentPage.value = 1;
+    fetchHistory();
 };
 
 const formatDate = (dateString) => {
