@@ -175,7 +175,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { Button } from '@/components/ui/button.vue';
+import Button from '@/components/ui/button.vue';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 
