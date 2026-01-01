@@ -231,10 +231,10 @@ async function runAudit() {
   auditing.value = true;
   try {
     await api.post('/admin/cms/security/run-dependency-audit');
-    toast.success('Dependency audit completed');
+    toast.success.action('Dependency audit completed');
     fetchVulnerabilities();
   } catch (error) {
-    toast.error('Failed to run audit');
+    toast.error.fromResponse(error);
     console.error(error);
   } finally {
     auditing.value = false;
@@ -245,9 +245,9 @@ async function updateStatus(vuln, status) {
   try {
     await api.put(`/admin/cms/security/dependency-vulnerabilities/${vuln.id}`, { status });
     vuln.status = status;
-    toast.success('Status updated');
+    toast.success.action('Status updated');
   } catch (error) {
-    toast.error('Failed to update status');
+    toast.error.fromResponse(error);
   }
 }
 
