@@ -222,17 +222,61 @@ class SystemService
     public function getCpuUsage(): array
     {
         try {
+            // 1. Get Core Count (Try nproc first, then /proc/cpuinfo)
+            $cores = 1;
+            if (function_exists('shell_exec')) {
+                if (\shell_exec('which nproc')) {
+                    $cores = (int) trim(\shell_exec('nproc'));
+                }
+            }
+            
+            if ($cores === 1 && file_exists('/proc/cpuinfo')) {
+                $cpuinfo = file_get_contents('/proc/cpuinfo');
+                $cores = substr_count($cpuinfo, 'processor');
+            }
+            if ($cores < 1) $cores = 1;
+
+            // 2. Get Real-Time CPU Usage from /proc/stat
+            if (file_exists('/proc/stat')) {
+                // Read first sample
+                $stat1 = file_get_contents('/proc/stat');
+                $time1 = microtime(true);
+                
+                // Small sleep to get a delta (100ms)
+                usleep(100000); // 0.1 seconds
+                
+                // Read second sample
+                $stat2 = file_get_contents('/proc/stat');
+                $time2 = microtime(true);
+
+                // Parse stats
+                $info1 = $this->parseProcStat($stat1);
+                $info2 = $this->parseProcStat($stat2);
+
+                if ($info1 && $info2) {
+                    // Calculate deltas
+                    $diffTotal = $info2['total'] - $info1['total'];
+                    $diffIdle = $info2['idle'] - $info1['idle'];
+                    
+                    if ($diffTotal > 0) {
+                        $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
+                        
+                        // Get load average just for display
+                        $load = sys_getloadavg();
+
+                        return [
+                            'percent' => round($cpuPercent, 2),
+                            'load' => $load[0] ?? 0,
+                            'cores' => $cores,
+                            'status' => $cpuPercent > 90 ? 'critical' : ($cpuPercent > 75 ? 'warning' : 'ok'),
+                        ];
+                    }
+                }
+            }
+
+            // Fallback to Load Average if /proc/stat fails
             if (file_exists('/proc/loadavg')) {
                 $load = sys_getloadavg();
-                
-                // Determine number of cores
-                $cores = 1;
-                if (file_exists('/proc/cpuinfo')) {
-                    $cpuinfo = file_get_contents('/proc/cpuinfo');
-                    $cores = substr_count($cpuinfo, 'processor');
-                }
-                if ($cores < 1) $cores = 1;
-
                 $cpuPercent = min(100, ($load[0] * 100) / $cores);
 
                 return [
@@ -246,7 +290,37 @@ class SystemService
             Log::debug('CPU usage error: ' . $e->getMessage());
         }
 
-        return ['percent' => 0, 'load' => 0, 'status' => 'unknown'];
+        return ['percent' => 0, 'load' => 0, 'cores' => 1, 'status' => 'unknown'];
+    }
+
+    /**
+     * Parse /proc/stat content
+     */
+    private function parseProcStat($content): ?array
+    {
+        // Get the first line which starts with "cpu "
+        $lines = explode("\n", $content);
+        foreach ($lines as $line) {
+            if (str_starts_with($line, 'cpu ')) {
+                // Format: cpu  user nice system idle iowait irq softirq steal guest guest_nice
+                $parts = preg_split('/\s+/', trim($line));
+                // Remove 'cpu'
+                array_shift($parts);
+                
+                // Sum all columns for total time
+                $total = array_sum($parts);
+                // Idle is the 4th column (index 3) + iowait (index 4) usually considered idle regarding CPU utilization?
+                // Standard calculation: Idle = idle + iowait
+                // Linux 2.6+:
+                // user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice
+                // indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+                
+                $idle = ($parts[3] ?? 0) + ($parts[4] ?? 0);
+                
+                return ['total' => $total, 'idle' => $idle];
+            }
+        }
+        return null;
     }
 
     /**
