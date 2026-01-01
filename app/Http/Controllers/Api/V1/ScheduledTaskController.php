@@ -19,14 +19,12 @@ class ScheduledTaskController extends BaseApiController
         return $this->success($tasks, 'Scheduled tasks retrieved successfully');
     }
 
-    /**
-     * Get allowed commands for UI dropdown
-     */
     public function allowedCommands()
     {
-        return $this->success([
-            'commands' => ScheduledTask::getAllowedCommands(),
-        ], 'Allowed commands retrieved');
+        return $this->success(
+            ScheduledTask::getAllowedCommands(),
+            'Allowed commands retrieved'
+        );
     }
 
     /**

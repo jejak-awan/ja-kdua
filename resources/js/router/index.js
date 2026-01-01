@@ -252,6 +252,12 @@ const routes = [
                 component: () => import('../views/admin/security/Index.vue'),
             },
             {
+                path: 'security/csp-reports',
+                name: 'security.csp-reports',
+                component: () => import('../views/admin/security/CspReports.vue'),
+                meta: { permission: 'manage settings' },
+            },
+            {
                 path: 'system',
                 name: 'system',
                 component: () => import('../views/admin/system/Index.vue'),
