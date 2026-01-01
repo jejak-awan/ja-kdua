@@ -1,5 +1,5 @@
 <template>
-  <div class="csp-reports-container">
+  <div class="csp-reports-container p-6">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
@@ -329,8 +329,3 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.csp-reports-container {
-  @apply p-6;
-}
-</style>

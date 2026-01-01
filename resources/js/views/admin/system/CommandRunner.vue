@@ -210,10 +210,10 @@ onMounted(async () => {
 
 async function fetchAllowedCommands() {
   try {
-    const response = await api.get('/admin/cms/scheduled-tasks/meta/allowed-commands');
-    allowedCommands.value = response.data.data.commands;
+    const response = await api.get('/admin/cms/scheduled-tasks/allowed-commands');
+    allowedCommands.value = response.data.data;
   } catch (error) {
-    console.error('Failed to fetch allowed commands:', error.message);
+    console.error('Failed to fetch allowed commands:', error);
     toast.error.fromResponse(error);
   }
 }

@@ -94,6 +94,40 @@
                 </Card>
             </div>
 
+            <!-- Quick Links -->
+            <Card class="mb-6">
+                <CardHeader>
+                    <CardTitle class="text-lg">{{ $t('features.security.quickLinks.title') }}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
+                            <router-link to="/admin/security/csp-reports">
+                                <div class="flex items-center mb-2">
+                                    <ShieldAlert class="w-5 h-5 mr-2 text-orange-600" />
+                                    <span class="font-semibold">CSP Violation Reports</span>
+                                </div>
+                                <p class="text-xs text-muted-foreground text-left">Monitor XSS attacks and security policy violations</p>
+                            </router-link>
+                        </Button>
+                        <Button variant="outline" class="h-auto py-4 flex-col items-start opacity-50 cursor-not-allowed">
+                            <div class="flex items-center mb-2">
+                                <Search class="w-5 h-5 mr-2 text-blue-600" />
+                                <span class="font-semibold">Slow Query Analysis</span>
+                            </div>
+                            <p class="text-xs text-muted-foreground text-left">Coming soon - Performance monitoring</p>
+                        </Button>
+                        <Button variant="outline" class="h-auto py-4 flex-col items-start opacity-50 cursor-not-allowed">
+                            <div class="flex items-center mb-2">
+                                <ShieldCheck class="w-5 h-5 mr-2 text-green-600" />
+                                <span class="font-semibold">Dependency Vulnerabilities</span>
+                            </div>
+                            <p class="text-xs text-muted-foreground text-left">Coming soon - Security audit results</p>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
             <!-- IP Management - Single Row -->
             <Card class="mb-6">
                 <CardHeader>
