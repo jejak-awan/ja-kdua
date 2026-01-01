@@ -9,7 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     {{-- Blocking script - Apply dark mode class immediately BEFORE any CSS --}}
-    <script>
+    <script nonce="{{ $cspNonce ?? '' }}">
         (function() {
             const savedMode = localStorage.getItem('admin-dark-mode');
             const isDark = savedMode === 'dark' || 
@@ -21,14 +21,14 @@
         })();
     </script>
     
-    <script>
+    <script nonce="{{ $cspNonce ?? '' }}">
         window.siteConfig = {
             lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
         };
     </script>
 
     {{-- Critical CSS - Must match app.css exactly --}}
-    <style>
+    <style nonce="{{ $cspNonce ?? '' }}">
         /* CSS Custom Properties - Synced with app.css */
         :root {
             /* Light mode - Shadcn Zinc matches app.css */

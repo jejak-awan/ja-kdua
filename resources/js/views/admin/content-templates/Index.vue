@@ -42,6 +42,19 @@
                                 <SelectItem value="custom">Custom</SelectItem>
                             </SelectContent>
                         </Select>
+                         <Select
+                            v-model="trashedFilter"
+                            @update:model-value="fetchTemplates"
+                        >
+                            <SelectTrigger class="w-[140px]">
+                                <SelectValue :placeholder="t('common.labels.status')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="without">{{ t('common.labels.activeOnly') }}</SelectItem>
+                                <SelectItem value="with">{{ t('common.labels.includesTrashed') }}</SelectItem>
+                                <SelectItem value="only">{{ t('common.labels.trashedOnly') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div v-if="selectedTemplates.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-top-1">
@@ -58,6 +71,8 @@
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="delete" class="text-destructive focus:text-destructive">Delete Selected</SelectItem>
+                                <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600">Restore Selected</SelectItem>
+                                <SelectItem value="force_delete" class="text-destructive focus:text-destructive">Force Delete Selected</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -100,7 +115,12 @@
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    <div class="text-sm font-medium text-foreground">{{ template.name }}</div>
+                                    <div class="flex items-center gap-2 text-sm font-medium text-foreground">
+                                        {{ template.name }}
+                                        <Badge v-if="template.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
+                                            {{ t('common.labels.deleted') }}
+                                        </Badge>
+                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary" class="capitalize">
@@ -137,10 +157,20 @@
                                             </router-link>
                                         </Button>
                                         <Button
+                                            v-if="template.deleted_at"
+                                            variant="ghost"
+                                            size="icon"
+                                            @click="handleRestore(template)"
+                                            :title="t('common.actions.restore')"
+                                            class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                                        >
+                                            <RotateCcw class="w-4 h-4" />
+                                        </Button>
+                                        <Button
                                             variant="ghost"
                                             size="icon"
                                             @click="handleDelete(template)"
-                                            :title="t('features.content_templates.actions.delete')"
+                                            :title="template.deleted_at ? t('common.actions.forceDelete') : t('features.content_templates.actions.delete')"
                                             class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                         >
                                             <Trash2 class="w-4 h-4" />
@@ -202,7 +232,8 @@ import {
     Pencil,
     Trash2,
     CopyPlus,
-    Loader2
+    Loader2,
+    RotateCcw
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -213,6 +244,7 @@ const templates = ref([]);
 const loading = ref(false);
 const search = ref('');
 const typeFilter = ref('all');
+const trashedFilter = ref('without');
 const pagination = ref(null);
 const perPage = ref('10');
 const selectedTemplates = ref([]);
@@ -233,7 +265,8 @@ const fetchTemplates = async (page = 1) => {
             page,
             per_page: perPage.value,
             type: typeFilter.value !== 'all' ? typeFilter.value : undefined,
-            search: search.value
+            search: search.value,
+            trashed: trashedFilter.value !== 'without' ? trashedFilter.value : undefined
         };
 
         const response = await api.get('/admin/cms/content-templates', { params });
@@ -264,22 +297,50 @@ const createFromTemplate = async (template) => {
 };
 
 const handleDelete = async (template) => {
+    const isTrashed = !!template.deleted_at;
     const confirmed = await confirm({
-        title: t('features.content_templates.actions.delete'),
-        message: t('features.content_templates.messages.deleteConfirm', { name: template.name }),
+        title: isTrashed ? t('common.actions.forceDelete') : t('features.content_templates.actions.delete'),
+        message: isTrashed 
+            ? `Are you sure you want to PERMANENTLY delete ${template.name}?`
+            : t('features.content_templates.messages.deleteConfirm', { name: template.name }),
         variant: 'danger',
-        confirmText: t('common.actions.delete'),
+        confirmText: isTrashed ? t('common.actions.forceDelete') : t('common.actions.delete'),
     });
 
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/content-templates/${template.id}`);
+        if (isTrashed) {
+            await api.delete(`/admin/cms/content-templates/${template.id}/force-delete`);
+            toast.success.action(t('common.messages.success.deleted', { item: 'Template' }));
+        } else {
+            await api.delete(`/admin/cms/content-templates/${template.id}`);
+            toast.success.delete('Template');
+        }
         await fetchTemplates(pagination.value?.current_page || 1);
-        toast.success.delete('Template');
     } catch (error) {
         console.error('Failed to delete template:', error);
         toast.error.delete(error, 'Template');
+    }
+};
+
+const handleRestore = async (template) => {
+    const confirmed = await confirm({
+        title: t('common.actions.restore'),
+        message: `Restore ${template.name}?`,
+        variant: 'info',
+        confirmText: t('common.actions.restore'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post(`/admin/cms/content-templates/${template.id}/restore`);
+        toast.success.restore('Template');
+        await fetchTemplates(pagination.value?.current_page || 1);
+    } catch (error) {
+        console.error('Failed to restore template:', error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -302,12 +363,18 @@ const toggleSelection = (id, checked) => {
 const handleBulkAction = async () => {
     if (!bulkAction.value || selectedTemplates.value.length === 0) return;
 
-    if (bulkAction.value === 'delete') {
+    const action = bulkAction.value;
+    const count = selectedTemplates.value.length;
+
+    if (action === 'delete' || action === 'force_delete') {
+        const isForce = action === 'force_delete';
         const confirmed = await confirm({
-            title: t('features.content_templates.actions.bulkDelete'),
-            message: `Are you sure you want to delete ${selectedTemplates.value.length} templates?`,
+            title: isForce ? t('common.actions.forceDelete') : t('features.content_templates.actions.bulkDelete'),
+            message: isForce 
+                ? `Are you sure you want to PERMANENTLY delete ${count} templates?`
+                : `Are you sure you want to move ${count} templates to trash?`,
             variant: 'danger',
-            confirmText: t('common.actions.delete'),
+            confirmText: isForce ? t('common.actions.forceDelete') : t('common.actions.delete'),
         });
 
         if (!confirmed) {
@@ -317,12 +384,25 @@ const handleBulkAction = async () => {
 
         try {
             await api.post('/admin/cms/content-templates/bulk-action', {
-                action: 'delete',
+                action: action,
                 ids: selectedTemplates.value
             });
             await fetchTemplates(pagination.value?.current_page || 1);
             bulkAction.value = '';
             toast.success.delete('Templates');
+        } catch (error) {
+            console.error('Bulk action failed:', error);
+            toast.error.action(error);
+        }
+    } else if (action === 'restore') {
+        try {
+            await api.post('/admin/cms/content-templates/bulk-action', {
+                action: 'restore',
+                ids: selectedTemplates.value
+            });
+            await fetchTemplates(pagination.value?.current_page || 1);
+            bulkAction.value = '';
+            toast.success.restore('Templates');
         } catch (error) {
             console.error('Bulk action failed:', error);
             toast.error.action(error);

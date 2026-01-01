@@ -25,6 +25,16 @@ class FormSubmissionController extends BaseApiController
             $query->where('form_id', $request->form_id);
         }
 
+        // Soft deletes filter
+        if ($request->has('trashed')) {
+            $trashed = $request->trashed;
+            if ($trashed === 'only') {
+                $query->onlyTrashed();
+            } elseif ($trashed === 'with') {
+                $query->withTrashed();
+            }
+        }
+
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -71,6 +81,20 @@ class FormSubmissionController extends BaseApiController
         $formSubmission->delete();
 
         return $this->success(null, 'Submission deleted successfully');
+    }
+
+    public function restore($id)
+    {
+        $submission = FormSubmission::withTrashed()->findOrFail($id);
+        $submission->restore();
+        return $this->success(null, 'Submission restored successfully');
+    }
+
+    public function forceDelete($id)
+    {
+        $submission = FormSubmission::withTrashed()->findOrFail($id);
+        $submission->forceDelete();
+        return $this->success(null, 'Submission permanently deleted');
     }
 
     public function export(Request $request, Form $form)

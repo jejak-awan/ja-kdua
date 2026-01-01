@@ -130,6 +130,8 @@ Route::prefix('v1')->group(function () {
         Route::post('newsletter/subscribers/bulk-action', [App\Http\Controllers\Api\V1\NewsletterController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::get('newsletter/subscribers', [App\Http\Controllers\Api\V1\NewsletterController::class, 'index'])->middleware('permission:manage users');
         Route::delete('newsletter/subscribers/{id}', [App\Http\Controllers\Api\V1\NewsletterController::class, 'destroy'])->middleware('permission:manage users');
+        Route::post('newsletter/subscribers/{id}/restore', [App\Http\Controllers\Api\V1\NewsletterController::class, 'restore'])->middleware('permission:manage users');
+        Route::delete('newsletter/subscribers/{id}/force-delete', [App\Http\Controllers\Api\V1\NewsletterController::class, 'forceDelete'])->middleware('permission:manage users');
         Route::get('newsletter/export', [App\Http\Controllers\Api\V1\NewsletterController::class, 'export'])->middleware('permission:manage users');
 
         // Content Revisions
@@ -194,6 +196,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('users', App\Http\Controllers\Api\V1\UserController::class)->middleware('permission:manage users');
         Route::post('users/{user}/force-logout', [App\Http\Controllers\Api\V1\UserController::class, 'forceLogout'])->middleware('permission:manage users');
         Route::post('users/{user}/verify', [App\Http\Controllers\Api\V1\UserController::class, 'verify'])->middleware('permission:manage users');
+        Route::post('users/{user}/restore', [App\Http\Controllers\Api\V1\UserController::class, 'restore'])->middleware('permission:manage users');
+        Route::delete('users/{user}/force-delete', [App\Http\Controllers\Api\V1\UserController::class, 'forceDelete'])->middleware('permission:manage users');
 
         // Roles (for user management)
         Route::post('roles/bulk-action', [App\Http\Controllers\Api\V1\RoleController::class, 'bulkAction'])->middleware('permission:manage users');
@@ -312,6 +316,9 @@ Route::prefix('v1')->group(function () {
         Route::post('themes/{theme}/layouts/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderLayout'])->middleware('permission:manage themes');
 
         // Menus
+        Route::post('menus/bulk-action', [App\Http\Controllers\Api\V1\MenuController::class, 'bulkAction'])->middleware('permission:manage menus');
+        Route::post('menus/{menu}/restore', [App\Http\Controllers\Api\V1\MenuController::class, 'restore'])->middleware('permission:manage menus');
+        Route::delete('menus/{menu}/force-delete', [App\Http\Controllers\Api\V1\MenuController::class, 'forceDelete'])->middleware('permission:manage menus');
         Route::apiResource('menus', App\Http\Controllers\Api\V1\MenuController::class)->middleware('permission:manage menus');
         Route::post('menus/{menu}/items', [App\Http\Controllers\Api\V1\MenuController::class, 'addItem'])->middleware('permission:manage menus');
         Route::put('menus/{menu}/items/{menuItem}', [App\Http\Controllers\Api\V1\MenuController::class, 'updateItem'])->middleware('permission:manage menus');
@@ -345,6 +352,8 @@ Route::prefix('v1')->group(function () {
         // Forms
         Route::post('forms/bulk-action', [App\Http\Controllers\Api\V1\FormController::class, 'bulkAction'])->middleware('permission:manage forms');
         Route::post('forms/{form}/duplicate', [App\Http\Controllers\Api\V1\FormController::class, 'duplicate'])->middleware('permission:manage forms');
+        Route::post('forms/{form}/restore', [App\Http\Controllers\Api\V1\FormController::class, 'restore'])->middleware('permission:manage forms');
+        Route::delete('forms/{form}/force-delete', [App\Http\Controllers\Api\V1\FormController::class, 'forceDelete'])->middleware('permission:manage forms');
         Route::apiResource('forms', App\Http\Controllers\Api\V1\FormController::class)->middleware('permission:manage forms');
         Route::post('forms/{form}/fields', [App\Http\Controllers\Api\V1\FormController::class, 'addField'])->middleware('permission:manage forms');
         Route::put('forms/{form}/fields/{formField}', [App\Http\Controllers\Api\V1\FormController::class, 'updateField'])->middleware('permission:manage forms');
@@ -360,6 +369,8 @@ Route::prefix('v1')->group(function () {
         Route::put('form-submissions/{formSubmission}/read', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'markAsRead'])->middleware('permission:manage forms');
         Route::put('form-submissions/{formSubmission}/archive', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'archive'])->middleware('permission:manage forms');
         Route::delete('form-submissions/{formSubmission}', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'destroy'])->middleware('permission:manage forms');
+        Route::post('form-submissions/{formSubmission}/restore', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'restore'])->middleware('permission:manage forms');
+        Route::delete('form-submissions/{formSubmission}/force-delete', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'forceDelete'])->middleware('permission:manage forms');
         Route::get('forms/{form}/submissions/export', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'export'])->middleware('permission:manage forms');
         Route::get('forms/{form}/submissions/statistics', [App\Http\Controllers\Api\V1\FormSubmissionController::class, 'statistics'])->middleware('permission:manage forms');
 
@@ -429,6 +440,8 @@ Route::prefix('v1')->group(function () {
 
         // Content Templates
         Route::post('content-templates/bulk-action', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'bulkAction'])->middleware('permission:manage content');
+        Route::post('content-templates/{contentTemplate}/restore', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'restore'])->middleware('permission:manage content');
+        Route::delete('content-templates/{contentTemplate}/force-delete', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'forceDelete'])->middleware('permission:manage content');
         Route::apiResource('content-templates', App\Http\Controllers\Api\V1\ContentTemplateController::class)->middleware('permission:manage content');
         Route::post('content-templates/{contentTemplate}/create-content', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'createContent'])->middleware('permission:create content');
 

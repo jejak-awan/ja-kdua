@@ -36,6 +36,16 @@ class ContentTemplateController extends BaseApiController
             $query->where('is_active', $request->boolean('is_active'));
         }
 
+        // Soft deletes filter
+        if ($request->has('trashed')) {
+            $trashed = $request->trashed;
+            if ($trashed === 'only') {
+                $query->onlyTrashed();
+            } elseif ($trashed === 'with') {
+                $query->withTrashed();
+            }
+        }
+
         $perPage = $request->input('per_page', 10);
         $templates = $query->latest()->paginate($perPage);
 
@@ -45,7 +55,7 @@ class ContentTemplateController extends BaseApiController
     public function bulkAction(Request $request)
     {
         $request->validate([
-            'action' => 'required|in:delete',
+            'action' => 'required|in:delete,restore,force_delete',
             'ids' => 'required|array',
             'ids.*' => 'exists:content_templates,id',
         ]);
@@ -64,6 +74,10 @@ class ContentTemplateController extends BaseApiController
 
         if ($action === 'delete') {
             $count = $query->delete();
+        } elseif ($action === 'restore') {
+            $count = ContentTemplate::withTrashed()->whereIn('id', $ids)->restore();
+        } elseif ($action === 'force_delete') {
+            $count = ContentTemplate::withTrashed()->whereIn('id', $ids)->forceDelete();
         }
 
         return $this->success(null, "Bulk action {$action} completed for {$count} templates");
@@ -160,6 +174,20 @@ class ContentTemplateController extends BaseApiController
         $contentTemplate->delete();
 
         return $this->success(null, 'Content template deleted successfully');
+    }
+
+    public function restore($id)
+    {
+        $template = ContentTemplate::withTrashed()->findOrFail($id);
+        $template->restore();
+        return $this->success(null, 'Content template restored successfully');
+    }
+
+    public function forceDelete($id)
+    {
+        $template = ContentTemplate::withTrashed()->findOrFail($id);
+        $template->forceDelete();
+        return $this->success(null, 'Content template permanently deleted');
     }
 
     public function createContent(Request $request, ContentTemplate $contentTemplate)

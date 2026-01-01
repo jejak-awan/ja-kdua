@@ -41,6 +41,19 @@
                         <SelectItem value="unsubscribed">{{ $t('features.newsletter.filters.unsubscribed') }}</SelectItem>
                     </SelectContent>
                 </Select>
+                <Select
+                    v-model="filters.trashed"
+                    @update:modelValue="fetchSubscribers"
+                >
+                    <SelectTrigger class="w-full md:w-[160px]">
+                        <SelectValue :placeholder="t('common.labels.status')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                         <SelectItem value="without">{{ t('common.labels.activeOnly') }}</SelectItem>
+                         <SelectItem value="with">{{ t('common.labels.includesTrashed') }}</SelectItem>
+                         <SelectItem value="only">{{ t('common.labels.trashedOnly') }}</SelectItem>
+                    </SelectContent>
+                </Select>
 
                 <!-- Bulk Actions -->
                 <div v-if="selectedIds.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1 ml-auto">
@@ -57,6 +70,8 @@
                         </SelectTrigger>
                         <SelectContent>
                              <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem value="restore" class="text-emerald-600 focus:text-emerald-600">{{ $t('common.actions.restore') }}</SelectItem>
+                             <SelectItem value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -105,8 +120,11 @@
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-foreground">
+                                    <div class="text-sm font-medium text-foreground flex items-center gap-2">
                                         {{ subscriber.name || $t('features.newsletter.messages.noName') }}
+                                        <Badge v-if="subscriber.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
+                                            {{ t('common.labels.deleted') }}
+                                        </Badge>
                                     </div>
                                     <div class="text-xs text-muted-foreground">
                                         {{ subscriber.email }}
@@ -131,11 +149,21 @@
                         <TableCell>
                             <div class="flex items-center justify-center">
                                 <Button
+                                    v-if="subscriber.deleted_at"
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="restoreSubscriber(subscriber)"
+                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                                    :title="$t('common.actions.restore')"
+                                >
+                                    <RotateCcw class="w-4 h-4" />
+                                </Button>
+                                <Button
                                     variant="ghost"
                                     size="icon"
                                     @click="deleteSubscriber(subscriber)"
                                     class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    :title="$t('features.newsletter.actions.delete')"
+                                    :title="subscriber.deleted_at ? $t('common.actions.forceDelete') : $t('features.newsletter.actions.delete')"
                                 >
                                     <Trash2 class="w-4 h-4" />
                                 </Button>
@@ -184,7 +212,7 @@ import TableHead from '../../../components/ui/table-head.vue';
 import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
 import Pagination from '../../../components/ui/pagination.vue';
-import { Download, Search, Trash2 } from 'lucide-vue-next';
+import { Download, Search, Trash2, RotateCcw } from 'lucide-vue-next';
 import _ from 'lodash';
 
 const { t } = useI18n();
@@ -197,6 +225,7 @@ const pagination = ref({});
 const filters = ref({
     status: 'all',
     q: '',
+    trashed: 'without',
     page: 1,
     per_page: 15,
 });
@@ -208,6 +237,9 @@ const fetchSubscribers = async () => {
         // Don't send 'all' status to API
         if (params.status === 'all') {
             delete params.status;
+        }
+        if (params.trashed === 'without') {
+            delete params.trashed;
         }
         const response = await api.get('/admin/cms/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
@@ -240,22 +272,50 @@ const changePerPage = (perPage) => {
 };
 
 const deleteSubscriber = async (subscriber) => {
+    const isTrashed = !!subscriber.deleted_at;
     const confirmed = await confirm({
-        title: t('features.newsletter.actions.delete'),
-        message: t('features.newsletter.confirm.delete', { email: subscriber.email }),
+        title: isTrashed ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
+        message: isTrashed 
+            ? `Are you sure you want to PERMANENTLY delete ${subscriber.email}?`
+            : t('features.newsletter.confirm.delete', { email: subscriber.email }),
         variant: 'danger',
-        confirmText: t('common.actions.delete'),
+        confirmText: isTrashed ? t('common.actions.forceDelete') : t('common.actions.delete'),
     });
 
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}`);
-        toast.success.delete('Subscriber');
+        if (isTrashed) {
+             await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}/force-delete`);
+             toast.success.action(t('common.messages.success.deleted', { item: 'Subscriber' }));
+        } else {
+            await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}`);
+            toast.success.delete('Subscriber');
+        }
         fetchSubscribers();
     } catch (error) {
         console.error('Failed to delete subscriber:', error);
         toast.error.delete(error, 'Subscriber');
+    }
+};
+
+const restoreSubscriber = async (subscriber) => {
+    const confirmed = await confirm({
+        title: t('common.actions.restore'),
+        message: `Restore ${subscriber.email}?`,
+        variant: 'info',
+        confirmText: t('common.actions.restore'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post(`/admin/cms/newsletter/subscribers/${subscriber.id}/restore`);
+        toast.success.restore('Subscriber');
+        fetchSubscribers();
+    } catch (error) {
+         console.error('Failed to restore subscriber:', error);
+        toast.error.fromResponse(error);
     }
 };
 
@@ -325,12 +385,15 @@ const toggleSelectAll = (checked) => {
 const bulkAction = async (action) => {
     if (selectedIds.value.length === 0) return;
     
-    if (action === 'delete') {
+    if (action === 'delete' || action === 'force_delete') {
+         const isForce = action === 'force_delete';
          const confirmed = await confirm({
-             title: t('features.newsletter.actions.delete'),
-             message: t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }),
+             title: isForce ? t('common.actions.forceDelete') : t('features.newsletter.actions.delete'),
+             message: isForce
+                ? `Are you sure you want to PERMANENTLY delete ${selectedIds.value.length} subscribers?`
+                : t('common.messages.confirm.bulkDelete', { count: selectedIds.value.length }),
              variant: 'danger',
-             confirmText: t('common.actions.delete'),
+             confirmText: isForce ? t('common.actions.forceDelete') : t('common.actions.delete'),
          });
 
          if (!confirmed) {
@@ -341,13 +404,37 @@ const bulkAction = async (action) => {
          try {
              await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
-                 action: 'delete'
+                 action: action
              });
              selectedIds.value = [];
              await fetchSubscribers();
-             toast.success.delete('Subscribers');
+             toast.success.action(t('common.messages.success.deleted', { item: 'Subscribers' }));
          } catch (error) {
-             toast.error.delete(error, 'Subscribers');
+             toast.error.action(error);
+         }
+    } else if (action === 'restore') {
+         try {
+             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: 'restore'
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             toast.success.restore('Subscribers');
+         } catch (error) {
+             toast.error.action(error);
+         }
+    } else if (action === 'unsubscribe' || action === 'subscribe') {
+         try {
+             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+                 ids: selectedIds.value,
+                 action: action
+             });
+             selectedIds.value = [];
+             await fetchSubscribers();
+             toast.success.action(t('common.messages.success.updated'));
+         } catch (error) {
+             toast.error.action(error);
          }
     }
 };

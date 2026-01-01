@@ -36,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Exempt analytics from CSRF protection (public tracking endpoint)
         $middleware->validateCsrfTokens(except: [
             'api/v1/analytics/*',
+            'api/v1/security/csp-report*',
+            'v1/security/csp-report*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

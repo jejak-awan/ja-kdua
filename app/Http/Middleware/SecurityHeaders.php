@@ -4,7 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
 
 class SecurityHeaders
 {
@@ -13,10 +16,15 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Generate nonce and share with views BEFORE handling request
+        $nonce = Str::random(32);
+        View::share('cspNonce', $nonce);
+        Vite::useCspNonce($nonce);
+        
         $response = $next($request);
         
         // Content Security Policy
-        $csp = $this->getContentSecurityPolicy();
+        $csp = $this->getContentSecurityPolicy($nonce);
         
         // ONLY set the standard CSP header. 
         // Do NOT set Report-Only here as it might cause duplicate headers if 
@@ -32,7 +40,7 @@ class SecurityHeaders
     /**
      * Get Content Security Policy directives
      */
-    protected function getContentSecurityPolicy(): string
+    protected function getContentSecurityPolicy(string $nonce): string
     {
         $isLocal = app()->environment('local');
         $isDevelopment = app()->environment(['local', 'development']);
@@ -42,7 +50,12 @@ class SecurityHeaders
         ];
         
         // Script sources
-        $scriptSrc = ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
+        $scriptSrc = [
+            "'self'", 
+            "'unsafe-inline'", 
+            "'unsafe-eval'",
+            "'nonce-{$nonce}'"
+        ];
         
         // Allow localhost for Vite dev server in development
         if ($isDevelopment) {

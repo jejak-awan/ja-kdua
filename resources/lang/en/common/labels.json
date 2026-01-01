@@ -57,5 +57,10 @@
     "quickActions": "Quick Actions",
     "other": "Other",
     "untitled": "Untitled",
-    "or": "or"
+    "or": "or",
+    "activeOnly": "Active Only",
+    "includesTrashed": "Includes Trashed",
+    "trashedOnly": "Trashed Only",
+    "deleted": "Deleted",
+    "loading": "Loading"
 }

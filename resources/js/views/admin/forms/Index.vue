@@ -33,6 +33,16 @@
                         <SelectItem value="inactive">{{ $t('features.forms.filters.inactive') }}</SelectItem>
                     </SelectContent>
                 </Select>
+                <Select v-model="trashedFilter">
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('common.labels.status')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="without">{{ $t('common.labels.activeOnly') }}</SelectItem>
+                        <SelectItem value="with">{{ $t('common.labels.includesTrashed') }}</SelectItem>
+                        <SelectItem value="only">{{ $t('common.labels.trashedOnly') }}</SelectItem>
+                    </SelectContent>
+                </Select>
                 <!-- View Toggle -->
                 <div class="flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30">
                     <Button
@@ -71,7 +81,9 @@
                             <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
                         </SelectTrigger>
                         <SelectContent>
-                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter !== 'only'" value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-emerald-600 focus:text-emerald-600">{{ $t('common.actions.restore') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter === 'only'" value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -111,7 +123,12 @@
                                 class="mt-1"
                             />
                             <div>
-                                <h3 class="text-lg font-semibold text-foreground">{{ form.name }}</h3>
+                                <h3 class="text-lg font-semibold text-foreground">
+                                    {{ form.name }}
+                                    <span v-if="form.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
+                                        {{ $t('common.labels.deleted') }}
+                                    </span>
+                                </h3>
                                 <p class="text-sm text-muted-foreground mt-1">{{ form.slug }}</p>
                             </div>
                         </div>
@@ -159,10 +176,32 @@
                             <Check v-else class="w-4 h-4" />
                         </Button>
                         <Button
+                            v-if="!form.deleted_at"
                             @click="deleteForm(form)"
                             variant="ghost"
                             size="icon"
                             class="h-8 w-8 text-destructive hover:text-destructive"
+                            :title="$t('common.actions.delete')"
+                        >
+                            <Trash2 class="w-4 h-4" />
+                        </Button>
+                        <Button
+                            v-if="form.deleted_at"
+                            @click="restoreForm(form)"
+                            variant="ghost"
+                            size="icon"
+                            class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            :title="$t('common.actions.restore')"
+                        >
+                            <RotateCcw class="w-4 h-4" />
+                        </Button>
+                        <Button
+                            v-if="form.deleted_at"
+                            @click="forceDeleteForm(form)"
+                            variant="ghost"
+                            size="icon"
+                            class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            :title="$t('common.actions.forceDelete')"
                         >
                             <Trash2 class="w-4 h-4" />
                         </Button>
@@ -213,7 +252,12 @@
                             </td>
                             <td class="px-4 py-4">
                                 <div>
-                                    <p class="font-medium text-foreground">{{ form.name }}</p>
+                                    <p class="font-medium text-foreground">
+                                        {{ form.name }}
+                                        <span v-if="form.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
+                                            {{ $t('common.labels.deleted') }}
+                                        </span>
+                                    </p>
                                     <p v-if="form.description" class="text-sm text-muted-foreground line-clamp-1">{{ form.description }}</p>
                                 </div>
                             </td>
@@ -257,11 +301,32 @@
                                         <Check v-else class="w-4 h-4" />
                                     </Button>
                                     <Button
+                                        v-if="!form.deleted_at"
                                         @click="deleteForm(form)"
                                         variant="ghost"
                                         size="icon"
                                         class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                         :title="$t('common.actions.delete')"
+                                    >
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        v-if="form.deleted_at"
+                                        @click="restoreForm(form)"
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                        :title="$t('common.actions.restore')"
+                                    >
+                                        <RotateCcw class="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        v-if="form.deleted_at"
+                                        @click="forceDeleteForm(form)"
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        :title="$t('common.actions.forceDelete')"
                                     >
                                         <Trash2 class="w-4 h-4" />
                                     </Button>
@@ -288,7 +353,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useConfirm } from '../../../composables/useConfirm';
 import api from '../../../services/api';
-import toast from '../../../services/toast';
+import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import Submissions from './Submissions.vue';
 import Card from '../../../components/ui/card.vue';
@@ -303,11 +368,12 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
 import { 
     Plus, Search, LayoutGrid, List, Loader2, FileText, Tag, 
-    Pencil, Inbox, Ban, Check, Trash2 
+    Pencil, Inbox, Ban, Check, Trash2, RotateCcw
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const toast = useToast();
 
 // State
 const router = useRouter();
@@ -315,6 +381,7 @@ const forms = ref([]);
 const loading = ref(true);
 const search = ref('');
 const statusFilter = ref('all');
+const trashedFilter = ref('without');
 const selectedForm = ref(null);
 const viewMode = ref('card');
 
@@ -341,7 +408,13 @@ const filteredForms = computed(() => {
 const fetchForms = async () => {
     try {
         loading.value = true;
-        const response = await api.get('/admin/cms/forms');
+        
+        const params = {};
+        if (trashedFilter.value !== 'without') {
+            params.trashed = trashedFilter.value;
+        }
+
+        const response = await api.get('/admin/cms/forms', { params });
         const { data } = parseResponse(response);
         forms.value = ensureArray(data);
     } catch (error) {
@@ -370,7 +443,7 @@ const toggleFormStatus = async (form) => {
         if (index !== -1) {
             forms.value[index] = updatedForm;
         }
-        toast.success(t('common.messages.success.updated', { item: 'Form status' }));
+        toast.success.action(t('common.messages.success.updated', { item: 'Form status' }));
     } catch (error) {
         console.error('Error toggling form status:', error);
         toast.error.fromResponse(error);
@@ -389,7 +462,7 @@ const deleteForm = async (form) => {
 
     try {
         await api.delete(`/admin/cms/forms/${form.id}`);
-        toast.success(t('features.forms.messages.deleteSuccess'));
+        toast.success.delete('Form');
         fetchForms();
     } catch (error) {
         console.error('Failed to delete form:', error);
@@ -414,7 +487,7 @@ const bulkDelete = async () => {
             ids: selectedIds.value,
             action: 'delete'
         });
-        toast.success(t('features.forms.messages.bulkDeleteSuccess'));
+        toast.success.delete('Forms');
         selectedIds.value = [];
         fetchForms();
     } catch (error) {
@@ -426,10 +499,50 @@ const bulkDelete = async () => {
 const duplicateForm = async (form) => {
     try {
         await api.post(`/admin/cms/forms/${form.id}/duplicate`);
-        toast.success(t('features.forms.messages.duplicateSuccess'));
+        toast.success.duplicate('Form');
         fetchForms();
     } catch (error) {
         console.error('Failed to duplicate form:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const restoreForm = async (form) => {
+    const confirmed = await confirm({
+        title: t('common.actions.restore'),
+        message: `Are you sure you want to restore ${form.name}?`,
+        variant: 'info',
+        confirmText: t('common.actions.restore'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post(`/admin/cms/forms/${form.id}/restore`);
+        toast.success.restore('Form');
+        fetchForms();
+    } catch (error) {
+        console.error('Failed to restore form:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
+const forceDeleteForm = async (form) => {
+    const confirmed = await confirm({
+        title: t('common.actions.forceDelete'),
+        message: `Are you sure you want to PERMANENTLY delete ${form.name}? This cannot be undone.`,
+        variant: 'danger',
+        confirmText: t('common.actions.forceDelete'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.delete(`/admin/cms/forms/${form.id}/force-delete`);
+        toast.success.action(t('common.messages.success.deleted', { item: 'Form' }));
+        fetchForms();
+    } catch (error) {
+        console.error('Failed to force delete form:', error);
         toast.error.fromResponse(error);
     }
 };
@@ -463,13 +576,54 @@ const handleBulkAction = async (value) => {
     if (!value) return;
     
     if (value === 'delete') {
-        await bulkDelete();
+        const confirmed = await confirm({
+            title: t('features.forms.bulk.delete'),
+            message: t('features.forms.bulk.confirmDelete', { count: selectedIds.value.length }),
+            variant: 'danger',
+            confirmText: t('common.actions.delete'),
+        });
+        if (confirmed) await performBulkAction('delete');
+    } else if (value === 'restore') {
+        const confirmed = await confirm({
+            title: t('common.actions.restore'),
+            message: `Restore ${selectedIds.value.length} forms?`,
+            variant: 'info',
+            confirmText: t('common.actions.restore'),
+        });
+        if (confirmed) await performBulkAction('restore');
+    } else if (value === 'force_delete') {
+        const confirmed = await confirm({
+            title: t('common.actions.forceDelete'),
+            message: `Permanently delete ${selectedIds.value.length} forms?`,
+            variant: 'danger',
+            confirmText: t('common.actions.forceDelete'),
+        });
+        if (confirmed) await performBulkAction('force_delete');
     }
     
     bulkActionSelection.value = '';
 };
 
+const performBulkAction = async (action) => {
+    try {
+        await api.post('/admin/cms/forms/bulk-action', { 
+            ids: selectedIds.value,
+            action: action
+        });
+        toast.success.action(t('common.messages.success.updated', { item: 'Forms' }));
+        selectedIds.value = [];
+        fetchForms();
+    } catch (error) {
+        console.error('Failed to bulk action forms:', error);
+        toast.error.fromResponse(error);
+    }
+};
+
 onMounted(() => {
+    fetchForms();
+});
+
+watch(trashedFilter, () => {
     fetchForms();
 });
 </script>

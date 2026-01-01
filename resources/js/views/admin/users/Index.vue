@@ -117,6 +117,16 @@
                         <SelectItem value="unverified">{{ $t('features.users.filters.unverifiedOnly') }}</SelectItem>
                     </SelectContent>
                 </Select>
+                <Select v-model="trashedFilter">
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue :placeholder="$t('common.labels.status')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="without">{{ $t('common.labels.activeOnly') }}</SelectItem>
+                        <SelectItem value="with">{{ $t('common.labels.includesTrashed') }}</SelectItem>
+                        <SelectItem value="only">{{ $t('common.labels.trashedOnly') }}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             
             
@@ -136,7 +146,9 @@
                         <SelectContent>
                              <SelectItem value="force_logout" class="text-amber-600 focus:text-amber-600">{{ $t('features.users.actions.forceLogout') }}</SelectItem>
                              <SelectItem value="verify" class="text-primary focus:text-primary">{{ $t('features.users.actions.verify') }}</SelectItem>
-                             <SelectItem value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter !== 'only'" value="delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.delete') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter === 'only'" value="restore" class="text-emerald-600 focus:text-emerald-600">{{ $t('common.actions.restore') }}</SelectItem>
+                             <SelectItem v-if="trashedFilter === 'only'" value="force_delete" class="text-destructive focus:text-destructive">{{ $t('common.actions.forceDelete') }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -207,7 +219,12 @@
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-foreground">{{ user.name }}</div>
+                                    <div class="text-sm font-medium text-foreground">
+                                        {{ user.name }}
+                                        <span v-if="user.deleted_at" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-destructive/10 text-destructive uppercase tracking-wide">
+                                            {{ $t('common.labels.deleted') }}
+                                        </span>
+                                    </div>
                                     <div v-if="user.phone" class="text-sm text-muted-foreground">{{ user.phone }}</div>
                                 </div>
                             </div>
@@ -289,6 +306,27 @@
                                 >
                                     <Trash2 class="w-4 h-4" :class="{ 'opacity-50': !canDelete(user) }" />
                                 </Button>
+                                
+                                <Button
+                                    v-if="user.deleted_at && authStore.hasPermission('delete users')"
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="restoreUser(user)"
+                                    class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                    :title="$t('common.actions.restore')"
+                                >
+                                    <RotateCcw class="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    v-if="user.deleted_at && authStore.hasPermission('delete users')"
+                                    variant="ghost"
+                                    size="icon"
+                                    @click="forceDeleteUser(user)"
+                                    class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    :title="$t('common.actions.forceDelete')"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </Button>
                             </div>
                         </td>
                     </tr>
@@ -329,7 +367,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import Checkbox from '../../../components/ui/checkbox.vue';
-import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity } from 'lucide-vue-next';
+import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity, RotateCcw } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
 import { useConfirm } from '../../../composables/useConfirm';
 
@@ -342,6 +380,7 @@ const roles = ref([]);
 const search = ref('');
 const roleFilter = ref('all');
 const verificationFilter = ref('all');
+const trashedFilter = ref('without');
 const activeStatFilter = ref(null);
 const pagination = ref(null);
 const authStore = useAuthStore();
@@ -414,6 +453,11 @@ const fetchUsers = async () => {
             params.verified = 0;
         }
 
+        // Add trashed filter
+        if (trashedFilter.value && trashedFilter.value !== 'without') {
+            params.trashed = trashedFilter.value;
+        }
+
         // Add stat filters
         if (activeStatFilter.value === 'recent') {
             params.recent = 1;
@@ -467,6 +511,7 @@ const clearFilters = () => {
     verificationFilter.value = 'all';
     activeStatFilter.value = null;
     roleFilter.value = 'all';
+    trashedFilter.value = 'without';
     search.value = '';
 };
 
@@ -568,6 +613,46 @@ const verifyUser = async (user) => {
     }
 };
 
+const restoreUser = async (user) => {
+    const confirmed = await confirm({
+        title: 'Restore User',
+        message: `Are you sure you want to restore ${user.name}?`,
+        variant: 'info',
+        confirmText: 'Restore',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.post(`/admin/cms/users/${user.id}/restore`);
+        toast.success.action('User restored');
+        await fetchUsers();
+    } catch (error) {
+        console.error('Failed to restore user:', error);
+        toast.error.action(error);
+    }
+};
+
+const forceDeleteUser = async (user) => {
+    const confirmed = await confirm({
+        title: 'Permanently Delete User',
+        message: `Are you sure you want to PERMANENTLY delete ${user.name}? This action cannot be undone.`,
+        variant: 'danger',
+        confirmText: 'Force Delete',
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.delete(`/admin/cms/users/${user.id}/force-delete`);
+        toast.success.action('User permanently deleted');
+        await fetchUsers();
+    } catch (error) {
+        console.error('Failed to force delete user:', error);
+        toast.error.action(error);
+    }
+};
+
 const selectedIds = ref([]);
 
 const isAllSelected = computed(() => {
@@ -616,6 +701,14 @@ const bulkAction = async (action) => {
     } else if (action === 'verify') {
         confirmMessage = t('features.users.messages.bulkVerifyConfirm', { count: selectedIds.value.length }) || `Verify ${selectedIds.value.length} users?`;
         confirmTitle = t('features.users.actions.verify');
+    } else if (action === 'restore') {
+        confirmMessage = `Restore ${selectedIds.value.length} users?`;
+        confirmTitle = 'Restore Users';
+        confirmVariant = 'info';
+    } else if (action === 'force_delete') {
+         confirmMessage = `Permanently delete ${selectedIds.value.length} users? This cannot be undone.`;
+         confirmTitle = 'Force Delete Users';
+        confirmVariant = 'danger';
     }
 
     const confirmed = await confirm({
@@ -657,7 +750,7 @@ const formatDate = (date) => {
     });
 };
 
-watch([search, roleFilter, verificationFilter, activeStatFilter], () => {
+watch([search, roleFilter, verificationFilter, trashedFilter, activeStatFilter], () => {
     if (pagination.value) {
         pagination.value.current_page = 1;
     }

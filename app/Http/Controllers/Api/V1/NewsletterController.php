@@ -127,6 +127,16 @@ class NewsletterController extends BaseApiController
                 $query->where('status', $request->status);
             }
 
+            // Soft deletes filter
+            if ($request->has('trashed')) {
+                $trashed = $request->trashed;
+                if ($trashed === 'only') {
+                    $query->onlyTrashed();
+                } elseif ($trashed === 'with') {
+                    $query->withTrashed();
+                }
+            }
+
             $perPage = $request->get('per_page', 10);
             $subscribers = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
@@ -149,6 +159,28 @@ class NewsletterController extends BaseApiController
             return $this->success(null, 'Subscriber deleted successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to delete subscriber', 500);
+        }
+    }
+
+    public function restore($id)
+    {
+        try {
+            $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
+            $subscriber->restore();
+            return $this->success(null, 'Subscriber restored successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to restore subscriber', 500);
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        try {
+            $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
+            $subscriber->forceDelete();
+            return $this->success(null, 'Subscriber permanently deleted');
+        } catch (\Exception $e) {
+            return $this->error('Failed to permanently delete subscriber', 500);
         }
     }
 
@@ -202,7 +234,7 @@ class NewsletterController extends BaseApiController
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:newsletter_subscribers,id',
-            'action' => 'required|in:delete,unsubscribe,subscribe',
+            'action' => 'required|in:delete,unsubscribe,subscribe,restore,force_delete',
         ]);
 
         $ids = $request->ids;
@@ -222,6 +254,16 @@ class NewsletterController extends BaseApiController
             if ($action === 'subscribe') {
                  NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'subscribed', 'subscribed_at' => now(), 'unsubscribed_at' => null]);
                 return $this->success(null, 'Selected subscribers subscribed successfully');
+            }
+
+            if ($action === 'restore') {
+                NewsletterSubscriber::withTrashed()->whereIn('id', $ids)->restore();
+                return $this->success(null, 'Selected subscribers restored successfully');
+            }
+
+            if ($action === 'force_delete') {
+                NewsletterSubscriber::withTrashed()->whereIn('id', $ids)->forceDelete();
+                return $this->success(null, 'Selected subscribers permanently deleted');
             }
 
         } catch (\Exception $e) {

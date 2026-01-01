@@ -57,5 +57,10 @@
     "quickActions": "Aksi Cepat",
     "other": "Lainnya",
     "untitled": "Tanpa Judul",
-    "or": "atau"
+    "or": "atau",
+    "activeOnly": "Hanya Aktif",
+    "includesTrashed": "Termasuk Sampah",
+    "trashedOnly": "Hanya Sampah",
+    "deleted": "Dihapus",
+    "loading": "Memuat"
 }

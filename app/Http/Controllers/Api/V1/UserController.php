@@ -15,6 +15,16 @@ class UserController extends BaseApiController
     {
         $query = User::with(['roles', 'permissions']);
 
+        // Soft deletes filter
+        if ($request->has('trashed')) {
+            $trashed = $request->trashed;
+            if ($trashed === 'only') {
+                $query->onlyTrashed();
+            } elseif ($trashed === 'with') {
+                $query->withTrashed();
+            }
+        }
+
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -455,12 +465,63 @@ class UserController extends BaseApiController
         return $this->success($user, 'User verified successfully');
     }
 
+    /**
+     * Restore a soft-deleted user.
+     */
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        if (!$user->trashed()) {
+            return $this->error('User is not deleted', 400);
+        }
+
+        $user->restore();
+
+        return $this->success(null, 'User restored successfully');
+    }
+
+    /**
+     * Permanently delete a user.
+     */
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Prevent deleting yourself
+        if ($user->id === auth()->id()) {
+            return $this->validationError(['user' => ['You cannot delete your own account']], 'You cannot delete your own account');
+        }
+
+        // Prevent deleting users with higher or equal rank (unless super-admin)
+        if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($user)) {
+            return $this->forbidden(trans('features.users.messages.hierarchy_restriction'));
+        }
+
+        // Prevent deleting the last super-admin
+        if ($user->hasRole('super-admin')) {
+            $superAdminCount = User::role('super-admin')->count();
+            if ($superAdminCount <= 1) {
+                return $this->validationError(['user' => ['Cannot delete the last super-admin account']], 'Cannot delete the last super-admin account');
+            }
+        }
+
+        // Delete avatar if exists
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->forceDelete();
+
+        return $this->success(null, 'User permanently deleted');
+    }
+
     public function bulkAction(Request $request)
     {
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:users,id',
-            'action' => 'required|in:delete,force_logout,verify',
+            'action' => 'required|in:delete,force_logout,verify,restore,force_delete',
         ]);
 
         $ids = $request->ids;
@@ -491,16 +552,46 @@ class UserController extends BaseApiController
                 }
             }
 
+            // Standard soft delete does NOT delete avatar
+            $count = User::whereIn('id', $ids)->delete();
+            $message = "{$count} users moved to trash";
+        } elseif ($action === 'force_delete') {
+             // Filter out self-deletion and hierarchy protection
+             $ids = array_filter($ids, function($id) {
+                // Self deletion check
+                if ($id == auth()->id()) return false;
+                
+                $target = User::withTrashed()->find($id);
+                if (!$target) return false;
+
+                // Rank check
+                if (auth()->user()->getRoleRank() < 100 && !auth()->user()->isHigherThan($target)) return false;
+
+                return true;
+            });
+
+            // Prevent deleting the last super-admin in bulk delete
+            $superAdminsToDelete = User::withTrashed()->whereIn('id', $ids)->role('super-admin')->count();
+            if ($superAdminsToDelete > 0) {
+                $totalSuperAdmins = User::role('super-admin')->count();
+                if ($totalSuperAdmins - $superAdminsToDelete < 1) {
+                    return $this->validationError(['ids' => ['Bulk action would leave the system without a super-admin']], 'Cannot delete the last super-admin');
+                }
+            }
+
             // Delete avatars
-            $users = User::whereIn('id', $ids)->get();
+            $users = User::withTrashed()->whereIn('id', $ids)->get();
             foreach ($users as $user) {
                 if ($user->avatar) {
                     Storage::disk('public')->delete($user->avatar);
                 }
             }
 
-            $count = User::whereIn('id', $ids)->delete();
-            $message = "{$count} users deleted successfully";
+            $count = User::withTrashed()->whereIn('id', $ids)->forceDelete();
+            $message = "{$count} users permanently deleted";
+        } elseif ($action === 'restore') {
+            $count = User::withTrashed()->whereIn('id', $ids)->restore();
+             $message = "{$count} users restored successfully";
         } elseif ($action === 'force_logout') {
             // Filter out self-logout and hierarchy protection
             $ids = array_filter($ids, function($id) {

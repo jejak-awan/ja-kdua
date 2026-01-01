@@ -21,6 +21,16 @@ class FormController extends BaseApiController
             $query->where('is_active', $request->boolean('is_active'));
         }
 
+        // Soft deletes filter
+        if ($request->has('trashed')) {
+            $trashed = $request->trashed;
+            if ($trashed === 'only') {
+                $query->onlyTrashed();
+            } elseif ($trashed === 'with') {
+                $query->withTrashed();
+            }
+        }
+
         $forms = $query->latest()->get();
 
         return $this->success($forms, 'Forms retrieved successfully');
@@ -117,6 +127,41 @@ class FormController extends BaseApiController
         $form->delete();
 
         return $this->success(null, 'Form deleted successfully');
+    }
+
+    public function restore($id, Request $request)
+    {
+        $form = Form::withTrashed()->findOrFail($id);
+
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to restore this form');
+        }
+
+        if (!$form->trashed()) {
+            return $this->error('Form is not deleted', 400);
+        }
+
+        $form->restore();
+
+        return $this->success(null, 'Form restored successfully');
+    }
+
+    public function forceDelete($id, Request $request)
+    {
+        $form = Form::withTrashed()->findOrFail($id);
+
+        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+            return $this->forbidden('You do not have permission to delete this form');
+        }
+
+        // Delete fields
+        $form->fields()->delete();
+        // Delete submissions
+        $form->submissions()->delete();
+
+        $form->forceDelete();
+
+        return $this->success(null, 'Form permanently deleted');
     }
 
     public function addField(Request $request, Form $form)
@@ -271,7 +316,9 @@ class FormController extends BaseApiController
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:forms,id',
-            'action' => 'required|in:delete',
+            'ids' => 'required|array',
+            'ids.*' => 'exists:forms,id',
+            'action' => 'required|in:delete,restore,force_delete',
         ]);
 
         $ids = $request->ids;
@@ -287,6 +334,27 @@ class FormController extends BaseApiController
 
                 $query->delete();
                 return $this->success(null, 'Selected forms deleted successfully');
+            } elseif ($action === 'restore') {
+                $query = Form::withTrashed()->whereIn('id', $ids);
+                if (!$request->user()->can('manage forms')) {
+                     $query->where('author_id', $request->user()->id);
+                }
+                $query->restore();
+                return $this->success(null, 'Selected forms restored successfully');
+            } elseif ($action === 'force_delete') {
+                 $query = Form::withTrashed()->whereIn('id', $ids);
+                if (!$request->user()->can('manage forms')) {
+                     $query->where('author_id', $request->user()->id);
+                }
+                
+                $forms = $query->get();
+                foreach ($forms as $form) {
+                    $form->fields()->delete();
+                    $form->submissions()->delete();
+                    $form->forceDelete();
+                }
+
+                return $this->success(null, 'Selected forms permanently deleted');
             }
         } catch (\Exception $e) {
             return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
