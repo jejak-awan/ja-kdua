@@ -282,6 +282,12 @@ const routes = [
                 meta: { title: 'Redis Management', permission: 'manage settings' },
             },
             {
+                path: 'system/notifications',
+                name: 'system-notifications',
+                component: () => import('../views/admin/system/NotificationManager.vue'),
+                meta: { title: 'Notification Manager', permission: 'manage system' },
+            },
+            {
                 path: 'activity-logs',
                 name: 'activity-logs',
                 component: () => import('../views/admin/activity-logs/Index.vue'),

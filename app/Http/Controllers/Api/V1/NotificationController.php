@@ -108,6 +108,123 @@ class NotificationController extends BaseApiController
         return $this->success(null, 'All notifications marked as read');
     }
 
+    public function indexSystem(Request $request)
+    {
+        $user = $request->user();
+
+        if (! $user || ! $user->hasRole('super-admin')) {
+             if (!$user->can('manage system') && !$user->hasRole('super-admin')) {
+                 return $this->forbidden('Unauthorized');
+             }
+        }
+
+        $limit = $request->input('limit', 20);
+
+        // Group by title, message, type, and approximate created_at to find unique "broadcasts"
+        $notifications = Notification::selectRaw('MIN(id) as id, title, message, type, MIN(created_at) as created_at, COUNT(*) as recipient_count')
+            ->groupBy('title', 'message', 'type', \DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")')) // Group by minute
+            ->orderBy('created_at', 'desc')
+            ->paginate($limit);
+
+        return $this->paginated($notifications, 'System notifications retrieved');
+    }
+
+    public function revokeSystem(Request $request)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+            return $this->forbidden('Unauthorized');
+        }
+
+        $request->validate([
+            'title' => 'required|string',
+            'message' => 'required|string',
+            'created_at' => 'required|string',
+        ]);
+
+        // Convert created_at to the same formatting used in groupBy for precise matching
+        // The input from frontend will be the full created_at string
+        $createdAt = date('Y-m-d H:i', strtotime($request->created_at));
+
+        $count = Notification::where('title', $request->title)
+            ->where('message', $request->message)
+            ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
+            ->delete();
+
+        return $this->success(['count' => $count], "Broadcast revoked. {$count} notifications removed.");
+    }
+
+    public function bulkRevokeSystem(Request $request)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+            return $this->forbidden('Unauthorized');
+        }
+
+        $request->validate([
+            'broadcasts' => 'required|array',
+            'broadcasts.*.title' => 'required|string',
+            'broadcasts.*.message' => 'required|string',
+            'broadcasts.*.created_at' => 'required|string',
+        ]);
+
+        $totalDeleted = 0;
+
+        foreach ($request->broadcasts as $broadcast) {
+            $createdAt = date('Y-m-d H:i', strtotime($broadcast['created_at']));
+            
+            $count = Notification::where('title', $broadcast['title'])
+                ->where('message', $broadcast['message'])
+                ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
+                ->delete();
+                
+            $totalDeleted += $count;
+        }
+
+        return $this->success(['count' => $totalDeleted], "Bulk revocation complete. {$totalDeleted} notifications removed.");
+    }
+
+    public function broadcast(Request $request)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->hasRole('super-admin') && ! $user->can('manage system'))) {
+            return $this->forbidden('Unauthorized');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'type' => 'required|in:info,success,warning,error',
+            'target_type' => 'required|in:all,role,user',
+            'target_id' => 'required_if:target_type,user,role',
+            'is_async' => 'nullable|boolean',
+        ]);
+
+        $payload = [
+            'type' => $request->type,
+            'title' => $request->title,
+            'message' => $request->message,
+            'target_type' => $request->target_type,
+            'target_id' => $request->target_id,
+            'sender_id' => $user->id,
+        ];
+
+        $isAsync = $request->boolean('is_async', true);
+
+        // Fallback to sync if queue driver is sync or user explicitly requested it
+        if ($isAsync && config('queue.default') !== 'sync') {
+            \App\Jobs\SendBroadcastNotification::dispatch($payload);
+            return $this->success(null, 'Broadcast notification queued for delivery');
+        } else {
+            // Direct delivery (sync)
+            \App\Jobs\SendBroadcastNotification::dispatchSync($payload);
+            return $this->success(null, 'Broadcast notification delivered successfully');
+        }
+    }
+
     public function destroy(Request $request, Notification $notification)
     {
         $user = $request->user();
@@ -117,7 +234,7 @@ class NotificationController extends BaseApiController
         }
 
         if ($notification->user_id !== $user->id) {
-            return $this->forbidden('Unauthorized');
+             return $this->forbidden('Unauthorized');
         }
 
         $notification->delete();

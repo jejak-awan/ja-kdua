@@ -324,8 +324,21 @@ const fetchNotifications = async () => {
     loadingNotifications.value = true;
     try {
         const response = await api.get('/admin/cms/notifications?limit=5');
-        const data = response.data?.data || response.data || [];
-        notifications.value = Array.isArray(data) ? data : [];
+        
+        let data = [];
+        // Handle paginated response structure: { success: true, data: { data: [...] } }
+        if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+            data = response.data.data.data;
+        } 
+        // Handle standard resource response: { data: [...] }
+        else if (response.data?.data && Array.isArray(response.data.data)) {
+            data = response.data.data;
+        } 
+        else if (Array.isArray(response.data)) {
+            data = response.data;
+        }
+        
+        notifications.value = data;
     } catch (error) {
         console.error('Failed to fetch notifications:', error);
         notifications.value = [];

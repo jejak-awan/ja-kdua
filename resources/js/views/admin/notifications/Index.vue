@@ -1,116 +1,175 @@
 <template>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.notifications.title') }}</h1>
-            <div class="flex items-center space-x-2">
-                <button
-                    v-if="unreadCount > 0"
-                    @click="markAllAsRead"
-                    class="px-4 py-2 border border-input bg-card text-foreground rounded-md text-foreground hover:bg-muted text-sm"
-                >
-                    {{ $t('features.notifications.actions.markAllRead') }}
-                </button>
-            </div>
+    <div class="space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.notifications.title') }}</h1>
+            <Button
+                v-if="unreadCount > 0"
+                variant="outline"
+                @click="markAllAsRead"
+            >
+                <CheckCheck class="mr-2 h-4 w-4" />
+                {{ $t('features.notifications.actions.markAllRead') }}
+            </Button>
         </div>
 
-        <div class="bg-card border border-border rounded-lg">
-            <div class="px-6 py-4 border-b border-border">
-                <div class="flex items-center space-x-4">
-                    <input
-                        v-model="search"
-                        type="text"
-                        :placeholder="$t('features.notifications.filters.search')"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                    <select
-                        v-model="typeFilter"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="">{{ $t('features.notifications.filters.allTypes') }}</option>
-                        <option value="info">{{ $t('features.notifications.filters.type.info') }}</option>
-                        <option value="success">{{ $t('features.notifications.filters.type.success') }}</option>
-                        <option value="warning">{{ $t('features.notifications.filters.type.warning') }}</option>
-                        <option value="error">{{ $t('features.notifications.filters.type.error') }}</option>
-                    </select>
-                    <select
-                        v-model="readFilter"
-                        class="px-4 py-2 border border-input bg-card text-foreground rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="">{{ $t('features.notifications.filters.readStatus.all') }}</option>
-                        <option value="unread">{{ $t('features.notifications.filters.readStatus.unread') }}</option>
-                        <option value="read">{{ $t('features.notifications.filters.readStatus.read') }}</option>
-                    </select>
+        <Card>
+            <CardHeader class="pb-3">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            v-model="search"
+                            type="text"
+                            :placeholder="$t('features.notifications.filters.search')"
+                            class="pl-9"
+                        />
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                        <Select v-model="typeFilter">
+                            <SelectTrigger class="w-full sm:w-[150px]">
+                                <SelectValue :placeholder="$t('features.notifications.filters.allTypes')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    {{ $t('features.notifications.filters.allTypes') }}
+                                </SelectItem>
+                                <SelectItem value="info">
+                                    {{ $t('features.notifications.filters.type.info') }}
+                                </SelectItem>
+                                <SelectItem value="success">
+                                    {{ $t('features.notifications.filters.type.success') }}
+                                </SelectItem>
+                                <SelectItem value="warning">
+                                    {{ $t('features.notifications.filters.type.warning') }}
+                                </SelectItem>
+                                <SelectItem value="error">
+                                    {{ $t('features.notifications.filters.type.error') }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select v-model="readFilter">
+                            <SelectTrigger class="w-full sm:w-[150px]">
+                                <SelectValue :placeholder="$t('features.notifications.filters.readStatus.all')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    {{ $t('features.notifications.filters.readStatus.all') }}
+                                </SelectItem>
+                                <SelectItem value="unread">
+                                    {{ $t('features.notifications.filters.readStatus.unread') }}
+                                </SelectItem>
+                                <SelectItem value="read">
+                                    {{ $t('features.notifications.filters.readStatus.read') }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
-            </div>
+            </CardHeader>
+            <CardContent>
+                <div v-if="loading" class="flex justify-center py-8">
+                    <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
 
-            <div v-if="loading" class="p-6 text-center">
-                <p class="text-muted-foreground">{{ $t('features.notifications.messages.loading') }}</p>
-            </div>
+                <div v-else-if="filteredNotifications.length === 0" class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                    <BellOff class="h-12 w-12 mb-4 opacity-20" />
+                    <p>{{ $t('features.notifications.messages.empty') }}</p>
+                </div>
 
-            <div v-else-if="filteredNotifications.length === 0" class="p-6 text-center">
-                <p class="text-muted-foreground">{{ $t('features.notifications.messages.empty') }}</p>
-            </div>
-
-            <div v-else class="divide-y divide-border">
-                <div
-                    v-for="notification in filteredNotifications"
-                    :key="notification.id"
-                    class="px-6 py-4 hover:bg-muted"
-                    :class="{ 'bg-blue-50': !notification.read_at }"
-                >
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <span
-                                    v-if="!notification.read_at"
-                                    class="h-2 w-2 bg-blue-600 rounded-full"
-                                />
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                    :class="{
-                                        'bg-blue-500/20 text-blue-400': notification.type === 'info',
-                                        'bg-green-500/20 text-green-400': notification.type === 'success',
-                                        'bg-yellow-500/20 text-yellow-400': notification.type === 'warning',
-                                        'bg-red-500/20 text-red-400': notification.type === 'error',
-                                    }"
-                                >
-                                    {{ $t(`features.notifications.filters.type.${notification.type}`) }}
-                                </span>
-                                <h3 class="text-sm font-medium text-foreground">{{ notification.title }}</h3>
-                            </div>
-                            <p class="mt-1 text-sm text-muted-foreground">{{ notification.message }}</p>
-                            <p class="mt-1 text-xs text-muted-foreground">{{ formatDate(notification.created_at) }}</p>
-                        </div>
-                        <div class="flex items-center space-x-2 ml-4">
-                            <button
+                <div v-else class="space-y-4">
+                    <div
+                        v-for="notification in filteredNotifications"
+                        :key="notification.id"
+                        class="group flex flex-col sm:flex-row gap-4 p-4 rounded-lg border transition-all hover:bg-muted/50"
+                        :class="notification.read_at ? 'bg-card border-border' : 'bg-primary/5 border-primary/20'"
+                    >
+                        <div class="flex-shrink-0 mt-1">
+                            <span
                                 v-if="!notification.read_at"
+                                class="flex h-2.5 w-2.5 rounded-full bg-primary"
+                            />
+                        </div>
+                        
+                        <div class="flex-1 space-y-1">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <Badge :variant="getBadgeVariant(notification.type)">
+                                            {{ $t(`features.notifications.filters.type.${notification.type}`) }}
+                                        </Badge>
+                                        <h4 class="font-semibold leading-none tracking-tight">
+                                            {{ notification.title }}
+                                        </h4>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground">
+                                        {{ notification.message }}
+                                    </p>
+                                </div>
+                                <span class="text-xs text-muted-foreground whitespace-nowrap">
+                                    {{ formatDate(notification.created_at) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex sm:flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                                v-if="!notification.read_at"
+                                variant="ghost"
+                                size="sm"
+                                class="h-8 w-8 p-0"
+                                :title="$t('features.notifications.actions.markRead')"
                                 @click="markAsRead(notification)"
-                                class="text-sm text-indigo-600 hover:text-indigo-900"
                             >
-                                {{ $t('features.notifications.actions.markRead') }}
-                            </button>
-                            <button
+                                <Check class="h-4 w-4" />
+                                <span class="sr-only">{{ $t('features.notifications.actions.markRead') }}</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                class="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                :title="$t('features.notifications.actions.delete')"
                                 @click="deleteNotification(notification)"
-                                class="text-sm text-red-600 hover:text-red-900"
                             >
-                                {{ $t('features.notifications.actions.delete') }}
-                            </button>
+                                <Trash2 class="h-4 w-4" />
+                                <span class="sr-only">{{ $t('features.notifications.actions.delete') }}</span>
+                            </Button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../../services/api';
 import toast from '../../../services/toast';
 import { useConfirm } from '../../../composables/useConfirm';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import { 
+    Check, 
+    CheckCheck, 
+    Search, 
+    Trash2, 
+    BellOff,
+    Loader2 
+} from 'lucide-vue-next';
+
+// UI Components
 import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Badge from '../../../components/ui/badge.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -118,24 +177,21 @@ const { confirm } = useConfirm();
 const notifications = ref([]);
 const loading = ref(false);
 const search = ref('');
-const typeFilter = ref('');
-const readFilter = ref('');
+const typeFilter = ref('all');
+const readFilter = ref('all');
+const pollingInterval = ref(null);
 
 const unreadCount = computed(() => {
-    if (!Array.isArray(notifications.value)) {
-        return 0;
-    }
+    if (!Array.isArray(notifications.value)) return 0;
     return notifications.value.filter(n => !n.read_at).length;
 });
 
 const filteredNotifications = computed(() => {
-    if (!Array.isArray(notifications.value)) {
-        return [];
-    }
+    if (!Array.isArray(notifications.value)) return [];
     
     let filtered = notifications.value;
     
-    if (typeFilter.value) {
+    if (typeFilter.value !== 'all') {
         filtered = filtered.filter(n => n?.type === typeFilter.value);
     }
     
@@ -156,23 +212,46 @@ const filteredNotifications = computed(() => {
     return filtered;
 });
 
+const getBadgeVariant = (type) => {
+    switch (type) {
+        case 'error': return 'destructive';
+        case 'warning': return 'warning'; // Assuming warning variant exists, fallback to secondary if not
+        case 'success': return 'default'; // Or custom success variant
+        case 'info': return 'secondary';
+        default: return 'outline';
+    }
+};
+
 const fetchNotifications = async () => {
-    loading.value = true;
+    // Only show loading on initial fetch
+    if (notifications.value.length === 0) {
+        loading.value = true;
+    }
+    
     try {
         const response = await api.get('/admin/cms/notifications');
-        // Handle different response structures
         let data = [];
-        if (response.data?.data && Array.isArray(response.data.data)) {
+        
+        // Handle paginated response structure: { success: true, data: { data: [...] } }
+        if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+            data = response.data.data.data;
+        } 
+        // Handle standard resource response: { data: [...] }
+        else if (response.data?.data && Array.isArray(response.data.data)) {
             data = response.data.data;
-        } else if (Array.isArray(response.data)) {
+        } 
+        // Handle direct array response: [...]
+        else if (Array.isArray(response.data)) {
             data = response.data;
-        } else if (response.data?.items && Array.isArray(response.data.items)) {
+        } 
+        // Handle items property: { items: [...] }
+        else if (response.data?.items && Array.isArray(response.data.items)) {
             data = response.data.items;
         }
+        
         notifications.value = data;
     } catch (error) {
         console.error('Failed to fetch notifications:', error);
-        notifications.value = [];
     } finally {
         loading.value = false;
     }
@@ -181,22 +260,28 @@ const fetchNotifications = async () => {
 const markAsRead = async (notification) => {
     try {
         await api.put(`/admin/cms/notifications/${notification.id}/read`);
-        toast.success(t('features.notifications.messages.mark_read_success'));
-        fetchNotifications();
+        toast.success(t('features.notifications.messages.markReadSuccess'));
+        
+        // Optimistic update
+        const index = notifications.value.findIndex(n => n.id === notification.id);
+        if (index !== -1) {
+            notifications.value[index].read_at = new Date().toISOString();
+        }
+        
     } catch (error) {
         console.error('Failed to mark notification as read:', error);
-        toast.error('Error', t('features.notifications.messages.mark_read_failed'));
+        toast.error('Error', t('features.notifications.messages.markReadFailed'));
     }
 };
 
 const markAllAsRead = async () => {
     try {
         await api.put('/admin/cms/notifications/read-all');
-        toast.success(t('features.notifications.messages.mark_all_read_success'));
+        toast.success(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
     } catch (error) {
         console.error('Failed to mark all notifications as read:', error);
-        toast.error('Error', t('features.notifications.messages.mark_all_read_failed'));
+        toast.error('Error', t('features.notifications.messages.markAllReadFailed'));
     }
 };
 
@@ -204,31 +289,46 @@ const deleteNotification = async (notification) => {
     const confirmed = await confirm({
         title: t('features.notifications.actions.delete'),
         message: t('features.notifications.confirm.delete'),
-        variant: 'danger',
-        confirmText: t('common.actions.delete'),
+        variant: 'destructive',
+        confirmText: t('features.notifications.actions.delete'),
     });
 
     if (!confirmed) return;
 
     try {
         await api.delete(`/admin/cms/notifications/${notification.id}`);
-        toast.success(t('features.notifications.messages.delete_success'));
-        fetchNotifications();
+        toast.success(t('features.notifications.messages.deleteSuccess'));
+        
+        // Optimistic update
+        notifications.value = notifications.value.filter(n => n.id !== notification.id);
+        
     } catch (error) {
         console.error('Failed to delete notification:', error);
-        toast.error('Error', t('features.notifications.messages.delete_failed'));
+        toast.error('Error', t('features.notifications.messages.deleteFailed'));
     }
 };
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleString();
+    // Use Intl.DateTimeFormat for consistent formatting
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(new Date(date));
 };
 
 onMounted(() => {
     fetchNotifications();
     // Poll for new notifications every 30 seconds
-    setInterval(fetchNotifications, 30000);
+    pollingInterval.value = setInterval(fetchNotifications, 30000);
+});
+
+onUnmounted(() => {
+    if (pollingInterval.value) {
+        clearInterval(pollingInterval.value);
+    }
 });
 </script>
-

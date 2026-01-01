@@ -7,7 +7,7 @@
       )"
       :position="position"
     >
-      <SelectViewport class="p-1">
+      <SelectViewport class="p-1 max-h-60 overflow-y-auto">
         <slot />
       </SelectViewport>
     </SelectContent>

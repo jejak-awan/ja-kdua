@@ -42,6 +42,43 @@ class SystemService
             'disk_usage_percent' => $diskInfo['percent'] ?? 0,
             // Uptime
             'uptime' => $this->getUptime(),
+            'queue_health' => $this->getQueueHealth(),
+        ];
+    }
+
+    /**
+     * Get queue connection health and worker status
+     */
+    public function getQueueHealth(): array
+    {
+        $driver = config('queue.default');
+        $lastSeen = Cache::get('queue_worker_last_seen');
+        
+        // Dispatch a heartbeat job for the next check
+        if ($driver !== 'sync') {
+            try {
+                \App\Jobs\QueueHeartbeatJob::dispatch();
+            } catch (\Exception $e) {
+                // Ignore dispatch errors here
+            }
+        }
+
+        $isActive = false;
+        if ($driver === 'sync') {
+            $isActive = true;
+        } elseif ($lastSeen) {
+            // If seen in the last 5 minutes, consider it active
+            $isActive = now()->parse($lastSeen)->diffInMinutes() < 5;
+        }
+
+        return [
+            'driver' => $driver,
+            'last_seen' => $lastSeen,
+            'is_active' => $isActive,
+            'status' => $isActive ? 'ok' : ($driver === 'sync' ? 'ok' : 'warning'),
+            'message' => $isActive 
+                ? ($driver === 'sync' ? 'Sync (Direct)' : 'Worker Active') 
+                : 'Worker Not Detected'
         ];
     }
 
@@ -89,6 +126,13 @@ class SystemService
                 'comments' => \App\Models\Comment::count(),
                 'forms' => \App\Models\Form::count(),
                 'form_submissions' => \App\Models\FormSubmission::count(),
+                'total_email_templates' => \App\Models\EmailTemplate::count(),
+                'newsletter_subscribers' => \App\Models\NewsletterSubscriber::count(),
+                'email' => [
+                    'templates' => \App\Models\EmailTemplate::count(),
+                    'subscribers' => \App\Models\NewsletterSubscriber::count(),
+                    'smtp_status' => Cache::get('email_smtp_status', 'unknown'),
+                ],
             ];
         } catch (\Exception $e) {
             Log::error('System statistics error: ' . $e->getMessage());

@@ -68,120 +68,153 @@
             </div>
         </div>
 
-        <!-- System Info -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.info.title') }}</h2>
-                <router-link
-                    to="/admin/settings?tab=performance"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 text-sm"
-                >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {{ t('features.system.info.cache.manage') }}
-                </router-link>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-sm font-medium text-foreground mb-3">{{ t('features.system.info.sections.application') }}</h3>
-                    <dl class="space-y-2">
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.phpVersion') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.php_version || '-' }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.laravelVersion') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.laravel_version || '-' }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.environment') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.environment || '-' }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.debugMode') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.debug_mode ? t('features.system.info.sections.enabled') : t('features.system.info.sections.disabled') }}</dd>
-                        </div>
-                    </dl>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- System Info -->
+            <div class="bg-card border border-border rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-foreground">{{ t('features.system.info.title') }}</h2>
+                    <router-link
+                        to="/admin/settings?tab=performance"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 text-sm"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {{ t('features.system.info.cache.manage') }}
+                    </router-link>
                 </div>
-                <div>
-                    <h3 class="text-sm font-medium text-foreground mb-3">{{ t('features.system.info.sections.server') }}</h3>
-                    <dl class="space-y-2">
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.serverSoftware') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.server_software || '-' }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.memoryUsage') }}</dt>
-                            <dd class="text-sm text-foreground">{{ displayMemory }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.diskUsage') }}</dt>
-                            <dd class="text-sm text-foreground">{{ displayDisk }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.database') }}</dt>
-                            <dd class="text-sm text-foreground">{{ systemInfo.database || '-' }}</dd>
-                        </div>
-                    </dl>
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <h3 class="text-sm font-medium text-foreground mb-3 font-bold border-b pb-1">{{ t('features.system.info.sections.application') }}</h3>
+                        <dl class="space-y-2">
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.phpVersion') }}</dt>
+                                <dd class="text-sm text-foreground font-mono">{{ systemInfo.php_version || '-' }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.laravelVersion') }}</dt>
+                                <dd class="text-sm text-foreground font-mono">{{ systemInfo.laravel_version || '-' }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.environment') }}</dt>
+                                <dd class="text-sm text-foreground capitalize">{{ systemInfo.environment || '-' }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.debugMode') }}</dt>
+                                <dd class="text-sm" :class="systemInfo.debug_mode ? 'text-red-500' : 'text-green-500'">{{ systemInfo.debug_mode ? t('features.system.info.sections.enabled') : t('features.system.info.sections.disabled') }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-foreground mb-3 font-bold border-b pb-1">{{ t('features.system.info.sections.server') }}</h3>
+                        <dl class="space-y-2">
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.serverSoftware') }}</dt>
+                                <dd class="text-sm text-foreground truncate max-w-[200px]" :title="systemInfo.server_software">{{ systemInfo.server_software || '-' }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.memoryUsage') }}</dt>
+                                <dd class="text-sm text-foreground font-mono">{{ displayMemory }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.diskUsage') }}</dt>
+                                <dd class="text-sm text-foreground font-mono">{{ displayDisk }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-muted-foreground">{{ t('features.system.info.sections.database') }}</dt>
+                                <dd class="text-sm text-foreground font-semibold">{{ systemInfo.database || '-' }}</dd>
+                            </div>
+                        </dl>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-card border border-border rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.quickActions.title') }}</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <router-link
-                    to="/admin/settings"
-                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                >
-                    <svg class="h-8 w-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.settings') }}</span>
-                </router-link>
-                
-                <router-link
-                    to="/admin/backups"
-                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                >
-                    <svg class="h-8 w-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.backups') }}</span>
-                </router-link>
-                
-                <router-link
-                    to="/admin/redis"
-                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                >
-                    <svg class="h-8 w-8 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                    </svg>
-                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.redis') }}</span>
-                </router-link>
-                
-                <router-link
-                    to="/admin/scheduled-tasks"
-                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                >
-                    <svg class="h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.scheduledTasks') }}</span>
-                </router-link>
-                
-                <router-link
-                    to="/admin/command-runner"
-                    class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                >
-                    <svg class="h-8 w-8 text-yellow-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="text-sm font-medium text-foreground">{{ t('features.system.info.quickActions.commandRunner') }}</span>
-                </router-link>
+            <!-- Quick Actions -->
+            <div class="bg-card border border-border rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">{{ t('features.system.info.quickActions.title') }}</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <router-link
+                        to="/admin/settings"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.settings') }}</span>
+                    </router-link>
+                    
+                    <router-link
+                        to="/admin/backups"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.backups') }}</span>
+                    </router-link>
+                    
+                    <router-link
+                        to="/admin/redis"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.redis') }}</span>
+                    </router-link>
+                    
+                    <router-link
+                        to="/admin/scheduled-tasks"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.scheduledTasks') }}</span>
+                    </router-link>
+                    
+                    <router-link
+                        to="/admin/command-runner"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-yellow-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.commandRunner') }}</span>
+                    </router-link>
+
+                    <router-link
+                        to="/admin/system/notifications"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-purple-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.notifications') }}</span>
+                    </router-link>
+
+                    <router-link
+                        to="/admin/settings?tab=email"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-orange-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.emailSettings') }}</span>
+                    </router-link>
+
+                    <router-link
+                        to="/admin/email-templates"
+                        class="flex flex-col items-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-all hover:shadow-sm"
+                    >
+                        <svg class="h-8 w-8 text-sky-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-xs font-medium text-foreground text-center">{{ t('features.system.info.quickActions.emailTemplates') }}</span>
+                    </router-link>
+                </div>
             </div>
         </div>
     </div>

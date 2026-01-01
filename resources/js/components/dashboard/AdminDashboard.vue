@@ -138,12 +138,16 @@
             </Card>
         </div>
 
-        <!-- Row 3: Recent Activity & Quick Actions -->
         <!-- Row 3: Widgets Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <!-- Recent Activity -->
             <div class="col-span-1" v-if="authStore.hasPermission('view users')">
                 <RecentActivityWidget ref="recentActivityWidget" />
+            </div>
+
+            <!-- Email Status -->
+            <div class="col-span-1" v-if="authStore.hasPermission('manage settings')">
+                <EmailStatusWidget />
             </div>
 
             <!-- System Health -->
@@ -170,6 +174,7 @@ const { t } = useI18n();
 import QuickActions from '@/components/admin/QuickActions.vue';
 import SystemHealthWidget from '@/components/admin/SystemHealthWidget.vue';
 import RecentActivityWidget from '@/components/admin/RecentActivityWidget.vue';
+import EmailStatusWidget from '@/components/admin/EmailStatusWidget.vue';
 import LineChart from '@/components/charts/LineChart.vue';
 import Card from '@/components/ui/card.vue';
 import CardHeader from '@/components/ui/card-header.vue';

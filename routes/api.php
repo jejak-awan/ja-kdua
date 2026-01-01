@@ -421,6 +421,10 @@ Route::prefix('v1')->group(function () {
         Route::get('notifications/unread-count', [App\Http\Controllers\Api\V1\NotificationController::class, 'unreadCount']);
         Route::put('notifications/{notification}/read', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
         Route::put('notifications/read-all', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAllAsRead']);
+        Route::get('notifications/system', [App\Http\Controllers\Api\V1\NotificationController::class, 'indexSystem']);
+        Route::delete('notifications/system/revoke', [App\Http\Controllers\Api\V1\NotificationController::class, 'revokeSystem']);
+        Route::post('notifications/system/bulk-revoke', [App\Http\Controllers\Api\V1\NotificationController::class, 'bulkRevokeSystem']);
+        Route::post('notifications/broadcast', [App\Http\Controllers\Api\V1\NotificationController::class, 'broadcast']);
         Route::delete('notifications/{notification}', [App\Http\Controllers\Api\V1\NotificationController::class, 'destroy']);
 
         // Content Templates

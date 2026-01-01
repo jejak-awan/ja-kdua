@@ -33,8 +33,10 @@
         "webhooks": "Webhooks",
         "plugins": "Plugin",
         "customFields": "Bidang Kustom",
-        "seo": "Alat SEO",
+        "seo": "SEO Tools",
         "system": "Info Sistem",
+        "systemNotifications": "Notifikasi",
+        "emailTemplates": "Template Email",
         "logout": "Keluar"
     },
     "sections": {

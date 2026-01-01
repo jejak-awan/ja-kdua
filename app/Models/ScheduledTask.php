@@ -62,6 +62,19 @@ class ScheduledTask extends Model
         // Maintenance & Cleanup
         'logs:cleanup-slow-queries',
         'logs:cleanup-csp-reports',
+
+        // Queue Management
+        'queue:restart',
+        'queue:flush',
+        'queue:prune-failed',
+        'queue:retry',
+        'queue:monitor',
+
+        // System Optimization
+        'optimize',
+        'optimize:clear',
+        'activitylog:clean',
+        'sanctum:prune-tokens',
     ];
 
     /**
@@ -117,12 +130,19 @@ class ScheduledTask extends Model
      */
     public static function getAllowedCommands(): array
     {
-        return array_map(function ($cmd) {
+        $commands = array_map(function ($cmd) {
             return [
                 'value' => $cmd,
                 'label' => ucfirst(str_replace([':', '-'], [' › ', ' '], $cmd)),
             ];
         }, self::ALLOWED_COMMANDS);
+
+        // Sort alphabetically by label
+        usort($commands, function ($a, $b) {
+            return strcasecmp($a['label'], $b['label']);
+        });
+
+        return $commands;
     }
 
     /**

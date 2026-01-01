@@ -44,7 +44,51 @@
             "backups": "Backups",
             "redis": "Redis Cache",
             "scheduledTasks": "Scheduled Tasks",
-            "commandRunner": "Command Runner"
+            "commandRunner": "Command Runner",
+            "notifications": "Notification Manager",
+            "emailSettings": "Email Settings",
+            "emailTemplates": "Email Templates"
+        }
+    },
+    "notifications": {
+        "title": "Notification Manager",
+        "create": {
+            "title": "Send Notification"
+        },
+        "history": {
+            "title": "Broadcast History"
+        },
+        "form": {
+            "title": "Title",
+            "message": "Message",
+            "type": "Type",
+            "target_type": "Target Audience",
+            "target_id": "Specific Target",
+            "send": "Send Notification",
+            "sending": "Sending...",
+            "revoke": "Revoke Broadcast",
+            "revoking": "Revoking...",
+            "targets": {
+                "all": "All Users",
+                "role": "Specific Role",
+                "user": "Specific User"
+            }
+        },
+        "table": {
+            "title": "Title",
+            "message": "Message",
+            "type": "Type",
+            "recipients": "Recipients",
+            "sent_at": "Sent At"
+        },
+        "messages": {
+            "sent": "Notification has been queued for delivery.",
+            "failed": "Failed to send notification.",
+            "revoked": "Broadcast successfully revoked."
+        },
+        "confirm": {
+            "send": "Are you sure you want to send this notification to all selected targets?",
+            "revoke": "Are you sure you want to revoke this broadcast? All associated notifications will be deleted from recipients' inboxes."
         }
     },
     "backups": {

@@ -35,6 +35,8 @@
         "customFields": "Custom Fields",
         "seo": "SEO Tools",
         "system": "System Info",
+        "systemNotifications": "Notifications",
+        "emailTemplates": "Email Templates",
         "logout": "Logout"
     },
     "sections": {

@@ -333,6 +333,9 @@
               v-model="adhocCommand.parameters" 
               :placeholder="$t('features.command_runner.parameters_placeholder')" 
             />
+            <p v-if="commandHint" class="text-xs text-muted-foreground italic">
+              💡 {{ commandHint }}
+            </p>
           </div>
 
           <div v-if="adhocOutput" class="mt-4">
@@ -439,6 +442,54 @@ const errors = ref({});
 const adhocCommand = ref({ command: '', parameters: '' });
 const adhocOutput = ref('');
 const adhocExecuting = ref(false);
+
+// Command Hints for better UX - covers all allowed commands
+const commandHints = {
+  // Cache Management
+  'cache:clear': 'Hapus semua cache aplikasi. Tidak perlu parameter.',
+  'cache:warm': 'Panaskan cache untuk performa. Tidak perlu parameter.',
+  'cms:clear-cache': 'Hapus cache CMS spesifik. Tidak perlu parameter.',
+  
+  // Maintenance
+  'logs:cleanup': 'Bersihkan log files. Parameter: --days=7 (opsional)',
+  'analytics:cleanup': 'Hapus data analytics lama. Tidak perlu parameter.',
+  'media:thumbnails': 'Regenerasi thumbnail media. Tidak perlu parameter.',
+  
+  // Health & Diagnostics
+  'cms:health-check': 'Cek kesehatan sistem CMS. Tidak perlu parameter.',
+  'config:clear': 'Hapus cache konfigurasi. Tidak perlu parameter.',
+  'route:clear': 'Hapus cache routing. Tidak perlu parameter.',
+  'view:clear': 'Hapus cache view/blade. Tidak perlu parameter.',
+  
+  // Backup
+  'cms:backup': 'Buat backup database & files. Tidak perlu parameter.',
+  
+  // Security
+  'security:clear-blocked-ips': 'Hapus semua IP yang diblokir. Tidak perlu parameter.',
+  'security:clear-rate-limit': 'Reset rate limiter. Tidak perlu parameter.',
+  'security:audit-dependencies': 'Audit keamanan package. Tidak perlu parameter.',
+  
+  // Maintenance & Cleanup
+  'logs:cleanup-slow-queries': 'Hapus log slow queries. Tidak perlu parameter.',
+  'logs:cleanup-csp-reports': 'Hapus laporan CSP. Tidak perlu parameter.',
+  
+  // Queue Management
+  'queue:restart': 'Restart semua queue worker. Tidak perlu parameter.',
+  'queue:flush': 'Kosongkan antrean job. Parameter: default (nama queue)',
+  'queue:prune-failed': 'Hapus job gagal lama. Parameter: --hours=24 (opsional)',
+  'queue:retry': 'Coba ulang job gagal. Parameter: all atau ID job tertentu',
+  'queue:monitor': 'Monitor antrean. Parameter: default (nama queue)',
+  
+  // System Optimization
+  'optimize': 'Optimasi config, routes & views. Tidak perlu parameter.',
+  'optimize:clear': 'Hapus semua cache optimasi. Tidak perlu parameter.',
+  'activitylog:clean': 'Hapus activity logs lama. Tidak perlu parameter.',
+  'sanctum:prune-tokens': 'Hapus token API expired. Tidak perlu parameter.'
+};
+
+const commandHint = computed(() => {
+  return commandHints[adhocCommand.value.command] || '';
+});
 
 // Selection & Bulk Actions
 const selectedTasks = ref([]);

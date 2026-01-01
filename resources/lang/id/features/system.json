@@ -44,7 +44,51 @@
             "backups": "Cadangan",
             "redis": "Cache Redis",
             "scheduledTasks": "Tugas Terjadwal",
-            "commandRunner": "Command Runner"
+            "commandRunner": "Penjalan Perintah",
+            "notifications": "Manajer Notifikasi",
+            "emailSettings": "Pengaturan Email",
+            "emailTemplates": "Template Email"
+        }
+    },
+    "notifications": {
+        "title": "Manajer Notifikasi",
+        "create": {
+            "title": "Kirim Notifikasi"
+        },
+        "history": {
+            "title": "Riwayat Siaran"
+        },
+        "form": {
+            "title": "Judul",
+            "message": "Pesan",
+            "type": "Tipe",
+            "target_type": "Target Audiens",
+            "target_id": "Target Spesifik",
+            "send": "Kirim Notifikasi",
+            "sending": "Mengirim...",
+            "revoke": "Tarik Notifikasi",
+            "revoking": "Menarik...",
+            "targets": {
+                "all": "Semua Pengguna",
+                "role": "Role Spesifik",
+                "user": "Pengguna Spesifik"
+            }
+        },
+        "table": {
+            "title": "Judul",
+            "message": "Pesan",
+            "type": "Tipe",
+            "send": "Kirim Notifikasi",
+            "sending": "Mengirim..."
+        },
+        "messages": {
+            "sent": "Notifikasi telah masuk antrean untuk dikirim.",
+            "failed": "Gagal mengirim notifikasi.",
+            "revoked": "Broadcast berhasil ditarik."
+        },
+        "confirm": {
+            "send": "Apakah Anda yakin ingin mengirim notifikasi ini ke semua target yang dipilih?",
+            "revoke": "Apakah Anda yakin ingin menarik broadcast ini? Semua notifikasi terkait akan dihapus dari kotak masuk penerima."
         }
     },
     "backups": {

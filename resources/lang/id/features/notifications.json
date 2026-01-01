@@ -23,7 +23,14 @@
     "messages": {
         "loading": "Memuat...",
         "empty": "Tidak ada notifikasi ditemukan",
-        "deleteConfirm": "Apakah Anda yakin ingin menghapus notifikasi ini?",
+        "markReadSuccess": "Notifikasi ditandai sudah dibaca",
+        "markReadFailed": "Gagal menandai notifikasi",
+        "markAllReadSuccess": "Semua notifikasi ditandai sudah dibaca",
+        "markAllReadFailed": "Gagal menandai semua notifikasi",
+        "deleteSuccess": "Notifikasi berhasil dihapus",
         "deleteFailed": "Gagal menghapus notifikasi"
+    },
+    "confirm": {
+        "delete": "Apakah Anda yakin ingin menghapus notifikasi ini?"
     }
 }
