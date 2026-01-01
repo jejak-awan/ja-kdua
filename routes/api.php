@@ -436,12 +436,21 @@ Route::prefix('v1')->group(function () {
             Route::get('csp-reports', [App\Http\Controllers\Api\V1\CspReportController::class, 'index'])->middleware('permission:manage settings');
             Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\V1\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
             Route::get('csp-reports/statistics', [App\Http\Controllers\Api\V1\CspReportController::class, 'statistics'])->middleware('permission:manage settings');
+            
+            // Slow Queries
+            Route::get('slow-queries', [App\Http\Controllers\Api\V1\SlowQueryController::class, 'index'])->middleware('permission:manage settings');
+            Route::get('slow-queries/statistics', [App\Http\Controllers\Api\V1\SlowQueryController::class, 'statistics'])->middleware('permission:manage settings');
+            
+            // Dependency Vulnerabilities
+            Route::get('dependency-vulnerabilities', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'index'])->middleware('permission:manage settings');
+            Route::put('dependency-vulnerabilities/{id}', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'update'])->middleware('permission:manage settings');
+            Route::post('run-dependency-audit', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'runAudit'])->middleware('permission:manage settings');
         });
         
-        // Scheduled Tasks
-        Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage scheduled tasks');
+        // Scheduled Tasks - Custom routes MUST come BEFORE apiResource
         Route::get('scheduled-tasks/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage scheduled tasks');
+        Route::apiResource('scheduled-tasks', App\Http\Controllers\Api\V1\ScheduledTaskController::class)->middleware('permission:manage scheduled tasks');
 
         // File Manager (Admin-level file system access)
         Route::get('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'index'])->middleware('permission:manage files');

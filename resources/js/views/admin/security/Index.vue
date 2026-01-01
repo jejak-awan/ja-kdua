@@ -110,19 +110,23 @@
                                 <p class="text-xs text-muted-foreground text-left">Monitor XSS attacks and security policy violations</p>
                             </router-link>
                         </Button>
-                        <Button variant="outline" class="h-auto py-4 flex-col items-start opacity-50 cursor-not-allowed">
-                            <div class="flex items-center mb-2">
-                                <Search class="w-5 h-5 mr-2 text-blue-600" />
-                                <span class="font-semibold">Slow Query Analysis</span>
-                            </div>
-                            <p class="text-xs text-muted-foreground text-left">Coming soon - Performance monitoring</p>
+                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
+                            <router-link to="/admin/security/slow-queries">
+                                <div class="flex items-center mb-2">
+                                    <Search class="w-5 h-5 mr-2 text-blue-600" />
+                                    <span class="font-semibold">Slow Query Analysis</span>
+                                </div>
+                                <p class="text-xs text-muted-foreground text-left">Monitor database performance bottlenecks</p>
+                            </router-link>
                         </Button>
-                        <Button variant="outline" class="h-auto py-4 flex-col items-start opacity-50 cursor-not-allowed">
-                            <div class="flex items-center mb-2">
-                                <ShieldCheck class="w-5 h-5 mr-2 text-green-600" />
-                                <span class="font-semibold">Dependency Vulnerabilities</span>
-                            </div>
-                            <p class="text-xs text-muted-foreground text-left">Coming soon - Security audit results</p>
+                        <Button variant="outline" as-child class="h-auto py-4 flex-col items-start">
+                            <router-link to="/admin/security/dependency-vulnerabilities">
+                                <div class="flex items-center mb-2">
+                                    <ShieldCheck class="w-5 h-5 mr-2 text-green-600" />
+                                    <span class="font-semibold">Dependency Vulnerabilities</span>
+                                </div>
+                                <p class="text-xs text-muted-foreground text-left">Track security vulnerabilities in packages</p>
+                            </router-link>
                         </Button>
                     </div>
                 </CardContent>

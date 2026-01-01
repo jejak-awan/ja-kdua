@@ -258,6 +258,18 @@ const routes = [
                 meta: { permission: 'manage settings' },
             },
             {
+                path: 'security/slow-queries',
+                name: 'security.slow-queries',
+                component: () => import('../views/admin/security/SlowQueries.vue'),
+                meta: { permission: 'manage settings' },
+            },
+            {
+                path: 'security/dependency-vulnerabilities',
+                name: 'security.dependency-vulnerabilities',
+                component: () => import('../views/admin/security/DependencyVulnerabilities.vue'),
+                meta: { permission: 'manage settings' },
+            },
+            {
                 path: 'system',
                 name: 'system',
                 component: () => import('../views/admin/system/Index.vue'),
