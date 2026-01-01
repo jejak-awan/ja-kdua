@@ -26,19 +26,19 @@
       <Card>
         <CardContent class="p-4">
           <div class="text-sm text-muted-foreground">Avg Duration</div>
-          <div class="text-2xl font-bold text-orange-600">{{ stats.avg_duration || 0 }}ms</div>
+          <div class="text-2xl font-bold text-foreground">{{ stats.avg_duration || 0 }}ms</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent class="p-4">
           <div class="text-sm text-muted-foreground">Max Duration</div>
-          <div class="text-2xl font-bold text-red-600">{{ stats.max_duration || 0 }}ms</div>
+          <div class="text-2xl font-bold text-foreground">{{ stats.max_duration || 0 }}ms</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent class="p-4">
           <div class="text-sm text-muted-foreground">Today</div>
-          <div class="text-2xl font-bold text-blue-600">{{ stats.today || 0 }}</div>
+          <div class="text-2xl font-bold text-foreground">{{ stats.today || 0 }}</div>
         </CardContent>
       </Card>
     </div>

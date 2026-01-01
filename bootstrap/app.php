@@ -37,7 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/v1/analytics/*',
             'api/v1/security/csp-report*',
+            'api/v1/security/crep-collect*',
             'v1/security/csp-report*',
+            'v1/security/crep-collect*',
+            '*/security/crep-collect*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

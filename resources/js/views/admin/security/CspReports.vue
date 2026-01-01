@@ -70,19 +70,16 @@
       </div>
     </div>
 
-    <!-- Bulk Actions -->
-    <div v-if="selectedReports.length > 0" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
-          {{ selectedReports.length }} report(s) selected
-        </span>
+    <div v-if="selectedReports.length > 0" class="bg-muted/50 border border-border rounded-lg p-4 mb-4 flex items-center justify-between transition-all duration-200">
+      <span class="text-sm font-medium text-foreground">
+        {{ selectedReports.length }} report(s) selected
+      </span>
         <div class="flex gap-2">
           <Button @click="bulkAction('mark_reviewed')" variant="outline" size="sm">Mark Reviewed</Button>
           <Button @click="bulkAction('mark_false_positive')" variant="outline" size="sm">Mark False Positive</Button>
           <Button @click="bulkAction('delete')" variant="destructive" size="sm">Delete</Button>
         </div>
       </div>
-    </div>
 
     <!-- Reports Table -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -138,10 +135,9 @@
               {{ report.ip_address }}
             </td>
             <td class="px-4 py-3">
-              <span :class="getStatusClass(report.status)" 
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <Badge :variant="getStatusVariant(report.status)">
                 {{ formatStatus(report.status) }}
-              </span>
+              </Badge>
             </td>
             <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(report.created_at) }}
@@ -305,13 +301,13 @@ function refreshReports() {
   fetchStatistics();
 }
 
-function getStatusClass(status) {
-  const classes = {
-    new: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-    reviewed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-    false_positive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+function getStatusVariant(status) {
+  const variants = {
+    new: 'warning',
+    reviewed: 'info',
+    false_positive: 'secondary',
   };
-  return classes[status] || '';
+  return variants[status] || 'secondary';
 }
 
 function formatStatus(status) {

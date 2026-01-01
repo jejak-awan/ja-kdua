@@ -143,8 +143,7 @@
                             <div v-if="ipStatus" class="mt-2">
                                 <Badge
                                     :variant="ipStatus.is_blocked ? 'destructive' : 'default'"
-                                    class="w-full justify-center py-2"
-                                    :class="!ipStatus.is_blocked ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' : ''"
+                                    class="w-full justify-center py-2 bg-muted/50 text-foreground"
                                 >
                                     {{ $t('features.security.ipManagement.status.label') }}: {{ ipStatus.is_blocked ? $t('features.security.ipManagement.status.blocked') : $t('features.security.ipManagement.status.allowed') }}
                                 </Badge>
@@ -159,7 +158,7 @@
                 <CardHeader class="flex flex-row items-center justify-between pb-4">
                     <div class="flex items-center space-x-4">
                         <CardTitle class="text-lg">{{ $t('features.security.logs.title') }}</CardTitle>
-                        <Badge v-if="selectedLogIds.length > 0" variant="secondary">
+                        <Badge v-if="selectedLogIds.length > 0" variant="secondary" class="bg-muted/50 text-foreground">
                             {{ $t('features.security.bulkActions.selected', { count: selectedLogIds.length }) }}
                         </Badge>
                         <Button
@@ -543,7 +542,7 @@
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.cspReports.stats.last24h') }}</p>
-                            <p class="text-2xl font-bold text-blue-600">{{ cspRecentCount }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ cspRecentCount }}</p>
                         </div>
                     </div>
 
@@ -583,10 +582,9 @@
                         </div>
                     </div>
 
-                    <!-- CSP Bulk Actions -->
                     <div v-if="selectedCspReports.length > 0" class="px-6 pb-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center justify-between">
-                            <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        <div class="bg-muted/50 border border-border rounded-lg p-4 flex items-center justify-between transition-all duration-200">
+                            <span class="text-sm font-medium text-foreground">
                                 {{ $t('features.security.bulkActions.selected', { count: selectedCspReports.length }) }}
                             </span>
                             <div class="flex gap-2">
@@ -804,19 +802,19 @@
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.critical') }}</p>
-                            <p class="text-2xl font-bold text-red-600">{{ vulnStats.critical || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ vulnStats.critical || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.high') }}</p>
-                            <p class="text-2xl font-bold text-orange-600">{{ vulnStats.high || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ vulnStats.high || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.medium') }}</p>
-                            <p class="text-2xl font-bold text-yellow-600">{{ vulnStats.medium || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ vulnStats.medium || 0 }}</p>
                         </div>
                         <div class="bg-muted/30 rounded-lg p-4">
                             <p class="text-sm text-muted-foreground">{{ $t('features.security.vulnerabilities.stats.low') }}</p>
-                            <p class="text-2xl font-bold text-blue-600">{{ vulnStats.low || 0 }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ vulnStats.low || 0 }}</p>
                         </div>
                     </div>
 
@@ -912,8 +910,8 @@
                                             <Badge :variant="getVulnSeverityVariant(vuln.severity)">{{ $t('features.security.vulnerabilities.severity.' + vuln.severity) }}</Badge>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <a v-if="vuln.cve" :href="`https://nvd.nist.gov/vuln/detail/${vuln.cve}`" target="_blank" class="text-blue-600 hover:underline text-sm">{{ vuln.cve }}</a>
-                                            <span v-else class="text-muted-foreground">-</span>
+                                            <a v-if="vuln.cve" :href="`https://nvd.nist.gov/vuln/detail/${vuln.cve}`" target="_blank" class="text-primary hover:underline text-sm">{{ vuln.cve }}</a>
+                                         <span v-else class="text-muted-foreground">-</span>
                                         </td>
                                         <td class="px-4 py-3">
                                             <Badge variant="outline">{{ $t('features.security.vulnerabilities.source.' + vuln.source) }}</Badge>
@@ -1454,17 +1452,17 @@ const getEventLabel = (eventType) => {
 
 const getEventClass = (eventType) => {
     const classes = {
-        'login_failed': 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30',
-        'login_success': 'bg-green-500/20 text-green-500 border border-green-500/30',
-        'ip_blocked': 'bg-red-500/20 text-red-500 border border-red-500/30',
-        'ip_unblocked': 'bg-blue-500/20 text-blue-500 border border-blue-500/30',
-        'suspicious_activity': 'bg-orange-500/20 text-orange-500 border border-orange-500/30',
-        'ip_whitelisted': 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30',
-        'ip_whitelist_removed': 'bg-amber-500/20 text-amber-500 border border-amber-500/30',
-        'account_locked': 'bg-purple-500/20 text-purple-500 border border-purple-500/30',
-        'login_blocked': 'bg-red-500/20 text-red-500 border border-red-500/30',
-        'ip_blocked_permanent': 'bg-red-500/20 text-red-500 border border-red-500/30',
-        'ip_blocked_temp': 'bg-red-500/20 text-red-500 border border-red-500/30',
+        'login_failed': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+        'login_success': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+        'ip_blocked': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+        'ip_unblocked': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+        'suspicious_activity': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+        'ip_whitelisted': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+        'ip_whitelist_removed': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+        'account_locked': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+        'login_blocked': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+        'ip_blocked_permanent': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+        'ip_blocked_temp': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
     };
     return classes[eventType] || 'bg-muted/50 text-muted-foreground border border-border';
 };
@@ -1584,7 +1582,7 @@ const cspBulkAction = async (action) => {
 };
 
 const getCspStatusVariant = (status) => {
-    const variants = { new: 'warning', reviewed: 'secondary', false_positive: 'outline' };
+    const variants = { new: 'warning', reviewed: 'info', false_positive: 'secondary' };
     return variants[status] || 'secondary';
 };
 

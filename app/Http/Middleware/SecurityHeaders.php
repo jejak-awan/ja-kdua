@@ -167,7 +167,7 @@ class SecurityHeaders
         $directives[] = "frame-src " . implode(' ', $frameSrc);
         
         // CSP Violation Reporting
-        $directives[] = "report-uri /api/v1/security/csp-report";
+        $directives[] = "report-uri /api/v1/security/crep-collect";
         
         return implode('; ', $directives);
     }

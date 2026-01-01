@@ -17,7 +17,9 @@ Route::prefix('v1')->group(function () {
     
     // CSP Violation Reporting (public, no auth, rate-limited)
     Route::post('/security/csp-report', [App\Http\Controllers\Api\V1\CspReportController::class, 'store'])
-        ->middleware('throttle:100,1'); // 100 reports per minute max
+        ->middleware('throttle:100,1');
+    Route::post('/security/crep-collect', [App\Http\Controllers\Api\V1\CspReportController::class, 'store'])
+        ->middleware('throttle:100,1');
     
     // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])

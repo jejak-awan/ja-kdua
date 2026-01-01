@@ -17,10 +17,17 @@ class CspReportController extends BaseApiController
         try {
             $report = $request->input('csp-report');
             
+            // Fallback for direct JSON or slightly different formats
             if (!$report) {
-                return response()->json(['status' => 'ignored'], 200);
+                $report = $request->json()->all();
+                if (isset($report['csp-report'])) {
+                    $report = $report['csp-report'];
+                }
             }
             
+            if (!$report || empty($report)) {
+                return response()->json(['status' => 'ignored'], 200);
+            }
             CspReport::create([
                 'document_uri' => $report['document-uri'] ?? '',
                 'violated_directive' => $report['violated-directive'] ?? '',
