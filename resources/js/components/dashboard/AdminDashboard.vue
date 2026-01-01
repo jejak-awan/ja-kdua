@@ -218,7 +218,10 @@ const refreshDashboard = async () => {
             recentActivityWidget.value?.fetchActivities()
         ]);
     } catch (error) {
-        console.error('Failed to refresh dashboard:', error);
+        // Silently handle canceled requests (401/session errors)
+        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+            console.error('Failed to refresh dashboard:', error);
+        }
     } finally {
         loadingVisits.value = false;
     }
@@ -272,7 +275,10 @@ const fetchStats = async () => {
             }
         }
     } catch (error) {
-        console.error('Failed to fetch statistics:', error);
+        // Silently handle canceled requests (401/session errors)
+        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+            console.error('Failed to fetch statistics:', error);
+        }
     }
 };
 
@@ -314,7 +320,10 @@ const fetchTraffic = async () => {
              visitsMobile.value = [];
         }
     } catch (error) {
-        console.error('Failed to fetch traffic:', error);
+        // Silently handle canceled requests (401/session errors)
+        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+            console.error('Failed to fetch traffic:', error);
+        }
     } finally {
         loadingVisits.value = false;
     }

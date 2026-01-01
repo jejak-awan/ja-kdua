@@ -296,14 +296,12 @@ class AuthController extends BaseApiController
             }
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
-
         $user->load('roles');
         $user->setRelation('permissions', $user->getAllPermissions());
 
+        // Pure session-based auth - no token needed
         return $this->success([
             'user' => $user,
-            'token' => $token,
         ], 'Login successful');
     }
 
@@ -404,7 +402,16 @@ class AuthController extends BaseApiController
         // Log activity
         \App\Models\ActivityLog::log('logout', null, [], $user, 'User logged out');
 
-        $user->currentAccessToken()->delete();
+        // Pure session-based logout - invalidate session only
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Logout from web guard if authenticated
+        if (\Illuminate\Support\Facades\Auth::guard('web')->check()) {
+            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        }
 
         return $this->success(null, 'Logged out successfully');
     }

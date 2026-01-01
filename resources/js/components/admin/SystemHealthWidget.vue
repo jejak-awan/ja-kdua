@@ -237,7 +237,10 @@ const fetchHealth = async () => {
       lastUpdated.value = new Date();
     }
   } catch (error) {
-    console.error('Failed to fetch system health:', error);
+    // Silently handle canceled requests (401/session errors)
+    if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+      console.error('Failed to fetch system health:', error);
+    }
   } finally {
     loading.value = false;
   }

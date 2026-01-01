@@ -33,12 +33,14 @@ class Content extends Model
         'og_image',
         'locked_by',
         'locked_at',
+        'blocks',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'locked_at' => 'datetime',
         'meta' => 'array',
+        'blocks' => 'array',
     ];
 
     public function author(): BelongsTo

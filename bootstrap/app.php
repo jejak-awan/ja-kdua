@@ -32,6 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);
+
+        // Exempt analytics from CSRF protection (public tracking endpoint)
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/analytics/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle rate limiting exceptions - add retry_after to response body

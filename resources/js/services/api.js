@@ -69,10 +69,18 @@ api.interceptors.request.use(
             config.signal = abortController.signal;
         }
 
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Manual XSRF-TOKEN handling for added robustness
+        // This ensures the header is ALWAYS set if the cookie is present,
+        // bypassing occasional Axios auto-detection failures.
+        const xsrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('XSRF-TOKEN='))
+            ?.split('=')[1];
+
+        if (xsrfToken) {
+            config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken);
         }
+
         return config;
     },
     (error) => {

@@ -113,7 +113,10 @@ const fetchActivities = async () => {
         const { data } = parseResponse(response);
         activities.value = data || [];
     } catch (error) {
-        console.error('Failed to fetch recent activities:', error);
+        // Silently handle canceled requests (401/session errors)
+        if (error.code !== 'ERR_CANCELED' && error.response?.status !== 401) {
+            console.error('Failed to fetch recent activities:', error);
+        }
     } finally {
         loading.value = false;
     }

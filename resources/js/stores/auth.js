@@ -13,7 +13,6 @@ export const ROLE_RANKS = {
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
-        token: null,
         isAuthenticated: false,
     }),
 
@@ -104,15 +103,10 @@ export const useAuthStore = defineStore('auth', {
                     };
                 }
 
-                if (responseData && responseData.user && responseData.token) {
+                if (responseData && responseData.user) {
                     this.setAuth(responseData);
                     return { success: true, data: responseData };
                 } else {
-                    // If response doesn't have expected structure, try to extract from response
-                    if (response.data?.user && response.data?.token) {
-                        this.setAuth(response.data);
-                        return { success: true, data: response.data };
-                    }
                     throw new Error('Invalid response format from server');
                 }
             } catch (error) {
@@ -269,9 +263,7 @@ export const useAuthStore = defineStore('auth', {
 
         setAuth(data) {
             this.user = data.user;
-            this.token = data.token;
             this.isAuthenticated = true;
-            localStorage.setItem('auth_token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             // Reset circuit breaker flags on successful auth
             window.__isSessionTerminated = false;
@@ -280,26 +272,21 @@ export const useAuthStore = defineStore('auth', {
 
         clearAuth() {
             this.user = null;
-            this.token = null;
             this.isAuthenticated = false;
-            localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
         },
 
         initAuth() {
             try {
-                const token = localStorage.getItem('auth_token');
                 const user = localStorage.getItem('user');
-                if (token && user) {
+                if (user) {
                     // Try to parse user JSON, clear if invalid
                     try {
                         const parsedUser = JSON.parse(user);
-                        this.token = token;
                         this.user = parsedUser;
                         this.isAuthenticated = true;
                     } catch (parseError) {
                         // Invalid JSON in localStorage, clear it
-                        // Only log in development mode to reduce console noise
                         if (import.meta.env.DEV) {
                             console.warn('Invalid user data in localStorage, clearing:', parseError);
                         }
@@ -307,7 +294,6 @@ export const useAuthStore = defineStore('auth', {
                     }
                 }
             } catch (error) {
-                // Only log in development mode to reduce console noise
                 if (import.meta.env.DEV) {
                     console.warn('Error initializing auth:', error);
                 }

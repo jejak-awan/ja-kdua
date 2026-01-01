@@ -22,67 +22,76 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+            <!-- Total Contents -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.dashboard.stats.totalContents') }}</p>
-                            <p class="text-2xl font-bold">{{ stats.total }}</p>
+                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.dashboard.stats.totalContents') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ stats.total }}</p>
                         </div>
-                        <div class="p-3 bg-primary/10 rounded-xl text-primary">
+                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
                             <FileText class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
+            <!-- Published -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.published') }}</p>
-                            <p class="text-2xl font-bold">{{ stats.published }}</p>
+                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.published') }}</p>
+                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.published }}</p>
                         </div>
-                        <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
+                        <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
+            <!-- Pending Review -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
-                            <p class="text-2xl font-bold">{{ stats.pending || 0 }}</p>
+                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.pending') }}</p>
+                            <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.pending || 0 }}</p>
                         </div>
-                        <div class="p-3 bg-amber-500/10 rounded-xl text-amber-500">
+                        <div class="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400">
                             <Clock3 class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
+            <!-- Drafts -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
-                            <p class="text-2xl font-bold">{{ stats.draft }}</p>
+                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.draft') }}</p>
+                            <p class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ stats.draft }}</p>
                         </div>
-                        <div class="p-3 bg-slate-500/10 rounded-xl text-slate-500">
-                            <FileText class="w-5 h-5" />
+                        <div class="p-2.5 bg-slate-500/10 rounded-xl text-slate-600 dark:text-slate-400">
+                            <FileEdit class="w-5 h-5" />
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
+            <!-- Archived -->
             <Card class="hover:shadow-md transition-all duration-300">
                 <CardContent class="p-6">
                     <div class="flex items-center justify-between">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-muted-foreground">{{ $t('features.content.status.archived') }}</p>
-                            <p class="text-2xl font-bold">{{ stats.archived }}</p>
+                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.archived') }}</p>
+                            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ stats.archived }}</p>
                         </div>
-                        <div class="p-3 bg-muted rounded-xl text-muted-foreground">
+                        <div class="p-2.5 bg-rose-500/10 rounded-xl text-rose-600 dark:text-rose-400">
                             <Archive class="w-5 h-5" />
                         </div>
                     </div>
@@ -322,7 +331,8 @@ import {
     Clock,
     Archive,
     Clock3,
-    XCircle
+    XCircle,
+    FileEdit
 } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
 import { useConfirm } from '../../../composables/useConfirm';

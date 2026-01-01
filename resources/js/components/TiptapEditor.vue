@@ -272,7 +272,6 @@ import { BubbleMenu } from '@tiptap/vue-3/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import ImageExtension from '@tiptap/extension-image'
-import LinkExtension from '@tiptap/extension-link'
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu'
 import Typography from '@tiptap/extension-typography'
 import TextAlign from '@tiptap/extension-text-align'
@@ -280,7 +279,6 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { FontFamily } from '@tiptap/extension-font-family'
 import { Color } from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
-import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
@@ -407,7 +405,6 @@ const editor = useEditor({
             placeholder: props.placeholder,
         }),
         ImageExtension,
-        LinkExtension,
         Typography,
         BubbleMenuExtension,
         TextAlign.configure({
@@ -419,7 +416,6 @@ const editor = useEditor({
         Highlight.configure({
             multicolor: true,
         }),
-        Underline,
         Table.configure({
             resizable: true,
         }),
