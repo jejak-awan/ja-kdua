@@ -76,8 +76,10 @@
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
 
-        --border: 240 5.9% 92%;
-        --input: 240 5.9% 90%;
+        --border: 240 8% 89%;
+        /* Crisper borders for better definition */
+        --input: 240 8% 87%;
+        /* Slightly darker for input fields */
         --ring: 240 10% 3.9%;
 
         --radius: 0.5rem;
