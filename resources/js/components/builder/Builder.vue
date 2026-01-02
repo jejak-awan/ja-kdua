@@ -1,5 +1,5 @@
 <template>
-    <component :is="isFullscreen ? Teleport : 'div'" :to="isFullscreen ? 'body' : undefined">
+    <Teleport to="body" :disabled="!isFullscreen">
         <div 
             :class="[
                 'flex flex-col bg-background relative group/builder transition-all duration-300',
@@ -51,7 +51,7 @@
                     </Button>
                     
                     <!-- Exit Fullscreen Button (prominent when in fullscreen) -->
-                    <Button v-if="isFullscreen" variant="outline" size="sm" class="h-8 gap-2 text-xs" @click="toggleFullscreen">
+                    <Button v-if="isFullscreen" variant="outline" size="sm" class="h-8 gap-2 text-xs border-border" @click="toggleFullscreen">
                         <X class="w-4 h-4" />
                         Exit
                     </Button>
@@ -70,7 +70,7 @@
                 <template #trigger><span class="hidden"></span></template>
             </MediaPicker>
         </div>
-    </component>
+    </Teleport>
 </template>
 
 <script setup>
