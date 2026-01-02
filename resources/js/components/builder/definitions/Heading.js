@@ -1,11 +1,12 @@
 import { Heading } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'heading',
     label: 'Heading',
     icon: Heading,
     description: 'Customizable heading with typography controls.',
-    component: () => import('@/components/builder/blocks/HeadingBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/HeadingBlock.vue')),
     settings: [
         {
             key: 'text',

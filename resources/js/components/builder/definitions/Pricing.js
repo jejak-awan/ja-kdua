@@ -1,11 +1,12 @@
 import { CreditCard } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'pricing',
     label: 'Pricing Table',
     icon: CreditCard,
     description: 'Compare plans and pricing.',
-    component: () => import('@/components/builder/blocks/PricingBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/PricingBlock.vue')),
     settings: [
         {
             key: 'title',

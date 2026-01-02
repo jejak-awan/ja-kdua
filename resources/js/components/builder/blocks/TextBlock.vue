@@ -11,6 +11,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 const props = defineProps({
     title: String,
     content: String,

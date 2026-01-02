@@ -1,11 +1,12 @@
 import { MessageSquareQuote } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'testimonial',
     label: 'Testimonials',
     icon: MessageSquareQuote,
     description: 'Showcase social proof.',
-    component: () => import('@/components/builder/blocks/TestimonialBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/TestimonialBlock.vue')),
     settings: [
         {
             key: 'title',

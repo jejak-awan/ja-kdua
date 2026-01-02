@@ -1,11 +1,12 @@
 import { Hash } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'counter',
     label: 'Counter',
     icon: Hash,
     description: 'Animated number counter for statistics.',
-    component: () => import('@/components/builder/blocks/CounterBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/CounterBlock.vue')),
     settings: [
         {
             key: 'number',

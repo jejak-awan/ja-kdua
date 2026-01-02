@@ -1,11 +1,12 @@
 import { Image as ImageIcon } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'image',
     label: 'Smooth Image',
     icon: ImageIcon,
     description: 'Display high-quality images with custom effects.',
-    component: () => import('@/components/builder/blocks/ImageBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/ImageBlock.vue')),
     settings: [
         {
             key: 'url',

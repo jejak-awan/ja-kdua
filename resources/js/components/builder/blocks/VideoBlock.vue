@@ -24,6 +24,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { VideoOff } from 'lucide-vue-next';
 

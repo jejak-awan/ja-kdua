@@ -1,11 +1,12 @@
 import { LayoutList } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'tabs',
     label: 'Tabs',
     icon: LayoutList,
     description: 'Tabbed content sections.',
-    component: () => import('@/components/builder/blocks/TabsBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/TabsBlock.vue')),
     settings: [
         {
             key: 'tabs',

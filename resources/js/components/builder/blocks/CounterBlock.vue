@@ -21,6 +21,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({

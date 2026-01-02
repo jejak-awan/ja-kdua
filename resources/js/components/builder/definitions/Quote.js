@@ -1,11 +1,12 @@
 import { Quote } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'quote',
     label: 'Quote',
     icon: Quote,
     description: 'Styled blockquote with author.',
-    component: () => import('@/components/builder/blocks/QuoteBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/QuoteBlock.vue')),
     settings: [
         {
             key: 'quote',

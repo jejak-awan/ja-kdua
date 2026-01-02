@@ -1,11 +1,12 @@
 import { Images } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'gallery',
     label: 'Image Gallery',
     icon: Images,
     description: 'Grid of images with captions.',
-    component: () => import('@/components/builder/blocks/GalleryBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/GalleryBlock.vue')),
     settings: [
         {
             key: 'title',

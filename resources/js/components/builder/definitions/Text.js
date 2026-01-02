@@ -1,11 +1,12 @@
 import { Type, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'text',
     label: 'Rich Text',
     icon: Type,
     description: 'Rich text area for your page body.',
-    component: () => import('@/components/builder/blocks/TextBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/TextBlock.vue')),
     settings: [
         {
             key: 'title',

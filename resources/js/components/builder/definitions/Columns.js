@@ -1,11 +1,12 @@
 import { Columns as ColumnsIcon } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'columns',
     label: 'Columns',
     icon: ColumnsIcon,
     description: 'Create multi-column layouts.',
-    component: () => import('@/components/builder/blocks/ColumnsBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/ColumnsBlock.vue')),
     settings: [
         {
             key: 'layout',

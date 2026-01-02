@@ -1,11 +1,12 @@
 import { Map } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'map',
     label: 'Map',
     icon: Map,
     description: 'Embed Google Maps or other map services.',
-    component: () => import('@/components/builder/blocks/MapBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/MapBlock.vue')),
     settings: [
         {
             key: 'embedUrl',

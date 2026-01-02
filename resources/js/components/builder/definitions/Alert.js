@@ -1,11 +1,12 @@
 import { Bell } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'alert',
     label: 'Alert',
     icon: Bell,
     description: 'Info, warning, success, or error notices.',
-    component: () => import('@/components/builder/blocks/AlertBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/AlertBlock.vue')),
     settings: [
         {
             key: 'title',

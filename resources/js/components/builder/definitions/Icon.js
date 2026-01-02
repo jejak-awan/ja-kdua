@@ -1,11 +1,12 @@
 import { Sparkles } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'icon',
     label: 'Icon',
     icon: Sparkles,
     description: 'Display a single icon with styling options.',
-    component: () => import('@/components/builder/blocks/IconBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/IconBlock.vue')),
     settings: [
         {
             key: 'icon',

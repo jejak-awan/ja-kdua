@@ -11,6 +11,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 
 const props = defineProps({

@@ -1,11 +1,12 @@
 import { BarChart3 } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'progress-bar',
     label: 'Progress Bar',
     icon: BarChart3,
     description: 'Visual progress indicator.',
-    component: () => import('@/components/builder/blocks/ProgressBarBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/ProgressBarBlock.vue')),
     settings: [
         {
             key: 'label',

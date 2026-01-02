@@ -25,6 +25,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { ref, computed } from 'vue';
 import { Info, AlertTriangle, CheckCircle, XCircle, Bell, X } from 'lucide-vue-next';
 

@@ -1,11 +1,12 @@
 import { MoveVertical } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'spacer',
     label: 'Spacer',
     icon: MoveVertical,
     description: 'Add vertical space between sections.',
-    component: () => import('@/components/builder/blocks/SpacerBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/SpacerBlock.vue')),
     settings: [
         {
             key: 'height',

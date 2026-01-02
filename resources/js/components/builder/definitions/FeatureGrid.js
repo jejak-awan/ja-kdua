@@ -1,11 +1,12 @@
 import { Grid } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'features',
     label: 'Feature Grid',
     icon: Grid,
     description: 'Display features in a responsive grid.',
-    component: () => import('@/components/builder/blocks/FeatureGridBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/FeatureGridBlock.vue')),
     settings: [
         {
             key: 'title',

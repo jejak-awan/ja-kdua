@@ -29,6 +29,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { 
     Facebook, Twitter, Instagram, Linkedin, Youtube, Github,

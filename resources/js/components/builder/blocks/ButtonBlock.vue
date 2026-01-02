@@ -23,6 +23,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { ArrowRight, ExternalLink, ChevronRight, Download, Play, Mail, Phone } from 'lucide-vue-next';
 

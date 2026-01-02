@@ -34,6 +34,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { 
     Check, Star, ArrowRight, Zap, Shield, Heart,

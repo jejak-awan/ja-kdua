@@ -20,6 +20,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { ArrowRight } from 'lucide-vue-next';
 
 const props = defineProps({

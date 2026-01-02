@@ -1,11 +1,12 @@
 import { List } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'accordion',
     label: 'Accordion',
     icon: List,
     description: 'Expandable list for FAQs or details.',
-    component: () => import('@/components/builder/blocks/AccordionBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/AccordionBlock.vue')),
     settings: [
         {
             key: 'title',

@@ -22,6 +22,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { 
     Star, Heart, Check, X, Plus, Minus, 

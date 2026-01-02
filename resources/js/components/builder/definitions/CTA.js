@@ -1,11 +1,12 @@
 import { MousePointer2 } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'cta',
     label: 'Action Bar',
     icon: MousePointer2,
     description: 'Eye-catching section with a primary button.',
-    component: () => import('@/components/builder/blocks/CTABlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/CTABlock.vue')),
     settings: [
         {
             key: 'title',

@@ -40,6 +40,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { ref } from 'vue';
 
 const props = defineProps({

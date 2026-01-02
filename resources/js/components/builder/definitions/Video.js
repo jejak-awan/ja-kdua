@@ -1,11 +1,12 @@
 import { Clapperboard } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'video',
     label: 'Video Player',
     icon: Clapperboard,
     description: 'Embed cinematic video content.',
-    component: () => import('@/components/builder/blocks/VideoBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/VideoBlock.vue')),
     settings: [
         {
             key: 'title',

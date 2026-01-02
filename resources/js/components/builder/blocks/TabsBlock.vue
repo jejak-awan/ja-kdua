@@ -30,6 +30,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import Tabs from '@/components/ui/tabs.vue';
 import TabsList from '@/components/ui/tabs-list.vue';

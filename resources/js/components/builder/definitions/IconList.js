@@ -1,11 +1,12 @@
 import { List } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'icon-list',
     label: 'Icon List',
     icon: List,
     description: 'Bulleted list with customizable icons.',
-    component: () => import('@/components/builder/blocks/IconListBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/IconListBlock.vue')),
     settings: [
         {
             key: 'title',

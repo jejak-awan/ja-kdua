@@ -30,6 +30,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 import { computed } from 'vue';
 import { Quote } from 'lucide-vue-next';
 

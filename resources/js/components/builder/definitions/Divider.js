@@ -1,11 +1,12 @@
 import { Minus } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'divider',
     label: 'Divider',
     icon: Minus,
     description: 'Visual separator line with multiple styles.',
-    component: () => import('@/components/builder/blocks/DividerBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/DividerBlock.vue')),
     settings: [
         {
             key: 'style',
