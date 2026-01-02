@@ -38,9 +38,6 @@
                 :group="{ name: 'blocks', pull: 'clone', put: false }"
                 :sort="false"
                 :clone="builder.cloneBlock"
-                :force-fallback="true"
-                :fallback-on-body="true"
-                fallback-class="drag-ghost-fallback"
                 @end="onDragEnd"
                 item-key="name"
                 class="grid gap-2"
@@ -106,13 +103,3 @@ const onDragEnd = (evt) => {
     // Logic handled by draggable clone, but we can hook here if needed
 };
 </script>
-
-<style>
-.drag-ghost-fallback {
-    opacity: 0.9 !important;
-    z-index: 99999 !important;
-    pointer-events: none;
-    transform: rotate(3deg);
-    cursor: grabbing !important;
-}
-</style>
