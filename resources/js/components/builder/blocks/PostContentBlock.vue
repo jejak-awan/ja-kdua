@@ -18,35 +18,30 @@ import { computed, defineAsyncComponent } from 'vue';
 // Lazy load BlockRenderer to avoid circular dependency loops
 const BlockRenderer = defineAsyncComponent(() => import('./BlockRenderer.vue'));
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-  config: {
-    type: Object,
-    default: () => ({
-        max_width: 'max-w-4xl',
-        font_size: 'text-base',
-        line_height: 'leading-relaxed',
-        padding: 'py-8',
-        alignment: 'text-left'
-    })
-  },
-  context: {
-    type: Object,
-    default: () => ({})
-  }
+    max_width: { type: String, default: 'max-w-4xl' },
+    font_size: { type: String, default: 'text-base' },
+    line_height: { type: String, default: 'leading-relaxed' },
+    padding: { type: String, default: 'py-8' },
+    alignment: { type: String, default: 'text-left' },
+    context: { type: Object, default: () => ({}) }
 });
 
 const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.config?.padding || 'py-8'].filter(Boolean);
+    return ['transition-all duration-300', props.padding].filter(Boolean);
 });
 
 const contentClasses = computed(() => {
-    const c = props.config || {};
     return [
         'prose prose-lg dark:prose-invert mx-auto',
-        c.max_width || 'max-w-4xl',
-        c.font_size || 'text-base',
-        c.line_height || 'leading-relaxed',
-        c.alignment || 'text-left'
+        props.max_width,
+        props.font_size,
+        props.line_height,
+        props.alignment
     ].filter(Boolean);
 });
 

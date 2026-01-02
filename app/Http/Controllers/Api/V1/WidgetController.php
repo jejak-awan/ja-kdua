@@ -85,6 +85,24 @@ class WidgetController extends BaseApiController
                 ->update(['sort_order' => $widgetData['sort_order']]);
         }
 
-        return $this->success(null, 'Widgets reordered successfully');
+    }
+
+    public function locations()
+    {
+        $defaultLocations = [
+            ['id' => 'sidebar-1', 'name' => 'Main Sidebar'],
+            ['id' => 'footer-1', 'name' => 'Footer Area 1'],
+            ['id' => 'footer-2', 'name' => 'Footer Area 2'],
+            ['id' => 'footer-3', 'name' => 'Footer Area 3'],
+        ];
+
+        $dbLocations = Widget::select('location')->distinct()->pluck('location')->filter()->map(function($loc) {
+            return ['id' => $loc, 'name' => ucwords(str_replace('-', ' ', $loc))];
+        });
+
+        // Merge and unique by id
+        $all = collect($defaultLocations)->concat($dbLocations)->unique('id')->values();
+
+        return $this->success($all, 'Widget locations retrieved successfully');
     }
 }

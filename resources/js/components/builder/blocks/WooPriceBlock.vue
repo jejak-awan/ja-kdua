@@ -15,9 +15,13 @@
 import { computed, ref, onMounted } from 'vue';
 import { productService } from '@/services/ProductService';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    content: Object,
-    settings: Object
+    text_align: { type: String, default: 'left' },
+    context: { type: Object, default: () => ({}) }
 });
 
 const product = ref({});
@@ -25,7 +29,7 @@ const product = ref({});
 const classes = computed(() => {
     return [
         'w-full flex',
-        props.settings.text_align === 'center' ? 'justify-center' : props.settings.text_align === 'right' ? 'justify-end' : 'justify-start'
+        props.text_align === 'center' ? 'justify-center' : props.text_align === 'right' ? 'justify-end' : 'justify-start'
     ];
 });
 

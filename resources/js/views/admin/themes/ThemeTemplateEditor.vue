@@ -23,7 +23,7 @@
 
         <!-- Builder -->
         <div class="flex-1 overflow-hidden" v-if="blocks">
-            <Builder v-model="blocks" :context="{ type: 'theme_template', id: route.params.id, part: part }" />
+            <Builder v-model="blocks" :context="{ type: 'theme_template', id: route.params.id, part: part, builderMode: true }" />
         </div>
         <div v-else class="flex-1 flex items-center justify-center">
             <Loader2 class="w-8 h-8 animate-spin text-muted-foreground" />

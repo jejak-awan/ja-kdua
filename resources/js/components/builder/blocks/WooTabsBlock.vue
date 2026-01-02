@@ -58,9 +58,12 @@
 import { computed, ref, onMounted } from 'vue';
 import { productService } from '@/services/ProductService';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    content: Object,
-    settings: Object
+    context: { type: Object, default: () => ({}) }
 });
 
 const product = ref({});

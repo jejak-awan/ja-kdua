@@ -65,6 +65,12 @@ export default {
         alignment: 'text-center',
         padding: 'py-16',
         bgColor: '',
-        visibility: { mobile: true, tablet: true, desktop: true }
+        visibility: { mobile: true, tablet: true, desktop: true },
+        dynamicSettings: {
+            title: 'post.title',
+            date: 'post.date',
+            author: 'post.author',
+            category: 'post.category'
+        }
     }
 };

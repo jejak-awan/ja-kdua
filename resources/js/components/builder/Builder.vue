@@ -69,6 +69,7 @@
                 <Sidebar />
                 <Canvas :context="context" />
                 <PropertiesPanel />
+                <LayersPanel />
             </div>
             </div>
             
@@ -85,6 +86,7 @@ import { useBuilder } from '@/composables/useBuilder';
 import Sidebar from './sidebar/Sidebar.vue';
 import Canvas from './canvas/Canvas.vue';
 import PropertiesPanel from './properties/PropertiesPanel.vue';
+import LayersPanel from './layers/LayersPanel.vue';
 import MediaPicker from '@/components/MediaPicker.vue';
 import Button from '@/components/ui/button.vue';
 import { 

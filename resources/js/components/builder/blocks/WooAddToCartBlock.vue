@@ -10,7 +10,7 @@
             
             <!-- Button -->
             <button class="bg-primary text-primary-foreground px-8 py-2.5 rounded-md font-bold hover:opacity-90 transition-opacity">
-                {{ settings.custom_label || 'Add to Cart' }}
+                {{ custom_label || 'Add to Cart' }}
             </button>
         </div>
     </div>
@@ -19,15 +19,20 @@
 <script setup>
 import { computed } from 'vue';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    content: Object,
-    settings: Object
+    custom_label: { type: String, default: 'Add to Cart' },
+    alignment: { type: String, default: 'left' },
+    context: { type: Object, default: () => ({}) }
 });
 
 const classes = computed(() => {
     return [
         'w-full flex',
-        props.settings.alignment === 'center' ? 'justify-center' : props.settings.alignment === 'right' ? 'justify-end' : 'justify-start'
+        props.alignment === 'center' ? 'justify-center' : props.alignment === 'right' ? 'justify-end' : 'justify-start'
     ];
 });
 </script>

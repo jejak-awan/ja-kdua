@@ -1,21 +1,5 @@
 <template>
     <div class="flex-1 min-h-0 overflow-y-auto bg-background/50 bg-dot-pattern p-6 custom-scrollbar relative flex flex-col items-center">
-        <!-- Canvas Toolbar (Device Switching) -->
-        <div class="w-full max-w-5xl mb-4 flex items-center justify-center gap-2 relative shrink-0">
-            <div class="flex items-center gap-1 p-1 bg-muted rounded-full shadow-sm border border-border">
-                <Button 
-                    v-for="mode in ['mobile', 'tablet', 'desktop']" 
-                    :key="mode"
-                    variant="ghost" 
-                    size="icon" 
-                    class="h-7 w-12 rounded-full transition-all text-muted-foreground hover:text-foreground" 
-                    :class="builder.deviceMode.value === mode ? 'bg-background shadow-sm text-foreground' : ''"
-                    @click="builder.deviceMode.value = mode"
-                >
-                    <component :is="mode === 'mobile' ? Smartphone : mode === 'tablet' ? Tablet : Monitor" class="w-3.5 h-3.5" />
-                </Button>
-            </div>
-        </div>
 
         <!-- Draggable Canvas -->
         <div 
@@ -61,14 +45,8 @@
             </div>
         </div>
 
-        <ContextMenu 
-            :visible="contextMenu.visible" 
-            :x="contextMenu.x" 
-            :y="contextMenu.y" 
-            :actions="contextMenuActions"
-            @close="contextMenu.visible = false"
-            @action="handleContextMenuAction"
-        />
+        <!-- Breadcrumbs Navigation -->
+        <BreadcrumbsBar />
         
         <!-- Global Undo/Redo/History (Coming Soon) -->
 
@@ -86,7 +64,7 @@ import {
 import Button from '@/components/ui/button.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockWrapper from './BlockWrapper.vue';
-import ContextMenu from '../ContextMenu.vue';
+import BreadcrumbsBar from './BreadcrumbsBar.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -98,41 +76,6 @@ const props = defineProps({
 
 const builder = inject('builder');
 const { t } = useI18n();
-
-const contextMenu = ref({
-    visible: false,
-    x: 0,
-    y: 0,
-    index: null
-});
-
-const contextMenuActions = computed(() => [
-    { label: t('features.builder.actions.duplicate'), icon: Copy, action: 'duplicate' },
-    { label: t('features.builder.actions.delete'), icon: Trash2, action: 'delete', variant: 'destructive' }
-]);
-
-const handleContextMenu = (e, index) => {
-    e.preventDefault();
-    contextMenu.value = {
-        visible: true,
-        x: e.clientX,
-        y: e.clientY,
-        index
-    };
-};
-
-const handleContextMenuAction = (action) => {
-    if (contextMenu.value.index === null) return;
-    
-    switch (action.action) {
-        case 'duplicate':
-            builder.duplicateBlock(contextMenu.value.index);
-            break;
-        case 'delete':
-            builder.removeBlock(contextMenu.value.index);
-            break;
-    }
-};
 
 const canvasWidthClass = computed(() => {
     switch (builder.deviceMode.value) {

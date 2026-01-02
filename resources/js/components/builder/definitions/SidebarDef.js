@@ -8,7 +8,15 @@ export default {
     description: 'Sidebar with widgets.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/SidebarBlock.vue')),
     settings: [
-        { key: 'title', type: 'text', label: 'Sidebar Title', default: '' },
+        {
+            key: 'location',
+            type: 'data_select',
+            label: 'Widget Area',
+            source: '/admin/cms/widgets/locations',
+            description: 'Select which widget area to display here.',
+            default: 'sidebar-1'
+        },
+        { key: 'title', type: 'text', label: 'Sidebar Title Override', default: '' },
         { key: 'show_search', type: 'boolean', label: 'Show Search', default: true },
         { key: 'show_categories', type: 'boolean', label: 'Show Categories', default: true },
         { key: 'show_recent_posts', type: 'boolean', label: 'Show Recent Posts', default: true },

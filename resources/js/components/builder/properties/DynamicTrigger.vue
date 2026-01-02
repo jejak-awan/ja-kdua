@@ -1,39 +1,41 @@
 <template>
     <Popover>
         <PopoverTrigger asChild>
-            <Button 
-                variant="outline" 
-                size="icon" 
-                class="h-8 w-8 shrink-0" 
-                :class="{ 'text-primary border-primary bg-primary/5': isConnected }"
+            <button 
+                class="opacity-50 hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-muted" 
+                :class="{ 'text-primary opacity-100 bg-primary/5': isConnected }"
                 title="Dynamic Content"
             >
-                <Database class="w-3.5 h-3.5" />
-            </Button>
+                <Database class="w-3 h-3" />
+            </button>
         </PopoverTrigger>
         <PopoverContent class="w-60 p-2" align="end">
-            <div class="space-y-2">
-                <h4 class="font-medium text-xs text-muted-foreground uppercase">Connect to...</h4>
-                <div class="grid gap-1">
+            <div class="space-y-4">
+                <div v-for="(group, groupName) in groupedSources" :key="groupName" class="space-y-1">
+                    <h4 class="font-bold text-[10px] text-muted-foreground uppercase px-2 py-1 bg-muted/30 rounded">{{ groupName }}</h4>
+                    <div class="grid gap-0.5">
+                        <Button 
+                            v-for="source in group" 
+                            :key="source.id"
+                            variant="ghost" 
+                            size="sm" 
+                            class="justify-start h-8 text-xs font-normal"
+                            @click="setDynamic(source.id)"
+                        >
+                            <component :is="sourceIcons[source.icon] || Database" class="w-3.5 h-3.5 mr-2 opacity-70" />
+                            {{ source.label }}
+                        </Button>
+                    </div>
+                </div>
+                
+                <div v-if="isConnected" class="pt-2 border-t">
                     <Button 
-                        v-for="source in dynamicSources" 
-                        :key="source.id"
                         variant="ghost" 
                         size="sm" 
-                        class="justify-start h-8 text-xs font-normal"
-                        @click="setDynamic(source.id)"
-                    >
-                        <component :is="sourceIcons[source.icon] || Database" class="w-3 h-3 mr-2 opacity-70" />
-                        {{ source.label }}
-                    </Button>
-                    <Button 
-                        v-if="isConnected"
-                        variant="ghost" 
-                        size="sm" 
-                        class="justify-start h-8 text-xs font-normal text-destructive hover:text-destructive"
+                        class="justify-start h-8 w-full text-xs font-normal text-destructive hover:text-destructive hover:bg-destructive/10"
                         @click="setDynamic(null)"
                     >
-                        <Unlink class="w-3 h-3 mr-2" />
+                        <Unlink class="w-3.5 h-3.5 mr-2" />
                         Disconnect
                     </Button>
                 </div>
@@ -48,7 +50,7 @@ import Button from '@/components/ui/button.vue';
 import Popover from '@/components/ui/popover.vue';
 import PopoverTrigger from '@/components/ui/popover-trigger.vue';
 import PopoverContent from '@/components/ui/popover-content.vue';
-import { Database, Unlink, FileText, Calendar, User, Globe, AlignLeft } from 'lucide-vue-next';
+import { Database, Unlink, FileText, Calendar, User, Globe, AlignLeft, Package, DollarSign, Hash, Star, Image, Quote, Tag } from 'lucide-vue-next';
 import { dynamicContent } from '@/services/DynamicContentService';
 
 const props = defineProps({
@@ -57,7 +59,16 @@ const props = defineProps({
 });
 
 const dynamicSources = dynamicContent.getSources();
-const sourceIcons = { FileText, Calendar, User, Globe, AlignLeft };
+const sourceIcons = { FileText, Calendar, User, Globe, AlignLeft, Package, DollarSign, Hash, Star, Image, Quote, Tag };
+
+const groupedSources = computed(() => {
+    return dynamicSources.reduce((groups, source) => {
+        const group = source.group || 'General';
+        if (!groups[group]) groups[group] = [];
+        groups[group].push(source);
+        return groups;
+    }, {});
+});
 
 const isConnected = computed(() => {
     return !!(props.block.dynamicSettings && props.block.dynamicSettings[props.field.key]);

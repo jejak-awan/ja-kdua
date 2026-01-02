@@ -4,15 +4,19 @@
             <label class="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
                 {{ field.label }}
                 <!-- Responsive Indicator/Toggle -->
-                <button 
-                    v-if="supportsResponsive"
-                    class="opacity-50 hover:opacity-100 transition-opacity"
-                    :class="{ 'text-primary opacity-100': isResponsive }"
-                    @click="toggleResponsive"
-                    :title="isResponsive ? 'Responsive Mode Active' : 'Enable Responsive Mode'"
-                >
-                    <component :is="currentDeviceIcon" class="w-3 h-3" />
-                </button>
+                <div class="flex items-center gap-2">
+                    <button 
+                        v-if="supportsResponsive"
+                        class="opacity-50 hover:opacity-100 transition-opacity"
+                        :class="{ 'text-primary opacity-100': isResponsive }"
+                        @click="toggleResponsive"
+                        :title="isResponsive ? 'Responsive Mode Active' : 'Enable Responsive Mode'"
+                    >
+                        <component :is="currentDeviceIcon" class="w-3 h-3" />
+                    </button>
+                    <!-- Global Dynamic Data Trigger -->
+                    <DynamicTrigger v-if="supportsDynamic" :field="field" :block="block" />
+                </div>
             </label>
         </div>
         
@@ -26,24 +30,22 @@
             </div>
 
             <!-- Text Input -->
-            <div v-if="field.type === 'text'" class="flex gap-2">
+            <div v-if="field.type === 'text'">
                 <Input v-model="proxyValue" class="h-8 text-xs bg-background border-input" :disabled="isDynamic" :placeholder="dynamicLabel" />
-                <DynamicTrigger :field="field" :block="block" />
             </div>
 
             <!-- Textarea -->
             <div v-if="field.type === 'textarea' || field.type === 'richtext'">
-                <Textarea v-model="proxyValue" class="min-h-[80px] text-xs bg-background border-input" />
+                <Textarea v-model="proxyValue" class="min-h-[80px] text-xs bg-background border-input" :disabled="isDynamic" :placeholder="dynamicLabel" />
             </div>
 
             <!-- Image -->
             <div v-if="field.type === 'image'">
                 <div class="flex gap-2">
-                    <Input v-model="proxyValue" class="h-8 text-xs bg-background border-input" placeholder="https://..." />
-                    <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPicker" title="Media Library">
+                    <Input v-model="proxyValue" class="h-8 text-xs bg-background border-input" placeholder="https://..." :disabled="isDynamic" />
+                    <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPicker" title="Media Library" :disabled="isDynamic">
                         <ImageIcon class="w-3.5 h-3.5" />
                     </Button>
-                    <DynamicTrigger :field="field" :block="block" />
                 </div>
             </div>
 
@@ -73,6 +75,23 @@
                 <select v-model="proxyValue" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground">
                     <option v-for="opt in field.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                 </select>
+            </div>
+
+            <!-- Data Select (Dynamic) -->
+            <div v-if="field.type === 'data_select'">
+                <div class="relative">
+                    <select 
+                        v-model="proxyValue" 
+                        class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground"
+                        :disabled="fetchingData"
+                    >
+                        <option :value="null">Select...</option>
+                        <option v-for="opt in dynamicOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                    <div v-if="fetchingData" class="absolute right-8 top-2">
+                        <Loader2 class="w-4 h-4 animate-spin text-muted-foreground" />
+                    </div>
+                </div>
             </div>
 
             <!-- Boolean -->
@@ -169,7 +188,10 @@ import Textarea from '@/components/ui/textarea.vue';
 import Button from '@/components/ui/button.vue';
 import Switch from '@/components/ui/switch.vue';
 import DynamicTrigger from './DynamicTrigger.vue';
-import { Image as ImageIcon, Smartphone, Tablet, Monitor, Trash2 } from 'lucide-vue-next';
+import { Image as ImageIcon, Smartphone, Tablet, Monitor, Trash2, Plus, Loader2 } from 'lucide-vue-next';
+import api from '@/services/api';
+import { onMounted } from 'vue';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
 
 const props = defineProps({
     field: { type: Object, required: true },
@@ -180,6 +202,32 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const builder = inject('builder');
 const { activeTheme, getSetting } = useTheme();
+
+const dynamicOptions = ref([]);
+const fetchingData = ref(false);
+
+const fetchDynamicData = async () => {
+    if (props.field.type !== 'data_select' || !props.field.source) return;
+
+    fetchingData.value = true;
+    try {
+        const response = await api.get(props.field.source);
+        const { data } = parseResponse(response);
+        const items = ensureArray(data);
+        
+        // Map to { label, value }
+        dynamicOptions.value = items.map(item => ({
+            label: item.name || item.title || item.label || `ID: ${item.id}`,
+            value: item.id
+        }));
+    } catch (error) {
+        console.error('Failed to fetch dynamic options:', error);
+    } finally {
+        fetchingData.value = false;
+    }
+};
+
+onMounted(fetchDynamicData);
 
 const createDefaultItem = (field) => {
     if (!field.fields) return {};
@@ -209,6 +257,10 @@ const supportsResponsive = computed(() => {
     // Text/Image content should genericly not be responsive (unless supported by component)
     // Color is complex (needs wrapper class knowledge).
     return ['select', 'slider', 'range', 'boolean'].includes(props.field.type);
+});
+
+const supportsDynamic = computed(() => {
+    return ['text', 'textarea', 'richtext', 'image'].includes(props.field.type);
 });
 
 const toggleResponsive = () => {

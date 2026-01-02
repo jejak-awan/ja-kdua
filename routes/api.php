@@ -338,6 +338,7 @@ Route::prefix('v1')->group(function () {
         Route::get('menus/location/{location}', [App\Http\Controllers\Api\V1\MenuController::class, 'getByLocation']);
 
         // Widgets
+        Route::get('widgets/locations', [App\Http\Controllers\Api\V1\WidgetController::class, 'locations']);
         Route::apiResource('widgets', App\Http\Controllers\Api\V1\WidgetController::class)->middleware('permission:manage widgets');
         Route::get('widgets/location/{location}', [App\Http\Controllers\Api\V1\WidgetController::class, 'getByLocation']);
         Route::post('widgets/reorder', [App\Http\Controllers\Api\V1\WidgetController::class, 'reorder'])->middleware('permission:manage widgets');

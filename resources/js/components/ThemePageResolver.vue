@@ -3,7 +3,11 @@
     v-if="builderData" 
     :blocks="builderData"
     :is-preview="true"
-    :context="{ page: page, post: currentContent }"
+    :context="{ 
+        page: page, 
+        post: currentContent, 
+        product: currentContent && currentContent.type === 'product' ? currentContent : null 
+    }"
     class="theme-builder-content"
   />
   

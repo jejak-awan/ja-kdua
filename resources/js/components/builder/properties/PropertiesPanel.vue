@@ -21,8 +21,8 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.activeRightSidebarTab.value === 'layers' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
-                    @click="setTab('layers')"
+                    :class="builder.showLayersPanel.value ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'"
+                    @click="builder.showLayersPanel.value = !builder.showLayersPanel.value"
                     :title="t('features.builder.properties.layers')"
                 >
                     <Layers class="w-4 h-4" />
@@ -78,23 +78,26 @@
                             </div>
                         </div>
 
-                        <!-- Responsive Controls -->
-                        <div class="flex items-center justify-between pt-2 border-t border-sidebar-border/50">
-                            <span class="text-[10px] font-medium text-muted-foreground uppercase">Mode</span>
-                            <div class="flex items-center gap-0.5 bg-background rounded-md border border-border p-0.5">
-                                <button 
-                                    v-for="mode in ['desktop', 'tablet', 'mobile']" 
-                                    :key="mode"
-                                    class="p-1 rounded hover:bg-muted transition-colors"
-                                    :class="builder.deviceMode.value === mode ? 'bg-muted text-foreground' : 'text-muted-foreground'"
-                                    @click="builder.deviceMode.value = mode"
-                                    :title="mode"
-                                >
-                                    <component 
-                                        :is="mode === 'mobile' ? Smartphone : mode === 'tablet' ? Tablet : Monitor" 
-                                        class="w-3.5 h-3.5" 
-                                    />
-                                </button>
+                        <div class="flex flex-col gap-2 pt-2 border-t border-sidebar-border/50">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-medium text-muted-foreground uppercase">State</span>
+                                <div class="flex items-center gap-0.5 bg-background rounded-md border border-border p-0.5">
+                                    <button 
+                                        @click="stateMode = 'default'"
+                                        class="px-2 py-0.5 text-[10px] font-bold rounded uppercase transition-all"
+                                        :class="stateMode === 'default' ? 'bg-muted text-foreground' : 'text-muted-foreground opacity-50 hover:opacity-100'"
+                                    >
+                                        Normal
+                                    </button>
+                                    <button 
+                                        @click="stateMode = 'hover'"
+                                        class="px-2 py-0.5 text-[10px] font-bold rounded uppercase transition-all flex items-center gap-1.2"
+                                        :class="stateMode === 'hover' ? 'bg-primary/10 text-primary' : 'text-muted-foreground opacity-50 hover:opacity-100'"
+                                    >
+                                        <MousePointer2 class="w-2.5 h-2.5" />
+                                        Hover
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,7 +131,7 @@
                                          <PropertyField 
                                             :field="field" 
                                             :block="selectedBlock"
-                                            v-model="selectedBlock.settings[field.key]"
+                                            v-model="activeSettings[field.key]"
                                         />
                                     </div>
                                 </template>
@@ -145,7 +148,7 @@
                                     <PropertyField 
                                         :field="field" 
                                         :block="selectedBlock"
-                                        v-model="selectedBlock.settings[field.key]"
+                                        v-model="activeSettings[field.key]"
                                     />
                                 </template>
                             </AccordionContent>
@@ -160,7 +163,7 @@
                                     <PropertyField 
                                         :field="field" 
                                         :block="selectedBlock"
-                                        v-model="selectedBlock.settings[field.key]"
+                                        v-model="activeSettings[field.key]"
                                     />
                                 </template>
                             </AccordionContent>
@@ -175,7 +178,7 @@
                                     <PropertyField 
                                         :field="field" 
                                         :block="selectedBlock"
-                                        v-model="selectedBlock.settings[field.key]"
+                                        v-model="activeSettings[field.key]"
                                     />
                                 </template>
                             </AccordionContent>
@@ -189,7 +192,7 @@
                                 <PropertyField 
                                     :field="shadowField" 
                                     :block="selectedBlock"
-                                    v-model="selectedBlock.settings.shadow"
+                                    v-model="activeSettings.shadow"
                                 />
                             </AccordionContent>
                         </AccordionItem>
@@ -203,7 +206,7 @@
                                     <PropertyField 
                                         :field="field" 
                                         :block="selectedBlock"
-                                        v-model="selectedBlock.settings[field.key]"
+                                        v-model="activeSettings[field.key]"
                                     />
                                 </template>
                             </AccordionContent>
@@ -250,11 +253,6 @@
                 </div>
             </div>
 
-            <!-- LAYERS TAB -->
-            <div v-else-if="builder.activeRightSidebarTab.value === 'layers'" class="space-y-2">
-                 <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 px-2">{{ t('features.builder.properties.layers') }}</h3>
-                 <LayersTree :blocks="builder.blocks.value" />
-            </div>
 
             <!-- VISIBILITY TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'visibility'" class="space-y-6">
@@ -341,7 +339,7 @@
 </template>
 
 <script setup>
-import { inject, computed } from 'vue';
+import { inject, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { 
     PanelRightClose, 
@@ -356,7 +354,8 @@ import {
     Plus,
     Trash2,
     Check,
-    Eye
+    Eye,
+    MousePointer2
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -368,7 +367,6 @@ import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
 import draggable from 'vuedraggable';
 import { blockRegistry } from '../BlockRegistry';
 import PropertyField from './PropertyField.vue';
-import LayersTree from '../layers/LayersTree.vue';
 
 const builder = inject('builder');
 const { t } = useI18n();
@@ -397,6 +395,19 @@ const selectedBlock = computed(() => {
         return builder.blocks.value[builder.editingIndex.value];
     }
     return null;
+});
+
+const stateMode = ref('default'); // 'default' | 'hover'
+
+const activeSettings = computed(() => {
+    if (!selectedBlock.value) return {};
+    if (stateMode.value === 'hover') {
+        if (!selectedBlock.value.hoverSettings) {
+             selectedBlock.value.hoverSettings = {};
+        }
+        return selectedBlock.value.hoverSettings;
+    }
+    return selectedBlock.value.settings;
 });
 
 const selectBlock = (index) => {

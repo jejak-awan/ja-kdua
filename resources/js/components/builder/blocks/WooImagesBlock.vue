@@ -24,9 +24,13 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import { productService } from '@/services/ProductService';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    content: Object,
-    settings: Object
+    show_gallery: { type: Boolean, default: true },
+    context: { type: Object, default: () => ({}) }
 });
 
 const product = ref({ images: [] });

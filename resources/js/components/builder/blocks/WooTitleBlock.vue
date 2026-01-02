@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" :style="styles">
+    <div :class="classes">
         <h1 class="text-3xl font-bold text-foreground">{{ product.name || 'Product Title' }}</h1>
     </div>
 </template>
@@ -8,9 +8,13 @@
 import { computed, ref, onMounted } from 'vue';
 import { productService } from '@/services/ProductService';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    content: Object,
-    settings: Object
+    text_align: { type: String, default: 'left' },
+    context: { type: Object, default: () => ({}) }
 });
 
 const product = ref({});
@@ -18,7 +22,7 @@ const product = ref({});
 const classes = computed(() => {
     return [
         'w-full',
-        props.settings.text_align ? `text-${props.settings.text_align}` : 'text-left'
+        props.text_align ? `text-${props.text_align}` : 'text-left'
     ];
 });
 

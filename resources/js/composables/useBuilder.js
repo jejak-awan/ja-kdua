@@ -63,6 +63,7 @@ export function useBuilder() {
 
     const activeRightSidebarTab = ref('properties'); // 'properties' | 'layers'
     const isRightSidebarOpen = ref(true);
+    const showLayersPanel = ref(false);
     const widgetSearch = ref('');
     const showMediaPicker = ref(false);
     const showTemplateLibrary = ref(false);
@@ -232,6 +233,33 @@ export function useBuilder() {
         takeSnapshot();
     };
 
+    const getBlockPath = (id) => {
+        if (!id) return [];
+        const path = [];
+        const find = (items, targetId, currentPath = []) => {
+            for (const block of items) {
+                const newPath = [...currentPath, {
+                    id: block.id,
+                    type: block.type,
+                    label: getBlockLabel(block.type)
+                }];
+                if (block.id === targetId) {
+                    path.push(...newPath);
+                    return true;
+                }
+                // Handle Columns
+                if (block.settings && block.settings.columns) {
+                    for (const column of block.settings.columns) {
+                        if (find(column.blocks, targetId, newPath)) return true;
+                    }
+                }
+            }
+            return false;
+        };
+        find(blocks.value, id);
+        return path;
+    };
+
     return {
         // State
         blocks,
@@ -244,6 +272,7 @@ export function useBuilder() {
         isPreview,
         isSidebarOpen,
         isRightSidebarOpen,
+        showLayersPanel,
         activeRightSidebarTab,
         activeMediaField,
         activeBlockId,
@@ -273,6 +302,7 @@ export function useBuilder() {
         // Methods
         getBlockLabel,
         getBlockComponent,
+        getBlockPath,
         cloneBlock,
         addBlock,
         removeBlock,

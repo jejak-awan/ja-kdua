@@ -1,9 +1,9 @@
 <template>
     <div :style="containerStyle" :class="[
         'relative overflow-hidden group',
-        config.aspectRatio,
-        config.rounded,
-        config.shadow
+        aspectRatio,
+        rounded,
+        shadow
     ]">
         <img 
             v-if="imageUrl" 
@@ -19,7 +19,7 @@
         </div>
         
         <!-- Overlay if configured -->
-        <div v-if="config.overlay" class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+        <div v-if="overlay" class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
     </div>
 </template>
 
@@ -27,21 +27,17 @@
 import { computed } from 'vue';
 import { Image as ImageIcon } from 'lucide-vue-next';
 
+defineOptions({
+    inheritAttrs: false
+});
+
 const props = defineProps({
-    config: {
-        type: Object,
-        default: () => ({
-            aspectRatio: 'aspect-video',
-            rounded: 'rounded-lg',
-            shadow: 'shadow-md',
-            overlay: false,
-            customHeight: ''
-        })
-    },
-    context: {
-        type: Object,
-        default: () => ({})
-    }
+    aspectRatio: { type: String, default: 'aspect-video' },
+    rounded: { type: String, default: 'rounded-lg' },
+    shadow: { type: String, default: 'shadow-md' },
+    overlay: { type: Boolean, default: false },
+    customHeight: { type: String, default: '' },
+    context: { type: Object, default: () => ({}) }
 });
 
 const imageUrl = computed(() => {
@@ -60,8 +56,8 @@ const imageUrl = computed(() => {
 const imageAlt = computed(() => props.context?.post?.title || 'Featured Image');
 
 const containerStyle = computed(() => {
-    if (props.config.customHeight) {
-        return { height: props.config.customHeight };
+    if (props.customHeight) {
+        return { height: props.customHeight };
     }
     return {};
 });

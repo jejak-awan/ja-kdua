@@ -23,13 +23,25 @@
             <!-- Overlay for clicks since blocks might have links -->
             <div class="absolute inset-0 z-[5]"></div>
         </div>
+
+        <!-- Context Menu -->
+        <ContextMenu 
+            v-model="showContextMenu" 
+            :x="menuX" 
+            :y="menuY" 
+            :block="block" 
+            :index="index"
+            :can-paste="builder.canPaste.value"
+            @action="handleMenuAction"
+        />
     </div>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { GripVertical, Copy, Trash2 } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
+import ContextMenu from './ContextMenu.vue';
 
 const props = defineProps({
     block: { type: Object, required: true },
@@ -84,6 +96,44 @@ const onDuplicate = () => {
 };
 
 const onContextMenu = (e) => {
-    // Optional: Emit context menu event or handle locally
+    menuX.value = e.clientX;
+    menuY.value = e.clientY;
+    showContextMenu.value = true;
 };
+
+const handleMenuAction = ({ action }) => {
+    switch (action) {
+        case 'edit':
+            onEdit();
+            break;
+        case 'duplicate':
+            onDuplicate();
+            break;
+        case 'copy':
+            builder.copyBlock(props.index);
+            break;
+        case 'cut':
+            builder.cutBlock(props.index);
+            break;
+        case 'paste':
+            builder.pasteBlock(props.index);
+            break;
+        case 'delete':
+            onDelete();
+            break;
+        case 'preset':
+            builder.activeRightSidebarTab.value = 'presets';
+            builder.isRightSidebarOpen.value = true;
+            onEdit();
+            break;
+        case 'layers':
+            builder.activeRightSidebarTab.value = 'layers';
+            builder.isRightSidebarOpen.value = true;
+            break;
+    }
+};
+
+const showContextMenu = ref(false);
+const menuX = ref(0);
+const menuY = ref(0);
 </script>

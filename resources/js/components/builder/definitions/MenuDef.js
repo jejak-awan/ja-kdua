@@ -9,9 +9,18 @@ export default {
     component: defineAsyncComponent(() => import('@/components/builder/blocks/MenuBlock.vue')),
     settings: [
         {
+            key: 'menu_id',
+            type: 'data_select',
+            label: 'System Menu',
+            source: '/admin/cms/menus',
+            description: 'Select a menu managed in the Menu Builder.',
+            default: null
+        },
+        {
             key: 'items',
             type: 'repeater',
-            label: 'Menu Items',
+            label: 'Manual Menu Items',
+            description: 'Use these if no System Menu is selected.',
             fields: [
                 { key: 'label', type: 'text', label: 'Label' },
                 { key: 'url', type: 'text', label: 'URL' },

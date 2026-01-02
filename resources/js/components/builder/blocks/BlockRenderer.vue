@@ -7,12 +7,13 @@
                     v-if="block && block.settings" 
                     :class="[
                         getVisibilityClasses(block.settings.visibility), 
-                        block.settings._css_class,
+                        resolveResponsiveValue(block.settings._css_class),
                         resolveAdvancedStyles(block.settings),
-                        block.settings.animation_effect,
-                        block.settings._position
+                        resolveAdvancedStyles(block.hoverSettings, 'hover'),
+                        resolveResponsiveValue(block.settings.animation_effect),
+                        resolveResponsiveValue(block.settings._position)
                     ].filter(Boolean)"
-                    :id="block.settings._css_id?.trim()"
+                    :id="block.settings._css_id ? String(resolveResponsiveValue(block.settings._css_id)).trim().replace(/\s/g, '-') : undefined"
                     :style="[
                         block.settings._custom_css,
                         getAnimationStyles(block.settings),
@@ -22,6 +23,8 @@
                     <component 
                         :is="getBlockComponent(block.type)" 
                         v-bind="resolveBlockSettings(block)"
+                        :context="context"
+                        :is-preview="isPreview"
                         :id="block.id"
                         class="block-item"
                     />
@@ -67,56 +70,80 @@ const applyPrefix = (str, prefix) => {
     return String(str).split(' ').filter(c => c.trim()).map(c => `${prefix}:${c.trim()}`).join(' ');
 };
 
+const resolveResponsiveValue = (val) => {
+    if (!val) return '';
+    if (typeof val !== 'object' || Array.isArray(val)) return String(val);
+    
+    // Check if it's a responsive object
+    if ('desktop' in val || 'mobile' in val || 'tablet' in val) {
+         const mobile = val.mobile !== undefined ? val.mobile : '';
+         const tablet = val.tablet;
+         const desktop = val.desktop;
+         
+         let classes = [];
+         if (mobile !== '') classes.push(mobile);
+         if (tablet !== undefined && tablet !== mobile) {
+             classes.push(applyPrefix(tablet, 'md'));
+         }
+         if (desktop !== undefined && desktop !== tablet) {
+             classes.push(applyPrefix(desktop, 'lg'));
+         }
+         
+         return classes.join(' ');
+    }
+    
+    return ''; // Generic object that we don't know how to handle
+};
+
 const resolveBlockSettings = (block) => {
     // Clone settings to avoid mutating original
     const settings = { ...block.settings };
+    const propsToPass = {};
 
-    // 1. Resolve Responsive Objects to Tailwind Strings
+    // 1. Resolve Responsive Objects and filterProps
     for (const key in settings) {
-        const val = settings[key];
-        // Check if it's a responsive object (not an array, not null)
+        // Strict key validation: only allow alphanumeric, underscore, hyphen
+        // This prevents "DOMException: String contains an invalid character" in setAttribute
+        if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
+
+        // Skip internal settings (prefixed with _)
+        if (key.startsWith('_')) continue;
+        
+        // Skip system-wide settings handled by BlockRenderer
+        if (['visibility', 'animation_effect', 'animation_duration', 'animation_delay', 'animation_repeat'].includes(key)) continue;
+
+        let val = settings[key];
+        
+        // Resolve responsive objects
         if (val && typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val)) {
-             // Mobile First strategy
-             const mobile = val.mobile !== undefined ? val.mobile : '';
-             const tablet = val.tablet;
-             const desktop = val.desktop;
-             
-             let classes = [];
-             
-             // Base classes (mobile)
-             if (mobile !== '') classes.push(mobile);
-             
-             // Tablet overrides (md:)
-             if (tablet !== undefined && tablet !== mobile) {
-                 classes.push(applyPrefix(tablet, 'md'));
-             }
-             
-             // Desktop overrides (lg:)
-             if (desktop !== undefined && desktop !== tablet) {
-                 classes.push(applyPrefix(desktop, 'lg'));
-             }
-             
-             settings[key] = classes.join(' ');
+             val = resolveResponsiveValue(val);
         }
+        
+        propsToPass[key] = val;
     }
     
-    // 2. Check for dynamic overrides
+    // 2. Add settings object itself for backward compatibility with blocks not yet refactored to flat props
+    propsToPass.settings = settings;
+
+    // 3. Check for dynamic overrides
     if (block.dynamicSettings) {
         Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {
-            if (sourceId) {
+            if (sourceId && propsToPass.hasOwnProperty(key)) {
                 const resolvedValue = dynamicContent.resolve(sourceId, props.context);
                 if (resolvedValue !== null && resolvedValue !== undefined) {
-                    settings[key] = resolvedValue;
+                    propsToPass[key] = resolvedValue;
                 }
             }
         });
     }
     
-    return settings;
+    return propsToPass;
 };
 
-const resolveAdvancedStyles = (settings) => {
+const resolveAdvancedStyles = (settings, prefix = '') => {
+    if (!settings) return '';
     let classes = [];
+    const p = prefix ? `${prefix}:` : '';
     
     // Mapping of setting key to Tailwind prefix
     const mapping = {
@@ -134,46 +161,49 @@ const resolveAdvancedStyles = (settings) => {
         skew_x: 'skew-x',
         skew_y: 'skew-y',
         translate_x: 'translate-x',
-        translate_y: 'translate-y'
+        translate_y: 'translate-y',
+        bgColor: 'bg' // Add bgColor mapping for hover
     };
 
     let hasFilter = false;
     let hasTransform = false;
 
-    Object.entries(mapping).forEach(([key, prefix]) => {
+    Object.entries(mapping).forEach(([key, tailwindPrefix]) => {
         const val = settings[key];
         if (val === undefined || val === null || val === '' || val === 0) return;
 
         // Special check for default values to avoid unnecessary classes
-        if ((key === 'scale' || key === 'brightness' || key === 'contrast' || key === 'saturate') && val === 100) return;
-        if ((key === 'rotate' || key === 'skew_x' || key === 'skew_y' || key === 'translate_x' || key === 'translate_y') && val === 0) return;
+        if (!prefix) {
+            if ((key === 'scale' || key === 'brightness' || key === 'contrast' || key === 'saturate') && val === 100) return;
+            if ((key === 'rotate' || key === 'skew_x' || key === 'skew_y' || key === 'translate_x' || key === 'translate_y') && val === 0) return;
+        }
 
         if (['blur', 'brightness', 'contrast', 'saturate', 'hue_rotate'].includes(key)) hasFilter = true;
         if (['scale', 'rotate', 'skew_x', 'skew_y', 'translate_x', 'translate_y'].includes(key)) hasTransform = true;
 
         if (typeof val === 'object' && !Array.isArray(val)) {
-            if (val.mobile !== undefined && val.mobile !== '') classes.push(`${prefix}-${val.mobile}`);
-            if (val.tablet !== undefined && val.tablet !== '' && val.tablet !== val.mobile) classes.push(`md:${prefix}-${val.tablet}`);
-            if (val.desktop !== undefined && val.desktop !== '' && val.desktop !== val.tablet) classes.push(`lg:${prefix}-${val.desktop}`);
+            if (val.mobile !== undefined && val.mobile !== '') classes.push(`${p}${tailwindPrefix}-${val.mobile}`);
+            if (val.tablet !== undefined && val.tablet !== '' && val.tablet !== val.mobile) classes.push(`${p}md:${tailwindPrefix}-${val.tablet}`);
+            if (val.desktop !== undefined && val.desktop !== '' && val.desktop !== val.tablet) classes.push(`${p}lg:${tailwindPrefix}-${val.desktop}`);
         } else {
-            classes.push(`${prefix}-${val}`);
+            classes.push(`${p}${tailwindPrefix}-${val}`);
         }
     });
 
-    // Handle Box Shadow separately as it's often a full class name already
+    // Handle Box Shadow separately
     if (settings.shadow && settings.shadow !== 'none') {
         const shadow = settings.shadow;
         if (typeof shadow === 'object' && !Array.isArray(shadow)) {
-            if (shadow.mobile) classes.push(shadow.mobile);
-            if (shadow.tablet && shadow.tablet !== shadow.mobile) classes.push(`md:${shadow.tablet}`);
-            if (shadow.desktop && shadow.desktop !== shadow.tablet) classes.push(`lg:${shadow.desktop}`);
+            if (shadow.mobile) classes.push(`${p}${shadow.mobile}`);
+            if (shadow.tablet && shadow.tablet !== shadow.mobile) classes.push(`${p}md:${shadow.tablet}`);
+            if (shadow.desktop && shadow.desktop !== shadow.tablet) classes.push(`${p}lg:${shadow.desktop}`);
         } else {
-            classes.push(shadow);
+            classes.push(`${p}${shadow}`);
         }
     }
 
-    if (hasFilter) classes.push('filter');
-    if (hasTransform) classes.push('transform');
+    if (hasFilter) classes.push(`${p}filter`);
+    if (hasTransform) classes.push(`${p}transform`);
 
     return classes.join(' ');
 };

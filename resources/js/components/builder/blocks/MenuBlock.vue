@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { Menu as MenuIcon, ChevronDown } from 'lucide-vue-next';
+import { ref, computed, onMounted, watch } from 'vue';
+import { Menu as MenuIcon, ChevronDown, Loader2 } from 'lucide-vue-next';
+import api from '@/services/api';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
 
 defineOptions({
     inheritAttrs: false
@@ -9,18 +11,9 @@ defineOptions({
 const props = defineProps({
     items: {
         type: Array,
-        default: () => [
-            { label: 'Home', url: '/', children: [] },
-            { label: 'About', url: '/about', children: [] },
-            { label: 'Services', url: '/services', children: [
-                { label: 'Web Design', url: '/services/web-design' },
-                { label: 'Development', url: '/services/development' },
-                { label: 'SEO', url: '/services/seo' }
-            ]},
-            { label: 'Blog', url: '/blog', children: [] },
-            { label: 'Contact', url: '/contact', children: [] }
-        ]
+        default: () => []
     },
+    menu_id: { type: [String, Number], default: null },
     style: { type: String, default: 'horizontal' },
     alignment: { type: String, default: 'center' },
     show_mobile_toggle: { type: Boolean, default: true },
@@ -29,8 +22,43 @@ const props = defineProps({
     bgColor: { type: String, default: '' }
 });
 
+const systemItems = ref(null);
+const loading = ref(false);
 const mobileOpen = ref(false);
 const openDropdown = ref(null);
+
+const displayItems = computed(() => {
+    if (props.menu_id && systemItems.value) {
+        return systemItems.value;
+    }
+    return props.items && props.items.length > 0 ? props.items : [
+        { label: 'Home', url: '/', children: [] },
+        { label: 'Blog', url: '/blog', children: [] },
+        { label: 'Contact', url: '/contact', children: [] }
+    ];
+});
+
+const fetchSystemMenu = async () => {
+    if (!props.menu_id) {
+        systemItems.value = null;
+        return;
+    }
+
+    loading.value = true;
+    try {
+        const response = await api.get(`/admin/cms/menus/${props.menu_id}`);
+        const { data } = parseResponse(response);
+        // Menu item format might need transformation
+        systemItems.value = ensureArray(data.items);
+    } catch (error) {
+        console.error('Failed to fetch system menu:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+onMounted(fetchSystemMenu);
+watch(() => props.menu_id, fetchSystemMenu);
 
 const containerClasses = computed(() => {
     return ['transition-all duration-300', props.padding].filter(Boolean);
@@ -54,12 +82,17 @@ const toggleDropdown = (index) => {
     <nav 
         :class="containerClasses"
         :style="{ backgroundColor: bgColor || 'transparent' }"
+        class="relative"
     >
+        <div v-if="loading" class="absolute inset-0 bg-background/50 flex items-center justify-center z-10 rounded-lg">
+            <Loader2 class="w-5 h-5 animate-spin text-primary" />
+        </div>
+
         <div class="container mx-auto px-6">
             <!-- Desktop Menu -->
             <ul :class="navClasses">
                 <li 
-                    v-for="(item, index) in items" 
+                    v-for="(item, index) in displayItems" 
                     :key="index"
                     class="relative group"
                 >
@@ -110,7 +143,7 @@ const toggleDropdown = (index) => {
                 v-if="mobileOpen"
                 class="md:hidden mt-4 bg-card border rounded-xl p-4 space-y-2"
             >
-                <template v-for="(item, index) in items" :key="index">
+                <template v-for="(item, index) in displayItems" :key="index">
                     <a 
                         :href="item.url || '#'"
                         class="block px-4 py-2 font-medium rounded-lg hover:bg-muted transition-colors"
