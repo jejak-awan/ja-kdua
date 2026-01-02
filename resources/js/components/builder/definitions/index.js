@@ -16,6 +16,12 @@ import Icon from './Icon';
 import Heading from './Heading';
 import Counter from './Counter';
 import IconList from './IconList';
+import Tabs from './Tabs';
+import SocialLinks from './SocialLinks';
+import Quote from './Quote';
+import Alert from './Alert';
+import Map from './Map';
+import ProgressBar from './ProgressBar';
 
 export default [
     Hero,
@@ -27,6 +33,12 @@ export default [
     Icon,
     Counter,
     IconList,
+    Tabs,
+    Quote,
+    Alert,
+    ProgressBar,
+    SocialLinks,
+    Map,
     FeatureGrid,
     CTA,
     Video,
@@ -37,3 +49,4 @@ export default [
     Testimonial,
     Spacer
 ];
+
