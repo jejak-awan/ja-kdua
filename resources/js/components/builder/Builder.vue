@@ -87,18 +87,76 @@ watch(builder.blocks, (newVal) => {
 
 // Keyboard Shortcuts
 const handleKeydown = (e) => {
-    // Check for Ctrl/Cmd key
-    if ((e.ctrlKey || e.metaKey) && !e.target.closest('input, textarea')) {
-        if (e.key === 'z') {
-            e.preventDefault();
-            if (e.shiftKey) {
+    // Don't trigger if user is in an input field
+    if (e.target.closest('input, textarea, [contenteditable]')) return;
+
+    const selectedIndex = builder.editingIndex.value;
+    
+    // Check for Ctrl/Cmd key combinations
+    if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+            case 'z':
+                e.preventDefault();
+                if (e.shiftKey) {
+                    builder.redo();
+                } else {
+                    builder.undo();
+                }
+                break;
+            case 'y':
+                e.preventDefault();
                 builder.redo();
-            } else {
-                builder.undo();
-            }
-        } else if (e.key === 'y') {
-            e.preventDefault();
-            builder.redo();
+                break;
+            case 'c':
+                if (selectedIndex !== null) {
+                    e.preventDefault();
+                    builder.copyBlock(selectedIndex);
+                }
+                break;
+            case 'x':
+                if (selectedIndex !== null) {
+                    e.preventDefault();
+                    builder.cutBlock(selectedIndex);
+                }
+                break;
+            case 'v':
+                if (builder.canPaste.value) {
+                    e.preventDefault();
+                    builder.pasteBlock(selectedIndex);
+                }
+                break;
+            case 'd':
+                if (selectedIndex !== null) {
+                    e.preventDefault();
+                    builder.duplicateBlock(selectedIndex);
+                }
+                break;
+        }
+    }
+    
+    // Non-Ctrl shortcuts
+    if (selectedIndex !== null) {
+        switch (e.key) {
+            case 'Delete':
+            case 'Backspace':
+                e.preventDefault();
+                builder.removeBlock(selectedIndex);
+                break;
+            case 'ArrowUp':
+                if (e.altKey) {
+                    e.preventDefault();
+                    builder.moveBlockUp(selectedIndex);
+                }
+                break;
+            case 'ArrowDown':
+                if (e.altKey) {
+                    e.preventDefault();
+                    builder.moveBlockDown(selectedIndex);
+                }
+                break;
+            case 'Escape':
+                builder.editingIndex.value = null;
+                break;
         }
     }
 };

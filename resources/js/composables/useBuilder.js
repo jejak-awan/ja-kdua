@@ -164,6 +164,53 @@ export function useBuilder() {
         blocks.value[index] = newBlock;
     };
 
+    // Clipboard for copy/paste
+    const clipboard = ref(null);
+
+    const copyBlock = (index) => {
+        const block = blocks.value[index];
+        if (block) {
+            clipboard.value = JSON.parse(JSON.stringify(block));
+        }
+    };
+
+    const cutBlock = (index) => {
+        copyBlock(index);
+        removeBlock(index);
+    };
+
+    const pasteBlock = (afterIndex = null) => {
+        if (!clipboard.value) return;
+
+        const newBlock = {
+            ...JSON.parse(JSON.stringify(clipboard.value)),
+            id: crypto.randomUUID()
+        };
+
+        if (afterIndex !== null) {
+            blocks.value.splice(afterIndex + 1, 0, newBlock);
+        } else {
+            blocks.value.push(newBlock);
+        }
+    };
+
+    const canPaste = computed(() => clipboard.value !== null);
+
+    // Move block up/down
+    const moveBlockUp = (index) => {
+        if (index <= 0) return;
+        const block = blocks.value.splice(index, 1)[0];
+        blocks.value.splice(index - 1, 0, block);
+        if (editingIndex.value === index) editingIndex.value = index - 1;
+    };
+
+    const moveBlockDown = (index) => {
+        if (index >= blocks.value.length - 1) return;
+        const block = blocks.value.splice(index, 1)[0];
+        blocks.value.splice(index + 1, 0, block);
+        if (editingIndex.value === index) editingIndex.value = index + 1;
+    };
+
     return {
         // State
         blocks,
@@ -179,16 +226,23 @@ export function useBuilder() {
         activeRightSidebarTab,
         activeMediaField,
         activeBlockId,
+        clipboard,
 
         // History
         canUndo,
         canRedo,
         undo,
         redo,
-        takeSnapshot, // Export for manual snapshots if needed (e.g. initial load)
+        takeSnapshot,
+
+        // Clipboard
+        canPaste,
+        copyBlock,
+        cutBlock,
+        pasteBlock,
 
         // Expose Registry Data
-        availableBlocks: blockRegistry.getAll(), // For Sidebar list
+        availableBlocks: blockRegistry.getAll(),
 
         // Methods
         getBlockLabel,
@@ -197,6 +251,9 @@ export function useBuilder() {
         addBlock,
         removeBlock,
         duplicateBlock,
-        updateBlock
+        updateBlock,
+        moveBlockUp,
+        moveBlockDown
     };
 }
+

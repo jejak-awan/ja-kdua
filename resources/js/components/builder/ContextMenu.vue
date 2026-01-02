@@ -1,23 +1,37 @@
 <template>
-    <div 
-        v-if="visible" 
-        class="fixed z-50 bg-popover text-popover-foreground border border-border shadow-md rounded-md min-w-[160px] p-1 animate-in fade-in zoom-in-95 duration-100"
-        :style="{ top: y + 'px', left: x + 'px' }"
-        @click.stop
-        ref="menuRef"
-    >
+    <Teleport to="body">
         <div 
-            v-for="action in actions" 
-            :key="action.label"
-            class="flex items-center gap-2 px-2 py-1.5 text-xs rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground select-none"
-            :class="{ 'text-destructive hover:text-destructive': action.variant === 'destructive' }"
-            @click="handleAction(action)"
+            v-if="visible" 
+            class="fixed z-[100] bg-popover text-popover-foreground border border-border shadow-xl rounded-lg min-w-[180px] py-1.5 animate-in fade-in zoom-in-95 duration-100"
+            :style="{ top: y + 'px', left: x + 'px' }"
+            @click.stop
+            ref="menuRef"
         >
-            <component :is="action.icon" class="w-3.5 h-3.5 opacity-70" />
-            <span>{{ action.label }}</span>
-            <span v-if="action.shortcut" class="ml-auto text-[10px] text-muted-foreground opacity-70">{{ action.shortcut }}</span>
+            <template v-for="(action, index) in actions" :key="action.label || 'sep-' + index">
+                <!-- Separator -->
+                <div v-if="action.separator" class="h-px bg-border my-1 mx-2"></div>
+                
+                <!-- Action Item -->
+                <div 
+                    v-else
+                    class="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer select-none mx-1 rounded-md transition-colors"
+                    :class="[
+                        action.disabled 
+                            ? 'opacity-40 cursor-not-allowed' 
+                            : 'hover:bg-accent hover:text-accent-foreground',
+                        action.variant === 'destructive' && !action.disabled
+                            ? 'text-destructive hover:bg-destructive/10 hover:text-destructive' 
+                            : ''
+                    ]"
+                    @click="!action.disabled && handleAction(action)"
+                >
+                    <component :is="action.icon" class="w-4 h-4 opacity-70" />
+                    <span class="flex-1">{{ action.label }}</span>
+                    <span v-if="action.shortcut" class="text-[10px] text-muted-foreground/70 font-mono">{{ action.shortcut }}</span>
+                </div>
+            </template>
         </div>
-    </div>
+    </Teleport>
 </template>
 
 <script setup>
