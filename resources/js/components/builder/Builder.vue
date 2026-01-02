@@ -9,7 +9,7 @@
     
     <div 
         :class="[
-            'flex flex-col bg-background group/builder transition-all duration-300',
+            'flex flex-col bg-background group/builder',
             !isFullscreen && 'relative h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden shadow-inner'
         ]"
         :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"

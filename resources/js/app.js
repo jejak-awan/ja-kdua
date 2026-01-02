@@ -25,8 +25,11 @@ const initDarkMode = () => {
 // Run before anything else
 initDarkMode();
 
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
 const app = createApp(App);
 const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 const head = createHead();
 
 // Register global directives

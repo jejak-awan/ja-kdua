@@ -52,6 +52,9 @@ import { WooPrice } from './WooPrice';
 import { WooAddToCart } from './WooAddToCart';
 import { WooImages } from './WooImages';
 import { WooTabs } from './WooTabs';
+import { Cart } from './Cart';
+import { PostCarousel } from './PostCarousel';
+import { TabbedPosts } from './TabbedPosts';
 
 export default [
     Hero,
@@ -107,5 +110,8 @@ export default [
     WooPrice,
     WooAddToCart,
     WooImages,
-    WooTabs
+    WooTabs,
+    Cart,
+    PostCarousel,
+    TabbedPosts
 ];

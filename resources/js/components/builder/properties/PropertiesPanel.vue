@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="border-l border-border bg-sidebar flex flex-col shrink-0 transition-all duration-300 ease-in-out relative overflow-hidden h-full z-10"
+        class="border-l border-border bg-sidebar flex flex-col shrink-0 transition-[width] duration-200 ease-in-out relative overflow-hidden h-full z-10"
         :class="builder.isRightSidebarOpen.value ? 'w-80' : 'w-14'"
     >
         <!-- Sidebar Header -->
@@ -11,7 +11,7 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.activeRightSidebarTab.value === 'properties' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    :class="builder.activeRightSidebarTab.value === 'properties' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
                     @click="setTab('properties')"
                     :title="t('features.builder.properties.title')"
                 >
@@ -31,7 +31,7 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.activeRightSidebarTab.value === 'presets' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    :class="builder.activeRightSidebarTab.value === 'presets' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
                     @click="setTab('presets')"
                     title="Style Presets"
                 >
@@ -41,7 +41,7 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
                     @click="setTab('visibility')"
                     title="Display Conditions"
                 >
@@ -69,7 +69,7 @@
                     <!-- Selected Block Info & Device Toggles -->
                     <div class="flex flex-col gap-2 p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-md bg-background flex items-center justify-center border border-border shadow-sm text-primary">
+                            <div class="w-8 h-8 rounded-md bg-sidebar-accent flex items-center justify-center border border-sidebar-border shadow-sm text-primary">
                                 <component :is="builder.getBlockComponent(selectedBlock.type)?.icon" class="w-4 h-4" />
                             </div>
                             <div class="overflow-hidden flex-1">
@@ -81,7 +81,7 @@
                         <div class="flex flex-col gap-2 pt-2 border-t border-sidebar-border/50">
                             <div class="flex items-center justify-between">
                                 <span class="text-[10px] font-medium text-muted-foreground">State</span>
-                                <div class="flex items-center gap-0.5 bg-background rounded-md border border-border p-0.5">
+                                <div class="flex items-center gap-0.5 bg-sidebar-accent rounded-md border border-sidebar-border p-0.5">
                                     <button 
                                         @click="stateMode = 'default'"
                                         class="px-2 py-0.5 text-[10px] font-bold rounded transition-all"
@@ -483,7 +483,12 @@ const animationFields = [
             { label: 'Fade Right', value: 'animate-fade-right' },
             { label: 'Zoom In', value: 'animate-zoom' },
             { label: 'Bounce In', value: 'animate-bounce-in' },
-            { label: 'Flip X', value: 'animate-flip-x' }
+            { label: 'Flip X', value: 'animate-flip-x' },
+            { label: 'Slide Up', value: 'animate-slide-up' },
+            { label: 'Slide Down', value: 'animate-slide-down' },
+            { label: 'Slide Left', value: 'animate-slide-left' },
+            { label: 'Slide Right', value: 'animate-slide-right' },
+            { label: 'Rotate In', value: 'animate-rotate-in' }
         ] 
     },
     { key: 'animation_duration', type: 'slider', label: 'Duration (ms)', min: 100, max: 2000, step: 100, default: 600 },

@@ -44,14 +44,14 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased subpixel-antialiased;
     }
 
 
     :root {
-        /* Light mode - Shadcn Zinc */
-        --background: 240 4.8% 95.9%;
-        /* Zinc-100: Soft Gray Canvas */
+        /* Light mode - Clean & Crisp (Notion/Cursor Style) */
+        --background: 0 0% 100%;
+        /* Pure White Canvas */
         --foreground: 240 10% 3.9%;
 
         --card: 0 0% 100%;
@@ -76,14 +76,14 @@
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
 
-        --border: 240 5.9% 90%;
+        --border: 240 5.9% 92%;
         --input: 240 5.9% 90%;
         --ring: 240 10% 3.9%;
 
         --radius: 0.5rem;
 
-        /* Sidebar - White Shell */
-        --sidebar: 0 0% 100%;
+        /* Sidebar - Slight Contrast */
+        --sidebar: 240 4.8% 98%;
         --sidebar-foreground: 240 5.9% 10%;
         --sidebar-accent: 240 4.8% 95.9%;
     }
@@ -318,4 +318,77 @@
 .builder-mode .animate-zoom,
 .builder-mode .animate-bounce-in {
     /* Optional: Show static state or only play once in builder */
+}
+
+/* --- Expanded Animations (Phase 13) --- */
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        transform: translateX(-50px);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        transform: translateX(50px);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes rotateIn {
+    from {
+        transform: rotate(-90deg);
+        opacity: 0;
+    }
+
+    to {
+        transform: rotate(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s both;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.6s both;
+}
+
+.animate-slide-left {
+    animation: slideLeft 0.6s both;
+}
+
+.animate-slide-right {
+    animation: slideRight 0.6s both;
+}
+
+.animate-rotate-in {
+    animation: rotateIn 0.6s both;
 }

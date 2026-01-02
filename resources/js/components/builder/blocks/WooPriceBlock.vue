@@ -21,10 +21,12 @@ defineOptions({
 
 const props = defineProps({
     text_align: { type: String, default: 'left' },
-    context: { type: Object, default: () => ({}) }
+    context: { type: Object, default: () => ({}) },
+    productId: { type: [Number, String], default: null }
 });
 
 const product = ref({});
+const loading = ref(false);
 
 const classes = computed(() => {
     return [
@@ -34,6 +36,12 @@ const classes = computed(() => {
 });
 
 onMounted(async () => {
-    product.value = await productService.getProduct(1);
+    const id = props.productId || props.context?.id || 1;
+    loading.value = true;
+    try {
+        product.value = await productService.getProduct(id);
+    } finally {
+        loading.value = false;
+    }
 });
 </script>

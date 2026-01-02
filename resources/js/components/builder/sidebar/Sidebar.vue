@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="border-r border-border bg-sidebar flex flex-col shrink-0 transition-all duration-300 ease-in-out relative overflow-hidden"
+        class="border-r border-border bg-sidebar flex flex-col shrink-0 transition-[width] duration-200 ease-in-out relative overflow-hidden"
         :class="builder.isSidebarOpen.value ? 'w-72' : 'w-14'"
     >
         <div class="p-4 border-b border-sidebar-border bg-sidebar-accent/10 flex items-center justify-between h-14 shrink-0">
@@ -59,9 +59,9 @@
                             <template #item="{ element: type }">
                                 <div 
                                     v-show="!builder.widgetSearch.value || type.label.toLowerCase().includes(builder.widgetSearch.value.toLowerCase())"
-                                    class="p-2 border border-sidebar-border bg-sidebar-accent/20 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-grab active:cursor-grabbing transition-all flex flex-col items-center gap-2 text-center group"
+                                    class="p-2 border border-sidebar-border bg-sidebar-accent/20 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-grab active:cursor-grabbing transition-colors flex flex-col items-center gap-2 text-center group"
                                 >
-                                    <div class="w-8 h-8 rounded-md flex items-center justify-center transition-colors bg-background border border-border/50 group-hover:bg-primary/10 group-hover:text-primary text-sidebar-foreground">
+                                    <div class="w-8 h-8 rounded-md flex items-center justify-center transition-colors bg-sidebar-accent/50 border border-sidebar-border group-hover:bg-primary/10 group-hover:text-primary text-sidebar-foreground">
                                         <component :is="type.icon" class="w-4 h-4" />
                                     </div>
                                     <span class="text-[10px] font-medium leading-none truncate w-full group-hover:text-primary transition-colors text-sidebar-foreground">{{ type.label }}</span>
@@ -85,7 +85,7 @@
                     <template #item="{ element: type }">
                         <div 
                             v-show="!builder.widgetSearch.value || type.label.toLowerCase().includes(builder.widgetSearch.value.toLowerCase())"
-                            class="p-2 border border-transparent rounded-lg hover:bg-sidebar-accent cursor-grab active:cursor-grabbing transition-all flex flex-col items-center justify-center py-3 group relative"
+                            class="p-2 border border-transparent rounded-lg hover:bg-sidebar-accent cursor-grab active:cursor-grabbing transition-colors flex flex-col items-center justify-center py-3 group relative"
                         >
                             <div class="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
                                 <component :is="type.icon" class="w-4 h-4" />
@@ -252,13 +252,19 @@ const categoryDefinitions = [
         name: 'dynamic',
         label: 'Dynamic',
         icon: Database,
-        blocks: ['blog_grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio']
+        blocks: ['blog_grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio', 'PostCarousel', 'TabbedPosts']
     },
     {
         name: 'commerce',
         label: 'Shop',
         icon: ShoppingBag,
-        blocks: ['shop', 'woo_title', 'woo_price', 'woo_add_to_cart', 'woo_images', 'woo_tabs']
+        blocks: ['shop', 'woo_title', 'woo_price', 'woo_add_to_cart', 'woo_images', 'woo_tabs', 'Cart']
+    },
+    {
+        name: 'magazine',
+        label: 'Magazine',
+        icon: FileText,
+        blocks: ['PostCarousel', 'TabbedPosts']
     }
 ];
 

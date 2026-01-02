@@ -1,11 +1,11 @@
 <template>
-    <div class="flex-1 min-h-0 overflow-y-auto bg-background/50 bg-dot-pattern p-6 custom-scrollbar relative flex flex-col items-center">
+    <div class="flex-1 min-h-0 overflow-y-auto bg-muted/50 bg-dot-pattern p-6 custom-scrollbar relative flex flex-col items-center">
 
         <!-- Draggable Canvas -->
         <div 
             :class="[
                 canvasWidthClass, 
-                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
+                'bg-background shadow-2xl transition-[width] duration-200 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
             ]"
             :style="{ minHeight: '600px' }"
         >
@@ -115,7 +115,7 @@ const themeStyles = computed(() => {
 
 <style scoped>
 .bg-dot-pattern {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-image: radial-gradient(hsl(var(--foreground) / 0.05) 1px, transparent 1px);
     background-size: 30px 30px;
 }
 .custom-scrollbar::-webkit-scrollbar {
