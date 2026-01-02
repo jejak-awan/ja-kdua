@@ -49,6 +49,8 @@
         }
     },
     "properties": {
+        "title": "Properties",
+        "layers": "Layers",
         "settings": "Settings",
         "id": "ID",
         "tabs": {

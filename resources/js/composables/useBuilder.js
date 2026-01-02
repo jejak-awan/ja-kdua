@@ -114,15 +114,23 @@ export function useBuilder() {
         };
     };
 
-    const cloneBlock = (block) => {
-        const definition = blockRegistry.get(block.type);
-        // Fallback to current settings if no definition found (shouldn't happen)
+    const cloneBlock = (blockOrDef) => {
+        const type = blockOrDef.type || blockOrDef.name;
+        const definition = blockRegistry.get(type);
+
+        // If no definition found, try minimal fallback if we have a type
+        if (!definition && !type) return null;
+
         const defaults = definition ? definition.defaultSettings : {};
+        const existingSettings = blockOrDef.settings || {};
 
         return {
             id: crypto.randomUUID(),
-            type: block.type,
-            settings: JSON.parse(JSON.stringify({ ...defaults, ...block.settings }))
+            type: type,
+            // Merge defaults with existing settings (if any)
+            // If it's a fresh definition from sidebar, existingSettings will be empty/undefined, 
+            // so we get fresh defaults.
+            settings: JSON.parse(JSON.stringify({ ...defaults, ...existingSettings }))
         };
     };
 
