@@ -301,11 +301,11 @@ Route::prefix('v1')->group(function () {
         Route::post('security/clear-failed-attempts', [App\Http\Controllers\Api\V1\SecurityController::class, 'clearFailedAttempts'])->middleware('permission:manage settings');
 
         // Themes
+        Route::get('themes/active', [App\Http\Controllers\Api\V1\ThemeController::class, 'getActive']);
+        Route::get('themes/active/locations', [App\Http\Controllers\Api\V1\ThemeController::class, 'locations']);
         Route::apiResource('themes', App\Http\Controllers\Api\V1\ThemeController::class)->middleware('permission:manage themes');
         Route::post('themes/{theme}/activate', [App\Http\Controllers\Api\V1\ThemeController::class, 'activate'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/deactivate', [App\Http\Controllers\Api\V1\ThemeController::class, 'deactivate'])->middleware('permission:manage themes');
-        Route::get('themes/active', [App\Http\Controllers\Api\V1\ThemeController::class, 'getActive']);
-        Route::get('themes/active/locations', [App\Http\Controllers\Api\V1\ThemeController::class, 'locations']);
         Route::post('themes/scan', [App\Http\Controllers\Api\V1\ThemeController::class, 'scan'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/validate', [App\Http\Controllers\Api\V1\ThemeController::class, 'validate'])->middleware('permission:manage themes');
         Route::get('themes/{theme}/assets', [App\Http\Controllers\Api\V1\ThemeController::class, 'getAssets'])->middleware('permission:manage themes');

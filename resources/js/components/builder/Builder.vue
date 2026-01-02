@@ -64,11 +64,12 @@
                 </div>
             </div>
 
-            <!-- Main Content Area -->
             <div class="flex flex-1 min-h-0 overflow-hidden">
+            <div class="theme-provider contents">
                 <Sidebar />
-                <Canvas />
+                <Canvas :context="context" />
                 <PropertiesPanel />
+            </div>
             </div>
             
             <!-- Shared Media Picker -->
@@ -102,6 +103,10 @@ const props = defineProps({
     modelValue: {
         type: Array,
         default: () => []
+    },
+    context: {
+        type: Object,
+        default: () => ({})
     }
 });
 

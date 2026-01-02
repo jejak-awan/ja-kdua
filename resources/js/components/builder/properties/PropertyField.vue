@@ -136,6 +136,19 @@
                                 <select v-if="subField.type === 'select'" v-model="item[subField.key]" class="w-full h-7 px-2 bg-background border border-input rounded-md text-xs">
                                      <option v-for="opt in subField.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                                 </select>
+
+                                <!-- List Type (Array of Strings) -->
+                                <div v-if="subField.type === 'list'" class="space-y-1.5 pt-1">
+                                    <div v-for="(str, sIdx) in item[subField.key]" :key="sIdx" class="flex gap-1 items-center">
+                                        <Input v-model="item[subField.key][sIdx]" class="h-6 text-[10px] bg-background" />
+                                        <Button variant="ghost" size="icon" class="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive" @click="item[subField.key].splice(sIdx, 1)">
+                                            <Trash2 class="w-2.5 h-2.5" />
+                                        </Button>
+                                    </div>
+                                    <Button variant="outline" size="sm" class="h-6 w-full text-[9px] border-dashed" @click="(item[subField.key] = item[subField.key] || []).push('')">
+                                        <Plus class="w-2.5 h-2.5 mr-1" /> Add Feature
+                                    </Button>
+                                </div>
                              </div>
                         </template>
                     </div>
@@ -249,4 +262,15 @@ const openMediaPicker = () => {
     builder.activeBlockId.value = props.block.id;
     builder.showMediaPicker.value = true;
 };
+
+const isDynamic = computed(() => {
+    return !!(props.block.dynamicSettings && props.block.dynamicSettings[props.field.key]);
+});
+
+const dynamicLabel = computed(() => {
+    if (!isDynamic.value) return '';
+    const sourceId = props.block.dynamicSettings[props.field.key];
+    const source = dynamicContent.getSources().find(s => s.id === sourceId);
+    return source ? `Connected to ${source.label}` : 'Connected to dynamic content';
+});
 </script>

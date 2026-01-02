@@ -1,75 +1,77 @@
-import { MessageSquareQuote } from 'lucide-vue-next';
+import { Quote } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'testimonial',
-    label: 'Testimonials',
-    icon: MessageSquareQuote,
-    description: 'Showcase social proof.',
+    label: 'Testimonial',
+    icon: Quote,
+    description: 'A stylish quote from a customer or client.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/TestimonialBlock.vue')),
     settings: [
         {
-            key: 'title',
+            key: 'quote',
+            type: 'textarea',
+            label: 'Quote Text',
+            default: 'This platform has completely transformed how we build our web presence. The visual builder is intuitive and powerful.',
+            responsive: true
+        },
+        {
+            key: 'author',
             type: 'text',
-            label: 'Title',
-            default: 'What Clients Say'
+            label: 'Author Name',
+            default: 'Sarah Johnson',
+            responsive: true
         },
         {
-            key: 'items',
-            type: 'repeater',
-            label: 'Testimonials',
-            itemLabel: 'Testimonial',
-            fields: [
-                { key: 'quote', type: 'textarea', label: 'Quote', default: 'This is an amazing product.' },
-                { key: 'author', type: 'text', label: 'Author', default: 'Jane Doe' },
-                { key: 'role', type: 'text', label: 'Role', default: 'CEO' },
-                { key: 'avatar', type: 'image', label: 'Avatar', default: '' }
-            ],
-            default: [
-                { quote: 'This tool completely changed how we work. Highly recommended!', author: 'Sarah Johnson', role: 'Product Manager', avatar: '' },
-                { quote: 'The best builder experience I have ever had. Smooth and intuitive.', author: 'Mike Chen', role: 'Developer', avatar: '' },
-                { quote: 'Incredible flexibility and performance. A game changer.', author: 'Emily Davis', role: 'Designer', avatar: '' }
-            ]
+            key: 'job_title',
+            type: 'text',
+            label: 'Job Title',
+            default: 'CEO at Techflow',
+            responsive: true
         },
         {
-            key: 'width',
+            key: 'avatar',
+            type: 'image',
+            label: 'Author Avatar',
+            default: ''
+        },
+        {
+            key: 'alignment',
             type: 'select',
-            label: 'Width',
+            label: 'Alignment',
             options: [
-                { label: 'Large', value: 'max-w-7xl' },
-                { label: 'Full', value: 'max-w-full' }
+                { label: 'Left', value: 'text-left' },
+                { label: 'Center', value: 'text-center' },
+                { label: 'Right', value: 'text-right' }
             ],
-            default: 'max-w-7xl'
+            default: 'text-left',
+            responsive: true
         },
         {
-            key: 'padding',
+            key: 'style',
             type: 'select',
-            label: 'Padding',
+            label: 'Card Style',
             options: [
-                { label: 'Medium', value: 'py-20' },
-                { label: 'Large', value: 'py-32' }
+                { label: 'Standard', value: 'bg-card border shadow-sm' },
+                { label: 'Modern (Floating)', value: 'bg-background shadow-xl border-none' },
+                { label: 'Minimal', value: 'bg-transparent border-none shadow-none p-0' }
             ],
-            default: 'py-20'
+            default: 'bg-card border shadow-sm'
         },
         {
-            key: 'bgColor',
+            key: 'quote_color',
             type: 'color',
-            label: 'Background Color',
-            default: 'transparent'
+            label: 'Quote Text Color',
+            default: ''
         }
     ],
     defaultSettings: {
-        title: 'What Clients Say',
-        items: [
-            { quote: 'This tool completely changed how we work. Highly recommended!', author: 'Sarah Johnson', role: 'Product Manager', avatar: '' },
-            { quote: 'The best builder experience I have ever had. Smooth and intuitive.', author: 'Mike Chen', role: 'Developer', avatar: '' },
-            { quote: 'Incredible flexibility and performance. A game changer.', author: 'Emily Davis', role: 'Designer', avatar: '' }
-        ],
-        width: 'max-w-7xl',
-        padding: 'py-20',
-        bgColor: 'transparent',
-        radius: 'rounded-none',
-        animation: '',
-        visibility: { mobile: true, tablet: true, desktop: true }
+        quote: 'This platform has completely transformed how we build our web presence. The visual builder is intuitive and powerful.',
+        author: 'Sarah Johnson',
+        job_title: 'CEO at Techflow',
+        alignment: 'text-left',
+        style: 'bg-card border shadow-sm',
+        padding: 'p-8',
+        radius: 'rounded-2xl'
     }
 };

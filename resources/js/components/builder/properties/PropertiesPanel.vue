@@ -27,6 +27,26 @@
                 >
                     <Layers class="w-4 h-4" />
                 </Button>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    class="h-8 w-8 rounded-md transition-colors"
+                    :class="builder.activeRightSidebarTab.value === 'presets' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    @click="setTab('presets')"
+                    title="Style Presets"
+                >
+                    <Sparkles class="w-4 h-4" />
+                </Button>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    class="h-8 w-8 rounded-md transition-colors"
+                    :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    @click="setTab('visibility')"
+                    title="Display Conditions"
+                >
+                    <Eye class="w-4 h-4" />
+                </Button>
             </div>
 
             <!-- Toggle Button -->
@@ -114,6 +134,80 @@
                                 </template>
                             </AccordionContent>
                         </AccordionItem>
+                        
+                        <!-- NEW: Advanced Design Suite -->
+                        <AccordionItem value="spacing" class="border-sidebar-border">
+                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                                Spacing (Margin)
+                            </AccordionTrigger>
+                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                                <template v-for="field in marginFields" :key="field.key">
+                                    <PropertyField 
+                                        :field="field" 
+                                        :block="selectedBlock"
+                                        v-model="selectedBlock.settings[field.key]"
+                                    />
+                                </template>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="filters" class="border-sidebar-border">
+                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                                Filters
+                            </AccordionTrigger>
+                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                                <template v-for="field in filterFields" :key="field.key">
+                                    <PropertyField 
+                                        :field="field" 
+                                        :block="selectedBlock"
+                                        v-model="selectedBlock.settings[field.key]"
+                                    />
+                                </template>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="transform" class="border-sidebar-border">
+                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                                Transform
+                            </AccordionTrigger>
+                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                                <template v-for="field in transformFields" :key="field.key">
+                                    <PropertyField 
+                                        :field="field" 
+                                        :block="selectedBlock"
+                                        v-model="selectedBlock.settings[field.key]"
+                                    />
+                                </template>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="shadow" class="border-sidebar-border">
+                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                                Box Shadow
+                            </AccordionTrigger>
+                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                                <PropertyField 
+                                    :field="shadowField" 
+                                    :block="selectedBlock"
+                                    v-model="selectedBlock.settings.shadow"
+                                />
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="animation" class="border-sidebar-border">
+                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                                Animation
+                            </AccordionTrigger>
+                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                                <template v-for="field in animationFields" :key="field.key">
+                                    <PropertyField 
+                                        :field="field" 
+                                        :block="selectedBlock"
+                                        v-model="selectedBlock.settings[field.key]"
+                                    />
+                                </template>
+                            </AccordionContent>
+                        </AccordionItem>
 
                         <AccordionItem value="advanced" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
@@ -134,6 +228,15 @@
                                         <label class="text-[10px] font-bold uppercase text-muted-foreground">Custom CSS</label>
                                         <Textarea v-model="selectedBlock.settings._custom_css" placeholder="border: 1px solid red;" class="min-h-[80px] text-xs bg-background border-input font-mono" />
                                     </div>
+
+                                    <!-- NEW: Positioning Refinements -->
+                                    <template v-for="field in positioningFields" :key="field.key">
+                                        <PropertyField 
+                                            :field="field" 
+                                            :block="selectedBlock"
+                                            v-model="selectedBlock.settings[field.key]"
+                                        />
+                                    </template>
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
@@ -172,6 +275,87 @@
                     </template>
                 </draggable>
             </div>
+
+            <!-- VISIBILITY TAB -->
+            <div v-else-if="builder.activeRightSidebarTab.value === 'visibility'" class="space-y-6">
+                <div class="px-2">
+                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Display Conditions</h3>
+                    
+                    <div v-if="selectedBlock" class="space-y-4">
+                        <div class="space-y-4">
+                             <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-bold uppercase text-muted-foreground">Logic Mode</label>
+                                <select v-model="selectedBlock.settings.visibility_mode" class="h-6 text-[10px] bg-background border rounded px-1">
+                                    <option value="all">Match All (AND)</option>
+                                    <option value="any">Match Any (OR)</option>
+                                </select>
+                             </div>
+
+                             <!-- Rules Repeater -->
+                             <PropertyField 
+                                :field="visibilityRulesField"
+                                :block="selectedBlock"
+                                v-model="selectedBlock.settings.visibility_rules"
+                             />
+                        </div>
+
+                        <div class="p-3 bg-primary/5 border border-primary/10 rounded-lg">
+                            <p class="text-[9px] text-primary/70 leading-relaxed italic">
+                                Note: Hidden blocks remain visible in the builder as placeholders but will be completely removed in preview mode or on the live site if conditions aren't met.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRESETS TAB -->
+            <div v-else-if="builder.activeRightSidebarTab.value === 'presets'" class="space-y-6">
+                 <div class="px-2">
+                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Style Presets</h3>
+                    
+                    <div v-if="selectedBlock" class="space-y-4">
+                        <!-- Save New Preset -->
+                        <div class="p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border space-y-3">
+                            <h4 class="text-[10px] font-bold uppercase text-foreground/80">Save current as preset</h4>
+                            <div class="flex gap-2">
+                                <Input v-model="newPresetName" placeholder="Preset name..." class="h-8 text-xs bg-background" />
+                                <Button size="sm" class="h-8 px-3 text-xs" @click="handleSavePreset">
+                                    <Plus class="w-3.5 h-3.5 mr-1" /> Save
+                                </Button>
+                            </div>
+                        </div>
+
+                        <!-- Existing Presets -->
+                        <div class="space-y-2">
+                            <h4 class="text-[10px] font-bold uppercase text-muted-foreground ml-1">Your Presets</h4>
+                            <div v-if="currentTypePresets.length > 0" class="space-y-1">
+                                <div 
+                                    v-for="preset in currentTypePresets" 
+                                    :key="preset.id"
+                                    class="group flex items-center justify-between p-2 rounded-md border border-sidebar-border bg-background hover:border-primary/50 transition-all"
+                                >
+                                    <span class="text-xs font-medium truncate shrink-0 max-w-[120px]">{{ preset.name }}</span>
+                                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-primary hover:bg-primary/10" @click="applyPreset(preset)" title="Apply Preset">
+                                            <Check class="w-3 h-3" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-destructive hover:bg-destructive/10" @click="deletePreset(preset.id)" title="Delete Preset">
+                                            <Trash2 class="w-3 h-3" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-center py-8 border rounded-lg border-dashed text-muted-foreground text-[10px]">
+                                No presets saved for {{ builder.getBlockLabel(selectedBlock.type) }} blocks.
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="flex flex-col items-center justify-center h-64 text-center opacity-60">
+                        <MousePointerClick class="w-12 h-12 text-muted-foreground stroke-1 mb-2" />
+                        <p class="text-sm font-medium text-muted-foreground">Select a block to manage presets.</p>
+                    </div>
+                 </div>
+            </div>
         </div>
     </div>
 </template>
@@ -187,7 +371,12 @@ import {
     GripVertical,
     Smartphone,
     Tablet,
-    Monitor
+    Monitor,
+    Sparkles,
+    Plus,
+    Trash2,
+    Check,
+    Eye
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -244,5 +433,179 @@ const setTab = (tab) => {
 
 const getBlockDefinition = (type) => {
     return blockRegistry.get(type) || { settings: [] };
+};
+
+// Advanced Design Suite Field Definitions
+const marginFields = [
+    { key: 'margin_top', type: 'slider', label: 'Margin Top', min: 0, max: 20, step: 1, responsive: true },
+    { key: 'margin_bottom', type: 'slider', label: 'Margin Bottom', min: 0, max: 20, step: 1, responsive: true },
+    { key: 'margin_left', type: 'slider', label: 'Margin Left', min: 0, max: 20, step: 1, responsive: true },
+    { key: 'margin_right', type: 'slider', label: 'Margin Right', min: 0, max: 20, step: 1, responsive: true },
+];
+
+const filterFields = [
+    { key: 'blur', type: 'slider', label: 'Blur', min: 0, max: 20, step: 1, responsive: true },
+    { key: 'brightness', type: 'slider', label: 'Brightness', min: 0, max: 200, step: 1, default: 100, responsive: true },
+    { key: 'contrast', type: 'slider', label: 'Contrast', min: 0, max: 200, step: 1, default: 100, responsive: true },
+    { key: 'saturate', type: 'slider', label: 'Saturation', min: 0, max: 200, step: 1, default: 100, responsive: true },
+    { key: 'hue_rotate', type: 'slider', label: 'Hue Rotate', min: 0, max: 360, step: 1, responsive: true },
+];
+
+const transformFields = [
+    { key: 'scale', type: 'slider', label: 'Scale', min: 0, max: 200, step: 1, default: 100, responsive: true },
+    { key: 'rotate', type: 'slider', label: 'Rotate', min: 0, max: 360, step: 1, responsive: true },
+    { key: 'skew_x', type: 'slider', label: 'Skew X', min: -45, max: 45, step: 1, responsive: true },
+    { key: 'skew_y', type: 'slider', label: 'Skew Y', min: -45, max: 45, step: 1, responsive: true },
+    { key: 'translate_x', type: 'slider', label: 'Translate X', min: -100, max: 100, step: 1, responsive: true },
+    { key: 'translate_y', type: 'slider', label: 'Translate Y', min: -100, max: 100, step: 1, responsive: true },
+];
+
+const shadowField = {
+    key: 'shadow',
+    type: 'select',
+    label: 'Box Shadow',
+    options: [
+        { label: 'None', value: 'none' },
+        { label: 'Small', value: 'shadow-sm' },
+        { label: 'Standard', value: 'shadow' },
+        { label: 'Medium', value: 'shadow-md' },
+        { label: 'Large', value: 'shadow-lg' },
+        { label: 'Extra Large', value: 'shadow-xl' },
+        { label: '2XL', value: 'shadow-2xl' },
+        { label: 'Inner', value: 'shadow-inner' },
+    ],
+    responsive: true
+};
+
+const animationFields = [
+    { 
+        key: 'animation_effect', 
+        type: 'select', 
+        label: 'Animation Effect', 
+        options: [
+            { label: 'None', value: '' },
+            { label: 'Fade In', value: 'animate-fade' },
+            { label: 'Fade Up', value: 'animate-fade-up' },
+            { label: 'Fade Down', value: 'animate-fade-down' },
+            { label: 'Fade Left', value: 'animate-fade-left' },
+            { label: 'Fade Right', value: 'animate-fade-right' },
+            { label: 'Zoom In', value: 'animate-zoom' },
+            { label: 'Bounce In', value: 'animate-bounce-in' },
+            { label: 'Flip X', value: 'animate-flip-x' }
+        ] 
+    },
+    { key: 'animation_duration', type: 'slider', label: 'Duration (ms)', min: 100, max: 2000, step: 100, default: 600 },
+    { key: 'animation_delay', type: 'slider', label: 'Delay (ms)', min: 0, max: 2000, step: 100, default: 0 },
+    { 
+        key: 'animation_repeat', 
+        type: 'select', 
+        label: 'Repeat', 
+        options: [
+            { label: 'Once', value: 'once' },
+            { label: 'Loop', value: 'infinite' }
+        ],
+        default: 'once'
+    }
+];
+
+const visibilityRulesField = {
+    key: 'visibility_rules',
+    type: 'repeater',
+    label: 'Conditions',
+    itemLabel: 'Rule',
+    fields: [
+        { 
+            key: 'type', 
+            type: 'select', 
+            label: 'Type', 
+            options: [
+                { label: 'Authentication', value: 'auth' },
+                { label: 'User Role', value: 'role' },
+                { label: 'Date/Time', value: 'date' }
+            ] 
+        },
+        { 
+            key: 'condition', 
+            type: 'select', 
+            label: 'Condition', 
+            options: [
+                { label: 'Is Logged In', value: 'logged_in' },
+                { label: 'Is Guest', value: 'guest' },
+                { label: 'User has Role', value: 'is' },
+                { label: 'User lacks Role', value: 'is_not' },
+                { label: 'Is Before', value: 'before' },
+                { label: 'Is After', value: 'after' }
+            ] 
+        },
+        { key: 'value', type: 'text', label: 'Value (Role/Date)' }
+    ]
+};
+
+
+const positioningFields = [
+    { 
+        key: '_z_index', 
+        type: 'slider', 
+        label: 'Z-Index', 
+        min: 0, 
+        max: 100, 
+        step: 1, 
+        default: 0 
+    },
+    { 
+        key: '_position', 
+        type: 'select', 
+        label: 'Position', 
+        options: [
+            { label: 'Default (Static)', value: 'static' },
+            { label: 'Relative', value: 'relative' },
+            { label: 'Absolute', value: 'absolute' },
+            { label: 'Fixed', value: 'fixed' },
+            { label: 'Sticky', value: 'sticky' }
+        ],
+        default: 'static'
+    },
+    { 
+        key: '_sticky_top', 
+        type: 'slider', 
+        label: 'Sticky Top Offset', 
+        min: 0, 
+        max: 200, 
+        step: 1, 
+        default: 0,
+        condition: (settings) => settings._position === 'sticky' || settings._position === 'fixed'
+    }
+];
+
+// Presets Logic
+import { ref as vueRef } from 'vue'; // To avoid conflict with inject ref if any
+import { blockPresets } from '@/services/BlockPresetService';
+
+const newPresetName = vueRef('');
+const currentTypePresets = computed(() => {
+    if (!selectedBlock.value) return [];
+    return blockPresets.getPresets(selectedBlock.value.type);
+});
+
+const handleSavePreset = () => {
+    if (!selectedBlock.value || !newPresetName.value) return;
+    blockPresets.savePreset(selectedBlock.value.type, newPresetName.value, selectedBlock.value.settings);
+    newPresetName.value = '';
+    // Optional: Toast or feedback
+};
+
+const applyPreset = (preset) => {
+    if (!selectedBlock.value) return;
+    // We want to MERGE settings or REPLACE?
+    // Divi usually replaces style settings.
+    // For now, let's replace all but keep current content if we knew which fields were content.
+    // Simple approach for now: replace all.
+    selectedBlock.value.settings = JSON.parse(JSON.stringify(preset.settings));
+    builder.takeSnapshot(); // Record for undo
+};
+
+const deletePreset = (id) => {
+    if (!selectedBlock.value) return;
+    blockPresets.deletePreset(selectedBlock.value.type, id);
 };
 </script>

@@ -1,9 +1,9 @@
 <template>
     <section 
-        :class="['transition-all duration-500', padding, animation]"
+        :class="containerClasses"
         :style="{ backgroundColor: bgColor || 'transparent' }"
     >
-        <div :class="['mx-auto px-6', width]">
+        <div :class="['mx-auto px-6', width || 'max-w-3xl']">
             <blockquote :class="['relative', styleClass]">
                 <Quote 
                     v-if="showQuoteIcon" 
@@ -16,7 +16,7 @@
                     <img 
                         v-if="authorImage" 
                         :src="authorImage" 
-                        :alt="author"
+                        :alt="author || 'Author'"
                         class="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
@@ -30,12 +30,12 @@
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
 import { computed } from 'vue';
 import { Quote } from 'lucide-vue-next';
+
+defineOptions({
+    inheritAttrs: false
+});
 
 const props = defineProps({
     quote: { type: String, default: 'The only way to do great work is to love what you do.' },
@@ -49,6 +49,10 @@ const props = defineProps({
     padding: { type: String, default: 'py-12' },
     bgColor: String,
     animation: { type: String, default: '' }
+});
+
+const containerClasses = computed(() => {
+    return ['transition-all duration-500', props.padding, props.animation].filter(Boolean);
 });
 
 const styleClass = computed(() => ({

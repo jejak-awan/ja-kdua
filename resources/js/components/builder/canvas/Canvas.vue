@@ -39,6 +39,7 @@
                         <BlockWrapper 
                             :block="block" 
                             :index="index"
+                            :context="context"
                             :isNested="false"
                             @edit="editBlock(index)"
                             @duplicate="builder.duplicateBlock(index)"
@@ -87,6 +88,13 @@ import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockWrapper from './BlockWrapper.vue';
 import ContextMenu from '../ContextMenu.vue';
 import { ref } from 'vue';
+
+const props = defineProps({
+    context: {
+        type: Object,
+        default: () => ({})
+    }
+});
 
 const builder = inject('builder');
 const { t } = useI18n();

@@ -19,7 +19,7 @@
 
         <!-- Live Rendering of Block -->
         <div class="relative">
-            <BlockRenderer :blocks="[block]" class="builder-render" />
+            <BlockRenderer :blocks="[block]" :context="context" class="builder-render" />
             <!-- Overlay for clicks since blocks might have links -->
             <div class="absolute inset-0 z-[5]"></div>
         </div>
@@ -34,6 +34,7 @@ import BlockRenderer from '../blocks/BlockRenderer.vue';
 const props = defineProps({
     block: { type: Object, required: true },
     index: { type: Number, required: true },
+    context: { type: Object, default: () => ({}) },
     isNested: { type: Boolean, default: false } // To handle logic diffs if needed
 });
 

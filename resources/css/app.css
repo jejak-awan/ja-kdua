@@ -4,6 +4,7 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.vue';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -159,4 +160,162 @@
 
 [dir="ltr"] {
     text-align: left;
+}
+
+/* --- Entrance Animations --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes flipInX {
+    from {
+        transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+        transition-timing-function: ease-in;
+        opacity: 0;
+    }
+
+    40% {
+        transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+        transition-timing-function: ease-in;
+    }
+
+    60% {
+        transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+        opacity: 1;
+    }
+
+    80% {
+        transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+    }
+
+    to {
+        transform: perspective(400px);
+    }
+}
+
+.animate-fade {
+    animation: fadeIn 0.6s both;
+}
+
+.animate-fade-up {
+    animation: fadeInUp 0.6s both;
+}
+
+.animate-fade-down {
+    animation: fadeInDown 0.6s both;
+}
+
+.animate-fade-left {
+    animation: fadeInLeft 0.6s both;
+}
+
+.animate-fade-right {
+    animation: fadeInRight 0.6s both;
+}
+
+.animate-zoom {
+    animation: zoomIn 0.6s both;
+}
+
+.animate-bounce-in {
+    animation: bounceIn 0.8s both;
+}
+
+.animate-flip-x {
+    animation: flipInX 0.8s both;
+}
+
+/* Animation Utils */
+.animation-paused {
+    animation-play-state: paused !important;
+}
+
+.builder-mode .animate-fade,
+.builder-mode .animate-fade-up,
+.builder-mode .animate-fade-down,
+.builder-mode .animate-zoom,
+.builder-mode .animate-bounce-in {
+    /* Optional: Show static state or only play once in builder */
 }

@@ -1,9 +1,9 @@
 <template>
     <section 
-        :class="['transition-all duration-500', padding, animation]"
+        :class="containerClasses"
         :style="{ backgroundColor: bgColor || 'transparent' }"
     >
-        <div :class="['mx-auto px-6', width]">
+        <div :class="['mx-auto px-6', width || 'max-w-4xl']">
             <div :class="['flex gap-4 p-4 rounded-xl', variantClass]">
                 <div class="flex-shrink-0">
                     <component :is="variantIcon" class="w-5 h-5 mt-0.5" />
@@ -25,12 +25,12 @@
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
 import { ref, computed } from 'vue';
 import { Info, AlertTriangle, CheckCircle, XCircle, Bell, X } from 'lucide-vue-next';
+
+defineOptions({
+    inheritAttrs: false
+});
 
 const props = defineProps({
     title: { type: String, default: '' },
@@ -44,6 +44,10 @@ const props = defineProps({
 });
 
 const dismissed = ref(false);
+
+const containerClasses = computed(() => {
+    return ['transition-all duration-500', props.padding, props.animation].filter(Boolean);
+});
 
 const variantIcons = {
     info: Info, warning: AlertTriangle, success: CheckCircle, error: XCircle, notice: Bell
