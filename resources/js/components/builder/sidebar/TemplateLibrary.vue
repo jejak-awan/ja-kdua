@@ -150,15 +150,18 @@
       loading.value = true;
       try {
           // Fetch explicit 'builder' types. 
-          // Note: Backend might need update to return both 'builder' and 'section'? 
-          // For now, let's just fetch all and filter in frontend or use controller 'type' param
           const response = await templateService.getTemplates({ type: 'builder', per_page: 100 });
-          const all = response.data.data;
           
-          // Split by ownership (assuming author_id is populated)
-          // Since the API response might not explicitly separate them in a "group" way,
-          // we check author_id. If missing or null => Premade. If present => Saved.
-          // Note: Current user is implied for 'Saved'.
+          // Debug response structure if needed
+          // response.data.data is the Paginator object.
+          // response.data.data.data is the Array of items.
+          const paginated = response.data.data;
+          const all = paginated && paginated.data ? paginated.data : [];
+          
+          if (!Array.isArray(all)) {
+               console.error("Unexpected API response format", response);
+               throw new Error("Invalid response format");
+          }
           
           premadeTemplates.value = all.filter(t => !t.author_id);
           savedTemplates.value = all.filter(t => t.author_id);
