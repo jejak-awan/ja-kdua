@@ -2,26 +2,38 @@ import { MoveVertical } from 'lucide-vue-next';
 
 export default {
     name: 'spacer',
-    label: 'Spacer / Divider',
+    label: 'Spacer',
     icon: MoveVertical,
-    description: 'Add vertical space or lines.',
+    description: 'Add vertical space between sections.',
     component: () => import('@/components/builder/blocks/SpacerBlock.vue'),
     settings: [
         {
             key: 'height',
             type: 'select',
-            label: 'Height',
+            label: 'Preset Height',
             options: [
-                { label: 'Small', value: 'h-12' },
-                { label: 'Medium', value: 'h-24' },
-                { label: 'Large', value: 'h-48' }
+                { label: 'None (Use Custom)', value: '' },
+                { label: 'Small (48px)', value: 'h-12' },
+                { label: 'Medium (96px)', value: 'h-24' },
+                { label: 'Large (192px)', value: 'h-48' },
+                { label: 'Extra Large (256px)', value: 'h-64' }
             ],
             default: 'h-24'
         },
         {
+            key: 'heightPx',
+            type: 'slider',
+            label: 'Custom Height',
+            min: 0,
+            max: 400,
+            step: 8,
+            unit: 'px',
+            default: null
+        },
+        {
             key: 'showLine',
             type: 'boolean',
-            label: 'Show Line/Divider',
+            label: 'Show Divider Line',
             default: false
         },
         {
@@ -33,6 +45,7 @@ export default {
     ],
     defaultSettings: {
         height: 'h-24',
+        heightPx: null,
         showLine: false,
         padding: 'py-0',
         bgColor: 'transparent',
@@ -40,3 +53,4 @@ export default {
         visibility: { mobile: true, tablet: true, desktop: true }
     }
 };
+

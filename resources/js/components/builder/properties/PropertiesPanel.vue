@@ -220,6 +220,38 @@
                                                 @update:checked="selectedBlock.settings[field.key] = $event"
                                             />
                                         </div>
+
+                                        <!-- Number Field -->
+                                        <div v-if="field.type === 'number'" class="flex gap-2 items-center">
+                                            <Input 
+                                                type="number" 
+                                                :value="selectedBlock.settings[field.key]"
+                                                @input="selectedBlock.settings[field.key] = Number($event.target.value)"
+                                                :min="field.min"
+                                                :max="field.max"
+                                                :step="field.step || 1"
+                                                class="h-8 text-xs bg-background border-input w-24"
+                                            />
+                                            <span v-if="field.unit" class="text-xs text-muted-foreground">{{ field.unit }}</span>
+                                        </div>
+
+                                        <!-- Slider / Range Field -->
+                                        <div v-if="field.type === 'slider' || field.type === 'range'" class="space-y-2">
+                                            <div class="flex items-center gap-3">
+                                                <input 
+                                                    type="range"
+                                                    :value="selectedBlock.settings[field.key]"
+                                                    @input="selectedBlock.settings[field.key] = Number($event.target.value)"
+                                                    :min="field.min || 0"
+                                                    :max="field.max || 100"
+                                                    :step="field.step || 1"
+                                                    class="flex-1 h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
+                                                />
+                                                <span class="text-xs font-mono text-muted-foreground w-12 text-right">
+                                                    {{ selectedBlock.settings[field.key] }}{{ field.unit || '' }}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </template>
                             </AccordionContent>
