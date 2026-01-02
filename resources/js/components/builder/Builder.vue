@@ -20,23 +20,23 @@
                 <div class="flex items-center gap-2">
                     <!-- Undo/Redo -->
                     <div class="flex items-center border-r border-border pr-3 mr-1 gap-1">
-                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" title="Undo (Ctrl+Z)">
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" :title="t('features.builder.canvas.toolbar.undo')">
                             <Undo2 class="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" title="Redo (Ctrl+Y)">
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" :title="t('features.builder.canvas.toolbar.redo')">
                             <Redo2 class="w-4 h-4" />
                         </Button>
                     </div>
                     
                     <!-- Device Selector -->
                     <div class="flex items-center gap-1 text-muted-foreground">
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'desktop' }" @click="builder.deviceMode.value = 'desktop'" title="Desktop">
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'desktop' }" @click="builder.deviceMode.value = 'desktop'" :title="t('features.builder.canvas.toolbar.desktop')">
                             <Monitor class="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'tablet' }" @click="builder.deviceMode.value = 'tablet'" title="Tablet">
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'tablet' }" @click="builder.deviceMode.value = 'tablet'" :title="t('features.builder.canvas.toolbar.tablet')">
                             <Tablet class="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'mobile' }" @click="builder.deviceMode.value = 'mobile'" title="Mobile">
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'mobile' }" @click="builder.deviceMode.value = 'mobile'" :title="t('features.builder.canvas.toolbar.mobile')">
                             <Smartphone class="w-4 h-4" />
                         </Button>
                     </div>

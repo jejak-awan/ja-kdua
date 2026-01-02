@@ -33,7 +33,7 @@
                     class="h-8 w-8 rounded-md transition-colors"
                     :class="builder.activeRightSidebarTab.value === 'presets' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
                     @click="setTab('presets')"
-                    title="Style Presets"
+                    :title="t('features.builder.properties.presets.title')"
                 >
                     <Sparkles class="w-4 h-4" />
                 </Button>
@@ -43,7 +43,7 @@
                     class="h-8 w-8 rounded-md transition-colors"
                     :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
                     @click="setTab('visibility')"
-                    title="Display Conditions"
+                    :title="t('features.builder.properties.visibility.title')"
                 >
                     <Eye class="w-4 h-4" />
                 </Button>
@@ -80,14 +80,14 @@
 
                         <div class="flex flex-col gap-2 pt-2 border-t border-sidebar-border/50">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-medium text-muted-foreground">State</span>
+                                <span class="text-[10px] font-medium text-muted-foreground">{{ t('features.builder.properties.advanced.state') }}</span>
                                 <div class="flex items-center gap-0.5 bg-sidebar-accent rounded-md border border-sidebar-border p-0.5">
                                     <button 
                                         @click="stateMode = 'default'"
                                         class="px-2 py-0.5 text-[10px] font-bold rounded transition-all"
                                         :class="stateMode === 'default' ? 'bg-muted text-foreground' : 'text-muted-foreground opacity-50 hover:opacity-100'"
                                     >
-                                        Normal
+                                        {{ t('features.builder.properties.advanced.stateDefault') }}
                                     </button>
                                     <button 
                                         @click="stateMode = 'hover'"
@@ -95,7 +95,7 @@
                                         :class="stateMode === 'hover' ? 'bg-primary/10 text-primary' : 'text-muted-foreground opacity-50 hover:opacity-100'"
                                     >
                                         <MousePointer2 class="w-2.5 h-2.5" />
-                                        Hover
+                                        {{ t('features.builder.properties.advanced.stateHover') }}
                                     </button>
                                 </div>
                             </div>
@@ -225,10 +225,10 @@
                                     <div class="space-y-1.5">
                                         <label class="text-[10px] font-bold text-muted-foreground">CSS Classes</label>
                                         <Input v-model="selectedBlock.settings._css_class" placeholder="p-4 bg-red-500" class="h-8 text-xs bg-background border-input font-mono" />
-                                        <p class="text-[9px] text-muted-foreground">Space separated classes (Tailwind supported)</p>
+                                        <p class="text-[9px] text-muted-foreground">{{ t('features.builder.properties.advanced.cssClassHelp') }}</p>
                                     </div>
                                     <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold text-muted-foreground">Custom CSS</label>
+                                        <label class="text-[10px] font-bold text-muted-foreground">{{ t('features.builder.properties.advanced.customCSS') }}</label>
                                         <Textarea v-model="selectedBlock.settings._custom_css" placeholder="border: 1px solid red;" class="min-h-[80px] text-xs bg-background border-input font-mono" />
                                     </div>
 
@@ -257,15 +257,15 @@
             <!-- VISIBILITY TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'visibility'" class="space-y-6">
                 <div class="px-2">
-                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">Display Conditions</h3>
+                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">{{ t('features.builder.properties.visibility.title') }}</h3>
                     
                     <div v-if="selectedBlock" class="space-y-4">
                         <div class="space-y-4">
                              <div class="flex items-center justify-between">
-                                <label class="text-[10px] font-bold text-muted-foreground">Logic Mode</label>
+                                <label class="text-[10px] font-bold text-muted-foreground">{{ t('features.builder.properties.visibility.logicMode') }}</label>
                                 <select v-model="selectedBlock.settings.visibility_mode" class="h-6 text-[10px] bg-background border rounded px-1">
-                                    <option value="all">Match All (AND)</option>
-                                    <option value="any">Match Any (OR)</option>
+                                    <option value="all">{{ t('features.builder.properties.visibility.matchAll') }}</option>
+                                    <option value="any">{{ t('features.builder.properties.visibility.matchAny') }}</option>
                                 </select>
                              </div>
 
@@ -289,14 +289,14 @@
             <!-- PRESETS TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'presets'" class="space-y-6">
                  <div class="px-2">
-                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">Style Presets</h3>
+                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">{{ t('features.builder.properties.presets.title') }}</h3>
                     
                     <div v-if="selectedBlock" class="space-y-4">
                         <!-- Save New Preset -->
                         <div class="p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border space-y-3">
-                            <h4 class="text-[10px] font-bold text-foreground/80">Save current as preset</h4>
+                            <h4 class="text-[10px] font-bold text-foreground/80">{{ t('features.builder.properties.presets.saveTitle') }}</h4>
                             <div class="flex gap-2">
-                                <Input v-model="newPresetName" placeholder="Preset name..." class="h-8 text-xs bg-background" />
+                                <Input v-model="newPresetName" :placeholder="t('features.builder.properties.presets.namePlaceholder')" class="h-8 text-xs bg-background" />
                                 <Button size="sm" class="h-8 px-3 text-xs" @click="handleSavePreset">
                                     <Plus class="w-3.5 h-3.5 mr-1" /> Save
                                 </Button>
@@ -305,7 +305,7 @@
 
                         <!-- Existing Presets -->
                         <div class="space-y-2">
-                            <h4 class="text-[10px] font-bold text-muted-foreground ml-1">Your Presets</h4>
+                            <h4 class="text-[10px] font-bold text-muted-foreground ml-1">{{ t('features.builder.properties.presets.yourPresets') }}</h4>
                             <div v-if="currentTypePresets.length > 0" class="space-y-1">
                                 <div 
                                     v-for="preset in currentTypePresets" 
@@ -314,10 +314,10 @@
                                 >
                                     <span class="text-xs font-medium truncate shrink-0 max-w-[120px]">{{ preset.name }}</span>
                                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-primary hover:bg-primary/10" @click="applyPreset(preset)" title="Apply Preset">
+                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-primary hover:bg-primary/10" @click="applyPreset(preset)" :title="t('features.builder.properties.tooltips.applyPreset')">
                                             <Check class="w-3 h-3" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-destructive hover:bg-destructive/10" @click="deletePreset(preset.id)" title="Delete Preset">
+                                        <Button variant="ghost" size="icon" class="h-6 w-6 text-destructive hover:bg-destructive/10" @click="deletePreset(preset.id)" :title="t('features.builder.properties.tooltips.deletePreset')">
                                             <Trash2 class="w-3 h-3" />
                                         </Button>
                                     </div>
@@ -330,7 +330,7 @@
                     </div>
                     <div v-else class="flex flex-col items-center justify-center h-64 text-center opacity-60">
                         <MousePointerClick class="w-12 h-12 text-muted-foreground stroke-1 mb-2" />
-                        <p class="text-sm font-medium text-muted-foreground">Select a block to manage presets.</p>
+                        <p class="text-sm font-medium text-muted-foreground">{{ t('features.builder.properties.presets.noSelection') }}</p>
                     </div>
                  </div>
             </div>

@@ -132,50 +132,50 @@
             class="absolute inset-0 bg-background/95 backdrop-blur-sm z-50 p-4 overflow-y-auto"
         >
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-sm">Keyboard Shortcuts</h3>
+                <h3 class="font-bold text-sm">{{ t('features.builder.sidebar.keyboardShortcuts.title') }}</h3>
                 <Button variant="ghost" size="icon" class="h-6 w-6" @click="showShortcuts = false">
                     <X class="w-4 h-4" />
                 </Button>
             </div>
             <div class="space-y-3 text-xs">
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Undo</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.undo') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + Z</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Redo</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.redo') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + Y</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Copy Block</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.copyBlock') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + C</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Cut Block</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.cutBlock') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + X</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Paste Block</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.pasteBlock') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + V</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Duplicate Block</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.duplicateBlock') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl + D</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Delete Block</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.deleteBlock') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Delete</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Move Up</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.moveUp') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Alt + ↑</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-border">
-                    <span class="text-muted-foreground">Move Down</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.moveDown') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Alt + ↓</kbd>
                 </div>
                 <div class="flex justify-between items-center py-1">
-                    <span class="text-muted-foreground">Deselect</span>
+                    <span class="text-muted-foreground">{{ t('features.builder.sidebar.keyboardShortcuts.deselect') }}</span>
                     <kbd class="px-2 py-0.5 bg-muted rounded text-[10px] font-mono">Escape</kbd>
                 </div>
             </div>

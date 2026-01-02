@@ -3,7 +3,20 @@
         "title": "Widgets",
         "elements": "Elements",
         "searchPlaceholder": "Search widgets...",
-        "layoutLibrary": "Layout Library"
+        "layoutLibrary": "Layout Library",
+        "keyboardShortcuts": {
+            "title": "Keyboard Shortcuts",
+            "undo": "Undo",
+            "redo": "Redo",
+            "copyBlock": "Copy Block",
+            "cutBlock": "Cut Block",
+            "pasteBlock": "Paste Block",
+            "duplicateBlock": "Duplicate Block",
+            "deleteBlock": "Delete Block",
+            "moveUp": "Move Up",
+            "moveDown": "Move Down",
+            "deselect": "Deselect"
+        }
     },
     "canvas": {
         "empty": {
@@ -14,7 +27,12 @@
             "mobile": "Mobile View",
             "tablet": "Tablet View",
             "desktop": "Desktop View",
-            "openSidebar": "Open Sidebar"
+            "openSidebar": "Open Sidebar",
+            "undo": "Undo (Ctrl+Z)",
+            "redo": "Redo (Ctrl+Y)",
+            "preview": "Preview",
+            "fullscreen": "Fullscreen",
+            "exitFullscreen": "Exit Fullscreen"
         },
         "hints": {
             "edit": "Click to Edit",
@@ -70,6 +88,34 @@
                 "medium": "Medium",
                 "large": "Large"
             }
+        },
+        "tooltips": {
+            "duplicate": "Duplicate",
+            "delete": "Delete",
+            "mediaLibrary": "Media Library",
+            "dynamicContent": "Dynamic Content",
+            "applyPreset": "Apply Preset",
+            "deletePreset": "Delete Preset"
+        },
+        "presets": {
+            "title": "Style Presets",
+            "saveTitle": "Save current as preset",
+            "namePlaceholder": "Preset name...",
+            "yourPresets": "Your Presets",
+            "noSelection": "Select a block to manage presets."
+        },
+        "advanced": {
+            "customCSS": "Custom CSS",
+            "cssClassHelp": "Space separated classes (Tailwind supported)",
+            "state": "State",
+            "stateDefault": "Default",
+            "stateHover": "Hover"
+        },
+        "visibility": {
+            "title": "Display Conditions",
+            "logicMode": "Logic Mode",
+            "matchAll": "Match All (AND)",
+            "matchAny": "Match Any (OR)"
         }
     },
     "templates": {

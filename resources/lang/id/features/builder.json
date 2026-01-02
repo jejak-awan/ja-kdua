@@ -1,53 +1,127 @@
 {
     "sidebar": {
-        "title": "Widgets",
-        "elements": "Elements",
-        "searchPlaceholder": "Search widgets...",
-        "layoutLibrary": "Layout Library"
+        "title": "Widget",
+        "elements": "Elemen",
+        "searchPlaceholder": "Cari widget...",
+        "layoutLibrary": "Pustaka Tata Letak",
+        "keyboardShortcuts": {
+            "title": "Pintasan Keyboard",
+            "undo": "Batalkan",
+            "redo": "Ulangi",
+            "copyBlock": "Salin Blok",
+            "cutBlock": "Potong Blok",
+            "pasteBlock": "Tempel Blok",
+            "duplicateBlock": "Duplikat Blok",
+            "deleteBlock": "Hapus Blok",
+            "moveUp": "Pindah Ke Atas",
+            "moveDown": "Pindah Ke Bawah",
+            "deselect": "Batalkan Pilihan"
+        }
     },
     "canvas": {
         "empty": {
-            "title": "Build your masterpiece",
-            "description": "Drag widgets from the left library and drop them here to start building your page."
+            "title": "Bangun karya Anda",
+            "description": "Seret widget dari pustaka kiri dan letakkan di sini untuk mulai membangun halaman Anda."
         },
         "toolbar": {
-            "mobile": "Mobile View",
-            "tablet": "Tablet View",
-            "desktop": "Desktop View",
-            "openSidebar": "Open Sidebar"
+            "mobile": "Tampilan Mobile",
+            "tablet": "Tampilan Tablet",
+            "desktop": "Tampilan Desktop",
+            "openSidebar": "Buka Sidebar",
+            "undo": "Batalkan (Ctrl+Z)",
+            "redo": "Ulangi (Ctrl+Y)",
+            "preview": "Pratinjau",
+            "fullscreen": "Layar Penuh",
+            "exitFullscreen": "Keluar Layar Penuh"
         },
         "hints": {
-            "edit": "Click to Edit",
-            "reorder": "Drag to Reorder",
-            "add": "Drop to Add"
-        }
-    },
-    "properties": {
-        "settings": "Settings",
-        "id": "ID",
-        "tabs": {
-            "content": "Content",
-            "style": "Style",
-            "advanced": "Advanced"
+            "edit": "Klik untuk Edit",
+            "reorder": "Seret untuk Susun Ulang",
+            "add": "Lepas untuk Tambah"
         },
-        "noSelection": "Select a block to edit settings",
-        "confirm": "Confirm & Close",
+        "properties": {
+            "title": "Properti",
+            "layers": "Navigator",
+            "noSelection": "Pilih elemen untuk edit pengaturan",
+            "confirm": "Selesai",
+            "id": "ID",
+            "settings": "Pengaturan",
+            "tabs": {
+                "content": "Konten",
+                "style": "Gaya",
+                "advanced": "Lanjutan"
+            }
+        },
+        "noSelection": "Pilih blok untuk edit pengaturan",
+        "confirm": "Konfirmasi & Tutup",
         "fields": {
-            "backgroundColor": "Background Color",
-            "backgroundImage": "Background Image",
-            "contentAlignment": "Content Alignment",
-            "verticalPadding": "Vertical Padding",
+            "backgroundColor": "Warna Latar",
+            "backgroundImage": "Gambar Latar",
+            "contentAlignment": "Perataan Konten",
+            "verticalPadding": "Padding Vertikal",
             "padding": {
-                "none": "None",
-                "medium": "Medium",
-                "large": "Large"
+                "none": "Tidak Ada",
+                "medium": "Sedang",
+                "large": "Besar"
             }
         }
     },
+    "properties": {
+        "title": "Properti",
+        "layers": "Layer",
+        "settings": "Pengaturan",
+        "id": "ID",
+        "tabs": {
+            "content": "Konten",
+            "style": "Gaya",
+            "advanced": "Lanjutan"
+        },
+        "noSelection": "Pilih blok untuk edit pengaturan",
+        "confirm": "Konfirmasi & Tutup",
+        "fields": {
+            "backgroundColor": "Warna Latar",
+            "backgroundImage": "Gambar Latar",
+            "contentAlignment": "Perataan Konten",
+            "verticalPadding": "Padding Vertikal",
+            "padding": {
+                "none": "Tidak Ada",
+                "medium": "Sedang",
+                "large": "Besar"
+            }
+        },
+        "tooltips": {
+            "duplicate": "Duplikat",
+            "delete": "Hapus",
+            "mediaLibrary": "Pustaka Media",
+            "dynamicContent": "Konten Dinamis",
+            "applyPreset": "Terapkan Preset",
+            "deletePreset": "Hapus Preset"
+        },
+        "presets": {
+            "title": "Preset Gaya",
+            "saveTitle": "Simpan sebagai preset",
+            "namePlaceholder": "Nama preset...",
+            "yourPresets": "Preset Anda",
+            "noSelection": "Pilih blok untuk kelola preset."
+        },
+        "advanced": {
+            "customCSS": "CSS Kustom",
+            "cssClassHelp": "Kelas dipisahkan spasi (Tailwind didukung)",
+            "state": "Status",
+            "stateDefault": "Default",
+            "stateHover": "Hover"
+        },
+        "visibility": {
+            "title": "Kondisi Tampilan",
+            "logicMode": "Mode Logika",
+            "matchAll": "Cocokkan Semua (AND)",
+            "matchAny": "Cocokkan Salah Satu (OR)"
+        }
+    },
     "templates": {
-        "title": "Template Library",
-        "description": "Choose a professionally designed block or full layout template.",
-        "insert": "Insert Template",
-        "close": "Close"
+        "title": "Pustaka Template",
+        "description": "Pilih blok atau template tata letak yang dirancang secara profesional.",
+        "insert": "Sisipkan Template",
+        "close": "Tutup"
     }
 }

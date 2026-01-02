@@ -43,7 +43,7 @@
             <div v-if="field.type === 'image'">
                 <div class="flex gap-2">
                     <Input v-model="proxyValue" class="h-8 text-xs bg-background border-input" placeholder="https://..." :disabled="isDynamic" />
-                    <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPicker" title="Media Library" :disabled="isDynamic">
+                    <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPicker" :title="t('features.builder.properties.tooltips.mediaLibrary')" :disabled="isDynamic">
                         <ImageIcon class="w-3.5 h-3.5" />
                     </Button>
                 </div>

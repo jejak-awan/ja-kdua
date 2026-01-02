@@ -4,7 +4,7 @@
             <button 
                 class="opacity-50 hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-muted" 
                 :class="{ 'text-primary opacity-100 bg-primary/5': isConnected }"
-                title="Dynamic Content"
+                :title="t('features.builder.properties.tooltips.dynamicContent')"
             >
                 <Database class="w-3 h-3" />
             </button>
