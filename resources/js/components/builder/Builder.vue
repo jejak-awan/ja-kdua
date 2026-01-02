@@ -1,52 +1,80 @@
 <template>
-    <div class="flex flex-col h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden bg-background shadow-inner relative group/builder">
-        <!-- Toolbar -->
-        <div class="h-12 bg-background border-b border-border flex items-center px-4 z-10 shrink-0">
-            <div class="flex items-center gap-2">
-                <div class="flex items-center mr-2 border-r border-border pr-2 gap-1">
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        :disabled="!builder.canUndo.value"
-                        @click="builder.undo"
-                        title="Undo (Ctrl+Z)"
-                    >
-                        <Undo2 class="w-4 h-4" />
+    <component :is="isFullscreen ? Teleport : 'div'" :to="isFullscreen ? 'body' : undefined">
+        <div 
+            :class="[
+                'flex flex-col bg-background relative group/builder transition-all duration-300',
+                isFullscreen 
+                    ? 'fixed inset-0 z-[9999]' 
+                    : 'h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden shadow-inner'
+            ]"
+        >
+            <!-- Toolbar -->
+            <div class="h-12 bg-background border-b border-border flex items-center justify-between px-4 z-10 shrink-0">
+                <!-- Left Section -->
+                <div class="flex items-center gap-2">
+                    <!-- Undo/Redo -->
+                    <div class="flex items-center border-r border-border pr-3 mr-1 gap-1">
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" title="Undo (Ctrl+Z)">
+                            <Undo2 class="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" title="Redo (Ctrl+Y)">
+                            <Redo2 class="w-4 h-4" />
+                        </Button>
+                    </div>
+                    
+                    <!-- Device Selector -->
+                    <div class="flex items-center gap-1 text-muted-foreground">
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'desktop' }" @click="builder.deviceMode.value = 'desktop'" title="Desktop">
+                            <Monitor class="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'tablet' }" @click="builder.deviceMode.value = 'tablet'" title="Tablet">
+                            <Tablet class="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'mobile' }" @click="builder.deviceMode.value = 'mobile'" title="Mobile">
+                            <Smartphone class="w-4 h-4" />
+                        </Button>
+                    </div>
+                </div>
+                
+                <!-- Right Section -->
+                <div class="flex items-center gap-2">
+                    <!-- Preview Toggle -->
+                    <Button variant="ghost" size="sm" class="h-8 gap-2 text-xs" :class="{ 'bg-accent': builder.isPreview.value }" @click="builder.isPreview.value = !builder.isPreview.value">
+                        <Eye class="w-4 h-4" />
+                        <span class="hidden sm:inline">Preview</span>
                     </Button>
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        class="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        :disabled="!builder.canRedo.value"
-                        @click="builder.redo"
-                        title="Redo (Ctrl+Y)"
-                    >
-                        <Redo2 class="w-4 h-4" />
+                    
+                    <!-- Fullscreen Toggle -->
+                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="toggleFullscreen" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+                        <Minimize2 v-if="isFullscreen" class="w-4 h-4" />
+                        <Maximize2 v-else class="w-4 h-4" />
+                    </Button>
+                    
+                    <!-- Exit Fullscreen Button (prominent when in fullscreen) -->
+                    <Button v-if="isFullscreen" variant="outline" size="sm" class="h-8 gap-2 text-xs" @click="toggleFullscreen">
+                        <X class="w-4 h-4" />
+                        Exit
                     </Button>
                 </div>
             </div>
-        </div>
 
-        <!-- Main Content Area (Sidebar + Canvas + Properties Panel) -->
-        <div class="flex flex-1 min-h-0 overflow-hidden">
-            <Sidebar />
-            <Canvas />
-            <PropertiesPanel />
+            <!-- Main Content Area -->
+            <div class="flex flex-1 min-h-0 overflow-hidden">
+                <Sidebar />
+                <Canvas />
+                <PropertiesPanel />
+            </div>
+            
+            <!-- Shared Media Picker -->
+            <MediaPicker v-model:open="builder.showMediaPicker.value" @selected="handleMediaSelect">
+                <template #trigger><span class="hidden"></span></template>
+            </MediaPicker>
         </div>
-        
-        <!-- Shared Media Picker -->
-         <MediaPicker
-            v-model:open="builder.showMediaPicker.value"
-            @selected="handleMediaSelect"
-        >
-            <template #trigger><span class="hidden"></span></template>
-        </MediaPicker>
-    </div>
+    </component>
 </template>
 
 <script setup>
-import { ref, provide, watch, onMounted, onUnmounted } from 'vue';
+import { ref, provide, watch, onMounted, onUnmounted, Teleport } from 'vue';
 import { useBuilder } from '@/composables/useBuilder';
 import Sidebar from './sidebar/Sidebar.vue';
 import Canvas from './canvas/Canvas.vue';
@@ -55,7 +83,14 @@ import MediaPicker from '@/components/MediaPicker.vue';
 import Button from '@/components/ui/button.vue';
 import { 
     Undo2, 
-    Redo2 
+    Redo2,
+    Monitor,
+    Tablet,
+    Smartphone,
+    Eye,
+    Maximize2,
+    Minimize2,
+    X
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -66,6 +101,14 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+// Fullscreen state
+const isFullscreen = ref(false);
+const toggleFullscreen = () => {
+    isFullscreen.value = !isFullscreen.value;
+    // Prevent body scroll when fullscreen
+    document.body.style.overflow = isFullscreen.value ? 'hidden' : '';
+};
 
 // Provide builder state
 const builder = useBuilder();
