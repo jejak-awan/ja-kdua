@@ -32,6 +32,7 @@
                         class="group/block relative border-2 border-transparent hover:border-primary/50 transition-all cursor-pointer"
                         :class="{ 'border-primary ring-4 ring-primary/10 z-10': builder.editingIndex.value === index }"
                         @click.stop="editBlock(index)"
+                        @contextmenu.prevent="handleContextMenu($event, index)"
                     >
                         <!-- Block Toolbar (Elementor Style) -->
                         <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-all z-30 flex items-center gap-0.5 bg-primary text-primary-foreground rounded-full px-1.5 py-1 shadow-xl scale-90 translate-y-1 group-hover/block:translate-y-0">
@@ -66,6 +67,15 @@
                 </div>
             </div>
         </div>
+
+        <ContextMenu 
+            :visible="contextMenu.visible" 
+            :x="contextMenu.x" 
+            :y="contextMenu.y" 
+            :actions="contextMenuActions"
+            @close="contextMenu.visible = false"
+            @action="handleContextMenuAction"
+        />
         
         <!-- Global Undo/Redo/History (Coming Soon) -->
 
@@ -81,10 +91,47 @@ import {
     Smartphone, Tablet, Monitor, GripVertical, Copy, Trash2, Plus, MousePointer2, PanelLeftOpen 
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
-import BlockRenderer from '../blocks/BlockRenderer.vue'; // Correct path from builder/canvas/
+import BlockRenderer from '../blocks/BlockRenderer.vue';
+import ContextMenu from '../ContextMenu.vue';
+import { ref } from 'vue';
 
 const builder = inject('builder');
 const { t } = useI18n();
+
+const contextMenu = ref({
+    visible: false,
+    x: 0,
+    y: 0,
+    index: null
+});
+
+const contextMenuActions = computed(() => [
+    { label: t('features.builder.actions.duplicate'), icon: Copy, action: 'duplicate' },
+    { label: t('features.builder.actions.delete'), icon: Trash2, action: 'delete', variant: 'destructive' }
+]);
+
+const handleContextMenu = (e, index) => {
+    e.preventDefault();
+    contextMenu.value = {
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        index
+    };
+};
+
+const handleContextMenuAction = (action) => {
+    if (contextMenu.value.index === null) return;
+    
+    switch (action.action) {
+        case 'duplicate':
+            builder.duplicateBlock(contextMenu.value.index);
+            break;
+        case 'delete':
+            builder.removeBlock(contextMenu.value.index);
+            break;
+    }
+};
 
 const canvasWidthClass = computed(() => {
     switch (builder.deviceMode.value) {

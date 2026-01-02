@@ -46,110 +46,213 @@
             <!-- PROPERTIES TAB -->
             <div v-if="builder.activeRightSidebarTab.value === 'properties'" class="space-y-4">
                 <div v-if="selectedBlock" class="space-y-4">
-                    <!-- Selected Block Info -->
-                    <div class="flex items-center gap-3 p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border">
-                        <div class="w-8 h-8 rounded-md bg-background flex items-center justify-center border border-border shadow-sm text-primary">
-                            <component :is="builder.getBlockComponent(selectedBlock.type)?.icon" class="w-4 h-4" />
+                    <!-- Selected Block Info & Device Toggles -->
+                    <div class="flex flex-col gap-2 p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-md bg-background flex items-center justify-center border border-border shadow-sm text-primary">
+                                <component :is="builder.getBlockComponent(selectedBlock.type)?.icon" class="w-4 h-4" />
+                            </div>
+                            <div class="overflow-hidden flex-1">
+                                <h3 class="font-bold text-xs text-foreground truncate">{{ builder.getBlockLabel(selectedBlock.type) }}</h3>
+                                <p class="text-[10px] text-muted-foreground font-mono truncate">#{{ selectedBlock.id.slice(0, 8) }}</p>
+                            </div>
                         </div>
-                        <div class="overflow-hidden">
-                            <h3 class="font-bold text-xs text-foreground truncate">{{ builder.getBlockLabel(selectedBlock.type) }}</h3>
-                            <p class="text-[10px] text-muted-foreground font-mono truncate">#{{ selectedBlock.id.slice(0, 8) }}</p>
+
+                        <!-- Responsive Controls -->
+                        <div class="flex items-center justify-between pt-2 border-t border-sidebar-border/50">
+                            <span class="text-[10px] font-medium text-muted-foreground uppercase">Mode</span>
+                            <div class="flex items-center gap-0.5 bg-background rounded-md border border-border p-0.5">
+                                <button 
+                                    v-for="mode in ['desktop', 'tablet', 'mobile']" 
+                                    :key="mode"
+                                    class="p-1 rounded hover:bg-muted transition-colors"
+                                    :class="builder.deviceMode.value === mode ? 'bg-muted text-foreground' : 'text-muted-foreground'"
+                                    @click="builder.deviceMode.value = mode"
+                                    :title="mode"
+                                >
+                                    <component 
+                                        :is="mode === 'mobile' ? Smartphone : mode === 'tablet' ? Tablet : Monitor" 
+                                        class="w-3.5 h-3.5" 
+                                    />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Accordion Settings -->
                     <Accordion type="multiple" class="w-full" :defaultValue="['content']">
-                        <!-- Content Section -->
                         <AccordionItem value="content" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.content') }}
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="(value, key) in selectedBlock.settings" :key="key">
-                                    <template v-if="['content', 'description', 'title', 'subtitle', 'buttonText', 'label', 'placeholder'].some(k => key.toLowerCase().includes(k)) && !key.toLowerCase().includes('color')">
-                                        <div class="space-y-1.5">
-                                            <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ key.replace(/([A-Z])/g, ' $1').trim() }}</label>
-                                            <div v-if="['content', 'description'].some(k => key.toLowerCase().includes(k))">
-                                                 <Textarea v-model="selectedBlock.settings[key]" class="min-h-[80px] text-xs bg-background border-input" />
-                                            </div>
-                                            <Input v-else v-model="selectedBlock.settings[key]" class="h-8 text-xs bg-background border-input" />
+                                <template v-for="field in getBlockDefinition(selectedBlock.type).settings" :key="field.key">
+                                    <div v-if="!['color', 'select'].includes(field.type) || field.key === 'alignment'" class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ field.label }}</label>
+                                        
+                                        <div v-if="field.type === 'text'" class="flex gap-2">
+                                            <Input v-model="selectedBlock.settings[field.key]" class="h-8 text-xs bg-background border-input" :disabled="isDynamic(selectedBlock, field.key)" :placeholder="getDynamicLabel(selectedBlock, field.key)" />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="icon" 
+                                                        class="h-8 w-8 shrink-0" 
+                                                        :class="{ 'text-primary border-primary bg-primary/5': isDynamic(selectedBlock, field.key) }"
+                                                        title="Dynamic Content"
+                                                    >
+                                                        <Database class="w-3.5 h-3.5" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent class="w-60 p-2" align="end">
+                                                    <div class="space-y-2">
+                                                        <h4 class="font-medium text-xs text-muted-foreground uppercase">Connect to...</h4>
+                                                        <div class="grid gap-1">
+                                                            <Button 
+                                                                v-for="source in dynamicSources" 
+                                                                :key="source.id"
+                                                                variant="ghost" 
+                                                                size="sm" 
+                                                                class="justify-start h-8 text-xs font-normal"
+                                                                @click="setDynamic(selectedBlock, field.key, source.id)"
+                                                            >
+                                                                <component :is="sourceIcons[source.icon] || Database" class="w-3 h-3 mr-2 opacity-70" />
+                                                                {{ source.label }}
+                                                            </Button>
+                                                            <Button 
+                                                                v-if="isDynamic(selectedBlock, field.key)"
+                                                                variant="ghost" 
+                                                                size="sm" 
+                                                                class="justify-start h-8 text-xs font-normal text-destructive hover:text-destructive"
+                                                                @click="setDynamic(selectedBlock, field.key, null)"
+                                                            >
+                                                                <Unlink class="w-3 h-3 mr-2" />
+                                                                Disconnect
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
-                                    </template>
-                                     <template v-else-if="(key.toLowerCase().includes('url') || key.toLowerCase().includes('image') || key === 'src') && !key.includes('bg')">
-                                        <div class="space-y-1.5">
-                                            <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ key.replace(/([A-Z])/g, ' $1').trim() }}</label>
+                                        <div v-if="field.type === 'textarea' || field.type === 'richtext'">
+                                            <Textarea v-model="selectedBlock.settings[field.key]" class="min-h-[80px] text-xs bg-background border-input" />
+                                        </div>
+
+                                        <div v-if="field.type === 'image'">
                                             <div class="flex gap-2">
-                                                <Input v-model="selectedBlock.settings[key]" class="h-8 text-xs bg-background border-input" />
-                                                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPickerFor(key)">
+                                                <Input v-model="selectedBlock.settings[field.key]" class="h-8 text-xs bg-background border-input" placeholder="https://..." />
+                                                <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPickerFor(field.key)" title="Media Library">
                                                     <ImageIcon class="w-3.5 h-3.5" />
                                                 </Button>
+                                                <!-- Dynamic Trigger -->
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="icon" 
+                                                            class="h-8 w-8 shrink-0" 
+                                                            :class="{ 'text-primary border-primary bg-primary/5': isDynamic(selectedBlock, field.key) }"
+                                                            title="Dynamic Content"
+                                                        >
+                                                            <Database class="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent class="w-60 p-2" align="end">
+                                                        <div class="space-y-2">
+                                                            <h4 class="font-medium text-xs text-muted-foreground uppercase">Connect to...</h4>
+                                                            <div class="grid gap-1">
+                                                                <Button 
+                                                                    v-for="source in dynamicSources" 
+                                                                    :key="source.id"
+                                                                    variant="ghost" 
+                                                                    size="sm" 
+                                                                    class="justify-start h-8 text-xs font-normal"
+                                                                    @click="setDynamic(selectedBlock, field.key, source.id)"
+                                                                >
+                                                                    <component :is="sourceIcons[source.icon] || Database" class="w-3 h-3 mr-2 opacity-70" />
+                                                                    {{ source.label }}
+                                                                </Button>
+                                                                <Button 
+                                                                    v-if="isDynamic(selectedBlock, field.key)"
+                                                                    variant="ghost" 
+                                                                    size="sm" 
+                                                                    class="justify-start h-8 text-xs font-normal text-destructive hover:text-destructive"
+                                                                    @click="setDynamic(selectedBlock, field.key, null)"
+                                                                >
+                                                                    <Unlink class="w-3 h-3 mr-2" />
+                                                                    Disconnect
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </PopoverContent>
+                                                </Popover>
                                             </div>
                                         </div>
-                                    </template>
+
+                                        <div v-if="field.type === 'repeater'" class="space-y-2">
+                                            <div v-for="(item, idx) in selectedBlock.settings[field.key]" :key="idx" class="p-2 border rounded-md bg-muted/20">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="text-[10px] font-bold">{{ field.itemLabel }} {{ idx + 1 }}</span>
+                                                    <Button variant="ghost" size="icon" class="h-5 w-5 text-destructive" @click="selectedBlock.settings[field.key].splice(idx, 1)"><Trash2 class="w-3 h-3" /></Button>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    <template v-for="subField in field.fields" :key="subField.key">
+                                                        <div class="space-y-1">
+                                                            <label class="text-[9px] uppercase text-muted-foreground">{{ subField.label }}</label>
+                                                            <Input v-if="subField.type === 'text'" v-model="item[subField.key]" class="h-7 text-xs" />
+                                                            <Textarea v-if="subField.type === 'textarea'" v-model="item[subField.key]" class="min-h-[40px] text-xs" />
+                                                             <div v-if="subField.type === 'image'" class="flex gap-1">
+                                                                <Input v-model="item[subField.key]" class="h-7 text-xs" />
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <Button variant="outline" size="sm" class="w-full text-xs" @click="selectedBlock.settings[field.key].push(createDefaultItem(field))">
+                                                Add {{ field.itemLabel }}
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </template>
                             </AccordionContent>
                         </AccordionItem>
 
-                        <!-- Style Section -->
                         <AccordionItem value="style" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.style') }}
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <!-- Background Color -->
-                                <div v-if="'bgColor' in selectedBlock.settings" class="space-y-1.5">
-                                    <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ t('features.builder.properties.fields.backgroundColor') }}</label>
-                                    <div class="flex gap-2">
-                                        <div class="w-8 h-8 rounded border border-border shadow-sm shrink-0" :style="{ backgroundColor: selectedBlock.settings.bgColor }"></div>
-                                        <Input v-model="selectedBlock.settings.bgColor" class="h-8 text-xs font-mono bg-background border-input" />
-                                    </div>
-                                </div>
-                                
-                                <!-- Background Image -->
-                                <div v-if="'bgImage' in selectedBlock.settings" class="space-y-1.5">
-                                    <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ t('features.builder.properties.fields.backgroundImage') }}</label>
-                                    <div class="flex gap-2">
-                                        <Input v-model="selectedBlock.settings.bgImage" class="h-8 text-xs bg-background border-input" placeholder="https://..." />
-                                        <Button variant="outline" size="icon" class="h-8 w-8 shrink-0" @click="openMediaPickerFor('bgImage')">
-                                            <ImageIcon class="w-3.5 h-3.5" />
-                                        </Button>
-                                    </div>
-                                </div>
+                                <template v-for="field in getBlockDefinition(selectedBlock.type).settings" :key="field.key">
+                                    <div v-if="['color', 'select'].includes(field.type) && field.key !== 'alignment'" class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ field.label }}</label>
+                                        
+                                        <div v-if="field.type === 'color'" class="space-y-2">
+                                            <!-- Quick Palette -->
+                                            <div v-if="themeColors.length > 0" class="flex flex-wrap gap-1.5 p-1.5 bg-muted/30 rounded-md border border-border/50">
+                                                <button 
+                                                    v-for="color in themeColors" 
+                                                    :key="color.variable"
+                                                    class="w-5 h-5 rounded-full border border-border shadow-sm transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                                    :style="{ backgroundColor: color.value }"
+                                                    :title="color.name"
+                                                    @click="selectedBlock.settings[field.key] = color.variable"
+                                                >
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="flex gap-2">
+                                                <div class="w-8 h-8 rounded border border-border shadow-sm shrink-0" :style="{ backgroundColor: selectedBlock.settings[field.key] }"></div>
+                                                <Input v-model="selectedBlock.settings[field.key]" class="h-8 text-xs font-mono bg-background border-input" />
+                                            </div>
+                                        </div>
 
-                                <!-- Alignment -->
-                                <div v-if="'alignment' in selectedBlock.settings" class="space-y-1.5">
-                                    <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ t('features.builder.properties.fields.contentAlignment') }}</label>
-                                    <div class="flex p-0.5 bg-muted rounded-md border border-border">
-                                        <Button 
-                                            v-for="align in [{id:'left',icon:AlignLeft}, {id:'center',icon:AlignCenter}, {id:'right',icon:AlignRight}]" 
-                                            :key="align.id"
-                                            variant="ghost" 
-                                            size="sm"
-                                            class="flex-1 h-6 rounded-sm"
-                                            :class="selectedBlock.settings.alignment === 'text-' + align.id ? 'bg-background shadow-xs text-foreground' : 'text-muted-foreground'"
-                                            @click="selectedBlock.settings.alignment = 'text-' + align.id"
-                                        >
-                                            <component :is="align.icon" class="w-3.5 h-3.5" />
-                                        </Button>
+                                        <div v-if="field.type === 'select'">
+                                            <select v-model="selectedBlock.settings[field.key]" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground">
+                                                <option v-for="opt in field.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-
-                        <!-- Advanced Section -->
-                        <AccordionItem value="advanced" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                {{ t('features.builder.properties.tabs.advanced') }}
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <div v-if="'padding' in selectedBlock.settings" class="space-y-1.5">
-                                    <label class="text-[10px] font-bold uppercase text-muted-foreground">{{ t('features.builder.properties.fields.verticalPadding') }}</label>
-                                    <select v-model="selectedBlock.settings.padding" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground">
-                                        <option value="py-0">{{ t('features.builder.properties.fields.padding.none') }}</option>
-                                        <option value="py-16">{{ t('features.builder.properties.fields.padding.medium') }}</option>
-                                        <option value="py-32">{{ t('features.builder.properties.fields.padding.large') }}</option>
-                                    </select>
-                                </div>
+                                </template>
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
@@ -203,7 +306,11 @@ import {
     AlignCenter, 
     AlignRight, 
     MousePointerClick,
-    GripVertical 
+    GripVertical,
+    Trash2,
+    Smartphone,
+    Tablet,
+    Monitor
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -214,9 +321,12 @@ import AccordionContent from '@/components/ui/accordion-content.vue';
 import AccordionItem from '@/components/ui/accordion-item.vue';
 import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
 import draggable from 'vuedraggable';
+import { blockRegistry } from '../BlockRegistry';
+import { useTheme } from '@/composables/useTheme';
 
 const builder = inject('builder');
 const { t } = useI18n();
+const { activeTheme, getSetting } = useTheme();
 
 const selectedBlock = computed(() => {
     if (builder.editingIndex.value === null) return null;
@@ -240,5 +350,62 @@ const openMediaPickerFor = (key) => {
     builder.activeMediaField.value = key;
     builder.activeBlockId.value = selectedBlock.value.id;
     builder.showMediaPicker.value = true;
+};
+
+const themeColors = computed(() => {
+    if (!activeTheme.value?.manifest?.settings_schema) return [];
+    
+    return Object.entries(activeTheme.value.manifest.settings_schema)
+        .filter(([_, setting]) => setting.type === 'color')
+        .map(([key, setting]) => ({
+            name: setting.label || key,
+            value: getSetting(key),
+            variable: `var(--theme-${key.replace(/_/g, '-')})` // Assumes standard naming convention from useTheme
+        }));
+});
+
+const getBlockDefinition = (type) => {
+    return blockRegistry.get(type) || { settings: [] };
+};
+
+const createDefaultItem = (field) => {
+    if (!field.fields) return {};
+    const item = {};
+    field.fields.forEach(f => {
+        item[f.key] = f.default || '';
+    });
+    return item;
+};
+
+// Dynamic Content Logic
+import { dynamicContent } from '@/services/DynamicContentService';
+import Popover from '@/components/ui/popover.vue';
+import PopoverTrigger from '@/components/ui/popover-trigger.vue';
+import PopoverContent from '@/components/ui/popover-content.vue';
+import { Database, Unlink, FileText, Calendar, User, Globe } from 'lucide-vue-next';
+
+const dynamicSources = dynamicContent.getSources();
+const sourceIcons = { FileText, Calendar, User, Globe, AlignLeft };
+
+const isDynamic = (block, key) => {
+    return !!(block.dynamicSettings && block.dynamicSettings[key]);
+};
+
+const getDynamicLabel = (block, key) => {
+    const sourceId = block.dynamicSettings?.[key];
+    const source = dynamicSources.find(s => s.id === sourceId);
+    return source ? `Dynamic: ${source.label}` : '';
+};
+
+const setDynamic = (block, key, sourceId) => {
+    if (!block.dynamicSettings) {
+        block.dynamicSettings = {};
+    }
+    
+    if (sourceId) {
+        block.dynamicSettings[key] = sourceId;
+    } else {
+        delete block.dynamicSettings[key];
+    }
 };
 </script>

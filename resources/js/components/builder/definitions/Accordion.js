@@ -1,0 +1,72 @@
+import { List } from 'lucide-vue-next';
+
+export default {
+    name: 'accordion',
+    label: 'Accordion',
+    icon: List,
+    description: 'Expandable list for FAQs or details.',
+    component: () => import('@/components/builder/blocks/AccordionBlock.vue'),
+    settings: [
+        {
+            key: 'title',
+            type: 'text',
+            label: 'Section Title',
+            default: 'Frequently Asked Questions'
+        },
+        {
+            key: 'items',
+            type: 'repeater',
+            label: 'Items',
+            itemLabel: 'Question',
+            fields: [
+                { key: 'question', type: 'text', label: 'Question', default: 'New Question' },
+                { key: 'answer', type: 'textarea', label: 'Answer', default: 'Answer goes here.' }
+            ],
+            default: [
+                { question: 'What is JA-Builder?', answer: 'A powerful visual page builder for modern web apps.' },
+                { question: 'Is it responsive?', answer: 'Yes, it works perfectly on all devices.' },
+                { question: 'Can I customize it?', answer: 'Absolutely! It is built with Vue and Tailwind CSS.' }
+            ]
+        },
+        {
+            key: 'width',
+            type: 'select',
+            label: 'Width',
+            options: [
+                { label: 'Medium', value: 'max-w-4xl' },
+                { label: 'Large', value: 'max-w-5xl' }
+            ],
+            default: 'max-w-5xl'
+        },
+        {
+            key: 'padding',
+            type: 'select',
+            label: 'Padding',
+            options: [
+                { label: 'Medium', value: 'py-20' },
+                { label: 'Large', value: 'py-32' }
+            ],
+            default: 'py-20'
+        },
+        {
+            key: 'bgColor',
+            type: 'color',
+            label: 'Background Color',
+            default: 'transparent'
+        }
+    ],
+    defaultSettings: {
+        title: 'Frequently Asked Questions',
+        items: [
+            { question: 'What is JA-Builder?', answer: 'A powerful visual page builder for modern web apps.' },
+            { question: 'Is it responsive?', answer: 'Yes, it works perfectly on all devices.' },
+            { question: 'Can I customize it?', answer: 'Absolutely! It is built with Vue and Tailwind CSS.' }
+        ],
+        width: 'max-w-5xl',
+        padding: 'py-20',
+        bgColor: 'transparent',
+        radius: 'rounded-none',
+        animation: '',
+        visibility: { mobile: true, tablet: true, desktop: true }
+    }
+};

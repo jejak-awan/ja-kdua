@@ -4,7 +4,8 @@
             <div v-if="block && block.settings" :class="getVisibilityClasses(block.settings.visibility)">
                 <component 
                     :is="getBlockComponent(block.type)" 
-                    v-bind="block.settings"
+                    v-bind="resolveBlockSettings(block)"
+                    :id="block.id"
                     class="block-item"
                 />
             </div>
@@ -16,17 +17,38 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent } from 'vue';
-
-// Import all blocks dynamically from the builder/blocks directory
-const blockModules = import.meta.glob('@/components/builder/blocks/*.vue', { eager: true });
+import { blockRegistry } from '../BlockRegistry';
+import { dynamicContent } from '@/services/DynamicContentService';
 
 const props = defineProps({
     blocks: {
         type: Array,
         default: () => []
+    },
+    context: {
+        type: Object,
+        default: () => ({})
     }
 });
+
+const resolveBlockSettings = (block) => {
+    // Clone settings to avoid mutating original
+    const settings = { ...block.settings };
+    
+    // Check for dynamic overrides
+    if (block.dynamicSettings) {
+        Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {
+            if (sourceId) {
+                const resolvedValue = dynamicContent.resolve(sourceId, props.context);
+                if (resolvedValue !== null && resolvedValue !== undefined) {
+                    settings[key] = resolvedValue;
+                }
+            }
+        });
+    }
+    
+    return settings;
+};
 
 const getVisibilityClasses = (visibility) => {
     if (!visibility) return '';
@@ -47,33 +69,6 @@ const getVisibilityClasses = (visibility) => {
 };
 
 const getBlockComponent = (type) => {
-    switch (type) {
-        case 'hero':
-            return defineAsyncComponent(() => import('./HeroBlock.vue'));
-        case 'text':
-            return defineAsyncComponent(() => import('./TextBlock.vue'));
-        case 'image':
-            return defineAsyncComponent(() => import('./ImageBlock.vue'));
-        case 'features':
-            return defineAsyncComponent(() => import('./FeatureGridBlock.vue'));
-        case 'cta':
-            return defineAsyncComponent(() => import('./CTABlock.vue'));
-        case 'video':
-            return defineAsyncComponent(() => import('./VideoBlock.vue'));
-        case 'spacer':
-            return defineAsyncComponent(() => import('./SpacerBlock.vue'));
-        case 'gallery':
-            return defineAsyncComponent(() => import('./GalleryBlock.vue'));
-        case 'columns':
-            return defineAsyncComponent(() => import('./ColumnsBlock.vue'));
-        case 'pricing':
-            return defineAsyncComponent(() => import('./PricingBlock.vue'));
-        case 'accordion':
-            return defineAsyncComponent(() => import('./AccordionBlock.vue'));
-        case 'testimonial':
-            return defineAsyncComponent(() => import('./TestimonialBlock.vue'));
-        default:
-            return null;
-    }
+    return blockRegistry.getComponent(type);
 };
 </script>
