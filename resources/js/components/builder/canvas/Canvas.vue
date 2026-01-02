@@ -1,7 +1,7 @@
 <template>
-    <div class="flex-1 overflow-y-auto bg-background/50 bg-dot-pattern p-8 custom-scrollbar relative flex flex-col items-center">
+    <div class="flex-1 min-h-0 overflow-y-auto bg-background/50 bg-dot-pattern p-6 custom-scrollbar relative flex flex-col items-center">
         <!-- Canvas Toolbar (Device Switching) -->
-        <div class="w-full max-w-5xl mb-6 flex items-center justify-center gap-2 relative">
+        <div class="w-full max-w-5xl mb-4 flex items-center justify-center gap-2 relative shrink-0">
             <div class="flex items-center gap-1 p-1 bg-muted rounded-full shadow-sm border border-border">
                 <Button 
                     v-for="mode in ['mobile', 'tablet', 'desktop']" 
@@ -18,13 +18,19 @@
         </div>
 
         <!-- Draggable Canvas -->
-        <div :class="[canvasWidthClass, 'bg-background shadow-2xl min-h-[700px] h-fit transition-all duration-500 ease-in-out rounded-xl overflow-hidden border border-border relative']">
+        <div 
+            :class="[
+                canvasWidthClass, 
+                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl overflow-hidden border border-border relative flex-1'
+            ]"
+            :style="{ minHeight: '600px' }"
+        >
             <draggable 
                 v-model="builder.blocks.value" 
                 item-key="id"
                 group="blocks"
                 handle=".drag-handle"
-                class="space-y-0 min-h-[700px] h-full w-full pb-20"
+                class="space-y-0 min-h-full w-full pb-20"
                 ghost-class="block-ghost"
             >
                 <template #item="{ element: block, index }">
@@ -79,7 +85,7 @@
         
         <!-- Global Undo/Redo/History (Coming Soon) -->
 
-        <div class="h-40 w-full shrink-0"></div>
+        <div class="h-20 w-full shrink-0"></div>
     </div>
 </template>
 

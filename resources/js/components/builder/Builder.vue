@@ -1,7 +1,7 @@
 <template>
-    <div class="flex h-[calc(100vh-12rem)] min-h-[600px] border rounded-xl overflow-hidden bg-background shadow-inner relative group/builder">
+    <div class="flex flex-col h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden bg-background shadow-inner relative group/builder">
         <!-- Toolbar -->
-        <div class="absolute top-0 left-0 right-0 h-12 bg-background border-b border-border flex items-center px-4 z-10">
+        <div class="h-12 bg-background border-b border-border flex items-center px-4 z-10 shrink-0">
             <div class="flex items-center gap-2">
                 <div class="flex items-center mr-2 border-r border-border pr-2 gap-1">
                     <Button 
@@ -28,10 +28,12 @@
             </div>
         </div>
 
-        <!-- Modular Components -->
-        <Sidebar />
-        <Canvas />
-        <PropertiesPanel />
+        <!-- Main Content Area (Sidebar + Canvas + Properties Panel) -->
+        <div class="flex flex-1 min-h-0 overflow-hidden">
+            <Sidebar />
+            <Canvas />
+            <PropertiesPanel />
+        </div>
         
         <!-- Shared Media Picker -->
          <MediaPicker

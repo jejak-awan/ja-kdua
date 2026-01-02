@@ -212,6 +212,14 @@
                                                 Add {{ field.itemLabel }}
                                             </Button>
                                         </div>
+
+                                        <!-- Boolean / Toggle Field -->
+                                        <div v-if="field.type === 'boolean'" class="flex items-center justify-between">
+                                            <Switch 
+                                                :checked="selectedBlock.settings[field.key]" 
+                                                @update:checked="selectedBlock.settings[field.key] = $event"
+                                            />
+                                        </div>
                                     </div>
                                 </template>
                             </AccordionContent>
@@ -320,6 +328,7 @@ import Accordion from '@/components/ui/accordion.vue';
 import AccordionContent from '@/components/ui/accordion-content.vue';
 import AccordionItem from '@/components/ui/accordion-item.vue';
 import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
+import Switch from '@/components/ui/switch.vue';
 import draggable from 'vuedraggable';
 import { blockRegistry } from '../BlockRegistry';
 import { useTheme } from '@/composables/useTheme';
