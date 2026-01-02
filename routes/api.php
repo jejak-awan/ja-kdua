@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // Public settings (no auth required - for frontend before login)
     Route::get('/public/settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']);
+
+    // Theme Resolver (Public)
+    Route::post('/theme-templates/resolve', [App\Http\Controllers\Api\V1\ThemeResolverController::class, 'resolve']);
     
     // Captcha endpoints (no auth required)
     Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
@@ -319,6 +322,9 @@ Route::prefix('v1')->group(function () {
         Route::get('themes/{theme}/layouts', [App\Http\Controllers\Api\V1\ThemeController::class, 'getLayouts'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/partials/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderPartial'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/layouts/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderLayout'])->middleware('permission:manage themes');
+
+        // Theme Builder Templates
+        Route::apiResource('theme-templates', App\Http\Controllers\Api\V1\ThemeTemplateController::class)->middleware('permission:manage themes');
 
         // Menus
         Route::post('menus/bulk-action', [App\Http\Controllers\Api\V1\MenuController::class, 'bulkAction'])->middleware('permission:manage menus');

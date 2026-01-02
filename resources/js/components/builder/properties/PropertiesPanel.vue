@@ -253,27 +253,7 @@
             <!-- LAYERS TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'layers'" class="space-y-2">
                  <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 px-2">{{ t('features.builder.properties.layers') }}</h3>
-                
-                 <draggable
-                    v-model="builder.blocks.value"
-                    group="layers"
-                    item-key="id"
-                    handle=".drag-handle"
-                    class="space-y-1"
-                >
-                    <template #item="{ element: block, index }">
-                        <div 
-                            class="group flex items-center gap-2 p-2 rounded-md border text-sm transition-all cursor-pointer hover:border-primary/50"
-                            :class="builder.editingIndex.value === index ? 'bg-primary/5 border-primary text-primary' : 'bg-sidebar-accent/20 border-transparent hover:bg-sidebar-accent text-sidebar-foreground'"
-                            @click="selectBlock(index)"
-                        >
-                            <GripVertical class="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-50 cursor-move drag-handle" />
-                            <component :is="builder.getBlockComponent(block.type)?.icon" class="w-3.5 h-3.5 shrink-0 opacity-70" />
-                            <span class="truncate font-medium flex-1">{{ builder.getBlockLabel(block.type) }}</span>
-                            <span v-if="builder.editingIndex.value === index" class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        </div>
-                    </template>
-                </draggable>
+                 <LayersTree :blocks="builder.blocks.value" />
             </div>
 
             <!-- VISIBILITY TAB -->
@@ -388,6 +368,7 @@ import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
 import draggable from 'vuedraggable';
 import { blockRegistry } from '../BlockRegistry';
 import PropertyField from './PropertyField.vue';
+import LayersTree from '../layers/LayersTree.vue';
 
 const builder = inject('builder');
 const { t } = useI18n();

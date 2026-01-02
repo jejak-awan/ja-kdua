@@ -203,7 +203,8 @@ import {
     FileText,
     Columns3,
     Zap,
-    Database
+    Database,
+    ShoppingBag
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -252,6 +253,12 @@ const categoryDefinitions = [
         label: 'Dynamic',
         icon: Database,
         blocks: ['blog_grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio']
+    },
+    {
+        name: 'commerce',
+        label: 'Shop',
+        icon: ShoppingBag,
+        blocks: ['shop', 'woo_title', 'woo_price', 'woo_add_to_cart', 'woo_images', 'woo_tabs']
     }
 ];
 

@@ -346,6 +346,18 @@ const routes = [
                 meta: { permission: 'manage themes' },
             },
             {
+                path: 'theme-builder',
+                name: 'theme-builder',
+                component: () => import('../views/admin/themes/ThemeBuilder.vue'),
+                meta: { permission: 'manage themes' },
+            },
+            {
+                path: 'theme-templates/:id/:part/edit',
+                name: 'theme-template-editor',
+                component: () => import('../views/admin/themes/ThemeTemplateEditor.vue'),
+                meta: { permission: 'manage themes' },
+            },
+            {
                 path: 'menus',
                 name: 'menus',
                 component: () => import('../views/admin/menus/Index.vue'),

@@ -40,10 +40,18 @@ import Toggle from './Toggle';
 import PostSlider from './PostSlider';
 import PostContent from './PostContent';
 import PostTitle from './PostTitle';
+import PostFeaturedImage from './PostFeaturedImage';
+import PostMeta from './PostMeta';
 import Portfolio from './Portfolio';
 import Menu from './MenuDef';
 import Sidebar from './SidebarDef';
 import Comments from './Comments';
+import { Shop } from './Shop';
+import { WooTitle } from './WooTitle';
+import { WooPrice } from './WooPrice';
+import { WooAddToCart } from './WooAddToCart';
+import { WooImages } from './WooImages';
+import { WooTabs } from './WooTabs';
 
 export default [
     Hero,
@@ -88,9 +96,16 @@ export default [
     PostSlider,
     PostContent,
     PostTitle,
+    PostFeaturedImage,
+    PostMeta,
     Portfolio,
     Menu,
     Sidebar,
-    Comments
+    Comments,
+    Shop,
+    WooTitle,
+    WooPrice,
+    WooAddToCart,
+    WooImages,
+    WooTabs
 ];
-

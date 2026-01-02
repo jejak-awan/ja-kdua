@@ -41,6 +41,7 @@ export const navigationGroups = {
     // Appearance (4 items)
     appearance: [
         { name: 'themes', to: '/admin/themes', label: 'Themes', permission: 'view themes' },
+        { name: 'theme-builder', to: '/admin/theme-builder', label: 'Theme Builder', permission: 'manage themes' },
         { name: 'menus', to: '/admin/menus', label: 'Menus', permission: 'view menus' },
         { name: 'widgets', to: '/admin/widgets', label: 'Widgets', permission: 'view widgets' },
         { name: 'languages', to: '/admin/languages', label: 'Languages', permission: 'view settings' },
