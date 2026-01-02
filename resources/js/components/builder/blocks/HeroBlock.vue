@@ -24,6 +24,10 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: false
+});
+
 const props = defineProps({
     title: String,
     subtitle: String,
