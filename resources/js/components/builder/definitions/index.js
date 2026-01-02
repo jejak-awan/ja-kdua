@@ -10,11 +10,23 @@ import Gallery from './Gallery';
 import Pricing from './Pricing';
 import Testimonial from './Testimonial';
 import Spacer from './Spacer';
+import Button from './Button';
+import Divider from './Divider';
+import Icon from './Icon';
+import Heading from './Heading';
+import Counter from './Counter';
+import IconList from './IconList';
 
 export default [
     Hero,
+    Heading,
     Text,
     Image,
+    Button,
+    Divider,
+    Icon,
+    Counter,
+    IconList,
     FeatureGrid,
     CTA,
     Video,
