@@ -21,7 +21,7 @@
         <div 
             :class="[
                 canvasWidthClass, 
-                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl overflow-hidden border border-border relative flex-1'
+                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl border border-border relative w-full shrink-0'
             ]"
             :style="{ minHeight: '600px' }"
         >
