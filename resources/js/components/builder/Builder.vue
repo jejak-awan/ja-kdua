@@ -1,14 +1,19 @@
 <template>
     <!-- Fullscreen overlay backdrop -->
-    <div v-if="isFullscreen" class="fixed inset-0 bg-background z-[9998]" @click="toggleFullscreen"></div>
     <div 
-            :class="[
-                'flex flex-col bg-background relative group/builder transition-all duration-300',
-                isFullscreen 
-                    ? 'fixed inset-0 z-[9999]' 
-                    : 'h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden shadow-inner'
-            ]"
-        >
+        v-if="isFullscreen" 
+        class="bg-background" 
+        :style="{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9998 }"
+        @click="toggleFullscreen"
+    ></div>
+    
+    <div 
+        :class="[
+            'flex flex-col bg-background group/builder transition-all duration-300',
+            !isFullscreen && 'relative h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden shadow-inner'
+        ]"
+        :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
+    >
             <!-- Toolbar -->
             <div class="h-12 bg-background border-b border-border flex items-center justify-between px-4 z-10 shrink-0">
                 <!-- Left Section -->
