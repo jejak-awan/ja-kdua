@@ -83,6 +83,7 @@
 
 <script setup>
 import { ref, provide, watch, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useBuilder } from '@/composables/useBuilder';
 import Sidebar from './sidebar/Sidebar.vue';
 import Canvas from './canvas/Canvas.vue';
@@ -115,6 +116,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
 
 // Fullscreen state
 const isFullscreen = ref(false);

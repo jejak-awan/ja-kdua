@@ -181,7 +181,8 @@
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { ref, computed, watch, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/composables/useTheme';
 import Input from '@/components/ui/input.vue';
 import Textarea from '@/components/ui/textarea.vue';
@@ -190,7 +191,6 @@ import Switch from '@/components/ui/switch.vue';
 import DynamicTrigger from './DynamicTrigger.vue';
 import { Image as ImageIcon, Smartphone, Tablet, Monitor, Trash2, Plus, Loader2 } from 'lucide-vue-next';
 import api from '@/services/api';
-import { onMounted } from 'vue';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
 
 const props = defineProps({
@@ -202,6 +202,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const builder = inject('builder');
 const { activeTheme, getSetting } = useTheme();
+const { t } = useI18n();
 
 const dynamicOptions = ref([]);
 const fetchingData = ref(false);

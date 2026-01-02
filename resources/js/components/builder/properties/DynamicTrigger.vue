@@ -45,13 +45,17 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '@/components/ui/button.vue';
 import Popover from '@/components/ui/popover.vue';
 import PopoverTrigger from '@/components/ui/popover-trigger.vue';
 import PopoverContent from '@/components/ui/popover-content.vue';
 import { Database, Unlink, FileText, Calendar, User, Globe, AlignLeft, Package, DollarSign, Hash, Star, Image, Quote, Tag } from 'lucide-vue-next';
 import { dynamicContent } from '@/services/DynamicContentService';
+
+const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
 
 const props = defineProps({
     field: { type: Object, required: true },

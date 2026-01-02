@@ -39,6 +39,7 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { GripVertical, Copy, Trash2 } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import ContextMenu from './ContextMenu.vue';
@@ -53,6 +54,7 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete', 'duplicate']);
 
 const builder = inject('builder');
+const { t } = useI18n();
 
 // Determine if this block is currently selected
 const isSelected = computed(() => {
