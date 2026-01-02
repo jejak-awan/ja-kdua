@@ -1,6 +1,7 @@
 <template>
-    <Teleport to="body" :disabled="!isFullscreen">
-        <div 
+    <!-- Fullscreen overlay backdrop -->
+    <div v-if="isFullscreen" class="fixed inset-0 bg-background z-[9998]" @click="toggleFullscreen"></div>
+    <div 
             :class="[
                 'flex flex-col bg-background relative group/builder transition-all duration-300',
                 isFullscreen 
@@ -70,11 +71,10 @@
                 <template #trigger><span class="hidden"></span></template>
             </MediaPicker>
         </div>
-    </Teleport>
 </template>
 
 <script setup>
-import { ref, provide, watch, onMounted, onUnmounted, Teleport } from 'vue';
+import { ref, provide, watch, onMounted, onUnmounted } from 'vue';
 import { useBuilder } from '@/composables/useBuilder';
 import Sidebar from './sidebar/Sidebar.vue';
 import Canvas from './canvas/Canvas.vue';
