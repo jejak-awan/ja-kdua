@@ -63,13 +63,13 @@
             </draggable>
             
             <!-- Empty Placeholder -->
-            <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-12 text-center">
+            <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-6 md:p-12 text-center">
                 <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
                     <Plus class="w-10 h-10 opacity-20" />
                 </div>
-                <div class="space-y-1">
+                <div class="space-y-1 w-full">
                     <h3 class="text-lg font-bold text-foreground">{{ t('features.builder.canvas.empty.title') }}</h3>
-                    <p class="text-sm max-w-xs mx-auto text-muted-foreground">{{ t('features.builder.canvas.empty.description') }}</p>
+                    <p class="text-sm max-w-[260px] md:max-w-xs mx-auto text-muted-foreground">{{ t('features.builder.canvas.empty.description') }}</p>
                 </div>
             </div>
         </div>
