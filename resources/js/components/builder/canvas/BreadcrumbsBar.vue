@@ -5,7 +5,7 @@
     >
         <template v-for="(item, index) in path" :key="item.id">
             <button 
-                class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all hover:bg-primary/10 hover:text-primary whitespace-nowrap"
+                class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition-all hover:bg-primary/10 hover:text-primary whitespace-nowrap"
                 :class="index === path.length - 1 ? 'text-primary bg-primary/5' : 'text-muted-foreground'"
                 @click="selectBlock(item.id)"
             >

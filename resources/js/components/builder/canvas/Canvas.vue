@@ -45,8 +45,6 @@
             </div>
         </div>
 
-        <!-- Breadcrumbs Navigation -->
-        <BreadcrumbsBar />
         
         <!-- Global Undo/Redo/History (Coming Soon) -->
 
@@ -64,7 +62,6 @@ import {
 import Button from '@/components/ui/button.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockWrapper from './BlockWrapper.vue';
-import BreadcrumbsBar from './BreadcrumbsBar.vue';
 import { ref } from 'vue';
 
 const props = defineProps({

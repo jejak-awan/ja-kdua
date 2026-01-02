@@ -12,7 +12,7 @@
                         <ChevronLeft class="w-5 h-5" />
                     </div>
                     <div :class="style === 'cards' ? 'flex-1' : ''">
-                        <span class="text-xs font-bold uppercase tracking-widest text-muted-foreground">{{ prev_label || 'Previous' }}</span>
+                        <span class="text-xs font-bold text-muted-foreground">{{ prev_label || 'Previous' }}</span>
                         <p v-if="show_titles" class="font-semibold text-foreground line-clamp-1 mt-1">{{ prev_title || 'Previous Post' }}</p>
                     </div>
                 </a>
@@ -31,7 +31,7 @@
                         <ChevronRight class="w-5 h-5" />
                     </div>
                     <div :class="style === 'cards' ? 'flex-1' : ''">
-                        <span class="text-xs font-bold uppercase tracking-widest text-muted-foreground">{{ next_label || 'Next' }}</span>
+                        <span class="text-xs font-bold text-muted-foreground">{{ next_label || 'Next' }}</span>
                         <p v-if="show_titles" class="font-semibold text-foreground line-clamp-1 mt-1">{{ next_title || 'Next Post' }}</p>
                     </div>
                 </a>

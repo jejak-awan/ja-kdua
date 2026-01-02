@@ -16,7 +16,7 @@
                 ></iframe>
                 <div v-else class="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-4">
                     <VideoOff class="w-12 h-12 opacity-20" />
-                    <p class="text-xs font-bold uppercase tracking-widest opacity-40">No Video Provided</p>
+                    <p class="text-xs font-bold opacity-40">No Video Provided</p>
                 </div>
             </div>
         </div>

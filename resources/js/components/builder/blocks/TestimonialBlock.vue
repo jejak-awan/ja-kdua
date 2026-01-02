@@ -27,7 +27,7 @@
                 <!-- Text -->
                 <div :class="alignment === 'text-right' ? 'text-right' : 'text-left'">
                     <h4 class="font-bold text-foreground">{{ author || 'Author Name' }}</h4>
-                    <p class="text-xs text-muted-foreground uppercase tracking-widest font-semibold">{{ job_title || 'Position' }}</p>
+                    <p class="text-xs text-muted-foreground font-semibold">{{ job_title || 'Position' }}</p>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@ const props = defineProps({
 
 const authorInitial = computed(() => {
     const name = props.author || 'A';
-    return name.charAt(0).toUpperCase();
+    return name.charAt(0);
 });
 
 const containerClasses = computed(() => {

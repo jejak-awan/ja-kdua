@@ -34,7 +34,7 @@
                     <!-- Category Header -->
                     <button 
                         @click="toggleCategory(category.name)"
-                        class="w-full flex items-center justify-between px-2 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        class="w-full flex items-center justify-between px-2 py-2 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <span class="flex items-center gap-2">
                             <component :is="category.icon" class="w-3.5 h-3.5" />
@@ -110,7 +110,7 @@
                 @click="builder.showTemplateLibrary.value = true"
             >
                 <LayoutTemplate class="w-4 h-4" :class="builder.isSidebarOpen.value ? 'mr-2' : ''" />
-                <span v-if="builder.isSidebarOpen.value" class="text-[10px] font-bold uppercase tracking-widest">{{ t('features.builder.sidebar.layoutLibrary') }}</span>
+                <span v-if="builder.isSidebarOpen.value" class="text-[10px] font-bold">{{ t('features.builder.sidebar.layoutLibrary') }}</span>
             </Button>
             
             <!-- Keyboard Shortcuts Help -->

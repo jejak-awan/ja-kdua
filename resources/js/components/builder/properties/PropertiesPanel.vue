@@ -80,18 +80,18 @@
 
                         <div class="flex flex-col gap-2 pt-2 border-t border-sidebar-border/50">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-medium text-muted-foreground uppercase">State</span>
+                                <span class="text-[10px] font-medium text-muted-foreground">State</span>
                                 <div class="flex items-center gap-0.5 bg-background rounded-md border border-border p-0.5">
                                     <button 
                                         @click="stateMode = 'default'"
-                                        class="px-2 py-0.5 text-[10px] font-bold rounded uppercase transition-all"
+                                        class="px-2 py-0.5 text-[10px] font-bold rounded transition-all"
                                         :class="stateMode === 'default' ? 'bg-muted text-foreground' : 'text-muted-foreground opacity-50 hover:opacity-100'"
                                     >
                                         Normal
                                     </button>
                                     <button 
                                         @click="stateMode = 'hover'"
-                                        class="px-2 py-0.5 text-[10px] font-bold rounded uppercase transition-all flex items-center gap-1.2"
+                                        class="px-2 py-0.5 text-[10px] font-bold rounded transition-all flex items-center gap-1.2"
                                         :class="stateMode === 'hover' ? 'bg-primary/10 text-primary' : 'text-muted-foreground opacity-50 hover:opacity-100'"
                                     >
                                         <MousePointer2 class="w-2.5 h-2.5" />
@@ -105,7 +105,7 @@
                     <!-- Accordion Settings -->
                     <Accordion type="multiple" class="w-full" :defaultValue="['content']">
                         <AccordionItem value="content" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.content') }}
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -122,7 +122,7 @@
                         </AccordionItem>
 
                         <AccordionItem value="style" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.style') }}
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -140,7 +140,7 @@
                         
                         <!-- NEW: Advanced Design Suite -->
                         <AccordionItem value="spacing" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Spacing (Margin)
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -155,7 +155,7 @@
                         </AccordionItem>
 
                         <AccordionItem value="filters" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Filters
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -170,7 +170,7 @@
                         </AccordionItem>
 
                         <AccordionItem value="transform" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Transform
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -185,7 +185,7 @@
                         </AccordionItem>
 
                         <AccordionItem value="shadow" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Box Shadow
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -198,7 +198,7 @@
                         </AccordionItem>
 
                         <AccordionItem value="animation" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Animation
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
@@ -213,22 +213,22 @@
                         </AccordionItem>
 
                         <AccordionItem value="advanced" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold uppercase tracking-widest text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
+                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 Advanced
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
                                 <div class="space-y-3">
                                     <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold uppercase text-muted-foreground">CSS ID</label>
+                                        <label class="text-[10px] font-bold text-muted-foreground">CSS ID</label>
                                         <Input v-model="selectedBlock.settings._css_id" placeholder="my-custom-id" class="h-8 text-xs bg-background border-input font-mono" />
                                     </div>
                                     <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold uppercase text-muted-foreground">CSS Classes</label>
+                                        <label class="text-[10px] font-bold text-muted-foreground">CSS Classes</label>
                                         <Input v-model="selectedBlock.settings._css_class" placeholder="p-4 bg-red-500" class="h-8 text-xs bg-background border-input font-mono" />
                                         <p class="text-[9px] text-muted-foreground">Space separated classes (Tailwind supported)</p>
                                     </div>
                                     <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold uppercase text-muted-foreground">Custom CSS</label>
+                                        <label class="text-[10px] font-bold text-muted-foreground">Custom CSS</label>
                                         <Textarea v-model="selectedBlock.settings._custom_css" placeholder="border: 1px solid red;" class="min-h-[80px] text-xs bg-background border-input font-mono" />
                                     </div>
 
@@ -257,12 +257,12 @@
             <!-- VISIBILITY TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'visibility'" class="space-y-6">
                 <div class="px-2">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Display Conditions</h3>
+                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">Display Conditions</h3>
                     
                     <div v-if="selectedBlock" class="space-y-4">
                         <div class="space-y-4">
                              <div class="flex items-center justify-between">
-                                <label class="text-[10px] font-bold uppercase text-muted-foreground">Logic Mode</label>
+                                <label class="text-[10px] font-bold text-muted-foreground">Logic Mode</label>
                                 <select v-model="selectedBlock.settings.visibility_mode" class="h-6 text-[10px] bg-background border rounded px-1">
                                     <option value="all">Match All (AND)</option>
                                     <option value="any">Match Any (OR)</option>
@@ -289,12 +289,12 @@
             <!-- PRESETS TAB -->
             <div v-else-if="builder.activeRightSidebarTab.value === 'presets'" class="space-y-6">
                  <div class="px-2">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Style Presets</h3>
+                    <h3 class="text-[10px] font-bold text-muted-foreground mb-4">Style Presets</h3>
                     
                     <div v-if="selectedBlock" class="space-y-4">
                         <!-- Save New Preset -->
                         <div class="p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border space-y-3">
-                            <h4 class="text-[10px] font-bold uppercase text-foreground/80">Save current as preset</h4>
+                            <h4 class="text-[10px] font-bold text-foreground/80">Save current as preset</h4>
                             <div class="flex gap-2">
                                 <Input v-model="newPresetName" placeholder="Preset name..." class="h-8 text-xs bg-background" />
                                 <Button size="sm" class="h-8 px-3 text-xs" @click="handleSavePreset">
@@ -305,7 +305,7 @@
 
                         <!-- Existing Presets -->
                         <div class="space-y-2">
-                            <h4 class="text-[10px] font-bold uppercase text-muted-foreground ml-1">Your Presets</h4>
+                            <h4 class="text-[10px] font-bold text-muted-foreground ml-1">Your Presets</h4>
                             <div v-if="currentTypePresets.length > 0" class="space-y-1">
                                 <div 
                                     v-for="preset in currentTypePresets" 

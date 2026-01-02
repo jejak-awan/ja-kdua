@@ -119,7 +119,7 @@ const containerClasses = computed(() => {
                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <span class="text-xs uppercase tracking-widest">No Image</span>
+                            <span class="text-xs">No Image</span>
                         </div>
                     </div>
                     
@@ -127,7 +127,7 @@ const containerClasses = computed(() => {
                     <div class="p-6">
                         <!-- Category Badge -->
                         <div v-if="show_category && post.category" class="mb-3">
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary">
                                 <Tag class="w-3 h-3" />
                                 {{ post.category.name || post.category }}
                             </span>

@@ -20,7 +20,7 @@
                     class="w-full bg-muted flex flex-col items-center justify-center text-muted-foreground gap-4"
                 >
                     <MapPin class="w-12 h-12 opacity-20" />
-                    <p class="text-xs font-bold uppercase tracking-widest opacity-40">Enter Map Embed URL</p>
+                    <p class="text-xs font-bold opacity-40">Enter Map Embed URL</p>
                 </div>
             </div>
             <p v-if="caption" class="mt-4 text-sm text-muted-foreground text-center">{{ caption }}</p>

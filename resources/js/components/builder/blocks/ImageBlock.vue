@@ -9,7 +9,7 @@
                 {{ title }}
             </div>
             <div v-if="!url" class="p-20 bg-muted/30 border-2 border-dashed border-primary/10 flex items-center justify-center">
-                <p class="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">No Image Selected</p>
+                <p class="text-xs font-bold text-muted-foreground/40">No Image Selected</p>
             </div>
         </div>
     </section>

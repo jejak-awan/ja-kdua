@@ -12,7 +12,7 @@
         <PopoverContent class="w-60 p-2" align="end">
             <div class="space-y-4">
                 <div v-for="(group, groupName) in groupedSources" :key="groupName" class="space-y-1">
-                    <h4 class="font-bold text-[10px] text-muted-foreground uppercase px-2 py-1 bg-muted/30 rounded">{{ groupName }}</h4>
+                    <h4 class="font-bold text-[10px] text-muted-foreground px-2 py-1 bg-muted/30 rounded">{{ groupName }}</h4>
                     <div class="grid gap-0.5">
                         <Button 
                             v-for="source in group" 

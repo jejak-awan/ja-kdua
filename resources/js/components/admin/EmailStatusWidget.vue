@@ -20,11 +20,11 @@
       <!-- Top Stats Row -->
       <div class="grid grid-cols-2 gap-3">
         <div class="p-3 rounded-xl bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/10 dark:border-orange-500/20 space-y-1">
-          <p class="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">{{ t('features.dashboard.widgets.emailStatus.templates', 'Templates') }}</p>
+          <p class="text-[10px] font-bold text-orange-600 dark:text-orange-400">{{ t('features.dashboard.widgets.emailStatus.templates', 'Templates') }}</p>
           <p class="text-2xl font-bold text-foreground tabular-nums">{{ stats.templates || 0 }}</p>
         </div>
         <div class="p-3 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 dark:border-blue-500/20 space-y-1">
-          <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{{ t('features.dashboard.widgets.emailStatus.subscribers', 'Subscribers') }}</p>
+          <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400">{{ t('features.dashboard.widgets.emailStatus.subscribers', 'Subscribers') }}</p>
           <p class="text-2xl font-bold text-foreground tabular-nums">{{ stats.subscribers || 0 }}</p>
         </div>
       </div>
@@ -36,13 +36,13 @@
           <span class="text-sm font-semibold text-foreground">{{ t('features.dashboard.widgets.emailStatus.smtpStatus', 'SMTP Connection') }}</span>
         </div>
         <Badge :class="statusBadgeClass" variant="outline" class="border-none font-bold text-[10px]">
-          {{ stats.smtp_status?.toUpperCase() || 'UNKNOWN' }}
+          {{ stats.smtp_status || 'UNKNOWN' }}
         </Badge>
       </div>
 
       <!-- Recent Logs -->
       <div class="space-y-2">
-        <h4 class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ t('features.dashboard.widgets.emailStatus.recentLogs', 'Recent Activity') }}</h4>
+        <h4 class="text-xs font-bold text-muted-foreground">{{ t('features.dashboard.widgets.emailStatus.recentLogs', 'Recent Activity') }}</h4>
         <div v-if="logs.length === 0" class="text-center py-4 text-xs text-muted-foreground italic">
           {{ t('features.dashboard.widgets.emailStatus.noLogs', 'No recent email activity') }}
         </div>
@@ -106,7 +106,7 @@ const statusBadgeClass = computed(() => {
   if (status === 'active' || status === 'healthy' || status === 'sent') return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
   if (status === 'warning') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
   if (status === 'critical' || status === 'error' || status === 'failed') return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-  return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+  return 'bg-muted text-muted-foreground';
 });
 
 const fetchStats = async () => {

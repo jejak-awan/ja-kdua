@@ -40,7 +40,7 @@
                 <!-- Recursion for Columns (Container) -->
                 <div v-if="block.type === 'columns' && block.settings.columns" class="ml-4 pl-2 border-l border-border/50">
                     <div v-for="(col, colIndex) in block.settings.columns" :key="colIndex" class="mt-1">
-                         <div class="px-2 py-1 text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                         <div class="px-2 py-1 text-[9px] font-bold text-muted-foreground flex items-center gap-1">
                              <span class="w-1.5 h-1.5 rounded-sm bg-muted-foreground/30"></span>
                              Column {{ colIndex + 1 }}
                          </div>

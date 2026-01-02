@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-1.5">
         <div class="flex items-center justify-between">
-            <label class="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+            <label class="text-[10px] font-bold text-muted-foreground flex items-center gap-2">
                 {{ field.label }}
                 <!-- Responsive Indicator/Toggle -->
                 <div class="flex items-center gap-2">
@@ -24,7 +24,7 @@
         <div :class="{ 'relative': isResponsive }">
             <!-- Responsive overlay indicator -->
              <div v-if="isResponsive" class="absolute -top-1.5 -right-1 z-10 pointer-events-none">
-                <span class="text-[8px] bg-primary text-primary-foreground px-1 rounded-full uppercase tracking-tighter shadow-sm">
+                <span class="text-[8px] bg-primary text-primary-foreground px-1 rounded-full shadow-sm">
                     {{ builder.deviceMode.value }}
                 </span>
             </div>
@@ -72,7 +72,7 @@
 
             <!-- Select -->
             <div v-if="field.type === 'select'">
-                <select v-model="proxyValue" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground">
+                <select v-model="proxyValue" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-inset focus:ring-primary text-foreground">
                     <option v-for="opt in field.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                 </select>
             </div>
@@ -82,7 +82,7 @@
                 <div class="relative">
                     <select 
                         v-model="proxyValue" 
-                        class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-primary/20 text-foreground"
+                        class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-inset focus:ring-primary text-foreground"
                         :disabled="fetchingData"
                     >
                         <option :value="null">Select...</option>
@@ -145,7 +145,7 @@
                          <!-- Recursive usage? Or simple rendering? Simple rendering for now to avoid complexity without dynamic context mismatch -->
                         <template v-for="subField in field.fields" :key="subField.key">
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase text-muted-foreground">{{ subField.label }}</label>
+                                <label class="text-[9px] text-muted-foreground">{{ subField.label }}</label>
                                 <!-- Direct Input components for Repeater sub-fields (Simple types only usually) -->
                                 <Input v-if="subField.type === 'text'" v-model="item[subField.key]" class="h-7 text-xs" />
                                 <Textarea v-if="subField.type === 'textarea'" v-model="item[subField.key]" class="min-h-[40px] text-xs" />

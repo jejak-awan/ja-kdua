@@ -13,7 +13,7 @@
                     class="relative p-8 rounded-3xl border bg-card/50 backdrop-blur-sm shadow-xl flex flex-col transition-all duration-300 hover:shadow-primary/10 hover:border-primary/50 group"
                     :class="{ 'border-primary ring-2 ring-primary/20 scale-105 z-10': index === 1 }"
                 >
-                    <div v-if="index === 1" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                    <div v-if="index === 1" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full">
                         Most Popular
                     </div>
                     

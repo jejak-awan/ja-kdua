@@ -7,7 +7,7 @@
 
             <form @submit.prevent="handleLogin" class="space-y-4">
                 <div class="space-y-2">
-                    <label class="text-xs font-bold uppercase text-muted-foreground ml-1">{{ username_label || 'Email Address' }}</label>
+                    <label class="text-xs font-bold text-muted-foreground ml-1">{{ username_label || 'Email Address' }}</label>
                     <input 
                         type="email" 
                         class="w-full h-11 rounded-xl border bg-background px-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
@@ -16,7 +16,7 @@
                 </div>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between px-1">
-                        <label class="text-xs font-bold uppercase text-muted-foreground">{{ password_label || 'Password' }}</label>
+                        <label class="text-xs font-bold text-muted-foreground">{{ password_label || 'Password' }}</label>
                         <a v-if="show_forgot_password" href="#" class="text-[10px] font-bold text-primary hover:underline">Forgot password?</a>
                     </div>
                     <input 

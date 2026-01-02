@@ -22,7 +22,7 @@
         >
             <div class="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
                 <slot name="icon"></slot>
-                <span v-if="!isCollapsed" class="text-[10px] font-bold uppercase tracking-wider">{{ title }}</span>
+                <span v-if="!isCollapsed" class="text-[10px] font-bold">{{ title }}</span>
             </div>
             
             <div class="flex items-center gap-1" @mousedown.stop>

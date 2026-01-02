@@ -71,7 +71,7 @@ const showFallback = computed(() => widgets.value.length === 0 && !loading.value
             <!-- Dynamic Widgets -->
             <template v-for="widget in widgets" :key="widget.id">
                 <div :class="widgetClasses">
-                    <h4 class="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <h4 class="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
                         <component 
                             :is="widget.type === 'recent_posts' ? Calendar : widget.type === 'categories' ? Archive : Search" 
                             class="w-4 h-4" 
@@ -106,7 +106,7 @@ const showFallback = computed(() => widgets.value.length === 0 && !loading.value
             <template v-if="showFallback">
                 <!-- Search Widget -->
                 <div v-if="show_search" :class="widgetClasses">
-                    <h4 class="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <h4 class="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
                         <Search class="w-4 h-4" />
                         Search (Demo)
                     </h4>
@@ -122,7 +122,7 @@ const showFallback = computed(() => widgets.value.length === 0 && !loading.value
                 
                 <!-- Categories Widget -->
                 <div v-if="show_categories" :class="widgetClasses">
-                    <h4 class="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <h4 class="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
                         <Archive class="w-4 h-4" />
                         Categories (Demo)
                     </h4>

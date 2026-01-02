@@ -55,7 +55,7 @@ const copyCode = async () => {
         >
             <!-- Header -->
             <div class="flex items-center justify-between px-4 py-2 border-b border-white/10">
-                <span class="text-xs uppercase tracking-wider opacity-60">{{ language }}</span>
+                <span class="text-xs opacity-60">{{ language }}</span>
                 <button 
                     v-if="show_copy_button"
                     @click="copyCode"

@@ -111,7 +111,7 @@ const submitComment = () => {
                     <div class="flex-1">
                         <div class="bg-muted/30 rounded-xl p-4">
                             <div class="flex items-baseline justify-between mb-1">
-                                <h5 class="font-bold text-sm">{{ comment.author }} <span v-if="comment.isAuthor" class="ml-2 px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded uppercase tracking-wider">Author</span></h5>
+                                <h5 class="font-bold text-sm">{{ comment.author }} <span v-if="comment.isAuthor" class="ml-2 px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded tracking-wider">Author</span></h5>
                                 <span v-if="show_date" class="text-xs text-muted-foreground">{{ comment.date }}</span>
                             </div>
                             <p class="text-sm leading-relaxed">{{ comment.content }}</p>
@@ -133,7 +133,7 @@ const submitComment = () => {
                                 <div class="flex-1">
                                     <div class="bg-muted/30 rounded-xl p-3">
                                         <div class="flex items-baseline justify-between mb-1">
-                                            <h5 class="font-bold text-xs">{{ reply.author }} <span v-if="reply.isAuthor" class="ml-2 px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded uppercase tracking-wider">Author</span></h5>
+                                            <h5 class="font-bold text-xs">{{ reply.author }} <span v-if="reply.isAuthor" class="ml-2 px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded tracking-wider">Author</span></h5>
                                             <span v-if="show_date" class="text-[10px] text-muted-foreground">{{ reply.date }}</span>
                                         </div>
                                         <p class="text-xs leading-relaxed">{{ reply.content }}</p>

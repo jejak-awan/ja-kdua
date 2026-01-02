@@ -41,7 +41,7 @@
 
                                 <template v-else-if="field.type === 'checkbox'">
                                     <div class="flex items-center gap-2 px-1">
-                                        <input type="checkbox" :id="`field-${index}`" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" :required="field.required">
+                                        <input type="checkbox" :id="`field-${index}`" class="w-4 h-4 rounded border-input text-primary focus:ring-primary" :required="field.required">
                                         <label :for="`field-${index}`" class="text-sm text-muted-foreground line-clamp-1">{{ field.label }}</label>
                                     </div>
                                 </template>

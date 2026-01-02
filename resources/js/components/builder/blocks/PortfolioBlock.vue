@@ -134,7 +134,7 @@ watch(() => [props.category, props.limit], fetchProjects);
                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <span class="text-xs uppercase tracking-widest">No Image</span>
+                            <span class="text-xs">No Image</span>
                         </div>
                         
                         <!-- Overlay -->
@@ -152,7 +152,7 @@ watch(() => [props.category, props.limit], fetchProjects);
                     
                     <!-- Info -->
                     <div v-if="style === 'cards' && (show_title || show_category)" class="p-4">
-                        <span v-if="show_category" class="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        <span v-if="show_category" class="text-[10px] font-bold text-primary">
                             {{ project.category?.name || project.category || 'Project' }}
                         </span>
                         <h3 v-if="show_title" class="font-bold mt-1 line-clamp-1">{{ project.title }}</h3>

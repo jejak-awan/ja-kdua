@@ -1,6 +1,6 @@
 <template>
     <div class="space-y-4">
-        <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-border/50 relative group">
+        <div class="aspect-square rounded-xl overflow-hidden bg-muted border border-border/50 relative group">
              <img 
                 :src="activeImage" 
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

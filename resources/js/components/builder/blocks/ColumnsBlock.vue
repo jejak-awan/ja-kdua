@@ -35,7 +35,7 @@
                                 
                                 <template #footer>
                                      <div v-if="column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center pointer-events-none opacity-50">
-                                        <span class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Column {{ index + 1 }}</span>
+                                        <span class="text-[10px] font-bold text-muted-foreground">Column {{ index + 1 }}</span>
                                         <span class="text-[9px] text-muted-foreground mt-1">Drop blocks here</span>
                                     </div>
                                 </template>

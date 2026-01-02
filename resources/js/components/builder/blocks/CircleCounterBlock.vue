@@ -127,7 +127,7 @@ watch(() => props.value, () => {
                     >
                         {{ Math.round(animate ? animatedValue : percentage) }}%
                     </span>
-                    <span v-if="title" class="text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">
+                    <span v-if="title" class="text-xs text-muted-foreground font-medium mt-1">
                         {{ title }}
                     </span>
                 </div>

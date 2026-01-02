@@ -78,7 +78,7 @@ const labelClass = computed(() => {
         medium: 'text-[10px]',
         large: 'text-xs'
     };
-    return `uppercase tracking-widest font-semibold text-muted-foreground mt-2 ${sizes[props.size] || sizes.large}`;
+    return `font-semibold text-muted-foreground mt-2 ${sizes[props.size] || sizes.large}`;
 });
 
 const containerClasses = computed(() => {
