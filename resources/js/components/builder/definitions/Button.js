@@ -1,11 +1,12 @@
 import { MousePointer } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'button',
     label: 'Button',
     icon: MousePointer,
     description: 'Customizable call-to-action button.',
-    component: () => import('@/components/builder/blocks/ButtonBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/ButtonBlock.vue')),
     settings: [
         {
             key: 'text',

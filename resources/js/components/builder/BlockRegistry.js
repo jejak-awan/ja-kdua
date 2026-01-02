@@ -1,4 +1,4 @@
-import { shallowRef, defineAsyncComponent } from 'vue';
+import { shallowRef } from 'vue';
 import blockDefinitions from './definitions';
 
 class BlockRegistry {
@@ -20,12 +20,6 @@ class BlockRegistry {
             console.error('Block definition must have a name');
             return;
         }
-
-        // Ensure component is wrapped in defineAsyncComponent if it's a dynamic import function
-        if (typeof definition.component === 'function') {
-            definition.component = defineAsyncComponent(definition.component);
-        }
-
         this.blocks.value.set(definition.name, definition);
     }
 

@@ -1,11 +1,12 @@
 import { LayoutTemplate } from 'lucide-vue-next';
+import { defineAsyncComponent } from 'vue';
 
 export default {
     name: 'hero',
     label: 'Hero Header',
     icon: LayoutTemplate,
     description: 'Large hero banner with title and background.',
-    component: () => import('@/components/builder/blocks/HeroBlock.vue'),
+    component: defineAsyncComponent(() => import('@/components/builder/blocks/HeroBlock.vue')),
     settings: [
         {
             key: 'title',
