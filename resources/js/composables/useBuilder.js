@@ -1,7 +1,10 @@
 import { ref, computed, watch } from 'vue';
 import { blockRegistry } from '../components/builder/BlockRegistry';
+import { useTheme } from './useTheme';
 
 export function useBuilder() {
+    const { activeTheme, themeSettings, loadActiveTheme } = useTheme();
+
     // State
     const deviceMode = ref('desktop');
     const editingIndex = ref(null);
@@ -16,12 +19,17 @@ export function useBuilder() {
     const takeSnapshot = () => {
         if (isUndoing.value) return;
 
+        const currentState = JSON.stringify(blocks.value);
+        const lastState = history.value.length > 0 ? JSON.stringify(history.value[historyIndex.value]) : null;
+
+        if (currentState === lastState) return;
+
         // Remove any future history if we're in the middle of the stack
         if (historyIndex.value < history.value.length - 1) {
             history.value = history.value.slice(0, historyIndex.value + 1);
         }
 
-        history.value.push(JSON.parse(JSON.stringify(blocks.value)));
+        history.value.push(JSON.parse(currentState));
         historyIndex.value++;
 
         // Limit history size (optional, e.g. 50 steps)
@@ -151,12 +159,13 @@ export function useBuilder() {
         } else {
             blocks.value.push(block);
         }
-        // takeSnapshot(); // Handled by watcher
+        takeSnapshot();
     };
 
     const removeBlock = (index) => {
         blocks.value.splice(index, 1);
         if (editingIndex.value === index) editingIndex.value = null;
+        takeSnapshot();
     };
 
     const duplicateBlock = (index) => {
@@ -166,6 +175,7 @@ export function useBuilder() {
             id: crypto.randomUUID()
         };
         blocks.value.splice(index + 1, 0, clone);
+        takeSnapshot();
     };
 
     const updateBlock = (index, newBlock) => {
@@ -200,6 +210,7 @@ export function useBuilder() {
         } else {
             blocks.value.push(newBlock);
         }
+        takeSnapshot();
     };
 
     const canPaste = computed(() => clipboard.value !== null);
@@ -210,6 +221,7 @@ export function useBuilder() {
         const block = blocks.value.splice(index, 1)[0];
         blocks.value.splice(index - 1, 0, block);
         if (editingIndex.value === index) editingIndex.value = index - 1;
+        takeSnapshot();
     };
 
     const moveBlockDown = (index) => {
@@ -217,6 +229,7 @@ export function useBuilder() {
         const block = blocks.value.splice(index, 1)[0];
         blocks.value.splice(index + 1, 0, block);
         if (editingIndex.value === index) editingIndex.value = index + 1;
+        takeSnapshot();
     };
 
     return {
@@ -235,6 +248,11 @@ export function useBuilder() {
         activeMediaField,
         activeBlockId,
         clipboard,
+
+        // Theme
+        activeTheme,
+        themeSettings,
+        loadActiveTheme,
 
         // History
         canUndo,

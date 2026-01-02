@@ -1,7 +1,12 @@
 <template>
     <div class="block-renderer w-full">
         <template v-for="block in blocks" :key="block.id">
-            <div v-if="block && block.settings" :class="getVisibilityClasses(block.settings.visibility)">
+            <div 
+                v-if="block && block.settings" 
+                :class="[getVisibilityClasses(block.settings.visibility), block.settings._css_class]"
+                :id="block.settings._css_id"
+                :style="block.settings._custom_css"
+            >
                 <component 
                     :is="getBlockComponent(block.type)" 
                     v-bind="resolveBlockSettings(block)"
@@ -31,11 +36,45 @@ const props = defineProps({
     }
 });
 
+const applyPrefix = (str, prefix) => {
+    if (!str && str !== 0) return '';
+    return String(str).split(' ').filter(c => c.trim()).map(c => `${prefix}:${c.trim()}`).join(' ');
+};
+
 const resolveBlockSettings = (block) => {
     // Clone settings to avoid mutating original
     const settings = { ...block.settings };
+
+    // 1. Resolve Responsive Objects to Tailwind Strings
+    for (const key in settings) {
+        const val = settings[key];
+        // Check if it's a responsive object (not an array, not null)
+        if (val && typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val)) {
+             // Mobile First strategy
+             const mobile = val.mobile !== undefined ? val.mobile : '';
+             const tablet = val.tablet;
+             const desktop = val.desktop;
+             
+             let classes = [];
+             
+             // Base classes (mobile)
+             if (mobile !== '') classes.push(mobile);
+             
+             // Tablet overrides (md:)
+             if (tablet !== undefined && tablet !== mobile) {
+                 classes.push(applyPrefix(tablet, 'md'));
+             }
+             
+             // Desktop overrides (lg:)
+             if (desktop !== undefined && desktop !== tablet) {
+                 classes.push(applyPrefix(desktop, 'lg'));
+             }
+             
+             settings[key] = classes.join(' ');
+        }
+    }
     
-    // Check for dynamic overrides
+    // 2. Check for dynamic overrides
     if (block.dynamicSettings) {
         Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {
             if (sourceId) {

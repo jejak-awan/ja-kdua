@@ -211,6 +211,8 @@ const handleKeydown = (e) => {
 
 onMounted(() => {
     window.addEventListener('keydown', handleKeydown);
+    // Load theme setting to ensure canvas matches the frontend theme
+    builder.loadActiveTheme('admin'); 
 });
 
 onUnmounted(() => {

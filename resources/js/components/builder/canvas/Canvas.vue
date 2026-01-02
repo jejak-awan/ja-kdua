@@ -21,46 +21,32 @@
         <div 
             :class="[
                 canvasWidthClass, 
-                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl border border-border relative w-full shrink-0'
+                'bg-background shadow-2xl transition-all duration-500 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
             ]"
             :style="{ minHeight: '600px' }"
         >
-            <draggable 
-                v-model="builder.blocks.value" 
-                item-key="id"
-                group="blocks"
-                handle=".drag-handle"
-                class="space-y-0 min-h-full w-full pb-20"
-                ghost-class="block-ghost"
-            >
-                <template #item="{ element: block, index }">
-                     <div 
-                        class="group/block relative border-2 border-transparent hover:border-primary/50 transition-all cursor-pointer"
-                        :class="{ 'border-primary ring-4 ring-primary/10 z-10': builder.editingIndex.value === index }"
-                        @click.stop="editBlock(index)"
-                        @contextmenu.prevent="handleContextMenu($event, index)"
-                    >
-                        <!-- Block Toolbar (Elementor Style) -->
-                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-all z-30 flex items-center gap-0.5 bg-primary text-primary-foreground rounded-full px-1.5 py-1 shadow-xl scale-90 translate-y-1 group-hover/block:translate-y-0">
-                            <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
-                            <div class="w-px h-3 bg-primary-foreground/20 mx-1"></div>
-                            <button class="h-6 w-6 flex items-center justify-center hover:bg-primary-foreground/20 rounded-full transition-colors" @click.stop="builder.duplicateBlock(index)">
-                                <Copy class="w-3 h-3" />
-                            </button>
-                            <button class="h-6 w-6 flex items-center justify-center hover:bg-primary-foreground/20 rounded-full transition-colors" @click.stop="builder.removeBlock(index)">
-                                <Trash2 class="w-3 h-3" />
-                            </button>
-                        </div>
-
-                        <!-- Live Rendering of Block -->
-                        <div class="relative">
-                            <BlockRenderer :blocks="[block]" class="builder-render" />
-                            <!-- Overlay for clicks since blocks might have links -->
-                            <div class="absolute inset-0 z-[5]"></div>
-                        </div>
-                    </div>
-                </template>
-            </draggable>
+            <!-- Theme Provider Wrapper: Remaps global variables to theme-specific ones -->
+            <div class="theme-provider contents" :style="themeStyles">
+                <draggable 
+                    v-model="builder.blocks.value" 
+                    item-key="id"
+                    group="blocks"
+                    handle=".drag-handle"
+                    class="space-y-0 min-h-[600px] w-full pb-20 flex-1"
+                    ghost-class="block-ghost"
+                >
+                    <template #item="{ element: block, index }">
+                        <BlockWrapper 
+                            :block="block" 
+                            :index="index"
+                            :isNested="false"
+                            @edit="editBlock(index)"
+                            @duplicate="builder.duplicateBlock(index)"
+                            @delete="builder.removeBlock(index)"
+                        />
+                    </template>
+                </draggable>
+            </div>
             
             <!-- Empty Placeholder -->
             <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-6 md:p-12 text-center">
@@ -98,6 +84,7 @@ import {
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
+import BlockWrapper from './BlockWrapper.vue';
 import ContextMenu from '../ContextMenu.vue';
 import { ref } from 'vue';
 
@@ -151,6 +138,31 @@ const editBlock = (index) => {
     builder.editingIndex.value = index;
     builder.activeTab.value = 'content';
 };
+
+// Compute theme overrides for the canvas
+const themeStyles = computed(() => {
+    if (!builder.activeTheme?.value?.manifest?.settings_schema) return {};
+    
+    const styles = {};
+    const settings = builder.activeTheme.value.manifest.settings_schema;
+    
+    Object.keys(settings).forEach(key => {
+        const setting = settings[key];
+        const cssKey = key.replace(/_/g, '-');
+        
+        // Colors mapping to Shadcn variables
+        if (setting.type === 'color') {
+            styles[`--${cssKey}`] = `var(--theme-${cssKey}-hsl)`;
+        }
+        
+        // Typography mapping
+        if (setting.type === 'font') {
+            styles[`--font-${cssKey}`] = `var(--theme-font-${cssKey})`;
+        }
+    });
+    
+    return styles;
+});
 </script>
 
 <style scoped>

@@ -92,6 +92,47 @@ export function useTheme() {
     };
 
     /**
+     * Helper: Convert Hex to HSL (Space separated for Tailwind)
+     */
+    const hexToHsl = (hex) => {
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return null;
+
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = parseInt('0x' + hex[1] + hex[1]);
+            g = parseInt('0x' + hex[2] + hex[2]);
+            b = parseInt('0x' + hex[3] + hex[3]);
+        } else if (hex.length === 7) {
+            r = parseInt('0x' + hex[1] + hex[2]);
+            g = parseInt('0x' + hex[3] + hex[4]);
+            b = parseInt('0x' + hex[5] + hex[6]);
+        }
+
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        const cmin = Math.min(r, g, b), cmax = Math.max(r, g, b), delta = cmax - cmin;
+        let h = 0, s = 0, l = 0;
+
+        if (delta === 0) h = 0;
+        else if (cmax === r) h = ((g - b) / delta) % 6;
+        else if (cmax === g) h = (b - r) / delta + 2;
+        else h = (r - g) / delta + 4;
+
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+
+        l = (cmax + cmin) / 2;
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+        s = +(s * 100).toFixed(1);
+        l = +(l * 100).toFixed(1);
+
+        return `${h} ${s}% ${l}%`;
+    };
+
+    /**
      * Apply theme styles (CSS variables)
      */
     const applyThemeStyles = () => {
@@ -103,12 +144,24 @@ export function useTheme() {
         if (manifest && manifest.settings_schema) {
             Object.keys(manifest.settings_schema).forEach(key => {
                 const setting = manifest.settings_schema[key];
+                const value = getSetting(key, setting.default);
+
+                if (!value) return;
+
+                const cssKey = '--theme-' + key.replace(/_/g, '-');
+
                 if (setting.type === 'color') {
-                    const value = getSetting(key, setting.default);
-                    if (value) {
-                        const cssKey = '--theme-' + key.replace(/_/g, '-');
-                        variables.push(`${cssKey}: ${value};`);
+                    variables.push(`${cssKey}: ${value};`);
+
+                    // Inject HSL version for Shadcn compatibility
+                    const hslValue = hexToHsl(value);
+                    if (hslValue) {
+                        variables.push(`${cssKey}-hsl: ${hslValue};`);
                     }
+                } else if (setting.type === 'font' || setting.type === 'typography') {
+                    // Inject font-family
+                    const fontValue = String(value).includes(' ') ? `"${value}"` : value;
+                    variables.push(`${cssKey}: ${fontValue};`);
                 }
             });
         }
@@ -118,7 +171,6 @@ export function useTheme() {
             injectCssString(cssVariables.value, 'theme-variables');
         }
     };
-
     /**
      * Apply custom CSS
      */

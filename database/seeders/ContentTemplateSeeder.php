@@ -156,6 +156,99 @@ class ContentTemplateSeeder extends Seeder
             ],
         ];
 
+        // Builder Templates
+        $builderTemplates = [
+            [
+                'name' => 'Modern Hero Section',
+                'slug' => 'modern-hero-section',
+                'description' => 'High-impact hero section with background image and dual buttons.',
+                'type' => 'section',
+                'body_template' => json_encode([
+                    [
+                        'id' => 'hero-seed-1',
+                        'type' => 'hero',
+                        'settings' => [
+                            'title' => 'Build Faster with JA-CMS',
+                            'subtitle' => 'The ultimate visual builder for modern web applications.',
+                            'primaryButtonText' => 'Get Started',
+                            'primaryButtonUrl' => '#',
+                            'secondaryButtonText' => 'Live Demo',
+                            'secondaryButtonUrl' => '#',
+                            'align' => 'center',
+                            'padding' => 'py-24',
+                            'theme' => 'dark'
+                        ]
+                    ]
+                ]),
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Feature Grid options',
+                'slug' => 'feature-grid-3-col',
+                'description' => 'Three-column feature grid with icons.',
+                'type' => 'section',
+                'body_template' => json_encode([
+                    [
+                        'id' => 'features-seed-1',
+                        'type' => 'feature-grid',
+                        'settings' => [
+                            'columns' => 3,
+                            'items' => [
+                                ['title' => 'Visual Editing', 'description' => 'Edit content directly on the page.', 'icon' => 'edit'],
+                                ['title' => 'Responsive', 'description' => 'Looks great on all devices.', 'icon' => 'smartphone'],
+                                ['title' => 'Fast Performance', 'description' => 'Optimized for speed and SEO.', 'icon' => 'zap'],
+                            ]
+                        ]
+                    ]
+                ]),
+                'is_active' => true,
+            ],
+            [
+                'name' => 'SaaS Landing Page',
+                'slug' => 'saas-landing-page',
+                'description' => 'Complete landing page layout for software products.',
+                'type' => 'builder',
+                'body_template' => json_encode([
+                    [
+                        'id' => 'page-hero',
+                        'type' => 'hero',
+                        'settings' => [
+                            'title' => 'Launch Your SaaS Today',
+                            'subtitle' => 'Everything you need to build and scale.',
+                            'primaryButtonText' => 'Start Free Trial',
+                            'align' => 'center',
+                            'padding' => 'py-32'
+                        ]
+                    ],
+                    [
+                        'id' => 'page-features',
+                        'type' => 'feature-grid',
+                        'settings' => [
+                            'columns' => 3,
+                            'title' => 'Why Choose Us?',
+                            'items' => [
+                                ['title' => 'Scalable', 'description' => 'Grows with your business.', 'icon' => 'trending-up'],
+                                ['title' => 'Secure', 'description' => 'Enterprise-grade security.', 'icon' => 'shield'],
+                                ['title' => 'Support', 'description' => '24/7 expert support.', 'icon' => 'life-buoy'],
+                            ]
+                        ]
+                    ],
+                    [
+                        'id' => 'page-cta',
+                        'type' => 'cta',
+                        'settings' => [
+                            'title' => 'Ready to get started?',
+                            'buttonText' => 'Create Account',
+                            'buttonUrl' => '/register'
+                        ]
+                    ]
+                ]),
+                'is_active' => true,
+            ]
+        ];
+
+        $templates = array_merge($templates, $builderTemplates);
+
         foreach ($templates as $template) {
             ContentTemplate::updateOrCreate(
                 ['slug' => $template['slug']],

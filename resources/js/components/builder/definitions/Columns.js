@@ -52,6 +52,7 @@ export default {
     defaultSettings: {
         layout: '1-1',
         columns: [{ blocks: [] }, { blocks: [] }],
+        customWidths: [50, 50],
         padding: 'py-16',
         width: 'max-w-7xl',
         bgColor: 'transparent',

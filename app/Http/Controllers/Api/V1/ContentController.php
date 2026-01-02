@@ -127,7 +127,19 @@ class ContentController extends BaseApiController
 
     public function adminShow(Content $content)
     {
-        return $this->success($content->load(['author', 'category', 'tags', 'allComments', 'customFields.customField.fieldGroup']), 'Content retrieved successfully');
+        $content->load(['author', 'category', 'tags', 'allComments', 'customFields.customField.fieldGroup', 'lockedBy']);
+
+        // Check if lock is active (e.g., within last 60 minutes)
+        $isLocked = $content->locked_by !== null && $content->locked_at && $content->locked_at->diffInMinutes(now()) < 60;
+
+        $content->lock_status = [
+            'is_locked' => $isLocked,
+            'locked_by' => $content->lockedBy,
+            'locked_at' => $content->locked_at,
+            'can_unlock' => request()->user()->id === $content->locked_by || request()->user()->can('manage content'),
+        ];
+
+        return $this->success($content, 'Content retrieved successfully');
     }
 
     public function stats(Request $request)
