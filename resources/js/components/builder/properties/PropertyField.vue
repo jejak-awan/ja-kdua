@@ -51,26 +51,12 @@
 
             <!-- Color -->
             <div v-if="field.type === 'color'" class="space-y-2">
-                <!-- Quick Palette (Only show if not responsive or if we want to support it per device) -->
-                <div v-if="themeColors.length > 0" class="flex flex-wrap gap-1.5 p-1.5 bg-muted/30 rounded-md border border-border/50">
-                    <button 
-                        v-for="color in themeColors" 
-                        :key="color.variable"
-                        class="w-5 h-5 rounded-full border border-border shadow-sm transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        :style="{ backgroundColor: color.value }"
-                        :title="color.name"
-                        @click="proxyValue = color.variable"
-                    >
-                    </button>
-                </div>
-                
-                <div class="flex gap-2">
-                    <!-- Native Color Picker -->
-                    <input 
-                        type="color" 
+                <div class="flex gap-2 items-center">
+                    <!-- Custom Color Picker -->
+                    <ColorPicker 
                         v-model="proxyValue" 
-                        class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer"
                         :title="field.label"
+                        :theme-colors="themeColors"
                     />
                     <!-- Hex Input -->
                     <Input v-model="proxyValue" class="h-8 text-xs font-mono bg-background border-input" placeholder="#000000" />
@@ -195,6 +181,7 @@ import Input from '@/components/ui/input.vue';
 import Textarea from '@/components/ui/textarea.vue';
 import Button from '@/components/ui/button.vue';
 import Switch from '@/components/ui/switch.vue';
+import ColorPicker from '@/components/ui/color-picker.vue';
 import DynamicTrigger from './DynamicTrigger.vue';
 import { Image as ImageIcon, Smartphone, Tablet, Monitor, Trash2, Plus, Loader2 } from 'lucide-vue-next';
 import api from '@/services/api';
