@@ -61,7 +61,12 @@
         </div>
 
         <!-- Main Content Area -->
-        <div v-show="builder.isRightSidebarOpen.value" class="flex-1 overflow-y-auto custom-scrollbar bg-sidebar p-4">
+        <div 
+            ref="scrollContainer"
+            v-show="builder.isRightSidebarOpen.value" 
+            class="flex-1 overflow-y-auto custom-scrollbar bg-sidebar p-4 relative"
+            @scroll="handleScroll"
+        >
             
             <!-- PROPERTIES TAB -->
             <div v-if="builder.activeRightSidebarTab.value === 'properties'" class="space-y-4">
@@ -334,12 +339,33 @@
                     </div>
                  </div>
             </div>
+
+            <!-- Back to Top Button -->
+            <Transition
+                enter-active-class="transition-all duration-200"
+                enter-from-class="opacity-0 translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-200"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-2"
+            >
+                <button
+                    v-if="showBackToTop"
+                    @click="scrollToTop"
+                    class="fixed bottom-6 right-6 z-50 w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center group"
+                    title="Back to Top"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:-translate-y-0.5">
+                        <path d="m18 15-6-6-6 6"/>
+                    </svg>
+                </button>
+            </Transition>
         </div>
     </div>
 </template>
 
 <script setup>
-import { inject, computed, ref } from 'vue';
+import { inject, computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { 
     PanelRightClose, 
@@ -370,6 +396,25 @@ import PropertyField from './PropertyField.vue';
 
 const builder = inject('builder');
 const { t } = useI18n();
+
+// Back to Top functionality
+const scrollContainer = ref(null);
+const showBackToTop = ref(false);
+
+const handleScroll = () => {
+    if (scrollContainer.value) {
+        showBackToTop.value = scrollContainer.value.scrollTop > 100;
+    }
+};
+
+const scrollToTop = () => {
+    if (scrollContainer.value) {
+        scrollContainer.value.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+};
 
 const selectedBlock = computed(() => {
     if (builder.activeBlockId.value) {
