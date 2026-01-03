@@ -65,8 +65,15 @@
                 </div>
                 
                 <div class="flex gap-2">
-                    <div class="w-8 h-8 rounded border border-border shadow-sm shrink-0" :style="{ backgroundColor: proxyValue }"></div>
-                    <Input v-model="proxyValue" class="h-8 text-xs font-mono bg-background border-input" />
+                    <!-- Native Color Picker -->
+                    <input 
+                        type="color" 
+                        v-model="proxyValue" 
+                        class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer"
+                        :title="field.label"
+                    />
+                    <!-- Hex Input -->
+                    <Input v-model="proxyValue" class="h-8 text-xs font-mono bg-background border-input" placeholder="#000000" />
                 </div>
             </div>
 
