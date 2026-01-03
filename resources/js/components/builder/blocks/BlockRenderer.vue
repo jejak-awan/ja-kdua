@@ -11,13 +11,15 @@
                         resolveAdvancedStyles(block.settings),
                         resolveAdvancedStyles(block.hoverSettings, 'hover'),
                         resolveResponsiveValue(block.settings.animation_effect),
-                        resolveResponsiveValue(block.settings._position)
+                        resolveResponsiveValue(block.settings._position),
+                        getColorClasses(block)
                     ].filter(Boolean)"
                     :id="block.settings._css_id ? String(resolveResponsiveValue(block.settings._css_id)).trim().replace(/\s/g, '-') : undefined"
                     :style="[
                         block.settings._custom_css,
                         getAnimationStyles(block.settings),
-                        getPositioningStyles(block.settings)
+                        getPositioningStyles(block.settings),
+                        getColorStyles(block)
                     ]"
                 >
                     <component 
@@ -249,5 +251,41 @@ const getPositioningStyles = (settings) => {
 
 const getBlockComponent = (type) => {
     return blockRegistry.getComponent(type);
+};
+const getColorStyles = (block) => {
+    const settings = block.settings || {};
+    const hover = block.hoverSettings || {};
+    
+    // Check for textColor or color (legacy/alt names)
+    const textColor = settings.textColor || settings.color;
+    const hoverTextColor = hover.textColor || hover.color;
+    
+    const bgColor = settings.bgColor || settings.background_color;
+    const hoverBgColor = hover.bgColor || hover.background_color;
+    
+    const styles = {};
+    
+    if (textColor) styles['--text-color'] = textColor;
+    if (hoverTextColor) styles['--hover-text-color'] = hoverTextColor;
+    
+    if (bgColor) styles['--bg-color'] = bgColor;
+    if (hoverBgColor) styles['--hover-bg-color'] = hoverBgColor;
+    
+    return styles;
+};
+
+const getColorClasses = (block) => {
+    const hover = block.hoverSettings || {};
+    const classes = [];
+    
+    if (hover.textColor || hover.color) {
+        classes.push('hover:[--text-color:var(--hover-text-color)]');
+    }
+    
+    if (hover.bgColor || hover.background_color) {
+        classes.push('hover:[--bg-color:var(--hover-bg-color)]');
+    }
+    
+    return classes.join(' ');
 };
 </script>

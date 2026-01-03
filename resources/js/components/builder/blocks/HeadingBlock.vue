@@ -12,7 +12,7 @@
                     alignmentClass,
                     decorationClass
                 ]"
-                :style="{ color: textColor || 'inherit' }"
+                :style="{ color: 'var(--text-color, ' + (textColor || 'inherit') + ')' }"
             >
                 {{ text || 'Heading Text' }}
             </component>
