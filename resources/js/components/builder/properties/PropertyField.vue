@@ -110,8 +110,31 @@
             </div>
 
             <!-- Slider/Range -->
-            <div v-if="field.type === 'slider' || field.type === 'range'" class="space-y-2">
-                <div class="flex items-center gap-3">
+            <div v-if="field.type === 'slider' || field.type === 'range'" class="space-y-1.5">
+                <!-- Value Input + Reset -->
+                <div class="flex items-center gap-2">
+                    <Input 
+                        type="number"
+                        :model-value="proxyValue"
+                        @input="proxyValue = Number($event.target.value)"
+                        :min="field.min || 0"
+                        :max="field.max || 100"
+                        :step="field.step || 1"
+                        class="h-7 text-xs font-mono bg-background border-input w-16 text-center"
+                    />
+                    <span v-if="field.unit" class="text-[10px] text-muted-foreground font-medium">{{ field.unit }}</span>
+                    <button 
+                        v-if="field.default !== undefined"
+                        @click="proxyValue = field.default"
+                        class="ml-auto text-[9px] text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted"
+                        title="Reset to default"
+                    >
+                        Reset
+                    </button>
+                </div>
+                
+                <!-- Slider with Min/Max Labels -->
+                <div class="space-y-1">
                     <input 
                         type="range"
                         :value="proxyValue"
@@ -119,11 +142,12 @@
                         :min="field.min || 0"
                         :max="field.max || 100"
                         :step="field.step || 1"
-                        class="flex-1 h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
+                        class="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer accent-primary [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-sm hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:transition-transform"
                     />
-                    <span class="text-xs font-mono text-muted-foreground w-12 text-right">
-                        {{ proxyValue }}{{ field.unit || '' }}
-                    </span>
+                    <div class="flex justify-between text-[9px] text-muted-foreground font-mono">
+                        <span>{{ field.min || 0 }}{{ field.unit || '' }}</span>
+                        <span>{{ field.max || 100 }}{{ field.unit || '' }}</span>
+                    </div>
                 </div>
             </div>
             
