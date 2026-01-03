@@ -234,7 +234,21 @@ const handleMediaSelect = (media) => {
         // Find block
         const block = builder.blocks.value.find(b => b.id === builder.activeBlockId.value);
         if (block) {
-            block.settings[builder.activeMediaField.value] = media.url;
+            // Support nested keys (e.g. "images[0].url" or "images.0.url")
+            const path = builder.activeMediaField.value;
+            if (path.includes('.') || path.includes('[')) {
+                // Simple Deep Set Implementation
+                const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+                let current = block.settings;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    const key = parts[i];
+                    if (!current[key]) current[key] = {}; // Create object if missing (though unlikely for arrays)
+                    current = current[key];
+                }
+                current[parts[parts.length - 1]] = media.url;
+            } else {
+                block.settings[path] = media.url;
+            }
         }
     }
     builder.showMediaPicker.value = false;

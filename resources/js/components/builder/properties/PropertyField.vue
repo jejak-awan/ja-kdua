@@ -167,7 +167,16 @@
                                 <Input v-if="subField.type === 'text'" v-model="item[subField.key]" class="h-7 text-xs" />
                                 <Textarea v-if="subField.type === 'textarea'" v-model="item[subField.key]" class="min-h-[40px] text-xs" />
                                 <div v-if="subField.type === 'image'" class="flex gap-1">
-                                    <Input v-model="item[subField.key]" class="h-7 text-xs" />
+                                    <Input v-model="item[subField.key]" class="h-7 text-xs flex-1" placeholder="https://..." />
+                                    <Button 
+                                        variant="outline" 
+                                        size="icon" 
+                                        class="h-7 w-7 shrink-0" 
+                                        @click="openNestedMediaPicker(field.key, idx, subField.key)"
+                                        :title="t('features.builder.properties.tooltips.mediaLibrary')"
+                                    >
+                                        <ImageIcon class="w-3.5 h-3.5" />
+                                    </Button>
                                 </div>
                                 <select v-if="subField.type === 'select'" v-model="item[subField.key]" class="w-full h-7 px-2 bg-background border border-input rounded-md text-xs">
                                      <option v-for="opt in subField.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
@@ -330,6 +339,14 @@ const themeColors = computed(() => {
 
 const openMediaPicker = () => {
     builder.activeMediaField.value = props.field.key;
+    builder.activeBlockId.value = props.block.id;
+    builder.showMediaPicker.value = true;
+};
+
+const openNestedMediaPicker = (parentKey, index, childKey) => {
+    // Construct path: "images[0].url"
+    const path = `${parentKey}[${index}].${childKey}`;
+    builder.activeMediaField.value = path;
     builder.activeBlockId.value = props.block.id;
     builder.showMediaPicker.value = true;
 };

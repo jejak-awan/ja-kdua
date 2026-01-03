@@ -54,7 +54,7 @@ class SecurityHeaders
             "'self'", 
             "'unsafe-inline'", 
             "'unsafe-eval'",
-            "'nonce-{$nonce}'"
+            // "'nonce-{$nonce}'" // RAM: Removed nonce to allow 'unsafe-inline' to work for dynamic content
         ];
         
         // Allow localhost for Vite dev server in development
