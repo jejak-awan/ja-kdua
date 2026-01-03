@@ -21,8 +21,8 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.showLayersPanel.value ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'"
-                    @click="builder.showLayersPanel.value = !builder.showLayersPanel.value"
+                    :class="builder.activeRightSidebarTab.value === 'layers' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    @click="setTab('layers')"
                     :title="t('features.builder.properties.layers')"
                 >
                     <Layers class="w-4 h-4" />
@@ -68,6 +68,15 @@
             @scroll="handleScroll"
         >
             
+            <!-- LAYERS TAB -->
+            <div v-if="builder.activeRightSidebarTab.value === 'layers'" class="space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-sidebar-border">
+                    <h3 class="font-bold text-xs text-foreground">Layers</h3>
+                    <span class="text-[10px] text-muted-foreground">{{ builder.blocks.value.length }} Root Elements</span>
+                </div>
+                <LayersTree :blocks="builder.blocks.value" />
+            </div>
+
             <!-- PROPERTIES TAB -->
             <div v-if="builder.activeRightSidebarTab.value === 'properties'" class="space-y-4">
                 <div v-if="selectedBlock" class="space-y-4">
@@ -379,6 +388,7 @@ import AccordionTrigger from '@/components/ui/accordion-trigger.vue';
 import draggable from 'vuedraggable';
 import { blockRegistry } from '../BlockRegistry';
 import PropertyField from './PropertyField.vue';
+import LayersTree from '../layers/LayersTree.vue';
 import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
 
