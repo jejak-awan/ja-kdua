@@ -272,6 +272,14 @@ const categoryDefinitions = [
 const collapsedCategories = reactive({});
 
 const toggleCategory = (name) => {
+    // If clicking already open category, close it
+    if (!collapsedCategories[name]) {
+        // Close all other categories first (single collapsible mode)
+        Object.keys(collapsedCategories).forEach(key => {
+            collapsedCategories[key] = true;
+        });
+    }
+    // Toggle clicked category
     collapsedCategories[name] = !collapsedCategories[name];
 };
 
