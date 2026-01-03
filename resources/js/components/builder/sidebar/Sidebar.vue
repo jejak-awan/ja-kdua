@@ -287,11 +287,20 @@ const toggleCategory = (name) => {
 const categorizedBlocks = computed(() => {
     const allBlocks = builder.availableBlocks;
     
-    return categoryDefinitions.map(cat => ({
+    const categories = categoryDefinitions.map(cat => ({
         ...cat,
         blocks: cat.blocks
             .map(blockName => allBlocks.find(b => b.name === blockName))
             .filter(Boolean)
     })).filter(cat => cat.blocks.length > 0);
+    
+    // Initialize collapsed state (all collapsed except first category)
+    categories.forEach((cat, index) => {
+        if (collapsedCategories[cat.name] === undefined) {
+            collapsedCategories[cat.name] = index !== 0; // false for first, true for rest
+        }
+    });
+    
+    return categories;
 });
 </script>

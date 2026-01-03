@@ -64,7 +64,7 @@
         <div 
             ref="scrollContainer"
             v-show="builder.isRightSidebarOpen.value" 
-            class="flex-1 overflow-y-auto custom-scrollbar bg-sidebar p-4 relative"
+            class="flex-1 overflow-y-auto custom-scrollbar bg-sidebar p-4 pb-16 relative"
             @scroll="handleScroll"
         >
             
