@@ -108,7 +108,7 @@
                     </div>
 
                     <!-- Accordion Settings -->
-                    <Accordion type="multiple" class="w-full" :defaultValue="['content']">
+                    <Accordion type="single" collapsible class="w-full" default-value="content">
                         <AccordionItem value="content" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.content') }}
