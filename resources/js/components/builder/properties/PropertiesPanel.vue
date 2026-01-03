@@ -352,7 +352,7 @@
                 <button
                     v-if="showBackToTop"
                     @click="scrollToTop"
-                    class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-9 h-9 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center group"
+                    class="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 w-9 h-9 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center group"
                     title="Back to Top"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:-translate-y-0.5">
