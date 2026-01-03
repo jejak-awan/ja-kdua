@@ -27,7 +27,11 @@
             </div>
         </div>
         
-        <div class="flex-1 overflow-y-auto p-2 custom-scrollbar bg-sidebar">
+        <div 
+            ref="scrollContainer"
+            @scroll="handleScroll"
+            class="flex-1 overflow-y-auto p-2 pb-16 custom-scrollbar bg-sidebar"
+        >
             <!-- Categorized Blocks (when sidebar is expanded) -->
             <template v-if="builder.isSidebarOpen.value">
                 <div v-for="category in categorizedBlocks" :key="category.name" class="mb-4">
@@ -183,13 +187,20 @@
 
         <!-- Template Library Modal -->
         <TemplateLibrary />
+        
+        <BackToTop 
+            :show="showBackToTop && builder.isSidebarOpen.value" 
+            @click="scrollToTop" 
+        />
     </div>
 </template>
 
 <script setup>
-import { inject, ref, computed, reactive } from 'vue';
+import { inject, ref, computed, reactive, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
+import BackToTop from '@/components/ui/back-to-top.vue';
+import { useScrollToTop } from '@/composables/useScrollToTop';
 import { 
     Search as SearchIcon, 
     LayoutTemplate, 
@@ -213,6 +224,9 @@ import TemplateLibrary from './TemplateLibrary.vue';
 
 const builder = inject('builder');
 const { t } = useI18n();
+
+const scrollContainer = ref(null);
+const { showBackToTop, handleScroll, scrollToTop } = useScrollToTop(scrollContainer);
 
 const showShortcuts = ref(false);
 

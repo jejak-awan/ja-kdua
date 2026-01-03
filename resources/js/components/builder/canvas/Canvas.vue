@@ -1,54 +1,66 @@
 <template>
-    <div class="flex-1 min-h-0 overflow-y-auto bg-muted/50 bg-dot-pattern p-6 custom-scrollbar relative flex flex-col items-center">
-
-        <!-- Draggable Canvas -->
+    <div class="flex-1 min-h-0 relative flex flex-col">
         <div 
-            :class="[
-                canvasWidthClass, 
-                'bg-background shadow-2xl transition-[width] duration-200 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
-            ]"
-            :style="{ minHeight: '600px' }"
+            ref="scrollContainer"
+            @scroll="handleScroll"
+            class="flex-1 overflow-y-auto bg-muted/50 bg-dot-pattern p-6 pb-20 custom-scrollbar flex flex-col items-center"
         >
-            <!-- Theme Provider Wrapper: Remaps global variables to theme-specific ones -->
-            <div class="theme-provider contents" :style="themeStyles">
-                <draggable 
-                    v-model="builder.blocks.value" 
-                    item-key="id"
-                    group="blocks"
-                    handle=".drag-handle"
-                    class="space-y-0 min-h-[600px] w-full pb-20 flex-1"
-                    ghost-class="block-ghost"
-                >
-                    <template #item="{ element: block, index }">
-                        <BlockWrapper 
-                            :block="block" 
-                            :index="index"
-                            :context="context"
-                            :isNested="false"
-                            @edit="editBlock(index)"
-                            @duplicate="builder.duplicateBlock(index)"
-                            @delete="builder.removeBlock(index)"
-                        />
-                    </template>
-                </draggable>
+
+            <!-- Draggable Canvas -->
+            <div 
+                :class="[
+                    canvasWidthClass, 
+                    'bg-background shadow-2xl transition-[width] duration-200 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
+                ]"
+                :style="{ minHeight: '600px' }"
+            >
+                <!-- Theme Provider Wrapper: Remaps global variables to theme-specific ones -->
+                <div class="theme-provider contents" :style="themeStyles">
+                    <draggable 
+                        v-model="builder.blocks.value" 
+                        item-key="id"
+                        group="blocks"
+                        handle=".drag-handle"
+                        class="space-y-0 min-h-[600px] w-full pb-20 flex-1"
+                        ghost-class="block-ghost"
+                    >
+                        <template #item="{ element: block, index }">
+                            <BlockWrapper 
+                                :block="block" 
+                                :index="index"
+                                :context="context"
+                                :isNested="false"
+                                @edit="editBlock(index)"
+                                @duplicate="builder.duplicateBlock(index)"
+                                @delete="builder.removeBlock(index)"
+                            />
+                        </template>
+                    </draggable>
+                </div>
+                
+                <!-- Empty Placeholder -->
+                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-6 md:p-12 text-center">
+                    <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
+                        <Plus class="w-10 h-10 opacity-20" />
+                    </div>
+                    <div class="space-y-1 w-full">
+                        <h3 class="text-lg font-bold text-foreground">{{ t('features.builder.canvas.empty.title') }}</h3>
+                        <p class="text-sm max-w-[260px] md:max-w-xs mx-auto text-muted-foreground">{{ t('features.builder.canvas.empty.description') }}</p>
+                    </div>
+                </div>
             </div>
+
             
-            <!-- Empty Placeholder -->
-            <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-6 md:p-12 text-center">
-                <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
-                    <Plus class="w-10 h-10 opacity-20" />
-                </div>
-                <div class="space-y-1 w-full">
-                    <h3 class="text-lg font-bold text-foreground">{{ t('features.builder.canvas.empty.title') }}</h3>
-                    <p class="text-sm max-w-[260px] md:max-w-xs mx-auto text-muted-foreground">{{ t('features.builder.canvas.empty.description') }}</p>
-                </div>
-            </div>
+            <!-- Global Undo/Redo/History (Coming Soon) -->
+
+            <div class="h-20 w-full shrink-0"></div>
         </div>
 
-        
-        <!-- Global Undo/Redo/History (Coming Soon) -->
-
-        <div class="h-20 w-full shrink-0"></div>
+        <BackToTop 
+            :show="showBackToTop" 
+            positionClass="bottom-6 right-6"
+            @click="scrollToTop" 
+        />
     </div>
 </template>
 
@@ -62,6 +74,8 @@ import {
 import Button from '@/components/ui/button.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockWrapper from './BlockWrapper.vue';
+import BackToTop from '@/components/ui/back-to-top.vue';
+import { useScrollToTop } from '@/composables/useScrollToTop';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -73,6 +87,9 @@ const props = defineProps({
 
 const builder = inject('builder');
 const { t } = useI18n();
+
+const scrollContainer = ref(null);
+const { showBackToTop, handleScroll, scrollToTop } = useScrollToTop(scrollContainer);
 
 const canvasWidthClass = computed(() => {
     switch (builder.deviceMode.value) {
