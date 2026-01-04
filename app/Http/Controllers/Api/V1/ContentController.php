@@ -177,7 +177,7 @@ class ContentController extends BaseApiController
                 'title' => 'required|string|max:255',
                 'slug' => 'required|string|unique:contents,slug',
                 'excerpt' => 'nullable|string',
-                'body' => 'required|string',
+                'body' => 'required_without:blocks|string',
                 'featured_image' => 'nullable|string',
                 'status' => 'required|in:draft,pending,published,archived',
                 'type' => 'required|in:post,page,custom',
@@ -194,6 +194,7 @@ class ContentController extends BaseApiController
                 'is_featured' => 'boolean',
                 'new_tags' => 'nullable|array',
                 'new_tags.*' => 'string|max:50',
+                'blocks' => 'nullable|array',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -257,11 +258,12 @@ class ContentController extends BaseApiController
                 'is_featured' => 'boolean',
                 'new_tags' => 'nullable|array',
                 'new_tags.*' => 'string|max:50',
+                'blocks' => 'nullable|array',
             ];
 
-            // If publishing, require body
+            // If publishing, require body OR blocks
             if ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published')) {
-               $rules['body'] = 'required|string';
+               $rules['body'] = 'required_without:blocks|string';
             }
 
             $validated = $request->validate($rules);
