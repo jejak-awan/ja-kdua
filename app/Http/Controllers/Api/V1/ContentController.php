@@ -177,7 +177,7 @@ class ContentController extends BaseApiController
                 'title' => 'required|string|max:255',
                 'slug' => 'required|string|unique:contents,slug',
                 'excerpt' => 'nullable|string',
-                'body' => 'required_without:blocks|string',
+                'body' => 'nullable|required_without:blocks|string',
                 'featured_image' => 'nullable|string',
                 'status' => 'required|in:draft,pending,published,archived',
                 'type' => 'required|in:post,page,custom',
@@ -263,7 +263,7 @@ class ContentController extends BaseApiController
 
             // If publishing, require body OR blocks
             if ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published')) {
-               $rules['body'] = 'required_without:blocks|string';
+               $rules['body'] = 'nullable|required_without:blocks|string';
             }
 
             $validated = $request->validate($rules);
