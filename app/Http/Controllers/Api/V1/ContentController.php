@@ -93,8 +93,12 @@ class ContentController extends BaseApiController
             $query->where('author_id', $request->user()->id);
         }
 
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+        if ($request->has('status') && $request->status !== 'all') {
+            if ($request->status === 'trashed') {
+                $query->onlyTrashed();
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->has('category_id')) {
@@ -540,5 +544,27 @@ class ContentController extends BaseApiController
         $this->contentService->unlock($content);
 
         return $this->success(null, 'Content unlocked successfully');
+    }
+
+    public function restore(Request $request, $id)
+    {
+        if (!$request->user()->can('delete content')) {
+             return $this->forbidden('You do not have permission to restore content');
+        }
+
+        $this->contentService->restore($id);
+
+        return $this->success(null, 'Content restored successfully');
+    }
+
+    public function forceDelete(Request $request, $id)
+    {
+        if (!$request->user()->can('delete content') || !$request->user()->can('manage content')) {
+             return $this->forbidden('You do not have permission to permanently delete content');
+        }
+
+        $this->contentService->forceDelete($id);
+
+        return $this->success(null, 'Content permanently deleted');
     }
 }

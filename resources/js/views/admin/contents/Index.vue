@@ -125,6 +125,7 @@
                                 <SelectItem value="pending">{{ $t('features.content.status.pending') }}</SelectItem>
                                 <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
                                 <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
+                                <SelectItem value="trashed">{{ $t('common.labels.trash') || 'Trash' }}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -243,7 +244,15 @@
                                 </div>
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">
-                                <div class="flex justify-end items-center gap-1">
+                                <div v-if="statusFilter === 'trashed'" class="flex justify-end items-center gap-1">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10" @click="handleRestore(content)" :title="$t('common.actions.restore') || 'Restore'">
+                                        <RotateCcw class="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleForceDelete(content)" :title="$t('common.actions.deletePermanently') || 'Delete Permanently'">
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                </div>
+                                <div v-else class="flex justify-end items-center gap-1">
                                     <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-500/10" @click="handleApprove(content)" :title="$t('features.content.actions.approve')">
                                         <CheckCircle2 class="w-4 h-4" />
                                     </Button>
@@ -332,7 +341,8 @@ import {
     Archive,
     Clock3,
     XCircle,
-    FileEdit
+    FileEdit,
+    RotateCcw
 } from 'lucide-vue-next';
 import { useAuthStore } from '../../../stores/auth';
 import { useConfirm } from '../../../composables/useConfirm';
@@ -573,9 +583,10 @@ const handleBulkAction = async () => {
     try {
         await api.post('/admin/cms/contents/bulk-action', {
             action: action,
-            ids: selectedContents.value,
+            content_ids: selectedContents.value,
         });
         await fetchContents();
+        await fetchStats();
         toast.success.update();
         bulkAction.value = '';
     } catch (error) {
@@ -598,8 +609,41 @@ const handleDelete = async (content) => {
     try {
         await api.delete(`/admin/cms/contents/${content.id}`);
         await fetchContents();
+        await fetchStats();
     } catch (error) {
         console.error('Failed to delete content:', error);
+        toast.error(error);
+    }
+};
+
+const handleRestore = async (content) => {
+    try {
+        await api.put(`/admin/cms/contents/${content.id}/restore`);
+        await fetchContents();
+        await fetchStats();
+        toast.success.default(t('common.messages.success.restored') || 'Content restored');
+    } catch (error) {
+        console.error('Failed to restore content:', error);
+        toast.error(error);
+    }
+};
+
+const handleForceDelete = async (content) => {
+    const confirmed = await confirm({
+        title: t('common.actions.deletePermanently'),
+        message: t('common.messages.confirm.deletePermanently', { item: content.title }),
+        confirmText: t('common.actions.delete'),
+        variant: 'destructive'
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.delete(`/admin/cms/contents/${content.id}/force-delete`);
+        await fetchContents();
+        await fetchStats();
+    } catch (error) {
+        console.error('Failed to force delete content:', error);
         toast.error(error);
     }
 };

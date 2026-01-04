@@ -200,8 +200,10 @@ const form = ref({
         add_to_menu: false,
         menu_id: '',
         parent_id: null,
+        parent_id: null,
         title: ''
-    }
+    },
+    blocks: []
 });
 
 const isDirty = computed(() => {
@@ -288,7 +290,8 @@ const fetchContent = async () => {
                 menu_id: '',
                 parent_id: null,
                 title: ''
-            }
+            },
+            blocks: content.blocks || []
         };
 
         // Handle menu items

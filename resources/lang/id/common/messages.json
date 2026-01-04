@@ -15,6 +15,7 @@
         "rejected": "{item} berhasil ditolak",
         "marked_spam": "{item} ditandai sebagai spam",
         "retrieved": "{item} berhasil diambil",
+        "restored": "{item} berhasil dipulihkan",
         "actionSuccess": "{item} berhasil {action}"
     },
     "error": {
@@ -43,6 +44,7 @@
         "approve": "Apakah Anda yakin ingin menyetujui {item} ini?",
         "reject": "Apakah Anda yakin ingin menolak {item} ini?",
         "duplicate": "Apakah Anda yakin ingin menduplikasi {item} ini?",
+        "deletePermanently": "Apakah Anda yakin ingin menghapus {item} secara permanen? Tindakan ini tidak dapat dibatalkan.",
         "bulkAction": "Apakah Anda yakin ingin {action} {count} item terpilih?"
     },
     "loading": {

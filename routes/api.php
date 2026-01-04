@@ -133,6 +133,8 @@ Route::prefix('v1')->group(function () {
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');
         Route::put('contents/{content}/approve', [App\Http\Controllers\Api\V1\ContentController::class, 'approve'])->middleware('permission:approve content');
         Route::put('contents/{content}/reject', [App\Http\Controllers\Api\V1\ContentController::class, 'reject'])->middleware('permission:approve content');
+        Route::put('contents/{id}/restore', [App\Http\Controllers\Api\V1\ContentController::class, 'restore'])->middleware('permission:delete content');
+        Route::delete('contents/{id}/force-delete', [App\Http\Controllers\Api\V1\ContentController::class, 'forceDelete'])->middleware('permission:delete content');
 
         // Newsletter
         Route::post('newsletter/subscribers/bulk-action', [App\Http\Controllers\Api\V1\NewsletterController::class, 'bulkAction'])->middleware('permission:manage users');

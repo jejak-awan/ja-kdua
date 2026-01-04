@@ -1,0 +1,476 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Content;
+use App\Models\Menu;
+use App\Models\MenuItem;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+
+class SampleContentSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $this->command->info('Creating sample content with Page Builder blocks...');
+
+        $user = User::first();
+        
+        // Create categories
+        $categories = $this->createCategories();
+        
+        // Create tags
+        $tags = $this->createTags();
+        
+        // Create menus
+        $this->createMenus();
+        
+        // Create pages
+        $this->createLandingPage($user);
+        $this->createAboutPage($user);
+        $this->createContactPage($user);
+        
+        // Create blog posts
+        $this->createBlogPosts($user, $categories, $tags);
+        
+        $this->command->info('Sample content created successfully!');
+    }
+
+    private function createCategories(): array
+    {
+        $categories = [
+            ['name' => 'Technology', 'slug' => 'technology', 'description' => 'Latest tech news and tutorials'],
+            ['name' => 'Design', 'slug' => 'design', 'description' => 'UI/UX and design inspiration'],
+            ['name' => 'Business', 'slug' => 'business', 'description' => 'Business insights and strategies'],
+            ['name' => 'Tutorial', 'slug' => 'tutorial', 'description' => 'Step-by-step guides'],
+        ];
+
+        $result = [];
+        foreach ($categories as $cat) {
+            $result[$cat['slug']] = Category::firstOrCreate(
+                ['slug' => $cat['slug']],
+                $cat
+            );
+        }
+        return $result;
+    }
+
+    private function createTags(): array
+    {
+        $tagNames = ['Laravel', 'Vue.js', 'CMS', 'Web Development', 'Design', 'Tutorial', 'Guide', 'Tips'];
+        $result = [];
+        
+        foreach ($tagNames as $name) {
+            $result[] = Tag::firstOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name, 'slug' => Str::slug($name)]
+            );
+        }
+        return $result;
+    }
+
+    private function createMenus(): void
+    {
+        // Header Menu
+        $headerMenu = Menu::firstOrCreate(
+            ['location' => 'header'],
+            ['name' => 'Main Navigation', 'slug' => 'main-navigation', 'location' => 'header']
+        );
+
+        $headerItems = [
+            ['title' => 'Home', 'url' => '/', 'sort_order' => 0],
+            ['title' => 'Blog', 'url' => '/blog', 'sort_order' => 1],
+            ['title' => 'About', 'url' => '/about', 'sort_order' => 2],
+            ['title' => 'Contact', 'url' => '/contact', 'sort_order' => 3],
+        ];
+
+        foreach ($headerItems as $item) {
+            MenuItem::firstOrCreate(
+                ['menu_id' => $headerMenu->id, 'title' => $item['title']],
+                array_merge($item, ['menu_id' => $headerMenu->id, 'type' => 'custom'])
+            );
+        }
+
+        // Footer Column 1
+        $footerCol1 = Menu::firstOrCreate(
+            ['location' => 'footer_col_1'],
+            ['name' => 'Quick Links', 'slug' => 'footer-quick-links', 'location' => 'footer_col_1']
+        );
+
+        $footerItems1 = [
+            ['title' => 'Home', 'url' => '/', 'sort_order' => 0],
+            ['title' => 'Blog', 'url' => '/blog', 'sort_order' => 1],
+            ['title' => 'About Us', 'url' => '/about', 'sort_order' => 2],
+            ['title' => 'Contact', 'url' => '/contact', 'sort_order' => 3],
+        ];
+
+        foreach ($footerItems1 as $item) {
+            MenuItem::firstOrCreate(
+                ['menu_id' => $footerCol1->id, 'title' => $item['title']],
+                array_merge($item, ['menu_id' => $footerCol1->id, 'type' => 'custom'])
+            );
+        }
+
+        // Footer Column 2
+        $footerCol2 = Menu::firstOrCreate(
+            ['location' => 'footer_col_2'],
+            ['name' => 'Resources', 'slug' => 'footer-resources', 'location' => 'footer_col_2']
+        );
+
+        $footerItems2 = [
+            ['title' => 'Documentation', 'url' => '/docs', 'sort_order' => 0],
+            ['title' => 'Support', 'url' => '/support', 'sort_order' => 1],
+            ['title' => 'Privacy Policy', 'url' => '/privacy', 'sort_order' => 2],
+            ['title' => 'Terms of Service', 'url' => '/terms', 'sort_order' => 3],
+        ];
+
+        foreach ($footerItems2 as $item) {
+            MenuItem::firstOrCreate(
+                ['menu_id' => $footerCol2->id, 'title' => $item['title']],
+                array_merge($item, ['menu_id' => $footerCol2->id, 'type' => 'custom'])
+            );
+        }
+
+        $this->command->info('Menus created: Header, Footer Column 1, Footer Column 2');
+    }
+
+    private function createLandingPage($user): void
+    {
+        $blocks = [
+            // Hero Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'hero',
+                'settings' => [
+                    'title' => 'Build Amazing Websites with JA-CMS',
+                    'subtitle' => 'The modern content management system that empowers you to create stunning, fast, and SEO-friendly websites without writing code.',
+                    'bgImage' => '',
+                    'bgColor' => '#4f46e5',
+                    'padding' => 'py-32',
+                    'radius' => 'rounded-none',
+                    'animation' => 'animate-in fade-in duration-700',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Features Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'features',
+                'settings' => [
+                    'title' => 'Why Choose JA-CMS?',
+                    'items' => [
+                        ['title' => 'Visual Page Builder', 'description' => 'Drag and drop blocks to create beautiful pages without touching code.'],
+                        ['title' => 'Theme Builder', 'description' => 'Customize every aspect of your site with our powerful theme builder.'],
+                        ['title' => 'Menu Builder', 'description' => 'Create complex navigation structures with ease.'],
+                        ['title' => 'SEO Optimized', 'description' => 'Built-in SEO tools to help your content rank higher.'],
+                        ['title' => 'Multi-language', 'description' => 'Full i18n support for global audiences.'],
+                        ['title' => 'Dark Mode', 'description' => 'Beautiful dark mode support out of the box.']
+                    ],
+                    'padding' => 'py-20',
+                    'bgColor' => 'transparent',
+                    'radius' => 'rounded-none',
+                    'animation' => 'animate-in fade-in duration-700',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Testimonial Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'testimonial',
+                'settings' => [
+                    'quote' => 'JA-CMS transformed how we manage our content. The visual builder is incredibly intuitive and our team loves it!',
+                    'author' => 'Sarah Johnson',
+                    'role' => 'Marketing Director at TechCorp',
+                    'avatar' => '',
+                    'bgColor' => '#f8fafc',
+                    'padding' => 'py-24',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Blog Grid Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'blog-grid',
+                'settings' => [
+                    'title' => 'Latest from Our Blog',
+                    'columns' => 3,
+                    'limit' => 3,
+                    'showExcerpt' => true,
+                    'showDate' => true,
+                    'showCategory' => true,
+                    'padding' => 'py-20',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // CTA Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'cta',
+                'settings' => [
+                    'title' => 'Ready to Get Started?',
+                    'subtitle' => 'Join thousands of creators and businesses using JA-CMS to build their online presence.',
+                    'buttonText' => 'Start Free Trial',
+                    'buttonUrl' => '/register',
+                    'bgColor' => '#4f46e5',
+                    'padding' => 'py-32',
+                    'radius' => 'rounded-2xl',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ]
+        ];
+
+        Content::updateOrCreate(
+            ['slug' => 'home', 'type' => 'page'],
+            [
+                'title' => 'Welcome to JA-CMS',
+                'slug' => 'home',
+                'type' => 'page',
+                'status' => 'published',
+                'body' => '',
+                'blocks' => $blocks,
+                'author_id' => $user->id,
+                'published_at' => now(),
+                'meta_title' => 'JA-CMS - Modern Content Management System',
+                'meta_description' => 'Build amazing websites with JA-CMS, the modern content management system with visual page builder.',
+            ]
+        );
+
+        $this->command->info('Landing page created with 5 blocks');
+    }
+
+    private function createAboutPage($user): void
+    {
+        $blocks = [
+            // Hero
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'hero',
+                'settings' => [
+                    'title' => 'About JA-CMS',
+                    'subtitle' => 'We are building the future of content management - simple, powerful, and beautiful.',
+                    'bgColor' => '#1e293b',
+                    'padding' => 'py-24',
+                    'animation' => 'animate-in fade-in duration-700',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Text Block - Our Story
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'settings' => [
+                    'content' => '<h2>Our Story</h2><p>JA-CMS was born from a simple idea: content management should be easy, fast, and beautiful. We believe that everyone deserves powerful tools to share their ideas with the world.</p><p>Our team of passionate developers and designers work tirelessly to create the best possible experience for our users. We combine modern technology with intuitive design to deliver a CMS that just works.</p>',
+                    'padding' => 'py-16',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Team Section
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'person',
+                'settings' => [
+                    'name' => 'The JA-CMS Team',
+                    'role' => 'Building the Future',
+                    'bio' => 'A dedicated team of developers, designers, and content strategists committed to making content management accessible to everyone.',
+                    'avatar' => '',
+                    'padding' => 'py-16',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Features
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'features',
+                'settings' => [
+                    'title' => 'Our Values',
+                    'items' => [
+                        ['title' => 'Simplicity', 'description' => 'We believe powerful tools can also be easy to use.'],
+                        ['title' => 'Performance', 'description' => 'Speed is not an afterthought - it is built into everything we do.'],
+                        ['title' => 'Open Source', 'description' => 'We embrace transparency and community collaboration.']
+                    ],
+                    'padding' => 'py-20',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ]
+        ];
+
+        Content::updateOrCreate(
+            ['slug' => 'about', 'type' => 'page'],
+            [
+                'title' => 'About Us',
+                'slug' => 'about',
+                'type' => 'page',
+                'status' => 'published',
+                'body' => '',
+                'blocks' => $blocks,
+                'author_id' => $user->id,
+                'published_at' => now(),
+                'meta_title' => 'About JA-CMS - Our Story',
+                'meta_description' => 'Learn about JA-CMS, our mission, and the team behind the modern content management system.',
+            ]
+        );
+
+        $this->command->info('About page created with 4 blocks');
+    }
+
+    private function createContactPage($user): void
+    {
+        $blocks = [
+            // Hero
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'hero',
+                'settings' => [
+                    'title' => 'Get in Touch',
+                    'subtitle' => 'Have questions? We would love to hear from you. Send us a message and we will respond as soon as possible.',
+                    'bgColor' => '#4f46e5',
+                    'padding' => 'py-24',
+                    'animation' => 'animate-in fade-in duration-700',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ],
+            // Two Columns - Form and Info
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'columns',
+                'settings' => [
+                    'columns' => 2,
+                    'gap' => 'gap-8',
+                    'padding' => 'py-20',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ],
+                'children' => [
+                    [
+                        'id' => Str::uuid()->toString(),
+                        'type' => 'contact-form',
+                        'settings' => [
+                            'title' => 'Send us a Message',
+                            'submitText' => 'Send Message',
+                            'successMessage' => 'Thank you! We will get back to you soon.',
+                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                        ]
+                    ],
+                    [
+                        'id' => Str::uuid()->toString(),
+                        'type' => 'text',
+                        'settings' => [
+                            'content' => '<h3>Contact Information</h3><p><strong>Email:</strong> hello@ja-cms.com</p><p><strong>Phone:</strong> +1 (555) 123-4567</p><p><strong>Address:</strong><br>123 Innovation Street<br>Tech City, TC 12345</p><h4>Office Hours</h4><p>Monday - Friday: 9am - 6pm<br>Saturday - Sunday: Closed</p>',
+                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                        ]
+                    ]
+                ]
+            ],
+            // Map
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'map',
+                'settings' => [
+                    'address' => '123 Innovation Street, Tech City',
+                    'zoom' => 15,
+                    'height' => '400px',
+                    'padding' => 'py-0',
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                ]
+            ]
+        ];
+
+        Content::updateOrCreate(
+            ['slug' => 'contact', 'type' => 'page'],
+            [
+                'title' => 'Contact Us',
+                'slug' => 'contact',
+                'type' => 'page',
+                'status' => 'published',
+                'body' => '',
+                'blocks' => $blocks,
+                'author_id' => $user->id,
+                'published_at' => now(),
+                'meta_title' => 'Contact JA-CMS - Get in Touch',
+                'meta_description' => 'Have questions about JA-CMS? Contact our team for support, partnerships, or general inquiries.',
+            ]
+        );
+
+        $this->command->info('Contact page created with 3 blocks');
+    }
+
+    private function createBlogPosts($user, $categories, $tags): void
+    {
+        $posts = [
+            [
+                'title' => 'Getting Started with JA-CMS Visual Builder',
+                'slug' => 'getting-started-visual-builder',
+                'excerpt' => 'Learn how to create stunning pages using the drag-and-drop visual builder in JA-CMS.',
+                'body' => '<p>The JA-CMS Visual Builder is a powerful tool that allows you to create beautiful, responsive pages without writing any code.</p><h2>Key Features</h2><p>Our visual builder comes with over 50 pre-built blocks including:</p><ul><li>Hero sections</li><li>Feature grids</li><li>Testimonials</li><li>Contact forms</li><li>And many more!</li></ul><h2>Getting Started</h2><p>To start building your page, simply navigate to the content editor and click on "Builder" to switch to visual editing mode. From there, you can drag blocks from the sidebar and customize them using the properties panel.</p>',
+                'category' => 'tutorial',
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'Best Practices for SEO in JA-CMS',
+                'slug' => 'seo-best-practices',
+                'excerpt' => 'Discover how to optimize your content for search engines using JA-CMS built-in SEO tools.',
+                'body' => '<p>Search engine optimization is crucial for getting your content discovered. JA-CMS comes with powerful SEO tools built right in.</p><h2>Meta Tags</h2><p>Every page and post in JA-CMS can have custom meta titles, descriptions, and keywords. These are essential for search engine rankings.</p><h2>URL Structure</h2><p>Clean, descriptive URLs help both users and search engines understand your content. JA-CMS automatically generates SEO-friendly slugs from your titles.</p><h2>Performance</h2><p>Page speed is a ranking factor. JA-CMS is optimized for performance with lazy loading, code splitting, and efficient caching.</p>',
+                'category' => 'technology',
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'Designing Beautiful Themes with Theme Builder',
+                'slug' => 'theme-builder-guide',
+                'excerpt' => 'A comprehensive guide to creating custom themes using the JA-CMS Theme Builder.',
+                'body' => '<p>The Theme Builder in JA-CMS gives you complete control over your site\'s appearance without writing CSS.</p><h2>Global Styles</h2><p>Set your brand colors, typography, and spacing once and apply them everywhere. Changes propagate throughout your entire site.</p><h2>Templates</h2><p>Create custom templates for different content types. Build a unique layout for your blog posts, pages, or custom post types.</p><h2>Dark Mode</h2><p>JA-CMS themes support dark mode out of the box. Users can toggle between light and dark modes based on their preference.</p>',
+                'category' => 'design',
+                'is_featured' => false,
+            ],
+            [
+                'title' => 'Building Multi-language Websites',
+                'slug' => 'multilanguage-websites',
+                'excerpt' => 'Learn how to create websites that support multiple languages with JA-CMS i18n features.',
+                'body' => '<p>JA-CMS has built-in support for internationalization (i18n), making it easy to create multi-language websites.</p><h2>Language Switcher</h2><p>Add a language switcher to your site header to allow visitors to choose their preferred language.</p><h2>Translation Management</h2><p>All interface text can be translated through JSON language files. Add new languages easily by creating new translation files.</p><h2>RTL Support</h2><p>JA-CMS themes support right-to-left languages like Arabic and Hebrew with automatic layout mirroring.</p>',
+                'category' => 'tutorial',
+                'is_featured' => false,
+            ],
+            [
+                'title' => 'Scaling Your Business with JA-CMS',
+                'slug' => 'scaling-business-cms',
+                'excerpt' => 'How JA-CMS can help you scale your online business with powerful content management.',
+                'body' => '<p>As your business grows, you need a CMS that can grow with you. JA-CMS is built for scale.</p><h2>Performance at Scale</h2><p>With Redis caching, queue workers, and optimized database queries, JA-CMS handles high traffic with ease.</p><h2>User Management</h2><p>Create teams with different roles and permissions. Control who can publish, edit, or manage content.</p><h2>API-First</h2><p>JA-CMS provides a comprehensive REST API, allowing you to integrate with external services and build headless applications.</p>',
+                'category' => 'business',
+                'is_featured' => false,
+            ],
+        ];
+
+        foreach ($posts as $postData) {
+            $category = $categories[$postData['category']] ?? null;
+            
+            $content = Content::updateOrCreate(
+                ['slug' => $postData['slug'], 'type' => 'post'],
+                [
+                    'title' => $postData['title'],
+                    'slug' => $postData['slug'],
+                    'type' => 'post',
+                    'status' => 'published',
+                    'body' => $postData['body'],
+                    'excerpt' => $postData['excerpt'],
+                    'blocks' => [],
+                    'author_id' => $user->id,
+                    'category_id' => $category?->id,
+                    'is_featured' => $postData['is_featured'],
+                    'published_at' => now()->subDays(rand(1, 30)),
+                    'meta_title' => $postData['title'],
+                    'meta_description' => $postData['excerpt'],
+                ]
+            );
+
+            // Attach random tags
+            $randomTags = collect($tags)->random(rand(2, 4))->pluck('id');
+            $content->tags()->sync($randomTags);
+        }
+
+        $this->command->info('Created 5 blog posts');
+    }
+}

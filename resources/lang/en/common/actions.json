@@ -4,6 +4,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "forceDelete": "Force Delete",
+    "deletePermanently": "Delete Permanently",
     "confirm": "Confirm",
     "cancel": "Cancel",
     "create": "Create",

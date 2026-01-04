@@ -63,5 +63,6 @@
     "trashedOnly": "Trashed Only",
     "deleted": "Deleted",
     "loading": "Loading",
-    "warning": "Warning"
+    "warning": "Warning",
+    "trash": "Trash"
 }

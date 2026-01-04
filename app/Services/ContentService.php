@@ -379,6 +379,14 @@ class ContentService
                         $content->update(['category_id' => $categoryId]);
                     }
                     break;
+                case 'restore':
+                    if ($content->trashed()) {
+                        $content->restore();
+                    }
+                    break;
+                case 'force_delete':
+                    $content->forceDelete();
+                    break;
             }
         }
 
@@ -502,5 +510,33 @@ class ContentService
         }
 
         return $slug;
+    }
+
+    /**
+     * Restore trashed content
+     */
+    public function restore(int $id): bool
+    {
+        $content = Content::withTrashed()->findOrFail($id);
+        if ($content->trashed()) {
+            $content->restore();
+            $this->clearContentCaches($id);
+            Webhook::triggerForEvent('content.restored', ['id' => $id]);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Force delete content
+     */
+    public function forceDelete(int $id): bool
+    {
+        $content = Content::withTrashed()->findOrFail($id);
+        SearchIndex::remove($content);
+        $content->forceDelete();
+        Webhook::triggerForEvent('content.force_deleted', ['id' => $id]);
+        $this->clearContentCaches($id);
+        return true;
     }
 }
