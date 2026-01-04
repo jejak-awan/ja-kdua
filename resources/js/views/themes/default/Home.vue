@@ -9,7 +9,7 @@
     <section v-if="featuredPosts.length > 0" class="py-20 bg-background">
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">Featured Stories</h2>
+          <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">{{ $t('features.frontend.home.sections.featured') }}</h2>
           <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
@@ -28,11 +28,11 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-end mb-12">
           <div>
-            <h2 class="text-3xl font-bold text-foreground mb-2">Latest Updates</h2>
-            <p class="text-muted-foreground">Stay up to date with our newest articles</p>
+            <h2 class="text-3xl font-bold text-foreground mb-2">{{ $t('features.frontend.home.sections.recent') }}</h2>
+            <p class="text-muted-foreground">{{ $t('features.frontend.home.sections.recentSubtitle') }}</p>
           </div>
           <router-link to="/blog" class="hidden md:flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors">
-            View All Posts
+            {{ $t('features.frontend.home.actions.viewAll') }}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </router-link>
         </div>
@@ -47,7 +47,7 @@
         
         <div class="mt-12 text-center md:hidden">
           <router-link to="/blog" class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
-            View All Posts
+            {{ $t('features.frontend.home.actions.viewAll') }}
           </router-link>
         </div>
       </div>
@@ -76,17 +76,17 @@
       
       <div class="container mx-auto px-4 relative z-10 text-center">
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-            Ready to Start Building?
+            {{ $t('features.frontend.home.sections.cta.title') }}
         </h2>
         <p class="text-indigo-200 text-xl max-w-2xl mx-auto mb-10">
-            Join thousands of developers and creators using JA-CMS to build modern web experiences.
+            {{ $t('features.frontend.home.sections.cta.text') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link to="/register" class="px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                Get Started Free
+                {{ $t('features.frontend.home.actions.getStarted') }}
             </router-link>
             <router-link to="/contact" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white hover:text-indigo-900 transition-all">
-                Contact Sales
+                {{ $t('features.frontend.home.actions.contactUs') }}
             </router-link>
         </div>
       </div>

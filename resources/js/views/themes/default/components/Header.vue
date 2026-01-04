@@ -30,7 +30,10 @@
                 </nav>
 
                 <!-- Actions -->
-                <div class="hidden md:flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-3">
+                    <!-- Language Switcher -->
+                    <LanguageSwitcher />
+                    
                     <!-- Dark Mode Toggle -->
                     <ThemeToggle />
                     
@@ -38,13 +41,13 @@
                         to="/login"
                         class="px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                     >
-                        Sign In
+                        {{ $t('features.frontend.nav.signIn') }}
                     </router-link>
                     <router-link 
                         to="/register"
                         class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-all shadow-lg transform hover:-translate-y-0.5"
                     >
-                        Get Started
+                        {{ $t('features.frontend.nav.getStarted') }}
                     </router-link>
                 </div>
 
@@ -90,13 +93,13 @@
                             to="/login"
                             class="w-full px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors"
                         >
-                            Sign In
+                            {{ $t('features.frontend.nav.signIn') }}
                         </router-link>
                         <router-link 
                             to="/register"
                             class="w-full px-4 py-2.5 text-center text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-md"
                         >
-                            Get Started
+                            {{ $t('features.frontend.nav.getStarted') }}
                         </router-link>
                     </div>
                 </div>
@@ -107,10 +110,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
+import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
 
+const { t } = useI18n();
 const { getSetting } = useTheme();
 const { menus, fetchMenuByLocation } = useMenu();
 

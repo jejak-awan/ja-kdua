@@ -70,8 +70,8 @@
         
         <!-- Not Found -->
         <div v-else class="text-center py-20">
-            <h1 class="text-2xl font-bold text-foreground">Post not found</h1>
-            <router-link to="/blog" class="text-primary hover:text-primary/80 mt-4 inline-block">Back to Blog</router-link>
+            <h1 class="text-2xl font-bold text-foreground">{{ $t('features.frontend.post.notFound') }}</h1>
+            <router-link to="/blog" class="text-primary hover:text-primary/80 mt-4 inline-block">{{ $t('features.frontend.post.backToBlog') }}</router-link>
         </div>
     </div>
 </template>
@@ -79,10 +79,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue';
 
 const route = useRoute();
+const { t } = useI18n();
 const post = ref(null);
 const loading = ref(true);
 

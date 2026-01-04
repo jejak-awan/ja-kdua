@@ -16,11 +16,12 @@
             "categories": "Categories"
         },
         "sections": {
-            "featured": "Featured Content",
-            "recent": "Recent Posts",
+            "featured": "Featured Stories",
+            "recent": "Latest Updates",
+            "recentSubtitle": "Stay up to date with our newest articles",
             "cta": {
-                "title": "Ready to Get Started?",
-                "text": "Join thousands of users who trust JA-CMS for their content management needs"
+                "title": "Ready to Start Building?",
+                "text": "Join thousands of developers and creators using JA-CMS to build modern web experiences."
             }
         }
     },
@@ -66,6 +67,7 @@
     "post": {
         "loading": "Loading...",
         "notFound": "Post not found",
+        "backToBlog": "Back to Blog",
         "views": "views",
         "tags": "Tags:"
     },
@@ -75,7 +77,9 @@
         "about": "About",
         "contact": "Contact",
         "login": "Login",
+        "signIn": "Sign In",
         "register": "Register",
+        "getStarted": "Get Started",
         "dashboard": "Dashboard",
         "logout": "Logout"
     },
