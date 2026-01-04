@@ -31,7 +31,7 @@
             :y="menuY" 
             :block="block" 
             :index="index"
-            :can-paste="builder.canPaste.value"
+            :can-paste="builder?.canPaste?.value ?? false"
             @action="handleMenuAction"
         />
     </div>
@@ -58,9 +58,9 @@ const { t } = useI18n();
 
 // Determine if this block is currently selected
 const isSelected = computed(() => {
+    if (!builder) return false;
+    
     // If nested, we might need a unique ID check instead of index
-    // But currently builder uses index. 
-    // TODO: Switch builder to use ID for selection to support nesting properly.
     if (props.isNested) {
          return builder.activeBlockId.value === props.block.id;
     }

@@ -248,9 +248,9 @@ export function useBuilder() {
                     return true;
                 }
                 // Handle Columns
-                if (block.settings && block.settings.columns) {
+                if (block.settings && Array.isArray(block.settings.columns)) {
                     for (const column of block.settings.columns) {
-                        if (find(column.blocks, targetId, newPath)) return true;
+                        if (column && Array.isArray(column.blocks) && find(column.blocks, targetId, newPath)) return true;
                     }
                 }
             }

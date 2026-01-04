@@ -1,10 +1,11 @@
-import { MousePointer2 } from 'lucide-vue-next';
+import { MousePointerClick } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
+
 
 export default {
     name: 'cta',
     label: 'Action Bar',
-    icon: MousePointer2,
+    icon: MousePointerClick,
     description: 'Eye-catching section with a primary button.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/CTABlock.vue')),
     settings: [
@@ -39,6 +40,12 @@ export default {
             default: '#4f46e5'
         },
         {
+            key: 'textColor',
+            type: 'color',
+            label: 'Text Color',
+            default: '#ffffff'
+        },
+        {
             key: 'padding',
             type: 'select',
             label: 'Padding',
@@ -66,6 +73,7 @@ export default {
         buttonUrl: '#',
         padding: 'py-32',
         bgColor: '#4f46e5',
+        textColor: '#ffffff',
         radius: 'rounded-2xl',
         animation: '',
         visibility: { mobile: true, tablet: true, desktop: true }

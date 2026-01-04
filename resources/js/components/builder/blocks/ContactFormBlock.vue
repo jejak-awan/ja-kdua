@@ -64,7 +64,7 @@
                                 :disabled="submitting"
                             >
                                 <Loader2 v-if="submitting" class="w-4 h-4 animate-spin" />
-                                {{ submitting ? 'Sending...' : button_text }}
+                                {{ submitting ? 'Sending...' : buttonText }}
                             </button>
                         </div>
                     </form>
@@ -75,7 +75,7 @@
                     <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary border-2 border-primary/20">
                         <Check class="w-10 h-10" />
                     </div>
-                    <h3 class="text-2xl font-bold">{{ success_message }}</h3>
+                    <h3 class="text-2xl font-bold">{{ successMessage }}</h3>
                     <p class="text-muted-foreground">We typically respond within 24 hours.</p>
                     <button @click="submitted = false" class="text-primary text-sm font-semibold hover:underline">
                         Send another message
@@ -97,9 +97,16 @@ defineOptions({
 const props = defineProps({
     title: { type: String, default: 'Get in Touch' },
     description: { type: String, default: '' },
-    button_text: { type: String, default: 'Send Message' },
-    success_message: { type: String, default: 'Thank you! Your message has been sent.' },
-    fields: { type: Array, default: () => [] },
+    buttonText: { type: String, default: 'Send Message' },
+    successMessage: { type: String, default: 'Thank you! Your message has been sent.' },
+    fields: { 
+        type: Array, 
+        default: () => [
+            { label: 'Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },
+            { label: 'Email', type: 'email', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },
+            { label: 'Message', type: 'textarea', required: true, width: 'w-full' }
+        ] 
+    },
     style: { type: String, default: 'bg-card border shadow-sm p-8 rounded-2xl' },
     padding: { type: String, default: 'py-20' },
     width: { type: String, default: 'max-w-3xl' },

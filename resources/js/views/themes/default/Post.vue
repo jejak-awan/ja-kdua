@@ -51,7 +51,7 @@
             <div class="container mx-auto px-4 max-w-3xl">
                 <!-- If using Page Builder -->
                 <div v-if="post.blocks && post.blocks.length > 0" class="space-y-0">
-                    <BlockRenderer :blocks="post.blocks" />
+                    <BlockRenderer :blocks="post.blocks" :is-preview="true" />
                 </div>
                 
                 <!-- If using Classic Editor -->

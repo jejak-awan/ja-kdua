@@ -267,7 +267,7 @@ const categoryDefinitions = [
         name: 'dynamic',
         label: 'Dynamic',
         icon: Database,
-        blocks: ['blog_grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio', 'PostCarousel', 'TabbedPosts']
+        blocks: ['blog-grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio', 'PostCarousel', 'TabbedPosts']
     },
     {
         name: 'commerce',

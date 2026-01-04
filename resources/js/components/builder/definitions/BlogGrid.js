@@ -2,7 +2,7 @@ import { LayoutGrid } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'blog_grid',
+    name: 'blog-grid',
     label: 'Blog Grid',
     icon: LayoutGrid,
     description: 'Display a grid of blog posts with dynamic filtering.',
@@ -15,7 +15,7 @@ export default {
             default: ''
         },
         {
-            key: 'post_type',
+            key: 'postType',
             type: 'select',
             label: 'Post Type',
             options: [
@@ -65,31 +65,31 @@ export default {
             default: '3'
         },
         {
-            key: 'show_image',
+            key: 'showImage',
             type: 'boolean',
             label: 'Show Featured Image',
             default: true
         },
         {
-            key: 'show_excerpt',
+            key: 'showExcerpt',
             type: 'boolean',
             label: 'Show Excerpt',
             default: true
         },
         {
-            key: 'show_date',
+            key: 'showDate',
             type: 'boolean',
             label: 'Show Date',
             default: true
         },
         {
-            key: 'show_author',
+            key: 'showAuthor',
             type: 'boolean',
             label: 'Show Author',
             default: true
         },
         {
-            key: 'show_category',
+            key: 'showCategory',
             type: 'boolean',
             label: 'Show Category',
             default: true
@@ -115,17 +115,17 @@ export default {
     ],
     defaultSettings: {
         title: '',
-        post_type: 'post',
+        postType: 'post',
         category: '',
         tag: '',
         limit: 6,
         layout: 'grid',
         columns: '3',
-        show_image: true,
-        show_excerpt: true,
-        show_date: true,
-        show_author: true,
-        show_category: true,
+        showImage: true,
+        showExcerpt: true,
+        showDate: true,
+        showAuthor: true,
+        showCategory: true,
         padding: 'py-16',
         bgColor: '',
         visibility: { mobile: true, tablet: true, desktop: true }

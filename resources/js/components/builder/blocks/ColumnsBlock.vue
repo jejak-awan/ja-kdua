@@ -12,7 +12,9 @@
                 <template v-for="(column, index) in columns" :key="index">
                     <div class="column-container relative flex items-stretch">
                         <div class="flex-1 min-h-[50px] space-y-4">
+                            <!-- Builder Mode -->
                             <draggable 
+                                v-if="isBuilder && !isPreview"
                                 v-model="column.blocks" 
                                 item-key="id"
                                 group="blocks"
@@ -40,16 +42,26 @@
                                     </div>
                                 </template>
                             </draggable>
+
+                            <!-- Live Mode -->
+                            <div v-else class="h-full">
+                                <BlockRenderer 
+                                    :blocks="column.blocks" 
+                                    :context="context" 
+                                    :is-preview="true"
+                                />
+                            </div>
                         </div>
 
                         <!-- Resizer Gutter -->
                         <div 
-                            v-if="index < columns.length - 1"
+                            v-if="isBuilder && !isPreview && index < columns.length - 1"
                             class="absolute -right-4 top-0 bottom-0 w-8 z-10 cursor-col-resize group flex items-center justify-center"
                             @mousedown.stop.prevent="startResize(index, $event)"
                         >
                             <div class="w-1 h-12 bg-border group-hover:bg-primary transition-colors rounded-full"></div>
                         </div>
+
                     </div>
                 </template>
             </div>
@@ -65,6 +77,7 @@ defineOptions({
 import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
+import BlockRenderer from './BlockRenderer.vue';
 
 const props = defineProps({
     id: String,
@@ -75,10 +88,13 @@ const props = defineProps({
     width: { type: String, default: 'max-w-7xl' },
     bgColor: String,
     radius: { type: String, default: 'rounded-none' },
-    animation: { type: String, default: '' }
+    animation: { type: String, default: '' },
+    context: { type: Object, default: () => ({}) },
+    isPreview: { type: Boolean, default: false }
 });
 
-const builder = inject('builder');
+const builder = inject('builder', null);
+const isBuilder = computed(() => !!builder);
 const gridRef = ref(null);
 const isResizing = ref(false);
 const activeResizer = ref(null);

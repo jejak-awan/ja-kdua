@@ -9,6 +9,7 @@
             v-if="pageData && pageData.blocks" 
             :blocks="pageData.blocks"
             :context="{ page: pageData }"
+            :is-preview="true"
         />
         
         <!-- Fallback if no content found (keep original hardcoded as temporary fallback) -->

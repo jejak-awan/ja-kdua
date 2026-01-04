@@ -49,6 +49,12 @@ export default {
             default: 'py-16'
         },
         {
+            key: 'isProse',
+            type: 'boolean',
+            label: 'Use Prose Styling',
+            default: true
+        },
+        {
             key: 'animation',
             type: 'select',
             label: 'Animation',

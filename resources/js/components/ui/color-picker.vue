@@ -2,85 +2,139 @@
     <Popover>
         <PopoverTrigger as-child>
             <button 
-                class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden"
                 :style="{ backgroundColor: modelValue || '#000000' }"
                 :title="title || 'Pick a color'"
             >
+                <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
             </button>
         </PopoverTrigger>
-        <PopoverContent class="w-64 p-3" align="start">
-            <div class="space-y-3">
-                <!-- Hex Input -->
-                <div class="flex gap-2 items-center">
+        <PopoverContent class="w-72 p-0 z-[9999]" align="start">
+            <Tabs default-value="picker" class="w-full">
+                <TabsList class="w-full grid grid-cols-2 rounded-t-md rounded-b-none">
+                    <TabsTrigger value="picker" class="text-xs">Custom</TabsTrigger>
+                    <TabsTrigger value="presets" class="text-xs">Presets</TabsTrigger>
+                </TabsList>
+                
+                <!-- CUSTOM PICKER TAB -->
+                <TabsContent value="picker" class="p-3 space-y-4">
+                    
+                    <!-- Saturation/Brightness Area -->
                     <div 
-                        class="w-10 h-10 rounded border-2 border-border shadow-sm shrink-0"
-                        :style="{ backgroundColor: modelValue || '#000000' }"
-                    ></div>
-                    <Input 
-                        :model-value="modelValue" 
-                        @update:model-value="$emit('update:modelValue', $event)"
-                        class="h-9 text-xs font-mono" 
-                        placeholder="#000000"
-                    />
-                </div>
-
-                <!-- Color Palette Grid -->
-                <div class="space-y-2">
-                    <p class="text-[10px] font-bold text-muted-foreground">Quick Colors</p>
-                    <div class="grid grid-cols-10 gap-1.5">
-                        <button
-                            v-for="color in colorPalette"
-                            :key="color"
-                            class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            :class="{ 'ring-2 ring-primary': modelValue === color }"
-                            :style="{ backgroundColor: color }"
-                            @click="$emit('update:modelValue', color)"
-                            :title="color"
-                        >
-                        </button>
+                        class="w-full h-32 rounded-md relative cursor-crosshair overflow-hidden border border-border"
+                        :style="{ backgroundColor: `hsl(${hsv.h}, 100%, 50%)` }"
+                        @mousedown="startDragSaturation"
+                        ref="saturationArea"
+                    >
+                        <div class="absolute inset-0 bg-gradient-to-r from-white to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                        <div 
+                            class="absolute w-3 h-3 rounded-full border-2 border-white shadow-sm -ml-1.5 -mt-1.5 pointer-events-none"
+                            :style="{ 
+                                left: `${hsv.s}%`, 
+                                top: `${100 - hsv.v}%`,
+                                backgroundColor: modelValue
+                            }"
+                        ></div>
                     </div>
-                </div>
 
-                <!-- Theme Colors (if provided) -->
-                <div v-if="themeColors && themeColors.length > 0" class="space-y-2">
-                    <p class="text-[10px] font-bold text-muted-foreground">Theme Colors</p>
-                    <div class="flex flex-wrap gap-1.5">
-                        <button
-                            v-for="color in themeColors"
-                            :key="color.variable"
-                            class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            :class="{ 'ring-2 ring-primary': modelValue === color.variable }"
-                            :style="{ backgroundColor: color.value }"
-                            @click="$emit('update:modelValue', color.variable)"
-                            :title="color.name"
-                        >
-                        </button>
+                    <!-- Sliders -->
+                    <div class="space-y-3">
+                        <!-- Hue Slider -->
+                        <div class="space-y-1">
+                            <input 
+                                type="range" 
+                                v-model.number="hsv.h" 
+                                min="0" 
+                                max="360" 
+                                class="w-full h-3 rounded-lg appearance-none cursor-pointer"
+                                :style="{ background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)' }"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <!-- Native Color Picker (Hidden, for advanced users) -->
-                <div class="pt-2 border-t">
-                    <label class="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded p-1.5 transition-colors">
-                        <input 
-                            type="color" 
-                            :value="modelValue || '#000000'"
-                            @input="$emit('update:modelValue', $event.target.value)"
-                            class="w-5 h-5 cursor-pointer"
-                        />
-                        <span class="text-[10px] text-muted-foreground">Advanced Picker</span>
-                    </label>
-                </div>
-            </div>
+                    <!-- Inputs -->
+                    <div class="flex gap-2 items-end">
+                        <div class="flex-1 space-y-0.5">
+                            <label class="text-[9px] text-muted-foreground font-mono ml-1">HEX</label>
+                            <Input 
+                                :model-value="modelValue" 
+                                @update:model-value="handleHexInput"
+                                class="h-8 text-xs font-mono uppercase" 
+                                maxlength="7"
+                            />
+                        </div>
+                        <div class="flex gap-1">
+                             <div class="h-8 w-8 rounded border border-border shrink-0" :style="{ backgroundColor: modelValue }"></div>
+                             
+                             <!-- Eyedropper Button -->
+                             <button
+                                type="button" 
+                                class="h-8 w-8 rounded border border-input bg-background hover:bg-accent hover:text-accent-foreground flex items-center justify-center transition-colors"
+                                @click="pickEyeDropper"
+                                title="Pick color from screen"
+                             >
+                                <Pipette class="w-4 h-4" />
+                             </button>
+                        </div>
+                    </div>
+
+                </TabsContent>
+
+                <!-- PRESETS TAB -->
+                <TabsContent value="presets" class="p-3 space-y-4">
+                     <!-- Quick Colors -->
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-bold text-muted-foreground">Quick Colors</p>
+                        <div class="grid grid-cols-8 gap-1.5">
+                            <button
+                                type="button"
+                                v-for="color in colorPalette"
+                                :key="color"
+                                class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                :class="{ 'ring-2 ring-primary': modelValue === color }"
+                                :style="{ backgroundColor: color }"
+                                @click="updateFromPreset(color)"
+                                :title="color"
+                            >
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Theme Colors -->
+                    <div v-if="themeColors && themeColors.length > 0" class="space-y-2">
+                        <p class="text-[10px] font-bold text-muted-foreground">Theme Colors</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                v-for="color in themeColors"
+                                :key="color.variable"
+                                class="w-6 h-6 rounded border border-border/50 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                :class="{ 'ring-2 ring-primary': modelValue === color.variable }"
+                                :style="{ backgroundColor: color.value }"
+                                @click="updateFromPreset(color.variable)"
+                                :title="color.name"
+                            >
+                            </button>
+                        </div>
+                    </div>
+                </TabsContent>
+            </Tabs>
         </PopoverContent>
     </Popover>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
 import Popover from '@/components/ui/popover.vue';
 import PopoverTrigger from '@/components/ui/popover-trigger.vue';
 import PopoverContent from '@/components/ui/popover-content.vue';
+import Tabs from '@/components/ui/tabs.vue';
+import TabsList from '@/components/ui/tabs-list.vue';
+import TabsTrigger from '@/components/ui/tabs-trigger.vue';
+import TabsContent from '@/components/ui/tabs-content.vue';
 import Input from '@/components/ui/input.vue';
+import { Pipette } from 'lucide-vue-next';
 
 const props = defineProps({
     modelValue: { type: String, default: '#000000' },
@@ -88,35 +142,163 @@ const props = defineProps({
     themeColors: { type: Array, default: () => [] }
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue']);
 
-// Comprehensive color palette (Material Design inspired)
+// HSV State
+const hsv = reactive({ h: 0, s: 0, v: 0 });
+const saturationArea = ref(null);
+const isDragging = ref(false);
+const hasEyeDropper = ref(window.EyeDropper !== undefined);
+
+// Helper: Hex to HSV
+const hexToHsv = (hex) => {
+    let r = 0, g = 0, b = 0;
+    if (hex.length === 4) {
+        r = parseInt("0x" + hex[1] + hex[1]);
+        g = parseInt("0x" + hex[2] + hex[2]);
+        b = parseInt("0x" + hex[3] + hex[3]);
+    } else if (hex.length === 7) {
+        r = parseInt("0x" + hex[1] + hex[2]);
+        g = parseInt("0x" + hex[3] + hex[4]);
+        b = parseInt("0x" + hex[5] + hex[6]);
+    }
+    r /= 255; g /= 255; b /= 255;
+    
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    let d = max - min;
+    s = max === 0 ? 0 : d / max;
+
+    if (max === min) {
+        h = 0; 
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+};
+
+// Helper: HSV to Hex
+const hsvToHex = (h, s, v) => {
+    let r, g, b, i, f, p, q, t;
+    h /= 360; s /= 100; v /= 100;
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    const toHex = x => {
+        let hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+// Sync HSV from Prop
+watch(() => props.modelValue, (val) => {
+    // If dragging, we are the source of truth, don't sync back from prop (prevents lag/loop)
+    if (isDragging.value) return;
+
+    if (val && !val.startsWith('var')) { // Don't parse theme vars
+        const newHsv = hexToHsv(val);
+        // Only update if significantly different (avoid slider jitter)
+        if (Math.abs(newHsv.h - hsv.h) > 1 || Math.abs(newHsv.s - hsv.s) > 1 || Math.abs(newHsv.v - hsv.v) > 1) {
+            Object.assign(hsv, newHsv);
+        }
+    }
+}, { immediate: true });
+
+// Sync Prop from HSV (Watcher on HSV)
+watch(hsv, () => {
+    // Only emit if not triggered by prop change (cycle)
+    // Actually we strictly compute Hex from HSV here
+    const hex = hsvToHex(hsv.h, hsv.s, hsv.v);
+    if (hex.toUpperCase() !== (props.modelValue || '').toUpperCase()) {
+        emit('update:modelValue', hex);
+    }
+});
+
+const handleHexInput = (val) => {
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+        emit('update:modelValue', val);
+    }
+};
+
+const updateFromPreset = (color) => {
+    emit('update:modelValue', color);
+};
+
+const pickEyeDropper = async () => {
+    if (!window.EyeDropper) {
+        alert('Your browser does not support the Eyedropper API. Test in Chrome/Edge.');
+        return;
+    }
+    const eyeDropper = new window.EyeDropper();
+    try {
+        const result = await eyeDropper.open();
+        if (result && result.sRGBHex) {
+            emit('update:modelValue', result.sRGBHex);
+            const newHsv = hexToHsv(result.sRGBHex);
+            Object.assign(hsv, newHsv);
+        }
+    } catch (e) {
+        console.log('Eyedropper cancelled');
+    }
+};
+
+// Saturation/Brightness Drag Logic
+const handleDrag = (event) => {
+    if (!saturationArea.value) return;
+    const rect = saturationArea.value.getBoundingClientRect();
+    let x = (event.clientX - rect.left) / rect.width;
+    let y = 1 - (event.clientY - rect.top) / rect.height; // Invert Y (Bottom is 0)
+
+    x = Math.max(0, Math.min(1, x));
+    y = Math.max(0, Math.min(1, y));
+
+    hsv.s = Math.round(x * 100);
+    hsv.v = Math.round(y * 100);
+};
+
+const startDragSaturation = (event) => {
+    isDragging.value = true;
+    handleDrag(event);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', stopDragSaturation);
+};
+
+const onMouseMove = (event) => {
+    if (isDragging.value) handleDrag(event);
+};
+
+const stopDragSaturation = () => {
+    isDragging.value = false;
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', stopDragSaturation);
+};
+
+// Palette
 const colorPalette = [
-    // Grays
-    '#000000', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB', '#E5E7EB', '#F3F4F6', '#F9FAFB', '#FFFFFF',
-    
-    // Reds
-    '#7F1D1D', '#991B1B', '#B91C1C', '#DC2626', '#EF4444', '#F87171', '#FCA5A5', '#FECACA', '#FEE2E2',
-    
-    // Oranges
-    '#7C2D12', '#9A3412', '#C2410C', '#EA580C', '#F97316', '#FB923C', '#FDBA74', '#FED7AA', '#FFEDD5',
-    
-    // Yellows
-    '#713F12', '#854D0E', '#A16207', '#CA8A04', '#EAB308', '#FACC15', '#FDE047', '#FEF08A', '#FEF9C3',
-    
-    // Greens
-    '#14532D', '#166534', '#15803D', '#16A34A', '#22C55E', '#4ADE80', '#86EFAC', '#BBF7D0', '#DCFCE7',
-    
-    // Teals
-    '#134E4A', '#115E59', '#0F766E', '#0D9488', '#14B8A6', '#2DD4BF', '#5EEAD4', '#99F6E4', '#CCFBF1',
-    
-    // Blues
-    '#1E3A8A', '#1E40AF', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE',
-    
-    // Purples
-    '#581C87', '#6B21A8', '#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE', '#F5F3FF',
-    
-    // Pinks
-    '#831843', '#9F1239', '#BE123C', '#E11D48', '#F43F5E', '#FB7185', '#FDA4AF', '#FECDD3', '#FCE7F3',
+    '#000000', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB', '#E5E7EB', '#F3F4F6', '#FFFFFF',
+    '#EF4444', '#F87171', '#FCA5A5', '#FECACA',
+    '#F97316', '#FB923C', '#FDBA74', '#FED7AA',
+    '#EAB308', '#FACC15', '#FDE047', '#FEF08A',
+    '#22C55E', '#4ADE80', '#86EFAC', '#BBF7D0',
+    '#06B6D4', '#22D3EE', '#67E8F9', '#A5F3FC',
+    '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
+    '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE',
+    '#EC4899', '#F472B6', '#FBCFE8', '#FCE7F3'
 ];
 </script>

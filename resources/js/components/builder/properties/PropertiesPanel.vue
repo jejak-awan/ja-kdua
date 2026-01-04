@@ -360,7 +360,7 @@
 </template>
 
 <script setup>
-import { inject, computed, ref, onMounted, onUnmounted } from 'vue';
+import { inject, computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { 
     PanelRightClose, 
@@ -405,7 +405,7 @@ const selectedBlock = computed(() => {
         const findBlock = (blocks, id) => {
             for (const block of blocks) {
                 if (block.id === id) return block;
-                if (block.settings && block.settings.columns) {
+                if (block.settings && Array.isArray(block.settings.columns)) {
                     for (const column of block.settings.columns) {
                          const found = findBlock(column.blocks, id);
                          if (found) return found;
@@ -633,4 +633,6 @@ const deletePreset = (id) => {
     if (!selectedBlock.value) return;
     blockPresets.deletePreset(selectedBlock.value.type, id);
 };
+
+
 </script>

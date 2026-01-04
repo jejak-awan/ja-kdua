@@ -23,20 +23,20 @@ export default {
             responsive: true
         },
         {
-            key: 'email_to',
+            key: 'emailTo',
             type: 'text',
             label: 'Email To',
             placeholder: 'admin@example.com',
             default: ''
         },
         {
-            key: 'success_message',
+            key: 'successMessage',
             type: 'text',
             label: 'Success Message',
             default: 'Thank you! Your message has been sent.'
         },
         {
-            key: 'button_text',
+            key: 'buttonText',
             type: 'text',
             label: 'Button Text',
             default: 'Send Message',
@@ -105,7 +105,7 @@ export default {
     defaultSettings: {
         title: 'Get in Touch',
         description: 'Fill out the form below and we will get back to you as soon as possible.',
-        button_text: 'Send Message',
+        buttonText: 'Send Message',
         fields: [
             { label: 'Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },
             { label: 'Email', type: 'email', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },

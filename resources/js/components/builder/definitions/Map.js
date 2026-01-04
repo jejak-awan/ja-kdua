@@ -52,7 +52,13 @@ export default {
                 { label: 'Large', value: 'py-12' }
             ],
             default: 'py-8'
-        }
+        },
+        {
+            key: 'visibility',
+            type: 'visibility',
+            label: 'Visibility',
+            defaultValue: { mobile: true, tablet: true, desktop: true },
+        },
     ],
     defaultSettings: {
         embedUrl: '',

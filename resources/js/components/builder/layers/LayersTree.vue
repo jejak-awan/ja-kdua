@@ -60,7 +60,7 @@
                         class="relative"
                     >
                         <!-- Container Children Logic -->
-                        <template v-if="block.type === 'columns' && block.settings.columns">
+                        <template v-if="block.type === 'columns' && Array.isArray(block.settings.columns)">
                             <div v-for="(col, colIndex) in block.settings.columns" :key="colIndex">
                                 <!-- Virtual Column Node -->
                                 <div class="relative pl-4 mt-0.5">
@@ -128,7 +128,7 @@ const toggleExpand = (id) => {
 };
 
 const hasChildren = (block) => {
-    return block.type === 'columns' && block.settings.columns && block.settings.columns.length > 0;
+    return block.type === 'columns' && Array.isArray(block.settings?.columns) && block.settings.columns.length > 0;
     // Add logic for other containers (Sections, Row) later
 };
 

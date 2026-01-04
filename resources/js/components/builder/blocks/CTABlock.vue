@@ -1,7 +1,7 @@
 <template>
     <section 
         :class="['transition-all duration-500', padding, radius, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
+        :style="{ backgroundColor: bgColor || 'transparent', color: textColor || 'inherit' }"
     >
         <div :class="['container mx-auto px-6 text-center space-y-8', width]">
             <h2 v-if="title" class="text-4xl md:text-6xl font-extrabold tracking-tight">{{ title }}</h2>
@@ -34,6 +34,7 @@ const props = defineProps({
     padding: { type: String, default: 'py-24' },
     width: { type: String, default: 'max-w-4xl' },
     bgColor: String,
+    textColor: String,
     radius: { type: String, default: 'rounded-none' },
     animation: { type: String, default: '' }
 });
