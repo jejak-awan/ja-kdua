@@ -62,5 +62,6 @@
     "includesTrashed": "Termasuk Sampah",
     "trashedOnly": "Hanya Sampah",
     "deleted": "Dihapus",
-    "loading": "Memuat"
+    "loading": "Memuat",
+    "warning": "Peringatan"
 }

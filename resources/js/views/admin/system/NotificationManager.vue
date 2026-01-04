@@ -517,5 +517,6 @@ const handleSend = async () => {
 
 onMounted(() => {
     fetchData();
+    fetchHistory();
 });
 </script>

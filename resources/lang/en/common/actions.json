@@ -51,5 +51,6 @@
     "generating": "Generating...",
     "verifying": "Verifying...",
     "disabling": "Disabling...",
-    "regenerating": "Regenerating..."
+    "regenerating": "Regenerating...",
+    "continue": "Continue"
 }

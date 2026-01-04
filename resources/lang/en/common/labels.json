@@ -62,5 +62,6 @@
     "includesTrashed": "Includes Trashed",
     "trashedOnly": "Trashed Only",
     "deleted": "Deleted",
-    "loading": "Loading"
+    "loading": "Loading",
+    "warning": "Warning"
 }

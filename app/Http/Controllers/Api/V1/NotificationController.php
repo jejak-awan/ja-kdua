@@ -11,6 +11,12 @@ class NotificationController extends BaseApiController
     public function index(Request $request)
     {
         try {
+            Log::info('NotificationController@index hit', [
+                'user_id' => $request->user()?->id,
+                'user_cls' => get_class($request->user() ?: new \stdClass),
+                'headers' => $request->headers->all(),
+            ]);
+
             $user = $request->user();
 
             if (! $user) {

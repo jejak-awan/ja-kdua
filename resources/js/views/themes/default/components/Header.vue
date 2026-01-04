@@ -31,6 +31,9 @@
 
                 <!-- Actions -->
                 <div class="hidden md:flex items-center gap-4">
+                    <!-- Dark Mode Toggle -->
+                    <ThemeToggle />
+                    
                     <router-link 
                         to="/login"
                         class="px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -106,6 +109,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
+import ThemeToggle from '../../../../components/ThemeToggle.vue';
 
 const { getSetting } = useTheme();
 const { menus, fetchMenuByLocation } = useMenu();

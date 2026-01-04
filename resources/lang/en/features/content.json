@@ -62,7 +62,11 @@
         "ogImage": "Open Graph Image",
         "recommendedHint": "Recommended: {dimensions}",
         "minHint": "(Min: {dimensions})",
-        "maxSizeHint": "Max Size: {size}MB | {extensions}"
+        "maxSizeHint": "Max Size: {size}MB | {extensions}",
+        "switchModeTitle": "Switch Editor Mode",
+        "switchModeDescription": "You're about to switch to a different editor mode. Content is stored separately for each mode.",
+        "switchToBuilderWarning": "Your classic editor content will remain saved, but won't be visible in the builder. The builder will start empty unless you've already added blocks.",
+        "switchToClassicWarning": "Your builder blocks will remain saved, but won't be visible in the classic editor. The classic editor will show previously saved content or be empty."
     },
     "seo": {
         "metaTitle": "SEO Title",

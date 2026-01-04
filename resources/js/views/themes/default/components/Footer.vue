@@ -11,8 +11,45 @@
                             <span class="text-xl font-bold">{{ getSetting('site_title', 'JA-CMS') }}</span>
                         </template>
                     </div>
-                    <h5 class="font-semibold mb-4 text-foreground">{{ $t('features.frontend.newsletter.title') }}</h5>
-                    <p class="text-muted-foreground text-sm mb-4">
+                    <p class="text-muted-foreground text-sm">
+                        {{ getSetting('site_description', 'Modern Content Management System built with Laravel and Vue.js') }}
+                    </p>
+                </div>
+
+                <!-- Dynamic Footer Column 1 -->
+                <div v-if="footerCol1Items.length > 0" class="space-y-4">
+                    <h5 class="font-semibold text-foreground">{{ menus['footer_col_1']?.name || 'Links' }}</h5>
+                    <ul class="space-y-2">
+                        <li v-for="item in footerCol1Items" :key="item.id">
+                            <router-link 
+                                :to="item.url || '/'" 
+                                class="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                            >
+                                {{ item.title }}
+                            </router-link>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Dynamic Footer Column 2 -->
+                <div v-if="footerCol2Items.length > 0" class="space-y-4">
+                    <h5 class="font-semibold text-foreground">{{ menus['footer_col_2']?.name || 'Resources' }}</h5>
+                    <ul class="space-y-2">
+                        <li v-for="item in footerCol2Items" :key="item.id">
+                            <router-link 
+                                :to="item.url || '/'" 
+                                class="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                            >
+                                {{ item.title }}
+                            </router-link>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="space-y-4">
+                    <h5 class="font-semibold text-foreground">{{ $t('features.frontend.newsletter.title') }}</h5>
+                    <p class="text-muted-foreground text-sm">
                         {{ $t('features.frontend.newsletter.description') }}
                     </p>
                     <form class="flex flex-col gap-2" @submit.prevent="submitNewsletter">
@@ -54,19 +91,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from '../../../../composables/useTheme'
+import { useMenu } from '../../../../composables/useMenu'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
 import { newsletterSchema } from '../../../../schemas'
 
 const { t } = useI18n()
 const { getSetting } = useTheme()
+const { menus, fetchMenuByLocation } = useMenu()
 const toast = useToast()
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
 const loading = ref(false)
 const email = ref('')
+
+// Fetch footer menu columns
+onMounted(() => {
+    fetchMenuByLocation('footer_col_1')
+    fetchMenuByLocation('footer_col_2')
+})
+
+const footerCol1Items = computed(() => menus.value['footer_col_1']?.items || [])
+const footerCol2Items = computed(() => menus.value['footer_col_2']?.items || [])
 
 const submitNewsletter = async () => {
     if (!validateWithZod({ email: email.value })) return

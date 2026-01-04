@@ -64,6 +64,7 @@ class ScheduledTask extends Model
         'logs:cleanup-csp-reports',
 
         // Queue Management
+        'queue:work',
         'queue:restart',
         'queue:flush',
         'queue:prune-failed',

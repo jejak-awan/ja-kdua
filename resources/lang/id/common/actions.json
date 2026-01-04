@@ -51,5 +51,6 @@
     "generating": "Memproses...",
     "verifying": "Memverifikasi...",
     "disabling": "Menonaktifkan...",
-    "regenerating": "Membuat ulang..."
+    "regenerating": "Membuat ulang...",
+    "continue": "Lanjutkan"
 }
