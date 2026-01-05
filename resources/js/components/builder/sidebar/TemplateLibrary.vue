@@ -150,12 +150,9 @@
   const fetchTemplates = async () => {
       loading.value = true;
       try {
-          // Fetch explicit 'builder' types. 
-          const response = await templateService.getTemplates({ type: 'builder', per_page: 100 });
+          // Fetch templates that are suitable for the builder (full layouts and sections)
+          const response = await templateService.getTemplates({ per_page: 100 });
           
-          // Debug response structure if needed
-          // response.data.data is the Paginator object.
-          // response.data.data.data is the Array of items.
           const paginated = response.data.data;
           const all = paginated && paginated.data ? paginated.data : [];
           
@@ -164,8 +161,12 @@
                throw new Error("Invalid response format");
           }
           
-          premadeTemplates.value = all.filter(t => !t.author_id);
-          savedTemplates.value = all.filter(t => t.author_id);
+          // Filter only relevant types for the visual builder
+          const builderTypes = ['builder', 'section', 'page'];
+          const relevantTemplates = all.filter(t => builderTypes.includes(t.type));
+          
+          premadeTemplates.value = relevantTemplates.filter(t => !t.author_id);
+          savedTemplates.value = relevantTemplates.filter(t => t.author_id);
           
       } catch (error) {
           console.error("Failed to load templates", error);
@@ -252,20 +253,19 @@
   const regenerateBlockIds = (block) => {
       const newBlock = { ...block };
       newBlock.id = generateUUID();
-      // If block has children (e.g. Columns), recurse?
-      // Currently our builder flat structure or uses settings? 
-      // ColumnsBlock usually has children? No, ColumnsBlock uses 'slots' or just structure.
-      // Wait, current builder implementation: blocks are flat array.
-      // Does 'ColumnsBlock' contain other blocks? 
-      // Checking ColumnsBlock.vue -> it just renders slots?
-      // Actually, looking at ja-cms structure, blocks are FLAT list in builder.blocks.
-      // ColumnsBlock likely just styles content.
-      // Wait, if columns contain other blocks, how is that stored?
-      // Ah, checking 'ColumnsBlock.vue' previously showed it uses `columns` prop?
-      // Or maybe it's just a layout block.
-      // IF Nested Blocks exist, we need recursion.
-      // BUT current task status says "24 Block Types".
-      // Let's assume flat for now or shallow.
+      
+      // Handle nested blocks in Section
+      if (newBlock.settings?.blocks && Array.isArray(newBlock.settings.blocks)) {
+          newBlock.settings.blocks = newBlock.settings.blocks.map(regenerateBlockIds);
+      }
+      
+      // Handle nested blocks in Columns
+      if (newBlock.settings?.columns && Array.isArray(newBlock.settings.columns)) {
+          newBlock.settings.columns = newBlock.settings.columns.map(col => ({
+              ...col,
+              blocks: Array.isArray(col.blocks) ? col.blocks.map(regenerateBlockIds) : []
+          }));
+      }
       
       return newBlock;
   };
