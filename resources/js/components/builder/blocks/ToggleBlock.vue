@@ -70,7 +70,7 @@ const toggle = () => {
             >
                 <div 
                     :class="[
-                        'text-muted-foreground leading-relaxed',
+                        'opacity-80 leading-relaxed',
                         style === 'minimal' ? 'py-4' : 'px-4 pb-4'
                     ]"
                 >

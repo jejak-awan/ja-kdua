@@ -18,7 +18,7 @@
             </component>
             <p 
                 v-if="subtitle" 
-                :class="['mt-4 text-muted-foreground', subtitleSizeClass, alignmentClass]"
+                :class="['mt-4 opacity-80', subtitleSizeClass, alignmentClass]"
             >
                 {{ subtitle }}
             </p>

@@ -8,7 +8,7 @@
                 <div v-if="!submitted">
                     <div class="mb-10" :class="alignment === 'text-center' ? 'text-center' : alignment === 'text-right' ? 'text-right' : 'text-left'">
                         <h2 v-if="title" class="text-3xl font-bold tracking-tight mb-2">{{ title }}</h2>
-                        <p v-if="description" class="text-muted-foreground">{{ description }}</p>
+                        <p v-if="description" class="opacity-80">{{ description }}</p>
                     </div>
 
                     <form @submit.prevent="handleSubmit" class="flex flex-wrap gap-4">
@@ -76,7 +76,7 @@
                         <Check class="w-10 h-10" />
                     </div>
                     <h3 class="text-2xl font-bold">{{ successMessage }}</h3>
-                    <p class="text-muted-foreground">We typically respond within 24 hours.</p>
+                    <p class="opacity-80">We typically respond within 24 hours.</p>
                     <button @click="submitted = false" class="text-primary text-sm font-semibold hover:underline">
                         Send another message
                     </button>

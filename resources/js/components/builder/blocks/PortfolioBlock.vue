@@ -143,7 +143,7 @@ watch(() => [props.category, props.limit], fetchProjects);
                         >
                             <a 
                                 :href="`/project/${project.slug || project.id}`"
-                                class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform"
+                                class="w-12 h-12 rounded-full bg-background text-foreground flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform"
                             >
                                 <ExternalLink class="w-5 h-5" />
                             </a>

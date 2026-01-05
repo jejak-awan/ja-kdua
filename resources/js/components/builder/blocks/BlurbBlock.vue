@@ -85,7 +85,7 @@ const containerClass = computed(() => {
             <component :is="title_tag" class="text-xl font-bold mb-2 tracking-tight">
                 {{ title }}
             </component>
-            <p class="text-muted-foreground leading-relaxed">
+            <p class="opacity-80 leading-relaxed">
                 {{ content }}
             </p>
         </div>

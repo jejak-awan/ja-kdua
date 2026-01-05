@@ -21,7 +21,7 @@
                     />
                     <div>
                         <cite v-if="author" class="font-bold not-italic">{{ author }}</cite>
-                        <p v-if="role" class="text-sm text-muted-foreground">{{ role }}</p>
+                        <p v-if="role" class="text-sm opacity-70">{{ role }}</p>
                     </div>
                 </footer>
             </blockquote>

@@ -27,7 +27,7 @@ const themeClasses = computed(() => {
     const themes = {
         dark: 'bg-zinc-900 text-zinc-100',
         light: 'bg-zinc-100 text-zinc-900',
-        github: 'bg-white text-zinc-800 border'
+        github: 'bg-card text-card-foreground border'
     };
     return themes[props.theme] || themes.dark;
 });
