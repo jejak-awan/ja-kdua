@@ -41,12 +41,22 @@
                     variant="ghost" 
                     size="icon" 
                     class="h-8 w-8 rounded-md transition-colors"
-                    :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
-                    @click="setTab('visibility')"
-                    :title="t('features.builder.properties.visibility.title')"
+                    :class="builder.activeRightSidebarTab.value === 'layout' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                    @click="setTab('layout')"
+                    title="Layout Settings"
                 >
-                    <Eye class="w-4 h-4" />
+                    <LayoutPanelTop class="w-4 h-4" />
                 </Button>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    class="h-8 w-8 rounded-md transition-colors"
+                     :class="builder.activeRightSidebarTab.value === 'visibility' ? 'bg-sidebar-accent shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                     @click="setTab('visibility')"
+                     :title="t('features.builder.properties.visibility.title')"
+                 >
+                     <Eye class="w-4 h-4" />
+                 </Button>
             </div>
 
             <!-- Toggle Button -->
@@ -76,6 +86,14 @@
                 </div>
                 <LayersTree :blocks="builder.blocks.value" />
             </div>
+
+            <!-- LAYOUT TAB -->
+             <div v-if="builder.activeRightSidebarTab.value === 'layout'" class="space-y-4">
+                 <div class="flex items-center justify-between pb-2 border-b border-sidebar-border">
+                     <h3 class="font-bold text-xs text-foreground">Global Settings</h3>
+                 </div>
+                 <LayoutSettings />
+             </div>
 
             <!-- PROPERTIES TAB -->
             <div v-if="builder.activeRightSidebarTab.value === 'properties'" class="space-y-4">
@@ -376,7 +394,8 @@ import {
     Trash2,
     Check,
     Eye,
-    MousePointer2
+    MousePointer2,
+    LayoutPanelTop
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -389,6 +408,7 @@ import draggable from 'vuedraggable';
 import { blockRegistry } from '../BlockRegistry';
 import PropertyField from './PropertyField.vue';
 import LayersTree from '../layers/LayersTree.vue';
+import LayoutSettings from './LayoutSettings.vue';
 import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
 

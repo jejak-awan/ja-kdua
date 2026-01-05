@@ -9,13 +9,13 @@
     
     <div 
         :class="[
-            'flex flex-col bg-background group/builder',
-            !isFullscreen && 'relative h-[calc(100vh-10rem)] min-h-[500px] border rounded-xl overflow-hidden shadow-inner'
+            'flex flex-col bg-zinc-950 text-foreground group/builder dark',
+            !isFullscreen && 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-zinc-800 rounded-xl overflow-hidden shadow-inner'
         ]"
         :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
     >
             <!-- Toolbar -->
-            <div class="h-12 bg-background border-b border-border flex items-center justify-between px-4 z-10 shrink-0">
+            <div class="h-12 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 z-10 shrink-0">
                 <!-- Left Section -->
                 <div class="flex items-center gap-2">
                     <!-- Undo/Redo -->

@@ -9,6 +9,9 @@
         <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-all z-30 flex items-center gap-0.5 bg-primary text-primary-foreground rounded-full px-1.5 py-1 shadow-xl scale-90 translate-y-1 group-hover/block:translate-y-0">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
             <div class="w-px h-3 bg-primary-foreground/20 mx-1"></div>
+            <button class="h-6 w-6 flex items-center justify-center hover:bg-primary-foreground/20 rounded-full transition-colors" @click.stop="onEdit" title="Settings">
+                <Settings2 class="w-3 h-3" />
+            </button>
             <button class="h-6 w-6 flex items-center justify-center hover:bg-primary-foreground/20 rounded-full transition-colors" @click.stop="onDuplicate" :title="t('features.builder.properties.tooltips.duplicate')">
                 <Copy class="w-3 h-3" />
             </button>
@@ -40,7 +43,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { GripVertical, Copy, Trash2 } from 'lucide-vue-next';
+import { GripVertical, Copy, Trash2, Settings2 } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import ContextMenu from './ContextMenu.vue';
 

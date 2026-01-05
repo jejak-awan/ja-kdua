@@ -216,7 +216,8 @@ import {
     Columns3,
     Zap,
     Database,
-    ShoppingBag
+    ShoppingBag,
+    LayoutPanelTop
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -233,6 +234,12 @@ const showShortcuts = ref(false);
 
 // Category definitions with block name mappings
 const categoryDefinitions = [
+    {
+        name: 'structure',
+        label: 'Structure',
+        icon: LayoutPanelTop,
+        blocks: ['section']
+    },
     {
         name: 'basic',
         label: 'Basic',

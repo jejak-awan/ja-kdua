@@ -15,6 +15,18 @@ export function useBuilder() {
     const historyIndex = ref(-1);
     const isUndoing = ref(false);
 
+    // Global Layout Settings
+    const globalSettings = ref({
+        container_max_width: 'max-w-7xl mx-auto px-4',
+        block_spacing: 'mb-4',
+    });
+
+    const getGlobalSetting = (key) => globalSettings.value[key];
+    const setGlobalSetting = (key, value) => {
+        globalSettings.value[key] = value;
+        takeSnapshot();
+    };
+
     // History Methods
     const takeSnapshot = () => {
         if (isUndoing.value) return;
@@ -309,7 +321,12 @@ export function useBuilder() {
         duplicateBlock,
         updateBlock,
         moveBlockUp,
-        moveBlockDown
+        moveBlockDown,
+
+        // Global Settings
+        globalSettings,
+        getGlobalSetting,
+        setGlobalSetting
     };
 }
 

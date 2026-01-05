@@ -39,14 +39,27 @@
                 </div>
                 
                 <!-- Empty Placeholder -->
-                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none p-6 md:p-12 text-center">
+                <!-- Empty Placeholder / Add Section -->
+                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none md:p-12 text-center pointer-events-auto">
                     <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
-                        <Plus class="w-10 h-10 opacity-20" />
+                        <LayoutPanelTop class="w-10 h-10 opacity-20" />
                     </div>
-                    <div class="space-y-1 w-full">
-                        <h3 class="text-lg font-bold text-foreground">{{ t('features.builder.canvas.empty.title') }}</h3>
-                        <p class="text-sm max-w-[260px] md:max-w-xs mx-auto text-muted-foreground">{{ t('features.builder.canvas.empty.description') }}</p>
+                    <div class="space-y-1 w-full max-w-sm">
+                        <h3 class="text-lg font-bold text-foreground">Start Building</h3>
+                        <p class="text-sm text-muted-foreground mb-4">Add a container section to start your layout.</p>
+                        <Button @click="addSection" size="lg" class="gap-2 shadow-lg">
+                            <Plus class="w-4 h-4" />
+                            Add Section
+                        </Button>
                     </div>
+                </div>
+                
+                <!-- Add Section at Bottom -->
+                <div v-else class="py-12 flex justify-center opacity-0 hover:opacity-100 transition-opacity">
+                     <Button variant="outline" class="gap-2 border-dashed text-muted-foreground hover:text-primary hover:border-primary" @click="addSection">
+                        <Plus class="w-4 h-4" />
+                        Add Section
+                    </Button>
                 </div>
             </div>
 
@@ -69,7 +82,7 @@ import { inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import { 
-    Smartphone, Tablet, Monitor, GripVertical, Copy, Trash2, Plus, MousePointer2, PanelLeftOpen 
+    Smartphone, Tablet, Monitor, GripVertical, Copy, Trash2, Plus, MousePointer2, PanelLeftOpen, LayoutPanelTop 
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
@@ -77,6 +90,7 @@ import BlockWrapper from './BlockWrapper.vue';
 import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
 import { ref } from 'vue';
+import { blockRegistry } from '../BlockRegistry';
 
 const props = defineProps({
     context: {
@@ -102,6 +116,20 @@ const canvasWidthClass = computed(() => {
 const editBlock = (index) => {
     builder.editingIndex.value = index;
     builder.activeTab.value = 'content';
+};
+
+const addSection = () => {
+    const sectionDef = blockRegistry.get('section');
+    if (!sectionDef) return;
+
+    const newBlock = {
+        id: crypto.randomUUID(),
+        type: 'section',
+        settings: JSON.parse(JSON.stringify(sectionDef.defaultSettings))
+    };
+    
+    builder.blocks.value.push(newBlock);
+    builder.takeSnapshot();
 };
 
 // Compute theme overrides for the canvas

@@ -36,9 +36,19 @@
                                 </template>
                                 
                                 <template #footer>
-                                     <div v-if="column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center pointer-events-none opacity-50">
-                                        <span class="text-[10px] font-bold text-muted-foreground">Column {{ index + 1 }}</span>
-                                        <span class="text-[9px] text-muted-foreground mt-1">Drop blocks here</span>
+                                     <div v-if="column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
+                                        <button 
+                                            @click.stop.prevent="openBlockPicker(index)"
+                                            type="button"
+                                            class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn"
+                                        >
+                                            <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover/btn:bg-primary/10 transition-colors">
+                                                <Plus class="w-4 h-4 text-muted-foreground group-hover/btn:text-primary" />
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-muted-foreground group-hover/btn:text-primary block">Add Block</span>
+                                            </div>
+                                        </button>
                                     </div>
                                 </template>
                             </draggable>
@@ -67,6 +77,13 @@
             </div>
         </div>
     </section>
+
+    <!-- Block Picker Modal -->
+    <BlockPicker 
+        :visible="showBlockPicker" 
+        @close="showBlockPicker = false"
+        @add="handleAddBlock"
+    />
 </template>
 
 <script setup>
@@ -76,8 +93,10 @@ defineOptions({
 
 import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
+import { Plus } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from './BlockRenderer.vue';
+import BlockPicker from '../canvas/BlockPicker.vue';
 
 const props = defineProps({
     id: String,
@@ -98,6 +117,22 @@ const isBuilder = computed(() => !!builder);
 const gridRef = ref(null);
 const isResizing = ref(false);
 const activeResizer = ref(null);
+const showBlockPicker = ref(false);
+const activeColumnIndex = ref(null);
+
+const openBlockPicker = (colIndex) => {
+    activeColumnIndex.value = colIndex;
+    showBlockPicker.value = true;
+};
+
+const handleAddBlock = (newBlock) => {
+    if (activeColumnIndex.value !== null && props.columns[activeColumnIndex.value]) {
+        props.columns[activeColumnIndex.value].blocks.push(newBlock);
+        builder.takeSnapshot();
+    }
+    showBlockPicker.value = false;
+    activeColumnIndex.value = null;
+};
 
 const getColumnCount = (layout) => {
     switch (layout) {
