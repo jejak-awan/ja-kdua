@@ -151,18 +151,22 @@
       loading.value = true;
       try {
           // Fetch templates that are suitable for the builder (full layouts and sections)
-          const response = await templateService.getTemplates({ per_page: 100 });
+          const response = await templateService.getTemplates({ 
+            per_page: 100,
+            is_active: true
+          });
           
-          const paginated = response.data.data;
-          const all = paginated && paginated.data ? paginated.data : [];
+          // Robust data extraction: handle both raw arrays and paginated responses
+          const result = response.data?.data;
+          const all = Array.isArray(result) ? result : (result?.data || []);
           
           if (!Array.isArray(all)) {
                console.error("Unexpected API response format", response);
                throw new Error("Invalid response format");
           }
           
-          // Filter only relevant types for the visual builder
-          const builderTypes = ['builder', 'section', 'page'];
+          // Filter broadly for any template that could be used in the visual builder
+          const builderTypes = ['builder', 'section', 'page', 'post', 'custom'];
           const relevantTemplates = all.filter(t => builderTypes.includes(t.type));
           
           premadeTemplates.value = relevantTemplates.filter(t => !t.author_id);
