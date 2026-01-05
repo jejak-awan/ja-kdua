@@ -78,6 +78,9 @@
             <MediaPicker v-model:open="builder.showMediaPicker.value" @selected="handleMediaSelect">
                 <template #trigger><span class="hidden"></span></template>
             </MediaPicker>
+
+            <!-- Global Context Menu -->
+            <ContextMenu />
         </div>
 </template>
 
@@ -90,6 +93,7 @@ import Canvas from './canvas/Canvas.vue';
 import PropertiesPanel from './properties/PropertiesPanel.vue';
 import BreadcrumbsBar from './canvas/BreadcrumbsBar.vue';
 import MediaPicker from '@/components/MediaPicker.vue';
+import ContextMenu from './ui/ContextMenu.vue';
 import Button from '@/components/ui/button.vue';
 import { 
     Undo2, 
@@ -231,8 +235,8 @@ onUnmounted(() => {
 
 const handleMediaSelect = (media) => {
     if (builder.activeBlockId.value && builder.activeMediaField.value) {
-        // Find block
-        const block = builder.blocks.value.find(b => b.id === builder.activeBlockId.value);
+        // Find block recursively
+        const block = builder.findBlockById(builder.activeBlockId.value);
         if (block) {
             // Support nested keys (e.g. "images[0].url" or "images.0.url")
             const path = builder.activeMediaField.value;

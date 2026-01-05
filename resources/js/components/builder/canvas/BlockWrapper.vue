@@ -26,17 +26,6 @@
             <!-- Overlay for clicks since blocks might have links -->
             <div class="absolute inset-0 z-[5]"></div>
         </div>
-
-        <!-- Context Menu -->
-        <ContextMenu 
-            v-model="showContextMenu" 
-            :x="menuX" 
-            :y="menuY" 
-            :block="block" 
-            :index="index"
-            :can-paste="builder?.canPaste?.value ?? false"
-            @action="handleMenuAction"
-        />
     </div>
 </template>
 
@@ -45,7 +34,6 @@ import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { GripVertical, Copy, Trash2, Settings2 } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
-import ContextMenu from './ContextMenu.vue';
 
 const props = defineProps({
     block: { type: Object, required: true },
@@ -101,44 +89,14 @@ const onDuplicate = () => {
 };
 
 const onContextMenu = (e) => {
-    menuX.value = e.clientX;
-    menuY.value = e.clientY;
-    showContextMenu.value = true;
+    if (!builder) return;
+    builder.contextMenu.value = {
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        type: props.block.type,
+        index: props.index,
+        blockId: props.block.id
+    };
 };
-
-const handleMenuAction = ({ action }) => {
-    switch (action) {
-        case 'edit':
-            onEdit();
-            break;
-        case 'duplicate':
-            onDuplicate();
-            break;
-        case 'copy':
-            builder.copyBlock(props.index);
-            break;
-        case 'cut':
-            builder.cutBlock(props.index);
-            break;
-        case 'paste':
-            builder.pasteBlock(props.index);
-            break;
-        case 'delete':
-            onDelete();
-            break;
-        case 'preset':
-            builder.activeRightSidebarTab.value = 'presets';
-            builder.isRightSidebarOpen.value = true;
-            onEdit();
-            break;
-        case 'layers':
-            builder.activeRightSidebarTab.value = 'layers';
-            builder.isRightSidebarOpen.value = true;
-            break;
-    }
-};
-
-const showContextMenu = ref(false);
-const menuX = ref(0);
-const menuY = ref(0);
 </script>

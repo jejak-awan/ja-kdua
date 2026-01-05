@@ -59,6 +59,14 @@
                         v-show="isExpanded(block.id)"
                         class="relative"
                     >
+                        <!-- Section Children Logic -->
+                        <template v-if="block.type === 'section' && Array.isArray(block.settings.blocks)">
+                            <LayersTree 
+                                :blocks="block.settings.blocks" 
+                                :depth="depth + 1"
+                            />
+                        </template>
+
                         <!-- Container Children Logic -->
                         <template v-if="block.type === 'columns' && Array.isArray(block.settings.columns)">
                             <div v-for="(col, colIndex) in block.settings.columns" :key="colIndex">
@@ -128,8 +136,9 @@ const toggleExpand = (id) => {
 };
 
 const hasChildren = (block) => {
-    return block.type === 'columns' && Array.isArray(block.settings?.columns) && block.settings.columns.length > 0;
-    // Add logic for other containers (Sections, Row) later
+    if (block.type === 'section') return Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0;
+    if (block.type === 'columns') return Array.isArray(block.settings?.columns) && block.settings.columns.length > 0;
+    return false;
 };
 
 const selectBlock = (block) => {

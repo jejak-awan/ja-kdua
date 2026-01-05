@@ -21,7 +21,10 @@
                         item-key="id"
                         :group="{ name: 'blocks', pull: true, put: true }"
                         handle=".drag-handle"
-                        class="space-y-0 min-h-[600px] w-full pb-20 flex-1"
+                        :class="[
+                            builder.globalSettings.value.block_spacing,
+                            'min-h-[600px] w-full pb-20 flex-1'
+                        ]"
                         ghost-class="block-ghost"
                     >
                         <template #item="{ element: block, index }">
@@ -110,7 +113,7 @@ const canvasWidthClass = computed(() => {
     switch (builder.deviceMode.value) {
         case 'mobile': return 'max-w-[375px]';
         case 'tablet': return 'max-w-[768px]';
-        default: return 'max-w-full';
+        default: return builder.globalSettings.value.container_max_width || 'max-w-full';
     }
 });
 
@@ -120,14 +123,8 @@ const editBlock = (index) => {
 };
 
 const addSection = () => {
-    console.log('[Canvas] Add Section clicked');
     const sectionDef = blockRegistry.get('section');
-    console.log('[Canvas] Section def:', sectionDef);
-    
-    if (!sectionDef) {
-        console.error('[Canvas] Section definition not found!');
-        return;
-    }
+    if (!sectionDef) return;
 
     const newBlock = {
         id: generateUUID(),
@@ -135,10 +132,13 @@ const addSection = () => {
         settings: JSON.parse(JSON.stringify(sectionDef.defaultSettings))
     };
     
-    console.log('[Canvas] Adding new block:', newBlock);
     builder.blocks.value.push(newBlock);
     builder.takeSnapshot();
-    console.log('[Canvas] Block added. Helper blocks:', builder.blocks.value);
+    
+    // Auto-select the new block
+    builder.activeBlockId.value = newBlock.id;
+    builder.editingIndex.value = builder.blocks.value.length - 1;
+    builder.activeTab.value = 'content';
 };
 
 // Compute theme overrides for the canvas

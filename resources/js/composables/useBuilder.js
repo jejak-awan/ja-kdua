@@ -1,6 +1,7 @@
 import { ref, computed, watch } from 'vue';
 import { blockRegistry } from '../components/builder/BlockRegistry';
 import { useTheme } from './useTheme';
+import { generateUUID } from '../components/builder/utils';
 
 export function useBuilder() {
     const { activeTheme, themeSettings, loadActiveTheme } = useTheme();
@@ -31,7 +32,11 @@ export function useBuilder() {
     const takeSnapshot = () => {
         if (isUndoing.value) return;
 
-        const currentState = JSON.stringify(blocks.value);
+        const currentState = JSON.stringify({
+            blocks: blocks.value,
+            globalSettings: globalSettings.value
+        });
+
         const lastState = history.value.length > 0 ? JSON.stringify(history.value[historyIndex.value]) : null;
 
         if (currentState === lastState) return;
@@ -55,8 +60,9 @@ export function useBuilder() {
         if (historyIndex.value > 0) {
             isUndoing.value = true;
             historyIndex.value--;
-            blocks.value = JSON.parse(JSON.stringify(history.value[historyIndex.value]));
-            // Use nextTick to reset flag if needed, but synchronous is fine for simple objects
+            const prevState = history.value[historyIndex.value];
+            blocks.value = JSON.parse(JSON.stringify(prevState.blocks));
+            globalSettings.value = JSON.parse(JSON.stringify(prevState.globalSettings));
             setTimeout(() => isUndoing.value = false, 0);
         }
     };
@@ -65,7 +71,9 @@ export function useBuilder() {
         if (historyIndex.value < history.value.length - 1) {
             isUndoing.value = true;
             historyIndex.value++;
-            blocks.value = JSON.parse(JSON.stringify(history.value[historyIndex.value]));
+            const nextState = history.value[historyIndex.value];
+            blocks.value = JSON.parse(JSON.stringify(nextState.blocks));
+            globalSettings.value = JSON.parse(JSON.stringify(nextState.globalSettings));
             setTimeout(() => isUndoing.value = false, 0);
         }
     };
@@ -73,13 +81,23 @@ export function useBuilder() {
     const canUndo = computed(() => historyIndex.value > 0);
     const canRedo = computed(() => historyIndex.value < history.value.length - 1);
 
-    const activeRightSidebarTab = ref('properties'); // 'properties' | 'layers'
+    const activeRightSidebarTab = ref('properties'); // 'properties' | 'layers' | 'presets' | 'layout' | 'visibility'
     const isRightSidebarOpen = ref(true);
     const showLayersPanel = ref(false);
     const widgetSearch = ref('');
     const showMediaPicker = ref(false);
     const showTemplateLibrary = ref(false);
     const isPreview = ref(false);
+
+    // Context Menu State
+    const contextMenu = ref({
+        visible: false,
+        x: 0,
+        y: 0,
+        type: null,
+        index: null,
+        blockId: null
+    });
 
     // Media Picker Context
     const activeMediaField = ref(null);
@@ -129,7 +147,7 @@ export function useBuilder() {
         if (!definition) return null;
 
         return {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: definition.name,
             settings: JSON.parse(JSON.stringify(definition.defaultSettings))
         };
@@ -146,7 +164,7 @@ export function useBuilder() {
         const existingSettings = blockOrDef.settings || {};
 
         return {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             type: type,
             // Merge defaults with existing settings (if any)
             // If it's a fresh definition from sidebar, existingSettings will be empty/undefined, 
@@ -185,7 +203,7 @@ export function useBuilder() {
         const original = blocks.value[index];
         const clone = {
             ...JSON.parse(JSON.stringify(original)),
-            id: crypto.randomUUID()
+            id: generateUUID()
         };
         blocks.value.splice(index + 1, 0, clone);
         takeSnapshot();
@@ -215,7 +233,7 @@ export function useBuilder() {
 
         const newBlock = {
             ...JSON.parse(JSON.stringify(clipboard.value)),
-            id: crypto.randomUUID()
+            id: generateUUID()
         };
 
         if (afterIndex !== null) {
@@ -243,6 +261,26 @@ export function useBuilder() {
         blocks.value.splice(index + 1, 0, block);
         if (editingIndex.value === index) editingIndex.value = index + 1;
         takeSnapshot();
+    };
+
+    const findBlockById = (id, items = blocks.value) => {
+        if (!id) return null;
+        for (const block of items) {
+            if (block.id === id) return block;
+            // Search in Columns (column.blocks)
+            if (block.settings && Array.isArray(block.settings.columns)) {
+                for (const column of block.settings.columns) {
+                    const found = findBlockById(id, column.blocks || []);
+                    if (found) return found;
+                }
+            }
+            // Search in Section nested blocks (settings.blocks)
+            if (block.settings && Array.isArray(block.settings.blocks)) {
+                const found = findBlockById(id, block.settings.blocks);
+                if (found) return found;
+            }
+        }
+        return null;
     };
 
     const getBlockPath = (id) => {
@@ -319,6 +357,7 @@ export function useBuilder() {
         getBlockLabel,
         getBlockComponent,
         getBlockPath,
+        findBlockById,
         cloneBlock,
         addBlock,
         removeBlock,
@@ -330,7 +369,10 @@ export function useBuilder() {
         // Global Settings
         globalSettings,
         getGlobalSetting,
-        setGlobalSetting
+        setGlobalSetting,
+
+        // UI Helpers
+        contextMenu
     };
 }
 

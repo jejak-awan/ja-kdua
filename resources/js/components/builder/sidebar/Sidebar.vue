@@ -62,7 +62,6 @@
                         >
                             <template #item="{ element: type }">
                                 <div 
-                                    v-show="!builder.widgetSearch.value || type.label.toLowerCase().includes(builder.widgetSearch.value.toLowerCase())"
                                     class="p-2 border border-sidebar-border bg-sidebar-accent/20 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-grab active:cursor-grabbing transition-colors flex flex-col items-center gap-2 text-center group"
                                 >
                                     <div class="w-8 h-8 rounded-md flex items-center justify-center transition-colors bg-sidebar-accent/50 border border-sidebar-border group-hover:bg-primary/10 group-hover:text-primary text-sidebar-foreground">
@@ -88,7 +87,6 @@
                 >
                     <template #item="{ element: type }">
                         <div 
-                            v-show="!builder.widgetSearch.value || type.label.toLowerCase().includes(builder.widgetSearch.value.toLowerCase())"
                             class="p-2 border border-transparent rounded-lg hover:bg-sidebar-accent cursor-grab active:cursor-grabbing transition-colors flex flex-col items-center justify-center py-3 group relative"
                         >
                             <div class="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
@@ -308,21 +306,37 @@ const toggleCategory = (name) => {
 // Group blocks by category
 const categorizedBlocks = computed(() => {
     const allBlocks = builder.availableBlocks;
+    const search = builder.widgetSearch.value.toLowerCase();
     
-    const categories = categoryDefinitions.map(cat => ({
-        ...cat,
-        blocks: cat.blocks
+    return categoryDefinitions.map(cat => {
+        const blocks = cat.blocks
             .map(blockName => allBlocks.find(b => b.name === blockName))
             .filter(Boolean)
-    })).filter(cat => cat.blocks.length > 0);
-    
-    // Initialize collapsed state (all collapsed except first category)
-    categories.forEach((cat, index) => {
+            .filter(b => !search || b.label.toLowerCase().includes(search));
+            
+        return {
+            ...cat,
+            blocks
+        };
+    }).filter(cat => cat.blocks.length > 0);
+});
+
+// Watch search to expand all categories when searching
+watch(() => builder.widgetSearch.value, (newSearch) => {
+    if (newSearch) {
+        // Expand all categories that have results
+        categorizedBlocks.value.forEach(cat => {
+            collapsedCategories[cat.name] = false;
+        });
+    }
+});
+
+// Initialize collapsed state (all collapsed except first category or those with results)
+onMounted(() => {
+    categorizedBlocks.value.forEach((cat, index) => {
         if (collapsedCategories[cat.name] === undefined) {
             collapsedCategories[cat.name] = index !== 0; // false for first, true for rest
         }
     });
-    
-    return categories;
 });
 </script>
