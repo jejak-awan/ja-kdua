@@ -115,6 +115,7 @@
   <script setup>
   import { inject, ref, onMounted, watch } from 'vue';
   import { LayoutTemplate, Loader2, Trash2, Plus } from 'lucide-vue-next';
+  import { generateUUID } from '../utils';
   import Button from '@/components/ui/button.vue';
   import Dialog from '@/components/ui/dialog.vue';
   import DialogContent from '@/components/ui/dialog-content.vue';
@@ -250,7 +251,7 @@
   
   const regenerateBlockIds = (block) => {
       const newBlock = { ...block };
-      newBlock.id = crypto.randomUUID();
+      newBlock.id = generateUUID();
       // If block has children (e.g. Columns), recurse?
       // Currently our builder flat structure or uses settings? 
       // ColumnsBlock usually has children? No, ColumnsBlock uses 'slots' or just structure.

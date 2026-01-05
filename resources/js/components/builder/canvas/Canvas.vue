@@ -40,7 +40,7 @@
                 
                 <!-- Empty Placeholder -->
                 <!-- Empty Placeholder / Add Section -->
-                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 pointer-events-none md:p-12 text-center pointer-events-auto">
+                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 md:p-12 text-center z-50">
                     <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
                         <LayoutPanelTop class="w-10 h-10 opacity-20" />
                     </div>
