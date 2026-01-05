@@ -234,26 +234,47 @@
   
   const insertTemplate = (tpl) => {
       try {
+          console.log("Template to insert:", tpl);
+          console.log("body_template type:", typeof tpl.body_template);
+          console.log("body_template value:", tpl.body_template);
+          
           // Handle body_template as either string or object
           let blocks;
           if (typeof tpl.body_template === 'string') {
-              blocks = JSON.parse(tpl.body_template);
-          } else {
+              try {
+                  blocks = JSON.parse(tpl.body_template);
+              } catch (parseError) {
+                  console.error("JSON Parse Error Details:", parseError);
+                  console.error("First 200 chars:", tpl.body_template.substring(0, 200));
+                  throw parseError;
+              }
+          } else if (Array.isArray(tpl.body_template)) {
+              // Already an array, use directly
               blocks = tpl.body_template;
+          } else if (typeof tpl.body_template === 'object') {
+              // Object but not array, might be wrapped
+              blocks = tpl.body_template;
+          } else {
+              throw new Error(`Unexpected body_template type: ${typeof tpl.body_template}`);
           }
           
-          if (!Array.isArray(blocks)) throw new Error("Invalid template format");
+          console.log("Parsed blocks:", blocks);
+          
+          if (!Array.isArray(blocks)) {
+              throw new Error("Invalid template format: blocks is not an array");
+          }
           
           // Assign new IDs to avoid conflicts
           const newBlocks = blocks.map(regenerateBlockIds);
           
           builder.blocks.value.push(...newBlocks);
+          builder.takeSnapshot();
           
-          toast.success("Template inserted");
+          toast.success("Template inserted successfully!");
           builder.showTemplateLibrary.value = false;
       } catch (error) {
           console.error("Insert failed", error);
-          toast.error("Failed to insert template: Invalid data");
+          toast.error(`Failed to insert template: ${error.message}`);
       }
   };
   
