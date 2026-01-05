@@ -150,29 +150,29 @@
   const fetchTemplates = async () => {
       loading.value = true;
       try {
-          // Fetch templates that are suitable for the builder (full layouts and sections)
-          const response = await templateService.getTemplates({ 
-            per_page: 100,
-            is_active: true
-          });
+          // Fetch templates without restrictive filters for maximum visibility
+          const response = await templateService.getTemplates({ per_page: 500 });
           
-          // Robust data extraction: handle both raw arrays and paginated responses
-          const result = response.data?.data;
-          const all = Array.isArray(result) ? result : (result?.data || []);
-          
-          if (!Array.isArray(all)) {
-               console.error("Unexpected API response format", response);
-               throw new Error("Invalid response format");
+          // Debug log (check browser console if possible)
+          console.debug("Templates API Raw Response:", response);
+
+          // Highly resilient data extraction
+          let all = [];
+          if (response.data) {
+              if (Array.isArray(response.data.data)) {
+                  all = response.data.data;
+              } else if (response.data.data && Array.isArray(response.data.data.data)) {
+                  all = response.data.data.data;
+              } else if (Array.isArray(response.data)) {
+                  all = response.data;
+              }
           }
+
+          console.debug("Extracted templates count:", all.length);
           
-          // Filter broadly for any template that could be used in the visual builder
-          const builderTypes = ['builder', 'section', 'page', 'post', 'custom'];
-          const relevantTemplates = all.filter(t => builderTypes.includes(t.type));
-          
-          premadeTemplates.value = relevantTemplates.filter(t => !t.author_id);
-          savedTemplates.value = relevantTemplates.filter(t => t.author_id);
-          
-      } catch (error) {
+          // Separate premade and saved
+          premadeTemplates.value = all.filter(t => !t.author_id);
+          savedTemplates.value = all.filter(t => t.author_id);
           console.error("Failed to load templates", error);
           toast.error("Failed to load templates");
       } finally {
