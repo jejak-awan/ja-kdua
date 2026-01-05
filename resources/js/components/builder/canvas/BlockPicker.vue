@@ -91,6 +91,7 @@ import { Search, X, LayoutPanelTop, Columns3 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
 import { blockRegistry } from '../BlockRegistry';
+import { generateUUID } from '../utils';
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
@@ -131,7 +132,7 @@ const addBlock = (type) => {
     if (!definition) return;
 
     const newBlock = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: definition.name,
         settings: JSON.parse(JSON.stringify(definition.defaultSettings))
     };

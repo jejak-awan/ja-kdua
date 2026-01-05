@@ -101,6 +101,7 @@ import { Settings2, Copy, Trash2, GripVertical, Plus } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
+import { generateUUID } from '../utils';
 
 defineOptions({
   inheritAttrs: false
@@ -231,7 +232,7 @@ const onDuplicateNested = (index) => {
     const original = blockObject.value.settings.blocks[index];
     const clone = {
         ...JSON.parse(JSON.stringify(original)),
-        id: crypto.randomUUID()
+        id: generateUUID()
     };
     blockObject.value.settings.blocks.splice(index + 1, 0, clone);
     builder?.takeSnapshot();

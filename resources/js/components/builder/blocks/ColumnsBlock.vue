@@ -97,6 +97,7 @@ import { Plus } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from './BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
+import { generateUUID } from '../utils';
 
 const props = defineProps({
     id: String,
@@ -250,7 +251,7 @@ const onDuplicate = (column, index) => {
     const original = column.blocks[index];
     const clone = {
         ...JSON.parse(JSON.stringify(original)),
-        id: crypto.randomUUID()
+        id: generateUUID()
     };
     column.blocks.splice(index + 1, 0, clone);
     builder.takeSnapshot();

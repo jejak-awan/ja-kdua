@@ -91,6 +91,7 @@ import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
 import { ref } from 'vue';
 import { blockRegistry } from '../BlockRegistry';
+import { generateUUID } from '../utils';
 
 const props = defineProps({
     context: {
@@ -119,17 +120,25 @@ const editBlock = (index) => {
 };
 
 const addSection = () => {
+    console.log('[Canvas] Add Section clicked');
     const sectionDef = blockRegistry.get('section');
-    if (!sectionDef) return;
+    console.log('[Canvas] Section def:', sectionDef);
+    
+    if (!sectionDef) {
+        console.error('[Canvas] Section definition not found!');
+        return;
+    }
 
     const newBlock = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'section',
         settings: JSON.parse(JSON.stringify(sectionDef.defaultSettings))
     };
     
+    console.log('[Canvas] Adding new block:', newBlock);
     builder.blocks.value.push(newBlock);
     builder.takeSnapshot();
+    console.log('[Canvas] Block added. Helper blocks:', builder.blocks.value);
 };
 
 // Compute theme overrides for the canvas
