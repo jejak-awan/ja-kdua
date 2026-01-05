@@ -29,7 +29,7 @@
                     
                     <div 
                         v-show="openIndex === index"
-                        class="p-6 pt-0 text-muted-foreground leading-relaxed animate-in slide-in-from-top-2 duration-300"
+                        class="p-6 pt-0 opacity-80 leading-relaxed animate-in slide-in-from-top-2 duration-300"
                     >
                         {{ faq.answer }}
                     </div>

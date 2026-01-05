@@ -25,7 +25,7 @@
                     </div>
                     <div class="flex-1 pt-0.5">
                         <h4 v-if="item.title" class="font-bold text-lg">{{ item.title }}</h4>
-                        <p v-if="item.description" class="text-muted-foreground mt-1">{{ item.description }}</p>
+                        <p v-if="item.description" class="opacity-80 mt-1">{{ item.description }}</p>
                     </div>
                 </li>
             </ul>

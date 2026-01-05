@@ -21,7 +21,7 @@
                         <h3 class="text-xl font-bold mb-2">{{ plan.name }}</h3>
                         <div class="flex items-baseline gap-1">
                             <span class="text-4xl font-extrabold">{{ plan.price }}</span>
-                            <span class="text-muted-foreground text-sm">/month</span>
+                            <span class="opacity-80 text-sm">/month</span>
                         </div>
                     </div>
 

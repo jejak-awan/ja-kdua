@@ -80,7 +80,7 @@ const containerClass = computed(() => {
         <div class="flex-1">
             <h3 class="text-2xl font-bold tracking-tight mb-1">{{ name }}</h3>
             <p class="text-primary font-medium mb-4">{{ position }}</p>
-            <p class="text-muted-foreground leading-relaxed mb-6 max-w-md">
+            <p class="opacity-80 leading-relaxed mb-6 max-w-md">
                 {{ bio }}
             </p>
 

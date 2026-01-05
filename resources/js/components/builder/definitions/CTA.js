@@ -76,6 +76,7 @@ export default {
         textColor: '#ffffff',
         radius: 'rounded-2xl',
         animation: '',
+        blocks: [], // Nested support
         visibility: { mobile: true, tablet: true, desktop: true }
     }
 };

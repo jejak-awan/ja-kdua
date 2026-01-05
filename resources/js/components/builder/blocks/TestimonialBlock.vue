@@ -26,8 +26,8 @@
 
                 <!-- Text -->
                 <div :class="alignment === 'text-right' ? 'text-right' : 'text-left'">
-                    <h4 class="font-bold text-foreground">{{ author || 'Author Name' }}</h4>
-                    <p class="text-xs text-muted-foreground font-semibold">{{ job_title || 'Position' }}</p>
+                    <h4 class="font-bold">{{ author || 'Author Name' }}</h4>
+                    <p class="text-xs font-semibold opacity-80">{{ job_title || 'Position' }}</p>
                 </div>
             </div>
         </div>

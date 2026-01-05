@@ -12,7 +12,7 @@
                     class="p-8 rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1"
                 >
                     <h3 class="font-bold text-xl mb-3">{{ item.title }}</h3>
-                    <p class="text-muted-foreground leading-relaxed">{{ item.description }}</p>
+                    <p class="opacity-80 leading-relaxed">{{ item.description }}</p>
                 </div>
             </div>
         </div>
