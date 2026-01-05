@@ -13,10 +13,10 @@
         </div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
-            <h1 v-if="title" class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-foreground drop-shadow-sm">
+            <h1 v-if="title" class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
                 {{ title }}
             </h1>
-            <p v-if="subtitle" class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed drop-shadow-sm">
+            <p v-if="subtitle" class="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed drop-shadow-sm opacity-80">
                 {{ subtitle }}
             </p>
         </div>

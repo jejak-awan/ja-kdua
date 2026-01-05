@@ -12,7 +12,7 @@
             </div>
             <p 
                 v-if="label" 
-                class="mt-4 text-lg text-muted-foreground font-medium"
+                class="mt-4 text-lg font-medium opacity-80"
             >
                 {{ label }}
             </p>

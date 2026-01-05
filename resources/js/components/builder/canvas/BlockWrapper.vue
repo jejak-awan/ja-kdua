@@ -1,7 +1,7 @@
 <template>
     <div 
-        class="group/block relative border-2 border-transparent hover:border-primary/50 transition-all cursor-pointer"
-        :class="{ 'border-primary ring-4 ring-primary/10 z-10': isSelected }"
+        class="group/block relative border-2 border-transparent hover:border-primary transition-all cursor-pointer"
+        :class="{ 'border-primary ring-4 ring-primary/20 z-10': isSelected }"
         @click.stop="onEdit"
         @contextmenu.prevent="onContextMenu"
     >
