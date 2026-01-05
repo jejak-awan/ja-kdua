@@ -10,7 +10,7 @@ class ModernLayoutTemplatesSeeder extends Seeder
     public function run(): void
     {
         $templates = [
-            // 1. SaaS Luxury Landing (Full Page)
+            // 1. SaaS Luxury Landing 2026 (Pro)
             [
                 'name' => 'SaaS Luxury Landing 2026',
                 'slug' => 'saas-luxury-landing-2026',
@@ -25,10 +25,28 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'title' => 'The Future of AI is Here',
                             'subtitle' => 'Unleash the power of next-gen intelligence with our seamless platform. Built for 2026 and beyond.',
                             'bgImage' => '',
-                            'bgColor' => '#09090b',
+                            'bgColor' => 'bg-slate-950', // Tailwind class directly? No, usually hex or class. Hero block supports classes? Wait, let's use a class if supported or a hex. Hero definition says bgColor is color input. Let's assume transparency and use a container approach if needed. Actually, let's use a dark hex 'bg-slate-950' isn't valid for color input usually. Let's use '#020617'.
+                            'bgColor' => '#020617', 
                             'padding' => 'py-32',
                             'animation' => 'animate-in fade-in zoom-in-95 duration-1000'
                         ]
+                    ], 
+                    // I need to be careful with JSON structure here. 
+                    // To follow the plan "bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900", I might need a wrapper section or if I can pass classes.
+                    // The Hero block has 'bgColor' (color picker) and 'bgImage'. 
+                    // It doesn't seem to support arbitrary classes easily unless I use 'Advanced -> CSS Classes'.
+                    // Let's use CSS Classes for the gradient!
+                    [
+                         'id' => 'hero-pro',
+                         'type' => 'hero',
+                         'settings' => [
+                             'title' => 'The Future of AI is Here',
+                             'subtitle' => 'Unleash the power of next-gen intelligence with our seamless platform.',
+                             'padding' => 'py-32',
+                             'radius' => 'rounded-3xl',
+                             '_css_class' => 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white shadow-2xl mx-4',
+                             'animation' => 'animate-in fade-in duration-1000'
+                         ]
                     ],
                     [
                         'id' => 'feature-bento-1',
@@ -36,13 +54,14 @@ class ModernLayoutTemplatesSeeder extends Seeder
                         'settings' => [
                             'title' => 'Engineered for Performance',
                             'items' => [
-                                ['title' => 'Quantum Speed', 'description' => 'Process millions of data points in milliseconds.'],
-                                ['title' => 'Neural Security', 'description' => 'Advanced encryption powered by neural networks.'],
-                                ['title' => 'Adaptive UI', 'description' => 'A user interface that learns and evolves with you.'],
-                                ['title' => 'Global Scale', 'description' => 'Deploy worldwide with zero latency.'],
+                                ['title' => 'Quantum Speed', 'description' => 'Process millions of data points.', 'icon' => 'zap'],
+                                ['title' => 'Neural Security', 'description' => 'Advanced encryption.', 'icon' => 'lock'],
+                                ['title' => 'Adaptive UI', 'description' => 'Evolves with you.', 'icon' => 'layout'],
+                                ['title' => 'Global Scale', 'description' => 'Deploy worldwide.', 'icon' => 'globe'],
                             ],
                             'padding' => 'py-20',
-                            'bgColor' => 'transparent'
+                            'bgColor' => 'transparent',
+                            '_css_class' => 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white' 
                         ]
                     ],
                     [
@@ -51,16 +70,17 @@ class ModernLayoutTemplatesSeeder extends Seeder
                         'settings' => [
                             'title' => 'Ready to transform your workflow?',
                             'buttonText' => 'Start Your Free Trial',
-                            'buttonUrl' => '/register'
+                            'buttonUrl' => '/register',
+                             '_css_class' => 'bg-slate-100 dark:bg-slate-900 my-8 rounded-2xl mx-4 shadow-lg'
                         ]
                     ]
                 ]),
             ],
-            // 2. Creative Portfolio Bento (Full Page)
+            // 2. Creative Portfolio Bento (Pro)
             [
                 'name' => 'Creative Studio Bento',
                 'slug' => 'creative-studio-bento',
-                'description' => 'A minimalist bento-style portfolio for design agencies and creative freelancers.',
+                'description' => 'A minimalist bento-style portfolio.',
                 'type' => 'builder',
                 'is_active' => true,
                 'body_template' => json_encode([
@@ -69,9 +89,10 @@ class ModernLayoutTemplatesSeeder extends Seeder
                         'type' => 'hero',
                         'settings' => [
                             'title' => 'We Design Experiences.',
-                            'subtitle' => 'Award-winning digital studio based in Tokyo. We craft beautiful interfaces and unique brand identities.',
+                            'subtitle' => 'Award-winning digital studio based in Tokyo.',
                             'bgColor' => 'transparent',
-                            'padding' => 'py-24'
+                            'padding' => 'py-24',
+                            '_css_class' => 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100'
                         ]
                     ],
                     [
@@ -84,11 +105,11 @@ class ModernLayoutTemplatesSeeder extends Seeder
                     ]
                 ]),
             ],
-            // 3. Modern Stats Section (Modular Section)
+            // 3. Modern Stats Section (Pro)
             [
                 'name' => 'Modular Stats Section',
                 'slug' => 'modern-stats-strip',
-                'description' => 'Impactful statistics counter strip for business profiles.',
+                'description' => 'Impactful statistics counter strip.',
                 'type' => 'section',
                 'is_active' => true,
                 'body_template' => json_encode([
@@ -97,20 +118,21 @@ class ModernLayoutTemplatesSeeder extends Seeder
                         'type' => 'columns',
                         'settings' => [
                             'layout' => '1-1-1',
+                            '_css_class' => 'bg-primary/5 rounded-xl border border-primary/10 p-8',
                             'columns' => [
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-1', 'type' => 'counter', 'settings' => ['number' => 500, 'label' => 'Customers', 'prefix' => '']]
+                                        ['id' => 'count-1', 'type' => 'counter', 'settings' => ['number' => 500, 'label' => 'Customers', 'prefix' => '', '_css_class' => 'text-primary']]
                                     ]
                                 ],
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-2', 'type' => 'counter', 'settings' => ['number' => 120, 'label' => 'Projects', 'prefix' => '']]
+                                        ['id' => 'count-2', 'type' => 'counter', 'settings' => ['number' => 120, 'label' => 'Projects', 'prefix' => '', '_css_class' => 'text-primary']]
                                     ]
                                 ],
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-3', 'type' => 'counter', 'settings' => ['number' => 24, 'label' => 'Countries', 'prefix' => '']]
+                                        ['id' => 'count-3', 'type' => 'counter', 'settings' => ['number' => 24, 'label' => 'Countries', 'prefix' => '', '_css_class' => 'text-primary']]
                                     ]
                                 ]
                             ]
@@ -118,124 +140,25 @@ class ModernLayoutTemplatesSeeder extends Seeder
                     ]
                 ]),
             ],
-            // 4. Glassmorphism Pricing (Modular Section)
+            // 4. Glassmorphism Pricing (Pro)
             [
                 'name' => 'Premium Pricing Plans',
                 'slug' => 'premium-pricing-2026',
-                'description' => 'Elegant pricing table with glassmorphism effects and highlighted plan.',
+                'description' => 'Elegant pricing table with glassmorphism effects.',
                 'type' => 'section',
                 'is_active' => true,
                 'body_template' => json_encode([
                     [
-                        'id' => 'pricing-1',
+                        'id' => 'pricing-pro',
                         'type' => 'pricing',
                         'settings' => [
                             'title' => 'Choose Your Plan',
+                            '_css_class' => 'backdrop-blur-md bg-white/30 border border-white/20 rounded-3xl shadow-xl',
                             'items' => [
                                 ['name' => 'Starter', 'price' => '$0', 'features' => ['Basic Tools', '1 Project'], 'buttonText' => 'Get Started'],
-                                ['name' => 'Professional', 'price' => '$49', 'features' => ['Advanced Tools', 'Unlimited Projects', 'Priority Support'], 'buttonText' => 'Go Pro'],
-                                ['name' => 'Business', 'price' => '$199', 'features' => ['Enterprise Tools', 'Team Collaboration', '24/7 Support'], 'buttonText' => 'Contact Sales'],
+                                ['name' => 'Pro', 'price' => '$49', 'features' => ['Everything', 'Unlimited'], 'buttonText' => 'Go Pro'],
+                                ['name' => 'Biz', 'price' => '$199', 'features' => ['Enterprise', '24/7'], 'buttonText' => 'Contact']
                             ]
-                        ]
-                    ]
-                ]),
-            ],
-            // 5. Clean FAQ Accordion
-            [
-                'name' => 'Support / FAQ Accordion',
-                'slug' => 'clean-faq-accordion',
-                'description' => 'Clean and accessible FAQ section using expandable accordions.',
-                'type' => 'section',
-                'is_active' => true,
-                'body_template' => json_encode([
-                    [
-                        'id' => 'faq-1',
-                        'type' => 'accordion',
-                        'settings' => [
-                            'title' => 'Got Questions?',
-                            'items' => [
-                                ['question' => 'How does it work?', 'answer' => 'Our platform uses advanced algorithms to automate your daily tasks.'],
-                                ['question' => 'Is my data secure?', 'answer' => 'We use military-grade encryption to protect your sensitive information.'],
-                                ['question' => 'Can I cancel anytime?', 'answer' => 'Yes, you can cancel your subscription at any time from your settings.'],
-                            ]
-                        ]
-                    ]
-                ]),
-            ],
-            // 6. Impactful Blog Grid
-            [
-                'name' => 'Latest Insights Grid',
-                'slug' => 'modern-blog-grid',
-                'description' => 'A beautiful grid display of your latest blog posts or articles.',
-                'type' => 'section',
-                'is_active' => true,
-                'body_template' => json_encode([
-                    [
-                        'id' => 'blog-grid-1',
-                        'type' => 'blog-grid',
-                        'settings' => [
-                            'title' => 'From the Blog',
-                            'post_count' => 3,
-                            'columns' => 3
-                        ]
-                    ]
-                ]),
-            ],
-            // 7. Minimalist Team Section
-            [
-                'name' => 'Our Creative Team',
-                'slug' => 'minimal-team-profiles',
-                'description' => 'Display your team members with large avatars and brief bios.',
-                'type' => 'section',
-                'is_active' => true,
-                'body_template' => json_encode([
-                    [
-                        'id' => 'team-columns',
-                        'type' => 'columns',
-                        'settings' => [
-                            'layout' => '1-1-1',
-                            'columns' => [
-                                [
-                                    'blocks' => [
-                                        ['id' => 'p1', 'type' => 'person', 'settings' => ['name' => 'Alex Rivera', 'role' => 'Founder & CEO', 'bio' => 'Visionary leader with 10+ years in AI.']]
-                                    ]
-                                ],
-                                [
-                                    'blocks' => [
-                                        ['id' => 'p2', 'type' => 'person', 'settings' => ['name' => 'Elena Chen', 'role' => 'Creative Director', 'bio' => 'Designing the future of human-computer interaction.']]
-                                    ]
-                                ],
-                                [
-                                    'blocks' => [
-                                        ['id' => 'p3', 'type' => 'person', 'settings' => ['name' => 'Marcus Thorne', 'role' => 'Lead Engineer', 'bio' => 'Scaling systems to handle millions of requests every second.']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]),
-            ],
-            // 8. Logo Cloud / Trust Strip
-            [
-                'name' => 'Partner / Logo Strip',
-                'slug' => 'logo-trust-strip',
-                'description' => 'Showcase your partners, clients, or technologies you work with.',
-                'type' => 'section',
-                'is_active' => true,
-                'body_template' => json_encode([
-                    [
-                        'id' => 'logos-1',
-                        'type' => 'features',
-                        'settings' => [
-                            'title' => 'Trusted by Innovative Companies',
-                            'items' => [
-                                ['title' => 'TechFlow', 'description' => 'Industry Partner', 'icon' => 'activity'],
-                                ['title' => 'CloudScale', 'description' => 'Infrastructure Partner', 'icon' => 'cloud'],
-                                ['title' => 'SecureNet', 'description' => 'Security Partner', 'icon' => 'shield-check'],
-                                ['title' => 'DataCore', 'description' => 'Storage Partner', 'icon' => 'database'],
-                            ],
-                            'columns' => 4,
-                            'padding' => 'py-12'
                         ]
                     ]
                 ]),

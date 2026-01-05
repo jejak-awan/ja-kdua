@@ -135,7 +135,7 @@
                     </div>
 
                     <!-- Accordion Settings -->
-                    <Accordion type="single" collapsible class="w-full" default-value="content">
+                    <Accordion type="multiple" collapsible class="w-full" :default-value="['content', 'style']">
                         <AccordionItem value="content" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
                                 {{ t('features.builder.properties.tabs.content') }}
@@ -155,7 +155,7 @@
 
                         <AccordionItem value="style" class="border-sidebar-border">
                             <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                {{ t('features.builder.properties.tabs.style') }}
+                                Block Styles
                             </AccordionTrigger>
                             <AccordionContent class="space-y-4 pt-4 pb-2">
                                 <template v-for="field in getBlockDefinition(selectedBlock.type).settings" :key="field.key">
