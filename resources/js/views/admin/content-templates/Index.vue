@@ -271,7 +271,12 @@ const fetchTemplates = async (page = 1) => {
 
         const response = await api.get('/admin/cms/content-templates', { params });
         const { data, pagination: pag } = parseResponse(response);
-        templates.value = ensureArray(data);
+        
+        // Filter out builder types as requested by user
+        // Classic editor should only see page, post, custom
+        const classicTypes = ['page', 'post', 'custom'];
+        templates.value = ensureArray(data).filter(t => classicTypes.includes(t.type));
+        
         pagination.value = pag;
         selectedTemplates.value = []; // Reset selection on page change
     } catch (error) {

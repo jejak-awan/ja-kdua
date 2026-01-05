@@ -28,7 +28,7 @@
                                 </Label>
                                 <Input
                                     id="title"
-                                    v-model="form.title"
+                                    v-model="form.title_template"
                                     :placeholder="t('features.content_templates.form.titlePlaceholder')"
                                 />
                             </div>
@@ -38,8 +38,8 @@
                                     {{ t('features.content_templates.form.body') }}
                                 </Label>
                                 <TiptapEditor
-                                    :model-value="form.body"
-                                    @update:model-value="(val) => form.body = val"
+                                    :model-value="form.body_template"
+                                    @update:model-value="(val) => form.body_template = val"
                                     :placeholder="t('features.content_templates.form.bodyPlaceholder')"
                                 />
                             </div>
@@ -50,7 +50,7 @@
                                 </Label>
                                 <Textarea
                                     id="excerpt"
-                                    v-model="form.excerpt"
+                                    v-model="form.excerpt_template"
                                     rows="3"
                                     :placeholder="t('features.content_templates.form.excerptPlaceholder')"
                                 />
@@ -175,9 +175,9 @@ const form = ref({
     name: '',
     description: '',
     type: 'post',
-    title: '',
-    body: '',
-    excerpt: '',
+    title_template: '',
+    body_template: '',
+    excerpt_template: '',
 });
 
 const isDirty = computed(() => {
@@ -195,9 +195,9 @@ const fetchTemplate = async () => {
             name: template.name || '',
             description: template.description || '',
             type: template.type || 'post',
-            title: template.title || '',
-            body: template.body || '',
-            excerpt: template.excerpt || '',
+            title_template: template.title_template || '',
+            body_template: template.body_template || '',
+            excerpt_template: template.excerpt_template || '',
         };
         
         // Save initial state for dirty checking
