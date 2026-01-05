@@ -3,16 +3,16 @@ import api from './api';
 
 export default {
     getTemplates(params) {
-        return api.get('/content-templates', { params });
+        return api.get('/admin/cms/content-templates', { params });
     },
     saveTemplate(data) {
         // data: { name, body_template (json string), type: 'builder'/'section', ... }
-        return api.post('/content-templates', data);
+        return api.post('/admin/cms/content-templates', data);
     },
     deleteTemplate(id) {
-        return api.delete(`/content-templates/${id}`);
+        return api.delete(`/admin/cms/content-templates/${id}`);
     },
     getTemplate(id) {
-        return api.get(`/content-templates/${id}`);
+        return api.get(`/admin/cms/content-templates/${id}`);
     }
 }
