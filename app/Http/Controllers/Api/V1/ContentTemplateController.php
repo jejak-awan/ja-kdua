@@ -21,7 +21,12 @@ class ContentTemplateController extends BaseApiController
         }
 
         if ($request->has('type') && $request->type !== 'all') {
-            $query->where('type', $request->type);
+            $types = explode(',', $request->type);
+            if (count($types) > 1) {
+                $query->whereIn('type', $types);
+            } else {
+                $query->where('type', $request->type);
+            }
         }
 
         if ($request->has('search')) {

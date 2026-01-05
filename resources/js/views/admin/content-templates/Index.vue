@@ -264,7 +264,8 @@ const fetchTemplates = async (page = 1) => {
         const params = {
             page,
             per_page: perPage.value,
-            type: typeFilter.value !== 'all' ? typeFilter.value : undefined,
+            // If 'all', send specific classic types to filter on server
+            type: typeFilter.value !== 'all' ? typeFilter.value : 'post,page,custom',
             search: search.value,
             trashed: trashedFilter.value !== 'without' ? trashedFilter.value : undefined
         };
@@ -272,11 +273,7 @@ const fetchTemplates = async (page = 1) => {
         const response = await api.get('/admin/cms/content-templates', { params });
         const { data, pagination: pag } = parseResponse(response);
         
-        // Filter out builder types as requested by user
-        // Classic editor should only see page, post, custom
-        const classicTypes = ['page', 'post', 'custom'];
-        templates.value = ensureArray(data).filter(t => classicTypes.includes(t.type));
-        
+        templates.value = ensureArray(data);
         pagination.value = pag;
         selectedTemplates.value = []; // Reset selection on page change
     } catch (error) {
