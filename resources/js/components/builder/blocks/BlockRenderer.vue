@@ -105,8 +105,8 @@ const resolveBlockSettings = (block) => {
     // 1. Resolve Responsive Objects and filterProps
     for (const key in settings) {
         // Strict key validation: only allow alphanumeric, underscore, hyphen
-        // This prevents "DOMException: String contains an invalid character" in setAttribute
-        if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
+        // MUST start with a letter to avoid DOMException with setAttribute ('1foo', etc)
+        if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(key)) continue;
 
         // Skip internal settings (prefixed with _)
         if (key.startsWith('_')) continue;

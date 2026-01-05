@@ -102,6 +102,10 @@ import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
 
+defineOptions({
+  inheritAttrs: false
+});
+
 const props = defineProps({
     // Props from BlockRenderer (flat)
     id: String,
