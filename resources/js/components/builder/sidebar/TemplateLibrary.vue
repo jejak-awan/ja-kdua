@@ -234,16 +234,17 @@
   
   const insertTemplate = (tpl) => {
       try {
-          const blocks = JSON.parse(tpl.body_template);
+          // Handle body_template as either string or object
+          let blocks;
+          if (typeof tpl.body_template === 'string') {
+              blocks = JSON.parse(tpl.body_template);
+          } else {
+              blocks = tpl.body_template;
+          }
+          
           if (!Array.isArray(blocks)) throw new Error("Invalid template format");
           
-          // Strategy: Append? Replace?
-          // Let's ask via simple confirm or just Append by default. 
-          // Usually Append is safer.
-          // Or if canvas is empty, Replace.
-          
-          // Assign new IDs to avoid conflicts?
-          // YES. Crucial step. Deep clone and regen IDs.
+          // Assign new IDs to avoid conflicts
           const newBlocks = blocks.map(regenerateBlockIds);
           
           builder.blocks.value.push(...newBlocks);
