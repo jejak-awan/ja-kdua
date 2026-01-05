@@ -17,7 +17,7 @@
                                 v-if="isBuilder && !isPreview"
                                 v-model="column.blocks" 
                                 item-key="id"
-                                group="blocks"
+                                :group="{ name: 'blocks', pull: true, put: true }"
                                 handle=".drag-handle"
                                 class="min-h-[100px] h-full border-2 border-dashed border-transparent hover:border-sidebar-border/50 rounded-xl transition-colors p-2"
                                 ghost-class="block-ghost"

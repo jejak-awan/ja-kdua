@@ -421,15 +421,21 @@ const { showBackToTop, handleScroll, scrollToTop } = useScrollToTop(scrollContai
 
 const selectedBlock = computed(() => {
     if (builder.activeBlockId.value) {
-        // Recursive find helper
+        // Recursive find helper - searches in Columns and Section nested blocks
         const findBlock = (blocks, id) => {
             for (const block of blocks) {
                 if (block.id === id) return block;
+                // Search in Columns (column.blocks)
                 if (block.settings && Array.isArray(block.settings.columns)) {
                     for (const column of block.settings.columns) {
-                         const found = findBlock(column.blocks, id);
+                         const found = findBlock(column.blocks || [], id);
                          if (found) return found;
                     }
+                }
+                // Search in Section nested blocks (settings.blocks)
+                if (block.settings && Array.isArray(block.settings.blocks)) {
+                    const found = findBlock(block.settings.blocks, id);
+                    if (found) return found;
                 }
             }
             return null;

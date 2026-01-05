@@ -265,6 +265,10 @@ export function useBuilder() {
                         if (column && Array.isArray(column.blocks) && find(column.blocks, targetId, newPath)) return true;
                     }
                 }
+                // Handle Section nested blocks
+                if (block.settings && Array.isArray(block.settings.blocks)) {
+                    if (find(block.settings.blocks, targetId, newPath)) return true;
+                }
             }
             return false;
         };

@@ -39,7 +39,7 @@
                 v-if="isBuilder && !isPreview"
                 v-model="blocks" 
                 item-key="id"
-                :group="{ name: 'blocks', put: ['blocks'] }"
+                :group="{ name: 'blocks', pull: true, put: true }"
                 handle=".drag-handle"
                 class="space-y-4 min-h-[60px] border-2 border-dashed border-transparent hover:border-primary/30 rounded-xl transition-colors flex flex-col flex-1"
                 :class="blocks.length === 0 ? 'bg-primary/5 border-primary/20' : ''"

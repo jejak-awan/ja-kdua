@@ -19,7 +19,7 @@
                     <draggable 
                         v-model="builder.blocks.value" 
                         item-key="id"
-                        group="blocks"
+                        :group="{ name: 'blocks', pull: true, put: true }"
                         handle=".drag-handle"
                         class="space-y-0 min-h-[600px] w-full pb-20 flex-1"
                         ghost-class="block-ghost"
@@ -55,9 +55,9 @@
                 </div>
                 
                 <!-- Add Section at Bottom -->
-                <div v-else class="py-12 flex justify-center opacity-0 hover:opacity-100 transition-opacity">
-                     <Button variant="outline" class="gap-2 border-dashed text-muted-foreground hover:text-primary hover:border-primary" @click="addSection">
-                        <Plus class="w-4 h-4" />
+                <div v-else class="py-8 flex justify-center">
+                     <Button variant="outline" size="lg" class="gap-2 border-dashed border-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/5 transition-all" @click="addSection">
+                        <Plus class="w-5 h-5" />
                         Add Section
                     </Button>
                 </div>
