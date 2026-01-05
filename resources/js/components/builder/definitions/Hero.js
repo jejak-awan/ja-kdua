@@ -76,6 +76,7 @@ export default {
         padding: 'py-32',
         radius: 'rounded-none',
         animation: 'animate-in fade-in duration-700',
+        blocks: [], // Nested blocks support
         visibility: { mobile: true, tablet: true, desktop: true }
     }
 };
