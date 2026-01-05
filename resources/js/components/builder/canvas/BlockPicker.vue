@@ -60,7 +60,7 @@
                                     <Columns3 class="w-5 h-5 text-primary" />
                                 </div>
                                 <div class="text-left">
-                                    <span class="text-sm font-medium block">Row</span>
+                                    <span class="text-sm font-medium block">Columns</span>
                                     <span class="text-[10px] text-muted-foreground">Multi-column layout</span>
                                 </div>
                             </button>

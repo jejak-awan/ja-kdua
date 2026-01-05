@@ -236,7 +236,7 @@ const categoryDefinitions = [
         name: 'structure',
         label: 'Structure',
         icon: LayoutPanelTop,
-        blocks: ['section']
+        blocks: ['section', 'columns']
     },
     {
         name: 'basic',
@@ -260,7 +260,7 @@ const categoryDefinitions = [
         name: 'layout',
         label: 'Layout',
         icon: Columns3,
-        blocks: ['columns', 'accordion', 'tabs', 'toggle', 'menu', 'sidebar']
+        blocks: ['accordion', 'tabs', 'toggle', 'menu', 'sidebar']
     },
     {
         name: 'interactive',
