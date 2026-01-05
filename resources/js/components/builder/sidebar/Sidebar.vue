@@ -195,7 +195,7 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, reactive, onMounted, onUnmounted } from 'vue';
+import { inject, ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import BackToTop from '@/components/ui/back-to-top.vue';

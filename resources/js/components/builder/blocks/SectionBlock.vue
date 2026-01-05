@@ -124,29 +124,9 @@ const props = defineProps({
 const builder = inject('builder', null);
 const isBuilder = computed(() => !!builder);
 
-// Find the actual block object from builder state using ID
 const blockObject = computed(() => {
     if (!builder || !props.id) return null;
-    
-    const findBlock = (blocks, id) => {
-        for (const block of blocks) {
-            if (block.id === id) return block;
-            // Search in nested
-            if (block.settings?.columns) {
-                for (const col of block.settings.columns) {
-                    const found = findBlock(col.blocks || [], id);
-                    if (found) return found;
-                }
-            }
-            if (block.settings?.blocks) {
-                const found = findBlock(block.settings.blocks, id);
-                if (found) return found;
-            }
-        }
-        return null;
-    };
-    
-    return findBlock(builder.blocks.value, props.id);
+    return builder.findBlockById(props.id);
 });
 
 // Nested blocks - use blockObject for reactive updates
@@ -157,7 +137,7 @@ const nestedBlocks = computed({
             return blockObject.value.settings?.blocks || [];
         }
         // Fallback to props for preview mode
-        return props.blocks || props.settings?.blocks || [];
+        return (props.blocks || props.settings?.blocks || []) || [];
     },
     set: (val) => {
         if (blockObject.value) {

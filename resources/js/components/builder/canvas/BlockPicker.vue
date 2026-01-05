@@ -2,20 +2,25 @@
     <Teleport to="body">
         <div 
             v-if="visible"
-            class="fixed inset-0 z-[10000] flex items-center justify-center"
-            @click.self="close"
+            ref="pickerRef"
+            class="fixed z-[10000] animate-in zoom-in-95 duration-200"
+            :style="pickerStyle"
         >
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" @click="close"></div>
-            
             <!-- Modal -->
-            <div class="relative bg-popover border border-border rounded-xl shadow-2xl w-full max-w-lg max-h-[70vh] overflow-hidden animate-in zoom-in-95 duration-200">
-                <!-- Header -->
-                <div class="flex items-center justify-between p-4 border-b border-border">
-                    <h3 class="font-bold text-sm">Add Block</h3>
+            <div class="bg-popover border border-border rounded-xl shadow-2xl w-full max-w-lg max-h-[70vh] overflow-hidden flex flex-col">
+                <!-- Header (Drag Handle) -->
+                <div 
+                    class="flex items-center justify-between p-4 border-b border-border cursor-move select-none"
+                    @mousedown="startDrag"
+                >
                     <div class="flex items-center gap-2">
+                        <h3 class="font-bold text-sm">Add Block</h3>
+                        <div class="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Draggable</div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2" @mousedown.stop>
                         <div class="relative flex-1">
-                            <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <SearchIcon class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input 
                                 v-model="searchQuery" 
                                 placeholder="Search blocks..." 
@@ -86,8 +91,8 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, nextTick, watch } from 'vue';
-import { Search, X, LayoutPanelTop, Columns3 } from 'lucide-vue-next';
+import { ref, computed, inject, nextTick, watch, onMounted, onUnmounted } from 'vue';
+import { Search as SearchIcon, X, LayoutPanelTop, Columns3 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
 import { blockRegistry } from '../BlockRegistry';
@@ -104,16 +109,70 @@ const emit = defineEmits(['close', 'add']);
 const builder = inject('builder');
 const searchQuery = ref('');
 const searchInput = ref(null);
+const pickerRef = ref(null);
+
+// Positioning State
+const position = ref({ x: 0, y: 0 });
+const isDragging = ref(false);
+const dragOffset = { x: 0, y: 0 };
+
+const pickerStyle = computed(() => ({
+    left: `${position.value.x}px`,
+    top: `${position.value.y}px`
+}));
+
+// Initialize centered position
+const centerPicker = () => {
+    const width = 512; // max-w-lg
+    const height = 400; // estimated
+    position.value = {
+        x: (window.innerWidth - width) / 2,
+        y: Math.max(100, (window.innerHeight - height) / 2)
+    };
+};
+
+// Dragging Logic
+const startDrag = (e) => {
+    isDragging.value = true;
+    dragOffset.x = e.clientX - position.value.x;
+    dragOffset.y = e.clientY - position.value.y;
+    
+    window.addEventListener('mousemove', handleDrag);
+    window.addEventListener('mouseup', stopDrag);
+};
+
+const handleDrag = (e) => {
+    if (!isDragging.value) return;
+    position.value = {
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+    };
+};
+
+const stopDrag = () => {
+    isDragging.value = false;
+    window.removeEventListener('mousemove', handleDrag);
+    window.removeEventListener('mouseup', stopDrag);
+};
 
 // Focus search on open
 watch(() => props.visible, (val) => {
     if (val) {
+        centerPicker();
         nextTick(() => {
-            // Safe Focus Fix
             const inputEl = searchInput.value?.$el || searchInput.value;
             inputEl?.focus?.();
         });
     }
+});
+
+onMounted(() => {
+    if (props.visible) centerPicker();
+});
+
+onUnmounted(() => {
+    window.removeEventListener('mousemove', handleDrag);
+    window.removeEventListener('mouseup', stopDrag);
 });
 
 const allBlocks = computed(() => {

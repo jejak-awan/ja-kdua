@@ -264,7 +264,7 @@ export function useBuilder() {
     };
 
     const findBlockById = (id, items = blocks.value) => {
-        if (!id) return null;
+        if (!id || !Array.isArray(items)) return null;
         for (const block of items) {
             if (block.id === id) return block;
             // Search in Columns (column.blocks)
@@ -287,6 +287,7 @@ export function useBuilder() {
         if (!id) return [];
         const path = [];
         const find = (items, targetId, currentPath = []) => {
+            if (!Array.isArray(items)) return false;
             for (const block of items) {
                 const newPath = [...currentPath, {
                     id: block.id,
