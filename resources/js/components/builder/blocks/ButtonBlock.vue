@@ -72,7 +72,7 @@ const sizeClass = computed(() => ({
 const variantClass = computed(() => ({
     'primary': 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-xl',
     'secondary': 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-    'outline': 'border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground',
+    'outline': 'border-2 border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground',
     'ghost': 'text-primary hover:bg-primary/10'
 }[props.variant] || 'bg-primary text-primary-foreground hover:bg-primary/90'));
 

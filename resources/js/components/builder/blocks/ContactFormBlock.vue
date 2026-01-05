@@ -21,7 +21,7 @@
                                 
                                 <template v-if="field.type === 'textarea'">
                                     <textarea 
-                                        class="w-full min-h-[120px] rounded-xl border bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
+                                        class="w-full min-h-[120px] rounded-xl border bg-background text-foreground px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
                                         :placeholder="field.label"
                                         :required="field.required"
                                     ></textarea>
@@ -29,7 +29,7 @@
 
                                 <template v-else-if="field.type === 'select'">
                                     <select 
-                                        class="w-full h-12 rounded-xl border bg-background px-4 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all appearance-none"
+                                        class="w-full h-12 rounded-xl border bg-background text-foreground px-4 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all appearance-none"
                                         :required="field.required"
                                     >
                                         <option value="" disabled selected>Select an option</option>
@@ -49,7 +49,7 @@
                                 <template v-else>
                                     <input 
                                         :type="field.type || 'text'"
-                                        class="w-full h-12 rounded-xl border bg-background px-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
+                                        class="w-full h-12 rounded-xl border bg-background text-foreground px-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
                                         :placeholder="field.label"
                                         :required="field.required"
                                     />

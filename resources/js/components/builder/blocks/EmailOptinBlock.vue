@@ -59,7 +59,7 @@
                                     :placeholder="name_placeholder"
                                     :class="[
                                         'h-12 px-4 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary',
-                                        style === 'gradient' ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-background border-input'
+                                        style === 'gradient' ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-background text-foreground border-input placeholder:text-muted-foreground'
                                     ]"
                                 />
                                 <input 
@@ -68,7 +68,7 @@
                                     :placeholder="placeholder"
                                     :class="[
                                         'h-12 px-4 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary flex-1',
-                                        style === 'gradient' ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-background border-input'
+                                        style === 'gradient' ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-background text-foreground border-input placeholder:text-muted-foreground'
                                     ]"
                                     @focus="resetForm"
                                 />

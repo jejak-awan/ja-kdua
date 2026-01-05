@@ -44,7 +44,7 @@ const containerClasses = computed(() => {
 });
 
 const inputClasses = computed(() => {
-    return ['w-full h-11 pl-10 pr-4 text-sm ring-offset-background border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2', props.style, props.radius].filter(Boolean);
+    return ['w-full h-11 pl-10 pr-4 text-sm text-foreground ring-offset-background border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2', props.style, props.radius].filter(Boolean);
 });
 
 const buttonClasses = computed(() => {

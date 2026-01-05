@@ -111,7 +111,7 @@ const containerClasses = computed(() => {
                 <article 
                     v-for="post in posts" 
                     :key="post.id"
-                    class="group bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                    class="group bg-card text-card-foreground border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
                 >
                     <!-- Featured Image -->
                     <div v-if="showImage" class="aspect-video overflow-hidden bg-muted relative">
@@ -152,13 +152,13 @@ const containerClasses = computed(() => {
                             </h3>
                         </router-link>
                         
-                        <p v-if="showExcerpt" class="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
+                        <p v-if="showExcerpt" class="text-sm opacity-80 line-clamp-3 mb-4 flex-1">
                             {{ post.excerpt }}
                         </p>
                         
                         <!-- Meta -->
                         <div class="flex items-center justify-between mt-auto">
-                            <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                            <div class="flex items-center gap-4 text-xs opacity-70">
                                 <span v-if="showAuthor && post.author" class="flex items-center gap-1.5">
                                     <User class="w-3.5 h-3.5" />
                                     {{ post.author.name || post.author }}
