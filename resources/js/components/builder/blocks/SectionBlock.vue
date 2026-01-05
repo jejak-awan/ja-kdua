@@ -1,8 +1,7 @@
 <template>
     <div class="relative group/section w-full transition-all duration-200" 
          :class="[
-             isSelected ? 'ring-2 ring-primary ring-offset-2 z-10' : 'hover:ring-1 hover:ring-primary/50',
-             getGlobalMarginClass(block)
+             isSelected ? 'ring-2 ring-primary ring-offset-2 z-10' : 'hover:ring-1 hover:ring-primary/50'
          ]"
          :style="sectionStyle"
          @click.stop="onSelect"
@@ -18,13 +17,13 @@
             <span class="text-[10px] font-bold px-2 text-muted-foreground uppercase tracking-wider">Section</span>
             <div class="w-px h-3 bg-border mx-1"></div>
             
-            <button class="p-1 hover:bg-accent rounded" title="Settings" @click.stop="">
+            <button class="p-1 hover:bg-accent rounded" title="Settings" @click.stop="onEdit">
                  <Settings2 class="w-3.5 h-3.5" />
             </button>
-            <button class="p-1 hover:bg-accent rounded" title="Duplicate" @click.stop="onDuplicate">
+            <button class="p-1 hover:bg-accent rounded" title="Duplicate" @click.stop="">
                 <Copy class="w-3.5 h-3.5" />
             </button>
-            <button class="p-1 hover:bg-destructive/10 hover:text-destructive rounded" title="Delete" @click.stop="onDelete">
+            <button class="p-1 hover:bg-destructive/10 hover:text-destructive rounded" title="Delete" @click.stop="">
                 <Trash2 class="w-3.5 h-3.5" />
             </button>
             <div class="w-px h-3 bg-border mx-1 drag-handle cursor-move"></div>
@@ -37,12 +36,12 @@
             <!-- Builder Mode: Draggable nested blocks -->
             <draggable 
                 v-if="isBuilder && !isPreview"
-                v-model="blocks" 
+                v-model="nestedBlocks" 
                 item-key="id"
                 :group="{ name: 'blocks', pull: true, put: true }"
                 handle=".drag-handle"
                 class="space-y-4 min-h-[60px] border-2 border-dashed border-transparent hover:border-primary/30 rounded-xl transition-colors flex flex-col flex-1"
-                :class="blocks.length === 0 ? 'bg-primary/5 border-primary/20' : ''"
+                :class="nestedBlocks.length === 0 ? 'bg-primary/5 border-primary/20' : ''"
                 ghost-class="block-ghost"
             >
                 <template #item="{ element: block, index }">
@@ -52,13 +51,13 @@
                         :context="context"
                         :isNested="true"
                         @edit="onEditBlock(block.id)"
-                        @duplicate="onDuplicate(index)"
-                        @delete="onDelete(index)"
+                        @duplicate="onDuplicateNested(index)"
+                        @delete="onDeleteNested(index)"
                     />
                 </template>
 
                 <template #footer>
-                     <div v-if="blocks.length === 0" class="flex-1 flex flex-col items-center justify-center p-6 text-center relative z-[20]">
+                     <div v-if="nestedBlocks.length === 0" class="flex-1 flex flex-col items-center justify-center p-6 text-center relative z-[20]">
                         <button 
                             @click.stop.prevent="showBlockPicker = true"
                             type="button"
@@ -79,10 +78,9 @@
             <!-- Live Mode: Render nested blocks -->
             <div v-else class="space-y-4">
                  <BlockRenderer 
-                    v-for="(block, index) in blocks" 
-                    :key="block.id" 
-                    :block="block" 
+                    :blocks="nestedBlocks" 
                     :context="context"
+                    :is-preview="isPreview"
                 />
             </div>
         </div>
@@ -101,54 +99,97 @@ import { computed, inject, ref } from 'vue';
 import draggable from 'vuedraggable';
 import { Settings2, Copy, Trash2, GripVertical, Plus } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
-import BlockRenderer from '../blocks/BlockRenderer.vue'; // Recursive renderer
+import BlockRenderer from '../blocks/BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
 
 const props = defineProps({
-    block: Object,
+    // Props from BlockRenderer (flat)
+    id: String,
+    settings: Object,
+    full_width: Boolean,
+    padding_top: String,
+    padding_bottom: String,
+    background_color: String,
+    background_image: String,
+    blocks: { type: Array, default: () => [] },
     context: Object,
-    isSelected: Boolean,
+    isPreview: { type: Boolean, default: false }
 });
 
-const builder = inject('builder');
+const builder = inject('builder', null);
 const isBuilder = computed(() => !!builder);
-const isPreview = computed(() => builder?.isPreview.value);
 
-// Nested blocks state (synced with block.settings.blocks)
-const blocks = computed({
-    get: () => props.block?.settings?.blocks || [],
+// Find the actual block object from builder state using ID
+const blockObject = computed(() => {
+    if (!builder || !props.id) return null;
+    
+    const findBlock = (blocks, id) => {
+        for (const block of blocks) {
+            if (block.id === id) return block;
+            // Search in nested
+            if (block.settings?.columns) {
+                for (const col of block.settings.columns) {
+                    const found = findBlock(col.blocks || [], id);
+                    if (found) return found;
+                }
+            }
+            if (block.settings?.blocks) {
+                const found = findBlock(block.settings.blocks, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+    
+    return findBlock(builder.blocks.value, props.id);
+});
+
+// Nested blocks - use blockObject for reactive updates
+const nestedBlocks = computed({
+    get: () => {
+        // In builder mode, get from blockObject for reactivity
+        if (blockObject.value) {
+            return blockObject.value.settings?.blocks || [];
+        }
+        // Fallback to props for preview mode
+        return props.blocks || props.settings?.blocks || [];
+    },
     set: (val) => {
-        if (!props.block) return;
-        // Update model logic
-        if (!props.block.settings) props.block.settings = {};
-        props.block.settings.blocks = val;
-        builder?.takeSnapshot();
+        if (blockObject.value) {
+            if (!blockObject.value.settings) blockObject.value.settings = {};
+            blockObject.value.settings.blocks = val;
+            builder?.takeSnapshot();
+        }
     }
 });
 
 const showBlockPicker = ref(false);
 
 const handleAddBlock = (newBlock) => {
-    if (!props.block) return;
-    // Add to nested blocks
-    if (!props.block.settings) props.block.settings = {};
-    if (!props.block.settings.blocks) props.block.settings.blocks = [];
-    props.block.settings.blocks.push(newBlock);
+    if (!blockObject.value) return;
+    if (!blockObject.value.settings) blockObject.value.settings = {};
+    if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
+    blockObject.value.settings.blocks.push(newBlock);
     builder?.takeSnapshot();
     showBlockPicker.value = false;
 };
 
-// ... Styles
+const isSelected = computed(() => {
+    if (!builder) return false;
+    return builder.activeBlockId?.value === props.id;
+});
+
+// Styles
 const sectionStyle = computed(() => {
-    const s = props.block?.settings || {};
     const style = {
-        paddingTop: s.padding_top || '4rem',
-        paddingBottom: s.padding_bottom || '4rem',
-        backgroundColor: s.background_color || 'transparent',
+        paddingTop: props.padding_top || props.settings?.padding_top || '4rem',
+        paddingBottom: props.padding_bottom || props.settings?.padding_bottom || '4rem',
+        backgroundColor: props.background_color || props.settings?.background_color || 'transparent',
     };
 
-    if (s.background_image) {
-        style.backgroundImage = `url(${s.background_image})`;
+    const bgImage = props.background_image || props.settings?.background_image;
+    if (bgImage) {
+        style.backgroundImage = `url(${bgImage})`;
         style.backgroundSize = 'cover';
         style.backgroundPosition = 'center';
     }
@@ -157,37 +198,44 @@ const sectionStyle = computed(() => {
 });
 
 const containerClass = computed(() => {
-    const s = props.block?.settings || {};
+    const fullWidth = props.full_width ?? props.settings?.full_width ?? false;
     return [
-        s.full_width ? 'w-full' : (builder?.getGlobalSetting?.('container_max_width') || 'max-w-7xl mx-auto px-4'),
+        fullWidth ? 'w-full' : (builder?.getGlobalSetting?.('container_max_width') || 'max-w-7xl mx-auto px-4'),
     ];
 });
 
-// Helper for margin
-const getGlobalMarginClass = (block) => {
-    // Basic wrapper, implementation detail
-    return 'mb-0'; 
-}
-
 const onSelect = () => {
-    if (builder) builder.editingIndex.value = props.block.id; // Or however selection works
-    // Actually builder.editingIndex is index based in root? 
-    // For nested, we might need ID based selection.
-    // Assuming BlockWrapper handles selection emit, but here we capture click.
-    // If builder.activeBlockId is used.
-    if(builder) builder.activeBlockId.value = props.block.id;
+    if (builder && props.id) {
+        builder.activeBlockId.value = props.id;
+    }
 };
 
-const onDelete = () => {
-    // Emit delete event to parent
-    // Needs BlockWrapper to handle this usually or emit up
+const onEdit = () => {
+    if (builder && props.id) {
+        builder.activeBlockId.value = props.id;
+        builder.activeRightSidebarTab.value = 'properties';
+        builder.isRightSidebarOpen.value = true;
+    }
 };
 
-const onDuplicate = () => {
-    // ...
+const onEditBlock = (id) => {
+    if (builder) builder.activeBlockId.value = id;
 };
 
-// Actions pass-through
-const onEditBlock = (id) => builder.activeBlockId.value = id;
+const onDuplicateNested = (index) => {
+    if (!blockObject.value?.settings?.blocks) return;
+    const original = blockObject.value.settings.blocks[index];
+    const clone = {
+        ...JSON.parse(JSON.stringify(original)),
+        id: crypto.randomUUID()
+    };
+    blockObject.value.settings.blocks.splice(index + 1, 0, clone);
+    builder?.takeSnapshot();
+};
 
+const onDeleteNested = (index) => {
+    if (!blockObject.value?.settings?.blocks) return;
+    blockObject.value.settings.blocks.splice(index, 1);
+    builder?.takeSnapshot();
+};
 </script>
