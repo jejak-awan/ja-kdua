@@ -170,9 +170,17 @@
 
           console.debug("Extracted templates count:", all.length);
           
+          // Only show templates that are compatible with the visual builder
+          // 'builder' and 'section' types have JSON block data
+          // 'page', 'post', 'custom' types have raw HTML (not compatible)
+          const builderCompatibleTypes = ['builder', 'section'];
+          const compatibleTemplates = all.filter(t => builderCompatibleTypes.includes(t.type));
+          
+          console.debug("Compatible templates count:", compatibleTemplates.length);
+          
           // Separate premade and saved
-          premadeTemplates.value = all.filter(t => !t.author_id);
-          savedTemplates.value = all.filter(t => t.author_id);
+          premadeTemplates.value = compatibleTemplates.filter(t => !t.author_id);
+          savedTemplates.value = compatibleTemplates.filter(t => t.author_id);
           
       } catch (error) {
           console.error("Failed to load templates", error);
