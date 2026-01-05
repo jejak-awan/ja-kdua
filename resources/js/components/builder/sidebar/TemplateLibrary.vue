@@ -173,6 +173,8 @@
           // Separate premade and saved
           premadeTemplates.value = all.filter(t => !t.author_id);
           savedTemplates.value = all.filter(t => t.author_id);
+          
+      } catch (error) {
           console.error("Failed to load templates", error);
           toast.error("Failed to load templates");
       } finally {
