@@ -351,12 +351,7 @@ const routes = [
                 component: () => import('../views/admin/themes/ThemeBuilder.vue'),
                 meta: { permission: 'manage themes' },
             },
-            {
-                path: 'theme-templates/:id/:part/edit',
-                name: 'theme-template-editor',
-                component: () => import('../views/admin/themes/ThemeTemplateEditor.vue'),
-                meta: { permission: 'manage themes' },
-            },
+
             {
                 path: 'menus',
                 name: 'menus',
@@ -388,6 +383,14 @@ const routes = [
                 component: () => import('../views/admin/translations/Index.vue'),
             },
         ],
+    },
+
+    // Fullscreen Editor Routes (outside AdminLayout)
+    {
+        path: '/admin/theme-templates/:id/:part/edit',
+        name: 'theme-template-editor',
+        component: () => import('../views/admin/themes/ThemeTemplateEditor.vue'),
+        meta: { requiresAuth: true, permission: 'manage themes' },
     },
 
     // Error pages
