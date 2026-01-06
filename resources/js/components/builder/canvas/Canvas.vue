@@ -1,11 +1,11 @@
 <template>
-    <div class="flex-1 min-h-0 relative flex flex-col">
+    <div class="flex-1 min-h-0 relative flex flex-col bg-zinc-100 dark:bg-zinc-950">
         <div 
             ref="scrollContainer"
             @scroll="handleScroll"
             :class="[
                 'flex-1 overflow-y-auto flex flex-col items-center custom-scrollbar',
-                !builder.isPreview.value ? 'bg-zinc-100 dark:bg-zinc-950 bg-dot-pattern p-6 pb-20' : 'bg-background'
+                !builder.isPreview.value ? 'bg-zinc-100 dark:!bg-zinc-950 bg-dot-pattern p-6 pb-20' : 'bg-background'
             ]"
         >
 
@@ -13,8 +13,8 @@
             <div 
                 :class="[
                     canvasWidthClass, 
-                    'bg-background transition-all duration-300 ease-in-out relative w-full shrink-0 flex flex-col',
-                    !builder.isPreview.value ? 'shadow-2xl rounded-xl border border-border mt-2' : ''
+                    'transition-all duration-300 ease-in-out relative w-full shrink-0 flex flex-col',
+                    !builder.isPreview.value ? 'bg-card shadow-2xl rounded-xl border border-border mt-2' : 'bg-background'
                 ]"
                 :style="{ minHeight: '600px' }"
             >
@@ -82,7 +82,7 @@
             
             <!-- Global Undo/Redo/History (Coming Soon) -->
 
-            <div class="h-20 w-full shrink-0"></div>
+            <div class="h-20 w-full shrink-0 bg-transparent"></div>
         </div>
 
         <BackToTop 

@@ -1,5 +1,15 @@
+/**
+ * Enhanced Section Block Definition
+ * Root level layout block with comprehensive background and spacing controls
+ */
+
 import { LayoutPanelTop } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
+
+// Import Presets
+import { backgroundDefaults } from './presets/background';
+import { borderRadiusPresets, borderDefaults } from './presets/border';
+import { shadowOptions } from './presets/effects';
 
 export default {
     name: 'section',
@@ -7,7 +17,10 @@ export default {
     icon: LayoutPanelTop,
     category: 'structure',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/SectionBlock.vue')),
+
     settings: [
+        // ============ LAYOUT TAB ============
+        { type: 'header', label: 'Layout', tab: 'style' },
         {
             key: 'full_width',
             type: 'switch',
@@ -16,51 +29,202 @@ export default {
             tab: 'style'
         },
         {
-            key: 'padding_top',
-            type: 'toggle_group',
-            label: 'Top Padding',
-            options: [
-                { label: 'None', value: '0rem' },
-                { label: 'Sm', value: '2rem' },
-                { label: 'Md', value: '4rem' },
-                { label: 'Lg', value: '8rem' }
-            ],
-            default: '4rem',
+            key: 'minHeight',
+            type: 'slider',
+            label: 'Min Height',
+            min: 0,
+            max: 1200,
+            step: 50,
+            unit: 'px',
+            default: 100,
             tab: 'style'
         },
         {
-            key: 'padding_bottom',
+            key: 'verticalAlign',
             type: 'toggle_group',
-            label: 'Bottom Padding',
+            label: 'Vertical Align',
             options: [
-                { label: 'None', value: '0rem' },
-                { label: 'Sm', value: '2rem' },
-                { label: 'Md', value: '4rem' },
-                { label: 'Lg', value: '8rem' }
+                { label: 'Top', value: 'start' },
+                { label: 'Center', value: 'center' },
+                { label: 'Bottom', value: 'end' }
             ],
-            default: '4rem',
+            default: 'start',
+            tab: 'style'
+        },
+
+        { type: 'header', label: 'Spacing', tab: 'style' },
+        {
+            key: 'padding',
+            type: 'box_model',
+            mode: 'padding',
+            label: 'Padding',
+            default: { top: '64px', right: '0', bottom: '64px', left: '0' },
             tab: 'style'
         },
         {
-            key: 'background_color',
+            key: 'margin',
+            type: 'box_model',
+            mode: 'margin',
+            label: 'Margin',
+            default: { top: '0', right: '0', bottom: '0', left: '0' },
+            tab: 'style'
+        },
+
+        // ============ BACKGROUND & BORDER ============
+        // We'll reuse the backgroundDefaults but maybe simplified or expanded?
+        // Let's use the full set manually to ensure it maps correctly to what we want
+        { type: 'header', label: 'Background', tab: 'style' },
+        {
+            key: 'bgType',
+            type: 'toggle_group',
+            label: 'Type',
+            options: [
+                { label: 'Color', value: 'color' },
+                { label: 'Image', value: 'image' },
+                { label: 'Gradient', value: 'gradient' }
+            ],
+            default: 'color',
+            tab: 'style'
+        },
+        {
+            key: 'bgColor',
             type: 'color',
-            label: 'Background Color',
+            label: 'Color',
             default: 'transparent',
             tab: 'style'
         },
         {
-            key: 'background_image',
+            key: 'bgImage',
             type: 'image',
-            label: 'Background Image',
-            default: null,
+            label: 'Image',
+            default: '',
             tab: 'style'
+        },
+        {
+            key: 'bgSize',
+            type: 'select',
+            label: 'Size',
+            options: [
+                { label: 'Cover', value: 'cover' },
+                { label: 'Contain', value: 'contain' },
+                { label: 'Auto', value: 'auto' }
+            ],
+            default: 'cover',
+            tab: 'style'
+        },
+        {
+            key: 'bgPosition',
+            type: 'select',
+            label: 'Position',
+            options: [
+                { label: 'Center', value: 'center' },
+                { label: 'Top', value: 'top' },
+                { label: 'Bottom', value: 'bottom' }
+            ],
+            default: 'center',
+            tab: 'style'
+        },
+        // Gradient props
+        {
+            key: 'gradientStart',
+            type: 'color',
+            label: 'Gradient Start',
+            default: '#3b82f6',
+            tab: 'style'
+        },
+        {
+            key: 'gradientEnd',
+            type: 'color',
+            label: 'Gradient End',
+            default: '#8b5cf6',
+            tab: 'style'
+        },
+        {
+            key: 'gradientDirection',
+            type: 'select',
+            label: 'Direction',
+            options: [
+                { label: 'To Right', value: 'to right' },
+                { label: 'To Bottom', value: 'to bottom' },
+                { label: 'To Bottom Right', value: 'to bottom right' }
+            ],
+            default: 'to right',
+            tab: 'style'
+        },
+
+        { type: 'header', label: 'Border', tab: 'style' },
+        {
+            key: 'borderWidth',
+            type: 'slider',
+            label: 'Border Width',
+            min: 0,
+            max: 12,
+            step: 1,
+            unit: 'px',
+            default: 0,
+            tab: 'style'
+        },
+        {
+            key: 'borderColor',
+            type: 'color',
+            label: 'Border Color',
+            default: '#e5e7eb',
+            tab: 'style'
+        },
+        {
+            key: 'radius',
+            type: 'toggle_group',
+            label: 'Radius',
+            options: borderRadiusPresets,
+            default: 'rounded-none',
+            tab: 'style'
+        },
+
+        { type: 'header', label: 'Effects', tab: 'style' },
+        {
+            key: 'shadow',
+            type: 'select',
+            label: 'Shadow',
+            options: shadowOptions,
+            default: 'none',
+            tab: 'style'
+        },
+        {
+            key: 'overlayColor',
+            type: 'color',
+            label: 'Overlay',
+            default: 'transparent',
+            tab: 'style'
+        },
+
+        // ============ HIDDEN ============
+        {
+            key: 'blocks',
+            type: 'hidden',
+            default: []
         }
     ],
+
     defaultSettings: {
         full_width: false,
-        background_color: 'transparent',
-        padding_top: '4rem',
-        padding_bottom: '4rem',
-        blocks: [] // Nested blocks
+        minHeight: 100,
+        verticalAlign: 'start',
+        padding: { top: '64px', right: '0', bottom: '64px', left: '0' },
+        margin: { top: '0', right: '0', bottom: '0', left: '0' },
+
+        bgType: 'color',
+        bgColor: 'transparent',
+        bgImage: '',
+        bgSize: 'cover',
+        bgPosition: 'center',
+
+        borderWidth: 0,
+        borderColor: '#e5e7eb',
+        radius: 'rounded-none',
+        shadow: 'none',
+        overlayColor: 'transparent',
+
+        blocks: [],
+        visibility: { mobile: true, tablet: true, desktop: true }
     }
 };

@@ -9,7 +9,7 @@
         @contextmenu.prevent="!builder.isPreview.value && onContextMenu()"
     >
         <!-- Block Toolbar (Elementor/Divi Style) -->
-        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 group-hover/block:opacity-100 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left"
+        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left"
              :class="{ 'opacity-100': isSelected }">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
             <div class="w-px h-3 bg-zinc-200 mx-1"></div>
@@ -33,12 +33,22 @@
         </div>
 
         <!-- Live Rendering of Block -->
-        <div class="relative">
-            <BlockRenderer :blocks="[block]" :context="context" class="builder-render" />
-            <!-- Overlay to capture clicks (prevents clicking links inside blocks) -->
-            <!-- Uses pointer-events-none so drag-drop passes through to nested components -->
-            <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
-        </div>
+        <ResizableWrapper
+            :is-active="isSelected"
+            :is-preview="builder.isPreview.value"
+            :width="block.settings?.width"
+            :height="isStructuralBlock ? 'auto' : block.settings?.height"
+            @update:width="updateBlockSize('width', $event)"
+            @update:height="updateBlockSize('height', $event)"
+            @resize-end="onResizeEnd"
+        >
+            <div class="relative h-full">
+                <BlockRenderer :blocks="[block]" :context="context" class="builder-render h-full" />
+                <!-- Overlay to capture clicks (prevents clicking links inside blocks) -->
+                <!-- Uses pointer-events-none so drag-drop passes through to nested components -->
+                <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
+            </div>
+        </ResizableWrapper>
     </div>
 </template>
 
@@ -47,6 +57,7 @@ import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { GripVertical, Copy, Trash2, Settings2, Box, Columns } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
+import ResizableWrapper from './ResizableWrapper.vue';
 
 const props = defineProps({
     block: { type: Object, required: true },
@@ -112,4 +123,24 @@ const onContextMenu = (e) => {
         blockId: props.block.id
     };
 };
+
+const isStructuralBlock = computed(() => ['section', 'hero', 'container'].includes(props.block.type));
+
+const updateBlockSize = (dimension, value) => {
+    if (!props.block.settings) props.block.settings = {};
+    
+    // For structural blocks, resize maps to minHeight for vertical resizing
+    if (dimension === 'height' && isStructuralBlock.value) {
+        props.block.settings.minHeight = value;
+        // Ensure fixed height doesn't conflict
+        if (props.block.settings.height) delete props.block.settings.height;
+    } else {
+        props.block.settings[dimension] = value;
+    }
+};
+
+const onResizeEnd = () => {
+    if (builder) builder.takeSnapshot();
+};
+
 </script>

@@ -232,6 +232,19 @@
                     Add {{ field.itemLabel }}
                 </Button>
             </div>
+
+            <!-- Box Model (Padding/Margin) -->
+            <div v-if="field.type === 'box_model'">
+                <BoxModelEditor 
+                    v-model="proxyValue" 
+                    :mode="field.mode || 'padding'" 
+                />
+            </div>
+
+            <!-- Typography -->
+            <div v-if="field.type === 'typography'">
+                <TypographyEditor v-model="proxyValue" />
+            </div>
         </div>
     </div>
 </template>
@@ -246,6 +259,8 @@ import Button from '@/components/ui/button.vue';
 import Switch from '@/components/ui/switch.vue';
 import ColorPicker from '@/components/ui/color-picker.vue';
 import DynamicTrigger from './DynamicTrigger.vue';
+import BoxModelEditor from './BoxModelEditor.vue';
+import TypographyEditor from './TypographyEditor.vue';
 import { Image as ImageIcon, Smartphone, Tablet, Monitor, Trash2, Plus, Loader2 } from 'lucide-vue-next';
 import api from '@/services/api';
 import { parseResponse, ensureArray } from '@/utils/responseParser';

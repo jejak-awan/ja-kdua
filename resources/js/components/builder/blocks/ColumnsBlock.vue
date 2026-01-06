@@ -1,11 +1,12 @@
 <template>
     <section 
-        :class="['transition-all duration-500', padding, radius, animation, isResizing ? 'cursor-col-resize select-none' : '']"
+        :class="['transition-all duration-500 h-full', padding, radius, animation, isResizing ? 'cursor-col-resize select-none' : '']"
         :style="{ backgroundColor: bgColor || 'transparent' }"
+        v-bind="$attrs"
     >
-        <div :class="['mx-auto px-6', width]">
+        <div :class="['mx-auto px-6 h-full', width]">
             <div 
-                :class="['grid gap-8', layout !== 'custom' ? gridLayout : '']"
+                :class="['grid gap-8 h-full', layout !== 'custom' ? gridLayout : '']"
                 :style="layout === 'custom' ? { gridTemplateColumns: customGridTemplate } : {}"
                 ref="gridRef"
             >

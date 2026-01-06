@@ -1,5 +1,5 @@
 <template>
-    <div class="block-renderer w-full">
+    <div class="block-renderer w-full h-full">
         <template v-for="block in blocks" :key="block.id">
             <!-- Visibility Condition Check -->
             <template v-if="ConditionEvaluator.evaluate(block, context)">
@@ -12,7 +12,8 @@
                         resolveAdvancedStyles(block.hoverSettings, 'hover'),
                         resolveResponsiveValue(block.settings.animation_effect),
                         resolveResponsiveValue(block.settings._position),
-                        getColorClasses(block)
+                        getColorClasses(block),
+                        'h-full'
                     ].filter(Boolean)"
                     :id="block.settings._css_id ? String(resolveResponsiveValue(block.settings._css_id)).trim().replace(/\s/g, '-') : undefined"
                     :style="[
@@ -28,7 +29,7 @@
                         :context="context"
                         :is-preview="isPreview"
                         :id="block.id"
-                        class="block-item"
+                        class="block-item h-full"
                     />
                 </div>
                 <div v-else-if="block" class="p-4 border border-dashed rounded-lg bg-muted/20 text-xs text-muted-foreground text-center">

@@ -1,21 +1,36 @@
+/**
+ * Enhanced Container Block Definition
+ * Flexible container with Flexbox controls, box styling, and layout options
+ */
+
 import { Box, AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd, AlignHorizontalSpaceBetween, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
+
+// Import Presets
+import { backgroundDefaults } from './presets/background';
+import { borderRadiusPresets, borderDefaults } from './presets/border';
+import { shadowOptions } from './presets/effects';
 
 export default {
     name: 'container',
     label: 'Container',
     icon: Box,
     description: 'A flexible container for grouping and laying out other blocks.',
+    category: 'structure',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/ContainerBlock.vue')),
+
     settings: [
-        { type: 'header', label: 'Layout', tab: 'style' },
+        // ============ LAYOUT TAB ============
+        { type: 'header', label: 'Flex Layout', tab: 'style' },
         {
             key: 'direction',
             type: 'toggle_group',
             label: 'Direction',
             options: [
                 { label: 'Column', value: 'flex-col' },
-                { label: 'Row', value: 'flex-row' }
+                { label: 'Row', value: 'flex-row' },
+                { label: 'Col Reverse', value: 'flex-col-reverse' },
+                { label: 'Row Reverse', value: 'flex-row-reverse' }
             ],
             default: 'flex-col',
             tab: 'style'
@@ -28,7 +43,7 @@ export default {
                 { label: 'Start', value: 'justify-start', icon: AlignHorizontalJustifyStart },
                 { label: 'Center', value: 'justify-center', icon: AlignHorizontalJustifyCenter },
                 { label: 'End', value: 'justify-end', icon: AlignHorizontalJustifyEnd },
-                { label: 'Space Between', value: 'justify-between', icon: AlignHorizontalSpaceBetween }
+                { label: 'Between', value: 'justify-between', icon: AlignHorizontalSpaceBetween }
             ],
             default: 'justify-start',
             tab: 'style'
@@ -47,68 +62,164 @@ export default {
             tab: 'style'
         },
         {
-            key: 'gap',
+            key: 'wrap',
             type: 'toggle_group',
-            label: 'Gap',
+            label: 'Wrap',
             options: [
-                { label: 'None', value: 'gap-0' },
-                { label: 'Sm', value: 'gap-2' },
-                { label: 'Md', value: 'gap-4' },
-                { label: 'Lg', value: 'gap-8' }
+                { label: 'No Wrap', value: 'flex-nowrap' },
+                { label: 'Wrap', value: 'flex-wrap' },
+                { label: 'Wrap Reverse', value: 'flex-wrap-reverse' }
             ],
-            default: 'gap-4',
+            default: 'flex-nowrap',
             tab: 'style'
         },
+        {
+            key: 'gap',
+            type: 'select',
+            label: 'Gap',
+            options: [
+                { label: '0px', value: '0px' },
+                { label: '4px', value: '4px' },
+                { label: '8px', value: '8px' },
+                { label: '12px', value: '12px' },
+                { label: '16px', value: '16px' },
+                { label: '24px', value: '24px' },
+                { label: '32px', value: '32px' },
+                { label: '48px', value: '48px' },
+                { label: '64px', value: '64px' }
+            ],
+            default: '16px',
+            tab: 'style'
+        },
+
+        { type: 'header', label: 'Dimensions', tab: 'style' },
+        {
+            key: 'width',
+            type: 'text',
+            label: 'Width',
+            placeholder: '100%, 300px, auto',
+            default: '100%',
+            tab: 'style'
+        },
+        {
+            key: 'maxWidth',
+            type: 'text',
+            label: 'Max Width',
+            placeholder: 'none, 100%, 800px',
+            default: 'none',
+            tab: 'style'
+        },
+        {
+            key: 'minHeight',
+            type: 'text',
+            label: 'Min Height',
+            placeholder: '0, 100px, 50vh',
+            default: '0',
+            tab: 'style'
+        },
+
         { type: 'header', label: 'Spacing', tab: 'style' },
         {
             key: 'padding',
-            type: 'toggle_group',
+            type: 'box_model',
+            mode: 'padding',
             label: 'Padding',
-            options: [
-                { label: 'None', value: 'p-0' },
-                { label: 'Sm', value: 'p-4' },
-                { label: 'Md', value: 'p-8' },
-                { label: 'Lg', value: 'p-12' }
-            ],
-            default: 'p-4',
+            default: { top: '16px', right: '16px', bottom: '16px', left: '16px' },
             tab: 'style'
         },
-        { type: 'header', label: 'Background', tab: 'style' },
+        {
+            key: 'margin',
+            type: 'box_model',
+            mode: 'margin',
+            label: 'Margin',
+            default: { top: '0', right: '0', bottom: '0', left: '0' },
+            tab: 'style'
+        },
+
+        // ============ BACKGROUND & BORDER ============
+        { type: 'header', label: 'Style', tab: 'style' },
         {
             key: 'bgColor',
             type: 'color',
-            label: 'Background Color',
+            label: 'Background',
             default: 'transparent',
+            tab: 'style'
+        },
+        {
+            key: 'borderWidth',
+            type: 'slider',
+            label: 'Border Width',
+            min: 0,
+            max: 10,
+            step: 1,
+            unit: 'px',
+            default: 0,
+            tab: 'style'
+        },
+        {
+            key: 'borderColor',
+            type: 'color',
+            label: 'Border Color',
+            default: '#e5e7eb',
             tab: 'style'
         },
         {
             key: 'radius',
             type: 'toggle_group',
-            label: 'Corner Radius',
-            options: [
-                { label: 'None', value: 'rounded-none' },
-                { label: 'Sm', value: 'rounded-md' },
-                { label: 'Md', value: 'rounded-xl' },
-                { label: 'Lg', value: 'rounded-2xl' }
-            ],
+            label: 'Radius',
+            options: borderRadiusPresets,
             default: 'rounded-none',
             tab: 'style'
         },
-        // The blocks array will hold the nested blocks
+        {
+            key: 'shadow',
+            type: 'select',
+            label: 'Shadow',
+            options: shadowOptions,
+            default: 'none',
+            tab: 'style'
+        },
+
+        // Overflow
+        {
+            key: 'overflow',
+            type: 'select',
+            label: 'Overflow',
+            options: [
+                { label: 'Visible', value: 'visible' },
+                { label: 'Hidden', value: 'hidden' },
+                { label: 'Scroll', value: 'scroll' },
+                { label: 'Auto', value: 'auto' }
+            ],
+            default: 'visible',
+            tab: 'style'
+        },
+
+        // ============ HIDDEN ============
         {
             key: 'blocks',
             type: 'hidden',
             default: []
         }
     ],
+
     defaultSettings: {
         direction: 'flex-col',
         justify: 'justify-start',
         align: 'items-start',
-        gap: 'gap-4',
-        padding: 'p-4',
+        wrap: 'flex-nowrap',
+        gap: '16px',
+        width: '100%',
+        maxWidth: 'none',
+        minHeight: '0',
+        padding: { top: '16px', right: '16px', bottom: '16px', left: '16px' },
+        margin: { top: '0', right: '0', bottom: '0', left: '0' },
         bgColor: 'transparent',
+        borderWidth: 0,
+        borderColor: '#e5e7eb',
         radius: 'rounded-none',
+        shadow: 'none',
+        overflow: 'visible',
         blocks: [],
         visibility: { mobile: true, tablet: true, desktop: true }
     }
