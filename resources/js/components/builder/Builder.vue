@@ -10,7 +10,7 @@
     <div 
         :class="[
             'flex flex-col bg-background text-foreground group/builder',
-            !isFullscreen && 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-border rounded-xl overflow-hidden shadow-inner'
+            isFullscreen ? '' : (props.context?.builderMode ? 'relative h-full min-h-[500px] overflow-hidden' : 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-border rounded-xl overflow-hidden shadow-inner')
         ]"
         :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
     >
