@@ -30,7 +30,7 @@
         <div 
             ref="scrollContainer"
             @scroll="handleScroll"
-            class="flex-1 overflow-y-auto p-2 pb-16 custom-scrollbar bg-sidebar"
+            class="flex-1 overflow-y-auto p-2 pb-32 custom-scrollbar bg-sidebar"
         >
             <!-- Categorized Blocks (when sidebar is expanded) -->
             <template v-if="builder.isSidebarOpen.value">
@@ -178,7 +178,7 @@
         
         <BackToTop 
             :show="showBackToTop && builder.isSidebarOpen.value" 
-            positionClass="bottom-24 left-1/2 -translate-x-1/2"
+            positionClass="bottom-8 left-1/2 -translate-x-1/2"
             @click="scrollToTop" 
         />
     </div>
