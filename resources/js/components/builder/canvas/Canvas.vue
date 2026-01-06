@@ -3,19 +3,26 @@
         <div 
             ref="scrollContainer"
             @scroll="handleScroll"
-            class="flex-1 overflow-y-auto bg-muted/50 bg-dot-pattern p-6 pb-20 custom-scrollbar flex flex-col items-center"
+            :class="[
+                'flex-1 overflow-y-auto flex flex-col items-center custom-scrollbar',
+                !builder.isPreview.value ? 'bg-muted/50 bg-dot-pattern p-6 pb-20' : 'bg-background'
+            ]"
         >
 
             <!-- Draggable Canvas -->
             <div 
                 :class="[
                     canvasWidthClass, 
-                    'bg-background shadow-2xl transition-[width] duration-200 ease-in-out rounded-xl border border-border relative w-full shrink-0 flex flex-col'
+                    'bg-background transition-all duration-300 ease-in-out relative w-full shrink-0 flex flex-col',
+                    !builder.isPreview.value ? 'shadow-2xl rounded-xl border border-border mt-2' : ''
                 ]"
                 :style="{ minHeight: '600px' }"
             >
                 <!-- Theme Provider Wrapper: Remaps global variables to theme-specific ones -->
-                <div class="theme-provider contents" :style="themeStyles">
+                <div class="theme-provider flex flex-col min-h-full" :style="themeStyles">
+                    <!-- Theme Header (Only in Preview) -->
+                    <ThemePageResolver v-if="builder.isPreview.value" page="components/Header" class="shrink-0" />
+
                     <draggable 
                         v-model="builder.blocks.value" 
                         item-key="id"
@@ -23,7 +30,8 @@
                         handle=".drag-handle"
                         :class="[
                             builder.globalSettings.value.block_spacing,
-                            'min-h-[600px] w-full pb-20 flex-1'
+                            'w-full flex-1',
+                            !builder.isPreview.value ? 'min-h-[600px] pb-20' : ''
                         ]"
                         ghost-class="block-ghost"
                     >
@@ -39,11 +47,14 @@
                             />
                         </template>
                     </draggable>
+
+                    <!-- Theme Footer (Only in Preview) -->
+                    <ThemePageResolver v-if="builder.isPreview.value" page="components/Footer" class="shrink-0" />
                 </div>
                 
                 <!-- Empty Placeholder -->
                 <!-- Empty Placeholder / Add Section -->
-                <div v-if="builder.blocks.value.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 md:p-12 text-center z-50">
+                <div v-if="builder.blocks.value.length === 0 && !builder.isPreview.value" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 md:p-12 text-center z-50">
                     <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
                         <LayoutPanelTop class="w-10 h-10 opacity-20" />
                     </div>
@@ -58,7 +69,7 @@
                 </div>
                 
                 <!-- Add Section at Bottom -->
-                <div v-else class="py-8 flex justify-center">
+                <div v-else-if="!builder.isPreview.value" class="py-8 flex justify-center">
                      <Button variant="outline" size="lg" class="gap-2 border-dashed border-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/5 transition-all" @click="addSection">
                         <Plus class="w-5 h-5" />
                         Add Section
@@ -95,6 +106,7 @@ import { useScrollToTop } from '@/composables/useScrollToTop';
 import { ref } from 'vue';
 import { blockRegistry } from '../BlockRegistry';
 import { generateUUID } from '../utils';
+import ThemePageResolver from '@/components/ThemePageResolver.vue';
 
 const props = defineProps({
     context: {

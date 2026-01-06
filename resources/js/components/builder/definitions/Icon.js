@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-vue-next';
+import { Sparkles, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
@@ -65,66 +65,73 @@ export default {
                 { label: '✨ Sparkles', value: 'sparkles' },
                 { label: '🔥 Flame', value: 'flame' }
             ],
-            default: 'star'
+            default: 'star',
+            tab: 'content'
         },
         {
             key: 'size',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Size',
             options: [
-                { label: 'Small', value: 'small' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Large', value: 'large' },
-                { label: 'Extra Large', value: 'xlarge' }
+                { label: 'Sm', value: 'small' },
+                { label: 'Md', value: 'medium' },
+                { label: 'Lg', value: 'large' },
+                { label: 'XL', value: 'xlarge' }
             ],
-            default: 'medium'
+            default: 'medium',
+            tab: 'style'
         },
         {
             key: 'shape',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Background Shape',
             options: [
                 { label: 'None', value: 'none' },
                 { label: 'Circle', value: 'circle' },
-                { label: 'Rounded', value: 'rounded' },
+                { label: 'Round', value: 'rounded' },
                 { label: 'Square', value: 'square' }
             ],
-            default: 'none'
+            default: 'none',
+            tab: 'style'
         },
         {
             key: 'alignment',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Alignment',
             options: [
-                { label: 'Left', value: 'left' },
-                { label: 'Center', value: 'center' },
-                { label: 'Right', value: 'right' }
+                { label: 'Left', value: 'left', icon: AlignLeft },
+                { label: 'Center', value: 'center', icon: AlignCenter },
+                { label: 'Right', value: 'right', icon: AlignRight }
             ],
-            default: 'center'
+            default: 'center',
+            tab: 'style'
         },
         {
             key: 'iconColor',
             type: 'color',
             label: 'Icon Color',
-            default: ''
+            default: '',
+            tab: 'style'
         },
         {
             key: 'iconBgColor',
             type: 'color',
             label: 'Background Color',
-            default: ''
+            default: '',
+            tab: 'style'
         },
         {
             key: 'padding',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Section Padding',
             options: [
                 { label: 'None', value: 'py-0' },
-                { label: 'Small', value: 'py-4' },
-                { label: 'Medium', value: 'py-8' },
-                { label: 'Large', value: 'py-12' }
+                { label: 'Sm', value: 'py-4' },
+                { label: 'Md', value: 'py-8' },
+                { label: 'Lg', value: 'py-12' }
             ],
-            default: 'py-8'
+            default: 'py-8',
+            tab: 'style'
         }
     ],
     defaultSettings: {

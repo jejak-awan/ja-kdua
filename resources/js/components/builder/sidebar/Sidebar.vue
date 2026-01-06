@@ -104,16 +104,7 @@
         
         <!-- Sidebar Footer -->
         <div class="p-3 border-t border-sidebar-border bg-sidebar shrink-0 space-y-2">
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                class="w-full text-sidebar-foreground hover:bg-sidebar-accent h-9" 
-                :class="!builder.isSidebarOpen.value ? 'px-0 justify-center' : 'justify-start'"
-                @click="builder.showTemplateLibrary.value = true"
-            >
-                <LayoutTemplate class="w-4 h-4" :class="builder.isSidebarOpen.value ? 'mr-2' : ''" />
-                <span v-if="builder.isSidebarOpen.value" class="text-[10px] font-bold">{{ t('features.builder.sidebar.layoutLibrary') }}</span>
-            </Button>
+
             
             <!-- Keyboard Shortcuts Help -->
             <Button 
@@ -183,8 +174,7 @@
             </div>
         </div>
 
-        <!-- Template Library Modal -->
-        <TemplateLibrary />
+
         
         <BackToTop 
             :show="showBackToTop && builder.isSidebarOpen.value" 
@@ -200,10 +190,8 @@ import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
-import { useSidebar } from '@/composables/useSidebar';
 import { 
     Search as SearchIcon, 
-    LayoutTemplate, 
     PanelLeftClose,
     ChevronDown,
     Keyboard,
@@ -221,10 +209,8 @@ import {
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
 import Badge from '@/components/ui/badge.vue';
-import TemplateLibrary from './TemplateLibrary.vue';
 
 const builder = inject('builder');
-const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen, closeSidebar } = useSidebar();
 const { t } = useI18n();
 
 const scrollContainer = ref(null);
@@ -275,18 +261,6 @@ const categoryDefinitions = [
         label: 'Dynamic',
         icon: Database,
         blocks: ['blog-grid', 'post_nav', 'post_slider', 'post_title', 'post_content', 'portfolio', 'PostCarousel', 'TabbedPosts']
-    },
-    {
-        name: 'commerce',
-        label: 'Shop',
-        icon: ShoppingBag,
-        blocks: ['shop', 'woo_title', 'woo_price', 'woo_add_to_cart', 'woo_images', 'woo_tabs', 'Cart']
-    },
-    {
-        name: 'magazine',
-        label: 'Magazine',
-        icon: FileText,
-        blocks: ['PostCarousel', 'TabbedPosts']
     }
 ];
 

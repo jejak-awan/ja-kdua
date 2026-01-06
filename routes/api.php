@@ -7,8 +7,6 @@ Route::prefix('v1')->group(function () {
     // Public settings (no auth required - for frontend before login)
     Route::get('/public/settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']);
 
-    // Theme Resolver (Public)
-    Route::post('/theme-templates/resolve', [App\Http\Controllers\Api\V1\ThemeResolverController::class, 'resolve']);
     
     // Captcha endpoints (no auth required)
     Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
@@ -108,6 +106,7 @@ Route::prefix('v1')->group(function () {
 
         // Menus (public)
         Route::get('/menus/location/{location}', [App\Http\Controllers\Api\V1\MenuController::class, 'getByLocation']);
+        Route::get('/menus/{menu}', [App\Http\Controllers\Api\V1\MenuController::class, 'show']);
     });
 
     // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)
@@ -325,14 +324,13 @@ Route::prefix('v1')->group(function () {
         Route::post('themes/{theme}/partials/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderPartial'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/layouts/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderLayout'])->middleware('permission:manage themes');
 
-        // Theme Builder Templates
-        Route::apiResource('theme-templates', App\Http\Controllers\Api\V1\ThemeTemplateController::class)->middleware('permission:manage themes');
 
         // Menus
         Route::post('menus/bulk-action', [App\Http\Controllers\Api\V1\MenuController::class, 'bulkAction'])->middleware('permission:manage menus');
         Route::post('menus/{menu}/restore', [App\Http\Controllers\Api\V1\MenuController::class, 'restore'])->middleware('permission:manage menus');
         Route::delete('menus/{menu}/force-delete', [App\Http\Controllers\Api\V1\MenuController::class, 'forceDelete'])->middleware('permission:manage menus');
         Route::apiResource('menus', App\Http\Controllers\Api\V1\MenuController::class)->middleware('permission:manage menus');
+        Route::get('menus/{menu}/items', [App\Http\Controllers\Api\V1\MenuController::class, 'items'])->middleware('permission:manage menus');
         Route::post('menus/{menu}/items', [App\Http\Controllers\Api\V1\MenuController::class, 'addItem'])->middleware('permission:manage menus');
         Route::put('menus/{menu}/items/{menuItem}', [App\Http\Controllers\Api\V1\MenuController::class, 'updateItem'])->middleware('permission:manage menus');
         Route::delete('menus/{menu}/items/{menuItem}', [App\Http\Controllers\Api\V1\MenuController::class, 'deleteItem'])->middleware('permission:manage menus');
@@ -452,12 +450,7 @@ Route::prefix('v1')->group(function () {
         Route::post('notifications/broadcast', [App\Http\Controllers\Api\V1\NotificationController::class, 'broadcast']);
         Route::delete('notifications/{notification}', [App\Http\Controllers\Api\V1\NotificationController::class, 'destroy']);
 
-        // Content Templates
-        Route::post('content-templates/bulk-action', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'bulkAction'])->middleware('permission:manage content');
-        Route::post('content-templates/{contentTemplate}/restore', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'restore'])->middleware('permission:manage content');
-        Route::delete('content-templates/{contentTemplate}/force-delete', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'forceDelete'])->middleware('permission:manage content');
-        Route::apiResource('content-templates', App\Http\Controllers\Api\V1\ContentTemplateController::class)->middleware('permission:manage content');
-        Route::post('content-templates/{contentTemplate}/create-content', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'createContent'])->middleware('permission:create content');
+
 
         // Content Preview
         Route::get('contents/{content}/preview', [App\Http\Controllers\Api\V1\ContentController::class, 'preview'])->middleware('permission:edit content');

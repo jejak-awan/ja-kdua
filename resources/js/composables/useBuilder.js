@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { blockRegistry } from '../components/builder/BlockRegistry';
 import { useTheme } from './useTheme';
 import { generateUUID } from '../components/builder/utils';
@@ -34,7 +34,9 @@ export function useBuilder() {
 
         const currentState = JSON.stringify({
             blocks: blocks.value,
-            globalSettings: globalSettings.value
+            globalSettings: globalSettings.value,
+            editingIndex: editingIndex.value,
+            activeBlockId: activeBlockId.value
         });
 
         const lastState = history.value.length > 0 ? JSON.stringify(history.value[historyIndex.value]) : null;
@@ -49,8 +51,8 @@ export function useBuilder() {
         history.value.push(JSON.parse(currentState));
         historyIndex.value++;
 
-        // Limit history size (optional, e.g. 50 steps)
-        if (history.value.length > 50) {
+        // Limit history size
+        if (history.value.length > 100) {
             history.value.shift();
             historyIndex.value--;
         }
@@ -63,6 +65,8 @@ export function useBuilder() {
             const prevState = history.value[historyIndex.value];
             blocks.value = JSON.parse(JSON.stringify(prevState.blocks));
             globalSettings.value = JSON.parse(JSON.stringify(prevState.globalSettings));
+            editingIndex.value = prevState.editingIndex;
+            activeBlockId.value = prevState.activeBlockId;
             setTimeout(() => isUndoing.value = false, 0);
         }
     };
@@ -74,6 +78,8 @@ export function useBuilder() {
             const nextState = history.value[historyIndex.value];
             blocks.value = JSON.parse(JSON.stringify(nextState.blocks));
             globalSettings.value = JSON.parse(JSON.stringify(nextState.globalSettings));
+            editingIndex.value = nextState.editingIndex;
+            activeBlockId.value = nextState.activeBlockId;
             setTimeout(() => isUndoing.value = false, 0);
         }
     };
@@ -86,7 +92,6 @@ export function useBuilder() {
     const showLayersPanel = ref(false);
     const widgetSearch = ref('');
     const showMediaPicker = ref(false);
-    const showTemplateLibrary = ref(false);
     const isPreview = ref(false);
 
     // Context Menu State
@@ -315,6 +320,45 @@ export function useBuilder() {
         return path;
     };
 
+    const handleMediaSelect = (media) => {
+        if (!activeMediaField.value || !activeBlockId.value || !media?.url) return;
+
+        const block = findBlockById(activeBlockId.value);
+        if (!block) return;
+
+        const path = activeMediaField.value; // e.g., "bgImage" or "slides[0].image"
+
+        // Helper to set nested value by path
+        const setByPath = (obj, path, value) => {
+            const parts = path.split(/[.\[\]]+/).filter(Boolean);
+            let current = obj;
+            for (let i = 0; i < parts.length - 1; i++) {
+                const part = parts[i];
+                if (!(part in current)) {
+                    // Try to guess if next part is an array index
+                    const nextIsNum = !isNaN(parts[i + 1]);
+                    current[part] = nextIsNum ? [] : {};
+                }
+                current = current[part];
+            }
+            current[parts[parts.length - 1]] = value;
+        };
+
+        if (!block.settings) block.settings = {};
+        setByPath(block.settings, path, media.url);
+
+        // Re-assign blocks to trigger deep reactivity
+        blocks.value = [...blocks.value];
+
+        // Reset context and take snapshot after Vue update
+        activeMediaField.value = null;
+        showMediaPicker.value = false;
+
+        nextTick(() => {
+            takeSnapshot();
+        });
+    };
+
     return {
         // State
         blocks,
@@ -323,7 +367,6 @@ export function useBuilder() {
         activeTab,
         widgetSearch,
         showMediaPicker,
-        showTemplateLibrary,
         isPreview,
         isSidebarOpen,
         isRightSidebarOpen,
@@ -332,6 +375,7 @@ export function useBuilder() {
         activeMediaField,
         activeBlockId,
         clipboard,
+        handleMediaSelect,
 
         // Theme
         activeTheme,

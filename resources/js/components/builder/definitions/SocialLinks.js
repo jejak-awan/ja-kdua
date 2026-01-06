@@ -30,7 +30,8 @@ export default {
                 },
                 { key: 'url', type: 'text', label: 'URL' },
                 { key: 'color', type: 'color', label: 'Custom Color' }
-            ]
+            ],
+            tab: 'content'
         },
         {
             key: 'alignment',
@@ -40,9 +41,10 @@ export default {
                 { label: 'Left', value: 'start' },
                 { label: 'Center', value: 'center' },
                 { label: 'Right', value: 'end' }
-            ]
+            ],
+            tab: 'style'
         },
-        { key: 'icon_size', type: 'text', label: 'Icon Size (e.g. 24px)' },
+        { key: 'icon_size', type: 'text', label: 'Icon Size (e.g. 24px)', tab: 'style' },
         {
             key: 'shape',
             type: 'select',
@@ -51,7 +53,8 @@ export default {
                 { label: 'Square', value: 'square' },
                 { label: 'Rounded', value: 'rounded' },
                 { label: 'Circle', value: 'circle' }
-            ]
+            ],
+            tab: 'style'
         },
         {
             key: 'style',
@@ -61,7 +64,8 @@ export default {
                 { label: 'Filled', value: 'filled' },
                 { label: 'Outline', value: 'outline' },
                 { label: 'Minimal', value: 'minimal' }
-            ]
+            ],
+            tab: 'style'
         }
     ],
     defaultSettings: {

@@ -8,11 +8,13 @@ export default {
     description: 'Display features in a responsive grid.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/FeatureGridBlock.vue')),
     settings: [
+        { type: 'header', label: 'Content', tab: 'content' },
         {
             key: 'title',
             type: 'text',
             label: 'Section Title',
-            default: 'Core Features'
+            default: 'Core Features',
+            tab: 'content'
         },
         {
             key: 'items',
@@ -27,8 +29,10 @@ export default {
                 { title: 'Visual Editor', description: 'Drag and drop elements with real-time feedback.' },
                 { title: 'Responsive', description: 'Perfect look on every screen size.' },
                 { title: 'Lightning Fast', description: 'Optimized for speed and SEO.' }
-            ]
+            ],
+            tab: 'content'
         },
+        { type: 'header', label: 'Grid Settings', tab: 'style' },
         {
             key: 'padding',
             type: 'select',
@@ -37,13 +41,15 @@ export default {
                 { label: 'Medium', value: 'py-20' },
                 { label: 'Large', value: 'py-32' }
             ],
-            default: 'py-20'
+            default: 'py-20',
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         },
         {
             key: 'radius',
@@ -53,7 +59,8 @@ export default {
                 { label: 'None', value: 'rounded-none' },
                 { label: 'Small', value: 'rounded-lg' }
             ],
-            default: 'rounded-none'
+            default: 'rounded-none',
+            tab: 'style'
         },
         {
             key: 'animation',
@@ -63,7 +70,8 @@ export default {
                 { label: 'None', value: '' },
                 { label: 'Fade In', value: 'animate-in fade-in duration-700' }
             ],
-            default: ''
+            default: '',
+            tab: 'style'
         }
     ],
     defaultSettings: {

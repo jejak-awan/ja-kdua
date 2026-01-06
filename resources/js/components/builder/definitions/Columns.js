@@ -10,16 +10,16 @@ export default {
     settings: [
         {
             key: 'layout',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Layout',
             options: [
-                { label: 'Two Columns (50/50)', value: '1-1' },
-                { label: 'One-Third / Two-Thirds', value: '1-2' },
-                { label: 'Two-Thirds / One-Third', value: '2-1' },
-                { label: 'Three Columns', value: '1-1-1' } // Future usage
-                // { label: 'Four Columns', value: '1-1-1-1' }
+                { label: '50/50', value: '1-1' },
+                { label: '1/3 - 2/3', value: '1-2' },
+                { label: '2/3 - 1/3', value: '2-1' },
+                { label: '3 Cols', value: '1-1-1' }
             ],
-            default: '1-1'
+            default: '1-1',
+            tab: 'style'
         },
         {
             key: 'width',
@@ -29,24 +29,27 @@ export default {
                 { label: 'Standard', value: 'max-w-7xl' },
                 { label: 'Full', value: 'max-w-full' }
             ],
-            default: 'max-w-7xl'
+            default: 'max-w-7xl',
+            tab: 'style'
         },
         {
             key: 'padding',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Padding',
             options: [
                 { label: 'None', value: 'py-0' },
-                { label: 'Medium', value: 'py-16' },
-                { label: 'Large', value: 'py-24' }
+                { label: 'Md', value: 'py-16' },
+                { label: 'Lg', value: 'py-24' }
             ],
-            default: 'py-16'
+            default: 'py-16',
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         }
     ],
     defaultSettings: {

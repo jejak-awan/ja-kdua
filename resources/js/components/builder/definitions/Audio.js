@@ -8,12 +8,12 @@ export default {
     description: 'Audio player with custom controls.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/AudioBlock.vue')),
     settings: [
-        { key: 'src', type: 'text', label: 'Audio URL', default: '' },
-        { key: 'title', type: 'text', label: 'Title', default: '' },
-        { key: 'artist', type: 'text', label: 'Artist', default: '' },
-        { key: 'cover_image', type: 'image', label: 'Cover Image', default: '' },
-        { key: 'autoplay', type: 'boolean', label: 'Autoplay', default: false },
-        { key: 'loop', type: 'boolean', label: 'Loop', default: false },
+        { key: 'src', type: 'image', label: 'Audio URL', default: '', tab: 'content' },
+        { key: 'title', type: 'text', label: 'Title', default: '', tab: 'content' },
+        { key: 'artist', type: 'text', label: 'Artist', default: '', tab: 'content' },
+        { key: 'cover_image', type: 'image', label: 'Cover Image', default: '', tab: 'content' },
+        { key: 'autoplay', type: 'boolean', label: 'Autoplay', default: false, tab: 'style' },
+        { key: 'loop', type: 'boolean', label: 'Loop', default: false, tab: 'style' },
         {
             key: 'style',
             type: 'select',
@@ -23,7 +23,8 @@ export default {
                 { label: 'Minimal', value: 'minimal' },
                 { label: 'Dark', value: 'dark' }
             ],
-            default: 'card'
+            default: 'card',
+            tab: 'style'
         },
         {
             key: 'alignment',
@@ -34,7 +35,8 @@ export default {
                 { label: 'Center', value: 'center' },
                 { label: 'Right', value: 'right' }
             ],
-            default: 'center'
+            default: 'center',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -46,7 +48,8 @@ export default {
                 { label: 'Medium', value: 'py-8' },
                 { label: 'Large', value: 'py-12' }
             ],
-            default: 'py-8'
+            default: 'py-8',
+            tab: 'style'
         }
     ],
     defaultSettings: {

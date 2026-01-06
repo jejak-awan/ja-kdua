@@ -134,148 +134,147 @@
                         </div>
                     </div>
 
-                    <!-- Accordion Settings -->
-                    <Accordion type="multiple" collapsible class="w-full" :default-value="['content', 'style']">
-                        <AccordionItem value="content" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                {{ t('features.builder.properties.tabs.content') }}
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in getBlockDefinition(selectedBlock.type).settings" :key="field.key">
-                                    <div v-if="!['color', 'select'].includes(field.type) || field.key === 'alignment'">
-                                        <PropertyField 
-                                            :field="field" 
-                                            :block="selectedBlock"
-                                            v-model="selectedBlock.settings[field.key]"
-                                        />
-                                    </div>
-                                </template>
-                            </AccordionContent>
-                        </AccordionItem>
+                    <!-- TABS: Content | Style | Advanced -->
+                    <Tabs default-value="content" class="w-full">
+                        <TabsList class="grid w-full grid-cols-3 mb-4">
+                            <TabsTrigger value="content">{{ t('features.builder.properties.tabs.content') }}</TabsTrigger>
+                            <TabsTrigger value="style">{{ t('features.builder.properties.tabs.style') }}</TabsTrigger>
+                            <TabsTrigger value="advanced">{{ t('features.builder.properties.tabs.advanced') }}</TabsTrigger>
+                        </TabsList>
 
-                        <AccordionItem value="style" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Block Styles
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in getBlockDefinition(selectedBlock.type).settings" :key="field.key">
-                                    <div v-if="['color', 'select'].includes(field.type) && field.key !== 'alignment'">
-                                         <PropertyField 
-                                            :field="field" 
-                                            :block="selectedBlock"
-                                            v-model="activeSettings[field.key]"
-                                        />
-                                    </div>
-                                </template>
-                            </AccordionContent>
-                        </AccordionItem>
-                        
-                        <!-- NEW: Advanced Design Suite -->
-                        <AccordionItem value="spacing" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Spacing (Margin)
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in marginFields" :key="field.key">
-                                    <PropertyField 
-                                        :field="field" 
-                                        :block="selectedBlock"
-                                        v-model="activeSettings[field.key]"
-                                    />
-                                </template>
-                            </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="filters" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Filters
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in filterFields" :key="field.key">
-                                    <PropertyField 
-                                        :field="field" 
-                                        :block="selectedBlock"
-                                        v-model="activeSettings[field.key]"
-                                    />
-                                </template>
-                            </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="transform" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Transform
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in transformFields" :key="field.key">
-                                    <PropertyField 
-                                        :field="field" 
-                                        :block="selectedBlock"
-                                        v-model="activeSettings[field.key]"
-                                    />
-                                </template>
-                            </AccordionContent>
-                        </AccordionItem>
-
-                        <AccordionItem value="shadow" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Box Shadow
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
+                        <!-- CONTENT TAB -->
+                        <TabsContent value="content" class="space-y-4">
+                            <template v-for="field in getContentFields(selectedBlock)" :key="field.key">
                                 <PropertyField 
-                                    :field="shadowField" 
+                                    :field="field" 
                                     :block="selectedBlock"
-                                    v-model="activeSettings.shadow"
+                                    v-model="selectedBlock.settings[field.key]"
                                 />
-                            </AccordionContent>
-                        </AccordionItem>
+                            </template>
+                            <div v-if="getContentFields(selectedBlock).length === 0" class="text-xs text-muted-foreground text-center py-4 italic">
+                                No content settings available.
+                            </div>
+                        </TabsContent>
 
-                        <AccordionItem value="animation" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Animation
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <template v-for="field in animationFields" :key="field.key">
+                        <!-- STYLE TAB -->
+                        <TabsContent value="style" class="space-y-4">
+                            <!-- Block Specific Styles -->
+                            <div v-if="getStyleFields(selectedBlock).length > 0" class="space-y-4 pb-4 border-b border-sidebar-border">
+                                <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">General</div>
+                                <template v-for="field in getStyleFields(selectedBlock)" :key="field.key">
                                     <PropertyField 
                                         :field="field" 
                                         :block="selectedBlock"
                                         v-model="activeSettings[field.key]"
                                     />
                                 </template>
-                            </AccordionContent>
-                        </AccordionItem>
+                            </div>
 
-                        <AccordionItem value="advanced" class="border-sidebar-border">
-                            <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-3 hover:no-underline hover:bg-sidebar-accent/50 px-2 -mx-2 rounded-md transition-colors">
-                                Advanced
-                            </AccordionTrigger>
-                            <AccordionContent class="space-y-4 pt-4 pb-2">
-                                <div class="space-y-3">
-                                    <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold text-muted-foreground">CSS ID</label>
-                                        <Input v-model="selectedBlock.settings._css_id" placeholder="my-custom-id" class="h-8 text-xs bg-background border-input font-mono" />
-                                    </div>
-                                    <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold text-muted-foreground">CSS Classes</label>
-                                        <Input v-model="selectedBlock.settings._css_class" placeholder="p-4 bg-red-500" class="h-8 text-xs bg-background border-input font-mono" />
-                                        <p class="text-[9px] text-muted-foreground">{{ t('features.builder.properties.advanced.cssClassHelp') }}</p>
-                                    </div>
-                                    <div class="space-y-1.5">
-                                        <label class="text-[10px] font-bold text-muted-foreground">{{ t('features.builder.properties.advanced.customCSS') }}</label>
-                                        <Textarea v-model="selectedBlock.settings._custom_css" placeholder="border: 1px solid red;" class="min-h-[80px] text-xs bg-background border-input font-mono" />
-                                    </div>
+                            <!-- Standard Style Groups (Accordion) -->
+                            <Accordion type="multiple" collapsible class="w-full" :default-value="['spacing']">
+                                <AccordionItem value="spacing" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Spacing
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <template v-for="field in marginFields" :key="field.key">
+                                            <PropertyField :field="field" :block="selectedBlock" v-model="activeSettings[field.key]" />
+                                        </template>
+                                    </AccordionContent>
+                                </AccordionItem>
 
-                                    <!-- NEW: Positioning Refinements -->
-                                    <template v-for="field in positioningFields" :key="field.key">
-                                        <PropertyField 
-                                            :field="field" 
-                                            :block="selectedBlock"
-                                            v-model="selectedBlock.settings[field.key]"
-                                        />
-                                    </template>
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
+                                <AccordionItem value="animation" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Animation
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <template v-for="field in animationFields" :key="field.key">
+                                            <PropertyField :field="field" :block="selectedBlock" v-model="activeSettings[field.key]" />
+                                        </template>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                <AccordionItem value="filters" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Filters
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <template v-for="field in filterFields" :key="field.key">
+                                            <PropertyField :field="field" :block="selectedBlock" v-model="activeSettings[field.key]" />
+                                        </template>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                <AccordionItem value="transform" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Transform
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <template v-for="field in transformFields" :key="field.key">
+                                            <PropertyField :field="field" :block="selectedBlock" v-model="activeSettings[field.key]" />
+                                        </template>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                <AccordionItem value="shadow" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Box Shadow
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <PropertyField :field="shadowField" :block="selectedBlock" v-model="activeSettings.shadow" />
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </TabsContent>
+
+                        <!-- ADVANCED TAB -->
+                        <TabsContent value="advanced" class="space-y-4">
+                             <!-- Block Specific Advanced Fields -->
+                             <template v-for="field in getAdvancedFields(selectedBlock)" :key="field.key">
+                                <PropertyField 
+                                    :field="field" 
+                                    :block="selectedBlock"
+                                    v-model="selectedBlock.settings[field.key]"
+                                />
+                            </template>
+
+                            <Accordion type="multiple" collapsible class="w-full" :default-value="['attributes', 'position']">
+                                <AccordionItem value="attributes" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        ID & Classes
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                        <div class="space-y-3">
+                                            <div class="space-y-1.5">
+                                                <label class="text-[10px] font-bold text-muted-foreground">CSS ID</label>
+                                                <Input v-model="selectedBlock.settings._css_id" placeholder="my-custom-id" class="h-8 text-xs bg-background border-input font-mono" />
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label class="text-[10px] font-bold text-muted-foreground">CSS Classes</label>
+                                                <Input v-model="selectedBlock.settings._css_class" placeholder="p-4 bg-red-500" class="h-8 text-xs bg-background border-input font-mono" />
+                                                <p class="text-[9px] text-muted-foreground">{{ t('features.builder.properties.advanced.cssClassHelp') }}</p>
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label class="text-[10px] font-bold text-muted-foreground">{{ t('features.builder.properties.advanced.customCSS') }}</label>
+                                                <Textarea v-model="selectedBlock.settings._custom_css" placeholder="border: 1px solid red;" class="min-h-[80px] text-xs bg-background border-input font-mono" />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                
+                                <AccordionItem value="position" class="border-sidebar-border">
+                                    <AccordionTrigger class="text-xs font-bold text-sidebar-foreground py-2 hover:no-underline">
+                                        Positioning
+                                    </AccordionTrigger>
+                                    <AccordionContent class="space-y-4 pt-2 pb-2">
+                                         <template v-for="field in positioningFields" :key="field.key">
+                                            <PropertyField :field="field" :block="selectedBlock" v-model="selectedBlock.settings[field.key]" />
+                                        </template>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </TabsContent>
+                    </Tabs>
                 </div>
                 
                 <!-- Empty State -->
@@ -400,6 +399,10 @@ import {
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
 import Textarea from '@/components/ui/textarea.vue';
+import Tabs from '@/components/ui/tabs.vue';
+import TabsContent from '@/components/ui/tabs-content.vue';
+import TabsList from '@/components/ui/tabs-list.vue';
+import TabsTrigger from '@/components/ui/tabs-trigger.vue';
 import Accordion from '@/components/ui/accordion.vue';
 import AccordionContent from '@/components/ui/accordion-content.vue';
 import AccordionItem from '@/components/ui/accordion-item.vue';
@@ -479,6 +482,22 @@ const setTab = (tab) => {
 
 const getBlockDefinition = (type) => {
     return blockRegistry.get(type) || { settings: [] };
+};
+
+const getContentFields = (block) => {
+    const settings = getBlockDefinition(block.type).settings || [];
+    // Default to content if no tab specified
+    return settings.filter(s => !s.tab || s.tab === 'content');
+};
+
+const getStyleFields = (block) => {
+    const settings = getBlockDefinition(block.type).settings || [];
+    return settings.filter(s => s.tab === 'style');
+};
+
+const getAdvancedFields = (block) => {
+    const settings = getBlockDefinition(block.type).settings || [];
+    return settings.filter(s => s.tab === 'advanced');
 };
 
 // Advanced Design Suite Field Definitions

@@ -1,4 +1,4 @@
-import { MousePointer } from 'lucide-vue-next';
+import { MousePointer, AlignLeft, AlignCenter, AlignRight, ArrowLeft, ArrowRight } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
@@ -12,53 +12,59 @@ export default {
             key: 'text',
             type: 'text',
             label: 'Button Text',
-            default: 'Click Here'
+            default: 'Click Here',
+            tab: 'content'
         },
         {
             key: 'url',
             type: 'text',
             label: 'Link URL',
-            default: '#'
+            default: '#',
+            tab: 'content'
         },
         {
             key: 'openNewTab',
             type: 'boolean',
             label: 'Open in New Tab',
-            default: false
+            default: false,
+            tab: 'content'
         },
         {
             key: 'variant',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Style',
             options: [
-                { label: 'Primary', value: 'primary' },
-                { label: 'Secondary', value: 'secondary' },
+                { label: 'Solid', value: 'primary' },
+                { label: 'Soft', value: 'secondary' },
                 { label: 'Outline', value: 'outline' },
                 { label: 'Ghost', value: 'ghost' }
             ],
-            default: 'primary'
+            default: 'primary',
+            tab: 'style'
         },
         {
             key: 'size',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Size',
             options: [
-                { label: 'Small', value: 'small' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Large', value: 'large' }
+                { label: 'Sm', value: 'small' },
+                { label: 'Md', value: 'medium' },
+                { label: 'Lg', value: 'large' }
             ],
-            default: 'medium'
+            default: 'medium',
+            tab: 'style'
         },
         {
             key: 'alignment',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Alignment',
             options: [
-                { label: 'Left', value: 'left' },
-                { label: 'Center', value: 'center' },
-                { label: 'Right', value: 'right' }
+                { label: 'Left', value: 'left', icon: AlignLeft },
+                { label: 'Center', value: 'center', icon: AlignCenter },
+                { label: 'Right', value: 'right', icon: AlignRight }
             ],
-            default: 'left'
+            default: 'left',
+            tab: 'style'
         },
         {
             key: 'iconName',
@@ -74,17 +80,19 @@ export default {
                 { label: 'Mail', value: 'mail' },
                 { label: 'Phone', value: 'phone' }
             ],
-            default: ''
+            default: '',
+            tab: 'style'
         },
         {
             key: 'iconPosition',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Icon Position',
             options: [
-                { label: 'Left', value: 'left' },
-                { label: 'Right', value: 'right' }
+                { label: 'Left', value: 'left', icon: ArrowLeft },
+                { label: 'Right', value: 'right', icon: ArrowRight }
             ],
-            default: 'right'
+            default: 'right',
+            tab: 'style'
         },
         {
             key: 'radius',
@@ -96,7 +104,8 @@ export default {
                 { label: 'Medium', value: 'rounded-xl' },
                 { label: 'Full', value: 'rounded-full' }
             ],
-            default: 'rounded-full'
+            default: 'rounded-full',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -108,7 +117,8 @@ export default {
                 { label: 'Medium', value: 'py-8' },
                 { label: 'Large', value: 'py-12' }
             ],
-            default: 'py-8'
+            default: 'py-8',
+            tab: 'style'
         }
     ],
     defaultSettings: {

@@ -8,30 +8,75 @@ export default {
     description: 'Large hero banner with title and background.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/HeroBlock.vue')),
     settings: [
+        { type: 'header', label: 'Typography', tab: 'content' },
         {
             key: 'title',
             type: 'text',
             label: 'Title',
-            default: 'New Hero Header'
+            default: 'New Hero Header',
+            tab: 'content'
+        },
+        {
+            key: 'titleSize',
+            type: 'toggle_group',
+            label: 'Title Size',
+            options: [
+                { label: 'Md', value: 'text-4xl md:text-5xl' },
+                { label: 'Lg', value: 'text-5xl md:text-7xl' },
+                { label: 'XL', value: 'text-6xl md:text-8xl' }
+            ],
+            default: 'text-5xl md:text-7xl',
+            tab: 'style'
+        },
+        {
+            key: 'titleColor',
+            type: 'color',
+            label: 'Title Color',
+            default: '#ffffff',
+            tab: 'style'
         },
         {
             key: 'subtitle',
             type: 'textarea',
             label: 'Subtitle',
-            default: 'Experience the next generation of visual editing.'
+            default: 'Experience the next generation of visual editing.',
+            tab: 'content'
         },
+        {
+            key: 'subtitleSize',
+            type: 'toggle_group',
+            label: 'Subtitle Size',
+            options: [
+                { label: 'Sm', value: 'text-lg md:text-xl' },
+                { label: 'Md', value: 'text-xl md:text-2xl' },
+                { label: 'Lg', value: 'text-2xl md:text-3xl' }
+            ],
+            default: 'text-xl md:text-2xl',
+            tab: 'style'
+        },
+        {
+            key: 'subtitleColor',
+            type: 'color',
+            label: 'Subtitle Color',
+            default: 'rgba(255, 255, 255, 0.8)',
+            tab: 'style'
+        },
+        { type: 'header', label: 'Background', tab: 'style' },
         {
             key: 'bgImage',
             type: 'image',
             label: 'Background Image',
-            default: ''
+            default: '',
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         },
+        { type: 'header', label: 'Layout', tab: 'style' },
         {
             key: 'padding',
             type: 'select',
@@ -39,9 +84,11 @@ export default {
             options: [
                 { label: 'Small', value: 'py-16' },
                 { label: 'Medium', value: 'py-24' },
-                { label: 'Large', value: 'py-32' }
+                { label: 'Large', value: 'py-32' },
+                { label: 'Extra Large', value: 'py-40' }
             ],
-            default: 'py-32'
+            default: 'py-32',
+            tab: 'style'
         },
         {
             key: 'radius',
@@ -53,7 +100,8 @@ export default {
                 { label: 'Medium', value: 'rounded-2xl' },
                 { label: 'Large', value: 'rounded-3xl' }
             ],
-            default: 'rounded-none'
+            default: 'rounded-none',
+            tab: 'style'
         },
         {
             key: 'animation',
@@ -64,13 +112,18 @@ export default {
                 { label: 'Fade In', value: 'animate-in fade-in duration-700' },
                 { label: 'Zoom In', value: 'animate-in zoom-in-95 duration-1000' }
             ],
-            default: 'animate-in fade-in duration-700'
+            default: 'animate-in fade-in duration-700',
+            tab: 'style'
         }
     ],
     defaultSettings: {
         // Legacy support / flat structure for easy access
         title: 'New Hero Header',
+        titleSize: 'text-5xl md:text-7xl',
+        titleColor: '#ffffff',
         subtitle: 'Experience the next generation of visual editing.',
+        subtitleSize: 'text-xl md:text-2xl',
+        subtitleColor: 'rgba(255, 255, 255, 0.8)',
         bgImage: '',
         bgColor: 'transparent',
         padding: 'py-32',

@@ -3,7 +3,6 @@
         "title": "Widgets",
         "elements": "Elements",
         "searchPlaceholder": "Search widgets...",
-        "layoutLibrary": "Layout Library",
         "keyboardShortcuts": {
             "title": "Keyboard Shortcuts",
             "undo": "Undo",
@@ -117,11 +116,5 @@
             "matchAll": "Match All (AND)",
             "matchAny": "Match Any (OR)"
         }
-    },
-    "templates": {
-        "title": "Template Library",
-        "description": "Choose a professionally designed block or full layout template.",
-        "insert": "Insert Template",
-        "close": "Close"
     }
 }

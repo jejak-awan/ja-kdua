@@ -55,11 +55,17 @@ class MenuItem extends Model
 
     public function getUrlAttribute($value)
     {
-        // If type is page or category, generate URL from target
+        // If type is page, generate URL from target (frontend uses /:slug)
         if ($this->type === 'page' && $this->target) {
-            return '/content/'.$this->target->slug;
+            return '/'.$this->target->slug;
         }
 
+        // If type is post, generate URL from target (frontend uses /blog/:slug)
+        if ($this->type === 'post' && $this->target) {
+            return '/blog/'.$this->target->slug;
+        }
+
+        // If type is category, generate URL from target
         if ($this->type === 'category' && $this->target) {
             return '/category/'.$this->target->slug;
         }

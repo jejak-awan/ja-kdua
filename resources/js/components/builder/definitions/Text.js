@@ -12,30 +12,34 @@ export default {
             key: 'title',
             type: 'text',
             label: 'Section Title',
-            default: 'Section Title'
+            default: 'Section Title',
+            tab: 'content'
         },
         {
             key: 'content',
             type: 'richtext', // Will map to textarea/tiptap
             label: 'Content',
-            default: 'Design beautiful layouts with zero compromise on performance. JA-Builder gives you the power of professional tools directly in your browser.'
+            default: 'Design beautiful layouts with zero compromise on performance. JA-Builder gives you the power of professional tools directly in your browser.',
+            tab: 'content'
         },
         {
             key: 'alignment',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Alignment',
             options: [
                 { label: 'Left', value: 'text-left', icon: AlignLeft },
                 { label: 'Center', value: 'text-center', icon: AlignCenter },
                 { label: 'Right', value: 'text-right', icon: AlignRight }
             ],
-            default: 'text-left'
+            default: 'text-left',
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -46,13 +50,15 @@ export default {
                 { label: 'Medium', value: 'py-16' },
                 { label: 'Large', value: 'py-24' }
             ],
-            default: 'py-16'
+            default: 'py-16',
+            tab: 'style'
         },
         {
             key: 'isProse',
             type: 'boolean',
             label: 'Use Prose Styling',
-            default: true
+            default: true,
+            tab: 'style'
         },
         {
             key: 'animation',
@@ -63,7 +69,8 @@ export default {
                 { label: 'Fade In', value: 'animate-in fade-in duration-700' },
                 { label: 'Slide Up', value: 'animate-in slide-in-from-bottom-4 duration-700' }
             ],
-            default: ''
+            default: '',
+            tab: 'style'
         }
     ],
     defaultSettings: {

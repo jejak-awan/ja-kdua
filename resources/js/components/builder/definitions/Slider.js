@@ -19,13 +19,15 @@ export default {
                 { key: 'image', type: 'image', label: 'Background Image' },
                 { key: 'button_text', type: 'text', label: 'Button Text' },
                 { key: 'button_url', type: 'text', label: 'Button URL' }
-            ]
+            ],
+            tab: 'content'
         },
         {
             key: 'autoplay',
             type: 'boolean',
             label: 'Autoplay',
-            default: true
+            default: true,
+            tab: 'style'
         },
         {
             key: 'autoplay_speed',
@@ -34,19 +36,22 @@ export default {
             min: 2000,
             max: 10000,
             step: 500,
-            default: 5000
+            default: 5000,
+            tab: 'style'
         },
         {
             key: 'show_arrows',
             type: 'boolean',
             label: 'Show Arrows',
-            default: true
+            default: true,
+            tab: 'style'
         },
         {
             key: 'show_dots',
             type: 'boolean',
             label: 'Show Dots',
-            default: true
+            default: true,
+            tab: 'style'
         },
         {
             key: 'height',
@@ -58,13 +63,15 @@ export default {
                 { label: 'Large (700px)', value: 'h-[700px]' },
                 { label: 'Full Screen', value: 'h-screen' }
             ],
-            default: 'h-[500px]'
+            default: 'h-[500px]',
+            tab: 'style'
         },
         {
             key: 'overlay_color',
             type: 'color',
             label: 'Overlay Color',
-            default: 'rgba(0,0,0,0.4)'
+            default: 'rgba(0,0,0,0.4)',
+            tab: 'style'
         },
         {
             key: 'animation',
@@ -74,7 +81,8 @@ export default {
                 { label: 'Fade', value: 'fade' },
                 { label: 'Slide', value: 'slide' }
             ],
-            default: 'fade'
+            default: 'fade',
+            tab: 'style'
         }
     ],
     defaultSettings: {

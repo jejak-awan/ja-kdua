@@ -207,24 +207,7 @@ const routes = [
                 name: 'email-templates.edit',
                 component: () => import('../views/admin/email-templates/Edit.vue'),
             },
-            {
-                path: 'content-templates',
-                name: 'content-templates',
-                component: () => import('../views/admin/content-templates/Index.vue'),
-                meta: { permission: 'manage content' },
-            },
-            {
-                path: 'content-templates/create',
-                name: 'content-templates.create',
-                component: () => import('../views/admin/content-templates/Create.vue'),
-                meta: { permission: 'manage content' },
-            },
-            {
-                path: 'content-templates/:id/edit',
-                name: 'content-templates.edit',
-                component: () => import('../views/admin/content-templates/Edit.vue'),
-                meta: { permission: 'manage content' },
-            },
+
             {
                 path: 'seo',
                 name: 'seo',
@@ -345,12 +328,7 @@ const routes = [
                 component: () => import('../views/admin/themes/Index.vue'),
                 meta: { permission: 'manage themes' },
             },
-            {
-                path: 'theme-builder',
-                name: 'theme-builder',
-                component: () => import('../views/admin/themes/ThemeBuilder.vue'),
-                meta: { permission: 'manage themes' },
-            },
+
 
             {
                 path: 'menus',
@@ -377,21 +355,11 @@ const routes = [
                 component: () => import('../views/admin/languages/Index.vue'),
                 meta: { permission: 'manage settings' },
             },
-            {
-                path: 'translations/:lang',
-                name: 'translations',
-                component: () => import('../views/admin/translations/Index.vue'),
-            },
+
         ],
     },
 
-    // Fullscreen Editor Routes (outside AdminLayout)
-    {
-        path: '/admin/theme-templates/:id/:part/edit',
-        name: 'theme-template-editor',
-        component: () => import('../views/admin/themes/ThemeTemplateEditor.vue'),
-        meta: { requiresAuth: true, permission: 'manage themes' },
-    },
+
 
     // Error pages
     {

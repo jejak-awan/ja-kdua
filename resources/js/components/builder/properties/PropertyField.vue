@@ -1,7 +1,16 @@
 <template>
-    <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-            <label class="text-[10px] font-bold text-muted-foreground flex items-center gap-2">
+        <!-- Header / Separator -->
+        <div v-if="field.type === 'header'" class="pt-4 pb-2">
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-primary/80 flex items-center gap-2">
+                {{ field.label }}
+                <div class="h-px bg-border flex-1"></div>
+            </h4>
+        </div>
+        
+        <!-- Standard Fields -->
+        <div v-else class="space-y-1.5">
+            <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-muted-foreground flex items-center gap-2">
                 {{ field.label }}
                 <!-- Responsive Indicator/Toggle -->
                 <div class="flex items-center gap-2">
@@ -68,6 +77,27 @@
                 <select v-model="proxyValue" class="w-full h-8 px-2 bg-background border border-input rounded-md text-xs outline-none focus:ring-1 focus:ring-inset focus:ring-primary text-foreground">
                     <option v-for="opt in field.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                 </select>
+            </div>
+
+            <!-- Toggle Group -->
+            <div v-if="field.type === 'toggle_group'">
+                <div class="flex flex-wrap gap-1 bg-muted/20 p-1 rounded-md border">
+                    <button 
+                        v-for="opt in field.options" 
+                        :key="opt.value"
+                        @click="proxyValue = opt.value"
+                        class="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded text-[10px] font-medium transition-all"
+                        :class="[
+                            proxyValue === opt.value 
+                                ? 'bg-background text-foreground shadow-sm ring-1 ring-black/5' 
+                                : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+                        ]"
+                        :title="opt.label"
+                    >
+                        <component :is="opt.icon" v-if="opt.icon" class="w-3.5 h-3.5" />
+                        <span v-if="!opt.icon || opt.showLabel">{{ opt.label }}</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Data Select (Dynamic) -->

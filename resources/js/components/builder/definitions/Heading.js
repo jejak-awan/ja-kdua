@@ -1,4 +1,4 @@
-import { Heading } from 'lucide-vue-next';
+import { Heading, AlignLeft, AlignCenter, AlignRight } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
@@ -12,17 +12,19 @@ export default {
             key: 'text',
             type: 'text',
             label: 'Heading Text',
-            default: 'Heading Text'
+            default: 'Heading Text',
+            tab: 'content'
         },
         {
             key: 'subtitle',
             type: 'text',
             label: 'Subtitle (Optional)',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'tag',
-            type: 'select',
+            type: 'toggle_group',
             label: 'HTML Tag',
             options: [
                 { label: 'H1', value: 'h1' },
@@ -32,31 +34,34 @@ export default {
                 { label: 'H5', value: 'h5' },
                 { label: 'H6', value: 'h6' }
             ],
-            default: 'h2'
+            default: 'h2',
+            tab: 'content'
         },
         {
             key: 'size',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Size',
             options: [
-                { label: 'Small', value: 'small' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Large', value: 'large' },
-                { label: 'Extra Large', value: 'xlarge' },
-                { label: 'Display', value: 'display' }
+                { label: 'Sm', value: 'small' },
+                { label: 'Md', value: 'medium' },
+                { label: 'Lg', value: 'large' },
+                { label: 'XL', value: 'xlarge' },
+                { label: '2XL', value: 'display' }
             ],
-            default: 'large'
+            default: 'large',
+            tab: 'style'
         },
         {
             key: 'alignment',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Alignment',
             options: [
-                { label: 'Left', value: 'left' },
-                { label: 'Center', value: 'center' },
-                { label: 'Right', value: 'right' }
+                { label: 'Left', value: 'left', icon: AlignLeft },
+                { label: 'Center', value: 'center', icon: AlignCenter },
+                { label: 'Right', value: 'right', icon: AlignRight }
             ],
-            default: 'left'
+            default: 'left',
+            tab: 'style'
         },
         {
             key: 'decoration',
@@ -68,13 +73,15 @@ export default {
                 { label: 'Highlight', value: 'highlight' },
                 { label: 'Gradient', value: 'gradient' }
             ],
-            default: 'none'
+            default: 'none',
+            tab: 'style'
         },
         {
             key: 'textColor',
             type: 'color',
             label: 'Text Color',
-            default: ''
+            default: '',
+            tab: 'style'
         },
         {
             key: 'width',
@@ -86,7 +93,8 @@ export default {
                 { label: 'Medium', value: 'max-w-2xl' },
                 { label: 'Small', value: 'max-w-xl' }
             ],
-            default: 'max-w-4xl'
+            default: 'max-w-4xl',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -98,7 +106,8 @@ export default {
                 { label: 'Medium', value: 'py-8' },
                 { label: 'Large', value: 'py-12' }
             ],
-            default: 'py-8'
+            default: 'py-8',
+            tab: 'style'
         }
     ],
     defaultSettings: {

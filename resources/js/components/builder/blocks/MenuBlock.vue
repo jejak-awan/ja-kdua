@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { Menu as MenuIcon, ChevronDown, Loader2 } from 'lucide-vue-next';
 import api from '@/services/api';
-import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
 
 defineOptions({
     inheritAttrs: false
@@ -46,10 +46,10 @@ const fetchSystemMenu = async () => {
 
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/menus/${props.menu_id}`);
-        const { data } = parseResponse(response);
+        const response = await api.get(`/cms/menus/${props.menu_id}`);
+        const data = parseSingleResponse(response);
         // Menu item format might need transformation
-        systemItems.value = ensureArray(data.items);
+        systemItems.value = ensureArray(data?.items);
     } catch (error) {
         console.error('Failed to fetch system menu:', error);
     } finally {
@@ -99,9 +99,9 @@ const toggleDropdown = (index) => {
                     <a 
                         :href="item.url || '#'"
                         class="flex items-center gap-1 px-4 py-2 font-medium text-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted"
-                        @click.prevent="item.children?.length ? toggleDropdown(index) : null"
+                        @click="item.children?.length ? ($event.preventDefault(), toggleDropdown(index)) : null"
                     >
-                        {{ item.label }}
+                        {{ item.title || item.label }}
                         <ChevronDown 
                             v-if="item.children?.length" 
                             class="w-4 h-4 transition-transform"
@@ -121,7 +121,7 @@ const toggleDropdown = (index) => {
                                 :href="child.url || '#'"
                                 class="block px-4 py-2 text-sm text-foreground hover:text-primary hover:bg-muted transition-colors"
                             >
-                                {{ child.label }}
+                                {{ child.title || child.label }}
                             </a>
                         </li>
                     </ul>
@@ -149,7 +149,7 @@ const toggleDropdown = (index) => {
                         class="block px-4 py-2 font-medium rounded-lg hover:bg-muted transition-colors"
                         @click="!item.children?.length && (mobileOpen = false)"
                     >
-                        {{ item.label }}
+                        {{ item.title || item.label }}
                     </a>
                     <div v-if="item.children?.length" class="pl-4 space-y-1">
                         <a 
@@ -159,7 +159,7 @@ const toggleDropdown = (index) => {
                             class="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
                             @click="mobileOpen = false"
                         >
-                            {{ child.label }}
+                            {{ child.title || child.label }}
                         </a>
                     </div>
                 </template>

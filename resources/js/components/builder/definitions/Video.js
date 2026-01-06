@@ -12,25 +12,29 @@ export default {
             key: 'title',
             type: 'text',
             label: 'Title',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'videoUrl',
-            type: 'text',
+            type: 'image',
             label: 'Video URL',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'autoplay',
             type: 'boolean', // Needs boolean toggle support in PropertiesPanel
             label: 'Autoplay',
-            default: false
+            default: false,
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -40,7 +44,8 @@ export default {
                 { label: 'None', value: 'py-0' },
                 { label: 'Medium', value: 'py-16' }
             ],
-            default: 'py-16'
+            default: 'py-16',
+            tab: 'style'
         },
         {
             key: 'radius',
@@ -50,7 +55,8 @@ export default {
                 { label: 'Medium', value: 'rounded-xl' },
                 { label: 'Large', value: 'rounded-3xl' }
             ],
-            default: 'rounded-3xl'
+            default: 'rounded-3xl',
+            tab: 'style'
         }
     ],
     defaultSettings: {

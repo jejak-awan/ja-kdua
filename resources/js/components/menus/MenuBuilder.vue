@@ -391,10 +391,10 @@ const saveTree = async (items, parentId) => {
                 target_id: item.target_id,
                 url: item.url,
                 is_active: item.is_active || 1,
-                order: i, 
+                sort_order: i, 
             };
             
-            const response = await api.post('/admin/cms/menu-items', payload);
+            const response = await api.post(`/admin/cms/menus/${props.menuId}/items`, payload);
             const newItem = response.data?.data || response.data;
             item.id = newItem.id; 
         }
@@ -436,7 +436,7 @@ const deleteMenuItem = async (item) => {
 
     try {
         if (item.id && !item.id.toString().startsWith('temp_')) {
-            await api.delete(`/admin/cms/menu-items/${item.id}`);
+            await api.delete(`/admin/cms/menus/${props.menuId}/items/${item.id}`);
         }
         removeItemFromTree(nestedItems.value, item.id || item._temp_id);
         toast.success.action(t('features.menus.messages.itemDeleted'));

@@ -12,7 +12,8 @@ export default {
             key: 'title',
             type: 'text',
             label: 'Title',
-            default: 'Our Gallery'
+            default: 'Our Gallery',
+            tab: 'content'
         },
         {
             key: 'images',
@@ -27,7 +28,8 @@ export default {
                 { url: '', caption: 'Project One' },
                 { url: '', caption: 'Project Two' },
                 { url: '', caption: 'Project Three' }
-            ]
+            ],
+            tab: 'content'
         },
         {
             key: 'columns',
@@ -35,7 +37,8 @@ export default {
             label: 'Columns',
             min: 1,
             max: 4,
-            default: 3
+            default: 3,
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -45,7 +48,8 @@ export default {
                 { label: 'Medium', value: 'py-16' },
                 { label: 'Large', value: 'py-24' }
             ],
-            default: 'py-16'
+            default: 'py-16',
+            tab: 'style'
         },
         {
             key: 'width',
@@ -55,7 +59,8 @@ export default {
                 { label: 'Medium', value: 'max-w-6xl' },
                 { label: 'Full', value: 'max-w-full' }
             ],
-            default: 'max-w-6xl'
+            default: 'max-w-6xl',
+            tab: 'style'
         }
     ],
     defaultSettings: {

@@ -132,7 +132,7 @@ class MenuController extends BaseApiController
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'nullable|string',
-            'type' => 'required|in:link,page,category,custom',
+            'type' => 'required|in:link,page,post,category,custom',
             'target_id' => 'nullable|integer',
             'target_type' => 'nullable|string',
             'parent_id' => 'nullable|exists:menu_items,id',
@@ -140,11 +140,27 @@ class MenuController extends BaseApiController
             'css_class' => 'nullable|string',
             'sort_order' => 'integer',
             'open_in_new_tab' => 'boolean',
+            'is_active' => 'boolean',
         ]);
+
+        // Auto-assign target_type based on type if not provided
+        if (empty($validated['target_type']) && !empty($validated['type'])) {
+            if (in_array($validated['type'], ['page', 'post'])) {
+                $validated['target_type'] = 'App\Models\Content';
+            } elseif ($validated['type'] === 'category') {
+                $validated['target_type'] = 'App\Models\Category';
+            }
+        }
 
         $item = $menu->items()->create($validated);
 
         return $this->success($item->load('children'), 'Menu item created successfully', 201);
+    }
+
+    public function items(Menu $menu)
+    {
+        // Return all items flattened, frontend will build the tree
+        return $this->success($menu->allItems, 'Menu items retrieved successfully');
     }
 
     public function updateItem(Request $request, Menu $menu, MenuItem $menuItem)
@@ -156,7 +172,7 @@ class MenuController extends BaseApiController
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'url' => 'nullable|string',
-            'type' => 'sometimes|required|in:link,page,category,custom',
+            'type' => 'sometimes|required|in:link,page,post,category,custom',
             'target_id' => 'nullable|integer',
             'target_type' => 'nullable|string',
             'parent_id' => 'nullable|exists:menu_items,id',
@@ -166,6 +182,15 @@ class MenuController extends BaseApiController
             'open_in_new_tab' => 'boolean',
             'is_active' => 'boolean',
         ]);
+
+        // Auto-assign target_type based on type if not provided
+        if (empty($validated['target_type']) && !empty($validated['type'])) {
+            if (in_array($validated['type'], ['page', 'post'])) {
+                $validated['target_type'] = 'App\Models\Content';
+            } elseif ($validated['type'] === 'category') {
+                $validated['target_type'] = 'App\Models\Category';
+            }
+        }
 
         $menuItem->update($validated);
 

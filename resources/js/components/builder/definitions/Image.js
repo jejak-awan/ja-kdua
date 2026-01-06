@@ -12,30 +12,33 @@ export default {
             key: 'url',
             type: 'image',
             label: 'Image Source',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'width',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Width',
             options: [
-                { label: 'Small', value: 'max-w-md' },
-                { label: 'Medium', value: 'max-w-2xl' },
-                { label: 'Large', value: 'max-w-5xl' },
+                { label: 'Sm', value: 'max-w-md' },
+                { label: 'Md', value: 'max-w-2xl' },
+                { label: 'Lg', value: 'max-w-5xl' },
                 { label: 'Full', value: 'max-w-full' }
             ],
-            default: 'max-w-5xl'
+            default: 'max-w-5xl',
+            tab: 'style'
         },
         {
             key: 'radius',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Corner Radius',
             options: [
                 { label: 'None', value: 'rounded-none' },
-                { label: 'Medium', value: 'rounded-2xl' },
+                { label: 'Md', value: 'rounded-2xl' },
                 { label: 'Full', value: 'rounded-full' }
             ],
-            default: 'rounded-2xl'
+            default: 'rounded-2xl',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -47,7 +50,8 @@ export default {
                 { label: 'Medium', value: 'py-16' },
                 { label: 'Large', value: 'py-24' }
             ],
-            default: 'py-16'
+            default: 'py-16',
+            tab: 'style'
         },
         {
             key: 'animation',
@@ -58,7 +62,8 @@ export default {
                 { label: 'Zoom In', value: 'animate-in zoom-in-95 duration-1000' },
                 { label: 'Fade In', value: 'animate-in fade-in duration-1000' }
             ],
-            default: 'animate-in zoom-in-95 duration-1000'
+            default: 'animate-in zoom-in-95 duration-1000',
+            tab: 'style'
         }
     ],
     defaultSettings: {

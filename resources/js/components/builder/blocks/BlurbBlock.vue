@@ -42,7 +42,11 @@ const props = defineProps({
     content: {
         type: String,
         default: 'Add a short description here.'
-    }
+    },
+    titleSize: { type: String, default: 'text-xl' },
+    titleColor: { type: String, default: '' },
+    contentSize: { type: String, default: 'text-base' },
+    contentColor: { type: String, default: '' }
 });
 
 const iconComponent = computed(() => {
@@ -82,10 +86,19 @@ const containerClass = computed(() => {
 
         <!-- Content -->
         <div class="blurb-content flex-1">
-            <component :is="title_tag" class="text-xl font-bold mb-2 tracking-tight">
+            <component 
+                :is="title_tag" 
+                class="font-bold mb-2 tracking-tight transition-all duration-300"
+                :class="[titleSize || 'text-xl']"
+                :style="{ color: titleColor || '' }"
+            >
                 {{ title }}
             </component>
-            <p class="opacity-80 leading-relaxed">
+            <p 
+                class="opacity-80 leading-relaxed transition-all duration-300"
+                :class="[contentSize || 'text-base']"
+                :style="{ color: contentColor || '' }"
+            >
                 {{ content }}
             </p>
         </div>

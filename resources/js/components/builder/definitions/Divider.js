@@ -20,36 +20,40 @@ export default {
                 { label: 'Gradient', value: 'gradient' },
                 { label: 'Shadow', value: 'shadow' }
             ],
-            default: 'line'
+            default: 'line',
+            tab: 'style'
         },
         {
             key: 'color',
             type: 'color',
             label: 'Line Color',
-            default: 'hsl(var(--border))'
+            default: 'hsl(var(--border))',
+            tab: 'style'
         },
         {
             key: 'height',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Thickness',
             options: [
-                { label: 'Thin', value: 'small' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Thick', value: 'large' }
+                { label: 'Sm', value: 'small' },
+                { label: 'Md', value: 'medium' },
+                { label: 'Lg', value: 'large' }
             ],
-            default: 'medium'
+            default: 'medium',
+            tab: 'style'
         },
         {
             key: 'width',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Width',
             options: [
                 { label: 'Full', value: 'max-w-full' },
-                { label: 'Large', value: 'max-w-4xl' },
-                { label: 'Medium', value: 'max-w-2xl' },
-                { label: 'Small', value: 'max-w-xl' }
+                { label: 'Lg', value: 'max-w-4xl' },
+                { label: 'Md', value: 'max-w-2xl' },
+                { label: 'Sm', value: 'max-w-xl' }
             ],
-            default: 'max-w-full'
+            default: 'max-w-full',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -61,7 +65,8 @@ export default {
                 { label: 'Medium', value: 'py-6' },
                 { label: 'Large', value: 'py-12' }
             ],
-            default: 'py-6'
+            default: 'py-6',
+            tab: 'style'
         }
     ],
     defaultSettings: {

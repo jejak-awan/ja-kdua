@@ -13,10 +13,20 @@
         </div>
 
         <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
-            <h1 v-if="title" class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
+            <h1 
+                v-if="title" 
+                class="font-extrabold mb-6 tracking-tight drop-shadow-sm transition-all duration-300"
+                :class="[titleSize || props.settings?.titleSize || 'text-5xl md:text-7xl']"
+                :style="{ color: titleColor || props.settings?.titleColor || '#ffffff' }"
+            >
                 {{ title }}
             </h1>
-            <p v-if="subtitle" class="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed drop-shadow-sm opacity-80 mb-8">
+            <p 
+                v-if="subtitle" 
+                class="max-w-3xl mx-auto leading-relaxed drop-shadow-sm opacity-80 mb-8 transition-all duration-300"
+                :class="[subtitleSize || props.settings?.subtitleSize || 'text-xl md:text-2xl']"
+                :style="{ color: subtitleColor || props.settings?.subtitleColor || 'rgba(255, 255, 255, 0.8)' }"
+            >
                 {{ subtitle }}
             </p>
 
@@ -94,7 +104,11 @@ defineOptions({
 const props = defineProps({
     id: String,
     title: String,
+    titleSize: String,
+    titleColor: String,
     subtitle: String,
+    subtitleSize: String,
+    subtitleColor: String,
     bgImage: String,
     bgColor: { type: String, default: 'transparent' },
     padding: { type: String, default: 'py-32' },

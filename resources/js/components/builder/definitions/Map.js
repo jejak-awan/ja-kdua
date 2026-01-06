@@ -12,7 +12,8 @@ export default {
             key: 'embedUrl',
             type: 'text',
             label: 'Map Embed URL',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'height',
@@ -22,13 +23,15 @@ export default {
             max: 600,
             step: 50,
             unit: 'px',
-            default: 400
+            default: 400,
+            tab: 'style'
         },
         {
             key: 'caption',
             type: 'text',
             label: 'Caption (Optional)',
-            default: ''
+            default: '',
+            tab: 'content'
         },
         {
             key: 'radius',
@@ -40,7 +43,8 @@ export default {
                 { label: 'Medium', value: 'rounded-xl' },
                 { label: 'Large', value: 'rounded-2xl' }
             ],
-            default: 'rounded-xl'
+            default: 'rounded-xl',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -51,13 +55,15 @@ export default {
                 { label: 'Medium', value: 'py-8' },
                 { label: 'Large', value: 'py-12' }
             ],
-            default: 'py-8'
+            default: 'py-8',
+            tab: 'style'
         },
         {
             key: 'visibility',
             type: 'visibility',
             label: 'Visibility',
             defaultValue: { mobile: true, tablet: true, desktop: true },
+            tab: 'style'
         },
     ],
     defaultSettings: {

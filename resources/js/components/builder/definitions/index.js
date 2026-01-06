@@ -60,19 +60,11 @@ import PostSlider from './PostSlider';
 import { PostCarousel } from './PostCarousel';
 import Comments from './Comments';
 
-// Shop / Woo
-import { Shop } from './Shop';
-import { Cart } from './Cart';
 import StarRating from './StarRating';
-import { WooTitle } from './WooTitle';
-import { WooPrice } from './WooPrice';
-import { WooImages } from './WooImages';
-import { WooAddToCart } from './WooAddToCart';
-import { WooTabs } from './WooTabs';
 
 export default [
     // Structure
-    Section, // Top level
+    Section,
     Columns,
 
     // Basic
@@ -133,13 +125,5 @@ export default [
     PostCarousel,
     Comments,
 
-    // Shop
-    Shop,
-    Cart,
-    StarRating,
-    WooTitle,
-    WooPrice,
-    WooImages,
-    WooAddToCart,
-    WooTabs
+    StarRating
 ];

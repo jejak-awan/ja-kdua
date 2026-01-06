@@ -12,7 +12,8 @@ export default {
             key: 'title',
             type: 'text',
             label: 'Section Title',
-            default: 'Frequently Asked Questions'
+            default: 'Frequently Asked Questions',
+            tab: 'content'
         },
         {
             key: 'items',
@@ -27,7 +28,8 @@ export default {
                 { question: 'What is JA-Builder?', answer: 'A powerful visual page builder for modern web apps.' },
                 { question: 'Is it responsive?', answer: 'Yes, it works perfectly on all devices.' },
                 { question: 'Can I customize it?', answer: 'Absolutely! It is built with Vue and Tailwind CSS.' }
-            ]
+            ],
+            tab: 'content'
         },
         {
             key: 'width',
@@ -37,7 +39,8 @@ export default {
                 { label: 'Medium', value: 'max-w-4xl' },
                 { label: 'Large', value: 'max-w-5xl' }
             ],
-            default: 'max-w-5xl'
+            default: 'max-w-5xl',
+            tab: 'style'
         },
         {
             key: 'padding',
@@ -47,13 +50,15 @@ export default {
                 { label: 'Medium', value: 'py-20' },
                 { label: 'Large', value: 'py-32' }
             ],
-            default: 'py-20'
+            default: 'py-20',
+            tab: 'style'
         },
         {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent'
+            default: 'transparent',
+            tab: 'style'
         }
     ],
     defaultSettings: {

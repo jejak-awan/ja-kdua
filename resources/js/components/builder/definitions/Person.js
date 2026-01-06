@@ -8,10 +8,10 @@ export default {
     description: 'Display a profile with name, position, bio, and social links.',
     component: defineAsyncComponent(() => import('@/components/builder/blocks/PersonBlock.vue')),
     settings: [
-        { key: 'name', type: 'text', label: 'Name' },
-        { key: 'position', type: 'text', label: 'Position / Job Title' },
-        { key: 'bio', type: 'textarea', label: 'Biography' },
-        { key: 'image_url', type: 'text', label: 'Image URL' },
+        { key: 'name', type: 'text', label: 'Name', tab: 'content' },
+        { key: 'position', type: 'text', label: 'Position / Job Title', tab: 'content' },
+        { key: 'bio', type: 'textarea', label: 'Biography', tab: 'content' },
+        { key: 'image_url', type: 'image', label: 'Image URL', tab: 'content' },
         {
             key: 'image_shape',
             type: 'select',
@@ -20,7 +20,8 @@ export default {
                 { label: 'Circle', value: 'circle' },
                 { label: 'Rounded', value: 'rounded' },
                 { label: 'Square', value: 'square' }
-            ]
+            ],
+            tab: 'style'
         },
         {
             key: 'alignment',
@@ -29,11 +30,12 @@ export default {
             options: [
                 { label: 'Left', value: 'left' },
                 { label: 'Center', value: 'center' }
-            ]
+            ],
+            tab: 'style'
         },
-        { key: 'facebook_url', type: 'text', label: 'Facebook URL' },
-        { key: 'twitter_url', type: 'text', label: 'Twitter URL' },
-        { key: 'linkedin_url', type: 'text', label: 'LinkedIn URL' }
+        { key: 'facebook_url', type: 'text', label: 'Facebook URL', tab: 'content' },
+        { key: 'twitter_url', type: 'text', label: 'Twitter URL', tab: 'content' },
+        { key: 'linkedin_url', type: 'text', label: 'LinkedIn URL', tab: 'content' }
     ],
     defaultSettings: {
         name: 'John Doe',
