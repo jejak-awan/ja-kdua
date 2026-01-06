@@ -100,23 +100,20 @@
                     </template>
                 </draggable>
             </template>
-        </div>
-        
-        <!-- Sidebar Footer -->
-        <div class="p-3 border-t border-sidebar-border bg-sidebar shrink-0 space-y-2">
-
-            
-            <!-- Keyboard Shortcuts Help -->
-            <Button 
-                v-if="builder.isSidebarOpen.value"
-                variant="ghost" 
-                size="sm" 
-                class="w-full text-muted-foreground hover:bg-sidebar-accent h-8 justify-start text-[10px]"
-                @click="showShortcuts = !showShortcuts"
-            >
-                <Keyboard class="w-3.5 h-3.5 mr-2" />
-                Keyboard Shortcuts
-            </Button>
+            <!-- Sidebar Footer (Moved inside for better flow) -->
+            <div class="p-3 border-t border-sidebar-border bg-sidebar shrink-0 space-y-2 mt-4">
+                <!-- Keyboard Shortcuts Help -->
+                <Button 
+                    v-if="builder.isSidebarOpen.value"
+                    variant="ghost" 
+                    size="sm" 
+                    class="w-full text-muted-foreground hover:bg-sidebar-accent h-8 justify-start text-[10px]"
+                    @click="showShortcuts = !showShortcuts"
+                >
+                    <Keyboard class="w-3.5 h-3.5 mr-2" />
+                    Keyboard Shortcuts
+                </Button>
+            </div>
         </div>
 
         <!-- Keyboard Shortcuts Modal -->
