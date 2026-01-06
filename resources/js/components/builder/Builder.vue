@@ -1,87 +1,89 @@
 <template>
-    <!-- Fullscreen overlay backdrop -->
-    <div 
-        v-if="isFullscreen" 
-        class="bg-background" 
-        :style="{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9998 }"
-        @click="toggleFullscreen"
-    ></div>
-    
-    <div 
-        :class="[
-            'flex flex-col bg-background text-foreground group/builder',
-            isFullscreen ? '' : (props.context?.builderMode ? 'relative h-full min-h-[500px] overflow-hidden' : 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-border rounded-xl overflow-hidden shadow-inner')
-        ]"
-        :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
-    >
-            <!-- Toolbar -->
-            <div class="h-12 bg-background border-b border-border flex items-center justify-between px-4 z-10 shrink-0">
-                <!-- Left Section -->
-                <div class="flex items-center gap-2">
-                    <!-- Undo/Redo -->
-                    <div class="flex items-center border-r border-border pr-3 mr-1 gap-1">
-                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" :title="t('features.builder.canvas.toolbar.undo')">
-                            <Undo2 class="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" :title="t('features.builder.canvas.toolbar.redo')">
-                            <Redo2 class="w-4 h-4" />
-                        </Button>
+    <div class="builder-root h-full">
+        <!-- Fullscreen overlay backdrop -->
+        <div 
+            v-if="isFullscreen" 
+            class="bg-background" 
+            :style="{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9998 }"
+            @click="toggleFullscreen"
+        ></div>
+        
+        <div 
+            :class="[
+                'flex flex-col bg-background text-foreground group/builder h-full',
+                isFullscreen ? '' : (props.context?.builderMode ? 'relative min-h-[500px] overflow-hidden' : 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-border rounded-xl overflow-hidden shadow-inner')
+            ]"
+            :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
+        >
+                <!-- Toolbar -->
+                <div class="h-12 bg-background border-b border-border flex items-center justify-between px-4 z-10 shrink-0">
+                    <!-- Left Section -->
+                    <div class="flex items-center gap-2">
+                        <!-- Undo/Redo -->
+                        <div class="flex items-center border-r border-border pr-3 mr-1 gap-1">
+                            <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" :title="t('features.builder.canvas.toolbar.undo')">
+                                <Undo2 class="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" :title="t('features.builder.canvas.toolbar.redo')">
+                                <Redo2 class="w-4 h-4" />
+                            </Button>
+                        </div>
+                        
+                        <!-- Device Selector -->
+                        <div class="flex items-center gap-1 text-muted-foreground">
+                            <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'desktop' }" @click="builder.deviceMode.value = 'desktop'" :title="t('features.builder.canvas.toolbar.desktop')">
+                                <Monitor class="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'tablet' }" @click="builder.deviceMode.value = 'tablet'" :title="t('features.builder.canvas.toolbar.tablet')">
+                                <Tablet class="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'mobile' }" @click="builder.deviceMode.value = 'mobile'" :title="t('features.builder.canvas.toolbar.mobile')">
+                                <Smartphone class="w-4 h-4" />
+                            </Button>
+                        </div>
                     </div>
                     
-                    <!-- Device Selector -->
-                    <div class="flex items-center gap-1 text-muted-foreground">
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'desktop' }" @click="builder.deviceMode.value = 'desktop'" :title="t('features.builder.canvas.toolbar.desktop')">
-                            <Monitor class="w-4 h-4" />
+                    <!-- Right Section -->
+                    <div class="flex items-center gap-2">
+                        <!-- Preview Toggle -->
+                        <Button variant="ghost" size="sm" class="h-8 gap-2 text-xs" :class="{ 'bg-accent': builder.isPreview.value }" @click="builder.isPreview.value = !builder.isPreview.value">
+                            <Eye class="w-4 h-4" />
+                            <span class="hidden sm:inline">Preview</span>
                         </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'tablet' }" @click="builder.deviceMode.value = 'tablet'" :title="t('features.builder.canvas.toolbar.tablet')">
-                            <Tablet class="w-4 h-4" />
+                        
+                        <!-- Fullscreen Toggle -->
+                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="toggleFullscreen" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+                            <Minimize2 v-if="isFullscreen" class="w-4 h-4" />
+                            <Maximize2 v-else class="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" class="h-8 w-8" :class="{ 'bg-accent text-accent-foreground': builder.deviceMode.value === 'mobile' }" @click="builder.deviceMode.value = 'mobile'" :title="t('features.builder.canvas.toolbar.mobile')">
-                            <Smartphone class="w-4 h-4" />
+                        
+                        <!-- Exit Fullscreen Button (prominent when in fullscreen) -->
+                        <Button v-if="isFullscreen" variant="outline" size="sm" class="h-8 gap-2 text-xs border-border" @click="toggleFullscreen">
+                            <X class="w-4 h-4" />
+                            Exit
                         </Button>
                     </div>
+                </div>
+
+                <div class="flex flex-1 min-h-0 overflow-hidden">
+                <div class="theme-provider contents">
+                    <Sidebar />
+                    <Canvas :context="context" />
+                    <PropertiesPanel />
+                    <!-- LayersPanel docked in PropertiesPanel -->
+                    <BreadcrumbsBar />
+                </div>
                 </div>
                 
-                <!-- Right Section -->
-                <div class="flex items-center gap-2">
-                    <!-- Preview Toggle -->
-                    <Button variant="ghost" size="sm" class="h-8 gap-2 text-xs" :class="{ 'bg-accent': builder.isPreview.value }" @click="builder.isPreview.value = !builder.isPreview.value">
-                        <Eye class="w-4 h-4" />
-                        <span class="hidden sm:inline">Preview</span>
-                    </Button>
-                    
-                    <!-- Fullscreen Toggle -->
-                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="toggleFullscreen" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
-                        <Minimize2 v-if="isFullscreen" class="w-4 h-4" />
-                        <Maximize2 v-else class="w-4 h-4" />
-                    </Button>
-                    
-                    <!-- Exit Fullscreen Button (prominent when in fullscreen) -->
-                    <Button v-if="isFullscreen" variant="outline" size="sm" class="h-8 gap-2 text-xs border-border" @click="toggleFullscreen">
-                        <X class="w-4 h-4" />
-                        Exit
-                    </Button>
-                </div>
-            </div>
+                <!-- Shared Media Picker -->
+                <MediaPicker v-model:open="builder.showMediaPicker.value" @selected="handleMediaSelect">
+                    <template #trigger><span class="hidden"></span></template>
+                </MediaPicker>
 
-            <div class="flex flex-1 min-h-0 overflow-hidden">
-            <div class="theme-provider contents">
-                <Sidebar />
-                <Canvas :context="context" />
-                <PropertiesPanel />
-                <!-- LayersPanel docked in PropertiesPanel -->
-                <BreadcrumbsBar />
+                <!-- Global Context Menu -->
+                <ContextMenu />
             </div>
-            </div>
-            
-            <!-- Shared Media Picker -->
-            <MediaPicker v-model:open="builder.showMediaPicker.value" @selected="handleMediaSelect">
-                <template #trigger><span class="hidden"></span></template>
-            </MediaPicker>
-
-            <!-- Global Context Menu -->
-            <ContextMenu />
-        </div>
+    </div>
 </template>
 
 <script setup>
