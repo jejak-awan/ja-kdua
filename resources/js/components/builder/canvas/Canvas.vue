@@ -5,7 +5,7 @@
             @scroll="handleScroll"
             :class="[
                 'flex-1 overflow-y-auto flex flex-col items-center custom-scrollbar',
-                !builder.isPreview.value ? 'bg-zinc-100 bg-dot-pattern p-6 pb-20' : 'bg-background'
+                !builder.isPreview.value ? 'bg-zinc-100 dark:bg-zinc-950 bg-dot-pattern p-6 pb-20' : 'bg-background'
             ]"
         >
 
