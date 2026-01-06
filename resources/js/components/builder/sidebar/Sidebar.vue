@@ -200,6 +200,7 @@ import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import BackToTop from '@/components/ui/back-to-top.vue';
 import { useScrollToTop } from '@/composables/useScrollToTop';
+import { useSidebar } from '@/composables/useSidebar';
 import { 
     Search as SearchIcon, 
     LayoutTemplate, 
@@ -223,6 +224,7 @@ import Badge from '@/components/ui/badge.vue';
 import TemplateLibrary from './TemplateLibrary.vue';
 
 const builder = inject('builder');
+const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen, closeSidebar } = useSidebar();
 const { t } = useI18n();
 
 const scrollContainer = ref(null);

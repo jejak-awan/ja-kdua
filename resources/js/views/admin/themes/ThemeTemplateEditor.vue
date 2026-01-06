@@ -70,8 +70,6 @@ const loadTemplate = async () => {
         template.value = data;
         // Load the specific part data, or empty array if null
         blocks.value = data[`${part}_data`] || []; 
-        console.log('[ThemeTemplateEditor] Loaded template:', data);
-        console.log('[ThemeTemplateEditor] Blocks:', blocks.value);
     } catch (e) {
         console.error('[ThemeTemplateEditor] Error:', e);
         error.value = e.response?.data?.message || e.message || 'Failed to load template';
