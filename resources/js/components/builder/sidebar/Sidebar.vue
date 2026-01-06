@@ -178,7 +178,7 @@
         
         <BackToTop 
             :show="showBackToTop && builder.isSidebarOpen.value" 
-            positionClass="bottom-8 left-1/2 -translate-x-1/2"
+            positionClass="bottom-20 left-1/2 -translate-x-1/2"
             @click="scrollToTop" 
         />
     </div>
