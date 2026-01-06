@@ -265,15 +265,18 @@ const categoryDefinitions = [
 const collapsedCategories = reactive({});
 
 const toggleCategory = (name) => {
-    // If clicking already open category, close it
-    if (!collapsedCategories[name]) {
-        // Close all other categories first (single collapsible mode)
+    const isCurrentlyOpen = !collapsedCategories[name]; // false=open, true=closed
+
+    if (isCurrentlyOpen) {
+        // If it's already open, we are clicking to close it
+        collapsedCategories[name] = true;
+    } else {
+        // If it's closed, we are opening it. Close others first (accordion mode)
         Object.keys(collapsedCategories).forEach(key => {
             collapsedCategories[key] = true;
         });
+        collapsedCategories[name] = false;
     }
-    // Toggle clicked category
-    collapsedCategories[name] = !collapsedCategories[name];
 };
 
 // Group blocks by category
