@@ -32,15 +32,16 @@
                                         @edit="onEditBlock(block.id)"
                                         @duplicate="onDuplicate(column, blockIndex)"
                                         @delete="onDelete(column, blockIndex)"
+                                        @wrap="onWrapInColumn(column, blockIndex)"
+                                        @split="onSplitInColumn(column, blockIndex)"
                                     />
                                 </template>
                                 
                                 <template #footer>
                                      <div v-if="column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
-                                        <button 
+                                        <div 
                                             @click.stop.prevent="openBlockPicker(index)"
-                                            type="button"
-                                            class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn"
+                                            class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn cursor-pointer"
                                         >
                                             <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover/btn:bg-primary/10 transition-colors">
                                                 <Plus class="w-4 h-4 text-muted-foreground group-hover/btn:text-primary" />
@@ -48,7 +49,7 @@
                                             <div>
                                                 <span class="text-[10px] font-bold text-muted-foreground group-hover/btn:text-primary block">Add Block</span>
                                             </div>
-                                        </button>
+                                        </div>
                                     </div>
                                 </template>
                             </draggable>
@@ -120,6 +121,7 @@ const isResizing = ref(false);
 const activeResizer = ref(null);
 const showBlockPicker = ref(false);
 const activeColumnIndex = ref(null);
+const rafId = ref(null); // For throttling resize updates
 
 const openBlockPicker = (colIndex) => {
     activeColumnIndex.value = colIndex;
@@ -203,38 +205,37 @@ const startResize = (index, event) => {
 const doResize = (event) => {
     if (!isResizing.value || activeResizer.value === null || !gridRef.value) return;
 
-    const gridRect = gridRef.value.getBoundingClientRect();
-    const mouseX = event.clientX - gridRect.left;
-    const gridWidth = gridRect.width;
-    
-    // Percentage from left
-    const percentage = (mouseX / gridWidth) * 100;
-
-    // We only support 2 columns for now for simplicity in resizing logic, 
-    // but can expand to multi-column drag later.
-    if (props.columns.length === 2 && activeResizer.value === 0) {
-        const leftWidth = Math.max(10, Math.min(90, percentage));
-        const rightWidth = 100 - leftWidth;
-        updateCustomWidths([leftWidth, rightWidth]);
-    } else if (props.columns.length === 3) {
-        // More complex multi-column resizing logic if needed
-        const currentWidths = [...props.customWidths];
-        const resizerIdx = activeResizer.value;
-        
-        // Calculate combined width of columns up to the resizer
-        let prevSum = 0;
-        for(let i=0; i < resizerIdx; i++) prevSum += currentWidths[i];
-        
-        const newColWidth = percentage - prevSum;
-        const remainingWidth = 100 - percentage;
-        
-        // Need to be careful with total % 
-        // For now, let's just stick to 2-column resizing as a starting point 
-        // until we have a more robust multi-point resizer.
+    // Cancel any pending animation frame to throttle updates
+    if (rafId.value) {
+        cancelAnimationFrame(rafId.value);
     }
+
+    // Use requestAnimationFrame for smoother updates
+    rafId.value = requestAnimationFrame(() => {
+        if (!gridRef.value) return;
+        
+        const gridRect = gridRef.value.getBoundingClientRect();
+        const mouseX = event.clientX - gridRect.left;
+        const gridWidth = gridRect.width;
+        
+        // Percentage from left
+        const percentage = (mouseX / gridWidth) * 100;
+
+        // We only support 2 columns for now for simplicity in resizing logic
+        if (props.columns.length === 2 && activeResizer.value === 0) {
+            const leftWidth = Math.max(15, Math.min(85, percentage));
+            const rightWidth = 100 - leftWidth;
+            updateCustomWidths([leftWidth, rightWidth]);
+        }
+    });
 };
 
 const stopResize = () => {
+    // Cancel any pending animation frame
+    if (rafId.value) {
+        cancelAnimationFrame(rafId.value);
+        rafId.value = null;
+    }
     isResizing.value = false;
     activeResizer.value = null;
     window.removeEventListener('mousemove', doResize);
@@ -259,6 +260,47 @@ const onDuplicate = (column, index) => {
 
 const onDelete = (column, index) => {
     column.blocks.splice(index, 1);
+    builder.takeSnapshot();
+};
+
+const onWrapInColumn = (column, index) => {
+    const original = column.blocks[index];
+    const container = {
+        id: generateUUID(),
+        type: 'container',
+        settings: {
+            direction: 'flex-col',
+            justify: 'justify-start',
+            align: 'items-start',
+            gap: 'gap-4',
+            padding: 'p-4',
+            blocks: [original]
+        }
+    };
+    column.blocks.splice(index, 1, container);
+    builder.takeSnapshot();
+};
+
+const onSplitInColumn = (column, index) => {
+    const original = column.blocks[index];
+    // Create a Columns block with proper grid distribution
+    const columns = {
+        id: generateUUID(),
+        type: 'columns',
+        settings: {
+            layout: '1-1',
+            columns: [
+                { blocks: [original] },
+                { blocks: [] }
+            ],
+            customWidths: [50, 50],
+            padding: 'py-0',
+            width: 'max-w-full',
+            bgColor: 'transparent',
+            radius: 'rounded-none'
+        }
+    };
+    column.blocks.splice(index, 1, columns);
     builder.takeSnapshot();
 };
 

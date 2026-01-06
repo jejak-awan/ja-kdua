@@ -5,7 +5,7 @@
             @scroll="handleScroll"
             :class="[
                 'flex-1 overflow-y-auto flex flex-col items-center custom-scrollbar',
-                !builder.isPreview.value ? 'bg-muted/50 bg-dot-pattern p-6 pb-20' : 'bg-background'
+                !builder.isPreview.value ? 'bg-zinc-100 bg-dot-pattern p-6 pb-20' : 'bg-background'
             ]"
         >
 
@@ -44,6 +44,8 @@
                                 @edit="editBlock(index)"
                                 @duplicate="builder.duplicateBlock(index)"
                                 @delete="builder.removeBlock(index)"
+                                @wrap="onWrapBlock(index)"
+                                @split="onSplitBlock(index)"
                             />
                         </template>
                     </draggable>
@@ -151,6 +153,47 @@ const addSection = () => {
     builder.activeBlockId.value = newBlock.id;
     builder.editingIndex.value = builder.blocks.value.length - 1;
     builder.activeTab.value = 'content';
+};
+
+const onWrapBlock = (index) => {
+    const original = builder.blocks.value[index];
+    const container = {
+        id: generateUUID(),
+        type: 'container',
+        settings: {
+            direction: 'flex-col',
+            justify: 'justify-start',
+            align: 'items-start',
+            gap: 'gap-4',
+            padding: 'p-4',
+            blocks: [original]
+        }
+    };
+    builder.blocks.value.splice(index, 1, container);
+    builder.takeSnapshot();
+};
+
+const onSplitBlock = (index) => {
+    const original = builder.blocks.value[index];
+    // Create a Columns block with proper grid distribution
+    const columns = {
+        id: generateUUID(),
+        type: 'columns',
+        settings: {
+            layout: '1-1',
+            columns: [
+                { blocks: [original] },
+                { blocks: [] }
+            ],
+            customWidths: [50, 50],
+            padding: 'py-0',
+            width: 'max-w-full',
+            bgColor: 'transparent',
+            radius: 'rounded-none'
+        }
+    };
+    builder.blocks.value.splice(index, 1, columns);
+    builder.takeSnapshot();
 };
 
 // Compute theme overrides for the canvas

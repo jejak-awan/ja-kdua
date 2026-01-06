@@ -1,5 +1,6 @@
 // Structure
 import Section from './Section';
+import Container from './Container';
 import Columns from './Columns';
 
 // Basic
@@ -65,6 +66,7 @@ import StarRating from './StarRating';
 export default [
     // Structure
     Section,
+    Container,
     Columns,
 
     // Basic

@@ -73,7 +73,7 @@ export default {
             key: 'bgColor',
             type: 'color',
             label: 'Background Color',
-            default: 'transparent',
+            default: '#18181b', // Default to dark for visibility
             tab: 'style'
         },
         { type: 'header', label: 'Layout', tab: 'style' },
@@ -125,7 +125,7 @@ export default {
         subtitleSize: 'text-xl md:text-2xl',
         subtitleColor: 'rgba(255, 255, 255, 0.8)',
         bgImage: '',
-        bgColor: 'transparent',
+        bgColor: '#18181b',
         padding: 'py-32',
         radius: 'rounded-none',
         animation: 'animate-in fade-in duration-700',

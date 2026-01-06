@@ -31,10 +31,13 @@ export default defineConfig({
                     'vendor-ui': ['chart.js', 'vue-chartjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],
                     // Utility libraries
                     'vendor-utils': ['axios', 'lodash'],
+                    // Icon library (large but infrequently changes)
+                    'lucide-vue-next': ['lucide-vue-next'],
                 },
             },
         },
-        chunkSizeWarningLimit: 600,
+        // Builder components are large but acceptable (gzip: ~195KB)
+        chunkSizeWarningLimit: 700,
     },
     optimizeDeps: {
         include: ['cropperjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],

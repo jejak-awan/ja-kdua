@@ -38,9 +38,14 @@ export function useAutoSave(form, contentId = null, options = {}) {
       return;
     }
 
-    const currentData = JSON.stringify(form.value);
-    const savedData = JSON.stringify(lastSavedData.value);
-    hasChanges.value = currentData !== savedData;
+    try {
+      const currentData = JSON.stringify(form.value || {});
+      const savedData = JSON.stringify(lastSavedData.value || {});
+      hasChanges.value = currentData !== savedData;
+    } catch (e) {
+      console.warn('AutoSave: Failed to compare changes', e);
+      hasChanges.value = true; // Assume changed on error
+    }
   };
 
   // Watch form for changes
@@ -110,7 +115,11 @@ export function useAutoSave(form, contentId = null, options = {}) {
       lastSaved.value = new Date();
       saveStatus.value = 'saved';
       hasChanges.value = false;
-      lastSavedData.value = JSON.parse(JSON.stringify(form.value));
+      try {
+        lastSavedData.value = JSON.parse(JSON.stringify(form.value || {}));
+      } catch (e) {
+        console.warn('AutoSave: Failed to update last saved state', e);
+      }
 
       // Callback
       if (onSave) {
@@ -196,7 +205,13 @@ export function useAutoSave(form, contentId = null, options = {}) {
 
   // Initialize
   onMounted(() => {
-    lastSavedData.value = JSON.parse(JSON.stringify(form.value));
+    try {
+      lastSavedData.value = JSON.parse(JSON.stringify(form.value || {}));
+    } catch (e) {
+      console.warn('AutoSave: Failed to clone initial state', e);
+      lastSavedData.value = {};
+    }
+
     if (getEnabled()) {
       startAutoSave();
     }

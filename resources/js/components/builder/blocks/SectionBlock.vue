@@ -11,24 +11,7 @@
              :class="isSelected ? 'bg-primary/5' : ''">
         </div>
 
-        <!-- Toolbar (Top Right) -->
-        <div v-if="isSelected && isBuilder && !isPreview" 
-             class="absolute right-4 top-4 z-[20] flex items-center gap-1 bg-background shadow-sm border border-border rounded-md p-1 opacity-100 transition-opacity">
-            <span class="text-[10px] font-bold px-2 text-muted-foreground uppercase tracking-wider">Section</span>
-            <div class="w-px h-3 bg-border mx-1"></div>
-            
-            <button class="p-1 hover:bg-accent rounded" title="Settings" @click.stop="onEdit">
-                 <Settings2 class="w-3.5 h-3.5" />
-            </button>
-            <button class="p-1 hover:bg-accent rounded" title="Duplicate" @click.stop="">
-                <Copy class="w-3.5 h-3.5" />
-            </button>
-            <button class="p-1 hover:bg-destructive/10 hover:text-destructive rounded" title="Delete" @click.stop="">
-                <Trash2 class="w-3.5 h-3.5" />
-            </button>
-            <div class="w-px h-3 bg-border mx-1 drag-handle cursor-move"></div>
-            <GripVertical class="w-3.5 h-3.5 text-muted-foreground drag-handle cursor-move" />
-        </div>
+        <!-- Toolbar removed (handled by BlockWrapper) -->
 
         <!-- Content Container -->
         <div :class="containerClass" class="relative z-[2] min-h-[100px] h-full flex flex-col">
@@ -53,24 +36,25 @@
                         @edit="onEditBlock(block.id)"
                         @duplicate="onDuplicateNested(index)"
                         @delete="onDeleteNested(index)"
+                        @wrap="onWrapNested(index)"
+                        @split="onSplitNested(index)"
                     />
                 </template>
 
                 <template #footer>
                      <div v-if="nestedBlocks.length === 0" class="flex-1 flex flex-col items-center justify-center p-6 text-center relative z-[20]">
-                        <button 
+                        <div 
                             @click.stop.prevent="showBlockPicker = true"
-                            type="button"
                             class="flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 hover:bg-primary/5 transition-all group cursor-pointer w-full h-full justify-center min-h-[100px]"
                         >
                             <div class="w-12 h-12 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                                 <Plus class="w-6 h-6 text-muted-foreground group-hover:text-primary" />
                             </div>
                             <div class="space-y-1">
-                                <span class="text-xs font-bold text-muted-foreground group-hover:text-primary block">Add Row or Element</span>
+                                <span class="text-xs font-bold text-muted-foreground group-hover:text-primary block">Add Block</span>
                                 <span class="text-[10px] text-muted-foreground/70">Click to browse blocks</span>
                             </div>
-                        </button>
+                        </div>
                     </div>
                 </template>
             </draggable>
@@ -221,6 +205,50 @@ const onDuplicateNested = (index) => {
 const onDeleteNested = (index) => {
     if (!blockObject.value?.settings?.blocks) return;
     blockObject.value.settings.blocks.splice(index, 1);
+    builder?.takeSnapshot();
+};
+
+const onWrapNested = (index) => {
+    if (!blockObject.value?.settings?.blocks) return;
+    const original = blockObject.value.settings.blocks[index];
+    const container = {
+        id: generateUUID(),
+        type: 'container',
+        settings: {
+            direction: 'flex-col',
+            justify: 'justify-start',
+            align: 'items-start',
+            gap: 'gap-4',
+            padding: 'p-4',
+            blocks: [original]
+        }
+    };
+    blockObject.value.settings.blocks.splice(index, 1, container);
+    builder?.takeSnapshot();
+};
+
+const onSplitNested = (index) => {
+    if (!blockObject.value?.settings?.blocks) return;
+    const original = blockObject.value.settings.blocks[index];
+    
+    // Create a Columns block with proper grid distribution
+    const columns = {
+        id: generateUUID(),
+        type: 'columns',
+        settings: {
+            layout: '1-1',
+            columns: [
+                { blocks: [original] },
+                { blocks: [] }
+            ],
+            customWidths: [50, 50],
+            padding: 'py-0',
+            width: 'max-w-full',
+            bgColor: 'transparent',
+            radius: 'rounded-none'
+        }
+    };
+    blockObject.value.settings.blocks.splice(index, 1, columns);
     builder?.takeSnapshot();
 };
 </script>

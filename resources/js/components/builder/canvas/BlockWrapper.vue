@@ -9,7 +9,8 @@
         @contextmenu.prevent="!builder.isPreview.value && onContextMenu()"
     >
         <!-- Block Toolbar (Elementor/Divi Style) -->
-        <div v-if="!builder.isPreview.value" class="absolute -top-3.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-all z-30 flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-full px-1.5 py-1 shadow-xl scale-90 translate-y-1 group-hover/block:translate-y-0">
+        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 group-hover/block:opacity-100 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left"
+             :class="{ 'opacity-100': isSelected }">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
             <div class="w-px h-3 bg-zinc-200 mx-1"></div>
             <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="onEdit" title="Settings">
@@ -18,6 +19,14 @@
             <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="onDuplicate" :title="t('features.builder.properties.tooltips.duplicate')">
                 <Copy class="w-3 h-3" />
             </button>
+            <div class="w-px h-3 bg-zinc-200 mx-1"></div>
+            <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="emit('wrap')" title="Wrap in Container">
+                <Box class="w-3 h-3" />
+            </button>
+            <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="emit('split')" title="Split (Add Column)">
+                <Columns class="w-3 h-3" />
+            </button>
+            <div class="w-px h-3 bg-zinc-200 mx-1"></div>
             <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="onDelete" :title="t('features.builder.properties.tooltips.delete')">
                 <Trash2 class="w-3 h-3" />
             </button>
@@ -35,7 +44,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { GripVertical, Copy, Trash2, Settings2 } from 'lucide-vue-next';
+import { GripVertical, Copy, Trash2, Settings2, Box, Columns } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
 
 const props = defineProps({
@@ -45,7 +54,7 @@ const props = defineProps({
     isNested: { type: Boolean, default: false } // To handle logic diffs if needed
 });
 
-const emit = defineEmits(['edit', 'delete', 'duplicate']);
+const emit = defineEmits(['edit', 'delete', 'duplicate', 'wrap', 'split']);
 
 const builder = inject('builder');
 const { t } = useI18n();
