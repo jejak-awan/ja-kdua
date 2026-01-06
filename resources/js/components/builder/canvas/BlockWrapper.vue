@@ -35,8 +35,9 @@
         <!-- Live Rendering of Block -->
         <div class="relative">
             <BlockRenderer :blocks="[block]" :context="context" class="builder-render" />
-            <!-- Overlay for clicks since blocks might have links -->
-            <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5]"></div>
+            <!-- Overlay to capture clicks (prevents clicking links inside blocks) -->
+            <!-- Uses pointer-events-none so drag-drop passes through to nested components -->
+            <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
         </div>
     </div>
 </template>
