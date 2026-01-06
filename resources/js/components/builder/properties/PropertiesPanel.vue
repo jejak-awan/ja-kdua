@@ -371,6 +371,7 @@
         <!-- Back to Top Button (Floating Sticky) -->
         <BackToTop 
             :show="showBackToTop && builder.isRightSidebarOpen.value" 
+            positionClass="bottom-16 left-1/2 -translate-x-1/2"
             @click="scrollToTop" 
         />
     </div>
