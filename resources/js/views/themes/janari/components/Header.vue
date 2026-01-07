@@ -102,7 +102,7 @@
                                             <template v-for="child in colItems" :key="child.id">
                                                 <!-- Group Item (Level 1 has children) -->
                                                 <div v-if="child.children && child.children.length > 0" class="mb-6 last:mb-0">
-                                                    <div class="flex items-center gap-2 mb-2 px-2">
+                                                    <div v-if="!child.hide_label" class="flex items-center gap-2 mb-2 px-2">
                                                         <component v-if="child.icon" :is="getIconComponent(child.icon)" class="w-4 h-4 text-primary" />
                                                         <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ child.title }}</span>
                                                     </div>

@@ -176,6 +176,14 @@
                                     </SelectContent>
                                 </Select>
                             </div>
+
+                             <div class="space-y-1.5" v-if="level === 1">
+                                <Label class="text-xs font-medium">Display</Label>
+                                <div class="flex items-center space-x-2 pt-1">
+                                    <Switch :checked="element.hide_label" @update:checked="(val) => element.hide_label = val" />
+                                    <Label class="text-xs font-normal text-muted-foreground">Hide Label</Label>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="space-y-4">

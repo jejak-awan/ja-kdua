@@ -32,11 +32,13 @@ class MenuItem extends Model
         'sort_order',
         'open_in_new_tab',
         'is_active',
+        'hide_label',
     ];
 
     protected $casts = [
         'open_in_new_tab' => 'boolean',
         'is_active' => 'boolean',
+        'hide_label' => 'boolean',
     ];
 
     public function menu(): BelongsTo

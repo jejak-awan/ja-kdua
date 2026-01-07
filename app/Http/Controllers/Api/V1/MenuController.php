@@ -231,7 +231,7 @@ class MenuController extends BaseApiController
             $optionalFields = [
                 'title', 'url', 'icon', 'css_class', 'description', 
                 'badge', 'badge_color', 'open_in_new_tab', 'image',
-                'mega_menu_layout', 'mega_menu_column'
+                'mega_menu_layout', 'mega_menu_column', 'hide_label'
             ];
             foreach ($optionalFields as $field) {
                 if (array_key_exists($field, $itemData)) {
