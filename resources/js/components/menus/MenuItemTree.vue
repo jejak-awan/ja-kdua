@@ -134,7 +134,7 @@
                             <IconPicker v-model="element.icon" placeholder="Choose icon..." />
                         </div>
 
-                        <div class="space-y-1.5 md:col-span-1">
+                        <div class="space-y-1.5 md:col-span-1" v-if="level === 0">
                             <Label class="text-xs font-medium">Layout</Label>
                              <Select v-model="element.mega_menu_layout">
                                 <SelectTrigger class="h-8 bg-background">
@@ -160,6 +160,21 @@
                                     class="min-h-[60px] bg-background text-sm"
                                     placeholder="Subtitle text..."
                                 />
+                            </div>
+                             <div class="space-y-1.5" v-if="level === 1">
+                                <Label class="text-xs font-medium">Target Column</Label>
+                                <Select v-model="element.mega_menu_column">
+                                    <SelectTrigger class="h-8 bg-background">
+                                        <SelectValue placeholder="Auto" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="0">Auto</SelectItem>
+                                        <SelectItem :value="1">Column 1</SelectItem>
+                                        <SelectItem :value="2">Column 2</SelectItem>
+                                        <SelectItem :value="3">Column 3</SelectItem>
+                                        <SelectItem :value="4">Column 4</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         
@@ -218,112 +233,17 @@
                         class="border-l-2 pl-3 min-h-[40px] transition-colors"
                         :class="element.children && element.children.length > 0 ? 'border-primary/30' : 'border-dashed border-muted-foreground/20'"
                     >
-                        <!-- Nested draggable for children -->
-                        <draggable
-                            :list="ensureChildren(element)"
-                            group="menu"
-                            :item-key="getItemKey"
+                        <!-- Recursive Children Tree -->
+                        <MenuItemTree
+                            :items="ensureChildren(element)"
+                            :all-items="allItems"
+                            :level="level + 1"
                             class="min-h-[36px] rounded-lg transition-colors"
                             :class="(!element.children || element.children.length === 0) ? 'bg-muted/20 border border-dashed border-muted-foreground/20 flex items-center justify-center' : 'space-y-2'"
-                            handle=".drag-handle"
-                            ghost-class="ghost"
                             @change="handleChange"
-                        >
-                            <template #item="{ element: child }">
-                                <!-- Recursive child item -->
-                                <div class="border border-border rounded-lg bg-card shadow-sm">
-                                    <div class="flex items-center justify-between p-2.5 bg-card rounded-lg hover:bg-muted/30 transition-colors">
-                                        <div class="flex items-center space-x-2 flex-1 overflow-hidden">
-                                            <div class="drag-handle cursor-move text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-colors">
-                                                <GripVertical class="w-3.5 h-3.5" />
-                                            </div>
-                                            <div v-if="child.icon" class="w-6 h-6 rounded bg-primary/10 flex items-center justify-center shrink-0">
-                                                <component :is="getIconComponent(child.icon)" class="w-3.5 h-3.5 text-primary" />
-                                            </div>
-                                            <div class="flex flex-col gap-0.5 overflow-hidden">
-                                                <div class="font-medium text-xs truncate flex items-center gap-1.5">
-                                                    {{ child.title || child.label }}
-                                                    <Badge variant="outline" class="text-[9px] px-1 py-0 h-3.5 capitalize font-normal">{{ child.type }}</Badge>
-                                                    <Badge v-if="child.badge" :variant="child.badge_color || 'default'" class="text-[9px] px-1 py-0 h-3.5">{{ child.badge }}</Badge>
-                                                </div>
-                                                <div v-if="child.description" class="text-[9px] text-muted-foreground truncate">{{ child.description }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-0.5">
-                                            <Button variant="ghost" size="sm" @click="toggleEdit(child)" class="h-7 w-7 p-0" :class="{ 'bg-muted': child._isEditing }">
-                                                <ChevronDown class="w-3.5 h-3.5" :class="{ 'rotate-180': child._isEditing }" />
-                                            </Button>
-                                            <Button variant="ghost" size="sm" @click="$emit('delete', child)" class="h-7 w-7 p-0 text-destructive hover:bg-destructive/10">
-                                                <Trash2 class="w-3.5 h-3.5" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <!-- Child Edit Panel -->
-                                    <div v-if="child._isEditing" class="border-t p-3 bg-muted/10 space-y-3">
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Label</Label>
-                                                <Input v-model="child.title" class="h-7 text-xs" />
-                                            </div>
-                                            <div class="space-y-1" v-if="child.type === 'custom'">
-                                                <Label class="text-[10px]">URL</Label>
-                                                <Input v-model="child.url" class="h-7 text-xs" />
-                                            </div>
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Icon</Label>
-                                                <IconPicker v-model="child.icon" placeholder="Icon..." />
-                                            </div>
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Description</Label>
-                                                <Input v-model="child.description" class="h-7 text-xs" placeholder="Subtitle..." />
-                                            </div>
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Target Column</Label>
-                                                <Select v-model="child.mega_menu_column">
-                                                    <SelectTrigger class="h-7 text-xs"><SelectValue placeholder="Auto" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem :value="0">Auto</SelectItem>
-                                                        <SelectItem :value="1">Col 1</SelectItem>
-                                                        <SelectItem :value="2">Col 2</SelectItem>
-                                                        <SelectItem :value="3">Col 3</SelectItem>
-                                                        <SelectItem :value="4">Col 4</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-3">
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Badge</Label>
-                                                <Input v-model="child.badge" class="h-7 text-xs" placeholder="NEW" />
-                                            </div>
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">Badge Color</Label>
-                                                <Select v-model="child.badge_color">
-                                                    <SelectTrigger class="h-7 text-xs"><SelectValue placeholder="Color" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="default">Default</SelectItem>
-                                                        <SelectItem value="primary">Primary</SelectItem>
-                                                        <SelectItem value="destructive">Red</SelectItem>
-                                                        <SelectItem value="success">Green</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div class="space-y-1">
-                                                <Label class="text-[10px]">New Tab</Label>
-                                                <div class="flex items-center h-7">
-                                                    <Switch :checked="child.open_in_new_tab" @update:checked="(val) => child.open_in_new_tab = val" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </draggable>
-                        <!-- Empty state hint -->
-                        <div v-if="!element.children || element.children.length === 0" class="text-[10px] text-muted-foreground py-2 text-center select-none">
-                            <CornerDownRight class="w-3 h-3 inline mr-1 opacity-50" />
-                            Drop here to nest
-                        </div>
+                            @delete="(item) => $emit('delete', item)"
+                            @parent-change="(payload) => $emit('parent-change', payload)"
+                        />
                     </div>
                 </div>
             </div>
@@ -352,6 +272,10 @@ import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
 
+defineOptions({
+  name: 'MenuItemTree'
+});
+
 const props = defineProps({
     items: {
         type: Array,
@@ -361,6 +285,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    level: {
+        type: Number,
+        default: 0
+    }
 });
 
 const emit = defineEmits(['delete', 'change', 'parent-change']);

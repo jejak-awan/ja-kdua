@@ -99,35 +99,60 @@
                                             :key="colIndex" 
                                             class="flex flex-col gap-2"
                                         >
-                                            <router-link
-                                                v-for="child in colItems"
-                                                :key="child.id"
-                                                :to="child.url || '/'"
-                                                :target="child.open_in_new_tab ? '_blank' : null"
-                                                class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
-                                            >
-                                                <div 
-                                                    v-if="child.icon"
-                                                    class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
-                                                >
-                                                    <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
-                                                        <span 
-                                                            v-if="child.badge"
-                                                            class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
-                                                            :class="getBadgeClasses(child.badge_color)"
-                                                        >
-                                                            {{ child.badge }}
-                                                        </span>
+                                            <template v-for="child in colItems" :key="child.id">
+                                                <!-- Group Item (Level 1 has children) -->
+                                                <div v-if="child.children && child.children.length > 0" class="mb-6 last:mb-0">
+                                                    <div class="flex items-center gap-2 mb-2 px-2">
+                                                        <component v-if="child.icon" :is="getIconComponent(child.icon)" class="w-4 h-4 text-primary" />
+                                                        <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ child.title }}</span>
                                                     </div>
-                                                    <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                                        {{ child.description }}
-                                                    </p>
+                                                    <div class="flex flex-col gap-1">
+                                                        <router-link
+                                                            v-for="subChild in child.children"
+                                                            :key="subChild.id"
+                                                            :to="subChild.url || '/'"
+                                                            :target="subChild.open_in_new_tab ? '_blank' : null"
+                                                            class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors group/subitem"
+                                                        >
+                                                            <div 
+                                                                v-if="subChild.icon"
+                                                                class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/subitem:bg-primary/20 transition-colors"
+                                                            >
+                                                                <component :is="getIconComponent(subChild.icon)" class="w-4 h-4 text-primary" />
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="font-medium text-sm text-foreground">{{ subChild.title }}</span>
+                                                                    <span v-if="subChild.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(subChild.badge_color)">{{ subChild.badge }}</span>
+                                                                </div>
+                                                                <p v-if="subChild.description" class="text-xs text-muted-foreground line-clamp-1">{{ subChild.description }}</p>
+                                                            </div>
+                                                        </router-link>
+                                                    </div>
                                                 </div>
-                                            </router-link>
+                                                
+                                                <!-- Direct Link Item (No children) -->
+                                                <router-link
+                                                    v-else
+                                                    :to="child.url || '/'"
+                                                    :target="child.open_in_new_tab ? '_blank' : null"
+                                                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                                >
+                                                    <div 
+                                                        v-if="child.icon"
+                                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                                    >
+                                                        <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                            <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
+                                                        </div>
+                                                        <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">{{ child.description }}</p>
+                                                    </div>
+                                                </router-link>
+                                            </template>
                                         </div>
                                     </template>
 
