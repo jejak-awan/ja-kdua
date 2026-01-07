@@ -116,6 +116,38 @@
             "default": "/register",
             "category": "Layout"
         },
+        "nav_style": {
+            "label": "Navigation Style",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Minimal (Clean)",
+                    "value": "minimal"
+                },
+                {
+                    "label": "Pill (Rounded Background)",
+                    "value": "pill"
+                },
+                {
+                    "label": "Underline (Animated)",
+                    "value": "underline"
+                },
+                {
+                    "label": "Glow (Neon Effect)",
+                    "value": "glow"
+                },
+                {
+                    "label": "Boxed (Bordered)",
+                    "value": "boxed"
+                },
+                {
+                    "label": "Gradient (Color Shift)",
+                    "value": "gradient"
+                }
+            ],
+            "default": "pill",
+            "category": "Layout"
+        },
         "hero_title": {
             "label": "Hero Title",
             "type": "text",

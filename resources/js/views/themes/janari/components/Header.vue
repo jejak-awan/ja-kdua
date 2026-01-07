@@ -72,9 +72,7 @@
                             v-if="item.children && item.children.length > 0"
                             class="relative group"
                         >
-                            <button 
-                                class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted/50"
-                            >
+                            <button :class="getNavItemClasses(false)">
                                 <component 
                                     v-if="item.icon" 
                                     :is="getIconComponent(item.icon)" 
@@ -128,8 +126,8 @@
                             v-else
                             :to="item.url || '/'"
                             :target="item.open_in_new_tab ? '_blank' : null"
-                            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted/50"
-                            active-class="text-primary bg-muted/50"
+                            :class="getNavItemClasses(false)"
+                            :active-class="getNavItemClasses(true)"
                         >
                             <component 
                                 v-if="item.icon" 
@@ -144,6 +142,8 @@
                             >
                                 {{ item.badge }}
                             </span>
+                            <!-- Underline indicator -->
+                            <span v-if="navStyle === 'underline'" class="nav-underline"></span>
                         </router-link>
                     </template>
                 </nav>
@@ -269,6 +269,49 @@ const headerStyleClasses = computed(() => {
     }
 });
 
+// Navigation Style
+const navStyle = computed(() => getSetting('nav_style', 'pill'));
+
+const getNavItemClasses = (isActive) => {
+    const baseClasses = 'flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all duration-200 relative';
+    
+    const styles = {
+        // Minimal - Clean, subtle hover
+        minimal: {
+            base: `${baseClasses} text-muted-foreground hover:text-foreground`,
+            active: 'text-foreground font-semibold'
+        },
+        // Pill - Rounded background on hover
+        pill: {
+            base: `${baseClasses} text-muted-foreground hover:text-primary rounded-full hover:bg-primary/10`,
+            active: 'text-primary bg-primary/10 rounded-full font-semibold'
+        },
+        // Underline - Animated bottom border
+        underline: {
+            base: `${baseClasses} text-muted-foreground hover:text-foreground nav-underline-item`,
+            active: 'text-foreground nav-underline-active'
+        },
+        // Glow - Neon glow effect
+        glow: {
+            base: `${baseClasses} text-muted-foreground hover:text-primary hover:drop-shadow-[0_0_8px_hsl(var(--primary))]`,
+            active: 'text-primary drop-shadow-[0_0_12px_hsl(var(--primary))] font-semibold'
+        },
+        // Boxed - Bordered container
+        boxed: {
+            base: `${baseClasses} text-muted-foreground hover:text-foreground border border-transparent hover:border-border rounded-lg hover:bg-muted/30`,
+            active: 'text-foreground border-primary/50 bg-primary/5 rounded-lg'
+        },
+        // Gradient - Color shift gradient
+        gradient: {
+            base: `${baseClasses} text-muted-foreground hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-primary hover:to-purple-500 rounded-lg hover:bg-primary/5`,
+            active: 'text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 font-semibold'
+        }
+    };
+    
+    const currentStyle = styles[navStyle.value] || styles.pill;
+    return isActive ? currentStyle.active : currentStyle.base;
+};
+
 // Mega Menu Helpers
 const getIconComponent = (iconName) => {
     return LucideIcons[iconName] || null;
@@ -294,3 +337,50 @@ onMounted(() => {
 const navItems = computed(() => menus.value['header']?.items || []);
 const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 </script>
+
+<style scoped>
+/* Underline Navigation Style */
+.nav-underline-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.nav-underline-item:hover::after {
+    width: 100%;
+}
+
+.nav-underline-active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+    border-radius: 2px;
+}
+
+.nav-underline {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.router-link-active .nav-underline,
+:hover > .nav-underline {
+    width: 80%;
+}
+</style>
