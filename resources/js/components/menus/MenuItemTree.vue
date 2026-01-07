@@ -1,7 +1,7 @@
 <template>
     <draggable
         :list="items"
-        group="menu"
+        :group="{ name: 'menu' }"
         :item-key="getItemKey"
         class="space-y-3 min-h-[50px] pb-2"
         handle=".drag-handle"

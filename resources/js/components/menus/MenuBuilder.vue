@@ -53,8 +53,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 <!-- Left Column: Source Items (Sticky) -->
-                <div class="lg:col-span-4 lg:sticky lg:top-4 space-y-4">
-                    <Card class="border-t-4 border-t-primary/20">
+                <div class="lg:sticky lg:top-4 space-y-4 transition-all duration-300" :class="isSidebarCollapsed ? 'lg:col-span-1' : 'lg:col-span-4'">
+                    <Button variant="outline" size="sm" class="mb-2 w-full" @click="isSidebarCollapsed = !isSidebarCollapsed">
+                        {{ isSidebarCollapsed ? 'Show' : 'Hide Sidebar' }}
+                    </Button>
+                    <Card v-show="!isSidebarCollapsed" class="border-t-4 border-t-primary/20">
                         <CardHeader class="pb-3">
                             <CardTitle class="text-base">{{ t('features.menus.form.addItems') }}</CardTitle>
                         </CardHeader>
@@ -67,6 +70,7 @@
                                             <FileText class="w-4 h-4 text-primary" />
                                             <span>{{ t('features.menus.form.types.page') }}</span>
                                             <Badge variant="secondary" class="ml-2">{{ pages.length }}</Badge>
+                                            <Button size="icon" variant="ghost" class="ml-auto h-6 w-6" title="Add All" @click.stop="addAll('page')"><Plus class="w-3 h-3" /></Button>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent class="px-4 pb-4">
@@ -99,6 +103,7 @@
                                             <File class="w-4 h-4 text-orange-500" />
                                             <span>{{ t('features.menus.form.types.post') }}</span>
                                             <Badge variant="secondary" class="ml-2">{{ posts.length }}</Badge>
+                                            <Button size="icon" variant="ghost" class="ml-auto h-6 w-6" title="Add All" @click.stop="addAll('post')"><Plus class="w-3 h-3" /></Button>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent class="px-4 pb-4">
@@ -131,6 +136,7 @@
                                             <Tag class="w-4 h-4 text-blue-500" />
                                             <span>{{ t('features.menus.form.types.category') }}</span>
                                             <Badge variant="secondary" class="ml-2">{{ categories.length }}</Badge>
+                                            <Button size="icon" variant="ghost" class="ml-auto h-6 w-6" title="Add All" @click.stop="addAll('category')"><Plus class="w-3 h-3" /></Button>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent class="px-4 pb-4">
@@ -187,20 +193,30 @@
                 </div>
 
                 <!-- Right Column: Menu Structure -->
-                <div class="lg:col-span-8 space-y-4">
+                <div class="space-y-4 transition-all duration-300" :class="isSidebarCollapsed ? 'lg:col-span-11' : 'lg:col-span-8'">
                     <Card class="min-h-[600px] flex flex-col">
                         <CardHeader class="flex flex-row items-center justify-between border-b pb-4">
                             <span class="text-xs text-muted-foreground mr-2">
                                 {{ t('features.menus.messages.dragHelp') }}
                             </span>
-                             <Button
-                                size="sm"
-                                variant="outline"
-                                @click="addMenuItem"
-                            >
+                             <div class="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    @click="addColumnGroup"
+                                >
+                                    <PlusCircle class="w-4 h-4 mr-2" />
+                                    Add Column Group
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    @click="addMenuItem"
+                                >
                                 <Plus class="w-4 h-4 mr-2" />
                                 {{ t('features.menus.actions.createItem') }}
                             </Button>
+                        </div>
                         </CardHeader>
                         <CardContent class="flex-1 bg-muted/10 p-6 relative">
                             <div v-if="nestedItems.length === 0" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
@@ -431,6 +447,28 @@ const saveTree = async (items, parentId) => {
     }
     const reordered = flattenTree(nestedItems.value);
     await api.post(`/admin/ja/menus/${props.menuId}/reorder`, { items: reordered });
+};
+
+const isSidebarCollapsed = ref(false);
+
+const addAll = (type) => {
+    let source = [];
+    if (type === 'page') source = pages.value;
+    if (type === 'post') source = posts.value;
+    if (type === 'category') source = categories.value;
+
+    if (source.length === 0) return;
+
+    source.forEach(item => {
+        nestedItems.value.push(cloneSourceItem(item, type));
+    });
+    toast.success(`Added ${source.length} items to menu`);
+};
+
+const addColumnGroup = () => {
+    const group = cloneSourceItem({ title: 'New Column', url: '#' }, 'custom');
+    nestedItems.value.push(group);
+    toast.success('Column Group added');
 };
 
 const addMenuItem = () => {
