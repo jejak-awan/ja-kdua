@@ -175,21 +175,6 @@
                                     <p class="text-[10px] text-muted-foreground">Override the admin label for the frontend. Use the switch below to hide.</p>
                                 </div>
                             </div>
-                             <div class="space-y-1.5" v-if="level === 1">
-                                <Label class="text-xs font-medium">Target Column</Label>
-                                <Select v-model="element.mega_menu_column">
-                                    <SelectTrigger class="h-8 bg-background">
-                                        <SelectValue placeholder="Auto" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem :value="0">Auto</SelectItem>
-                                        <SelectItem :value="1">Column 1</SelectItem>
-                                        <SelectItem :value="2">Column 2</SelectItem>
-                                        <SelectItem :value="3">Column 3</SelectItem>
-                                        <SelectItem :value="4">Column 4</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
 
                              <div class="space-y-1.5" v-if="level === 1">
                                 <Label class="text-xs font-medium">Display</Label>
@@ -225,7 +210,7 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <Label class="text-xs font-medium">Image URL (Mega Menu)</Label>
+                                <Label class="text-xs font-medium">Promotional Image</Label>
                                 <Input v-model="element.image" class="h-8 bg-background" placeholder="https://..." />
                             </div>
 
@@ -261,7 +246,7 @@
                             :all-items="allItems"
                             :level="level + 1"
                             class="min-h-[36px] rounded-lg transition-colors"
-                            :class="(!element.children || element.children.length === 0) ? 'bg-muted/20 border border-dashed border-muted-foreground/20 flex items-center justify-center' : 'space-y-2'"
+                            :class="(!element.children || element.children.length === 0) ? 'bg-muted/20 border border-dashed border-muted-foreground/20 flex items-center justify-center' : getGridClass(element.mega_menu_layout)"
                             @change="handleChange"
                             @delete="(item) => $emit('delete', item)"
                             @parent-change="(payload) => $emit('parent-change', payload)"
@@ -293,6 +278,14 @@ import { GripVertical, Trash2, ChevronDown, CornerDownRight, FolderTree, Home } 
 import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
+
+const getGridClass = (layout) => {
+    if (!layout) return 'space-y-2';
+    if (layout === 'grid-2') return 'grid grid-cols-2 gap-4';
+    if (layout === 'grid-3') return 'grid grid-cols-3 gap-4';
+    if (layout === 'full') return 'grid grid-cols-4 gap-4';
+    return 'space-y-2';
+};
 
 defineOptions({
   name: 'MenuItemTree'
