@@ -104,6 +104,18 @@
             "default": "glass",
             "category": "Layout"
         },
+        "header_cta_text": {
+            "label": "Header CTA Button Text",
+            "type": "text",
+            "default": "Get Started",
+            "category": "Layout"
+        },
+        "header_cta_url": {
+            "label": "Header CTA Button URL",
+            "type": "text",
+            "default": "/register",
+            "category": "Layout"
+        },
         "hero_title": {
             "label": "Hero Title",
             "type": "text",

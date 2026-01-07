@@ -93,10 +93,10 @@
                         {{ $t('features.frontend.nav.signIn') }}
                     </router-link>
                     <router-link 
-                        to="/register"
+                        :to="headerCtaUrl"
                         class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-all shadow-lg transform hover:-translate-y-0.5"
                     >
-                        {{ $t('features.frontend.nav.getStarted') }}
+                        {{ headerCtaText }}
                     </router-link>
                 </div>
 
@@ -145,10 +145,10 @@
                             {{ $t('features.frontend.nav.signIn') }}
                         </router-link>
                         <router-link 
-                            to="/register"
+                            :to="headerCtaUrl"
                             class="w-full px-4 py-2.5 text-center text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-md"
                         >
-                            {{ $t('features.frontend.nav.getStarted') }}
+                            {{ headerCtaText }}
                         </router-link>
                     </div>
                 </div>
@@ -182,6 +182,8 @@ const { siteSettings } = cmsStore;
 const siteName = computed(() => getSetting('site_title') || siteSettings?.site_name || 'Janari');
 const siteLogo = computed(() => getSetting('brand_logo') || siteSettings?.site_logo || '');
 const siteVersion = computed(() => siteSettings?.site_version || 'v1.0 Janari');
+const headerCtaText = computed(() => getSetting('header_cta_text', 'Get Started'));
+const headerCtaUrl = computed(() => getSetting('header_cta_url', '/register'));
 
 const headerStyleClasses = computed(() => {
     switch (headerStyle.value) {
