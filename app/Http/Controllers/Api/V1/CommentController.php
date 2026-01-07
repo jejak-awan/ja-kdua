@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 
 class CommentController extends BaseApiController
 {
+    protected $securityService;
+
+    public function __construct(\App\Services\CommentSecurityService $securityService)
+    {
+        $this->securityService = $securityService;
+    }
+
     public function index(Content $content)
     {
         $comments = Comment::with(['user', 'replies' => function ($q) {
@@ -24,6 +31,11 @@ class CommentController extends BaseApiController
 
     public function store(Request $request, Content $content)
     {
+        // Check if comments are enabled for this content
+        if (!$content->comment_status) {
+            return $this->error('Comments are disabled for this content', 403);
+        }
+
         try {
             $validated = $request->validate([
                 'body' => 'required|string',
@@ -38,20 +50,29 @@ class CommentController extends BaseApiController
         // If user is authenticated, use user data
         if ($request->user()) {
             $validated['user_id'] = $request->user()->id;
+            $authorEmail = $request->user()->email;
         } else {
             // For guest comments, name and email are required
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
             ]);
+            $authorEmail = $validated['email'];
         }
 
+        // Security Checks
+        $isSpam = $this->securityService->isSpam($validated['body'], $authorEmail, $request->ip());
+        
         $validated['content_id'] = $content->id;
-        $validated['status'] = 'pending'; // All comments need approval
+        $validated['status'] = $this->securityService->getInitialStatus($isSpam);
 
         $comment = Comment::create($validated);
+        
+        $message = $comment->status === 'approved' 
+            ? 'Comment posted successfully' 
+            : ($comment->status === 'spam' ? 'Comment marked as spam' : 'Comment pending approval');
 
-        return $this->success($comment->load('user'), 'Comment created successfully', 201);
+        return $this->success($comment->load('user'), $message, 201);
     }
 
     public function adminIndex(Request $request)

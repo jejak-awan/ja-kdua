@@ -91,6 +91,7 @@ export default {
             type: 'color',
             label: 'Color',
             default: 'transparent',
+            condition: (s) => s.bgType === 'color',
             tab: 'style'
         },
         {
@@ -98,6 +99,7 @@ export default {
             type: 'image',
             label: 'Image',
             default: '',
+            condition: (s) => s.bgType === 'image',
             tab: 'style'
         },
         {
@@ -110,6 +112,7 @@ export default {
                 { label: 'Auto', value: 'auto' }
             ],
             default: 'cover',
+            condition: (s) => s.bgType === 'image',
             tab: 'style'
         },
         {
@@ -122,6 +125,7 @@ export default {
                 { label: 'Bottom', value: 'bottom' }
             ],
             default: 'center',
+            condition: (s) => s.bgType === 'image',
             tab: 'style'
         },
         // Gradient props
@@ -130,6 +134,7 @@ export default {
             type: 'color',
             label: 'Gradient Start',
             default: '#3b82f6',
+            condition: (s) => s.bgType === 'gradient',
             tab: 'style'
         },
         {
@@ -137,6 +142,7 @@ export default {
             type: 'color',
             label: 'Gradient End',
             default: '#8b5cf6',
+            condition: (s) => s.bgType === 'gradient',
             tab: 'style'
         },
         {
@@ -149,6 +155,7 @@ export default {
                 { label: 'To Bottom Right', value: 'to bottom right' }
             ],
             default: 'to right',
+            condition: (s) => s.bgType === 'gradient',
             tab: 'style'
         },
 

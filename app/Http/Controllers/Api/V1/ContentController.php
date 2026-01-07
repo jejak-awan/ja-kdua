@@ -193,6 +193,7 @@ class ContentController extends BaseApiController
                 'new_tags' => 'nullable|array',
                 'new_tags.*' => 'string|max:50',
                 'blocks' => 'nullable|array',
+                'comment_status' => 'boolean',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -257,6 +258,7 @@ class ContentController extends BaseApiController
                 'new_tags' => 'nullable|array',
                 'new_tags.*' => 'string|max:50',
                 'blocks' => 'nullable|array',
+                'comment_status' => 'boolean',
             ];
 
             // If publishing, require body OR blocks

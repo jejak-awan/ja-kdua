@@ -34,6 +34,7 @@ class Content extends Model
         'locked_by',
         'locked_at',
         'blocks',
+        'comment_status',
     ];
 
     protected $casts = [

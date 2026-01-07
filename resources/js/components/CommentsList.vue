@@ -35,6 +35,32 @@
                         </div>
                         <p class="text-foreground">{{ comment.body }}</p>
                         
+                        <!-- Actions -->
+                        <div class="mt-2">
+                            <button 
+                                @click="activeReplyId = activeReplyId === comment.id ? null : comment.id"
+                                class="text-sm text-primary hover:underline font-medium flex items-center"
+                            >
+                                {{ $t('features.comments.reply') }}
+                            </button>
+                        </div>
+
+                        <!-- Reply Form -->
+                        <div v-if="activeReplyId === comment.id" class="mt-4">
+                            <CommentForm 
+                                :content-id="contentId" 
+                                :parent-id="comment.id"
+                                @submitted="handleReplySubmitted"
+                                class="border-l-4 border-primary/20 pl-4"
+                            />
+                            <button 
+                                @click="activeReplyId = null"
+                                class="text-xs text-muted-foreground hover:text-foreground mt-2 ml-4"
+                            >
+                                {{ $t('common.actions.cancel') }}
+                            </button>
+                        </div>
+                        
                         <!-- Replies -->
                         <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 space-y-4">
                             <div
@@ -74,6 +100,7 @@ import { Loader2 } from 'lucide-vue-next';
 import Avatar from './ui/avatar.vue';
 import AvatarImage from './ui/avatar-image.vue';
 import AvatarFallback from './ui/avatar-fallback.vue';
+import CommentForm from './CommentForm.vue';
 
 const props = defineProps({
     contentId: {
@@ -85,6 +112,7 @@ const props = defineProps({
 const { t } = useI18n();
 const comments = ref([]);
 const loading = ref(true);
+const activeReplyId = ref(null);
 
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -106,6 +134,11 @@ const fetchComments = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const handleReplySubmitted = () => {
+    activeReplyId.value = null;
+    fetchComments();
 };
 
 onMounted(() => {

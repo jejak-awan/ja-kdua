@@ -66,7 +66,9 @@
         "switchModeTitle": "Ganti Mode Editor",
         "switchModeDescription": "Anda akan beralih ke mode editor yang berbeda. Konten disimpan terpisah untuk setiap mode.",
         "switchToBuilderWarning": "Konten editor klasik Anda akan tetap tersimpan, tetapi tidak akan terlihat di builder. Builder akan mulai kosong kecuali Anda sudah menambahkan blok sebelumnya.",
-        "switchToClassicWarning": "Blok builder Anda akan tetap tersimpan, tetapi tidak akan terlihat di editor klasik. Editor klasik akan menampilkan konten yang tersimpan sebelumnya atau kosong."
+        "switchToClassicWarning": "Blok builder Anda akan tetap tersimpan, tetapi tidak akan terlihat di editor klasik. Editor klasik akan menampilkan konten yang tersimpan sebelumnya atau kosong.",
+        "discussion": "Diskusi",
+        "allowCommentsDesc": "Aktifkan atau nonaktifkan komentar untuk item konten ini."
     },
     "seo": {
         "metaTitle": "Judul SEO",

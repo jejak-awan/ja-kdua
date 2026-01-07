@@ -319,6 +319,43 @@
             </div>
         </div>
 
+        <!-- Discussion Settings -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden">
+            <button 
+                type="button"
+                @click="sections.discussion = !sections.discussion"
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+            >
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 rounded-md bg-orange-500/10 text-orange-500">
+                        <MessageSquare class="w-3.5 h-3.5" />
+                    </div>
+                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.discussion') }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                     <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-orange-500/10 text-orange-500 border-orange-500/20">
+                        Disabled
+                    </Badge>
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.discussion }"
+                    />
+                </div>
+            </button>
+            <div v-show="sections.discussion" class="border-t border-border p-4">
+                <div class="flex items-center justify-between border rounded-md p-3">
+                    <div class="space-y-0.5">
+                        <Label class="text-xs font-medium">{{ $t('features.content.form.allowComments') }}</Label>
+                        <p class="text-[10px] text-muted-foreground">{{ $t('features.content.form.allowCommentsDesc') }}</p>
+                    </div>
+                    <Switch
+                        :checked="!!modelValue.comment_status"
+                        @update:checked="(val) => updateField('comment_status', val)"
+                    />
+                </div>
+            </div>
+        </div>
+
         <!-- SEO Settings -->
         <div class="bg-card border border-border rounded-lg overflow-hidden">
             <button 
@@ -409,7 +446,7 @@ import SelectValue from '@/components/ui/select-value.vue';
 import Badge from '@/components/ui/badge.vue';
 import Button from '@/components/ui/button.vue';
 import Switch from '@/components/ui/switch.vue';
-import { X, ChevronDown, FileCheck, Tags, FileText, Search, Image as ImageIcon, MenuSquare } from 'lucide-vue-next';
+import { X, ChevronDown, FileCheck, Tags, FileText, Search, Image as ImageIcon, MenuSquare, MessageSquare } from 'lucide-vue-next';
 import FeaturedImage from './FeaturedImage.vue';
 import MediaPicker from '../MediaPicker.vue';
 
@@ -422,7 +459,8 @@ const sections = ref({
     taxonomy: true,
     image: false,
     excerpt: false,
-    seo: false
+    seo: false,
+    discussion: false
 });
 
 // Tag input state

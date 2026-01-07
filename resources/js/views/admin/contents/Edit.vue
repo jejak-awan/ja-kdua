@@ -203,7 +203,8 @@ const form = ref({
         parent_id: null,
         title: ''
     },
-    blocks: []
+    blocks: [],
+    comment_status: true
 });
 
 const isDirty = computed(() => {
@@ -291,7 +292,8 @@ const fetchContent = async () => {
                 parent_id: null,
                 title: ''
             },
-            blocks: content.blocks || []
+            blocks: content.blocks || [],
+            comment_status: content.comment_status !== undefined ? content.comment_status : true
         };
 
         // Handle menu items

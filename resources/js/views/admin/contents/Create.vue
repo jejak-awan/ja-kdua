@@ -127,7 +127,8 @@ const form = ref({
         menu_id: '',
         parent_id: null,
         title: ''
-    }
+    },
+    comment_status: true
 });
 
 // Auto-generation logic

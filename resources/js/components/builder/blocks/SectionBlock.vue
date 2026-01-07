@@ -199,7 +199,9 @@ const wrapperStyle = computed(() => {
 
 const backgroundStyle = computed(() => {
     const style = {};
-    if (props.bgType === 'color') style.backgroundColor = props.bgColor;
+    // Always apply background color if present (allows fallback for images/gradients)
+    if (props.bgColor) style.backgroundColor = props.bgColor;
+    
     if (props.bgType === 'gradient') {
          style.backgroundImage = `linear-gradient(${props.gradientDirection || 'to right'}, ${props.gradientStart}, ${props.gradientEnd})`;
     }
