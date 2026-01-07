@@ -17,7 +17,7 @@
     <link rel="icon" href="{{ $faviconUrl }}">
 
     {{-- Blocking script - Apply dark mode class immediately BEFORE any CSS --}}
-    <script nonce="{{ $cspNonce ?? '' }}">
+    <script>
         (function() {
             const savedMode = localStorage.getItem('admin-dark-mode');
             const isDark = savedMode === 'dark' || 
@@ -29,14 +29,14 @@
         })();
     </script>
     
-    <script nonce="{{ $cspNonce ?? '' }}">
+    <script>
         window.siteConfig = {
             lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
         };
     </script>
 
     {{-- Critical CSS - Must match app.css exactly --}}
-    <style nonce="{{ $cspNonce ?? '' }}">
+    <style>
         /* CSS Custom Properties - Synced with app.css */
         :root {
             /* Light mode - Shadcn Zinc matches app.css */

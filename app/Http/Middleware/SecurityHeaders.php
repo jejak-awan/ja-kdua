@@ -16,15 +16,15 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Generate nonce and share with views BEFORE handling request
-        // $nonce = Str::random(32);
-        // View::share('cspNonce', $nonce);
-        // Vite::useCspNonce($nonce); // Disabled to fix unsafe-inline blocking issues
-
+        // JA-CMS CSP STRATEGY: STABILITY OVER STRICT NONCE
+        // We do NOT use Nonce because dynamic plugins, themes, and Vue/Vite splitting
+        // frequently break with strict nonce enforcement.
+        // We rely on 'unsafe-inline' + sanitization for security.
+        
         $response = $next($request);
 
         // Content Security Policy
-        $csp = $this->getContentSecurityPolicy(''); // Pass empty nonce
+        $csp = $this->getContentSecurityPolicy();
         $response->headers->set('Content-Security-Policy', $csp);
 
         // Remove server signature
@@ -36,7 +36,7 @@ class SecurityHeaders
     /**
      * Get Content Security Policy directives
      */
-    protected function getContentSecurityPolicy(string $nonce): string
+    protected function getContentSecurityPolicy(): string
     {
         $isLocal = app()->environment('local');
         $isDevelopment = app()->environment(['local', 'development']);
@@ -46,11 +46,12 @@ class SecurityHeaders
         ];
 
         // Script sources
+        // 'unsafe-inline' and 'unsafe-eval' are required for Vue/Vite and many plugins
         $scriptSrc = [
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
-            // "'nonce-{$nonce}'", // Nonce disables unsafe-inline, so we remove it to allow inline scripts if needed by libs
+            "https:",
         ];
 
         // Allow localhost for Vite dev server in development
