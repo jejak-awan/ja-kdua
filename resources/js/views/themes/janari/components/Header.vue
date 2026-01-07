@@ -231,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
@@ -369,12 +369,58 @@ const getMegaMenuLayoutClasses = (item) => {
     }
 };
 
+import { useRoute } from 'vue-router'; // Import useRoute manually since it might not be auto-imported
+
+const route = useRoute();
+
+// Dynamic Menu Location Logic
+const currentMenuLocation = computed(() => {
+    // 1. Priority: Route meta override
+    if (route.meta?.menu_location) {
+        return route.meta.menu_location;
+    }
+    
+    // 2. Special Case: Homepage
+    if (route.name === 'home' || route.path === '/') {
+        // We will try to fetch 'header_home' first, but logic needs to handle fallback.
+        // For simplicity in this implementation, we assume if user wants different menu for home,
+        // they create a menu location 'header_home'.
+        return 'header_home';
+    }
+
+    // 3. Default
+    return 'header';
+});
+
+// Watch route/location changes to fetch appropriate menu
+watch(currentMenuLocation, async (newLoc) => {
+    // Attempt to fetch specific menu
+    await fetchMenuByLocation(newLoc);
+    
+    // Fallback logic: If specific menu is empty/not found, fetch default 'header'
+    // Note: useMenu store needs to handle empty response gracefully or we check here
+    if (!menus.value[newLoc] || !menus.value[newLoc].items || menus.value[newLoc].items.length === 0) {
+        if (newLoc !== 'header') {
+            console.warn(`Menu location '${newLoc}' not found or empty. Falling back to 'header'.`);
+            await fetchMenuByLocation('header');
+        }
+    }
+}, { immediate: true });
+
 onMounted(() => {
-    fetchMenuByLocation('header');
+    // Initial fetch handled by watch immediate
     fetchMenuByLocation('header_top');
 });
 
-const navItems = computed(() => menus.value['header']?.items || []);
+const navItems = computed(() => {
+    const loc = currentMenuLocation.value;
+    // Return specific menu if exists and has items, otherwise fallback to 'header'
+    if (menus.value[loc] && menus.value[loc].items && menus.value[loc].items.length > 0) {
+        return menus.value[loc].items;
+    }
+    return menus.value['header']?.items || [];
+});
+
 const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 </script>
 
