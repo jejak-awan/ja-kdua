@@ -255,6 +255,6 @@ class MenuController extends BaseApiController
             return $this->success(null, 'No menu assigned to this location');
         }
 
-        return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
+        return $this->success($menu->load(['items.children.children']), 'Menu retrieved successfully');
     }
 }

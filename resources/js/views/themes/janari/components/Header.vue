@@ -146,7 +146,7 @@
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center gap-2">
-                                                            <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                            <span class="font-medium text-sm text-foreground">{{ child.heading || child.title }}</span>
                                                             <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
                                                         </div>
                                                         <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">{{ child.description }}</p>
