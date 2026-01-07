@@ -18,15 +18,30 @@
                             <GripVertical class="w-4 h-4" />
                         </div>
                         
+                        <!-- Icon Display -->
+                        <div v-if="element.icon" class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <component :is="getIconComponent(element.icon)" class="w-4 h-4 text-primary" />
+                        </div>
+                        
                         <!-- Title & Badges -->
-                        <div class="flex flex-col gap-1 overflow-hidden">
+                        <div class="flex flex-col gap-0.5 overflow-hidden">
                             <div class="font-medium text-sm truncate flex items-center gap-2">
                                 {{ element.title || element.label || t('common.labels.untitled') }}
                                 <Badge variant="outline" class="text-[10px] px-1.5 py-0 h-4 capitalize font-normal border-muted-foreground/30">
                                     {{ element.type }}
                                 </Badge>
+                                <Badge 
+                                    v-if="element.badge" 
+                                    :variant="element.badge_color || 'default'"
+                                    class="text-[10px] px-1.5 py-0 h-4"
+                                >
+                                    {{ element.badge }}
+                                </Badge>
                             </div>
-                            <div class="text-[10px] text-muted-foreground truncate" v-if="element.url && element.type === 'custom'">
+                            <div v-if="element.description" class="text-[10px] text-muted-foreground truncate max-w-[200px]">
+                                {{ element.description }}
+                            </div>
+                            <div v-else-if="element.url && element.type === 'custom'" class="text-[10px] text-muted-foreground truncate">
                                 {{ element.url }}
                             </div>
                         </div>
@@ -34,6 +49,9 @@
 
                     <!-- Actions -->
                     <div class="flex items-center gap-1">
+                        <Badge v-if="element.children && element.children.length > 0" variant="secondary" class="text-[10px] mr-1">
+                            {{ element.children.length }} sub
+                        </Badge>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -59,7 +77,8 @@
 
                 <!-- Inline Edit Form (Accordion Body) -->
                 <div v-if="element._isEditing" class="border-t border-border p-4 bg-muted/10 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Row 1: Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="space-y-1.5">
                             <Label class="text-xs font-medium">{{ t('features.menus.form.label') }}</Label>
                             <Input v-model="element.title" class="h-8 bg-background" />
@@ -71,17 +90,61 @@
                         </div>
 
                         <div class="space-y-1.5">
-                            <Label class="text-xs font-medium">{{ t('features.menus.form.cssClasses') }}</Label>
-                            <Input v-model="element.css_class" class="h-8 bg-background" :placeholder="t('features.menus.form.placeholders.cssClasses')" />
+                            <Label class="text-xs font-medium">Icon</Label>
+                            <IconPicker v-model="element.icon" placeholder="Choose icon..." />
                         </div>
-                         <div class="space-y-1.5">
-                            <Label class="text-xs font-medium">{{ t('features.menus.form.openInNewTab') }}</Label>
-                            <div class="flex items-center h-8">
-                                <Switch 
-                                    :checked="!!element.target" 
-                                    @update:checked="(val) => element.target = val ? '_blank' : null" 
-                                />
-                                <span class="ml-2 text-xs text-muted-foreground">{{ element.target === '_blank' ? t('common.labels.yes') : t('common.labels.no') }}</span>
+                    </div>
+
+                    <!-- Row 2: Mega Menu Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <Label class="text-xs font-medium">Description (Mega Menu)</Label>
+                            <Textarea 
+                                v-model="element.description" 
+                                class="min-h-[60px] bg-background text-sm"
+                                placeholder="Optional subtitle for mega menu dropdown..."
+                            />
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <Label class="text-xs font-medium">Badge Text</Label>
+                                    <Input v-model="element.badge" class="h-8 bg-background" placeholder="e.g. NEW" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <Label class="text-xs font-medium">Badge Color</Label>
+                                    <Select v-model="element.badge_color">
+                                        <SelectTrigger class="h-8">
+                                            <SelectValue placeholder="Color" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="default">Default</SelectItem>
+                                            <SelectItem value="primary">Primary</SelectItem>
+                                            <SelectItem value="secondary">Secondary</SelectItem>
+                                            <SelectItem value="destructive">Red</SelectItem>
+                                            <SelectItem value="success">Green</SelectItem>
+                                            <SelectItem value="warning">Yellow</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <Label class="text-xs font-medium">{{ t('features.menus.form.cssClasses') }}</Label>
+                                    <Input v-model="element.css_class" class="h-8 bg-background" :placeholder="t('features.menus.form.placeholders.cssClasses')" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <Label class="text-xs font-medium">{{ t('features.menus.form.openInNewTab') }}</Label>
+                                    <div class="flex items-center h-8">
+                                        <Switch 
+                                            :checked="element.open_in_new_tab" 
+                                            @update:checked="(val) => element.open_in_new_tab = val" 
+                                        />
+                                        <span class="ml-2 text-xs text-muted-foreground">{{ element.open_in_new_tab ? t('common.labels.yes') : t('common.labels.no') }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -89,7 +152,7 @@
 
                 <!-- Nested Children -->
                 <div class="pl-6 pr-2 pb-2" v-if="element.children && element.children.length > 0">
-                    <div class="border-l-2 border-border/50 pl-2">
+                    <div class="border-l-2 border-primary/20 pl-2">
                         <MenuItemTree
                             :items="element.children"
                             @delete="$emit('delete', $event)"
@@ -111,7 +174,15 @@ import Badge from '../ui/badge.vue';
 import Input from '../ui/input.vue';
 import Label from '../ui/label.vue';
 import Switch from '../ui/switch.vue';
-import { GripVertical, Pencil, Trash2, ChevronDown } from 'lucide-vue-next';
+import Textarea from '../ui/textarea.vue';
+import Select from '../ui/select.vue';
+import SelectTrigger from '../ui/select-trigger.vue';
+import SelectValue from '../ui/select-value.vue';
+import SelectContent from '../ui/select-content.vue';
+import SelectItem from '../ui/select-item.vue';
+import IconPicker from '../ui/icon-picker.vue';
+import { GripVertical, Trash2, ChevronDown } from 'lucide-vue-next';
+import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -123,6 +194,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['delete', 'change']);
+
+const getIconComponent = (iconName) => {
+    return LucideIcons[iconName] || LucideIcons.Circle;
+};
 
 const toggleEdit = (element) => {
     // Add reactivity if missing

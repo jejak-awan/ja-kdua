@@ -342,6 +342,14 @@ const flattenTree = (items, parentId = null) => {
             id: item.id,
             parent_id: parentId,
             sort_order: index,
+            title: item.title,
+            url: item.url,
+            icon: item.icon || null,
+            css_class: item.css_class || null,
+            description: item.description || null,
+            badge: item.badge || null,
+            badge_color: item.badge_color || 'primary',
+            open_in_new_tab: item.open_in_new_tab || false,
         });
         if (item.children && item.children.length > 0) {
             result = result.concat(flattenTree(item.children, item.id));
@@ -390,6 +398,12 @@ const saveTree = async (items, parentId) => {
                 type: item.type,
                 target_id: item.target_id,
                 url: item.url,
+                icon: item.icon || null,
+                css_class: item.css_class || null,
+                description: item.description || null,
+                badge: item.badge || null,
+                badge_color: item.badge_color || 'primary',
+                open_in_new_tab: item.open_in_new_tab || false,
                 is_active: item.is_active || 1,
                 sort_order: i, 
             };

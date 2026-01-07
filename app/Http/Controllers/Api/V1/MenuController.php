@@ -222,12 +222,22 @@ class MenuController extends BaseApiController
         ]);
 
         foreach ($request->items as $itemData) {
+            $updateData = [
+                'sort_order' => $itemData['sort_order'],
+                'parent_id' => $itemData['parent_id'] ?? null,
+            ];
+
+            // Include optional mega menu fields if present
+            $optionalFields = ['title', 'url', 'icon', 'css_class', 'description', 'badge', 'badge_color', 'open_in_new_tab'];
+            foreach ($optionalFields as $field) {
+                if (array_key_exists($field, $itemData)) {
+                    $updateData[$field] = $itemData[$field];
+                }
+            }
+
             MenuItem::where('id', $itemData['id'])
                 ->where('menu_id', $menu->id)
-                ->update([
-                    'sort_order' => $itemData['sort_order'],
-                    'parent_id' => $itemData['parent_id'] ?? null,
-                ]);
+                ->update($updateData);
         }
 
         return $this->success(null, 'Menu items reordered successfully');
