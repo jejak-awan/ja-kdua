@@ -123,7 +123,7 @@
 
                     <!-- Row 1: Basic Info & Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="space-y-1.5 md:col-span-1" v-if="level !== 1">
+                        <div class="space-y-1.5 md:col-span-1">
                             <Label class="text-xs font-medium">{{ t('features.menus.form.label') }}</Label>
                             <Input v-model="element.title" class="h-8 bg-background" />
                         </div>
@@ -169,8 +169,11 @@
                                 />
                             </div>
                              <div class="col-span-2 space-y-1.5" v-if="level === 1">
-                                <Label class="text-xs font-medium">Group Name</Label>
-                                <Input v-model="element.title" class="h-8 bg-background" placeholder="Group Name (e.g. Products)" />
+                                <Label class="text-xs font-medium">Public Divider Title</Label>
+                                <div class="space-y-1">
+                                    <Input v-model="element.heading" class="h-8 bg-background" placeholder="Visible title (e.g. Products). Leaves empty to use Label." />
+                                    <p class="text-[10px] text-muted-foreground">Override the admin label for the frontend. Use the switch below to hide.</p>
+                                </div>
                             </div>
                              <div class="space-y-1.5" v-if="level === 1">
                                 <Label class="text-xs font-medium">Target Column</Label>

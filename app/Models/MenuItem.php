@@ -33,6 +33,7 @@ class MenuItem extends Model
         'open_in_new_tab',
         'is_active',
         'hide_label',
+        'heading',
     ];
 
     protected $casts = [

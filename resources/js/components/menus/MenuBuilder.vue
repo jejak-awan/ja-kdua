@@ -356,6 +356,7 @@ const flattenTree = (items, parentId = null) => {
             open_in_new_tab: item.open_in_new_tab || false,
             image: item.image || null,
             hide_label: item.hide_label || false,
+            heading: item.heading || null,
         });
         if (item.children && item.children.length > 0) {
             result = result.concat(flattenTree(item.children, item.id));
@@ -415,6 +416,7 @@ const saveTree = async (items, parentId) => {
                 mega_menu_layout: item.mega_menu_layout || 'default',
                 mega_menu_column: item.mega_menu_column || 0,
                 hide_label: item.hide_label || false,
+                heading: item.heading || null,
                 sort_order: i, 
             };
             
@@ -593,6 +595,7 @@ const cloneSourceItem = (item, type) => {
         mega_menu_column: 0,
         image: null,
         hide_label: false,
+        heading: null,
         is_active: 1, 
         _temp_id: 'temp_' + Date.now() + Math.random().toString(36).substr(2, 9)
     };
