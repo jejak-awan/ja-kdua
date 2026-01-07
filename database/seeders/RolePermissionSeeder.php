@@ -21,25 +21,25 @@ class RolePermissionSeeder extends Seeder
             'view content templates', 'create content templates', 'edit content templates', 'delete content templates',
             'view categories', 'create categories', 'edit categories', 'delete categories',
             'view tags', 'create tags', 'edit tags', 'delete tags',
-            
+
             // Media
             'view media', 'upload media', 'edit media', 'delete media', // 'manage media' as fallback/alias
             'view files', 'upload files', 'edit files', 'delete files',
-            
+
             // Engagement
-            'view comments', 'create comments', 'edit comments', 'delete comments', 'approve comments',
+            'view comments', 'create comments', 'edit comments', 'delete comments', 'approve comments', 'manage comments',
             'view forms', 'create forms', 'edit forms', 'delete forms', 'view submissions',
             'view newsletter', 'create newsletter', 'edit newsletter', 'delete newsletter',
 
             // Check Access (Users & Roles)
             'view users', 'create users', 'edit users', 'delete users', 'verify users',
             'view roles', 'create roles', 'edit roles', 'delete roles',
-            
+
             // Appearance
             'view themes', 'upload themes', 'edit themes', 'delete themes', 'manage themes',
             'view menus', 'create menus', 'edit menus', 'delete menus',
             'view widgets', 'create widgets', 'edit widgets', 'delete widgets',
-            
+
             // System & Settings
             'view settings', 'manage settings',
             'view plugins', 'install plugins', 'edit plugins', 'delete plugins',
@@ -47,7 +47,7 @@ class RolePermissionSeeder extends Seeder
             'view scheduled tasks', 'manage scheduled tasks',
             'view backups', 'create backups', 'download backups', 'delete backups',
             'view system', 'manage system',
-            
+
             // Logs & Analytics
             'view logs', 'delete logs',
             'view analytics',
@@ -58,8 +58,8 @@ class RolePermissionSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
-        
-        // Ensure legacy 'manage' permissions exist for backward compatibility if needed, 
+
+        // Ensure legacy 'manage' permissions exist for backward compatibility if needed,
         // or rely on matching logic. For now, we prefer replacing them.
         // But to avoid breaking existing super-admins until re-seeded:
         $legacy = ['manage content', 'manage media', 'manage users', 'manage roles'];
@@ -82,7 +82,7 @@ class RolePermissionSeeder extends Seeder
             'view security logs',
             'manage backups',
             'manage scheduled tasks',
-            'manage roles', 
+            'manage roles',
             'delete users', // Safety
         ])->get();
         $adminRole->syncPermissions($adminPermissions);
@@ -113,7 +113,7 @@ class RolePermissionSeeder extends Seeder
         $authorRole->syncPermissions([
             'view content', 'create content', 'edit content', 'delete content', // Ownership handled by Policy
             'view categories',
-            'view tags', 
+            'view tags',
             'view media', 'upload media', 'edit media', // Authors need to upload images for posts
         ]);
 

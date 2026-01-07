@@ -39,12 +39,12 @@ class RoleSeeder extends Seeder
                     'manage backups',
                     'manage system',
                     'view logs',
-                    'view analytics'
+                    'view analytics',
                 ],
                 'user' => [
                     'name' => 'Technical Admin',
                     'email' => 'tech.admin@example.com',
-                ]
+                ],
             ],
             'Content Manager' => [
                 'permissions' => [
@@ -61,7 +61,7 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'Content Manager',
                     'email' => 'content.manager@example.com',
-                ]
+                ],
             ],
             'SEO Specialist' => [
                 'permissions' => [
@@ -74,7 +74,7 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'SEO Specialist',
                     'email' => 'seo@example.com',
-                ]
+                ],
             ],
             'Community Moderator' => [
                 'permissions' => [
@@ -84,7 +84,7 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'Community Moderator',
                     'email' => 'moderator@example.com',
-                ]
+                ],
             ],
             'Technical Support' => [
                 'permissions' => [
@@ -95,7 +95,7 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'Technical Support',
                     'email' => 'support@example.com',
-                ]
+                ],
             ],
             'Media Assistant' => [
                 'permissions' => [
@@ -104,7 +104,7 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'Media Assistant',
                     'email' => 'media@example.com',
-                ]
+                ],
             ],
             'Marketing Manager' => [
                 'permissions' => [
@@ -115,14 +115,14 @@ class RoleSeeder extends Seeder
                 'user' => [
                     'name' => 'Marketing Manager',
                     'email' => 'marketing@example.com',
-                ]
+                ],
             ],
         ];
 
         foreach ($rolesData as $roleName => $data) {
             // Create role
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-            
+
             // Sync permissions (using names)
             $role->syncPermissions($data['permissions']);
 

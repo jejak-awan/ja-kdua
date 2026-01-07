@@ -25,7 +25,7 @@ class SearchService
         // 1. Try Strict Search (AND)
         $this->applySearchLogic($searchQuery, $query, true);
         $this->applyFilters($searchQuery, $filters);
-        
+
         $results = $searchQuery->orderByDesc('relevance_score')
             ->orderByDesc('created_at')
             ->limit($limit)
@@ -37,7 +37,7 @@ class SearchService
             $searchQuery = SearchIndex::query();
             $this->applySearchLogic($searchQuery, $query, false);
             $this->applyFilters($searchQuery, $filters);
-            
+
             $results = $searchQuery->orderByDesc('relevance_score')
                 ->orderByDesc('created_at')
                 ->limit($limit)
@@ -94,7 +94,7 @@ class SearchService
                         });
                     } else {
                         $q->orWhere('title', 'like', "%{$term}%")
-                          ->orWhere('content', 'like', "%{$term}%");
+                            ->orWhere('content', 'like', "%{$term}%");
                     }
                 }
             });
@@ -126,10 +126,10 @@ class SearchService
         }
 
         // 1. Try simple substring match
-        $suggestions = SearchIndex::where(function($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                  ->orWhere('content', 'like', "%{$query}%");
-            })
+        $suggestions = SearchIndex::where(function ($q) use ($query) {
+            $q->where('title', 'like', "%{$query}%")
+                ->orWhere('content', 'like', "%{$query}%");
+        })
             ->select('title', 'type')
             ->distinct()
             ->limit($limit)

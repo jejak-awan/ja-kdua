@@ -87,9 +87,9 @@ class SecurityService
      */
     protected function incrementFailedAttempts(string $identifier, string $type = 'ip'): int
     {
-        $key = $this->cachePrefix . "failed_attempts:{$type}:{$identifier}";
+        $key = $this->cachePrefix."failed_attempts:{$type}:{$identifier}";
         $attempts = Cache::get($key, 0) + 1;
-        
+
         // Store with TTL so it auto-expires (no manual cache:clear needed)
         Cache::put($key, $attempts, now()->addMinutes($this->accountLockMinutes));
 
@@ -101,7 +101,7 @@ class SecurityService
      */
     public function getFailedAttempts(string $identifier, string $type = 'ip'): int
     {
-        $key = $this->cachePrefix . "failed_attempts:{$type}:{$identifier}";
+        $key = $this->cachePrefix."failed_attempts:{$type}:{$identifier}";
 
         return Cache::get($key, 0);
     }
@@ -112,7 +112,7 @@ class SecurityService
      *
      * @return int Block duration in seconds
      */
-    public function blockIpTemporarily(string $ipAddress, string $reason = null): int
+    public function blockIpTemporarily(string $ipAddress, ?string $reason = null): int
     {
         if ($this->isProtectedIp($ipAddress)) {
             return 0;
@@ -123,7 +123,7 @@ class SecurityService
         }
 
         // Get and increment offense count
-        $offenseKey = $this->cachePrefix . "offense_count:{$ipAddress}";
+        $offenseKey = $this->cachePrefix."offense_count:{$ipAddress}";
         $offenseCount = Cache::get($offenseKey, 0) + 1;
         Cache::put($offenseKey, $offenseCount, now()->addHours($this->offenseResetHours));
 
@@ -136,13 +136,13 @@ class SecurityService
         // Store block_until timestamp (auto-expires via cache TTL)
         $blockUntil = now()->addMinutes($blockMinutes);
         Cache::put(
-            $this->cachePrefix . "block_until:{$ipAddress}",
+            $this->cachePrefix."block_until:{$ipAddress}",
             $blockUntil->toIso8601String(),
             $blockMinutes * 60 // TTL in seconds
         );
 
         SecurityLog::log('ip_blocked_temp', null, $ipAddress,
-            "IP temporarily blocked for {$blockMinutes} minute(s): " . ($reason ?? 'Too many failed attempts'),
+            "IP temporarily blocked for {$blockMinutes} minute(s): ".($reason ?? 'Too many failed attempts'),
             [
                 'duration_minutes' => $blockMinutes,
                 'offense_count' => $offenseCount,
@@ -175,7 +175,7 @@ class SecurityService
         }
 
         // Check temporary block (auto-expires via cache TTL)
-        return Cache::has($this->cachePrefix . "block_until:{$ipAddress}");
+        return Cache::has($this->cachePrefix."block_until:{$ipAddress}");
     }
 
     /**
@@ -183,7 +183,7 @@ class SecurityService
      */
     public function getRemainingBlockTime(string $ipAddress): int
     {
-        $key = $this->cachePrefix . "block_until:{$ipAddress}";
+        $key = $this->cachePrefix."block_until:{$ipAddress}";
         $blockUntil = Cache::get($key);
 
         if (! $blockUntil) {
@@ -203,7 +203,7 @@ class SecurityService
         return [
             'is_blocked' => $this->isIpBlocked($ipAddress),
             'remaining_seconds' => $this->getRemainingBlockTime($ipAddress),
-            'offense_count' => Cache::get($this->cachePrefix . "offense_count:{$ipAddress}", 0),
+            'offense_count' => Cache::get($this->cachePrefix."offense_count:{$ipAddress}", 0),
             'failed_attempts' => $this->getFailedAttempts($ipAddress),
         ];
     }
@@ -211,7 +211,7 @@ class SecurityService
     /**
      * Permanently block an IP (adds to database).
      */
-    public function blockIpPermanently(string $ipAddress, string $reason = null): bool
+    public function blockIpPermanently(string $ipAddress, ?string $reason = null): bool
     {
         if ($this->isProtectedIp($ipAddress)) {
             return false;
@@ -263,14 +263,14 @@ class SecurityService
         ];
 
         foreach ($keys as $key) {
-            Cache::forget($this->cachePrefix . $key);
+            Cache::forget($this->cachePrefix.$key);
         }
     }
 
     /**
      * Add IP to whitelist.
      */
-    public function addToWhitelist(string $ipAddress, string $reason = null): bool
+    public function addToWhitelist(string $ipAddress, ?string $reason = null): bool
     {
         // Remove from blocklist if exists
         IpList::where('ip_address', $ipAddress)->where('type', 'blocklist')->delete();
@@ -319,16 +319,16 @@ class SecurityService
      */
     public function isAccountLocked(string $email): bool
     {
-        return Cache::has($this->cachePrefix . "account_locked:{$email}");
+        return Cache::has($this->cachePrefix."account_locked:{$email}");
     }
 
     /**
      * Lock an account temporarily.
      */
-    public function lockAccount(string $email, string $reason = null): void
+    public function lockAccount(string $email, ?string $reason = null): void
     {
         Cache::put(
-            $this->cachePrefix . "account_locked:{$email}",
+            $this->cachePrefix."account_locked:{$email}",
             now()->addMinutes($this->accountLockMinutes)->toIso8601String(),
             $this->accountLockMinutes * 60
         );
@@ -339,8 +339,8 @@ class SecurityService
      */
     public function unlockAccount(string $email): void
     {
-        Cache::forget($this->cachePrefix . "account_locked:{$email}");
-        Cache::forget($this->cachePrefix . "failed_attempts:email:{$email}");
+        Cache::forget($this->cachePrefix."account_locked:{$email}");
+        Cache::forget($this->cachePrefix."failed_attempts:email:{$email}");
     }
 
     /**
@@ -348,7 +348,7 @@ class SecurityService
      */
     public function getAccountLockoutRemaining(string $email): int
     {
-        $key = $this->cachePrefix . "account_locked:{$email}";
+        $key = $this->cachePrefix."account_locked:{$email}";
         $lockUntil = Cache::get($key);
 
         if (! $lockUntil) {
@@ -379,7 +379,7 @@ class SecurityService
     /**
      * Record suspicious activity.
      */
-    public function recordSuspiciousActivity(string $description, User $user = null, array $metadata = []): void
+    public function recordSuspiciousActivity(string $description, ?User $user = null, array $metadata = []): void
     {
         SecurityLog::log('suspicious_activity', $user, request()?->ip(), $description, $metadata);
     }
@@ -421,7 +421,7 @@ class SecurityService
     {
         // Only protect localhost IPs (development/testing)
         $localhostIps = ['127.0.0.1', '::1', 'localhost'];
-        
+
         return in_array($ip, $localhostIps);
     }
 }

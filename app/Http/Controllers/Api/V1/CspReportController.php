@@ -16,16 +16,16 @@ class CspReportController extends BaseApiController
     {
         try {
             $report = $request->input('csp-report');
-            
+
             // Fallback for direct JSON or slightly different formats
-            if (!$report) {
+            if (! $report) {
                 $report = $request->json()->all();
                 if (isset($report['csp-report'])) {
                     $report = $report['csp-report'];
                 }
             }
-            
-            if (!$report || empty($report)) {
+
+            if (! $report || empty($report)) {
                 return response()->json(['status' => 'ignored'], 200);
             }
             CspReport::create([
@@ -39,11 +39,12 @@ class CspReportController extends BaseApiController
                 'raw_report' => $report,
                 'status' => 'new',
             ]);
-            
+
             return response()->json(['status' => 'received'], 200);
-            
+
         } catch (\Exception $e) {
             Log::error('CSP report storage failed', ['error' => $e->getMessage()]);
+
             return response()->json(['status' => 'error'], 500);
         }
     }
@@ -54,25 +55,25 @@ class CspReportController extends BaseApiController
     public function index(Request $request)
     {
         $query = CspReport::query();
-        
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->filled('directive')) {
             $query->where('violated_directive', 'like', "%{$request->directive}%");
         }
-        
+
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
-        
+
         $reports = $query->latest()->paginate($request->input('per_page', 50));
-        
+
         return $this->paginated($reports, 'CSP reports retrieved successfully');
     }
 
@@ -85,9 +86,9 @@ class CspReportController extends BaseApiController
             'ids' => 'required|array',
             'action' => 'required|in:mark_reviewed,mark_false_positive,delete',
         ]);
-        
+
         $query = CspReport::whereIn('id', $validated['ids']);
-        
+
         switch ($validated['action']) {
             case 'mark_reviewed':
                 $query->update(['status' => 'reviewed']);
@@ -99,7 +100,7 @@ class CspReportController extends BaseApiController
                 $query->delete();
                 break;
         }
-        
+
         return $this->success(null, 'Bulk action completed successfully');
     }
 
@@ -122,7 +123,7 @@ class CspReportController extends BaseApiController
                 ->orderBy('date')
                 ->get(),
         ];
-        
+
         return $this->success($stats, 'CSP statistics retrieved successfully');
     }
 }

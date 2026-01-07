@@ -23,10 +23,10 @@ class AnalyticsController extends BaseApiController
     {
         $dateFrom = $request->input('date_from', now()->subDays(30)->format('Y-m-d'));
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
-        
+
         return [
-            $dateFrom . ' 00:00:00',
-            $dateTo . ' 23:59:59',
+            $dateFrom.' 00:00:00',
+            $dateTo.' 23:59:59',
         ];
     }
 
@@ -110,6 +110,7 @@ class AnalyticsController extends BaseApiController
                             }
                         }
                         $content->visits_count = $visits;
+
                         return $content;
                     })
                     ->sortByDesc('visits_count')
@@ -259,9 +260,11 @@ class AnalyticsController extends BaseApiController
     {
         try {
             $visit = AnalyticsVisit::trackVisit($request);
+
             return $this->success($visit, 'Visit tracked successfully');
         } catch (\Exception $e) {
-            Log::error('Track visit error: ' . $e->getMessage());
+            Log::error('Track visit error: '.$e->getMessage());
+
             return $this->error('Failed to track visit', 500);
         }
     }
@@ -391,7 +394,7 @@ class AnalyticsController extends BaseApiController
             case 'day':
                 return 'DATE(visited_at) as period, count(*) as visits';
             case 'week':
-                return 'YEARWEEK(visited_at) as period, count(*) as visits';
+                return 'YEARWEEK(visited_at, 1) as period, count(*) as visits';
             case 'month':
                 return "DATE_FORMAT(visited_at, '%Y-%m') as period, count(*) as visits";
             default:
@@ -407,7 +410,7 @@ class AnalyticsController extends BaseApiController
             case 'day':
                 return 'DATE(visited_at)';
             case 'week':
-                return 'YEARWEEK(visited_at)';
+                return 'YEARWEEK(visited_at, 1)';
             case 'month':
                 return "DATE_FORMAT(visited_at, '%Y-%m')";
             default:
@@ -443,7 +446,8 @@ class AnalyticsController extends BaseApiController
                 'Content-Disposition' => "attachment; filename=\"{$filename}\"",
             ]);
         } catch (\Exception $e) {
-            Log::error('Analytics export error: ' . $e->getMessage());
+            Log::error('Analytics export error: '.$e->getMessage());
+
             return $this->error('Failed to export analytics data', 500);
         }
     }

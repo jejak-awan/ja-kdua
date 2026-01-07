@@ -55,4 +55,3 @@ class WarmCache extends Command
         $this->info("Cache warming completed in {$duration} seconds");
     }
 }
-

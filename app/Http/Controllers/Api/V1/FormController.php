@@ -13,7 +13,7 @@ class FormController extends BaseApiController
         $query = Form::with('fields');
 
         // Multi-tenancy scoping
-        if (!$request->user()->can('manage forms')) {
+        if (! $request->user()->can('manage forms')) {
             $query->where('author_id', $request->user()->id);
         }
 
@@ -63,7 +63,7 @@ class FormController extends BaseApiController
 
     public function show(Request $request, Form $form)
     {
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to view this form');
         }
 
@@ -72,7 +72,7 @@ class FormController extends BaseApiController
 
     public function update(Request $request, Form $form)
     {
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to update this form');
         }
 
@@ -110,7 +110,7 @@ class FormController extends BaseApiController
 
             // Delete fields not in request
             $toDelete = array_diff($existingFieldIds, $requestFieldIds);
-            if (!empty($toDelete)) {
+            if (! empty($toDelete)) {
                 FormField::whereIn('id', $toDelete)->delete();
             }
         }
@@ -120,7 +120,7 @@ class FormController extends BaseApiController
 
     public function destroy(Request $request, Form $form)
     {
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to delete this form');
         }
 
@@ -133,11 +133,11 @@ class FormController extends BaseApiController
     {
         $form = Form::withTrashed()->findOrFail($id);
 
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to restore this form');
         }
 
-        if (!$form->trashed()) {
+        if (! $form->trashed()) {
             return $this->error('Form is not deleted', 400);
         }
 
@@ -150,7 +150,7 @@ class FormController extends BaseApiController
     {
         $form = Form::withTrashed()->findOrFail($id);
 
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to delete this form');
         }
 
@@ -287,16 +287,16 @@ class FormController extends BaseApiController
             'submission_id' => $submission->id,
         ]);
     }
-    
+
     public function duplicate(Request $request, Form $form)
     {
-        if (!$request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
+        if (! $request->user()->can('manage forms') && $form->author_id !== $request->user()->id) {
             return $this->forbidden('You do not have permission to duplicate this form');
         }
 
         $newForm = $form->replicate(['slug', 'name']);
-        $newForm->name = $form->name . ' (Copy)';
-        $newForm->slug = $form->slug . '-copy-' . time();
+        $newForm->name = $form->name.' (Copy)';
+        $newForm->slug = $form->slug.'-copy-'.time();
         $newForm->is_active = false;
         $newForm->author_id = $request->user()->id; // Assign to current user
         $newForm->save();
@@ -327,26 +327,28 @@ class FormController extends BaseApiController
         try {
             if ($action === 'delete') {
                 $query = Form::whereIn('id', $ids);
-                
-                if (!$request->user()->can('manage forms')) {
+
+                if (! $request->user()->can('manage forms')) {
                     $query->where('author_id', $request->user()->id);
                 }
 
                 $query->delete();
+
                 return $this->success(null, 'Selected forms deleted successfully');
             } elseif ($action === 'restore') {
                 $query = Form::withTrashed()->whereIn('id', $ids);
-                if (!$request->user()->can('manage forms')) {
-                     $query->where('author_id', $request->user()->id);
+                if (! $request->user()->can('manage forms')) {
+                    $query->where('author_id', $request->user()->id);
                 }
                 $query->restore();
+
                 return $this->success(null, 'Selected forms restored successfully');
             } elseif ($action === 'force_delete') {
-                 $query = Form::withTrashed()->whereIn('id', $ids);
-                if (!$request->user()->can('manage forms')) {
-                     $query->where('author_id', $request->user()->id);
+                $query = Form::withTrashed()->whereIn('id', $ids);
+                if (! $request->user()->can('manage forms')) {
+                    $query->where('author_id', $request->user()->id);
                 }
-                
+
                 $forms = $query->get();
                 foreach ($forms as $form) {
                     $form->fields()->delete();
@@ -357,7 +359,7 @@ class FormController extends BaseApiController
                 return $this->success(null, 'Selected forms permanently deleted');
             }
         } catch (\Exception $e) {
-            return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
+            return $this->error('Bulk action failed: '.$e->getMessage(), 500);
         }
 
         return $this->error('Invalid action', 422);

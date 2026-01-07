@@ -96,7 +96,7 @@ class WidgetController extends BaseApiController
             ['id' => 'footer-3', 'name' => 'Footer Area 3'],
         ];
 
-        $dbLocations = Widget::select('location')->distinct()->pluck('location')->filter()->map(function($loc) {
+        $dbLocations = Widget::select('location')->distinct()->pluck('location')->filter()->map(function ($loc) {
             return ['id' => $loc, 'name' => ucwords(str_replace('-', ' ', $loc))];
         });
 

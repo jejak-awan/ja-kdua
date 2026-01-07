@@ -78,4 +78,3 @@ class LanguageFactory extends Factory
         };
     }
 }
-

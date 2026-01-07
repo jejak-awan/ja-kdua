@@ -49,7 +49,7 @@ class BackupController extends BaseApiController
             \Log::error('Backup creation error: '.$e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return $this->error(
@@ -114,6 +114,7 @@ class BackupController extends BaseApiController
     {
         if ($request->isMethod('GET')) {
             $schedule = $this->backupService->getScheduleSettings();
+
             return $this->success($schedule, 'Backup schedule retrieved successfully');
         }
 

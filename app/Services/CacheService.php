@@ -95,7 +95,7 @@ class CacheService
 
     /**
      * Warm up important caches
-     * 
+     *
      * @deprecated Use CacheWarmingService instead
      */
     public function warmUp()
@@ -110,7 +110,7 @@ class CacheService
      */
     public function getKey(string $prefix, string $key): string
     {
-        return $prefix . $key;
+        return $prefix.':'.$key;
     }
 
     /**
@@ -118,21 +118,22 @@ class CacheService
      */
     public function invalidateByPattern(string $pattern): int
     {
-        if (!$this->isRedisAvailable()) {
+        if (! $this->isRedisAvailable()) {
             return 0;
         }
 
         try {
             $redis = Cache::getRedis();
-            $keys = $redis->keys(config('cache.prefix') . ':' . $pattern);
-            
+            $keys = $redis->keys(config('cache.prefix').':'.$pattern);
+
             if (empty($keys)) {
                 return 0;
             }
 
             return $redis->del($keys);
         } catch (\Exception $e) {
-            \Log::warning('Failed to invalidate cache by pattern: ' . $e->getMessage());
+            \Log::warning('Failed to invalidate cache by pattern: '.$e->getMessage());
+
             return 0;
         }
     }
@@ -143,18 +144,20 @@ class CacheService
     public function isRedisAvailable(): bool
     {
         $cacheDriver = config('cache.default');
-        
+
         // Not using Redis
-        if (!in_array($cacheDriver, ['redis', 'redis_failover', 'failover'])) {
+        if (! in_array($cacheDriver, ['redis', 'redis_failover', 'failover'])) {
             return false;
         }
 
         try {
             $redis = \Illuminate\Support\Facades\Redis::connection();
             $redis->ping();
+
             return true;
         } catch (\Exception $e) {
-            \Log::debug('Redis not available: ' . $e->getMessage());
+            \Log::debug('Redis not available: '.$e->getMessage());
+
             return false;
         }
     }
@@ -180,8 +183,8 @@ class CacheService
             'configured_driver' => $driver,
             'redis_available' => $redisAvailable,
             'effective_driver' => $redisAvailable ? 'redis' : 'file',
-            'recommendation' => $redisAvailable 
-                ? 'Redis is active - optimal performance' 
+            'recommendation' => $redisAvailable
+                ? 'Redis is active - optimal performance'
                 : 'Using file cache - consider enabling Redis for better performance',
         ];
     }
@@ -192,7 +195,7 @@ class CacheService
     public function smartRemember(string $key, int $ttlSeconds, callable $callback)
     {
         $store = $this->getPreferredStore();
-        
+
         return Cache::store($store)->remember($key, $ttlSeconds, $callback);
     }
 }

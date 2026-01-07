@@ -13,8 +13,6 @@ class PublicSettingsController extends BaseApiController
 {
     /**
      * Get public settings for the frontend
-     * 
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {

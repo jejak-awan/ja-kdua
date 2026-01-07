@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class RedisConfigServiceProvider extends ServiceProvider
 {
@@ -27,14 +27,14 @@ class RedisConfigServiceProvider extends ServiceProvider
         }
 
         try {
-            if (!Schema::hasTable('redis_settings')) {
+            if (! Schema::hasTable('redis_settings')) {
                 return;
             }
 
             $this->loadRedisSettingsFromDatabase();
         } catch (\Exception $e) {
             // Silently fail if database is not available
-            \Log::debug('RedisConfigServiceProvider: Could not load settings - ' . $e->getMessage());
+            \Log::debug('RedisConfigServiceProvider: Could not load settings - '.$e->getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ class RedisConfigServiceProvider extends ServiceProvider
      */
     protected function isMigrating(): bool
     {
-        return in_array('migrate', $_SERVER['argv'] ?? []) 
+        return in_array('migrate', $_SERVER['argv'] ?? [])
             || in_array('migrate:fresh', $_SERVER['argv'] ?? [])
             || in_array('migrate:refresh', $_SERVER['argv'] ?? []);
     }
@@ -55,7 +55,7 @@ class RedisConfigServiceProvider extends ServiceProvider
     {
         // Use model collection to properly apply value accessor (decryption)
         $redisSettings = \App\Models\RedisSetting::all();
-        
+
         if ($redisSettings->isEmpty()) {
             return;
         }
@@ -90,7 +90,7 @@ class RedisConfigServiceProvider extends ServiceProvider
             // Apply config if mapping exists
             if (isset($configMap[$key]) && $configMap[$key] !== null) {
                 config([$configMap[$key] => $value]);
-                
+
                 // Also update cache connection for consistency
                 if ($key === 'redis_host') {
                     config(['database.redis.cache.host' => $value]);

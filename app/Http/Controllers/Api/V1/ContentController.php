@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Content;
-use App\Models\ContentCustomField;
-use App\Models\ContentRevision;
 use App\Services\CacheService;
 use App\Services\ContentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class ContentController extends BaseApiController
 {
@@ -17,7 +14,7 @@ class ContentController extends BaseApiController
 
     public function __construct()
     {
-        $this->contentService = new ContentService();
+        $this->contentService = new ContentService;
     }
 
     public function index(Request $request)
@@ -40,19 +37,19 @@ class ContentController extends BaseApiController
             ->firstOrFail();
 
         // Check if content is published
-        $isPublished = $content->status === 'published' && 
+        $isPublished = $content->status === 'published' &&
                        ($content->published_at === null || $content->published_at <= Carbon::now());
 
         // If not published, verify permissions
-        if (!$isPublished) {
+        if (! $isPublished) {
             $user = auth('sanctum')->user();
-            
-            if (!$user) {
+
+            if (! $user) {
                 abort(404);
             }
-            
+
             // Allow if user has manage/edit permission or is the author
-            if (!$user->can('manage content') && !$user->can('edit content') && $user->id !== $content->author_id) {
+            if (! $user->can('manage content') && ! $user->can('edit content') && $user->id !== $content->author_id) {
                 abort(404);
             }
         }
@@ -80,7 +77,7 @@ class ContentController extends BaseApiController
 
         return $this->success([
             'content' => $content->load(['author', 'category', 'tags', 'customFields.customField']),
-            'preview_url' => rtrim(config('app.frontend_url'), '/') . '/' . ltrim($content->slug, '/'),
+            'preview_url' => rtrim(config('app.frontend_url'), '/').'/'.ltrim($content->slug, '/'),
         ], 'Content preview retrieved successfully');
     }
 
@@ -89,7 +86,7 @@ class ContentController extends BaseApiController
         $query = Content::with(['author', 'category', 'tags']);
 
         // Multi-tenancy scoping
-        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
+        if (! $request->user()->can('manage content') && ! $request->user()->can('publish content')) {
             $query->where('author_id', $request->user()->id);
         }
 
@@ -111,10 +108,10 @@ class ContentController extends BaseApiController
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('body', 'like', "%{$search}%")
-                  ->orWhere('excerpt', 'like', "%{$search}%");
+                    ->orWhere('body', 'like', "%{$search}%")
+                    ->orWhere('excerpt', 'like', "%{$search}%");
             });
         }
 
@@ -148,14 +145,14 @@ class ContentController extends BaseApiController
 
     public function stats(Request $request)
     {
-        if (!$request->user()->can('view content')) {
+        if (! $request->user()->can('view content')) {
             return $this->forbidden('Unauthorized to view content statistics');
         }
 
         $query = Content::query();
-        
+
         // Scope stats if not a content manager
-        if (!$request->user()->can('manage content')) {
+        if (! $request->user()->can('manage content')) {
             $query->where('author_id', $request->user()->id);
         }
 
@@ -202,7 +199,7 @@ class ContentController extends BaseApiController
         }
 
         // Approval Workflow: Authors cannot publish directly
-        if (!$request->user()->can('publish content')) {
+        if (! $request->user()->can('publish content')) {
             if ($validated['status'] === 'published') {
                 $validated['status'] = 'pending';
             }
@@ -220,7 +217,7 @@ class ContentController extends BaseApiController
         // Check if content is locked by another user
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
             // Allow Admins and Super Admins to bypass the lock
-            if (!$request->user()->hasRole('super-admin') && !$request->user()->hasRole('admin')) {
+            if (! $request->user()->hasRole('super-admin') && ! $request->user()->hasRole('admin')) {
                 $lockedBy = $content->lockedBy;
 
                 return $this->error(
@@ -264,25 +261,26 @@ class ContentController extends BaseApiController
 
             // If publishing, require body OR blocks
             if ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published')) {
-               $rules['body'] = 'nullable|required_without:blocks|string';
+                $rules['body'] = 'nullable|required_without:blocks|string';
             }
 
             $validated = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Illuminate\Support\Facades\Log::error('Content update validation failed', ['errors' => $e->errors(), 'input' => $request->all()]);
+
             return $this->validationError($e->errors());
         }
 
         // Ownership check
-        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
-             if ($content->author_id !== $request->user()->id) {
-                 return $this->forbidden('You can only update your own content');
-             }
+        if (! $request->user()->can('manage content') && ! $request->user()->can('publish content')) {
+            if ($content->author_id !== $request->user()->id) {
+                return $this->forbidden('You can only update your own content');
+            }
         }
 
         // Approval Workflow: Authors cannot publish directly
         if (isset($validated['status']) && $validated['status'] === 'published') {
-            if (!$request->user()->can('publish content')) {
+            if (! $request->user()->can('publish content')) {
                 $validated['status'] = 'pending';
             }
         }
@@ -291,20 +289,20 @@ class ContentController extends BaseApiController
         $revisionNote = $request->input('revision_note');
 
         $content = $this->contentService->update(
-            $content, 
-            $validated, 
-            $request->user()->id, 
-            $createRevision, 
+            $content,
+            $validated,
+            $request->user()->id,
+            $createRevision,
             $revisionNote
         );
 
         // Handle Menu Item Logic
         if ($request->has('menu_item')) {
             $menuData = $request->input('menu_item');
-            if (!empty($menuData['add_to_menu']) && !empty($menuData['menu_id'])) {
+            if (! empty($menuData['add_to_menu']) && ! empty($menuData['menu_id'])) {
                 // Determine title: use provided label or content title
-                $menuTitle = !empty($menuData['title']) ? $menuData['title'] : $content->title;
-                
+                $menuTitle = ! empty($menuData['title']) ? $menuData['title'] : $content->title;
+
                 // Check if already exists in this menu
                 $menuItem = \App\Models\MenuItem::where('menu_id', $menuData['menu_id'])
                     ->where('target_id', $content->id)
@@ -337,14 +335,14 @@ class ContentController extends BaseApiController
     public function toggleFeatured(Request $request, Content $content)
     {
         $isFeatured = $this->contentService->toggleFeatured($content);
-        
+
         return $this->success(['is_featured' => $isFeatured], 'Content featured status updated');
     }
 
     /**
      * Auto-save draft (lightweight save without revisions, webhooks, or search indexing)
      */
-    public function autosave(Request $request, Content $content = null)
+    public function autosave(Request $request, ?Content $content = null)
     {
         try {
             $validated = $request->validate([
@@ -373,7 +371,7 @@ class ContentController extends BaseApiController
         if ($content) {
             // Update existing content
             // Check if content is locked by another user
-             if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
+            if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
                 return $this->error('Content is currently being edited by another user', 423);
             }
 
@@ -396,15 +394,15 @@ class ContentController extends BaseApiController
             ], 'Draft auto-saved successfully');
         } else {
             // Create new draft
-            if (!isset($validated['title']) || empty($validated['title'])) {
+            if (! isset($validated['title']) || empty($validated['title'])) {
                 return $this->error('Title is required for auto-save', 422);
             }
 
             // Generate slug if not provided
-            if (!isset($validated['slug']) || empty($validated['slug'])) {
+            if (! isset($validated['slug']) || empty($validated['slug'])) {
                 $validated['slug'] = \Illuminate\Support\Str::slug($validated['title']);
             }
-            
+
             // Ensure slug is unique
             $validated['slug'] = $this->contentService->generateUniqueSlug($validated['slug']);
 
@@ -434,7 +432,7 @@ class ContentController extends BaseApiController
 
     public function approve(Request $request, Content $content)
     {
-        if (!$request->user()->can('approve content')) {
+        if (! $request->user()->can('approve content')) {
             return $this->forbidden('You do not have permission to approve content');
         }
 
@@ -457,7 +455,7 @@ class ContentController extends BaseApiController
 
     public function reject(Request $request, Content $content)
     {
-        if (!$request->user()->can('approve content')) {
+        if (! $request->user()->can('approve content')) {
             return $this->forbidden('You do not have permission to reject content');
         }
 
@@ -487,13 +485,13 @@ class ContentController extends BaseApiController
 
         // Ownership and permission check for bulk actions
         $query = Content::whereIn('id', $validated['content_ids']);
-        if (!$request->user()->can('manage content') && !$request->user()->can('publish content')) {
-             $query->where('author_id', $request->user()->id);
-             
-             // If author, they can't 'publish' or 'approve' or 'reject'
-             if (in_array($validated['action'], ['publish', 'approve', 'reject'])) {
-                 return $this->forbidden('You do not have permission to perform this action');
-             }
+        if (! $request->user()->can('manage content') && ! $request->user()->can('publish content')) {
+            $query->where('author_id', $request->user()->id);
+
+            // If author, they can't 'publish' or 'approve' or 'reject'
+            if (in_array($validated['action'], ['publish', 'approve', 'reject'])) {
+                return $this->forbidden('You do not have permission to perform this action');
+            }
         }
 
         $contentIds = $query->pluck('id')->toArray();
@@ -512,11 +510,11 @@ class ContentController extends BaseApiController
         // ... existing lock code ...
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
             // Allow Admins/Super Admins to steal the lock
-            if (!$request->user()->hasRole('super-admin') && !$request->user()->hasRole('admin')) {
+            if (! $request->user()->hasRole('super-admin') && ! $request->user()->hasRole('admin')) {
                 $lockedBy = $content->lockedBy;
 
                 return $this->error(
-                    'Content is currently being edited by ' . $lockedBy->name,
+                    'Content is currently being edited by '.$lockedBy->name,
                     423,
                     [],
                     'CONTENT_LOCKED',
@@ -539,7 +537,7 @@ class ContentController extends BaseApiController
     public function unlock(Request $request, Content $content)
     {
         if ($this->contentService->isLockedByOther($content, $request->user()->id)) {
-            if (!$request->user()->can('manage content')) {
+            if (! $request->user()->can('manage content')) {
                 return $this->forbidden('You can only unlock content you locked');
             }
         }
@@ -551,8 +549,8 @@ class ContentController extends BaseApiController
 
     public function restore(Request $request, $id)
     {
-        if (!$request->user()->can('delete content')) {
-             return $this->forbidden('You do not have permission to restore content');
+        if (! $request->user()->can('delete content')) {
+            return $this->forbidden('You do not have permission to restore content');
         }
 
         $this->contentService->restore($id);
@@ -562,12 +560,13 @@ class ContentController extends BaseApiController
 
     public function forceDelete(Request $request, $id)
     {
-        if (!$request->user()->can('delete content') || !$request->user()->can('manage content')) {
-             return $this->forbidden('You do not have permission to permanently delete content');
+        if (! $request->user()->can('delete content') || ! $request->user()->can('manage content')) {
+            return $this->forbidden('You do not have permission to permanently delete content');
         }
 
         $this->contentService->forceDelete($id);
 
         return $this->success(null, 'Content permanently deleted');
     }
+
 }

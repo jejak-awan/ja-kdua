@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Services\SecurityService;
 use App\Services\CacheWarmingService;
-use App\Services\QueryPerformanceService;
+use App\Services\SecurityService;
 use App\Services\SystemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +17,7 @@ class SystemController extends BaseApiController
 
     public function __construct()
     {
-        $this->systemService = new SystemService();
+        $this->systemService = new SystemService;
     }
 
     public function info()
@@ -28,11 +27,11 @@ class SystemController extends BaseApiController
 
     public function health()
     {
-        $securityService = new SecurityService();
+        $securityService = new SecurityService;
         $health = $securityService->checkSystemHealth();
 
-        $health['php'] = ['status' => 'ok', 'message' => 'PHP ' . PHP_VERSION];
-        $health['laravel'] = ['status' => 'ok', 'message' => 'Laravel ' . app()->version()];
+        $health['php'] = ['status' => 'ok', 'message' => 'PHP '.PHP_VERSION];
+        $health['laravel'] = ['status' => 'ok', 'message' => 'Laravel '.app()->version()];
 
         try {
             Cache::put('health_check_queue', 'test', 10);
@@ -60,6 +59,7 @@ class SystemController extends BaseApiController
     public function cacheStatus()
     {
         $status = $this->systemService->getCacheStatus();
+
         return $this->success($status, 'Cache status retrieved successfully');
     }
 
@@ -85,6 +85,7 @@ class SystemController extends BaseApiController
 
             if ($type) {
                 $count = $warmingService->warmByType($type, $limit);
+
                 return $this->success([
                     'type' => $type,
                     'items_cached' => $count,
@@ -99,9 +100,9 @@ class SystemController extends BaseApiController
                 ], "Cache warming completed: {$total} total items");
             }
         } catch (\Exception $e) {
-            Log::error('Cache warming failed: ' . $e->getMessage());
+            Log::error('Cache warming failed: '.$e->getMessage());
 
-            return $this->error('Failed to warm cache: ' . $e->getMessage(), 500, [], 'CACHE_WARMING_FAILED');
+            return $this->error('Failed to warm cache: '.$e->getMessage(), 500, [], 'CACHE_WARMING_FAILED');
         }
     }
 
@@ -116,7 +117,7 @@ class SystemController extends BaseApiController
 
             return $this->success($stats, 'Cache warming statistics retrieved successfully');
         } catch (\Exception $e) {
-            Log::error('Failed to get cache warming stats: ' . $e->getMessage());
+            Log::error('Failed to get cache warming stats: '.$e->getMessage());
 
             return $this->error('Failed to get cache warming statistics', 500, [], 'STATS_ERROR');
         }
@@ -125,6 +126,7 @@ class SystemController extends BaseApiController
     public function systemHealth()
     {
         $health = $this->systemService->getSystemHealth();
+
         return $this->success($health, 'System health retrieved successfully');
     }
 
@@ -149,7 +151,7 @@ class SystemController extends BaseApiController
                 "throttle:60,1:{$ip}",
                 "throttle:120,1:{$ip}",
             ];
-            
+
             foreach ($throttleKeys as $throttleKey) {
                 RateLimiter::clear($throttleKey);
                 Cache::forget($throttleKey);
@@ -180,7 +182,7 @@ class SystemController extends BaseApiController
                         DB::table('cache')->where('key', 'like', "%account_locked_{$email}%")->delete();
                         DB::table('cache')->where('key', 'like', "%failed_login_attempts_email_{$email}%")->delete();
                     }
-                    $cleared[] = "Database cache entries cleared";
+                    $cleared[] = 'Database cache entries cleared';
                 } catch (\Exception $e) {
                     Log::warning('Failed to clear database cache: '.$e->getMessage());
                 }

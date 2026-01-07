@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class WebhookTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     protected User $admin;
 
@@ -355,4 +355,3 @@ class WebhookTest extends TestCase
         $response->assertStatus(403);
     }
 }
-

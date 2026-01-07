@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 class CaptchaService
 {
     protected string $method;
+
     protected int $ttl = 300; // 5 minutes
 
     public function __construct()
@@ -39,7 +40,7 @@ class CaptchaService
         $cacheKey = "captcha:{$token}";
         $stored = Cache::get($cacheKey);
 
-        if (!$stored) {
+        if (! $stored) {
             return false;
         }
 
@@ -60,7 +61,7 @@ class CaptchaService
      */
     public static function isEnabled(string $action = 'login'): bool
     {
-        if (!Setting::get('enable_captcha', false)) {
+        if (! Setting::get('enable_captcha', false)) {
             return false;
         }
 
@@ -116,11 +117,11 @@ class CaptchaService
     protected function generateMathChallenge(): array
     {
         $token = Str::random(32);
-        
+
         // Simplify: only addition, numbers 1-9
         $a = rand(1, 9);
         $b = rand(1, 9);
-        
+
         $answer = $a + $b;
 
         Cache::put("captcha:{$token}", [
@@ -159,7 +160,7 @@ class CaptchaService
         return [
             'method' => 'image',
             'token' => $token,
-            'image' => 'data:image/png;base64,' . base64_encode($image),
+            'image' => 'data:image/png;base64,'.base64_encode($image),
         ];
     }
 
@@ -206,24 +207,24 @@ class CaptchaService
         $fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
         // Fallback if system font not found - normally we'd check file_exists
         $useTtf = file_exists($fontPath);
-        
+
         $fontSize = 24; // Much larger font size
-        
+
         // Improve spacing logic for TTF
         // Calculate approximation of text width
-        $boxWidth = $width * 0.8; 
+        $boxWidth = $width * 0.8;
         $charPadding = $boxWidth / strlen($code);
         $startX = ($width - $boxWidth) / 2;
-        
+
         for ($i = 0; $i < strlen($code); $i++) {
             $char = $code[$i];
-            
+
             $angle = rand(-15, 15);
             $color = $textColors[array_rand($textColors)];
-            
+
             $x = $startX + ($i * $charPadding) + rand(-2, 2);
             $y = ($height / 2) + ($fontSize / 2) + rand(-2, 2); // Baseline position
-            
+
             if ($useTtf) {
                 imagettftext($image, $fontSize, $angle, $x, $y, $color, $fontPath, $char);
             } else {
@@ -233,7 +234,7 @@ class CaptchaService
                 $fw = imagefontwidth($baseFont);
                 $fh = imagefontheight($baseFont);
                 // Center roughly
-                $lx = $x + ($charPadding/2) - ($fw/2);
+                $lx = $x + ($charPadding / 2) - ($fw / 2);
                 $ly = ($height - $fh) / 2;
                 imagestring($image, $baseFont, $lx, $ly, $char, $color);
             }

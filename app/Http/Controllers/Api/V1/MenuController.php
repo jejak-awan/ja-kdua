@@ -76,16 +76,17 @@ class MenuController extends BaseApiController
     {
         $menu = Menu::withTrashed()->findOrFail($id);
         $menu->restore();
+
         return $this->success(null, 'Menu restored successfully');
     }
 
     public function forceDelete($id)
     {
         $menu = Menu::withTrashed()->findOrFail($id);
-        
+
         // Delete menu items
         $menu->items()->delete();
-        
+
         $menu->forceDelete();
 
         return $this->success(null, 'Menu permanently deleted');
@@ -105,23 +106,26 @@ class MenuController extends BaseApiController
         try {
             if ($action === 'delete') {
                 Menu::whereIn('id', $ids)->delete();
+
                 return $this->success(null, 'Selected menus deleted successfully');
             } elseif ($action === 'restore') {
                 Menu::withTrashed()->whereIn('id', $ids)->restore();
+
                 return $this->success(null, 'Selected menus restored successfully');
             } elseif ($action === 'force_delete') {
                 $menus = Menu::withTrashed()->whereIn('id', $ids)->get();
                 foreach ($menus as $menu) {
                     $menu->items()->delete(); // Soft delete items first just in case, orforce delete depending on requirement. Usually items are Cascade.
-                    // But actually $menu->items() returns checking menu_id. 
+                    // But actually $menu->items() returns checking menu_id.
                     // Let's force delete items associated.
                     $menu->items()->forceDelete();
                     $menu->forceDelete();
                 }
+
                 return $this->success(null, 'Selected menus permanently deleted');
             }
         } catch (\Exception $e) {
-            return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
+            return $this->error('Bulk action failed: '.$e->getMessage(), 500);
         }
 
         return $this->error('Invalid action', 422);
@@ -144,7 +148,7 @@ class MenuController extends BaseApiController
         ]);
 
         // Auto-assign target_type based on type if not provided
-        if (empty($validated['target_type']) && !empty($validated['type'])) {
+        if (empty($validated['target_type']) && ! empty($validated['type'])) {
             if (in_array($validated['type'], ['page', 'post'])) {
                 $validated['target_type'] = 'App\Models\Content';
             } elseif ($validated['type'] === 'category') {
@@ -184,7 +188,7 @@ class MenuController extends BaseApiController
         ]);
 
         // Auto-assign target_type based on type if not provided
-        if (empty($validated['target_type']) && !empty($validated['type'])) {
+        if (empty($validated['target_type']) && ! empty($validated['type'])) {
             if (in_array($validated['type'], ['page', 'post'])) {
                 $validated['target_type'] = 'App\Models\Content';
             } elseif ($validated['type'] === 'category') {

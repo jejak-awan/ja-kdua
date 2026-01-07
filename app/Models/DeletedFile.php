@@ -55,10 +55,13 @@ class DeletedFile extends Model
      */
     public function getFormattedSizeAttribute()
     {
-        if (!$this->size) return '0 B';
-        
+        if (! $this->size) {
+            return '0 B';
+        }
+
         $units = ['B', 'KB', 'MB', 'GB'];
         $i = floor(log($this->size, 1024));
-        return round($this->size / pow(1024, $i), 2) . ' ' . $units[$i];
+
+        return round($this->size / pow(1024, $i), 2).' '.$units[$i];
     }
 }

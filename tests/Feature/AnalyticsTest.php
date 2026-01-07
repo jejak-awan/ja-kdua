@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class AnalyticsTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected User $admin;
 
@@ -167,20 +167,20 @@ class AnalyticsTest extends TestCase
      */
     public function test_admin_can_get_device_statistics(): void
     {
-        // Create visits from different devices
-        AnalyticsVisit::factory()->count(10)->create([
+        // Create sessions from different devices
+        \App\Models\AnalyticsSession::factory()->count(10)->create([
             'device_type' => 'desktop',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(5)->create([
+        \App\Models\AnalyticsSession::factory()->count(5)->create([
             'device_type' => 'mobile',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(2)->create([
+        \App\Models\AnalyticsSession::factory()->count(2)->create([
             'device_type' => 'tablet',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -197,20 +197,20 @@ class AnalyticsTest extends TestCase
      */
     public function test_admin_can_get_browser_statistics(): void
     {
-        // Create visits from different browsers
-        AnalyticsVisit::factory()->count(8)->create([
+        // Create sessions from different browsers
+        \App\Models\AnalyticsSession::factory()->count(8)->create([
             'browser' => 'Chrome',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(5)->create([
+        \App\Models\AnalyticsSession::factory()->count(5)->create([
             'browser' => 'Firefox',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(3)->create([
+        \App\Models\AnalyticsSession::factory()->count(3)->create([
             'browser' => 'Safari',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -227,20 +227,20 @@ class AnalyticsTest extends TestCase
      */
     public function test_admin_can_get_country_statistics(): void
     {
-        // Create visits from different countries
-        AnalyticsVisit::factory()->count(10)->create([
+        // Create sessions from different countries
+        \App\Models\AnalyticsSession::factory()->count(10)->create([
             'country' => 'United States',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(5)->create([
+        \App\Models\AnalyticsSession::factory()->count(5)->create([
             'country' => 'United Kingdom',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
-        AnalyticsVisit::factory()->count(3)->create([
+        \App\Models\AnalyticsSession::factory()->count(3)->create([
             'country' => 'Indonesia',
-            'visited_at' => now()->subDays(1),
+            'started_at' => now()->subDays(1),
         ]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -367,4 +367,3 @@ class AnalyticsTest extends TestCase
         $response->assertStatus(401);
     }
 }
-

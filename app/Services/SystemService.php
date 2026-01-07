@@ -15,7 +15,7 @@ class SystemService
     {
         $memoryInfo = $this->getMemoryUsage();
         $diskInfo = $this->getDiskUsage();
-        
+
         return [
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
@@ -53,7 +53,7 @@ class SystemService
     {
         $driver = config('queue.default');
         $lastSeen = Cache::get('queue_worker_last_seen');
-        
+
         // Dispatch a heartbeat job for the next check
         if ($driver !== 'sync') {
             try {
@@ -76,9 +76,9 @@ class SystemService
             'last_seen' => $lastSeen,
             'is_active' => $isActive,
             'status' => $isActive ? 'ok' : ($driver === 'sync' ? 'ok' : 'warning'),
-            'message' => $isActive 
-                ? ($driver === 'sync' ? 'Sync (Direct)' : 'Worker Active') 
-                : 'Worker Not Detected'
+            'message' => $isActive
+                ? ($driver === 'sync' ? 'Sync (Direct)' : 'Worker Active')
+                : 'Worker Not Detected',
         ];
     }
 
@@ -135,7 +135,8 @@ class SystemService
                 ],
             ];
         } catch (\Exception $e) {
-            Log::error('System statistics error: ' . $e->getMessage());
+            Log::error('System statistics error: '.$e->getMessage());
+
             return $this->getDefaultStatistics();
         }
     }
@@ -171,9 +172,10 @@ class SystemService
             if (file_exists('/proc/uptime')) {
                 $uptime = file_get_contents('/proc/uptime');
                 $uptime = explode(' ', $uptime);
+
                 return (int) $uptime[0];
             }
-            
+
             // Fallback: try uptime command
             $output = @shell_exec('uptime -s 2>/dev/null');
             if ($output) {
@@ -183,9 +185,9 @@ class SystemService
                 }
             }
         } catch (\Exception $e) {
-            Log::debug('Uptime error: ' . $e->getMessage());
+            Log::debug('Uptime error: '.$e->getMessage());
         }
-        
+
         return null;
     }
 
@@ -229,22 +231,24 @@ class SystemService
                     $cores = (int) trim(\shell_exec('nproc'));
                 }
             }
-            
+
             if ($cores === 1 && file_exists('/proc/cpuinfo')) {
                 $cpuinfo = file_get_contents('/proc/cpuinfo');
                 $cores = substr_count($cpuinfo, 'processor');
             }
-            if ($cores < 1) $cores = 1;
+            if ($cores < 1) {
+                $cores = 1;
+            }
 
             // 2. Get Real-Time CPU Usage from /proc/stat
             if (file_exists('/proc/stat')) {
                 // Read first sample
                 $stat1 = file_get_contents('/proc/stat');
                 $time1 = microtime(true);
-                
+
                 // Small sleep to get a delta (100ms)
                 usleep(100000); // 0.1 seconds
-                
+
                 // Read second sample
                 $stat2 = file_get_contents('/proc/stat');
                 $time2 = microtime(true);
@@ -257,10 +261,10 @@ class SystemService
                     // Calculate deltas
                     $diffTotal = $info2['total'] - $info1['total'];
                     $diffIdle = $info2['idle'] - $info1['idle'];
-                    
+
                     if ($diffTotal > 0) {
                         $cpuPercent = (($diffTotal - $diffIdle) / $diffTotal) * 100;
-                        
+
                         // Get load average just for display
                         $load = sys_getloadavg();
 
@@ -287,7 +291,7 @@ class SystemService
                 ];
             }
         } catch (\Exception $e) {
-            Log::debug('CPU usage error: ' . $e->getMessage());
+            Log::debug('CPU usage error: '.$e->getMessage());
         }
 
         return ['percent' => 0, 'load' => 0, 'cores' => 1, 'status' => 'unknown'];
@@ -306,7 +310,7 @@ class SystemService
                 $parts = preg_split('/\s+/', trim($line));
                 // Remove 'cpu'
                 array_shift($parts);
-                
+
                 // Sum all columns for total time
                 $total = array_sum($parts);
                 // Idle is the 4th column (index 3) + iowait (index 4) usually considered idle regarding CPU utilization?
@@ -314,12 +318,13 @@ class SystemService
                 // Linux 2.6+:
                 // user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice
                 // indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-                
+
                 $idle = ($parts[3] ?? 0) + ($parts[4] ?? 0);
-                
+
                 return ['total' => $total, 'idle' => $idle];
             }
         }
+
         return null;
     }
 
@@ -350,7 +355,7 @@ class SystemService
                 }
             }
         } catch (\Exception $e) {
-            Log::debug('Memory usage error: ' . $e->getMessage());
+            Log::debug('Memory usage error: '.$e->getMessage());
         }
 
         return ['percent' => 0, 'used' => '0 B', 'total' => '0 B', 'status' => 'unknown'];
@@ -387,6 +392,7 @@ class SystemService
     {
         try {
             DB::connection()->getPdo();
+
             return ['status' => 'ok', 'message' => 'Connected'];
         } catch (\Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
@@ -404,15 +410,17 @@ class SystemService
                 try {
                     $redis = \Illuminate\Support\Facades\Redis::connection();
                     $redis->ping();
+
                     return ['status' => 'ok', 'message' => 'Connected'];
                 } catch (\Exception $e) {
                     // Only return error if it's actually configured but failing
                     // If not configured (e.g. standard file cache), return disabled
-                     if (config('database.redis.default.host')) {
-                         return ['status' => 'error', 'message' => 'Connection Failed: ' . $e->getMessage()];
-                     }
+                    if (config('database.redis.default.host')) {
+                        return ['status' => 'error', 'message' => 'Connection Failed: '.$e->getMessage()];
+                    }
                 }
             }
+
             return ['status' => 'disabled', 'message' => 'Redis not configured'];
         } catch (\Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
@@ -435,8 +443,10 @@ class SystemService
                         $count++;
                     }
                 }
+
                 return ['size' => $this->formatBytes($size), 'count' => $count];
             }
+
             return ['size' => '0 B', 'count' => 0];
         }
 
@@ -469,18 +479,18 @@ class SystemService
                 $redis = \Illuminate\Support\Facades\Redis::connection();
                 $redis->ping();
                 $enabled = true;
-                
+
                 $info = $redis->info('stats');
                 $hits = $info['keyspace_hits'] ?? 0;
                 $misses = $info['keyspace_misses'] ?? 0;
                 $keys = $redis->dbsize();
-                
+
                 // Estimate size for Redis (not accurate but better than nothing)
                 $memory = $redis->info('memory');
                 $size = $this->formatBytes($memory['used_memory'] ?? 0);
 
             } catch (\Exception $e) {
-                Log::debug('Redis stats not available: ' . $e->getMessage());
+                Log::debug('Redis stats not available: '.$e->getMessage());
                 // Try to get file cache size as fallback if redis fails but driver is set
                 // Or leave as 0
             }
@@ -519,10 +529,10 @@ class SystemService
     {
         try {
             $database = DB::connection()->getDatabaseName();
-            $size = DB::select("SELECT 
+            $size = DB::select('SELECT 
                 ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb
                 FROM information_schema.TABLES 
-                WHERE table_schema = ?", [$database]);
+                WHERE table_schema = ?', [$database]);
 
             return [
                 'total_mb' => $size[0]->size_mb ?? 0,
@@ -540,14 +550,14 @@ class SystemService
     {
         try {
             $database = DB::connection()->getDatabaseName();
-            $tables = DB::select("SELECT 
+            $tables = DB::select('SELECT 
                 table_name,
                 ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb,
                 table_rows
                 FROM information_schema.TABLES 
                 WHERE table_schema = ?
                 ORDER BY (data_length + index_length) DESC
-                LIMIT 10", [$database]);
+                LIMIT 10', [$database]);
 
             return array_map(function ($table) {
                 return [
@@ -573,6 +583,6 @@ class SystemService
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
 
-        return round($bytes, $precision) . ' ' . $units[$pow];
+        return round($bytes, $precision).' '.$units[$pow];
     }
 }

@@ -82,17 +82,17 @@ class AuthController extends BaseApiController
 
         // Verify Captcha - Skip if two_factor_code is present (step 2 of login)
         // This avoids 422 errors because the captcha token is consumed during the first attempt.
-        if (\App\Models\Setting::get('enable_captcha', false) && 
-            \App\Models\Setting::get('captcha_on_login', true) && 
-            !$request->has('two_factor_code')) {
-            $captchaService = new \App\Services\CaptchaService();
-            
+        if (\App\Models\Setting::get('enable_captcha', false) &&
+            \App\Models\Setting::get('captcha_on_login', true) &&
+            ! $request->has('two_factor_code')) {
+            $captchaService = new \App\Services\CaptchaService;
+
             $request->validate([
                 'captcha_token' => 'required|string',
                 'captcha_answer' => 'required|string',
             ]);
-            
-            if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+
+            if (! $captchaService->verify($request->captcha_token, $request->captcha_answer)) {
                 return $this->validationError(['captcha' => ['Invalid captcha verification. Please try again.']]);
             }
         }
@@ -105,7 +105,7 @@ class AuthController extends BaseApiController
         if ($securityService->isIpBlocked($ipAddress)) {
             $remainingSeconds = $securityService->getRemainingBlockTime($ipAddress);
             $remainingMinutes = max(1, ceil($remainingSeconds / 60));
-            
+
             return response()->json([
                 'success' => false,
                 'message' => "Your IP address has been temporarily blocked. Please try again in {$remainingMinutes} minute(s).",
@@ -120,7 +120,7 @@ class AuthController extends BaseApiController
         if ($securityService->isAccountLocked($request->email)) {
             $remainingSeconds = $securityService->getAccountLockoutRemaining($request->email);
             $remainingMinutes = max(1, ceil($remainingSeconds / 60));
-            
+
             return response()->json([
                 'success' => false,
                 'message' => "Account temporarily locked. Please try again in {$remainingMinutes} minute(s).",
@@ -138,7 +138,7 @@ class AuthController extends BaseApiController
             $result = $securityService->recordFailedLogin($request->email, $ipAddress);
 
             // Record failed login history if user exists
-            if ($user) {
+            if ($user && isset($user->id)) {
                 \App\Models\LoginHistory::create([
                     'user_id' => $user->id,
                     'ip_address' => $ipAddress,
@@ -150,7 +150,7 @@ class AuthController extends BaseApiController
             }
 
             // If IP was just blocked, return 429 with retry_after
-            if ($result['ip_blocked']) {
+            if (isset($result['ip_blocked']) && $result['ip_blocked']) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Too many failed attempts. Your IP has been temporarily blocked.',
@@ -166,16 +166,9 @@ class AuthController extends BaseApiController
             ]);
         }
 
-        // Check if email verification is required (based on setting)
-        $requireVerification = \App\Models\Setting::get('require_email_verification', true);
-        if ($requireVerification && !$user->hasVerifiedEmail()) {
-            return $this->error(
-                'Please verify your email address before logging in.',
-                403,
-                [],
-                'EMAIL_NOT_VERIFIED',
-                ['requires_verification' => true]
-            );
+        // Check verification
+        if (! $user->hasVerifiedEmail()) {
+            return $this->error('Please verify your email address before logging in.', 403);
         }
 
         // Record successful login
@@ -209,7 +202,7 @@ class AuthController extends BaseApiController
             // Verify 2FA code
             $twoFactorAuth = $user->twoFactorAuth;
             $secret = $twoFactorAuth->getDecryptedSecret();
-            
+
             $google2fa = new \PragmaRX\Google2FA\Google2FA;
             $valid = $google2fa->verifyKey($secret, $request->two_factor_code, 2);
 
@@ -221,7 +214,7 @@ class AuthController extends BaseApiController
             if (! $valid) {
                 // Record failed login
                 $securityService->recordFailedLogin($request->email, $ipAddress);
-                
+
                 \App\Models\LoginHistory::create([
                     'user_id' => $user->id,
                     'ip_address' => $ipAddress,
@@ -254,12 +247,12 @@ class AuthController extends BaseApiController
             // Revoke all previous tokens (Sanctum)
             $tokens = $user->tokens();
             $revokedCount = $tokens->count();
-            
+
             \Illuminate\Support\Facades\Log::info("Single Session: User {$user->email} has {$revokedCount} tokens. Revoking...");
 
             if ($revokedCount > 0) {
                 $tokens->delete();
-                
+
                 \App\Models\SecurityLog::log(
                     'session_invalidated',
                     $user,
@@ -270,28 +263,31 @@ class AuthController extends BaseApiController
 
             // Also invalidate previous sessions if using stateful session guards
             // Note: This requires the AuthenticateSession middleware to be active
+            // Also invalidate previous sessions if using stateful session guards
+            // Note: This requires the AuthenticateSession middleware to be active
             try {
                 // Create web session for Sanctum SPA (stateful)
-                \Illuminate\Support\Facades\Auth::login($user);
-                
+                \Illuminate\Support\Facades\Auth::login($user, $request->remember ?? false);
+                $request->session()->regenerate();
+
                 // Set tiered session lifetime based on user role
                 \App\Services\SessionManager::setLifetimeForUser($user);
 
                 \Illuminate\Support\Facades\Auth::logoutOtherDevices($request->password);
                 \Illuminate\Support\Facades\Log::info("Single Session: logoutOtherDevices called for {$user->email}");
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Single Session Error: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Single Session Error: '.$e->getMessage());
             }
         } elseif ($maxSessions > 0) {
             // Limit concurrent sessions (token based)
             $activeTokens = $user->tokens()->orderBy('created_at', 'asc')->get();
-            
+
             if ($activeTokens->count() >= $maxSessions) {
                 // Remove oldest tokens to make room for new one
                 $tokensToRemove = $activeTokens->count() - $maxSessions + 1;
                 $oldestTokenIds = $activeTokens->take($tokensToRemove)->pluck('id');
                 $user->tokens()->whereIn('id', $oldestTokenIds)->delete();
-                
+
                 \App\Models\SecurityLog::log(
                     'session_limit_reached',
                     $user,
@@ -303,6 +299,12 @@ class AuthController extends BaseApiController
 
         $user->load('roles');
         $user->setRelation('permissions', $user->getAllPermissions());
+
+        // Ensure session is started if it wasn't handled by single-session logic above
+        if (! \Illuminate\Support\Facades\Auth::check()) {
+             \Illuminate\Support\Facades\Auth::login($user, $request->remember ?? false);
+             $request->session()->regenerate();
+        }
 
         // Pure session-based auth - no token needed
         return $this->success([
@@ -349,23 +351,23 @@ class AuthController extends BaseApiController
     {
         // Check if registration is enabled in settings
         $registrationEnabled = \App\Models\Setting::get('enable_registration', true);
-        if (!$registrationEnabled) {
+        if (! $registrationEnabled) {
             return $this->error('Registration is currently disabled.', 403, [], 'REGISTRATION_DISABLED');
         }
 
         try {
             // Verify Captcha
             if (\App\Models\Setting::get('enable_captcha', false) && \App\Models\Setting::get('captcha_on_register', true)) {
-                $captchaService = new \App\Services\CaptchaService();
-                
+                $captchaService = new \App\Services\CaptchaService;
+
                 $request->validate([
                     'captcha_token' => 'required|string',
                     'captcha_answer' => 'required|string',
                 ]);
-                
-                if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+
+                if (! $captchaService->verify($request->captcha_token, $request->captcha_answer)) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'captcha' => ['Invalid captcha verification. Please try again.']
+                        'captcha' => ['Invalid captcha verification. Please try again.'],
                     ]);
                 }
             }
@@ -373,7 +375,7 @@ class AuthController extends BaseApiController
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
+                'password' => ['required', 'confirmed', 'min:8', new StrongPassword],
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e->errors());
@@ -425,6 +427,7 @@ class AuthController extends BaseApiController
     {
         $user = $request->user()->load('roles');
         $user->setRelation('permissions', $user->getAllPermissions());
+
         return $this->success($user, 'User retrieved successfully');
     }
 
@@ -555,7 +558,7 @@ class AuthController extends BaseApiController
             $request->validate([
                 'token' => 'required',
                 'email' => 'required|email',
-                'password' => ['required', 'confirmed', 'min:8', new StrongPassword()],
+                'password' => ['required', 'confirmed', 'min:8', new StrongPassword],
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e->errors());

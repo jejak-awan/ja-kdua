@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\AnalyticsEvent;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AnalyticsEventFactory extends Factory
@@ -32,14 +31,13 @@ class AnalyticsEventFactory extends Factory
     private function getEventName(string $eventType): string
     {
         return match ($eventType) {
-            'page_view' => 'Page View: ' . $this->faker->words(3, true),
-            'click' => 'Click: ' . $this->faker->randomElement(['Button', 'Link', 'Menu']),
-            'form_submit' => 'Form Submit: ' . $this->faker->randomElement(['Contact', 'Newsletter', 'Registration']),
-            'download' => 'Download: ' . $this->faker->randomElement(['PDF', 'Image', 'Document']),
-            'search' => 'Search: ' . $this->faker->words(2, true),
-            'video_play' => 'Video Play: ' . $this->faker->words(3, true),
+            'page_view' => 'Page View: '.$this->faker->words(3, true),
+            'click' => 'Click: '.$this->faker->randomElement(['Button', 'Link', 'Menu']),
+            'form_submit' => 'Form Submit: '.$this->faker->randomElement(['Contact', 'Newsletter', 'Registration']),
+            'download' => 'Download: '.$this->faker->randomElement(['PDF', 'Image', 'Document']),
+            'search' => 'Search: '.$this->faker->words(2, true),
+            'video_play' => 'Video Play: '.$this->faker->words(3, true),
             default => 'Event',
         };
     }
 }
-

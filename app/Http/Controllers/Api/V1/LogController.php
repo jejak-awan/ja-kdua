@@ -35,21 +35,21 @@ class LogController extends BaseApiController
 
     public function show($filename)
     {
-        $logFile = storage_path('logs/' . basename($filename));
+        $logFile = storage_path('logs/'.basename($filename));
 
         if (! File::exists($logFile)) {
             return $this->notFound('Log file');
         }
 
         // Limit content to last 2MB to avoid huge payload
-        $content = $this->tailFile($logFile, 2000); 
+        $content = $this->tailFile($logFile, 2000);
 
         return $this->success(['content' => $content], 'Log content retrieved successfully');
     }
 
     public function download($filename)
     {
-        $logFile = storage_path('logs/' . basename($filename));
+        $logFile = storage_path('logs/'.basename($filename));
 
         if (File::exists($logFile)) {
             return response()->download($logFile, basename($filename));
@@ -60,12 +60,13 @@ class LogController extends BaseApiController
 
     public function clear(Request $request)
     {
-         // Default to laravel.log or specific file
+        // Default to laravel.log or specific file
         $filename = $request->input('filename', 'laravel.log');
-        $logFile = storage_path('logs/' . basename($filename));
+        $logFile = storage_path('logs/'.basename($filename));
 
         if (File::exists($logFile)) {
             File::put($logFile, '');
+
             return $this->success(null, 'Log file cleared successfully');
         }
 
@@ -77,12 +78,13 @@ class LogController extends BaseApiController
         // Simple file get for now, or sophisticated tail logic
         // Since admin might want to see whole file but pagination is hard with text files
         // We will return the last 100 KB text
-        
+
         $content = File::get($filepath);
         // If too large, truncate
         if (strlen($content) > 1024 * 500) { // 500KB limit
-             return '... (File too large, showing last 500KB) ...' . "\n" . substr($content, -1024 * 500);
+            return '... (File too large, showing last 500KB) ...'."\n".substr($content, -1024 * 500);
         }
+
         return $content;
     }
 }

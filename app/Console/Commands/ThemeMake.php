@@ -38,17 +38,18 @@ class ThemeMake extends Command
         $parent = $this->option('parent');
 
         // Validate type
-        if (!in_array($type, ['frontend', 'admin', 'email'])) {
-            $this->error("Invalid type. Must be one of: frontend, admin, email");
+        if (! in_array($type, ['frontend', 'admin', 'email'])) {
+            $this->error('Invalid type. Must be one of: frontend, admin, email');
+
             return Command::FAILURE;
         }
 
         // Check if theme already exists
         $themeService->ensureThemeDirectory();
-        $themePath = $themeService->getThemeDirectory() . "/{$slug}";
+        $themePath = $themeService->getThemeDirectory()."/{$slug}";
 
         if (is_dir($themePath)) {
-            if (!$this->confirm("Theme directory already exists. Continue anyway?")) {
+            if (! $this->confirm('Theme directory already exists. Continue anyway?')) {
                 return Command::FAILURE;
             }
         }
@@ -56,8 +57,9 @@ class ThemeMake extends Command
         $this->info("Creating theme: {$name} ({$slug})");
 
         // Create theme structure
-        if (!ThemeDirectoryHelper::createStructure($themePath, $name, $slug)) {
-            $this->error("Failed to create theme structure");
+        if (! ThemeDirectoryHelper::createStructure($themePath, $name, $slug)) {
+            $this->error('Failed to create theme structure');
+
             return Command::FAILURE;
         }
 
@@ -86,11 +88,11 @@ class ThemeMake extends Command
         $this->info("✓ Theme structure created at: {$themePath}");
         $this->info("✓ Theme registered in database (ID: {$theme->id})");
         $this->newLine();
-        $this->info("Next steps:");
+        $this->info('Next steps:');
         $this->line("  1. Edit theme files in: {$themePath}");
-        $this->line("  2. Customize theme.json for configuration");
-        $this->line("  3. Add your CSS/JS files in assets/ directory");
-        $this->line("  4. Create templates in templates/ directory");
+        $this->line('  2. Customize theme.json for configuration');
+        $this->line('  3. Add your CSS/JS files in assets/ directory');
+        $this->line('  4. Create templates in templates/ directory');
         $this->line("  5. Run 'php artisan themes:scan' to refresh theme list");
 
         return Command::SUCCESS;

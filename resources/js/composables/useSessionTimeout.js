@@ -225,7 +225,6 @@ export function useSessionTimeout() {
             hideWarning();
             startWarningTimer();
 
-            console.log('Session extended successfully');
         } catch (error) {
             console.error('Failed to extend session:', error);
             // If extend fails, likely session already expired

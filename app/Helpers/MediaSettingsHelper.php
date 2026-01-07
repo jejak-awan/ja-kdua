@@ -24,15 +24,17 @@ class MediaSettingsHelper
     public static function getAllowedImageTypes(): array
     {
         $types = Setting::get('allowed_image_types', 'jpg,jpeg,png,gif,webp,svg');
+
         return array_map('trim', explode(',', $types));
     }
 
     /**
-     * Get allowed file types (comma-separated)  
+     * Get allowed file types (comma-separated)
      */
     public static function getAllowedFileTypes(): array
     {
         $types = Setting::get('allowed_file_types', 'pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar');
+
         return array_map('trim', explode(',', $types));
     }
 
@@ -53,6 +55,7 @@ class MediaSettingsHelper
     public static function isExtensionAllowed(string $extension): bool
     {
         $extension = strtolower(trim($extension, '.'));
+
         return in_array($extension, self::getAllowedExtensions());
     }
 
@@ -95,13 +98,13 @@ class MediaSettingsHelper
     {
         $maxSize = self::getMaxUploadSize();
         $allowedExtensions = implode(',', self::getAllowedExtensions());
-        
+
         return [
             'file' => [
                 'required',
                 'file',
-                'max:' . $maxSize,
-                'mimes:' . $allowedExtensions,
+                'max:'.$maxSize,
+                'mimes:'.$allowedExtensions,
             ],
         ];
     }
@@ -113,13 +116,13 @@ class MediaSettingsHelper
     {
         $maxSize = self::getMaxUploadSize();
         $allowedImages = implode(',', self::getAllowedImageTypes());
-        
+
         return [
             'file' => [
                 'required',
                 'file',
-                'max:' . $maxSize,
-                'mimes:' . $allowedImages,
+                'max:'.$maxSize,
+                'mimes:'.$allowedImages,
             ],
         ];
     }

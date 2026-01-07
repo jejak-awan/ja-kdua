@@ -9,6 +9,7 @@ namespace App\Services;
 class ThemeHooksService
 {
     protected array $actions = [];
+
     protected array $filters = [];
 
     /**
@@ -16,7 +17,7 @@ class ThemeHooksService
      */
     public function addAction(string $hook, callable $callback, int $priority = 10): void
     {
-        if (!isset($this->actions[$hook])) {
+        if (! isset($this->actions[$hook])) {
             $this->actions[$hook] = [];
         }
 
@@ -36,7 +37,7 @@ class ThemeHooksService
      */
     public function doAction(string $hook, ...$args): void
     {
-        if (!isset($this->actions[$hook])) {
+        if (! isset($this->actions[$hook])) {
             return;
         }
 
@@ -50,7 +51,7 @@ class ThemeHooksService
      */
     public function addFilter(string $hook, callable $callback, int $priority = 10): void
     {
-        if (!isset($this->filters[$hook])) {
+        if (! isset($this->filters[$hook])) {
             $this->filters[$hook] = [];
         }
 
@@ -70,7 +71,7 @@ class ThemeHooksService
      */
     public function applyFilter(string $hook, $value, ...$args)
     {
-        if (!isset($this->filters[$hook])) {
+        if (! isset($this->filters[$hook])) {
             return $value;
         }
 
@@ -86,7 +87,7 @@ class ThemeHooksService
      */
     public function removeAction(string $hook, callable $callback): void
     {
-        if (!isset($this->actions[$hook])) {
+        if (! isset($this->actions[$hook])) {
             return;
         }
 
@@ -103,7 +104,7 @@ class ThemeHooksService
      */
     public function removeFilter(string $hook, callable $callback): void
     {
-        if (!isset($this->filters[$hook])) {
+        if (! isset($this->filters[$hook])) {
             return;
         }
 
@@ -120,7 +121,7 @@ class ThemeHooksService
      */
     public function hasAction(string $hook): bool
     {
-        return isset($this->actions[$hook]) && !empty($this->actions[$hook]);
+        return isset($this->actions[$hook]) && ! empty($this->actions[$hook]);
     }
 
     /**
@@ -128,7 +129,7 @@ class ThemeHooksService
      */
     public function hasFilter(string $hook): bool
     {
-        return isset($this->filters[$hook]) && !empty($this->filters[$hook]);
+        return isset($this->filters[$hook]) && ! empty($this->filters[$hook]);
     }
 
     /**
@@ -142,4 +143,3 @@ class ThemeHooksService
         ];
     }
 }
-

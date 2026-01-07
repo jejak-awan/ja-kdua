@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -62,10 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get a user preference value.
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
      */
     public function getPreference(string $key, mixed $default = null): mixed
     {
@@ -75,8 +70,6 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Set a user preference value.
      *
-     * @param string $key
-     * @param mixed $value
      * @return $this
      */
     public function setPreference(string $key, mixed $value): self
@@ -84,9 +77,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $preferences = $this->preferences ?? [];
         data_set($preferences, $key, $value);
         $this->preferences = $preferences;
+
         return $this;
     }
-
 
     public function activityLogs()
     {
@@ -149,14 +142,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $roleRanks = [
             'super-admin' => 100,
-            'admin'       => 80,
-            'editor'      => 60,
-            'author'      => 40,
-            'member'      => 20,
+            'admin' => 80,
+            'editor' => 60,
+            'author' => 40,
+            'member' => 20,
         ];
 
         $userRoles = $this->getRoleNames();
-        
+
         $maxRank = 0;
         foreach ($userRoles as $role) {
             if (isset($roleRanks[$role]) && $roleRanks[$role] > $maxRank) {
@@ -182,13 +175,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $roleRanks = [
             'super-admin' => 100,
-            'admin'       => 80,
-            'editor'      => 60,
-            'author'      => 40,
-            'member'      => 20,
+            'admin' => 80,
+            'editor' => 60,
+            'author' => 40,
+            'member' => 20,
         ];
 
-        if (!isset($roleRanks[$roleName])) {
+        if (! isset($roleRanks[$roleName])) {
             return false;
         }
 

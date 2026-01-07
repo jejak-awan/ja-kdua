@@ -22,7 +22,7 @@ trait HasQueryOptimization
     {
         $relations = array_merge($this->getDefaultRelations(), $additionalRelations);
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -34,7 +34,7 @@ trait HasQueryOptimization
      */
     protected function optimizeSelect(Builder $query, array $columns = []): Builder
     {
-        if (!empty($columns)) {
+        if (! empty($columns)) {
             $query->select($columns);
         }
 
@@ -102,4 +102,3 @@ trait HasQueryOptimization
         return $optimized;
     }
 }
-

@@ -20,8 +20,6 @@ class SendBroadcastNotification implements ShouldQueue
 
     /**
      * Create a new job instance.
-     *
-     * @param array $payload
      */
     public function __construct(array $payload)
     {
@@ -83,7 +81,7 @@ class SendBroadcastNotification implements ShouldQueue
                 );
             }
         } catch (\Exception $e) {
-            Log::error('Broadcast job error: ' . $e->getMessage());
+            Log::error('Broadcast job error: '.$e->getMessage());
             throw $e;
         }
     }

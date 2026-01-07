@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends BaseApiController
 {
@@ -21,12 +21,13 @@ class RoleController extends BaseApiController
 
         $roles = $query->paginate($limit);
 
-        // Safely add users_count manually since Spatie's users() relation 
+        // Safely add users_count manually since Spatie's users() relation
         // sometimes fails to resolve the model in this environment
         $roles->getCollection()->transform(function ($role) {
             $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
                 ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
                 ->count();
+
             return $role;
         });
 
@@ -47,7 +48,7 @@ class RoleController extends BaseApiController
 
         foreach ($ids as $id) {
             $role = Role::find($id);
-            
+
             // Prevent deleting protected roles
             if ($role->name === 'super-admin') {
                 continue;
@@ -55,7 +56,7 @@ class RoleController extends BaseApiController
 
             // Prevent deleting roles with users
             if ($role->users()->count() > 0) {
-                 continue;
+                continue;
             }
 
             if ($action === 'delete') {
@@ -64,7 +65,7 @@ class RoleController extends BaseApiController
             }
         }
 
-        return $this->success(null, ucfirst($action) . " completed for {$count} roles");
+        return $this->success(null, ucfirst($action)." completed for {$count} roles");
     }
 
     public function show(Role $role)
@@ -73,7 +74,7 @@ class RoleController extends BaseApiController
         $role->users_count = \DB::table(config('permission.table_names.model_has_roles'))
             ->where(config('permission.column_names.role_pivot_key') ?? 'role_id', $role->id)
             ->count();
-            
+
         return $this->success($role, 'Role retrieved successfully');
     }
 
@@ -87,7 +88,7 @@ class RoleController extends BaseApiController
 
         $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
 
-        if (!empty($validated['permissions'])) {
+        if (! empty($validated['permissions'])) {
             $role->syncPermissions($validated['permissions']);
         }
 
@@ -102,7 +103,7 @@ class RoleController extends BaseApiController
         }
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255|unique:roles,name,' . $role->id,
+            'name' => 'sometimes|string|max:255|unique:roles,name,'.$role->id,
             'permissions' => 'array',
             'permissions.*' => 'exists:permissions,name',
         ]);
@@ -140,6 +141,7 @@ class RoleController extends BaseApiController
         $permissions = Permission::orderBy('name')->get()->groupBy(function ($permission) {
             // Group by category (resource name - everything after the first word)
             $parts = explode(' ', $permission->name, 2);
+
             return isset($parts[1]) ? ucfirst($parts[1]) : 'General';
         });
 
@@ -166,7 +168,7 @@ class RoleController extends BaseApiController
     public function duplicate(Role $role)
     {
         $newRole = Role::create([
-            'name' => $role->name . ' (copy)',
+            'name' => $role->name.' (copy)',
             'guard_name' => 'web',
         ]);
 
@@ -175,4 +177,3 @@ class RoleController extends BaseApiController
         return $this->success($newRole->load('permissions'), 'Role duplicated successfully', 201);
     }
 }
-

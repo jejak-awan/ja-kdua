@@ -119,9 +119,9 @@ class NotificationController extends BaseApiController
         $user = $request->user();
 
         if (! $user || ! $user->hasRole('super-admin')) {
-             if (!$user->can('manage system') && !$user->hasRole('super-admin')) {
-                 return $this->forbidden('Unauthorized');
-             }
+            if (! $user->can('manage system') && ! $user->hasRole('super-admin')) {
+                return $this->forbidden('Unauthorized');
+            }
         }
 
         $limit = $request->input('limit', 20);
@@ -180,12 +180,12 @@ class NotificationController extends BaseApiController
 
         foreach ($request->broadcasts as $broadcast) {
             $createdAt = date('Y-m-d H:i', strtotime($broadcast['created_at']));
-            
+
             $count = Notification::where('title', $broadcast['title'])
                 ->where('message', $broadcast['message'])
                 ->where(\DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i")'), $createdAt)
                 ->delete();
-                
+
             $totalDeleted += $count;
         }
 
@@ -223,10 +223,12 @@ class NotificationController extends BaseApiController
         // Fallback to sync if queue driver is sync or user explicitly requested it
         if ($isAsync && config('queue.default') !== 'sync') {
             \App\Jobs\SendBroadcastNotification::dispatch($payload);
+
             return $this->success(null, 'Broadcast notification queued for delivery');
         } else {
             // Direct delivery (sync)
             \App\Jobs\SendBroadcastNotification::dispatchSync($payload);
+
             return $this->success(null, 'Broadcast notification delivered successfully');
         }
     }
@@ -240,7 +242,7 @@ class NotificationController extends BaseApiController
         }
 
         if ($notification->user_id !== $user->id) {
-             return $this->forbidden('Unauthorized');
+            return $this->forbidden('Unauthorized');
         }
 
         $notification->delete();

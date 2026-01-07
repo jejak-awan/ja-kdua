@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class Theme extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'slug',
@@ -52,20 +54,20 @@ class Theme extends Model
                 ->where('type', $type)
                 ->where('status', 'active')
                 ->first();
-            
+
             // If no active theme, try to auto-activate default theme
-            if (!$activeTheme) {
+            if (! $activeTheme) {
                 $defaultTheme = self::where('type', $type)
                     ->where('slug', 'default')
                     ->first();
-                
+
                 // If no default theme, get first available theme
-                if (!$defaultTheme) {
+                if (! $defaultTheme) {
                     $defaultTheme = self::where('type', $type)
                         ->orderBy('id')
                         ->first();
                 }
-                
+
                 // Auto-activate if found
                 if ($defaultTheme) {
                     try {
@@ -74,13 +76,14 @@ class Theme extends Model
                             'status' => 'active',
                         ]);
                         Cache::forget("theme.active.{$type}");
+
                         return $defaultTheme->fresh();
                     } catch (\Exception $e) {
-                        \Log::warning('Failed to auto-activate default theme: ' . $e->getMessage());
+                        \Log::warning('Failed to auto-activate default theme: '.$e->getMessage());
                     }
                 }
             }
-            
+
             return $activeTheme;
         });
     }
@@ -92,20 +95,20 @@ class Theme extends Model
     {
         // Validate theme before activation (warn but don't block)
         $errors = $this->validate();
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             // Log warnings but allow activation
             \Log::warning("Theme '{$this->name}' has validation warnings but will be activated", [
                 'theme_id' => $this->id,
                 'errors' => $errors,
             ]);
-            
+
             // Only block if critical errors (invalid JSON)
-            $criticalErrors = array_filter($errors, function($error) {
+            $criticalErrors = array_filter($errors, function ($error) {
                 return strpos($error, 'Invalid theme.json format') !== false;
             });
-            
-            if (!empty($criticalErrors)) {
-                throw new \Exception("Theme '{$this->name}' is invalid and cannot be activated: " . implode(', ', $criticalErrors));
+
+            if (! empty($criticalErrors)) {
+                throw new \Exception("Theme '{$this->name}' is invalid and cannot be activated: ".implode(', ', $criticalErrors));
             }
         }
 
@@ -133,6 +136,7 @@ class Theme extends Model
     {
         $this->update(['is_active' => false]);
         Cache::forget("theme.active.{$this->type}");
+
         return true;
     }
 
@@ -158,7 +162,7 @@ class Theme extends Model
      */
     public function hasParent(): bool
     {
-        return !empty($this->parent_theme);
+        return ! empty($this->parent_theme);
     }
 
     /**
@@ -166,7 +170,7 @@ class Theme extends Model
      */
     public function getParent(): ?self
     {
-        if (!$this->hasParent()) {
+        if (! $this->hasParent()) {
             return null;
         }
 
@@ -178,11 +182,11 @@ class Theme extends Model
      */
     public function supports(string $feature): bool
     {
-        if (!$this->supports) {
+        if (! $this->supports) {
             return false;
         }
 
-        return in_array($feature, $this->supports) || 
+        return in_array($feature, $this->supports) ||
                (isset($this->supports[$feature]) && $this->supports[$feature] === true);
     }
 
@@ -191,7 +195,7 @@ class Theme extends Model
      */
     public function getSetting(string $key, $default = null)
     {
-        if (!$this->settings) {
+        if (! $this->settings) {
             return $default;
         }
 
@@ -217,33 +221,34 @@ class Theme extends Model
         $themePath = $this->getThemePath();
 
         // Check if theme directory exists
-        if (!is_dir($themePath)) {
+        if (! is_dir($themePath)) {
             $errors[] = "Theme directory does not exist: {$themePath}";
+
             return $errors;
         }
 
         // Check for theme.json
         $manifestPath = "{$themePath}/theme.json";
-        if (!file_exists($manifestPath)) {
-            $errors[] = "Theme manifest (theme.json) not found";
+        if (! file_exists($manifestPath)) {
+            $errors[] = 'Theme manifest (theme.json) not found';
         } else {
             // Validate manifest
             $manifest = json_decode(file_get_contents($manifestPath), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $errors[] = "Invalid theme.json format: " . json_last_error_msg();
+                $errors[] = 'Invalid theme.json format: '.json_last_error_msg();
             }
         }
 
         // Check required directories for Vue themes
         $requiredDirs = ['assets']; // templates no longer required for Vue SPA
         foreach ($requiredDirs as $dir) {
-            if (!is_dir("{$themePath}/{$dir}")) {
+            if (! is_dir("{$themePath}/{$dir}")) {
                 $errors[] = "Required directory missing: {$dir}";
             }
         }
-        
+
         // Check for Vue components directory (optional but recommended)
-        if (!is_dir("{$themePath}/components")) {
+        if (! is_dir("{$themePath}/components")) {
             // Not an error, just a warning
             \Log::info("Theme '{$this->name}' does not have a components directory");
         }
@@ -264,13 +269,13 @@ class Theme extends Model
     public function getManifest(): ?array
     {
         $manifestPath = "{$this->getThemePath()}/theme.json";
-        
-        if (!file_exists($manifestPath)) {
+
+        if (! file_exists($manifestPath)) {
             return null;
         }
 
         $manifest = json_decode(file_get_contents($manifestPath), true);
-        
+
         return $manifest ?: null;
     }
 
@@ -279,7 +284,7 @@ class Theme extends Model
      */
     public function hasUpdate(): bool
     {
-        if (!$this->update_url) {
+        if (! $this->update_url) {
             return false;
         }
 
@@ -360,7 +365,7 @@ class Theme extends Model
     {
         $themePath = $this->getThemePath();
         $componentsDir = "{$themePath}/components";
-        
+
         return is_dir($componentsDir) && count(glob("{$componentsDir}/*")) > 0;
     }
 
@@ -371,7 +376,7 @@ class Theme extends Model
     {
         $themePath = $this->getThemePath();
         $componentsDir = "{$themePath}/components";
-        
+
         return is_dir($componentsDir) ? $componentsDir : null;
     }
 
@@ -381,7 +386,7 @@ class Theme extends Model
     public function getComponentManifest(): array
     {
         $manifest = $this->getManifest();
-        
+
         return $manifest['components'] ?? [];
     }
 
@@ -392,7 +397,7 @@ class Theme extends Model
     {
         $themePath = $this->getThemePath();
         $composablesDir = "{$themePath}/composables";
-        
+
         return is_dir($composablesDir) ? $composablesDir : null;
     }
 
@@ -402,7 +407,7 @@ class Theme extends Model
     public function getThemeConfig(): array
     {
         $manifest = $this->getManifest();
-        
+
         return [
             'settings_schema' => $manifest['settings_schema'] ?? [],
             'supports' => $manifest['supports'] ?? [],
@@ -417,7 +422,7 @@ class Theme extends Model
     public function isVueBased(): bool
     {
         $manifest = $this->getManifest();
-        
+
         return isset($manifest['framework']) && $manifest['framework'] === 'vue';
     }
 }

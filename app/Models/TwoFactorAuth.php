@@ -111,4 +111,3 @@ class TwoFactorAuth extends Model
         return count($this->backup_codes);
     }
 }
-

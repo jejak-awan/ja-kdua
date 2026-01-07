@@ -10,14 +10,14 @@ class ContentTemplateController extends BaseApiController
     public function index(Request $request)
     {
         $query = ContentTemplate::with('category');
-        
+
         // Scope logic
-        if ($request->user() && !$request->user()->can('manage templates')) {
-            $query->where(function($q) use ($request) {
-                 $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+        if ($request->user() && ! $request->user()->can('manage templates')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
             });
-        } elseif (!$request->user()) {
-             $query->whereNull('author_id');
+        } elseif (! $request->user()) {
+            $query->whereNull('author_id');
         }
 
         if ($request->has('type') && $request->type !== 'all') {
@@ -31,9 +31,9 @@ class ContentTemplateController extends BaseApiController
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -67,12 +67,12 @@ class ContentTemplateController extends BaseApiController
 
         $action = $request->input('action');
         $ids = $request->input('ids');
-        
+
         $query = ContentTemplate::whereIn('id', $ids);
-        
+
         // Scope
-        if (!$request->user()->can('manage templates')) {
-             $query->where('author_id', $request->user()->id);
+        if (! $request->user()->can('manage templates')) {
+            $query->where('author_id', $request->user()->id);
         }
 
         $count = 0;
@@ -104,7 +104,7 @@ class ContentTemplateController extends BaseApiController
             'is_active' => 'boolean',
             'author_id' => 'nullable|exists:users,id',
         ]);
-        
+
         // Author Assignment
         if ($request->user()->can('manage templates')) {
             // Admin can assign
@@ -122,26 +122,26 @@ class ContentTemplateController extends BaseApiController
         // Permission/Ownership check?
         // Usually viewing templates is fine if they are visible in index?
         // But let's enforce consistency.
-        if (request()->user() && !request()->user()->can('manage templates')) {
-             if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to view this template');
-             }
+        if (request()->user() && ! request()->user()->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+                return $this->forbidden('You do not have permission to view this template');
+            }
         }
-        
+
         return $this->success($contentTemplate->load('category'), 'Content template retrieved successfully');
     }
 
     public function update(Request $request, ContentTemplate $contentTemplate)
     {
         // Ownership check
-        if (!$request->user()->can('manage templates')) {
-             if ($contentTemplate->author_id && $contentTemplate->author_id !== $request->user()->id) {
-                 return $this->forbidden('You do not have permission to update this template');
-             }
-             if (is_null($contentTemplate->author_id)) {
-                 return $this->forbidden('You cannot update global templates');
-             }
-             unset($request['author_id']);
+        if (! $request->user()->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== $request->user()->id) {
+                return $this->forbidden('You do not have permission to update this template');
+            }
+            if (is_null($contentTemplate->author_id)) {
+                return $this->forbidden('You cannot update global templates');
+            }
+            unset($request['author_id']);
         }
 
         $validated = $request->validate([
@@ -167,13 +167,13 @@ class ContentTemplateController extends BaseApiController
     public function destroy(ContentTemplate $contentTemplate)
     {
         // Ownership check
-        if (!request()->user()->can('manage templates')) {
-             if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to delete this template');
-             }
-             if (is_null($contentTemplate->author_id)) {
-                 return $this->forbidden('You cannot delete global templates');
-             }
+        if (! request()->user()->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+                return $this->forbidden('You do not have permission to delete this template');
+            }
+            if (is_null($contentTemplate->author_id)) {
+                return $this->forbidden('You cannot delete global templates');
+            }
         }
 
         $contentTemplate->delete();
@@ -185,6 +185,7 @@ class ContentTemplateController extends BaseApiController
     {
         $template = ContentTemplate::withTrashed()->findOrFail($id);
         $template->restore();
+
         return $this->success(null, 'Content template restored successfully');
     }
 
@@ -192,24 +193,25 @@ class ContentTemplateController extends BaseApiController
     {
         $template = ContentTemplate::withTrashed()->findOrFail($id);
         $template->forceDelete();
+
         return $this->success(null, 'Content template permanently deleted');
     }
 
     public function createContent(Request $request, ContentTemplate $contentTemplate)
     {
         // Scope?
-        if (request()->user() && !request()->user()->can('manage templates')) {
-             if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
-                 // But wait, can I use a template if it is Global? YES.
-                 // So only forbidden if it's someone ELSE'S private template.
-                 // Global (null) is OK.
-                 return $this->forbidden('You do not have permission to use this template');
-             }
-             // Actually, index logic allows seeing Global or Own.
-             // So if I can see it, I can use it?
-             // Yes.
+        if (request()->user() && ! request()->user()->can('manage templates')) {
+            if ($contentTemplate->author_id && $contentTemplate->author_id !== request()->user()->id) {
+                // But wait, can I use a template if it is Global? YES.
+                // So only forbidden if it's someone ELSE'S private template.
+                // Global (null) is OK.
+                return $this->forbidden('You do not have permission to use this template');
+            }
+            // Actually, index logic allows seeing Global or Own.
+            // So if I can see it, I can use it?
+            // Yes.
         }
-        
+
         $data = $request->input('data', []);
         $data['author_id'] = $request->user()->id;
 

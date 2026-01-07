@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,10 +14,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register ThemeHooksService as singleton
         $this->app->singleton(\App\Services\ThemeHooksService::class);
-        
+
         // Register ThemeCacheService as singleton
         $this->app->singleton(\App\Services\ThemeCacheService::class);
-        
 
     }
 
@@ -33,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \App\Models\MediaFolder::observe(\App\Observers\MediaFolderObserver::class);
-        
+
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
                 // Load Performance Settings
@@ -41,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
                     ->whereIn('key', [
                         'enable_cache', 'cache_driver', 'cache_ttl',
                         'enable_cdn', 'cdn_url', 'cdn_preset', 'cdn_included_dirs', 'cdn_excluded_extensions',
-                        'enable_image_optimization', 'enable_lazy_loading'
+                        'enable_image_optimization', 'enable_lazy_loading',
                     ])
                     ->get()
                     ->flatMap(function ($setting) {
@@ -49,8 +48,8 @@ class AppServiceProvider extends ServiceProvider
                     });
 
                 // Apply Cache Driver Strategy
-                if (isset($performanceSettings['enable_cache']) && 
-                    !filter_var($performanceSettings['enable_cache'], FILTER_VALIDATE_BOOLEAN)) {
+                if (isset($performanceSettings['enable_cache']) &&
+                    ! filter_var($performanceSettings['enable_cache'], FILTER_VALIDATE_BOOLEAN)) {
                     config(['cache.default' => 'array']); // Force disable if explicitly off
                 } elseif (isset($performanceSettings['cache_driver'])) {
                     config(['cache.default' => $performanceSettings['cache_driver']]);
@@ -69,13 +68,13 @@ class AppServiceProvider extends ServiceProvider
                         'aws_access_key_id', 'aws_secret_access_key', 'aws_default_region', 'aws_bucket', 'aws_endpoint',
                         'google_client_id', 'google_client_secret', 'google_refresh_token', 'google_folder_id',
                         'ftp_host', 'ftp_username', 'ftp_password', 'ftp_root', 'ftp_port', 'ftp_ssl',
-                        'dropbox_authorization_token'
+                        'dropbox_authorization_token',
                     ])
                     ->get()
                     ->flatMap(function ($setting) {
                         return [$setting->key => $setting->value];
                     });
-                
+
                 // Merge all settings for easier access
                 $allSettings = $performanceSettings->merge($mediaSettings);
 
@@ -87,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
                         'cdn.preset' => $allSettings['cdn_preset'] ?? 'custom',
                         'cdn.included_dirs' => $allSettings['cdn_included_dirs'] ?? 'assets,storage',
                         'cdn.excluded_extensions' => $allSettings['cdn_excluded_extensions'] ?? '.php,.json',
-                        
+
                         // Performance
                         'media.optimize' => filter_var($allSettings['enable_image_optimization'] ?? false, FILTER_VALIDATE_BOOLEAN),
                         'view.lazy_loading' => filter_var($allSettings['enable_lazy_loading'] ?? true, FILTER_VALIDATE_BOOLEAN),
@@ -96,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
                     // Apply Storage Settings
                     if (isset($allSettings['storage_driver'])) {
                         config(['filesystems.default' => $allSettings['storage_driver']]);
-                        
+
                         if ($allSettings['storage_driver'] === 's3') {
                             config([
                                 'filesystems.disks.s3.key' => $allSettings['aws_access_key_id'] ?? env('AWS_ACCESS_KEY_ID'),
@@ -104,7 +103,7 @@ class AppServiceProvider extends ServiceProvider
                                 'filesystems.disks.s3.region' => $allSettings['aws_default_region'] ?? env('AWS_DEFAULT_REGION', 'us-east-1'),
                                 'filesystems.disks.s3.bucket' => $allSettings['aws_bucket'] ?? env('AWS_BUCKET'),
                                 'filesystems.disks.s3.endpoint' => $allSettings['aws_endpoint'] ?? env('AWS_ENDPOINT'),
-                                'filesystems.disks.s3.use_path_style_endpoint' => !empty($allSettings['aws_endpoint']),
+                                'filesystems.disks.s3.use_path_style_endpoint' => ! empty($allSettings['aws_endpoint']),
                             ]);
                         } elseif ($allSettings['storage_driver'] === 'google') {
                             config([

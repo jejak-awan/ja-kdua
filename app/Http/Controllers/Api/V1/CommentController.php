@@ -24,12 +24,16 @@ class CommentController extends BaseApiController
 
     public function store(Request $request, Content $content)
     {
-        $validated = $request->validate([
-            'body' => 'required|string',
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'parent_id' => 'nullable|exists:comments,id',
-        ]);
+        try {
+            $validated = $request->validate([
+                'body' => 'required|string',
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'parent_id' => 'nullable|exists:comments,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         // If user is authenticated, use user data
         if ($request->user()) {
@@ -55,7 +59,7 @@ class CommentController extends BaseApiController
         $query = Comment::with(['content', 'user', 'parent']);
 
         // Multi-tenancy: Authors only see comments on their own content
-        if (!$request->user()->can('manage comments')) {
+        if (! $request->user()->can('manage comments')) {
             $query->whereHas('content', function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id);
             });
@@ -73,8 +77,8 @@ class CommentController extends BaseApiController
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('body', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -89,7 +93,7 @@ class CommentController extends BaseApiController
         $query = Comment::query();
 
         // Multi-tenancy scoping
-        if (!$request->user()->can('manage comments')) {
+        if (! $request->user()->can('manage comments')) {
             $query->whereHas('content', function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id);
             });
@@ -174,4 +178,3 @@ class CommentController extends BaseApiController
         return $this->success(null, 'Comment deleted successfully');
     }
 }
-

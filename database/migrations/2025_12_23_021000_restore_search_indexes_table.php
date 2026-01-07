@@ -25,7 +25,7 @@ return new class extends Migration
 
                 $table->index(['searchable_type', 'searchable_id']);
                 $table->index('type');
-                
+
                 // Add fulltext index only for MySQL/MariaDB (SQLite doesn't support it)
                 if (DB::getDriverName() === 'mysql') {
                     $table->fullText(['title', 'content']);
@@ -36,7 +36,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Don't drop it in down() since it's a restore migration, 
+        // Don't drop it in down() since it's a restore migration,
         // or actually yes drop it if we roll this back as it implies we want to undo the restoration?
         // But the original migration also drops it.
         // Let's leave down() empty or use dropIfExists to be safe against double-drops if necessary.

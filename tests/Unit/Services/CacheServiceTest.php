@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CacheServiceTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -27,7 +27,7 @@ class CacheServiceTest extends TestCase
         Cache::put('categories_list', 'test', 60);
         Cache::put('media_list', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearAll();
 
         $this->assertNull(Cache::get('contents_list'));
@@ -45,7 +45,7 @@ class CacheServiceTest extends TestCase
         Cache::put('content_1', 'test', 60);
         Cache::put('sitemap_index', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearContentCaches();
 
         $this->assertNull(Cache::get('contents_list'));
@@ -62,7 +62,7 @@ class CacheServiceTest extends TestCase
         Cache::put('content_slug_1', 'test', 60);
         Cache::put('content_2', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearContentCaches(1);
 
         $this->assertNull(Cache::get('content_1'));
@@ -79,7 +79,7 @@ class CacheServiceTest extends TestCase
         Cache::put('categories_tree', 'test', 60);
         Cache::put('category_1', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearCategoryCaches();
 
         $this->assertNull(Cache::get('categories_list'));
@@ -94,7 +94,7 @@ class CacheServiceTest extends TestCase
         Cache::put('category_1', 'test', 60);
         Cache::put('category_2', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearCategoryCaches(1);
 
         $this->assertNull(Cache::get('category_1'));
@@ -109,7 +109,7 @@ class CacheServiceTest extends TestCase
         Cache::put('media_list', 'test', 60);
         Cache::put('media_1', 'test', 60);
 
-        $service = new CacheService();
+        $service = new CacheService;
         $service->clearMediaCaches();
 
         $this->assertNull(Cache::get('media_list'));
@@ -120,8 +120,8 @@ class CacheServiceTest extends TestCase
      */
     public function test_get_key_generates_consistent_keys(): void
     {
-        $service = new CacheService();
-        
+        $service = new CacheService;
+
         $key1 = $service->getKey('content', '1');
         $key2 = $service->getKey('content', '1');
 
@@ -136,8 +136,8 @@ class CacheServiceTest extends TestCase
     {
         // This test may require Redis
         // For now, we'll test the method exists and doesn't throw
-        $service = new CacheService();
-        
+        $service = new CacheService;
+
         try {
             $result = $service->invalidateByPattern('content:*');
             $this->assertIsInt($result);
@@ -147,4 +147,3 @@ class CacheServiceTest extends TestCase
         }
     }
 }
-

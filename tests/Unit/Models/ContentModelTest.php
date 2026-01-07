@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Content;
-use App\Models\User;
 use App\Models\Category;
+use App\Models\Content;
 use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ContentModelTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     /**
      * Test content belongs to author.
@@ -118,4 +118,3 @@ class ContentModelTest extends TestCase
         $this->assertEquals('value', $content->meta['key']);
     }
 }
-

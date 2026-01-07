@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Cron\CronExpression;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Cron\CronExpression;
 
 class ScheduledTask extends Model
 {
@@ -39,26 +39,26 @@ class ScheduledTask extends Model
         'cache:clear',
         'cache:warm',
         'cms:clear-cache',
-        
+
         // Maintenance
         'logs:cleanup',
         'analytics:cleanup',
         'media:thumbnails',
-        
+
         // Health & diagnostics
         'cms:health-check',
         'config:clear',
         'route:clear',
         'view:clear',
-        
+
         // Backup
         'cms:backup',
-        
+
         // Security
         'security:clear-blocked-ips',
         'security:clear-rate-limit',
         'security:audit-dependencies',
-        
+
         // Maintenance & Cleanup
         'logs:cleanup-slow-queries',
         'logs:cleanup-csp-reports',
@@ -102,14 +102,14 @@ class ScheduledTask extends Model
     {
         // Extract base command (before any arguments/options)
         $baseCommand = trim(explode(' ', $command)[0]);
-        
+
         // Check against blocked commands (including partials like 'make:')
         foreach (self::BLOCKED_COMMANDS as $blocked) {
             if (str_starts_with($baseCommand, $blocked)) {
                 return false;
             }
         }
-        
+
         // Check if in allowed list
         return in_array($baseCommand, self::ALLOWED_COMMANDS);
     }
@@ -151,12 +151,13 @@ class ScheduledTask extends Model
      */
     public function getNextRunAt(): ?\DateTime
     {
-        if (!$this->schedule || !self::isValidCronExpression($this->schedule)) {
+        if (! $this->schedule || ! self::isValidCronExpression($this->schedule)) {
             return null;
         }
 
         try {
             $cron = new CronExpression($this->schedule);
+
             return $cron->getNextRunDate();
         } catch (\Exception $e) {
             return null;

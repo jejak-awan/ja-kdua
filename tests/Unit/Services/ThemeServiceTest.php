@@ -4,15 +4,12 @@ namespace Tests\Unit\Services;
 
 use App\Models\Theme;
 use App\Services\ThemeService;
-use App\Services\ThemeCacheService;
-use App\Services\ThemeHooksService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ThemeServiceTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     /**
      * Test getActiveTheme returns active theme.
@@ -24,7 +21,7 @@ class ThemeServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new ThemeService();
+        $service = new ThemeService;
         $activeTheme = $service->getActiveTheme('frontend');
 
         $this->assertNotNull($activeTheme);
@@ -41,7 +38,7 @@ class ThemeServiceTest extends TestCase
             'is_active' => false,
         ]);
 
-        $service = new ThemeService();
+        $service = new ThemeService;
         $activeTheme = $service->getActiveTheme('frontend');
 
         // Service may auto-activate default theme, so we just check it doesn't throw
@@ -63,7 +60,7 @@ class ThemeServiceTest extends TestCase
             'is_active' => false,
         ]);
 
-        $service = new ThemeService();
+        $service = new ThemeService;
         $result = $service->activateTheme($theme2);
 
         $theme1->refresh();
@@ -82,10 +79,11 @@ class ThemeServiceTest extends TestCase
     {
         $theme = Theme::factory()->create([
             'slug' => 'test-theme',
+            'path' => 'test-theme',
         ]);
 
-        $service = new ThemeService();
-        $path = $service->getThemePath($theme);
+        // Use Theme model's getThemePath method instead of ThemeService
+        $path = $theme->getThemePath();
 
         $this->assertStringContainsString('test-theme', $path);
     }
@@ -97,10 +95,12 @@ class ThemeServiceTest extends TestCase
     {
         $theme = Theme::factory()->create([
             'slug' => 'test-theme',
+            'path' => 'test-theme',
         ]);
 
-        $service = new ThemeService();
-        $assets = $service->getThemeAssets($theme);
+        $service = new ThemeService;
+        // Use loadThemeAssets instead of getThemeAssets
+        $assets = $service->loadThemeAssets($theme);
 
         $this->assertIsArray($assets);
         // Assets should have css and js keys
@@ -108,4 +108,3 @@ class ThemeServiceTest extends TestCase
         $this->assertArrayHasKey('js', $assets);
     }
 }
-

@@ -25,7 +25,7 @@ return new class extends Migration
 
                 $table->index(['searchable_type', 'searchable_id']);
                 $table->index('type');
-                
+
                 // Add fulltext index only for MySQL/MariaDB (SQLite doesn't support it)
                 if (DB::getDriverName() === 'mysql') {
                     $table->fullText(['title', 'content']);

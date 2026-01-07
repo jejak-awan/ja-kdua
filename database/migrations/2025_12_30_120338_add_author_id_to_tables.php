@@ -19,7 +19,7 @@ return new class extends Migration
         foreach ($tables as $tableName) {
             if (Schema::hasTable($tableName)) {
                 Schema::table($tableName, function (Blueprint $table) use ($tableName) {
-                    if (!Schema::hasColumn($tableName, 'author_id')) {
+                    if (! Schema::hasColumn($tableName, 'author_id')) {
                         $table->foreignId('author_id')->nullable()->constrained('users')->nullOnDelete();
                     }
                 });
@@ -38,7 +38,7 @@ return new class extends Migration
             if (Schema::hasTable($tableName)) {
                 Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                     if (Schema::hasColumn($tableName, 'author_id')) {
-                        $table->dropForeign([$tableName . '_author_id_foreign']); // Or explicit foreign key name if needed
+                        $table->dropForeign([$tableName.'_author_id_foreign']); // Or explicit foreign key name if needed
                         $table->dropColumn('author_id');
                     }
                 });

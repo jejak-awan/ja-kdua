@@ -48,4 +48,3 @@ class LoginHistory extends Model
         return $query->where('login_at', '>=', now()->subDays($days));
     }
 }
-

@@ -7,21 +7,20 @@ Route::prefix('v1')->group(function () {
     // Public settings (no auth required - for frontend before login)
     Route::get('/public/settings', [App\Http\Controllers\Api\V1\PublicSettingsController::class, 'index']);
 
-    
     // Captcha endpoints (no auth required)
     Route::get('/captcha/generate', [App\Http\Controllers\Api\V1\CaptchaController::class, 'generate']);
     Route::post('/captcha/verify', [App\Http\Controllers\Api\V1\CaptchaController::class, 'verify']);
     Route::get('/captcha/settings', [App\Http\Controllers\Api\V1\CaptchaController::class, 'settings']);
-    
+
     // Public endpoint to clear rate limit (no auth required for emergency)
     Route::post('/clear-rate-limit', [App\Http\Controllers\Api\V1\SystemController::class, 'clearRateLimit']);
-    
+
     // CSP Violation Reporting (public, no auth, rate-limited)
     Route::post('/security/csp-report', [App\Http\Controllers\Api\V1\CspReportController::class, 'store'])
         ->middleware('throttle:100,1');
     Route::post('/security/crep-collect', [App\Http\Controllers\Api\V1\CspReportController::class, 'store'])
         ->middleware('throttle:100,1');
-    
+
     // Authentication Routes (rate limiting handled by SecurityService with progressive blocking)
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])
         ->middleware('throttle:60,1'); // Increase Laravel throttle to avoid conflict with SecurityService
@@ -51,12 +50,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/profile/login-history', [App\Http\Controllers\Api\V1\UserController::class, 'loginHistory']);
         Route::get('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'getPreferences']);
         Route::put('/profile/preferences', [App\Http\Controllers\Api\V1\UserController::class, 'updatePreferences']);
-        
+
         // Dashboard routes
         Route::get('/dashboard/admin', [App\Http\Controllers\Api\V1\DashboardController::class, 'admin'])->middleware('permission:manage users|manage settings');
         Route::get('/dashboard/creator', [App\Http\Controllers\Api\V1\DashboardController::class, 'creator'])->middleware('permission:create content|edit content');
         Route::get('/dashboard/viewer', [App\Http\Controllers\Api\V1\DashboardController::class, 'viewer']);
-
 
         // Two-Factor Authentication Routes
         Route::prefix('two-factor')->group(function () {
@@ -78,13 +76,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/contents/{slug}/related', [App\Http\Controllers\Api\V1\ContentController::class, 'related']);
         Route::get('/categories', [App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
         Route::get('/tags', [App\Http\Controllers\Api\V1\TagController::class, 'index']);
-        
+
         // Public theme endpoint (no auth required)
         Route::get('/themes/active', [App\Http\Controllers\Api\V1\ThemeController::class, 'getActive']);
 
         // Comments (public)
         Route::get('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'index']);
-        Route::post('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'store']);
+        Route::post('/contents/{content}/comments', [App\Http\Controllers\Api\V1\CommentController::class, 'store'])->middleware('throttle:10,1');
 
         // Newsletter (public subscription)
         Route::post('/newsletter/subscribe', [App\Http\Controllers\Api\V1\NewsletterController::class, 'subscribe'])->middleware('throttle:10,1');
@@ -293,21 +291,21 @@ Route::prefix('v1')->group(function () {
         Route::get('security/logs/{securityLog}', [App\Http\Controllers\Api\V1\SecurityController::class, 'show'])->middleware('permission:manage settings');
         Route::get('security/stats', [App\Http\Controllers\Api\V1\SecurityController::class, 'stats'])->middleware('permission:manage settings');
         Route::get('security/alerts', [App\Http\Controllers\Api\V1\SecurityController::class, 'alerts'])->middleware('permission:manage settings');
-        
+
         // IP Blocklist
         Route::get('security/blocklist', [App\Http\Controllers\Api\V1\SecurityController::class, 'getBlocklist'])->middleware('permission:manage settings');
         Route::post('security/block-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'blockIp'])->middleware('permission:manage settings');
         Route::post('security/unblock-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'unblockIp'])->middleware('permission:manage settings');
         Route::post('security/bulk-block', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkBlock'])->middleware('permission:manage settings');
         Route::post('security/bulk-unblock', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkUnblock'])->middleware('permission:manage settings');
-        
+
         // IP Whitelist
         Route::get('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'getWhitelist'])->middleware('permission:manage settings');
         Route::post('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'addToWhitelist'])->middleware('permission:manage settings');
         Route::delete('security/whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'removeFromWhitelist'])->middleware('permission:manage settings');
         Route::post('security/bulk-whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkWhitelist'])->middleware('permission:manage settings');
         Route::post('security/bulk-remove-whitelist', [App\Http\Controllers\Api\V1\SecurityController::class, 'bulkRemoveWhitelist'])->middleware('permission:manage settings');
-        
+
         // IP Check & Clear
         Route::get('security/check-ip', [App\Http\Controllers\Api\V1\SecurityController::class, 'checkIp'])->middleware('permission:manage settings');
         Route::post('security/clear-failed-attempts', [App\Http\Controllers\Api\V1\SecurityController::class, 'clearFailedAttempts'])->middleware('permission:manage settings');
@@ -331,7 +329,6 @@ Route::prefix('v1')->group(function () {
         Route::get('themes/{theme}/layouts', [App\Http\Controllers\Api\V1\ThemeController::class, 'getLayouts'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/partials/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderPartial'])->middleware('permission:manage themes');
         Route::post('themes/{theme}/layouts/render', [App\Http\Controllers\Api\V1\ThemeController::class, 'renderLayout'])->middleware('permission:manage themes');
-
 
         // Menus
         Route::post('menus/bulk-action', [App\Http\Controllers\Api\V1\MenuController::class, 'bulkAction'])->middleware('permission:manage menus');
@@ -458,8 +455,6 @@ Route::prefix('v1')->group(function () {
         Route::post('notifications/broadcast', [App\Http\Controllers\Api\V1\NotificationController::class, 'broadcast']);
         Route::delete('notifications/{notification}', [App\Http\Controllers\Api\V1\NotificationController::class, 'destroy']);
 
-
-
         // Content Preview
         Route::get('contents/{content}/preview', [App\Http\Controllers\Api\V1\ContentController::class, 'preview'])->middleware('permission:edit content');
 
@@ -469,18 +464,18 @@ Route::prefix('v1')->group(function () {
             Route::get('csp-reports', [App\Http\Controllers\Api\V1\CspReportController::class, 'index'])->middleware('permission:manage settings');
             Route::post('csp-reports/bulk-action', [App\Http\Controllers\Api\V1\CspReportController::class, 'bulkAction'])->middleware('permission:manage settings');
             Route::get('csp-reports/statistics', [App\Http\Controllers\Api\V1\CspReportController::class, 'statistics'])->middleware('permission:manage settings');
-            
+
             // Slow Queries
             Route::get('slow-queries', [App\Http\Controllers\Api\V1\SlowQueryController::class, 'index'])->middleware('permission:manage settings');
             Route::get('slow-queries/statistics', [App\Http\Controllers\Api\V1\SlowQueryController::class, 'statistics'])->middleware('permission:manage settings');
-            
+
             // Dependency Vulnerabilities
             Route::get('dependency-vulnerabilities', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'index'])->middleware('permission:manage settings');
             Route::get('dependency-vulnerabilities/statistics', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'statistics'])->middleware('permission:manage settings');
             Route::put('dependency-vulnerabilities/{id}', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'update'])->middleware('permission:manage settings');
             Route::post('run-dependency-audit', [App\Http\Controllers\Api\V1\DependencyVulnerabilityController::class, 'runAudit'])->middleware('permission:manage settings');
         });
-        
+
         // Scheduled Tasks - Custom routes MUST come BEFORE apiResource
         Route::get('scheduled-tasks/allowed-commands', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'allowedCommands'])->middleware('permission:manage scheduled tasks');
         Route::post('scheduled-tasks/{id}/run', [App\Http\Controllers\Api\V1\ScheduledTaskController::class, 'run'])->middleware('permission:manage scheduled tasks');

@@ -3,7 +3,7 @@
 namespace Tests;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Spatie\Permission\Models\Permission;
@@ -11,7 +11,7 @@ use Spatie\Permission\Models\Role;
 
 abstract class TestCase extends BaseTestCase
 {
-    use RefreshDatabase, WithFaker;
+    use DatabaseTransactions, WithFaker;
 
     /**
      * Creates the application.
@@ -43,18 +43,58 @@ abstract class TestCase extends BaseTestCase
         // Clear cached permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Flush cache to reset rate limiters
+        \Illuminate\Support\Facades\Cache::flush();
+
+        // If permissions already exist, we don't need to seed them again
+        if (Permission::exists()) {
+            return;
+        }
+
         // Create permissions if they don't exist
+        // Include all permissions used by api.php routes
         $permissions = [
-            'manage content', 'create content', 'edit content', 'delete content', 'publish content',
-            'manage categories', 'manage tags', 'manage media', 'manage comments',
-            'manage users', 'manage roles', 'manage permissions',
-            'manage settings', 'manage forms', 'view analytics',
-            'manage themes', 'manage plugins', 'manage menus', 'manage widgets',
+            // Content
+            'view content', 'create content', 'edit content', 'delete content', 'publish content', 'approve content', 'manage content',
+            'view content templates', 'create content templates', 'edit content templates', 'delete content templates',
+            'view categories', 'create categories', 'edit categories', 'delete categories', 'manage categories',
+            'view tags', 'create tags', 'edit tags', 'delete tags', 'manage tags',
+            // Media
+            'view media', 'upload media', 'edit media', 'delete media', 'manage media',
+            'view files', 'upload files', 'edit files', 'delete files', 'manage files',
+            // Engagement
+            'view comments', 'create comments', 'edit comments', 'delete comments', 'approve comments', 'manage comments',
+            'view forms', 'create forms', 'edit forms', 'delete forms', 'manage forms',
+            'view newsletter', 'manage newsletter',
+            // Users & Roles
+            'view users', 'create users', 'edit users', 'delete users', 'manage users',
+            'view roles', 'create roles', 'edit roles', 'delete roles', 'manage roles', 'manage permissions',
+            // Appearance
+            'view themes', 'upload themes', 'edit themes', 'delete themes', 'manage themes',
+            'view menus', 'create menus', 'edit menus', 'delete menus', 'manage menus',
+            'view widgets', 'create widgets', 'edit widgets', 'delete widgets', 'manage widgets',
+            // System & Settings
+            'view settings', 'manage settings',
+            'view plugins', 'install plugins', 'edit plugins', 'delete plugins', 'manage plugins',
+            'view redirects', 'create redirects', 'edit redirects', 'delete redirects',
+            'view scheduled tasks', 'manage scheduled tasks',
+            'view backups', 'create backups', 'download backups', 'delete backups', 'manage backups',
+            'view system', 'manage system',
+            // Logs & Analytics
+            'view logs', 'delete logs',
+            'view analytics',
+            'view activity logs',
+            'view activity logs',
+            'view security logs',
+            // Missing permissions
+            'manage comments', 'manage content', 'publish content', 'approve content',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
+
+
 
         // Create admin role if it doesn't exist
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);

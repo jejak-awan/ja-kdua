@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Category;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends BaseApiController
 {
@@ -14,13 +13,13 @@ class CategoryController extends BaseApiController
         $query = Category::query();
 
         // Admin/Manager can see all, others see own + global
-        if ($request->user() && !$request->user()->can('manage categories')) {
-            $query->where(function($q) use ($request) {
+        if ($request->user() && ! $request->user()->can('manage categories')) {
+            $query->where(function ($q) use ($request) {
                 $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
             });
-        } elseif (!$request->user()) {
-             // Public/Guest sees only global categories
-             $query->whereNull('author_id');
+        } elseif (! $request->user()) {
+            // Public/Guest sees only global categories
+            $query->whereNull('author_id');
         }
 
         // Tree view
@@ -95,9 +94,9 @@ class CategoryController extends BaseApiController
         // Current logic: Admin categories are NULL (Global). So visible.
         // Private categories have AuthorID.
         // If Author A tries to view Author B's category:
-        if (request()->user() && !request()->user()->can('manage categories')) {
+        if (request()->user() && ! request()->user()->can('manage categories')) {
             if ($category->author_id && $category->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to view this category');
+                return $this->forbidden('You do not have permission to view this category');
             }
         }
 
@@ -107,9 +106,9 @@ class CategoryController extends BaseApiController
     public function update(Request $request, Category $category)
     {
         // Ownership check
-        if (!request()->user()->can('manage categories')) {
+        if (! request()->user()->can('manage categories')) {
             if ($category->author_id && $category->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to update this category');
+                return $this->forbidden('You do not have permission to update this category');
             }
             // Cannot change author_id
             unset($request['author_id']);
@@ -149,7 +148,7 @@ class CategoryController extends BaseApiController
         $category->update($validated);
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearCategoryCaches();
 
         return $this->success($category->load(['parent', 'children']), 'Category updated successfully');
@@ -157,14 +156,14 @@ class CategoryController extends BaseApiController
 
     public function destroy(Category $category)
     {
-         // Ownership check
-        if (!request()->user()->can('manage categories')) {
+        // Ownership check
+        if (! request()->user()->can('manage categories')) {
             if ($category->author_id && $category->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to delete this category');
+                return $this->forbidden('You do not have permission to delete this category');
             }
             // Global categories (null author) cannot be deleted by non-managers
-             if (is_null($category->author_id)) {
-                 return $this->forbidden('You do not have permission to delete global categories');
+            if (is_null($category->author_id)) {
+                return $this->forbidden('You do not have permission to delete global categories');
             }
         }
 
@@ -224,7 +223,7 @@ class CategoryController extends BaseApiController
         $category->update($validated);
 
         // Clear caches
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearCategoryCaches();
 
         return $this->success($category->load(['parent', 'children']), 'Category moved successfully');

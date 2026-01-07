@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\TwoFactorAuth;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -298,4 +297,3 @@ class TwoFactorController extends BaseApiController
         return $codes;
     }
 }
-

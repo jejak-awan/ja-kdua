@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Normalize analytics_visits table by removing duplicate columns
      * that are already stored in analytics_sessions table.
      * These columns will be retrieved via JOIN when needed.

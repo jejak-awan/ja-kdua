@@ -166,8 +166,8 @@ class TestHelpers
         return array_merge([
             'name' => 'Test User',
             'email' => 'test'.uniqid().'@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
         ], $overrides);
     }
 

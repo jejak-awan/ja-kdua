@@ -56,7 +56,7 @@ api.interceptors.request.use(
         }
 
         // Whitelist auth-related endpoints so they are NOT blocked even if session is marked as dead
-        const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
+        const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/', 'user'];
         const isAuthRequest = authEndpoints.some(endpoint => config.url?.includes(endpoint));
 
         // VAPOR LOCK CHECK: Instantly block any non-auth request if session is dead
@@ -108,7 +108,7 @@ api.interceptors.response.use(
         // Handle 419 CSRF token mismatch / Session Expired
         if (error.response?.status === 419) {
             const url = error.config?.url || '';
-            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
+            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/', 'user'];
             const isAuthRequest = authEndpoints.some(endpoint => url.includes(endpoint));
             const currentPath = window.location.pathname;
 
@@ -147,7 +147,7 @@ api.interceptors.response.use(
         // Handle 401 Unauthorized (session expired from Sanctum)
         if (error.response?.status === 401) {
             const url = error.config?.url || '';
-            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/'];
+            const authEndpoints = ['login', 'register', 'forgot-password', 'reset-password', 'sanctum/csrf-cookie', 'logout', 'captcha/', 'user'];
             const isAuthRequest = authEndpoints.some(endpoint => url.includes(endpoint));
 
             // Whitelist check

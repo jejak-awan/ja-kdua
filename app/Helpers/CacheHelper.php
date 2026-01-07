@@ -19,20 +19,30 @@ class CacheHelper
      * Cache key prefixes
      */
     const PREFIX_CONTENT = 'content:';
+
     const PREFIX_MEDIA = 'media:';
+
     const PREFIX_CATEGORY = 'category:';
+
     const PREFIX_TAG = 'tag:';
+
     const PREFIX_USER = 'user:';
+
     const PREFIX_SETTINGS = 'settings:';
+
     const PREFIX_STATISTICS = 'statistics:';
+
     const PREFIX_API = 'api:';
 
     /**
      * Default cache TTL (Time To Live) in seconds
      */
     const TTL_SHORT = 300;      // 5 minutes
+
     const TTL_MEDIUM = 1800;    // 30 minutes
+
     const TTL_LONG = 3600;      // 1 hour
+
     const TTL_VERY_LONG = 86400; // 24 hours
 
     /**
@@ -41,6 +51,7 @@ class CacheHelper
     protected static function supportsTagging(): bool
     {
         $driver = config('cache.default');
+
         return in_array($driver, ['redis', 'memcached', 'redis_failover']);
     }
 
@@ -49,7 +60,7 @@ class CacheHelper
      */
     public static function key(string $prefix, string $key): string
     {
-        return $prefix . $key;
+        return $prefix.$key;
     }
 
     /**
@@ -63,7 +74,7 @@ class CacheHelper
             try {
                 return $callback();
             } catch (\Exception $e) {
-                Log::error('Cache callback error: ' . $e->getMessage());
+                Log::error('Cache callback error: '.$e->getMessage());
                 throw $e;
             }
         });
@@ -133,7 +144,7 @@ class CacheHelper
             try {
                 Cache::tags(['content'])->flush();
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
     }
@@ -150,7 +161,7 @@ class CacheHelper
             try {
                 Cache::tags(['media'])->flush();
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
     }
@@ -167,7 +178,7 @@ class CacheHelper
             try {
                 Cache::tags(['categories'])->flush();
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
     }
@@ -180,9 +191,10 @@ class CacheHelper
         if (self::supportsTagging()) {
             try {
                 Cache::tags(['content'])->flush();
+
                 return;
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
 
@@ -199,9 +211,10 @@ class CacheHelper
         if (self::supportsTagging()) {
             try {
                 Cache::tags(['media'])->flush();
+
                 return;
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
 
@@ -216,9 +229,10 @@ class CacheHelper
         if (self::supportsTagging()) {
             try {
                 Cache::tags(['categories'])->flush();
+
                 return;
             } catch (\Exception $e) {
-                Log::warning('Tagged cache flush failed: ' . $e->getMessage());
+                Log::warning('Tagged cache flush failed: '.$e->getMessage());
             }
         }
 
@@ -271,7 +285,7 @@ class CacheHelper
 
             return $result;
         } catch (\Exception $e) {
-            Log::warning('Cache not available: ' . $e->getMessage());
+            Log::warning('Cache not available: '.$e->getMessage());
 
             return false;
         }

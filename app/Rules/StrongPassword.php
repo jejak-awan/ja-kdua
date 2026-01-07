@@ -8,10 +8,15 @@ use Illuminate\Contracts\Validation\Rule;
 class StrongPassword implements Rule
 {
     protected int $minLength;
+
     protected bool $requireUppercase;
+
     protected bool $requireLowercase;
+
     protected bool $requireNumber;
+
     protected bool $requireSymbol;
+
     protected array $failedChecks = [];
 
     /**
@@ -43,22 +48,22 @@ class StrongPassword implements Rule
         }
 
         // Check uppercase requirement
-        if ($this->requireUppercase && !preg_match('/[A-Z]/', $value)) {
+        if ($this->requireUppercase && ! preg_match('/[A-Z]/', $value)) {
             $this->failedChecks[] = 'one uppercase letter';
         }
 
         // Check lowercase requirement
-        if ($this->requireLowercase && !preg_match('/[a-z]/', $value)) {
+        if ($this->requireLowercase && ! preg_match('/[a-z]/', $value)) {
             $this->failedChecks[] = 'one lowercase letter';
         }
 
         // Check number requirement
-        if ($this->requireNumber && !preg_match('/[0-9]/', $value)) {
+        if ($this->requireNumber && ! preg_match('/[0-9]/', $value)) {
             $this->failedChecks[] = 'one number';
         }
 
         // Check symbol requirement
-        if ($this->requireSymbol && !preg_match('/[!@#$%^&*()_+\-=\[\]{};\':\"\\\\|,.<>\/?]/', $value)) {
+        if ($this->requireSymbol && ! preg_match('/[!@#$%^&*()_+\-=\[\]{};\':\"\\\\|,.<>\/?]/', $value)) {
             $this->failedChecks[] = 'one symbol (!@#$%^&*...)';
         }
 
@@ -77,6 +82,7 @@ class StrongPassword implements Rule
         }
 
         $requirements = implode(', ', $this->failedChecks);
+
         return "The :attribute must contain: {$requirements}.";
     }
 }

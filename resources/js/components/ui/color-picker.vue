@@ -254,7 +254,6 @@ const pickEyeDropper = async () => {
             Object.assign(hsv, newHsv);
         }
     } catch (e) {
-        console.log('Eyedropper cancelled');
     }
 };
 

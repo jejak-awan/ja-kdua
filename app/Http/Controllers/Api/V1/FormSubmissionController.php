@@ -13,7 +13,7 @@ class FormSubmissionController extends BaseApiController
         $query = FormSubmission::with(['form', 'user']);
 
         // Multi-tenancy scoping
-        if (!$request->user()->can('manage forms')) {
+        if (! $request->user()->can('manage forms')) {
             $query->whereHas('form', function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id);
             });
@@ -87,6 +87,7 @@ class FormSubmissionController extends BaseApiController
     {
         $submission = FormSubmission::withTrashed()->findOrFail($id);
         $submission->restore();
+
         return $this->success(null, 'Submission restored successfully');
     }
 
@@ -94,6 +95,7 @@ class FormSubmissionController extends BaseApiController
     {
         $submission = FormSubmission::withTrashed()->findOrFail($id);
         $submission->forceDelete();
+
         return $this->success(null, 'Submission permanently deleted');
     }
 
@@ -116,7 +118,7 @@ class FormSubmissionController extends BaseApiController
         // Build export data
         $data = [];
         $headers = ['ID', 'Submitted At', 'IP Address', 'Status'];
-        
+
         // Collect all possible field keys from submissions
         $fieldKeys = [];
         foreach ($submissions as $submission) {
@@ -146,17 +148,17 @@ class FormSubmissionController extends BaseApiController
 
         // Return as CSV if requested
         if ($request->input('format') === 'csv') {
-            $filename = str_replace(' ', '_', $form->name) . '_submissions_' . now()->format('Y-m-d') . '.csv';
-            
-            $callback = function() use ($headers, $data) {
+            $filename = str_replace(' ', '_', $form->name).'_submissions_'.now()->format('Y-m-d').'.csv';
+
+            $callback = function () use ($headers, $data) {
                 $handle = fopen('php://output', 'w');
-                
+
                 // BOM for Excel UTF-8
                 fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-                
+
                 // Write headers
                 fputcsv($handle, $headers);
-                
+
                 // Write data rows
                 foreach ($data as $row) {
                     $orderedRow = [];
@@ -165,13 +167,13 @@ class FormSubmissionController extends BaseApiController
                     }
                     fputcsv($handle, $orderedRow);
                 }
-                
+
                 fclose($handle);
             };
 
             return response()->stream($callback, 200, [
                 'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);
         }
 
@@ -189,7 +191,7 @@ class FormSubmissionController extends BaseApiController
         $query = FormSubmission::query();
 
         // Multi-tenancy scoping
-        if (!$request->user()->can('manage forms')) {
+        if (! $request->user()->can('manage forms')) {
             $query->whereHas('form', function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id);
             });

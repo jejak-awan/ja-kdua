@@ -42,7 +42,7 @@ class ScheduledTaskController extends BaseApiController
         ]);
 
         // Validate command against whitelist
-        if (!ScheduledTask::isCommandAllowed($validated['command'])) {
+        if (! ScheduledTask::isCommandAllowed($validated['command'])) {
             return $this->error(
                 'Command not allowed. Use GET /scheduled-tasks/allowed-commands to see available commands.',
                 403,
@@ -52,7 +52,7 @@ class ScheduledTaskController extends BaseApiController
         }
 
         // Validate cron expression
-        if (!ScheduledTask::isValidCronExpression($validated['schedule'])) {
+        if (! ScheduledTask::isValidCronExpression($validated['schedule'])) {
             return $this->validationError([
                 'schedule' => ['Invalid cron expression format'],
             ]);
@@ -76,7 +76,7 @@ class ScheduledTaskController extends BaseApiController
     {
         $task = ScheduledTask::find($id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->notFound('Task');
         }
 
@@ -90,7 +90,7 @@ class ScheduledTaskController extends BaseApiController
         ]);
 
         // Validate command if changed
-        if (isset($validated['command']) && !ScheduledTask::isCommandAllowed($validated['command'])) {
+        if (isset($validated['command']) && ! ScheduledTask::isCommandAllowed($validated['command'])) {
             return $this->error(
                 'Command not allowed',
                 403,
@@ -100,7 +100,7 @@ class ScheduledTaskController extends BaseApiController
         }
 
         // Validate cron expression if changed
-        if (isset($validated['schedule']) && !ScheduledTask::isValidCronExpression($validated['schedule'])) {
+        if (isset($validated['schedule']) && ! ScheduledTask::isValidCronExpression($validated['schedule'])) {
             return $this->validationError([
                 'schedule' => ['Invalid cron expression format'],
             ]);
@@ -124,12 +124,12 @@ class ScheduledTaskController extends BaseApiController
     {
         $task = ScheduledTask::find($id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->notFound('Task');
         }
 
         // Check if user has permission
-        if (!auth()->user()->can('manage scheduled tasks')) {
+        if (! auth()->user()->can('manage scheduled tasks')) {
             Log::warning('Unauthorized task execution attempt', [
                 'task_id' => $task->id,
                 'command' => $task->command,
@@ -145,7 +145,7 @@ class ScheduledTaskController extends BaseApiController
         }
 
         // Double-check command is still allowed (in case whitelist changed)
-        if (!ScheduledTask::isCommandAllowed($task->command)) {
+        if (! ScheduledTask::isCommandAllowed($task->command)) {
             return $this->error(
                 'This command is no longer allowed to be executed',
                 403,
@@ -202,7 +202,7 @@ class ScheduledTaskController extends BaseApiController
             ]);
 
             return $this->error(
-                'Task execution failed: ' . $e->getMessage(),
+                'Task execution failed: '.$e->getMessage(),
                 500,
                 [],
                 'TASK_EXECUTION_ERROR'
@@ -217,7 +217,7 @@ class ScheduledTaskController extends BaseApiController
     {
         $task = ScheduledTask::find($id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->notFound('Task');
         }
 
@@ -239,7 +239,7 @@ class ScheduledTaskController extends BaseApiController
     {
         $task = ScheduledTask::find($id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->notFound('Task');
         }
 

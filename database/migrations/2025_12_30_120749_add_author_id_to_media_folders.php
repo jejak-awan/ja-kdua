@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('media_folders', function (Blueprint $table) {
-            if (!Schema::hasColumn('media_folders', 'author_id')) {
+            if (! Schema::hasColumn('media_folders', 'author_id')) {
                 $table->foreignId('author_id')->nullable()->after('sort_order')->constrained('users')->nullOnDelete();
             }
         });

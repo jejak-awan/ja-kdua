@@ -18,13 +18,13 @@ return new class extends Migration
             'menus',
             'menu_items',
             'content_templates',
-            'newsletter_subscribers'
+            'newsletter_subscribers',
         ];
 
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) {
                 Schema::table($table, function (Blueprint $table) {
-                    if (!Schema::hasColumn($table->getTable(), 'deleted_at')) {
+                    if (! Schema::hasColumn($table->getTable(), 'deleted_at')) {
                         $table->softDeletes();
                     }
                 });
@@ -44,7 +44,7 @@ return new class extends Migration
             'menus',
             'menu_items',
             'content_templates',
-            'newsletter_subscribers'
+            'newsletter_subscribers',
         ];
 
         foreach ($tables as $table) {

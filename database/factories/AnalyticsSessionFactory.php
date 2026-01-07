@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\AnalyticsSession;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AnalyticsSessionFactory extends Factory
@@ -33,4 +32,3 @@ class AnalyticsSessionFactory extends Factory
         ];
     }
 }
-

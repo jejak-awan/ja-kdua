@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\AnalyticsVisit;
 use App\Models\Content;
 use App\Models\Media;
 use App\Models\User;
-use App\Models\AnalyticsVisit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -51,7 +51,7 @@ class DashboardController extends Controller
             'topContent' => $this->getMyTopContent($userId),
         ]);
     }
-    
+
     /**
      * Get viewer dashboard data (minimal)
      */
@@ -84,7 +84,7 @@ class DashboardController extends Controller
             'images' => Media::where('mime_type', 'like', 'image/%')->count(),
             'videos' => Media::where('mime_type', 'like', 'video/%')->count(),
             'documents' => Media::where('mime_type', 'not like', 'image/%')
-                           ->where('mime_type', 'not like', 'video/%')->count(),
+                ->where('mime_type', 'not like', 'video/%')->count(),
         ];
     }
 
@@ -157,16 +157,16 @@ class DashboardController extends Controller
     private function getMyContentTraffic($userId, $days = 30)
     {
         $slugs = Content::where('author_id', $userId)->pluck('slug');
-        
+
         if ($slugs->isEmpty()) {
             return [];
         }
 
         return AnalyticsVisit::where(function ($query) use ($slugs) {
-                foreach ($slugs as $slug) {
-                    $query->orWhere('url', 'like', '%' . $slug);
-                }
-            })
+            foreach ($slugs as $slug) {
+                $query->orWhere('url', 'like', '%'.$slug);
+            }
+        })
             ->where('visited_at', '>=', now()->subDays($days))
             ->select(DB::raw('DATE(visited_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')

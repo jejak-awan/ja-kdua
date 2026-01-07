@@ -34,8 +34,7 @@ class WarmCacheJob implements ShouldQueue
     public function __construct(
         public ?string $type = null,
         public int $limit = 50
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -57,7 +56,7 @@ class WarmCacheJob implements ShouldQueue
                 Log::info("Cache warming completed: {$total} total items", $results);
             }
         } catch (\Exception $e) {
-            Log::error('Cache warming job failed: ' . $e->getMessage(), [
+            Log::error('Cache warming job failed: '.$e->getMessage(), [
                 'type' => $this->type,
                 'exception' => $e,
             ]);
@@ -65,4 +64,3 @@ class WarmCacheJob implements ShouldQueue
         }
     }
 }
-

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->json('raw_report')->nullable();
             $table->enum('status', ['new', 'reviewed', 'false_positive'])->default('new')->index();
             $table->timestamps();
-            
+
             $table->index('created_at');
         });
     }

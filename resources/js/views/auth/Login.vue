@@ -164,7 +164,7 @@ import { useAuthStore } from '../../stores/auth';
 import { useFormValidation } from '../../composables/useFormValidation';
 import { loginSchema } from '../../schemas/auth';
 import { Loader2 } from 'lucide-vue-next';
-import api from '../../services/api';
+import api, { resetLockdown } from '../../services/api';
 
 // Shadcn Components
 import Card from '../../components/ui/card.vue';
@@ -229,6 +229,9 @@ const timeoutMessage = computed(() => {
 });
 
 onMounted(async () => {
+    // Reset any existing locks from stale session checks
+    resetLockdown();
+
     // Check if registration is enabled
     try {
         const response = await api.get('/public/settings');

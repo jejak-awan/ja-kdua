@@ -5,9 +5,9 @@ namespace Database\Seeders;
 use App\Models\Content;
 use App\Models\Menu;
 use App\Models\MenuItem;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 class FixContentSeeder extends Seeder
 {
@@ -22,7 +22,7 @@ class FixContentSeeder extends Seeder
     {
         $this->command->info('Fixing Header Menu...');
         $headerMenu = Menu::where('location', 'header')->first();
-        
+
         if ($headerMenu) {
             // Ensure Home URL
             MenuItem::where('menu_id', $headerMenu->id)
@@ -33,7 +33,7 @@ class FixContentSeeder extends Seeder
             MenuItem::where('menu_id', $headerMenu->id)
                 ->where('title', 'Blog')
                 ->update(['url' => '/blog']);
-            
+
             // Ensure About URL
             MenuItem::where('menu_id', $headerMenu->id)
                 ->where('title', 'About')
@@ -44,7 +44,7 @@ class FixContentSeeder extends Seeder
             $count = MenuItem::where('menu_id', $headerMenu->id)
                 ->where('title', 'About')
                 ->count();
-                
+
             if ($count > 1) {
                 MenuItem::where('menu_id', $headerMenu->id)
                     ->where('title', 'About')
@@ -60,7 +60,9 @@ class FixContentSeeder extends Seeder
     {
         $this->command->info('Fixing Contact Page Columns...');
         $user = User::first();
-        if (!$user) return;
+        if (! $user) {
+            return;
+        }
 
         $blocks = [
             // Hero
@@ -73,8 +75,8 @@ class FixContentSeeder extends Seeder
                     'bgColor' => '#4f46e5',
                     'padding' => 'py-24',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Two Columns - Form and Info
             [
@@ -99,12 +101,12 @@ class FixContentSeeder extends Seeder
                                         'fields' => [
                                             ['label' => 'Name', 'type' => 'text', 'required' => true, 'width' => 'w-full md:w-[calc(50%-1rem)]'],
                                             ['label' => 'Email', 'type' => 'email', 'required' => true, 'width' => 'w-full md:w-[calc(50%-1rem)]'],
-                                            ['label' => 'Message', 'type' => 'textarea', 'required' => true, 'width' => 'w-full']
+                                            ['label' => 'Message', 'type' => 'textarea', 'required' => true, 'width' => 'w-full'],
                                         ],
-                                        'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                                    ]
-                                ]
-                            ]
+                                        'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'blocks' => [
@@ -161,15 +163,15 @@ class FixContentSeeder extends Seeder
     </div>
 </div>',
 
-                                        'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ], 
+                                        'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     'gap' => 'gap-16',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Map
             [
@@ -181,9 +183,9 @@ class FixContentSeeder extends Seeder
                     'radius' => 'rounded-2xl',
                     'padding' => 'py-0',
                     'width' => 'max-w-7xl',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
-            ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
+            ],
         ];
 
         Content::updateOrCreate(
@@ -199,7 +201,9 @@ class FixContentSeeder extends Seeder
     {
         $this->command->info('Creating Blog Page content...');
         $user = User::first();
-        if (!$user) return;
+        if (! $user) {
+            return;
+        }
 
         $blocks = [
             // Hero
@@ -212,8 +216,8 @@ class FixContentSeeder extends Seeder
                     'bgColor' => '#1e293b',
                     'padding' => 'py-24',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Blog Grid
             [
@@ -230,9 +234,9 @@ class FixContentSeeder extends Seeder
                     'showAuthor' => true,
                     'showCategory' => true,
                     'padding' => 'py-20',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
-            ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
+            ],
         ];
 
         Content::updateOrCreate(
@@ -248,6 +252,6 @@ class FixContentSeeder extends Seeder
                 'published_at' => now(),
             ]
         );
-         $this->command->info('Blog Page created.');
+        $this->command->info('Blog Page created.');
     }
 }

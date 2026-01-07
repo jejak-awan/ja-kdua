@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('status', ['success', 'failed', 'blocked'])->default('success');
             $table->string('failure_reason')->nullable();
             $table->timestamps();
-            
+
             $table->index('user_id');
             $table->index('login_at');
             $table->index('status');

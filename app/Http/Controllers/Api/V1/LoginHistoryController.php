@@ -44,6 +44,7 @@ class LoginHistoryController extends BaseApiController
             return $this->paginated($logs, 'Login history retrieved successfully');
         } catch (\Exception $e) {
             Log::error('Login history index error: '.$e->getMessage());
+
             return $this->success([], 'Login history retrieved successfully');
         }
     }
@@ -68,6 +69,7 @@ class LoginHistoryController extends BaseApiController
             return $this->success($stats, 'Login history statistics retrieved successfully');
         } catch (\Exception $e) {
             Log::error('Login history statistics error: '.$e->getMessage());
+
             return $this->success([
                 'total_logins' => 0,
                 'failed_logins' => 0,
@@ -111,9 +113,9 @@ class LoginHistoryController extends BaseApiController
                 $duration = '';
                 if ($log->login_at && $log->logout_at) {
                     $minutes = $log->login_at->diffInMinutes($log->logout_at);
-                    $duration = $minutes . ' min';
+                    $duration = $minutes.' min';
                 }
-                
+
                 $csv .= sprintf(
                     "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
                     $log->id,
@@ -130,10 +132,11 @@ class LoginHistoryController extends BaseApiController
 
             return response($csv, 200, [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="login-history-' . now()->format('Y-m-d') . '.csv"',
+                'Content-Disposition' => 'attachment; filename="login-history-'.now()->format('Y-m-d').'.csv"',
             ]);
         } catch (\Exception $e) {
             Log::error('Login history export error: '.$e->getMessage());
+
             return $this->error('Failed to export login history', 500);
         }
     }
@@ -145,13 +148,16 @@ class LoginHistoryController extends BaseApiController
 
             if ($retainDays) {
                 $count = LoginHistory::where('login_at', '<', now()->subDays($retainDays))->delete();
+
                 return $this->success(null, "Cleared $count login history records older than $retainDays days");
             }
 
             LoginHistory::truncate();
+
             return $this->success(null, 'All login history cleared successfully');
         } catch (\Exception $e) {
             Log::error('Login history clear error: '.$e->getMessage());
+
             return $this->error('Failed to clear login history', 500);
         }
     }

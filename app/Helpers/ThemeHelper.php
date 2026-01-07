@@ -7,7 +7,7 @@ use App\Services\ThemeService;
 
 /**
  * Theme Helper Class
- * 
+ *
  * Provides static methods for interacting with the Vue-based theme system.
  * Handles theme data retrieval, settings, assets, and feature detection.
  */
@@ -23,6 +23,7 @@ class ThemeHelper
         if (self::$themeService === null) {
             self::$themeService = app(ThemeService::class);
         }
+
         return self::$themeService;
     }
 
@@ -51,7 +52,7 @@ class ThemeHelper
         } catch (\Exception $e) {
             // Return default on error
         }
-        
+
         return $default;
     }
 
@@ -63,18 +64,18 @@ class ThemeHelper
         try {
             $theme = self::getThemeService()->getActiveTheme($type);
             if ($theme && $theme->path) {
-                $themePath = storage_path('app/themes/' . $theme->path);
-                $assetPath = $themePath . '/' . ltrim($path, '/');
-                
+                $themePath = storage_path('app/themes/'.$theme->path);
+                $assetPath = $themePath.'/'.ltrim($path, '/');
+
                 if (file_exists($assetPath)) {
                     // Use /themes/{slug}/ path (via symlink)
-                    return asset('themes/' . $theme->path . '/' . ltrim($path, '/'));
+                    return asset('themes/'.$theme->path.'/'.ltrim($path, '/'));
                 }
             }
         } catch (\Exception $e) {
             // Return null on error
         }
-        
+
         return null;
     }
 
@@ -86,16 +87,16 @@ class ThemeHelper
         try {
             $theme = self::getThemeService()->getActiveTheme($type);
             if ($theme && $theme->supports) {
-                $supports = is_string($theme->supports) 
-                    ? json_decode($theme->supports, true) 
+                $supports = is_string($theme->supports)
+                    ? json_decode($theme->supports, true)
                     : $theme->supports;
-                
+
                 return isset($supports[$feature]) && $supports[$feature] === true;
             }
         } catch (\Exception $e) {
             // Return false on error
         }
-        
+
         return false;
     }
 
@@ -112,7 +113,7 @@ class ThemeHelper
         } catch (\Exception $e) {
             // Return empty string on error
         }
-        
+
         return '';
     }
 
@@ -137,5 +138,4 @@ class ThemeHelper
             return null;
         }
     }
-
 }

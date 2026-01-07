@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\NewsletterSubscriber;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class NewsletterController extends BaseApiController
 {
@@ -85,7 +85,7 @@ class NewsletterController extends BaseApiController
         try {
             $subscriber = NewsletterSubscriber::where('email', $request->email)->first();
 
-            if (!$subscriber) {
+            if (! $subscriber) {
                 return $this->error('Email tidak ditemukan', 404);
             }
 
@@ -105,6 +105,7 @@ class NewsletterController extends BaseApiController
             return $this->error('Terjadi kesalahan saat berhenti berlangganan', 500);
         }
     }
+
     /**
      * Admin: Get paginated subscribers
      */
@@ -118,7 +119,7 @@ class NewsletterController extends BaseApiController
                 $search = $request->q;
                 $query->where(function ($q) use ($search) {
                     $q->where('email', 'like', "%{$search}%")
-                      ->orWhere('name', 'like', "%{$search}%");
+                        ->orWhere('name', 'like', "%{$search}%");
                 });
             }
 
@@ -142,7 +143,8 @@ class NewsletterController extends BaseApiController
 
             return $this->success($subscribers);
         } catch (\Exception $e) {
-            Log::error('Newsletter admin index error: ' . $e->getMessage());
+            Log::error('Newsletter admin index error: '.$e->getMessage());
+
             return $this->error('Failed to fetch subscribers', 500);
         }
     }
@@ -167,6 +169,7 @@ class NewsletterController extends BaseApiController
         try {
             $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
             $subscriber->restore();
+
             return $this->success(null, 'Subscriber restored successfully');
         } catch (\Exception $e) {
             return $this->error('Failed to restore subscriber', 500);
@@ -178,6 +181,7 @@ class NewsletterController extends BaseApiController
         try {
             $subscriber = NewsletterSubscriber::withTrashed()->findOrFail($id);
             $subscriber->forceDelete();
+
             return $this->success(null, 'Subscriber permanently deleted');
         } catch (\Exception $e) {
             return $this->error('Failed to permanently delete subscriber', 500);
@@ -225,10 +229,12 @@ class NewsletterController extends BaseApiController
 
             return response()->stream($callback, 200, $headers);
         } catch (\Exception $e) {
-             Log::error('Newsletter export error: ' . $e->getMessage());
-             return $this->error('Failed to export subscribers', 500);
+            Log::error('Newsletter export error: '.$e->getMessage());
+
+            return $this->error('Failed to export subscribers', 500);
         }
     }
+
     public function bulkAction(Request $request)
     {
         $request->validate([
@@ -243,34 +249,38 @@ class NewsletterController extends BaseApiController
         try {
             if ($action === 'delete') {
                 NewsletterSubscriber::whereIn('id', $ids)->delete();
+
                 return $this->success(null, 'Selected subscribers deleted successfully');
             }
 
             if ($action === 'unsubscribe') {
                 NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'unsubscribed', 'unsubscribed_at' => now()]);
+
                 return $this->success(null, 'Selected subscribers unsubscribed successfully');
             }
 
             if ($action === 'subscribe') {
-                 NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'subscribed', 'subscribed_at' => now(), 'unsubscribed_at' => null]);
+                NewsletterSubscriber::whereIn('id', $ids)->update(['status' => 'subscribed', 'subscribed_at' => now(), 'unsubscribed_at' => null]);
+
                 return $this->success(null, 'Selected subscribers subscribed successfully');
             }
 
             if ($action === 'restore') {
                 NewsletterSubscriber::withTrashed()->whereIn('id', $ids)->restore();
+
                 return $this->success(null, 'Selected subscribers restored successfully');
             }
 
             if ($action === 'force_delete') {
                 NewsletterSubscriber::withTrashed()->whereIn('id', $ids)->forceDelete();
+
                 return $this->success(null, 'Selected subscribers permanently deleted');
             }
 
         } catch (\Exception $e) {
-            return $this->error('Bulk action failed: ' . $e->getMessage(), 500);
+            return $this->error('Bulk action failed: '.$e->getMessage(), 500);
         }
 
         return $this->error('Invalid action', 422);
     }
 }
-

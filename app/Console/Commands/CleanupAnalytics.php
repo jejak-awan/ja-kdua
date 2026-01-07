@@ -37,7 +37,7 @@ class CleanupAnalytics extends Command
 
         $this->info("Analytics Cleanup - Retention: {$retentionDays} days");
         $this->info("Cutoff date: {$cutoffDate->format('Y-m-d H:i:s')}");
-        
+
         if ($dryRun) {
             $this->warn('DRY RUN MODE - No data will be deleted');
         }
@@ -62,16 +62,19 @@ class CleanupAnalytics extends Command
 
         if ($totalRecords === 0) {
             $this->info('No records to delete.');
+
             return Command::SUCCESS;
         }
 
         if ($dryRun) {
             $this->info("Would delete {$totalRecords} total records.");
+
             return Command::SUCCESS;
         }
 
-        if (!$this->confirm("Delete {$totalRecords} records older than {$retentionDays} days?", true)) {
+        if (! $this->confirm("Delete {$totalRecords} records older than {$retentionDays} days?", true)) {
             $this->info('Cleanup cancelled.');
+
             return Command::SUCCESS;
         }
 

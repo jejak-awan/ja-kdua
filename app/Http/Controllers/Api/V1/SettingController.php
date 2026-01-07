@@ -26,21 +26,21 @@ class SettingController extends BaseApiController
 
     public function getGroup($group)
     {
-        // Permission check: if user doesn't have 'view settings', 
+        // Permission check: if user doesn't have 'view settings',
         // they might still need specific group settings (e.g. media settings for authors)
-        if (!request()->user()->can('view settings')) {
+        if (! request()->user()->can('view settings')) {
             $allowedGroups = [
                 'media' => ['view media', 'upload media'],
                 'general' => [],
             ];
 
             $requiredPermissions = $allowedGroups[$group] ?? null;
-            
+
             if (is_null($requiredPermissions)) {
                 return $this->forbidden('You do not have permission to view these settings');
             }
 
-            if (!empty($requiredPermissions)) {
+            if (! empty($requiredPermissions)) {
                 $hasAny = false;
                 foreach ($requiredPermissions as $perm) {
                     if (request()->user()->can($perm)) {
@@ -48,7 +48,7 @@ class SettingController extends BaseApiController
                         break;
                     }
                 }
-                if (!$hasAny) {
+                if (! $hasAny) {
                     return $this->forbidden('You do not have permission to view these settings');
                 }
             }
@@ -134,7 +134,7 @@ class SettingController extends BaseApiController
         $driver = $request->input('driver');
         $config = $request->input('config'); // Array of settings formData
 
-        if (!$driver || !$config) {
+        if (! $driver || ! $config) {
             return $this->error('Driver and configuration are required', 400);
         }
 
@@ -148,7 +148,7 @@ class SettingController extends BaseApiController
                 'region' => $config['aws_default_region'] ?? 'us-east-1',
                 'bucket' => $config['aws_bucket'] ?? '',
                 'endpoint' => $config['aws_endpoint'] ?? '',
-                'use_path_style_endpoint' => !empty($config['aws_endpoint']),
+                'use_path_style_endpoint' => ! empty($config['aws_endpoint']),
             ]);
         } elseif ($driver === 'google') {
             $diskConfig = array_merge($diskConfig, [
@@ -167,7 +167,7 @@ class SettingController extends BaseApiController
                 'ssl' => $config['ftp_ssl'] ?? false,
             ]);
         } elseif ($driver === 'dropbox') {
-             $diskConfig = array_merge($diskConfig, [
+            $diskConfig = array_merge($diskConfig, [
                 'authorizationToken' => $config['dropbox_authorization_token'] ?? '',
             ]);
         }
@@ -178,25 +178,26 @@ class SettingController extends BaseApiController
         try {
             // Attempt to list contents
             \Illuminate\Support\Facades\Storage::disk("test_{$driver}")->listContents('/');
+
             return $this->success(null, 'Connection successful! Storage is accessible.');
         } catch (\Throwable $e) {
             $message = $e->getMessage();
-            
+
             // Helpful messages for missing drivers
             if (str_contains($message, 'Driver [google] is not supported')) {
                 $message = 'Google Drive adapter is missing. Please run: composer require spatie/flysystem-google-drive';
             }
             if (str_contains($message, 'Driver [s3] is not supported')) {
-                 $message = 'AWS S3 adapter is missing. Please run: composer require league/flysystem-aws-s3-v3';
+                $message = 'AWS S3 adapter is missing. Please run: composer require league/flysystem-aws-s3-v3';
             }
-             if (str_contains($message, 'Driver [dropbox] is not supported')) {
-                 $message = 'Dropbox adapter is missing. Please run: composer require spatie/flysystem-dropbox';
+            if (str_contains($message, 'Driver [dropbox] is not supported')) {
+                $message = 'Dropbox adapter is missing. Please run: composer require spatie/flysystem-dropbox';
             }
-             if (str_contains($message, 'Driver [ftp] is not supported')) {
-                 $message = 'FTP adapter is missing. Please run: composer require league/flysystem-ftp';
+            if (str_contains($message, 'Driver [ftp] is not supported')) {
+                $message = 'FTP adapter is missing. Please run: composer require league/flysystem-ftp';
             }
 
-            return $this->error('Connection failed: ' . $message, 500);
+            return $this->error('Connection failed: '.$message, 500);
         }
     }
 }

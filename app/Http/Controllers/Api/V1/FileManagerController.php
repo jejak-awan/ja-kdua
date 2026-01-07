@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Auth;
-use App\Models\DeletedFile;
 use App\Helpers\MediaSettingsHelper;
+use App\Models\DeletedFile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class FileManagerController extends BaseApiController
 {
     public function index(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to manage files');
         }
 
@@ -71,19 +71,19 @@ class FileManagerController extends BaseApiController
 
     public function download(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to download files');
         }
 
         $path = $request->input('path');
         $disk = $request->input('disk', 'public');
 
-        if (!$path || !Storage::disk($disk)->exists($path)) {
+        if (! $path || ! Storage::disk($disk)->exists($path)) {
             return $this->notFound('File');
         }
 
         $fullPath = Storage::disk($disk)->path($path);
-        
+
         if (is_dir($fullPath)) {
             return $this->downloadFolder($path, $disk);
         }
@@ -93,7 +93,7 @@ class FileManagerController extends BaseApiController
 
     public function upload(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to upload files');
         }
 
@@ -101,7 +101,7 @@ class FileManagerController extends BaseApiController
         $maxSize = MediaSettingsHelper::getMaxUploadSize();
         $allowedExtensions = MediaSettingsHelper::getAllowedExtensions();
         $allowedMimes = implode(',', $allowedExtensions);
-        
+
         $request->validate([
             'file' => "required_without:files|file|max:{$maxSize}|mimes:{$allowedMimes}",
             'files' => 'required_without:file|array',
@@ -115,19 +115,19 @@ class FileManagerController extends BaseApiController
         $uploadedFiles = [];
 
         // Handle single file or multiple files
-        $files = $request->hasFile('files') 
-            ? $request->file('files') 
+        $files = $request->hasFile('files')
+            ? $request->file('files')
             : [$request->file('file')];
 
         foreach ($files as $file) {
             // Double-check extension is allowed (in case mimes validation is bypassed)
             $extension = strtolower($file->getClientOriginalExtension());
-            if (!MediaSettingsHelper::isExtensionAllowed($extension)) {
+            if (! MediaSettingsHelper::isExtensionAllowed($extension)) {
                 return $this->validationError([
-                    'file' => ["File type '{$extension}' is not allowed."]
+                    'file' => ["File type '{$extension}' is not allowed."],
                 ], 'Invalid file type');
             }
-            
+
             $fileName = $file->getClientOriginalName();
             $filePath = $path ? $path.'/'.$fileName : $fileName;
 
@@ -154,7 +154,7 @@ class FileManagerController extends BaseApiController
      */
     public function delete(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to delete files or folders');
         }
 
@@ -168,20 +168,21 @@ class FileManagerController extends BaseApiController
         $disk = $request->input('disk', 'public');
         $permanent = $request->input('permanent', false);
 
-        if (!Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk($disk)->exists($path)) {
             return $this->notFound('File');
         }
 
         if ($permanent) {
             Storage::disk($disk)->delete($path);
+
             return $this->success(null, 'File permanently deleted');
         }
 
         // Move to trash
         $fileName = basename($path);
-        $trashPath = '.trash/' . uniqid() . '_' . $fileName;
+        $trashPath = '.trash/'.uniqid().'_'.$fileName;
         $fullPath = Storage::disk($disk)->path($path);
-        
+
         // Get file info before moving
         $size = filesize($fullPath);
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -189,13 +190,13 @@ class FileManagerController extends BaseApiController
 
         // Create trash directory if not exists
         Storage::disk($disk)->makeDirectory('.trash');
-        
+
         // Move file to trash
         Storage::disk($disk)->move($path, $trashPath);
 
         // Record in database
         DeletedFile::create([
-            'original_path' => '/' . $path,
+            'original_path' => '/'.$path,
             'trash_path' => $trashPath,
             'name' => $fileName,
             'type' => 'file',
@@ -214,7 +215,7 @@ class FileManagerController extends BaseApiController
      */
     public function deleteFolder(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to delete folders');
         }
 
@@ -230,29 +231,30 @@ class FileManagerController extends BaseApiController
 
         $fullPath = Storage::disk($disk)->path($path);
 
-        if (!is_dir($fullPath)) {
+        if (! is_dir($fullPath)) {
             return $this->notFound('Folder');
         }
 
         if ($permanent) {
             Storage::disk($disk)->deleteDirectory($path);
+
             return $this->success(null, 'Folder permanently deleted');
         }
 
         // Move to trash
         $folderName = basename($path);
-        $trashPath = '.trash/' . uniqid() . '_' . $folderName;
-        
+        $trashPath = '.trash/'.uniqid().'_'.$folderName;
+
         // Create trash directory if not exists
         Storage::disk($disk)->makeDirectory('.trash');
-        
+
         // Move folder to trash
         $trashFullPath = Storage::disk($disk)->path($trashPath);
         File::moveDirectory($fullPath, $trashFullPath);
 
         // Record in database
         DeletedFile::create([
-            'original_path' => '/' . $path,
+            'original_path' => '/'.$path,
             'trash_path' => $trashPath,
             'name' => $folderName,
             'type' => 'folder',
@@ -268,7 +270,7 @@ class FileManagerController extends BaseApiController
 
     public function createFolder(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to create folders');
         }
 
@@ -298,7 +300,7 @@ class FileManagerController extends BaseApiController
      */
     public function move(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to move files or folders');
         }
 
@@ -326,14 +328,14 @@ class FileManagerController extends BaseApiController
                 $sourcePath = Storage::disk($disk)->path($source);
                 $destPath = Storage::disk($disk)->path($newPath);
 
-                if (!is_dir($sourcePath)) {
+                if (! is_dir($sourcePath)) {
                     return $this->notFound('Source folder');
                 }
 
                 // Use File facade for moving directories
                 File::moveDirectory($sourcePath, $destPath);
             } else {
-                if (!Storage::disk($disk)->exists($source)) {
+                if (! Storage::disk($disk)->exists($source)) {
                     return $this->notFound('Source file');
                 }
 
@@ -354,7 +356,7 @@ class FileManagerController extends BaseApiController
      */
     public function copy(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to copy files or folders');
         }
 
@@ -381,13 +383,13 @@ class FileManagerController extends BaseApiController
                 $sourcePath = Storage::disk($disk)->path($source);
                 $destPath = Storage::disk($disk)->path($newPath);
 
-                if (!is_dir($sourcePath)) {
+                if (! is_dir($sourcePath)) {
                     return $this->notFound('Source folder');
                 }
 
                 File::copyDirectory($sourcePath, $destPath);
             } else {
-                if (!Storage::disk($disk)->exists($source)) {
+                if (! Storage::disk($disk)->exists($source)) {
                     return $this->notFound('Source file');
                 }
 
@@ -407,22 +409,22 @@ class FileManagerController extends BaseApiController
      */
     private function getUniquePath($disk, $path)
     {
-        if (!Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk($disk)->exists($path)) {
             return $path;
         }
 
         $dir = dirname($path);
-        $dir = $dir === '.' ? '' : $dir . '/';
+        $dir = $dir === '.' ? '' : $dir.'/';
         $filename = pathinfo($path, PATHINFO_FILENAME);
         $extension = pathinfo($path, PATHINFO_EXTENSION);
-        $extString = $extension ? '.' . $extension : '';
+        $extString = $extension ? '.'.$extension : '';
 
         $counter = 1;
-        while (Storage::disk($disk)->exists($dir . $filename . ' (' . $counter . ')' . $extString)) {
+        while (Storage::disk($disk)->exists($dir.$filename.' ('.$counter.')'.$extString)) {
             $counter++;
         }
 
-        return $dir . $filename . ' (' . $counter . ')' . $extString;
+        return $dir.$filename.' ('.$counter.')'.$extString;
     }
 
     /**
@@ -430,7 +432,7 @@ class FileManagerController extends BaseApiController
      */
     public function rename(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to rename files or folders');
         }
 
@@ -455,13 +457,13 @@ class FileManagerController extends BaseApiController
                 $sourcePath = Storage::disk($disk)->path($path);
                 $destPath = Storage::disk($disk)->path($newPath);
 
-                if (!is_dir($sourcePath)) {
+                if (! is_dir($sourcePath)) {
                     return $this->notFound('Folder');
                 }
 
                 File::moveDirectory($sourcePath, $destPath);
             } else {
-                if (!Storage::disk($disk)->exists($path)) {
+                if (! Storage::disk($disk)->exists($path)) {
                     return $this->notFound('File');
                 }
 
@@ -483,7 +485,7 @@ class FileManagerController extends BaseApiController
      */
     public function trash(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to view trashed files');
         }
 
@@ -515,7 +517,7 @@ class FileManagerController extends BaseApiController
      */
     public function restore(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to restore files');
         }
 
@@ -533,35 +535,37 @@ class FileManagerController extends BaseApiController
         // Check if trash file exists
         if ($deletedFile->type === 'folder') {
             $trashFullPath = Storage::disk($disk)->path($trashPath);
-            if (!is_dir($trashFullPath)) {
+            if (! is_dir($trashFullPath)) {
                 $deletedFile->delete();
+
                 return $this->error('Trash item no longer exists', 404, [], 'TRASH_ITEM_NOT_FOUND');
             }
-            
+
             // Check if original path is available
             $originalFullPath = Storage::disk($disk)->path($originalPath);
             if (is_dir($originalFullPath)) {
                 // Generate unique path
-                $originalPath = $originalPath . '_restored_' . time();
+                $originalPath = $originalPath.'_restored_'.time();
             }
-            
+
             // Restore folder
             File::moveDirectory($trashFullPath, Storage::disk($disk)->path($originalPath));
         } else {
-            if (!Storage::disk($disk)->exists($trashPath)) {
+            if (! Storage::disk($disk)->exists($trashPath)) {
                 $deletedFile->delete();
+
                 return $this->error('Trash item no longer exists', 404, [], 'TRASH_ITEM_NOT_FOUND');
             }
-            
+
             // Check if original path is available
             if (Storage::disk($disk)->exists($originalPath)) {
                 $ext = pathinfo($originalPath, PATHINFO_EXTENSION);
                 $name = pathinfo($originalPath, PATHINFO_FILENAME);
                 $dir = dirname($originalPath);
-                $dir = $dir === '.' ? '' : $dir . '/';
-                $originalPath = $dir . $name . '_restored_' . time() . '.' . $ext;
+                $dir = $dir === '.' ? '' : $dir.'/';
+                $originalPath = $dir.$name.'_restored_'.time().'.'.$ext;
             }
-            
+
             // Restore file
             Storage::disk($disk)->move($trashPath, $originalPath);
         }
@@ -570,7 +574,7 @@ class FileManagerController extends BaseApiController
         $deletedFile->delete();
 
         return $this->success([
-            'restored_path' => '/' . $originalPath,
+            'restored_path' => '/'.$originalPath,
         ], 'Item restored successfully');
     }
 
@@ -579,7 +583,7 @@ class FileManagerController extends BaseApiController
      */
     public function emptyTrash(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to empty trash');
         }
 
@@ -610,7 +614,7 @@ class FileManagerController extends BaseApiController
      */
     public function deletePermanently(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to permanently delete files');
         }
 
@@ -647,7 +651,7 @@ class FileManagerController extends BaseApiController
      */
     public function extract(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to extract archives');
         }
 
@@ -660,7 +664,7 @@ class FileManagerController extends BaseApiController
         $disk = $request->input('disk', 'public');
         $fullPath = Storage::disk($disk)->path($path);
 
-        if (!file_exists($fullPath)) {
+        if (! file_exists($fullPath)) {
             return $this->notFound('Archive file');
         }
 
@@ -668,14 +672,14 @@ class FileManagerController extends BaseApiController
         $fileName = pathinfo($path, PATHINFO_FILENAME);
         $parentDir = dirname($path);
         $parentDir = $parentDir === '.' ? '' : $parentDir;
-        
+
         // Create extraction directory
-        $extractDir = $parentDir ? $parentDir . '/' . $fileName : $fileName;
+        $extractDir = $parentDir ? $parentDir.'/'.$fileName : $fileName;
         $extractPath = Storage::disk($disk)->path($extractDir);
 
         // Handle if directory already exists
         if (is_dir($extractPath)) {
-            $extractDir = $extractDir . '_' . time();
+            $extractDir = $extractDir.'_'.time();
             $extractPath = Storage::disk($disk)->path($extractDir);
         }
 
@@ -683,7 +687,7 @@ class FileManagerController extends BaseApiController
 
         try {
             if ($extension === 'zip') {
-                $zip = new \ZipArchive();
+                $zip = new \ZipArchive;
                 if ($zip->open($fullPath) === true) {
                     $zip->extractTo($extractPath);
                     $zip->close();
@@ -707,14 +711,15 @@ class FileManagerController extends BaseApiController
             }
 
             return $this->success([
-                'extracted_to' => '/' . $extractDir,
+                'extracted_to' => '/'.$extractDir,
             ], 'Archive extracted successfully');
         } catch (\Exception $e) {
             // Clean up on failure
             if (is_dir($extractPath)) {
                 File::deleteDirectory($extractPath);
             }
-            return $this->error('Failed to extract: ' . $e->getMessage(), 500, [], 'EXTRACT_ERROR');
+
+            return $this->error('Failed to extract: '.$e->getMessage(), 500, [], 'EXTRACT_ERROR');
         }
     }
 
@@ -723,7 +728,7 @@ class FileManagerController extends BaseApiController
      */
     public function compress(Request $request)
     {
-        if (!$request->user()->can('manage files')) {
+        if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to compress files');
         }
 
@@ -739,16 +744,16 @@ class FileManagerController extends BaseApiController
         $archiveName = $request->input('name');
 
         // Determine archive name
-        if (!$archiveName) {
+        if (! $archiveName) {
             if (count($paths) === 1) {
-                $archiveName = pathinfo(trim($paths[0], '/'), PATHINFO_FILENAME) . '.zip';
+                $archiveName = pathinfo(trim($paths[0], '/'), PATHINFO_FILENAME).'.zip';
             } else {
-                $archiveName = 'archive_' . date('Y-m-d_His') . '.zip';
+                $archiveName = 'archive_'.date('Y-m-d_His').'.zip';
             }
         }
 
         // Ensure .zip extension
-        if (!str_ends_with(strtolower($archiveName), '.zip')) {
+        if (! str_ends_with(strtolower($archiveName), '.zip')) {
             $archiveName .= '.zip';
         }
 
@@ -756,19 +761,19 @@ class FileManagerController extends BaseApiController
         $firstPath = trim($paths[0], '/');
         $parentDir = dirname($firstPath);
         $parentDir = $parentDir === '.' ? '' : $parentDir;
-        $archivePath = $parentDir ? $parentDir . '/' . $archiveName : $archiveName;
+        $archivePath = $parentDir ? $parentDir.'/'.$archiveName : $archiveName;
         $fullArchivePath = Storage::disk($disk)->path($archivePath);
 
         // Handle if archive already exists
         if (file_exists($fullArchivePath)) {
             $baseName = pathinfo($archiveName, PATHINFO_FILENAME);
-            $archiveName = $baseName . '_' . time() . '.zip';
-            $archivePath = $parentDir ? $parentDir . '/' . $archiveName : $archiveName;
+            $archiveName = $baseName.'_'.time().'.zip';
+            $archivePath = $parentDir ? $parentDir.'/'.$archiveName : $archiveName;
             $fullArchivePath = Storage::disk($disk)->path($archivePath);
         }
 
         try {
-            $zip = new \ZipArchive();
+            $zip = new \ZipArchive;
             if ($zip->open($fullArchivePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
                 return $this->error('Failed to create ZIP archive', 500, [], 'COMPRESS_ERROR');
             }
@@ -790,14 +795,15 @@ class FileManagerController extends BaseApiController
             $zip->close();
 
             return $this->success([
-                'archive_path' => '/' . $archivePath,
+                'archive_path' => '/'.$archivePath,
                 'archive_name' => $archiveName,
             ], 'Files compressed successfully');
         } catch (\Exception $e) {
             if (file_exists($fullArchivePath)) {
                 unlink($fullArchivePath);
             }
-            return $this->error('Failed to compress: ' . $e->getMessage(), 500, [], 'COMPRESS_ERROR');
+
+            return $this->error('Failed to compress: '.$e->getMessage(), 500, [], 'COMPRESS_ERROR');
         }
     }
 
@@ -810,10 +816,12 @@ class FileManagerController extends BaseApiController
         $files = scandir($path);
 
         foreach ($files as $file) {
-            if ($file === '.' || $file === '..') continue;
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
 
-            $fullPath = $path . DIRECTORY_SEPARATOR . $file;
-            $localPath = $relativePath . '/' . $file;
+            $fullPath = $path.DIRECTORY_SEPARATOR.$file;
+            $localPath = $relativePath.'/'.$file;
 
             if (is_dir($fullPath)) {
                 $this->addDirectoryToZip($zip, $fullPath, $localPath);

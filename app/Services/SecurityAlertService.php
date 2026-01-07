@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\LoginHistory;
 use App\Models\SecurityLog;
-use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -15,8 +14,11 @@ class SecurityAlertService
      * Alert thresholds
      */
     protected int $failedLoginThreshold = 5;
+
     protected int $blockedIpThreshold = 3;
+
     protected int $suspiciousIpThreshold = 10;
+
     protected int $checkWindowMinutes = 60;
 
     /**
@@ -44,7 +46,10 @@ class SecurityAlertService
             usort($alerts, function ($a, $b) {
                 $severityOrder = ['critical' => 0, 'warning' => 1, 'info' => 2];
                 $severityDiff = ($severityOrder[$a['severity']] ?? 3) - ($severityOrder[$b['severity']] ?? 3);
-                if ($severityDiff !== 0) return $severityDiff;
+                if ($severityDiff !== 0) {
+                    return $severityDiff;
+                }
+
                 return strtotime($b['timestamp']) - strtotime($a['timestamp']);
             });
 
@@ -58,7 +63,8 @@ class SecurityAlertService
     public function getAlertCount(): int
     {
         $alerts = $this->getAlerts();
-        return count(array_filter($alerts, fn($a) => $a['severity'] !== 'info'));
+
+        return count(array_filter($alerts, fn ($a) => $a['severity'] !== 'info'));
     }
 
     /**
@@ -79,7 +85,7 @@ class SecurityAlertService
 
             foreach ($failedByIp as $record) {
                 $alerts[] = [
-                    'id' => 'failed_login_' . md5($record->ip_address),
+                    'id' => 'failed_login_'.md5($record->ip_address),
                     'type' => 'failed_login',
                     'severity' => $record->count >= 10 ? 'critical' : 'warning',
                     'title' => 'Multiple Failed Logins',
@@ -90,7 +96,7 @@ class SecurityAlertService
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('Failed to get failed login alerts: ' . $e->getMessage());
+            Log::error('Failed to get failed login alerts: '.$e->getMessage());
         }
 
         return $alerts;
@@ -112,7 +118,7 @@ class SecurityAlertService
 
             foreach ($blockedIps as $log) {
                 $alerts[] = [
-                    'id' => 'blocked_ip_' . $log->id,
+                    'id' => 'blocked_ip_'.$log->id,
                     'type' => 'ip_blocked',
                     'severity' => 'warning',
                     'title' => 'IP Blocked',
@@ -122,7 +128,7 @@ class SecurityAlertService
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('Failed to get blocked IP alerts: ' . $e->getMessage());
+            Log::error('Failed to get blocked IP alerts: '.$e->getMessage());
         }
 
         return $alerts;
@@ -148,7 +154,7 @@ class SecurityAlertService
             foreach ($multipleIpLogins as $record) {
                 if ($record->user) {
                     $alerts[] = [
-                        'id' => 'multiple_ip_' . $record->user_id,
+                        'id' => 'multiple_ip_'.$record->user_id,
                         'type' => 'multiple_ip_login',
                         'severity' => 'info',
                         'title' => 'Multiple IP Login',
@@ -171,7 +177,7 @@ class SecurityAlertService
 
             foreach ($bruteForce as $record) {
                 $alerts[] = [
-                    'id' => 'brute_force_' . $record->user_id,
+                    'id' => 'brute_force_'.$record->user_id,
                     'type' => 'brute_force',
                     'severity' => 'critical',
                     'title' => 'Possible Brute Force Attack',
@@ -182,7 +188,7 @@ class SecurityAlertService
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('Failed to get suspicious activity alerts: ' . $e->getMessage());
+            Log::error('Failed to get suspicious activity alerts: '.$e->getMessage());
         }
 
         return $alerts;

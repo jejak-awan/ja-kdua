@@ -13,7 +13,7 @@ class MediaService
 
     public function __construct()
     {
-        $this->cacheService = new CacheService();
+        $this->cacheService = new CacheService;
     }
 
     /**
@@ -46,7 +46,7 @@ class MediaService
             try {
                 $this->generateThumbnail($media);
             } catch (\Exception $e) {
-                Log::warning('Auto-thumbnail generation failed: ' . $e->getMessage());
+                Log::warning('Auto-thumbnail generation failed: '.$e->getMessage());
             }
         }
 
@@ -60,13 +60,13 @@ class MediaService
      */
     public function optimizeImage(string $fullPath, int $maxWidth = 1920, int $quality = 85): bool
     {
-        if (!class_exists(\Intervention\Image\ImageManager::class)) {
+        if (! class_exists(\Intervention\Image\ImageManager::class)) {
             return false;
         }
 
         try {
             $driver = $this->getImageDriver();
-            if (!$driver) {
+            if (! $driver) {
                 return false;
             }
 
@@ -81,7 +81,8 @@ class MediaService
 
             return true;
         } catch (\Exception $e) {
-            Log::warning('Image optimization failed: ' . $e->getMessage());
+            Log::warning('Image optimization failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -92,10 +93,10 @@ class MediaService
     public function generateThumbnail(Media $media, int $width = 300, int $height = 300): ?string
     {
         $fullPath = Storage::disk($media->disk)->path($media->path);
-        
+
         // Create thumbnails directory
         $thumbnailDir = Storage::disk($media->disk)->path('media/thumbnails');
-        if (!is_dir($thumbnailDir)) {
+        if (! is_dir($thumbnailDir)) {
             mkdir($thumbnailDir, 0755, true);
         }
 
@@ -105,13 +106,13 @@ class MediaService
         // SVG files get converted to PNG for thumbnail
         $isSvg = $media->mime_type === 'image/svg+xml' || strtolower($extension) === 'svg';
         $thumbnailExtension = $isSvg ? 'png' : $extension;
-        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $thumbnailExtension;
+        $thumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.'.$thumbnailExtension;
         $thumbnailFullPath = Storage::disk($media->disk)->path($thumbnailPath);
 
         // Handle SVG with Imagick
         if ($isSvg && extension_loaded('imagick') && class_exists('Imagick')) {
             try {
-                $imagick = new \Imagick();
+                $imagick = new \Imagick;
                 $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
                 $imagick->readImage($fullPath);
                 $imagick->setImageFormat('png');
@@ -122,13 +123,13 @@ class MediaService
 
                 return $thumbnailPath;
             } catch (\Exception $e) {
-                Log::warning('SVG thumbnail generation failed: ' . $e->getMessage());
+                Log::warning('SVG thumbnail generation failed: '.$e->getMessage());
             }
         }
 
         // Use Intervention Image for raster images
         $driver = $this->getImageDriver();
-        if (!$driver) {
+        if (! $driver) {
             return null;
         }
 
@@ -145,7 +146,8 @@ class MediaService
 
             return $thumbnailPath;
         } catch (\Exception $e) {
-            Log::warning('Thumbnail generation failed: ' . $e->getMessage());
+            Log::warning('Thumbnail generation failed: '.$e->getMessage());
+
             return null;
         }
     }
@@ -156,7 +158,7 @@ class MediaService
     public function resize(Media $media, int $width, ?int $height = null, int $quality = 85): bool
     {
         $driver = $this->getImageDriver();
-        if (!$driver) {
+        if (! $driver) {
             return false;
         }
 
@@ -178,7 +180,8 @@ class MediaService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Image resize failed: ' . $e->getMessage());
+            Log::error('Image resize failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -190,6 +193,7 @@ class MediaService
     {
         if ($permanent) {
             $this->forceDelete($media);
+
             return;
         }
 
@@ -206,10 +210,10 @@ class MediaService
     {
         $this->deleteVariants($media);
         Storage::disk($media->disk)->delete($media->path);
-        
+
         // Delete usages
         $media->usages()->delete();
-        
+
         // Force delete the model
         $media->forceDelete();
         $this->cacheService->clearMediaCaches();
@@ -224,8 +228,10 @@ class MediaService
         if ($media) {
             $media->restore();
             $this->cacheService->clearMediaCaches();
+
             return $media;
         }
+
         return null;
     }
 
@@ -238,13 +244,13 @@ class MediaService
         $extension = pathinfo($media->path, PATHINFO_EXTENSION);
 
         // Delete thumbnail
-        $thumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.' . $extension;
+        $thumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.'.$extension;
         if (Storage::disk($media->disk)->exists($thumbnailPath)) {
             Storage::disk($media->disk)->delete($thumbnailPath);
         }
 
         // Delete PNG thumbnail for SVG
-        $pngThumbnailPath = 'media/thumbnails/' . $fileName . '_thumb.png';
+        $pngThumbnailPath = 'media/thumbnails/'.$fileName.'_thumb.png';
         if (Storage::disk($media->disk)->exists($pngThumbnailPath)) {
             Storage::disk($media->disk)->delete($pngThumbnailPath);
         }
@@ -267,7 +273,7 @@ class MediaService
         if ($action === 'restore') {
             $query->onlyTrashed();
         }
-        
+
         $media = $query->whereIn('id', $mediaIds)->get();
 
         foreach ($media as $item) {
@@ -307,15 +313,15 @@ class MediaService
             return null;
         }
 
-        $zipFileName = 'media-' . now()->format('Y-m-d-His') . '.zip';
-        $zipPath = storage_path('app/temp/' . $zipFileName);
+        $zipFileName = 'media-'.now()->format('Y-m-d-His').'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
 
         $tempDir = storage_path('app/temp');
-        if (!is_dir($tempDir)) {
+        if (! is_dir($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             return null;
         }
@@ -347,7 +353,7 @@ class MediaService
                     $model = $modelClass::find($usage->model_id);
                 }
             } catch (\Exception $e) {
-                Log::warning('Failed to load model for usage: ' . $e->getMessage());
+                Log::warning('Failed to load model for usage: '.$e->getMessage());
             }
 
             return [
@@ -376,7 +382,7 @@ class MediaService
     public function editImage(Media $media, UploadedFile $imageFile, bool $saveAsNew = false): ?Media
     {
         $driver = $this->getImageDriver();
-        if (!$driver) {
+        if (! $driver) {
             return null;
         }
 
@@ -386,19 +392,19 @@ class MediaService
 
             if ($saveAsNew) {
                 $pathInfo = pathinfo($media->path);
-                $newFileName = $pathInfo['filename'] . '_edited_' . time() . '.' . $pathInfo['extension'];
-                $newPath = $pathInfo['dirname'] . '/' . $newFileName;
+                $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
+                $newPath = $pathInfo['dirname'].'/'.$newFileName;
 
                 $fullPath = Storage::disk($media->disk)->path($newPath);
                 $directory = dirname($fullPath);
-                if (!is_dir($directory)) {
+                if (! is_dir($directory)) {
                     mkdir($directory, 0755, true);
                 }
 
                 $image->save($fullPath);
 
                 $newMedia = Media::create([
-                    'name' => $pathInfo['filename'] . '_edited',
+                    'name' => $pathInfo['filename'].'_edited',
                     'file_name' => $newFileName,
                     'path' => $newPath,
                     'mime_type' => $media->mime_type,
@@ -412,7 +418,7 @@ class MediaService
                 try {
                     $this->generateThumbnail($newMedia);
                 } catch (\Exception $e) {
-                    Log::warning('Thumbnail generation failed for edited image: ' . $e->getMessage());
+                    Log::warning('Thumbnail generation failed for edited image: '.$e->getMessage());
                 }
 
                 return $newMedia;
@@ -426,12 +432,13 @@ class MediaService
             try {
                 $this->generateThumbnail($media);
             } catch (\Exception $e) {
-                Log::warning('Thumbnail regeneration failed: ' . $e->getMessage());
+                Log::warning('Thumbnail regeneration failed: '.$e->getMessage());
             }
 
             return $media->fresh();
         } catch (\Exception $e) {
-            Log::error('Image editing failed: ' . $e->getMessage());
+            Log::error('Image editing failed: '.$e->getMessage());
+
             return null;
         }
     }
@@ -441,16 +448,16 @@ class MediaService
      */
     protected function getImageDriver(): ?object
     {
-        if (!class_exists(\Intervention\Image\ImageManager::class)) {
+        if (! class_exists(\Intervention\Image\ImageManager::class)) {
             return null;
         }
 
         if (extension_loaded('gd')) {
-            return new \Intervention\Image\Drivers\Gd\Driver();
+            return new \Intervention\Image\Drivers\Gd\Driver;
         }
 
         if (extension_loaded('imagick')) {
-            return new \Intervention\Image\Drivers\Imagick\Driver();
+            return new \Intervention\Image\Drivers\Imagick\Driver;
         }
 
         return null;

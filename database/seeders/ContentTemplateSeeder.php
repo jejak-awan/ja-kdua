@@ -20,7 +20,7 @@ class ContentTemplateSeeder extends Seeder
                 'type' => 'post',
                 'title_template' => '{{ title }}',
                 'excerpt_template' => '{{ excerpt }}',
-                'body_template' => "
+                'body_template' => '
                     <h2>Introduction</h2>
                     <p>Write your introduction here...</p>
                     
@@ -33,7 +33,7 @@ class ContentTemplateSeeder extends Seeder
                     
                     <h2>Conclusion</h2>
                     <p>Summarize your thoughts here...</p>
-                ",
+                ',
                 'is_active' => true,
                 'default_fields' => [],
             ],
@@ -44,7 +44,7 @@ class ContentTemplateSeeder extends Seeder
                 'type' => 'post',
                 'title_template' => 'Announcing: {{ product_name }}',
                 'excerpt_template' => 'We are excited to announce our new product...',
-                'body_template' => "
+                'body_template' => '
                     <h2>Introducing {{ product_name }}</h2>
                     <p>We are thrilled to unveil our latest innovation...</p>
                     
@@ -60,7 +60,7 @@ class ContentTemplateSeeder extends Seeder
                     
                     <h3>Pricing and Availability</h3>
                     <p>Details about pricing...</p>
-                ",
+                ',
                 'is_active' => true,
                 'default_fields' => [
                     'product_name' => '',
@@ -74,7 +74,7 @@ class ContentTemplateSeeder extends Seeder
                 'type' => 'page',
                 'title_template' => 'How to {{ action }}',
                 'excerpt_template' => 'Learn how to {{ action }} with this step-by-step guide.',
-                'body_template' => "
+                'body_template' => '
                     <h2>Overview</h2>
                     <p>Brief explanation of the task...</p>
                     
@@ -93,7 +93,7 @@ class ContentTemplateSeeder extends Seeder
                     
                     <h2>Troubleshooting</h2>
                     <p>Common issues and fixes...</p>
-                ",
+                ',
                 'is_active' => true,
                 'default_fields' => [
                     'action' => 'do something',
@@ -176,9 +176,9 @@ class ContentTemplateSeeder extends Seeder
                             'secondaryButtonUrl' => '#',
                             'align' => 'center',
                             'padding' => 'py-24',
-                            'theme' => 'dark'
-                        ]
-                    ]
+                            'theme' => 'dark',
+                        ],
+                    ],
                 ]),
                 'is_active' => true,
             ],
@@ -197,9 +197,9 @@ class ContentTemplateSeeder extends Seeder
                                 ['title' => 'Visual Editing', 'description' => 'Edit content directly on the page.', 'icon' => 'edit'],
                                 ['title' => 'Responsive', 'description' => 'Looks great on all devices.', 'icon' => 'smartphone'],
                                 ['title' => 'Fast Performance', 'description' => 'Optimized for speed and SEO.', 'icon' => 'zap'],
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ]),
                 'is_active' => true,
             ],
@@ -217,8 +217,8 @@ class ContentTemplateSeeder extends Seeder
                             'subtitle' => 'Everything you need to build and scale.',
                             'primaryButtonText' => 'Start Free Trial',
                             'align' => 'center',
-                            'padding' => 'py-32'
-                        ]
+                            'padding' => 'py-32',
+                        ],
                     ],
                     [
                         'id' => 'page-features',
@@ -230,8 +230,8 @@ class ContentTemplateSeeder extends Seeder
                                 ['title' => 'Scalable', 'description' => 'Grows with your business.', 'icon' => 'trending-up'],
                                 ['title' => 'Secure', 'description' => 'Enterprise-grade security.', 'icon' => 'shield'],
                                 ['title' => 'Support', 'description' => '24/7 expert support.', 'icon' => 'life-buoy'],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     [
                         'id' => 'page-cta',
@@ -239,12 +239,12 @@ class ContentTemplateSeeder extends Seeder
                         'settings' => [
                             'title' => 'Ready to get started?',
                             'buttonText' => 'Create Account',
-                            'buttonUrl' => '/register'
-                        ]
-                    ]
+                            'buttonUrl' => '/register',
+                        ],
+                    ],
                 ]),
                 'is_active' => true,
-            ]
+            ],
         ];
 
         $templates = array_merge($templates, $builderTemplates);

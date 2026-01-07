@@ -3,9 +3,6 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Exceptions\InvalidSignatureException;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Throwable;
 
@@ -36,7 +33,6 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $e
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Throwable
@@ -46,7 +42,7 @@ class Handler extends ExceptionHandler
         // Handle rate limiting exceptions - add retry_after to response body
         if ($e instanceof TooManyRequestsHttpException) {
             $retryAfter = $e->getHeaders()['Retry-After'] ?? 60;
-            
+
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -61,4 +57,3 @@ class Handler extends ExceptionHandler
         return parent::render($request, $e);
     }
 }
-

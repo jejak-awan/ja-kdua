@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 
 class ClearRateLimit extends Command
 {
@@ -36,6 +36,7 @@ class ClearRateLimit extends Command
             // Clear all rate limit keys
             $this->clearAllRateLimits();
             $this->info('All rate limits cleared successfully!');
+
             return 0;
         }
 
@@ -43,6 +44,7 @@ class ClearRateLimit extends Command
             // Clear rate limit for specific IP
             $this->clearRateLimitForIp($ip);
             $this->info("Rate limit cleared for IP: {$ip}");
+
             return 0;
         }
 
@@ -51,6 +53,7 @@ class ClearRateLimit extends Command
         $this->info('Examples:');
         $this->info('  php artisan rate-limit:clear --ip=127.0.0.1');
         $this->info('  php artisan rate-limit:clear --all');
+
         return 1;
     }
 
@@ -119,4 +122,3 @@ class ClearRateLimit extends Command
         return $cleared > 0;
     }
 }
-

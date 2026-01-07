@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Content;
 use App\Models\Menu;
 use App\Models\MenuItem;
-use App\Models\Category;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -21,24 +21,24 @@ class SampleContentSeeder extends Seeder
         $this->command->info('Creating sample content with Page Builder blocks...');
 
         $user = User::first();
-        
+
         // Create categories
         $categories = $this->createCategories();
-        
+
         // Create tags
         $tags = $this->createTags();
-        
+
         // Create menus
         $this->createMenus();
-        
+
         // Create pages
         $this->createLandingPage($user);
         $this->createAboutPage($user);
         $this->createContactPage($user);
-        
+
         // Create blog posts
         $this->createBlogPosts($user, $categories, $tags);
-        
+
         $this->command->info('Sample content created successfully!');
     }
 
@@ -58,6 +58,7 @@ class SampleContentSeeder extends Seeder
                 $cat
             );
         }
+
         return $result;
     }
 
@@ -65,13 +66,14 @@ class SampleContentSeeder extends Seeder
     {
         $tagNames = ['Laravel', 'Vue.js', 'CMS', 'Web Development', 'Design', 'Tutorial', 'Guide', 'Tips'];
         $result = [];
-        
+
         foreach ($tagNames as $name) {
             $result[] = Tag::firstOrCreate(
                 ['slug' => Str::slug($name)],
                 ['name' => $name, 'slug' => Str::slug($name)]
             );
         }
+
         return $result;
     }
 
@@ -155,8 +157,8 @@ class SampleContentSeeder extends Seeder
                     'padding' => 'py-32',
                     'radius' => 'rounded-none',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Features Section
             [
@@ -170,14 +172,14 @@ class SampleContentSeeder extends Seeder
                         ['title' => 'Menu Builder', 'description' => 'Create complex navigation structures with ease.'],
                         ['title' => 'SEO Optimized', 'description' => 'Built-in SEO tools to help your content rank higher.'],
                         ['title' => 'Multi-language', 'description' => 'Full i18n support for global audiences.'],
-                        ['title' => 'Dark Mode', 'description' => 'Beautiful dark mode support out of the box.']
+                        ['title' => 'Dark Mode', 'description' => 'Beautiful dark mode support out of the box.'],
                     ],
                     'padding' => 'py-20',
                     'bgColor' => 'transparent',
                     'radius' => 'rounded-none',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Testimonial Section
             [
@@ -190,8 +192,8 @@ class SampleContentSeeder extends Seeder
                     'avatar' => '',
                     'bgColor' => '#f8fafc',
                     'padding' => 'py-24',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Blog Grid Section
             [
@@ -205,8 +207,8 @@ class SampleContentSeeder extends Seeder
                     'showDate' => true,
                     'showCategory' => true,
                     'padding' => 'py-20',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // CTA Section
             [
@@ -220,9 +222,9 @@ class SampleContentSeeder extends Seeder
                     'bgColor' => '#4f46e5',
                     'padding' => 'py-32',
                     'radius' => 'rounded-2xl',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
-            ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
+            ],
         ];
 
         Content::updateOrCreate(
@@ -257,8 +259,8 @@ class SampleContentSeeder extends Seeder
                     'bgColor' => '#1e293b',
                     'padding' => 'py-24',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Text Block - Our Story
             [
@@ -267,8 +269,8 @@ class SampleContentSeeder extends Seeder
                 'settings' => [
                     'content' => '<h2>Our Story</h2><p>JA-CMS was born from a simple idea: content management should be easy, fast, and beautiful. We believe that everyone deserves powerful tools to share their ideas with the world.</p><p>Our team of passionate developers and designers work tirelessly to create the best possible experience for our users. We combine modern technology with intuitive design to deliver a CMS that just works.</p>',
                     'padding' => 'py-16',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Team Section
             [
@@ -280,8 +282,8 @@ class SampleContentSeeder extends Seeder
                     'bio' => 'A dedicated team of developers, designers, and content strategists committed to making content management accessible to everyone.',
                     'avatar' => '',
                     'padding' => 'py-16',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Features
             [
@@ -292,12 +294,12 @@ class SampleContentSeeder extends Seeder
                     'items' => [
                         ['title' => 'Simplicity', 'description' => 'We believe powerful tools can also be easy to use.'],
                         ['title' => 'Performance', 'description' => 'Speed is not an afterthought - it is built into everything we do.'],
-                        ['title' => 'Open Source', 'description' => 'We embrace transparency and community collaboration.']
+                        ['title' => 'Open Source', 'description' => 'We embrace transparency and community collaboration.'],
                     ],
                     'padding' => 'py-20',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
-            ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
+            ],
         ];
 
         Content::updateOrCreate(
@@ -332,8 +334,8 @@ class SampleContentSeeder extends Seeder
                     'bgColor' => '#4f46e5',
                     'padding' => 'py-24',
                     'animation' => 'animate-in fade-in duration-700',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
             ],
             // Two Columns - Form and Info
             [
@@ -343,7 +345,7 @@ class SampleContentSeeder extends Seeder
                     'columns' => 2,
                     'gap' => 'gap-8',
                     'padding' => 'py-20',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
                 ],
                 'children' => [
                     [
@@ -353,18 +355,18 @@ class SampleContentSeeder extends Seeder
                             'title' => 'Send us a Message',
                             'submitText' => 'Send Message',
                             'successMessage' => 'Thank you! We will get back to you soon.',
-                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                        ]
+                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                        ],
                     ],
                     [
                         'id' => Str::uuid()->toString(),
                         'type' => 'text',
                         'settings' => [
                             'content' => '<h3>Contact Information</h3><p><strong>Email:</strong> hello@ja-cms.com</p><p><strong>Phone:</strong> +1 (555) 123-4567</p><p><strong>Address:</strong><br>123 Innovation Street<br>Tech City, TC 12345</p><h4>Office Hours</h4><p>Monday - Friday: 9am - 6pm<br>Saturday - Sunday: Closed</p>',
-                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                        ]
-                    ]
-                ]
+                            'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                        ],
+                    ],
+                ],
             ],
             // Map
             [
@@ -375,9 +377,9 @@ class SampleContentSeeder extends Seeder
                     'zoom' => 15,
                     'height' => '400px',
                     'padding' => 'py-0',
-                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true]
-                ]
-            ]
+                    'visibility' => ['mobile' => true, 'tablet' => true, 'desktop' => true],
+                ],
+            ],
         ];
 
         Content::updateOrCreate(
@@ -446,7 +448,7 @@ class SampleContentSeeder extends Seeder
 
         foreach ($posts as $postData) {
             $category = $categories[$postData['category']] ?? null;
-            
+
             $content = Content::updateOrCreate(
                 ['slug' => $postData['slug'], 'type' => 'post'],
                 [

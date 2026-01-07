@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('route')->nullable()->index();
             $table->unsignedBigInteger('user_id')->nullable()->index();
             $table->timestamps();
-            
+
             $table->index('created_at');
             $table->index('duration');
-            
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }

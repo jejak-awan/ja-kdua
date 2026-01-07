@@ -69,7 +69,7 @@ class ThemeController extends BaseApiController
         ]);
 
         $theme->update($validated);
-        
+
         // Clear cache after update
         $this->themeService->clearThemeCache($theme);
 
@@ -106,7 +106,7 @@ class ThemeController extends BaseApiController
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->error($e->getMessage(), 422);
         }
     }
@@ -139,13 +139,14 @@ class ThemeController extends BaseApiController
             // Load assets
             $assets = $this->themeService->loadThemeAssets($theme);
             $theme->assets = $assets;
-            
+
             // Load manifest
             $theme->manifest = $theme->getManifest();
 
             return $this->success($theme, 'Active theme retrieved successfully');
         } catch (\Exception $e) {
-            \Log::error('Failed to get active theme: ' . $e->getMessage());
+            \Log::error('Failed to get active theme: '.$e->getMessage());
+
             // Return null instead of error for public endpoint
             return $this->success(null, 'Theme service unavailable');
         }
@@ -161,18 +162,18 @@ class ThemeController extends BaseApiController
             // Merge with existing settings instead of replacing
             $existingSettings = $theme->settings ?? [];
             $newSettings = array_merge($existingSettings, $validated['settings']);
-            
+
             $theme->update(['settings' => $newSettings]);
             $this->themeService->clearThemeCache($theme);
 
             return $this->success($theme->fresh(), 'Theme settings updated successfully');
         } catch (\Exception $e) {
-            \Log::error('Failed to update theme settings: ' . $e->getMessage(), [
+            \Log::error('Failed to update theme settings: '.$e->getMessage(), [
                 'theme_id' => $theme->id,
                 'error' => $e->getTraceAsString(),
             ]);
-            
-            return $this->error('Failed to update theme settings: ' . $e->getMessage(), 500);
+
+            return $this->error('Failed to update theme settings: '.$e->getMessage(), 500);
         }
     }
 
@@ -227,7 +228,7 @@ class ThemeController extends BaseApiController
         $key = $request->get('key');
         $default = $request->get('default');
 
-        if (!$key) {
+        if (! $key) {
             return $this->validationError(['key' => ['Key is required']], 'Key is required');
         }
 
@@ -253,7 +254,7 @@ class ThemeController extends BaseApiController
         $type = $request->get('type', 'frontend');
         $theme = $this->themeService->getActiveTheme($type);
 
-        if (!$theme) {
+        if (! $theme) {
             return $this->success([], 'No active theme found');
         }
 
@@ -261,7 +262,6 @@ class ThemeController extends BaseApiController
 
         return $this->success($locations, 'Menu locations retrieved successfully');
     }
-
 
     /**
      * Get Vue components manifest
@@ -303,10 +303,10 @@ class ThemeController extends BaseApiController
         try {
             $composablesPath = $theme->getComposablesPath();
 
-            if (!$composablesPath) {
+            if (! $composablesPath) {
                 return $this->success([
                     'has_composables' => false,
-                    'message' => 'Theme does not have composables directory'
+                    'message' => 'Theme does not have composables directory',
                 ]);
             }
 
@@ -322,4 +322,3 @@ class ThemeController extends BaseApiController
         }
     }
 }
-

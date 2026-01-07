@@ -37,4 +37,3 @@ class NewsletterSubscriber extends Model
         return $query->where('status', 'pending');
     }
 }
-

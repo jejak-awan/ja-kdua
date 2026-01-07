@@ -581,7 +581,6 @@ const saveImage = async () => {
 
         // Get blob securely (whether it's base64 or url)
         const blob = await getSecureBlob();
-        console.log("Saving Blob size:", blob.size); // Debugging
         
         if (blob.size === 0) throw new Error("Generated image is empty");
         

@@ -9,9 +9,6 @@ class IpHelper
     /**
      * Get the real client IP address from the request.
      * This handles various proxy/CDN scenarios.
-     *
-     * @param Request|null $request
-     * @return string
      */
     public static function getClientIp(?Request $request = null): string
     {
@@ -33,7 +30,7 @@ class IpHelper
         foreach ($headers as $header) {
             if ($request->hasHeader($header)) {
                 $value = $request->header($header);
-                
+
                 // X-Forwarded-For can contain multiple IPs
                 if ($header === 'X-Forwarded-For') {
                     $ips = array_map('trim', explode(',', $value));
@@ -55,9 +52,6 @@ class IpHelper
     /**
      * Check if an IP is a private/internal IP.
      * These should generally not be blocked as they might be server IPs.
-     *
-     * @param string $ip
-     * @return bool
      */
     public static function isPrivateIp(string $ip): bool
     {
@@ -70,21 +64,16 @@ class IpHelper
 
     /**
      * Check if an IP is localhost.
-     *
-     * @param string $ip
-     * @return bool
      */
     public static function isLocalhost(string $ip): bool
     {
         $localhostIps = ['127.0.0.1', '::1', 'localhost'];
+
         return in_array($ip, $localhostIps);
     }
 
     /**
      * Get all proxy-related headers for debugging.
-     *
-     * @param Request|null $request
-     * @return array
      */
     public static function getProxyHeaders(?Request $request = null): array
     {

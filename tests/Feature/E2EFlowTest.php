@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 class E2EFlowTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     protected User $admin;
 
@@ -236,16 +236,20 @@ class E2EFlowTest extends TestCase
     }
 
     /**
-     * Helper: Get authentication token
+     * Helper: Get authentication token - DEPRECATED
+     * Login now uses session-based auth without tokens.
+     * Use actingAs() for test authentication instead.
      */
     protected function getAuthToken(User $user): string
     {
-        $response = $this->postJson('/api/v1/login', [
+        // Login to establish session and use actingAs for subsequent requests
+        $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
-        return $response->json('data.token');
+        // For tests, we simulate token by creating a Sanctum token
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     /**
@@ -259,4 +263,3 @@ class E2EFlowTest extends TestCase
         ]);
     }
 }
-

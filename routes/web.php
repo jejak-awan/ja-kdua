@@ -32,17 +32,17 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
         if (! $user || (! $user->hasRole('admin') && ! $user->can('view logs'))) {
             abort(403, 'Unauthorized. You need admin role or "view logs" permission.');
         }
-        
+
         // Use Log Viewer package
         return app(\Rap2hpoutre\LaravelLogViewer\LaravelLogViewer::class)->index();
     })->name('logs.index');
-    
+
     Route::get('/logs/{file}', function ($file) {
         $user = auth()->user();
         if (! $user || (! $user->hasRole('admin') && ! $user->can('view logs'))) {
             abort(403, 'Unauthorized. You need admin role or "view logs" permission.');
         }
-        
+
         return app(\Rap2hpoutre\LaravelLogViewer\LaravelLogViewer::class)->show($file);
     })->name('logs.show');
 });
@@ -54,6 +54,11 @@ Route::middleware(['auth:sanctum', 'web'])->group(function () {
 Route::get('/login', function () {
     return view('app');
 })->name('login');
+
+// Ignore Cloudflare cdn-cgi routes if they hit the app directly
+Route::any('/cdn-cgi/{any}', function () {
+    return response()->noContent();
+})->where('any', '.*');
 
 // SPA Route - All routes handled by Vue Router
 Route::get('/{any?}', function () {

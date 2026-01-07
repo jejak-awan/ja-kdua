@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class AnalyticsService
@@ -16,13 +15,12 @@ class AnalyticsService
      * @param  string  $eventName  Name of the event (e.g., 'Button Click: Subscribe')
      * @param  array  $data  Additional event data
      * @param  int|null  $contentId  Related content ID (optional)
-     * @return AnalyticsEvent
      */
     public static function trackEvent(string $eventType, string $eventName, array $data = [], ?int $contentId = null): AnalyticsEvent
     {
         try {
             $sessionId = session()->getId();
-            
+
             // Ensure session exists
             if ($sessionId) {
                 AnalyticsSession::start(request(), $sessionId);
@@ -36,7 +34,7 @@ class AnalyticsService
             ]);
 
             // Return a dummy event to prevent breaking the application
-            return new AnalyticsEvent();
+            return new AnalyticsEvent;
         }
     }
 
@@ -44,7 +42,6 @@ class AnalyticsService
      * Track multiple events in batch
      *
      * @param  array  $events  Array of events [['type' => 'click', 'name' => 'Button', 'data' => []]]
-     * @return array
      */
     public static function trackBatch(array $events): array
     {
@@ -67,7 +64,6 @@ class AnalyticsService
      * @param  int  $contentId  Content ID
      * @param  string  $action  Action type (view, like, share, comment)
      * @param  array  $data  Additional data
-     * @return AnalyticsEvent
      */
     public static function trackContentInteraction(int $contentId, string $action, array $data = []): AnalyticsEvent
     {
@@ -84,7 +80,6 @@ class AnalyticsService
      *
      * @param  string  $formName  Form name/identifier
      * @param  array  $data  Form data (sanitized)
-     * @return AnalyticsEvent
      */
     public static function trackFormSubmission(string $formName, array $data = []): AnalyticsEvent
     {
@@ -101,7 +96,6 @@ class AnalyticsService
      * @param  string  $fileName  File name
      * @param  string  $fileType  File type/extension
      * @param  int|null  $mediaId  Media ID if applicable
-     * @return AnalyticsEvent
      */
     public static function trackDownload(string $fileName, string $fileType, ?int $mediaId = null): AnalyticsEvent
     {
@@ -118,7 +112,6 @@ class AnalyticsService
      *
      * @param  string  $query  Search query
      * @param  int  $resultsCount  Number of results
-     * @return AnalyticsEvent
      */
     public static function trackSearch(string $query, int $resultsCount = 0): AnalyticsEvent
     {
@@ -134,7 +127,6 @@ class AnalyticsService
      *
      * @param  string  $videoTitle  Video title
      * @param  int|null  $contentId  Content ID
-     * @return AnalyticsEvent
      */
     public static function trackVideoPlay(string $videoTitle, ?int $contentId = null): AnalyticsEvent
     {
@@ -151,7 +143,6 @@ class AnalyticsService
      *
      * @param  string  $buttonName  Button/link name
      * @param  string  $url  URL clicked
-     * @return AnalyticsEvent
      */
     public static function trackClick(string $buttonName, string $url): AnalyticsEvent
     {
@@ -162,4 +153,3 @@ class AnalyticsService
         );
     }
 }
-

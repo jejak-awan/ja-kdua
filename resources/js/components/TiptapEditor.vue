@@ -446,7 +446,6 @@ watch(() => props.modelValue, (newValue) => {
 })
 
 function handleMediaSelect(media) {
-    console.log('Media selected:', media) // Debug
     const url = media?.url || media?.path || media?.file_url
     if (url) {
         editor.value.chain().focus().setImage({ 

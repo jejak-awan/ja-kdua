@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('source', ['composer', 'npm'])->index();
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['package_name', 'version', 'cve']);
         });
     }

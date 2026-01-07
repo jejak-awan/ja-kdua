@@ -23,7 +23,7 @@ class ActivityLogController extends BaseApiController
             }
 
             if ($request->has('model_type') && $request->model_type) {
-                $query->where('model_type', 'like', '%' . $request->model_type . '%');
+                $query->where('model_type', 'like', '%'.$request->model_type.'%');
             }
 
             if ($request->has('ip_address') && $request->ip_address) {
@@ -42,10 +42,10 @@ class ActivityLogController extends BaseApiController
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('description', 'like', "%{$search}%")
-                      ->orWhere('model_type', 'like', "%{$search}%")
-                      ->orWhereHas('user', function ($userQuery) use ($search) {
-                          $userQuery->where('name', 'like', "%{$search}%");
-                      });
+                        ->orWhere('model_type', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%");
+                        });
                 });
             }
 
@@ -68,6 +68,7 @@ class ActivityLogController extends BaseApiController
             Log::error('Activity logs index error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this->success([], 'Activity logs retrieved successfully');
         }
     }
@@ -90,7 +91,7 @@ class ActivityLogController extends BaseApiController
             }
 
             if ($request->has('model_type') && $request->model_type) {
-                $query->where('model_type', 'like', '%' . $request->model_type . '%');
+                $query->where('model_type', 'like', '%'.$request->model_type.'%');
             }
 
             if ($request->has('date_from') && $request->date_from) {
@@ -121,10 +122,11 @@ class ActivityLogController extends BaseApiController
 
             return response($csv, 200, [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="activity-logs-' . now()->format('Y-m-d') . '.csv"',
+                'Content-Disposition' => 'attachment; filename="activity-logs-'.now()->format('Y-m-d').'.csv"',
             ]);
         } catch (\Exception $e) {
             Log::error('Activity logs export error: '.$e->getMessage());
+
             return $this->error('Failed to export activity logs', 500);
         }
     }
@@ -207,13 +209,16 @@ class ActivityLogController extends BaseApiController
 
             if ($retainDays) {
                 $count = ActivityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+
                 return $this->success(null, "Cleared $count activity logs older than $retainDays days");
             }
 
             ActivityLog::truncate();
+
             return $this->success(null, 'All activity logs cleared successfully');
         } catch (\Exception $e) {
             Log::error('Activity logs clear error: '.$e->getMessage());
+
             return $this->error('Failed to clear activity logs', 500);
         }
     }

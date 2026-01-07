@@ -6,12 +6,12 @@ use App\Models\Content;
 use App\Models\ContentCustomField;
 use App\Models\ContentRevision;
 use App\Models\SearchIndex;
+use App\Models\Tag;
 use App\Models\Webhook;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use App\Models\Tag;
 
 class ContentService
 {
@@ -19,7 +19,7 @@ class ContentService
 
     public function __construct()
     {
-        $this->cacheService = new CacheService();
+        $this->cacheService = new CacheService;
     }
 
     /**
@@ -27,7 +27,7 @@ class ContentService
      */
     public function getPublishedContents(Request $request): array
     {
-        $cacheKey = 'contents_published_' . md5($request->getQueryString());
+        $cacheKey = 'contents_published_'.md5($request->getQueryString());
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($request) {
             $query = Content::with(['author', 'category', 'tags'])
@@ -50,6 +50,7 @@ class ContentService
             }
 
             $perPage = $request->get('per_page', 12);
+
             return [
                 'data' => $query->paginate($perPage),
                 'paginated' => true,
@@ -109,11 +110,11 @@ class ContentService
      */
     public function getRelatedContent(string $slug, int $limit = 5): array
     {
-        $cacheKey = 'content_related_' . $slug;
+        $cacheKey = 'content_related_'.$slug;
 
         return Cache::remember($cacheKey, now()->addHours(2), function () use ($slug, $limit) {
             $content = Content::where('slug', $slug)->first();
-            if (!$content) {
+            if (! $content) {
                 return [];
             }
 
@@ -170,7 +171,7 @@ class ContentService
         $tags = $data['tags'] ?? [];
         $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
-        
+
         unset($data['create_revision'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         $content = Content::create($data);
@@ -185,7 +186,7 @@ class ContentService
         }
 
         // Sync tags
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $content->tags()->sync($tags);
         }
 
@@ -195,10 +196,10 @@ class ContentService
         }
 
         // Track media usage
-        if (!empty($content->featured_image)) {
+        if (! empty($content->featured_image)) {
             $this->trackMediaUsage($content, 'featured_image');
         }
-        if (!empty($content->og_image)) {
+        if (! empty($content->og_image)) {
             $this->trackMediaUsage($content, 'og_image');
         }
 
@@ -255,7 +256,7 @@ class ContentService
         }
 
         // Sync tags
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $content->tags()->sync($tags);
         }
 
@@ -293,11 +294,11 @@ class ContentService
      */
     public function toggleFeatured(Content $content): bool
     {
-        $content->is_featured = !$content->is_featured;
+        $content->is_featured = ! $content->is_featured;
         $content->save();
 
         $this->clearContentCaches($content->id);
-        
+
         return $content->is_featured;
     }
 
@@ -330,7 +331,7 @@ class ContentService
     public function duplicate(Content $content, int $userId): Content
     {
         $newContent = $content->replicate();
-        $newContent->title = $content->title . ' (Copy)';
+        $newContent->title = $content->title.' (Copy)';
         $newContent->slug = $this->generateUniqueSlug($newContent->title);
         $newContent->status = 'draft';
         $newContent->author_id = $userId;
@@ -442,7 +443,7 @@ class ContentService
             'title' => $content->title,
             'content' => strip_tags($content->body),
             'excerpt' => $content->excerpt,
-            'url' => url('/content/' . $content->slug),
+            'url' => url('/content/'.$content->slug),
             'type' => $content->type,
         ]);
     }
@@ -501,7 +502,7 @@ class ContentService
         }
 
         while ($query->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $counter++;
             $query = Content::where('slug', $slug);
             if ($excludeId) {
@@ -522,8 +523,10 @@ class ContentService
             $content->restore();
             $this->clearContentCaches($id);
             Webhook::triggerForEvent('content.restored', ['id' => $id]);
+
             return true;
         }
+
         return false;
     }
 
@@ -537,6 +540,7 @@ class ContentService
         $content->forceDelete();
         Webhook::triggerForEvent('content.force_deleted', ['id' => $id]);
         $this->clearContentCaches($id);
+
         return true;
     }
 }

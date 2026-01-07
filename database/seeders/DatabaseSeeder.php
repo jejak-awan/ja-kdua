@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create default settings (required)
         $this->call(SettingsSeeder::class);
+        $this->call(ScheduledTaskSeeder::class);
 
         // 3. Create admin user if not exists
         $admin = User::firstOrCreate(

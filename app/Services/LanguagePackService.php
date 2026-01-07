@@ -8,7 +8,7 @@ use ZipArchive;
 
 /**
  * Secure Language Pack Service
- * 
+ *
  * Handles import/export of language packs with comprehensive security validation:
  * - File type validation (only ZIP allowed)
  * - Content validation (only JSON and JS files)
@@ -21,17 +21,18 @@ use ZipArchive;
 class LanguagePackService
 {
     protected string $langPath;
+
     protected array $protectedLocales = ['en', 'id']; // Cannot be deleted
-    
+
     // Allowed file extensions in language packs
     protected array $allowedExtensions = ['json', 'js'];
-    
+
     // Maximum file size per file in bytes (100KB)
     protected int $maxFileSize = 102400;
-    
+
     // Maximum total extracted size (5MB)
     protected int $maxTotalSize = 5242880;
-    
+
     // Dangerous patterns that indicate malicious content
     protected array $dangerousPatterns = [
         // PHP code
@@ -48,14 +49,14 @@ class LanguagePackService
         '/\bbase64_decode\s*\(/i',
         '/\bgzinflate\s*\(/i',
         '/\bunserialize\s*\(/i',
-        
+
         // Shell/script execution
         '/\b(bash|sh|zsh|csh|ksh)\s*-c/i',
         '/\bcurl\s+.*\|.*sh/i',
         '/\bwget\s+.*\|.*sh/i',
         '/\b(nc|netcat)\s+/i',
         '/\brm\s+(-rf?|--recursive)/i',
-        
+
         // SQL injection patterns (shouldn't be in translations)
         '/\bDROP\s+TABLE\b/i',
         '/\bDELETE\s+FROM\b/i',
@@ -64,7 +65,7 @@ class LanguagePackService
         '/\bUNION\s+SELECT\b/i',
         '/\b(\'|")\s*OR\s+\d+\s*=\s*\d+/i',
         '/\bEXEC(\s+|\s*\()xp_/i',
-        
+
         // XSS patterns
         '/\b(javascript|vbscript):/i',
         '/\bonload\s*=/i',
@@ -77,7 +78,7 @@ class LanguagePackService
         '/<object[\s>]/i',
         '/<embed[\s>]/i',
         '/<applet[\s>]/i',
-        
+
         // Require/import malicious modules
         '/require\s*\(\s*[\'"]child_process[\'"]\s*\)/i',
         '/require\s*\(\s*[\'"]fs[\'"]\s*\)/i',
@@ -113,13 +114,13 @@ class LanguagePackService
      */
     protected function isValidLocaleFolder(string $path): bool
     {
-        if (!File::isDirectory($path)) {
+        if (! File::isDirectory($path)) {
             return false;
         }
-        
-        $hasIndex = File::exists($path . '/index.js');
-        $hasJson = count(glob($path . '/*.json')) > 0 || count(glob($path . '/*/*.json')) > 0;
-        
+
+        $hasIndex = File::exists($path.'/index.js');
+        $hasJson = count(glob($path.'/*.json')) > 0 || count(glob($path.'/*/*.json')) > 0;
+
         return $hasIndex || $hasJson;
     }
 
@@ -137,29 +138,31 @@ class LanguagePackService
     public function exportLanguagePack(string $locale): ?string
     {
         // Validate locale code
-        if (!$this->isValidLocaleCode($locale)) {
+        if (! $this->isValidLocaleCode($locale)) {
             Log::warning("Invalid locale code for export: {$locale}");
+
             return null;
         }
 
-        $localePath = $this->langPath . '/' . $locale;
-        
-        if (!File::isDirectory($localePath)) {
+        $localePath = $this->langPath.'/'.$locale;
+
+        if (! File::isDirectory($localePath)) {
             return null;
         }
 
-        $zipFileName = "language-pack-{$locale}-" . now()->format('Y-m-d-His') . '.zip';
-        $zipPath = storage_path('app/temp/' . $zipFileName);
+        $zipFileName = "language-pack-{$locale}-".now()->format('Y-m-d-His').'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
 
         // Ensure temp directory exists with secure permissions
         $tempDir = storage_path('app/temp');
-        if (!File::isDirectory($tempDir)) {
+        if (! File::isDirectory($tempDir)) {
             File::makeDirectory($tempDir, 0750, true);
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             Log::error("Could not create ZIP file: {$zipPath}");
+
             return null;
         }
 
@@ -179,16 +182,16 @@ class LanguagePackService
     protected function addDirectoryToZip(ZipArchive $zip, string $directory, string $basePath): void
     {
         $files = File::allFiles($directory);
-        
+
         foreach ($files as $file) {
             $extension = strtolower($file->getExtension());
-            
+
             // Only include allowed file types
-            if (!in_array($extension, $this->allowedExtensions)) {
+            if (! in_array($extension, $this->allowedExtensions)) {
                 continue;
             }
-            
-            $relativePath = $basePath . '/' . $file->getRelativePathname();
+
+            $relativePath = $basePath.'/'.$file->getRelativePathname();
             $zip->addFile($file->getRealPath(), $relativePath);
         }
     }
@@ -199,7 +202,7 @@ class LanguagePackService
     public function importLanguagePack(string $zipPath, ?string $targetLocale = null): array
     {
         // Validate ZIP file exists and is readable
-        if (!file_exists($zipPath) || !is_readable($zipPath)) {
+        if (! file_exists($zipPath) || ! is_readable($zipPath)) {
             return ['success' => false, 'message' => 'ZIP file not found or not readable'];
         }
 
@@ -209,32 +212,34 @@ class LanguagePackService
             return ['success' => false, 'message' => 'ZIP file exceeds maximum allowed size (5MB)'];
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath) !== true) {
             return ['success' => false, 'message' => 'Could not open ZIP file - file may be corrupted'];
         }
 
         // Security validation before extraction
         $validation = $this->validateZipContents($zip);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             $zip->close();
             Log::warning('Language pack import blocked', [
                 'reason' => $validation['message'],
                 'file' => $zipPath,
             ]);
+
             return ['success' => false, 'message' => $validation['message']];
         }
 
         $locale = $targetLocale ?? $validation['locale'] ?? 'unknown';
 
         // Validate locale code
-        if (!$this->isValidLocaleCode($locale)) {
+        if (! $this->isValidLocaleCode($locale)) {
             $zip->close();
+
             return ['success' => false, 'message' => 'Invalid locale code format. Must be 2-5 lowercase letters.'];
         }
 
         // Create temporary extraction directory
-        $tempExtractPath = storage_path('app/temp/lang_import_' . uniqid());
+        $tempExtractPath = storage_path('app/temp/lang_import_'.uniqid());
         File::makeDirectory($tempExtractPath, 0750, true);
 
         try {
@@ -244,18 +249,19 @@ class LanguagePackService
 
             // Validate extracted content
             $contentValidation = $this->validateExtractedContent($tempExtractPath, $locale);
-            if (!$contentValidation['valid']) {
+            if (! $contentValidation['valid']) {
                 $this->cleanupTempDirectory($tempExtractPath);
+
                 return ['success' => false, 'message' => $contentValidation['message']];
             }
 
             // Move validated content to lang directory
-            $sourcePath = $tempExtractPath . '/' . $locale;
-            $targetPath = $this->langPath . '/' . $locale;
+            $sourcePath = $tempExtractPath.'/'.$locale;
+            $targetPath = $this->langPath.'/'.$locale;
 
             // Backup existing if present
             if (File::isDirectory($targetPath)) {
-                $backupPath = $targetPath . '_backup_' . now()->format('YmdHis');
+                $backupPath = $targetPath.'_backup_'.now()->format('YmdHis');
                 File::moveDirectory($targetPath, $backupPath);
             }
 
@@ -283,7 +289,8 @@ class LanguagePackService
                 'error' => $e->getMessage(),
                 'file' => $zipPath,
             ]);
-            return ['success' => false, 'message' => 'Import failed: ' . $e->getMessage()];
+
+            return ['success' => false, 'message' => 'Import failed: '.$e->getMessage()];
         }
     }
 
@@ -322,18 +329,18 @@ class LanguagePackService
 
             // Validate file extension
             $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            if (!in_array($extension, $this->allowedExtensions)) {
+            if (! in_array($extension, $this->allowedExtensions)) {
                 return [
-                    'valid' => false, 
-                    'message' => "Invalid file type: .{$extension}. Only .json and .js files are allowed."
+                    'valid' => false,
+                    'message' => "Invalid file type: .{$extension}. Only .json and .js files are allowed.",
                 ];
             }
 
             // Check file size
             if ($stat['size'] > $this->maxFileSize) {
                 return [
-                    'valid' => false, 
-                    'message' => "File too large: {$name} exceeds 100KB limit"
+                    'valid' => false,
+                    'message' => "File too large: {$name} exceeds 100KB limit",
                 ];
             }
 
@@ -348,7 +355,7 @@ class LanguagePackService
             $content = $zip->getFromIndex($i);
             if ($content !== false) {
                 $contentCheck = $this->validateFileContent($content, $name);
-                if (!$contentCheck['valid']) {
+                if (! $contentCheck['valid']) {
                     return $contentCheck;
                 }
             }
@@ -375,7 +382,7 @@ class LanguagePackService
             if (preg_match($pattern, $content)) {
                 return [
                     'valid' => false,
-                    'message' => "Security violation: Potentially malicious content detected in {$filename}"
+                    'message' => "Security violation: Potentially malicious content detected in {$filename}",
                 ];
             }
         }
@@ -387,15 +394,15 @@ class LanguagePackService
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return [
                     'valid' => false,
-                    'message' => "Invalid JSON in {$filename}: " . json_last_error_msg()
+                    'message' => "Invalid JSON in {$filename}: ".json_last_error_msg(),
                 ];
             }
 
             // Validate JSON structure (should only contain strings)
-            if (!$this->validateTranslationStructure($json, $filename)) {
+            if (! $this->validateTranslationStructure($json, $filename)) {
                 return [
                     'valid' => false,
-                    'message' => "Invalid translation structure in {$filename}: Values must be strings only"
+                    'message' => "Invalid translation structure in {$filename}: Values must be strings only",
                 ];
             }
         }
@@ -410,17 +417,19 @@ class LanguagePackService
     {
         foreach ($data as $key => $value) {
             // Key should be alphanumeric with underscores
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $key)) {
+            if (! preg_match('/^[a-zA-Z0-9_]+$/', $key)) {
                 Log::warning("Invalid translation key: {$path}.{$key}");
+
                 return false;
             }
 
             if (is_array($value)) {
-                if (!$this->validateTranslationStructure($value, "{$path}.{$key}")) {
+                if (! $this->validateTranslationStructure($value, "{$path}.{$key}")) {
                     return false;
                 }
-            } elseif (!is_string($value)) {
+            } elseif (! is_string($value)) {
                 Log::warning("Non-string value in translation: {$path}.{$key}");
+
                 return false;
             }
         }
@@ -433,12 +442,12 @@ class LanguagePackService
      */
     protected function validateExtractedContent(string $extractPath, string $locale): array
     {
-        $localePath = $extractPath . '/' . $locale;
+        $localePath = $extractPath.'/'.$locale;
 
-        if (!File::isDirectory($localePath)) {
+        if (! File::isDirectory($localePath)) {
             return [
                 'valid' => false,
-                'message' => "Locale folder '{$locale}' not found in extracted content"
+                'message' => "Locale folder '{$locale}' not found in extracted content",
             ];
         }
 
@@ -446,17 +455,17 @@ class LanguagePackService
         $files = File::allFiles($localePath);
         foreach ($files as $file) {
             $extension = strtolower($file->getExtension());
-            
-            if (!in_array($extension, $this->allowedExtensions)) {
+
+            if (! in_array($extension, $this->allowedExtensions)) {
                 return [
                     'valid' => false,
-                    'message' => "Unexpected file type found: " . $file->getFilename()
+                    'message' => 'Unexpected file type found: '.$file->getFilename(),
                 ];
             }
 
             $content = File::get($file->getRealPath());
             $check = $this->validateFileContent($content, $file->getFilename());
-            if (!$check['valid']) {
+            if (! $check['valid']) {
                 return $check;
             }
         }
@@ -471,9 +480,9 @@ class LanguagePackService
     {
         // Directory: 0755 (rwxr-xr-x)
         // Files: 0644 (rw-r--r--)
-        
+
         chmod($path, 0755);
-        
+
         $files = File::allFiles($path);
         foreach ($files as $file) {
             chmod($file->getRealPath(), 0644);
@@ -501,14 +510,14 @@ class LanguagePackService
     public function createFromTemplate(string $newLocale, string $templateLocale = 'en'): array
     {
         // Validate locale codes
-        if (!$this->isValidLocaleCode($newLocale)) {
+        if (! $this->isValidLocaleCode($newLocale)) {
             return ['success' => false, 'message' => 'Invalid locale code format'];
         }
 
-        $templatePath = $this->langPath . '/' . $templateLocale;
-        $newPath = $this->langPath . '/' . $newLocale;
+        $templatePath = $this->langPath.'/'.$templateLocale;
+        $newPath = $this->langPath.'/'.$newLocale;
 
-        if (!File::isDirectory($templatePath)) {
+        if (! File::isDirectory($templatePath)) {
             return ['success' => false, 'message' => "Template locale '{$templateLocale}' not found"];
         }
 
@@ -541,7 +550,7 @@ class LanguagePackService
     public function deleteLanguagePack(string $locale): array
     {
         // Validate locale code
-        if (!$this->isValidLocaleCode($locale)) {
+        if (! $this->isValidLocaleCode($locale)) {
             return ['success' => false, 'message' => 'Invalid locale code'];
         }
 
@@ -550,9 +559,9 @@ class LanguagePackService
             return ['success' => false, 'message' => "Cannot delete protected locale: {$locale}"];
         }
 
-        $localePath = $this->langPath . '/' . $locale;
+        $localePath = $this->langPath.'/'.$locale;
 
-        if (!File::isDirectory($localePath)) {
+        if (! File::isDirectory($localePath)) {
             return ['success' => false, 'message' => "Locale '{$locale}' not found"];
         }
 
@@ -571,13 +580,13 @@ class LanguagePackService
      */
     public function getLocaleStats(string $locale): array
     {
-        if (!$this->isValidLocaleCode($locale)) {
+        if (! $this->isValidLocaleCode($locale)) {
             return ['exists' => false];
         }
 
-        $localePath = $this->langPath . '/' . $locale;
+        $localePath = $this->langPath.'/'.$locale;
 
-        if (!File::isDirectory($localePath)) {
+        if (! File::isDirectory($localePath)) {
             return ['exists' => false];
         }
 
@@ -618,6 +627,7 @@ class LanguagePackService
                 $count++;
             }
         }
+
         return $count;
     }
 }

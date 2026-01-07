@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Mail\Message;
 
 class EmailTestController extends BaseApiController
 {
@@ -330,4 +330,3 @@ class EmailTestController extends BaseApiController
         Cache::put('email_logs', $logs, now()->addDays(7));
     }
 }
-

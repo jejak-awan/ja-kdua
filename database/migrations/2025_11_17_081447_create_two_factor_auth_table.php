@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('enabled_at')->nullable();
             $table->timestamp('recovery_codes_generated_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('user_id');
             $table->index('enabled');
         });

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Tag;
-use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,21 +13,21 @@ class TagController extends BaseApiController
         $query = Tag::orderBy('name');
 
         // Admin/Manager can see all, others see own + global
-        if ($request->user() && !$request->user()->can('manage tags')) {
-            $query->where(function($q) use ($request) {
+        if ($request->user() && ! $request->user()->can('manage tags')) {
+            $query->where(function ($q) use ($request) {
                 $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
             });
-        } elseif (!$request->user()) {
+        } elseif (! $request->user()) {
             // Public/Guest sees only global tags
             $query->whereNull('author_id');
         }
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -43,6 +42,7 @@ class TagController extends BaseApiController
         if ($request->has('per_page')) {
             $perPage = (int) $request->get('per_page', 20);
             $tags = $query->withCount('contents')->paginate($perPage);
+
             return $this->success($tags, 'Tags retrieved successfully');
         }
 
@@ -79,27 +79,28 @@ class TagController extends BaseApiController
     public function show(Tag $tag)
     {
         // Scope check
-        if (request()->user() && !request()->user()->can('manage tags')) {
+        if (request()->user() && ! request()->user()->can('manage tags')) {
             if ($tag->author_id && $tag->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to view this tag');
+                return $this->forbidden('You do not have permission to view this tag');
             }
         }
+
         return $this->success($tag->load('contents'), 'Tag retrieved successfully');
     }
 
     public function update(Request $request, Tag $tag)
     {
         // Ownership check
-        if (!request()->user()->can('manage tags')) {
+        if (! request()->user()->can('manage tags')) {
             if ($tag->author_id && $tag->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to update this tag');
+                return $this->forbidden('You do not have permission to update this tag');
             }
             unset($request['author_id']);
         }
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:tags,slug,' . $tag->id,
+            'slug' => 'sometimes|required|string|unique:tags,slug,'.$tag->id,
             'description' => 'nullable|string',
             'author_id' => 'nullable|exists:users,id',
         ]);
@@ -114,12 +115,12 @@ class TagController extends BaseApiController
     public function destroy(Tag $tag)
     {
         // Ownership check
-        if (!request()->user()->can('manage tags')) {
+        if (! request()->user()->can('manage tags')) {
             if ($tag->author_id && $tag->author_id !== request()->user()->id) {
-                 return $this->forbidden('You do not have permission to delete this tag');
+                return $this->forbidden('You do not have permission to delete this tag');
             }
             if (is_null($tag->author_id)) {
-                 return $this->forbidden('You do not have permission to delete global tags');
+                return $this->forbidden('You do not have permission to delete global tags');
             }
         }
 
@@ -140,7 +141,7 @@ class TagController extends BaseApiController
         $query = Tag::whereIn('id', $validated['ids']);
 
         // Scope deletion
-        if (!$request->user()->can('manage tags')) {
+        if (! $request->user()->can('manage tags')) {
             $query->where('author_id', $request->user()->id);
             // This implicitly prevents deleting Global tags (author_id is null)
         }
@@ -155,34 +156,34 @@ class TagController extends BaseApiController
     public function statistics(Request $request)
     {
         $cacheKey = 'tags_statistics';
-        if ($request->user() && !$request->user()->can('manage settings')) {
-            $cacheKey .= '_u' . $request->user()->id;
+        if ($request->user() && ! $request->user()->can('manage settings')) {
+            $cacheKey .= '_u'.$request->user()->id;
         }
 
         $stats = Cache::remember($cacheKey, now()->addHours(1), function () use ($request) {
             $query = Tag::query();
 
             // Scope if not manager
-            if ($request->user() && !$request->user()->can('manage settings')) {
+            if ($request->user() && ! $request->user()->can('manage settings')) {
                 $query->where('author_id', $request->user()->id);
             }
 
             $tags = (clone $query)->withCount(['contents' => function ($q) use ($request) {
-                // Also scope content count if author? 
-                // Currently tags are shared but have author_id? 
+                // Also scope content count if author?
+                // Currently tags are shared but have author_id?
                 // Phase 10 says: "Add author_id to ... tags".
                 // If tags are personal, then we only show personal tags.
-                if ($request->user() && !$request->user()->can('manage content')) {
+                if ($request->user() && ! $request->user()->can('manage content')) {
                     $q->where('author_id', $request->user()->id);
                 }
             }])->get();
 
             return [
                 'total_tags' => $tags->count(),
-                'used_tags' => $tags->filter(fn($tag) => $tag->contents_count > 0)->count(),
-                'unused_tags' => $tags->filter(fn($tag) => $tag->contents_count === 0)->count(),
+                'used_tags' => $tags->filter(fn ($tag) => $tag->contents_count > 0)->count(),
+                'unused_tags' => $tags->filter(fn ($tag) => $tag->contents_count === 0)->count(),
                 'total_usage' => $tags->sum('contents_count'),
-                'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(fn($tag) => [
+                'most_used' => $tags->sortByDesc('contents_count')->take(5)->map(fn ($tag) => [
                     'id' => $tag->id,
                     'name' => $tag->name,
                     'slug' => $tag->slug,

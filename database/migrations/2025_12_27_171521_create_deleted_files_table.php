@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('original_path');
             $table->index('deleted_at');
         });

@@ -5,19 +5,18 @@ namespace Tests\Unit\Services;
 use App\Services\QueryPerformanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class QueryPerformanceServiceTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     /**
      * Test enableQueryLog enables query logging.
      */
     public function test_enable_query_log_enables_logging(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $service->enableQueryLog();
 
         // Make a query
@@ -32,7 +31,7 @@ class QueryPerformanceServiceTest extends TestCase
      */
     public function test_get_query_log_returns_query_log(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $service->enableQueryLog();
 
         DB::table('users')->count();
@@ -46,7 +45,7 @@ class QueryPerformanceServiceTest extends TestCase
      */
     public function test_analyze_queries_analyzes_performance(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $service->enableQueryLog();
 
         DB::table('users')->count();
@@ -67,7 +66,7 @@ class QueryPerformanceServiceTest extends TestCase
      */
     public function test_get_performance_stats_returns_statistics(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $service->enableQueryLog();
 
         DB::table('users')->count();
@@ -86,7 +85,7 @@ class QueryPerformanceServiceTest extends TestCase
      */
     public function test_cache_metrics_caches_metrics(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $metrics = ['test' => 'data'];
 
         $service->cacheMetrics('test_key', $metrics, 60);
@@ -100,10 +99,9 @@ class QueryPerformanceServiceTest extends TestCase
      */
     public function test_get_cached_metrics_returns_null_for_non_existent(): void
     {
-        $service = new QueryPerformanceService();
+        $service = new QueryPerformanceService;
         $cached = $service->getCachedMetrics('non_existent_key');
 
         $this->assertNull($cached);
     }
 }
-

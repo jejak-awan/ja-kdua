@@ -84,7 +84,7 @@ class TrustProxies
         if ($realIp && filter_var($realIp, FILTER_VALIDATE_IP)) {
             // Store in request attributes for later use
             $request->attributes->set('real_client_ip', $realIp);
-            
+
             // Override server REMOTE_ADDR if we have a valid IP
             $request->server->set('REMOTE_ADDR', $realIp);
         }

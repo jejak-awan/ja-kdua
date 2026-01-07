@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\QueryPerformanceService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\QueryPerformanceService;
 
 class LogSlowQueries
 {
@@ -44,7 +44,7 @@ class LogSlowQueries
                     return ($query['time'] ?? 0) > $this->threshold;
                 });
 
-                if (!empty($slowQueries)) {
+                if (! empty($slowQueries)) {
                     // Log to file
                     Log::warning('Slow queries detected', [
                         'url' => $request->fullUrl(),
@@ -59,7 +59,7 @@ class LogSlowQueries
                             ];
                         }, $slowQueries),
                     ]);
-                    
+
                     // Store in database for analytics
                     if (config('database.store_slow_queries', true)) {
                         foreach ($slowQueries as $query) {

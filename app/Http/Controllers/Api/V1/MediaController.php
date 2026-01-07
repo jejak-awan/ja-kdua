@@ -14,7 +14,7 @@ class MediaController extends BaseApiController
 
     public function __construct()
     {
-        $this->mediaService = new MediaService();
+        $this->mediaService = new MediaService;
     }
 
     public function index(Request $request)
@@ -22,12 +22,12 @@ class MediaController extends BaseApiController
         $query = Media::with(['folder', 'usages']);
 
         // Scope logic - apply BEFORE trash handling
-        if ($request->user() && !$request->user()->can('manage media')) {
+        if ($request->user() && ! $request->user()->can('manage media')) {
             $query->where(function ($q) use ($request) {
                 $q->where('author_id', $request->user()->id)
                     ->orWhere('is_shared', true);
             });
-        } elseif (!$request->user()) {
+        } elseif (! $request->user()) {
             $query->where('is_shared', true);
         }
 
@@ -78,14 +78,14 @@ class MediaController extends BaseApiController
         $query = Media::query();
 
         // Scope stats if not a manager
-        if ($request->user() && !$request->user()->can('manage media')) {
+        if ($request->user() && ! $request->user()->can('manage media')) {
             $query->where('author_id', $request->user()->id);
         }
 
         $totalMedia = (clone $query)->count();
         $totalSize = (clone $query)->sum('size');
         $trashCount = (clone $query)->onlyTrashed()->count();
-        
+
         $typeBreakdown = (clone $query)->selectRaw('
             CASE 
                 WHEN mime_type LIKE "image/%" THEN "image"
@@ -95,28 +95,28 @@ class MediaController extends BaseApiController
             END as type,
             COUNT(*) as count
         ')
-        ->groupBy('type')
-        ->get();
+            ->groupBy('type')
+            ->get();
 
         return $this->success([
             'total_count' => $totalMedia,
             'total_size' => $totalSize,
             'trash_count' => $trashCount,
-            'types' => $typeBreakdown
+            'types' => $typeBreakdown,
         ], 'Media statistics retrieved successfully');
     }
 
     public function upload(Request $request)
     {
-        if (!$request->user()->can('upload media') && !$request->user()->can('manage media')) {
+        if (! $request->user()->can('upload media') && ! $request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
         try {
             $maxSize = \App\Models\Setting::get('max_upload_size', 10240);
-            
+
             $request->validate([
-                'file' => ['required', 'file', 'max:' . $maxSize],
+                'file' => ['required', 'file', 'max:'.$maxSize],
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
                 'min_width' => 'nullable|integer|min:1',
@@ -130,14 +130,22 @@ class MediaController extends BaseApiController
             // Additional image dimension validation if requested
             if (str_starts_with($request->file('file')->getMimeType(), 'image/')) {
                 $dimensions = [];
-                if ($request->has('min_width')) $dimensions[] = 'min_width=' . $request->min_width;
-                if ($request->has('min_height')) $dimensions[] = 'min_height=' . $request->min_height;
-                if ($request->has('max_width')) $dimensions[] = 'max_width=' . $request->max_width;
-                if ($request->has('max_height')) $dimensions[] = 'max_height=' . $request->max_height;
+                if ($request->has('min_width')) {
+                    $dimensions[] = 'min_width='.$request->min_width;
+                }
+                if ($request->has('min_height')) {
+                    $dimensions[] = 'min_height='.$request->min_height;
+                }
+                if ($request->has('max_width')) {
+                    $dimensions[] = 'max_width='.$request->max_width;
+                }
+                if ($request->has('max_height')) {
+                    $dimensions[] = 'max_height='.$request->max_height;
+                }
 
-                if (!empty($dimensions)) {
+                if (! empty($dimensions)) {
                     $request->validate([
-                        'file' => 'dimensions:' . implode(',', $dimensions),
+                        'file' => 'dimensions:'.implode(',', $dimensions),
                     ]);
                 }
             }
@@ -148,7 +156,7 @@ class MediaController extends BaseApiController
         // Determine author
         $authorId = $request->user()->id;
         if ($request->user()->can('manage media') && $request->has('author_id')) {
-             $authorId = $request->input('author_id');
+            $authorId = $request->input('author_id');
         }
 
         $media = $this->mediaService->upload(
@@ -167,16 +175,16 @@ class MediaController extends BaseApiController
 
     public function uploadMultiple(Request $request)
     {
-        if (!$request->user()->can('upload media') && !$request->user()->can('manage media')) {
+        if (! $request->user()->can('upload media') && ! $request->user()->can('manage media')) {
             return $this->forbidden('You do not have permission to upload media');
         }
 
         try {
             $maxSize = \App\Models\Setting::get('max_upload_size', 10240);
-            
+
             $request->validate([
                 'files' => 'required|array',
-                'files.*' => ['required', 'file', 'max:' . $maxSize],
+                'files.*' => ['required', 'file', 'max:'.$maxSize],
                 'folder_id' => 'nullable|exists:media_folders,id',
                 'optimize' => 'boolean',
                 'author_id' => 'nullable|exists:users,id',
@@ -190,25 +198,25 @@ class MediaController extends BaseApiController
         $files = $request->file('files');
         $folderId = $request->input('folder_id');
         $optimize = $request->input('optimize', config('media.optimize', true));
-        
+
         // Determine author
         $authorId = $request->user()->id;
         if ($request->user()->can('manage media') && $request->has('author_id')) {
-             $authorId = $request->input('author_id');
+            $authorId = $request->input('author_id');
         }
 
         foreach ($files as $file) {
             try {
                 $media = $this->mediaService->upload(
-                    $file, 
-                    $folderId, 
-                    $optimize, 
+                    $file,
+                    $folderId,
+                    $optimize,
                     $authorId,
                     $request->user()->can('manage media') ? $request->boolean('is_shared') : false
                 );
                 $uploadedMedia[] = $media->load(['folder', 'usages']);
             } catch (\Exception $e) {
-                \Log::error('Bulk upload failed for a file: ' . $e->getMessage());
+                \Log::error('Bulk upload failed for a file: '.$e->getMessage());
             }
         }
 
@@ -221,24 +229,26 @@ class MediaController extends BaseApiController
     public function show(Media $media)
     {
         // Scope check
-        if (request()->user() && !request()->user()->can('manage media')) {
-             if ($media->author_id !== request()->user()->id && !$media->is_shared) {
-                 return $this->forbidden('You do not have permission to view this media');
-             }
+        if (request()->user() && ! request()->user()->can('manage media')) {
+            if ($media->author_id !== request()->user()->id && ! $media->is_shared) {
+                return $this->forbidden('You do not have permission to view this media');
+            }
         }
+
         return $this->success($media->load(['folder', 'usages.model']), 'Media retrieved successfully');
     }
 
     public function usage(Media $media)
     {
         // Scope check
-        if (request()->user() && !request()->user()->can('manage media')) {
-             if ($media->author_id !== request()->user()->id && !$media->is_shared) {
-                 return $this->forbidden('You do not have permission to view this media');
-             }
+        if (request()->user() && ! request()->user()->can('manage media')) {
+            if ($media->author_id !== request()->user()->id && ! $media->is_shared) {
+                return $this->forbidden('You do not have permission to view this media');
+            }
         }
 
         $usageInfo = $this->mediaService->getUsageInfo($media);
+
         return $this->success($usageInfo, 'Media usage retrieved successfully');
     }
 
@@ -249,18 +259,18 @@ class MediaController extends BaseApiController
         $isManager = $user->can('manage media');
 
         // Owners can always update their own media
-        if (!$isOwner && !$isManager) {
-            if (!$user->can('edit media')) {
+        if (! $isOwner && ! $isManager) {
+            if (! $user->can('edit media')) {
                 return $this->forbidden('You do not have permission to update media');
             }
             // Has edit media permission but still can't edit others' private media
-            if ($media->author_id && !$media->is_shared) {
+            if ($media->author_id && ! $media->is_shared) {
                 return $this->forbidden('You do not have permission to update this media');
             }
         }
 
         // Global media (no author) can only be updated by managers
-        if (is_null($media->author_id) && !$isManager) {
+        if (is_null($media->author_id) && ! $isManager) {
             return $this->forbidden('You cannot update global media');
         }
 
@@ -277,13 +287,13 @@ class MediaController extends BaseApiController
         }
 
         // Protection for is_shared
-        if (isset($validated['is_shared']) && !request()->user()->can('manage media')) {
+        if (isset($validated['is_shared']) && ! request()->user()->can('manage media')) {
             unset($validated['is_shared']);
         }
 
         $media->update($validated);
 
-        $cacheService = new CacheService();
+        $cacheService = new CacheService;
         $cacheService->clearMediaCaches();
 
         return $this->success($media->load(['folder', 'usages']), 'Media updated successfully');
@@ -296,38 +306,38 @@ class MediaController extends BaseApiController
         $isManager = $user->can('manage media');
 
         // Owners can always delete their own media
-        if (!$isOwner && !$isManager) {
+        if (! $isOwner && ! $isManager) {
             // Not owner and not manager - check if they have delete permission for shared items
-            if (!$user->can('delete media')) {
+            if (! $user->can('delete media')) {
                 return $this->forbidden('You do not have permission to delete media');
             }
             // Has delete media permission but still can't delete others' private media
-            if ($media->author_id && !$media->is_shared) {
+            if ($media->author_id && ! $media->is_shared) {
                 return $this->forbidden('You do not have permission to delete this media');
             }
         }
 
         // Global media (no author) can only be deleted by managers
-        if (is_null($media->author_id) && !$isManager) {
+        if (is_null($media->author_id) && ! $isManager) {
             return $this->forbidden('You cannot delete global media');
         }
 
         $permanent = $request->boolean('permanent', false);
-        
+
         if ($permanent) {
             return $this->forceDelete($request, $media->id); // Pass ID to forceDelete
         }
 
         // Check usage before soft delete - return warning but still proceed
         $usageCount = $media->usages()->count();
-        
+
         $this->mediaService->delete($media, false);
 
         $response = [
             'message' => 'Media moved to trash',
             'usage_count' => $usageCount,
         ];
-        
+
         if ($usageCount > 0) {
             $response['warning'] = "This media is used in {$usageCount} content(s). The references may break.";
         }
@@ -339,26 +349,26 @@ class MediaController extends BaseApiController
     {
         $user = $request->user();
         $media = Media::onlyTrashed()->findOrFail($id);
-        
+
         $isOwner = $media->author_id && $media->author_id === $user->id;
         $isManager = $user->can('manage media');
 
         // Owners can always restore their own media
-        if (!$isOwner && !$isManager) {
-            if (!$user->can('delete media')) {
+        if (! $isOwner && ! $isManager) {
+            if (! $user->can('delete media')) {
                 return $this->forbidden('You do not have permission to restore media');
             }
             // Has delete media permission but still can't restore others' private media
-            if ($media->author_id && !$media->is_shared) {
+            if ($media->author_id && ! $media->is_shared) {
                 return $this->forbidden('You do not have permission to restore this media');
             }
         }
 
         // Global media (no author) can only be restored by managers
-        if (is_null($media->author_id) && !$isManager) {
+        if (is_null($media->author_id) && ! $isManager) {
             return $this->forbidden('You cannot restore global media');
         }
-        
+
         $this->mediaService->restore($media->id);
 
         return $this->success($media->fresh()->load(['folder', 'usages']), 'Media restored successfully');
@@ -368,29 +378,29 @@ class MediaController extends BaseApiController
     {
         $user = $request->user();
         $media = Media::withTrashed()->findOrFail($id);
-        
+
         $isOwner = $media->author_id && $media->author_id === $user->id;
         $isManager = $user->can('manage media');
 
         // Owners can always permanently delete their own media
-        if (!$isOwner && !$isManager) {
-            if (!$user->can('delete media')) {
+        if (! $isOwner && ! $isManager) {
+            if (! $user->can('delete media')) {
                 return $this->forbidden('You do not have permission to permanently delete media');
             }
             // Has delete media permission but still can't delete others' private media
-            if ($media->author_id && !$media->is_shared) {
+            if ($media->author_id && ! $media->is_shared) {
                 return $this->forbidden('You do not have permission to manage this media');
             }
         }
 
         // Global media (no author) can only be deleted by managers
-        if (is_null($media->author_id) && !$isManager) {
+        if (is_null($media->author_id) && ! $isManager) {
             return $this->forbidden('You cannot delete global media');
         }
-        
+
         // Safety check: if not forcing and in use, block
         $usageCount = $media->usages()->count();
-        if ($usageCount > 0 && !$request->input('force', false)) {
+        if ($usageCount > 0 && ! $request->input('force', false)) {
             return $this->validationError([
                 'media' => ['Media is currently in use. Use force=true to delete anyway.'],
                 'usage_count' => $usageCount,
@@ -407,39 +417,39 @@ class MediaController extends BaseApiController
      */
     public function emptyTrash(Request $request)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('delete media')) {
+        if (! $request->user()->can('manage media') && ! $request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to empty trash');
         }
 
         // Get all trashed media (scoped)
         $query = Media::onlyTrashed();
-         // Scope
-        if (!$request->user()->can('manage media')) {
-             $query->where('author_id', $request->user()->id);
+        // Scope
+        if (! $request->user()->can('manage media')) {
+            $query->where('author_id', $request->user()->id);
         }
         $trashedMedia = $query->get();
 
         $deletedCount = 0;
-        
+
         foreach ($trashedMedia as $media) {
             $this->mediaService->delete($media, true);
             $deletedCount++;
         }
-        
+
         // Also delete trashed folders
         $folderQuery = \App\Models\MediaFolder::onlyTrashed();
-        if (!$request->user()->can('manage media')) {
-             $folderQuery->where('author_id', $request->user()->id);
+        if (! $request->user()->can('manage media')) {
+            $folderQuery->where('author_id', $request->user()->id);
         }
         $trashedFolders = $folderQuery->get();
 
         $deletedFoldersCount = 0;
-        
+
         foreach ($trashedFolders as $folder) {
             $folder->forceDelete();
             $deletedFoldersCount++;
         }
-        
+
         return $this->success([
             'deleted_media' => $deletedCount,
             'deleted_folders' => $deletedFoldersCount,
@@ -448,7 +458,7 @@ class MediaController extends BaseApiController
 
     public function bulkAction(Request $request)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('edit media') && !$request->user()->can('delete media')) {
+        if (! $request->user()->can('manage media') && ! $request->user()->can('edit media') && ! $request->user()->can('delete media')) {
             return $this->forbidden('You do not have permission to perform bulk actions on media');
         }
 
@@ -459,14 +469,14 @@ class MediaController extends BaseApiController
             $action = 'move_folder';
         }
 
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return $this->validationError(['ids' => ['Media IDs are required.']], 'The selected action is invalid.');
         }
 
         $query = Media::withTrashed()->whereIn('id', $ids);
-        
+
         // Scope Logic
-        if (!$request->user()->can('manage media')) {
+        if (! $request->user()->can('manage media')) {
             // Cannot touch Global items or other users' items
             // But if I want to "copy" or something? No, this is bulk action (delete, move)
             // Implicitly restrict to OWN items.
@@ -475,12 +485,12 @@ class MediaController extends BaseApiController
 
         $existingIds = $query->pluck('id')->toArray();
         if (count($existingIds) !== count($ids)) {
-             // Some IDs were filtered out or didn't exist
-             // return error or just proceed with valid ones?
-             // UI might send mixed IDs. Let's just proceed with what we found but maybe warn?
-             // The original code returned error if count mismatch.
-             // If I am not manager, and I try to delete Admin's file, I should get error.
-             return $this->validationError(['ids' => ['Some media IDs do not exist or you do not have permission.']], 'The selected action is invalid.');
+            // Some IDs were filtered out or didn't exist
+            // return error or just proceed with valid ones?
+            // UI might send mixed IDs. Let's just proceed with what we found but maybe warn?
+            // The original code returned error if count mismatch.
+            // If I am not manager, and I try to delete Admin's file, I should get error.
+            return $this->validationError(['ids' => ['Some media IDs do not exist or you do not have permission.']], 'The selected action is invalid.');
         }
 
         $folderId = $request->input('folder_id');
@@ -490,8 +500,8 @@ class MediaController extends BaseApiController
 
         // If moving, check folder permission?
         if (($action === 'move' || $action === 'move_folder') && $folderId) {
-             // Check if target folder is owned by me or global?
-             // ...
+            // Check if target folder is owned by me or global?
+            // ...
         }
 
         $affected = $this->mediaService->bulkAction(
@@ -506,18 +516,18 @@ class MediaController extends BaseApiController
 
     public function generateThumbnail(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
+        if (! $request->user()->can('manage media') && ! $request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to generate thumbnails');
         }
-        
+
         // Ownership
-        if (!$request->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== $request->user()->id) {
-                 return $this->forbidden('You do not have permission to modify this media');
-             }
+        if (! $request->user()->can('manage media')) {
+            if ($media->author_id && $media->author_id !== $request->user()->id) {
+                return $this->forbidden('You do not have permission to modify this media');
+            }
         }
 
-        if (!str_starts_with($media->mime_type, 'image/')) {
+        if (! str_starts_with($media->mime_type, 'image/')) {
             return $this->error('Thumbnail can only be generated for images', 400, [], 'INVALID_MEDIA_TYPE');
         }
 
@@ -528,7 +538,7 @@ class MediaController extends BaseApiController
 
         if ($thumbnailPath) {
             $thumbnailUrl = $media->disk === 'public'
-                ? '/storage/' . ltrim($thumbnailPath, '/')
+                ? '/storage/'.ltrim($thumbnailPath, '/')
                 : Storage::disk($media->disk)->url($thumbnailPath);
 
             return $this->success([
@@ -543,15 +553,15 @@ class MediaController extends BaseApiController
 
     public function resize(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
+        if (! $request->user()->can('manage media') && ! $request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to resize media');
         }
-        
+
         // Ownership
-        if (!$request->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== $request->user()->id) {
-                 return $this->forbidden('You do not have permission to modify this media');
-             }
+        if (! $request->user()->can('manage media')) {
+            if ($media->author_id && $media->author_id !== $request->user()->id) {
+                return $this->forbidden('You do not have permission to modify this media');
+            }
         }
 
         // Only for images
@@ -622,8 +632,8 @@ class MediaController extends BaseApiController
 
     public function downloadZip(Request $request)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('view media')) {
-             // Anyone who can view can download?
+        if (! $request->user()->can('manage media') && ! $request->user()->can('view media')) {
+            // Anyone who can view can download?
             return $this->forbidden('You do not have permission to download media');
         }
 
@@ -634,14 +644,14 @@ class MediaController extends BaseApiController
 
         $ids = $request->input('ids');
         $query = Media::whereIn('id', $ids);
-        
+
         // Scope
-        if (!$request->user()->can('manage media')) {
-             $query->where(function($q) use ($request) {
-                  $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
-             });
+        if (! $request->user()->can('manage media')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereNull('author_id')->orWhere('author_id', $request->user()->id);
+            });
         }
-        
+
         $media = $query->get();
 
         if ($media->isEmpty()) {
@@ -678,15 +688,15 @@ class MediaController extends BaseApiController
 
     public function edit(Request $request, Media $media)
     {
-        if (!$request->user()->can('manage media') && !$request->user()->can('edit media')) {
+        if (! $request->user()->can('manage media') && ! $request->user()->can('edit media')) {
             return $this->forbidden('You do not have permission to edit media');
         }
-        
+
         // Ownership
-        if (!$request->user()->can('manage media')) {
-             if ($media->author_id && $media->author_id !== $request->user()->id) {
-                 return $this->forbidden('You do not have permission to edit this media');
-             }
+        if (! $request->user()->can('manage media')) {
+            if ($media->author_id && $media->author_id !== $request->user()->id) {
+                return $this->forbidden('You do not have permission to edit this media');
+            }
         }
 
         // Only for images
@@ -726,21 +736,21 @@ class MediaController extends BaseApiController
                         // Save as new version
                         $originalPath = $media->path;
                         $pathInfo = pathinfo($originalPath);
-                        
+
                         if ($customFilename) {
                             // Sanitize filename to be safe
                             $customFilename = \Illuminate\Support\Str::slug(pathinfo($customFilename, PATHINFO_FILENAME));
-                            $newFileName = $customFilename . '.' . $pathInfo['extension'];
+                            $newFileName = $customFilename.'.'.$pathInfo['extension'];
                         } else {
                             $newFileName = $pathInfo['filename'].'_edited_'.time().'.'.$pathInfo['extension'];
                         }
-                        
+
                         $newPath = $pathInfo['dirname'].'/'.$newFileName;
 
                         // Check if file exists, if so maybe error? Or append unique?
                         if ($customFilename && Storage::disk($media->disk)->exists($newPath)) {
-                             $newFileName = $customFilename . '_' . time() . '.' . $pathInfo['extension'];
-                             $newPath = $pathInfo['dirname'].'/'.$newFileName;
+                            $newFileName = $customFilename.'_'.time().'.'.$pathInfo['extension'];
+                            $newPath = $pathInfo['dirname'].'/'.$newFileName;
                         }
 
                         // Save to same disk
@@ -812,5 +822,4 @@ class MediaController extends BaseApiController
             return $this->error('Failed to edit image: '.$e->getMessage(), 500, [], 'IMAGE_EDIT_ERROR');
         }
     }
-
 }

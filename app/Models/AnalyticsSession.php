@@ -133,6 +133,7 @@ class AnalyticsSession extends Model
     public static function getLocation($ipAddress)
     {
         $geoService = app(\App\Services\GeoIpService::class);
+
         return $geoService->getLocation($ipAddress);
     }
 }

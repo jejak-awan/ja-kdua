@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Language;
 use App\Services\LanguagePackService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class LanguageController extends BaseApiController
 {
@@ -28,6 +27,7 @@ class LanguageController extends BaseApiController
             $stats = $this->languagePackService->getLocaleStats($lang->code);
             $lang->has_ui_translations = $stats['exists'] ?? false;
             $lang->translation_keys = $stats['total_keys'] ?? 0;
+
             return $lang;
         });
 
@@ -76,8 +76,8 @@ class LanguageController extends BaseApiController
         if ($validated['create_from_template'] ?? false) {
             $templateLocale = $validated['template_locale'] ?? 'en';
             $result = $this->languagePackService->createFromTemplate($validated['code'], $templateLocale);
-            
-            if (!$result['success']) {
+
+            if (! $result['success']) {
                 return $this->error($result['message'], 400);
             }
         }
@@ -156,7 +156,7 @@ class LanguageController extends BaseApiController
     {
         $zipPath = $this->languagePackService->exportLanguagePack($language->code);
 
-        if (!$zipPath || !file_exists($zipPath)) {
+        if (! $zipPath || ! file_exists($zipPath)) {
             return $this->error('Failed to create language pack export', 500);
         }
 
@@ -183,15 +183,15 @@ class LanguageController extends BaseApiController
         $targetLocale = $request->input('target_locale');
 
         // Store uploaded file temporarily
-        $tempPath = $file->storeAs('temp', 'import-' . now()->timestamp . '.zip');
-        $fullPath = storage_path('app/' . $tempPath);
+        $tempPath = $file->storeAs('temp', 'import-'.now()->timestamp.'.zip');
+        $fullPath = storage_path('app/'.$tempPath);
 
         $result = $this->languagePackService->importLanguagePack($fullPath, $targetLocale);
 
         // Clean up temp file
         @unlink($fullPath);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $this->error($result['message'], 400);
         }
 

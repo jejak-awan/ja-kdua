@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Category;
+use App\Models\Content;
 use App\Models\Menu;
 use App\Models\MenuItem;
-use App\Models\Content;
-use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class MenuSeeder extends Seeder
 {
@@ -17,7 +17,7 @@ class MenuSeeder extends Seeder
             ['location' => 'header'],
             [
                 'name' => 'Header Main Menu',
-                'slug' => 'header-main-menu'
+                'slug' => 'header-main-menu',
             ]
         );
 
@@ -31,7 +31,7 @@ class MenuSeeder extends Seeder
             'type' => 'url',
             'url' => '/',
             'sort_order' => 1,
-            'open_in_new_tab' => false
+            'open_in_new_tab' => false,
         ]);
 
         // "About Us" Page (if exists)
@@ -69,7 +69,7 @@ class MenuSeeder extends Seeder
                 'sort_order' => $index + 1,
             ]);
         }
-        
+
         // Generic "Contact" Link
         MenuItem::create([
             'menu_id' => $mainMenu->id,
@@ -79,13 +79,12 @@ class MenuSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-
         // 2. Create Footer Menu
         $footerMenu = Menu::firstOrCreate(
             ['location' => 'footer'],
             [
                 'name' => 'Footer Main Menu',
-                'slug' => 'footer-main-menu'
+                'slug' => 'footer-main-menu',
             ]
         );
         $footerMenu->items()->delete();
@@ -105,13 +104,13 @@ class MenuSeeder extends Seeder
             'url' => '/terms-of-service',
             'sort_order' => 2,
         ]);
-        
+
         // 3. Create Sidebar Menu
         $sidebarMenu = Menu::firstOrCreate(
             ['location' => 'sidebar'],
             [
                 'name' => 'Sidebar Menu',
-                'slug' => 'sidebar-menu'
+                'slug' => 'sidebar-menu',
             ]
         );
         $sidebarMenu->items()->delete();

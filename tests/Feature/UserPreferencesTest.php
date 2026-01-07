@@ -8,19 +8,20 @@ use Tests\TestCase;
 
 class UserPreferencesTest extends TestCase
 {
-    use RefreshDatabase;
+// use RefreshDatabase;
 
     protected User $user;
+
     protected string $token;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create([
             'email_verified_at' => now(),
         ]);
-        
+
         $this->token = $this->user->createToken('test-token')->plainTextToken;
     }
 

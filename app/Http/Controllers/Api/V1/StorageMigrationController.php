@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class StorageMigrationController extends BaseApiController
 {
@@ -17,15 +17,15 @@ class StorageMigrationController extends BaseApiController
             // We specifically want to list files from the 'public' disk (local)
             // even if the default driver is changed to s3/google
             $files = Storage::disk('public')->allFiles();
-            
+
             // Filter out hidden files or specific system files if needed
-            $files = array_filter($files, function($file) {
-                return !str_starts_with($file, '.');
+            $files = array_filter($files, function ($file) {
+                return ! str_starts_with($file, '.');
             });
 
             return $this->success(array_values($files), 'Files retrieved successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to list files: ' . $e->getMessage());
+            return $this->error('Failed to list files: '.$e->getMessage());
         }
     }
 
@@ -36,18 +36,18 @@ class StorageMigrationController extends BaseApiController
     {
         $request->validate([
             'files' => 'required|array',
-            'files.*' => 'string'
+            'files.*' => 'string',
         ]);
 
         $files = $request->input('files');
         $results = [
             'success' => [],
             'failed' => [],
-            'skipped' => [] // Files that already exist
+            'skipped' => [], // Files that already exist
         ];
 
         $targetDisk = Storage::getDefaultDriver();
-        
+
         // Safety check: Don't migrate if target is public (local)
         if ($targetDisk === 'public' || $targetDisk === 'local') {
             return $this->error('Target storage is set to local. Please configure an external storage driver first.');
@@ -56,14 +56,16 @@ class StorageMigrationController extends BaseApiController
         foreach ($files as $file) {
             try {
                 // Check if file exists on source
-                if (!Storage::disk('public')->exists($file)) {
+                if (! Storage::disk('public')->exists($file)) {
                     $results['failed'][$file] = 'File not found on source';
+
                     continue;
                 }
 
                 // Check if file already exists on target
                 if (Storage::disk($targetDisk)->exists($file)) {
                     $results['skipped'][] = $file;
+
                     continue;
                 }
 
@@ -83,7 +85,7 @@ class StorageMigrationController extends BaseApiController
 
             } catch (\Exception $e) {
                 $results['failed'][$file] = $e->getMessage();
-                Log::error("Migration failed for file {$file}: " . $e->getMessage());
+                Log::error("Migration failed for file {$file}: ".$e->getMessage());
             }
         }
 

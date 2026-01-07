@@ -52,7 +52,6 @@ export const SystemMonitor = {
                 });
 
                 if (response.ok) {
-                    console.log('System recovered. Reloading...');
                     window.location.reload();
                     return;
                 }

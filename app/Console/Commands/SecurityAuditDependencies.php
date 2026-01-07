@@ -9,36 +9,37 @@ use Illuminate\Support\Facades\Process;
 class SecurityAuditDependencies extends Command
 {
     protected $signature = 'security:audit-dependencies';
+
     protected $description = 'Scan composer and npm dependencies for known vulnerabilities';
 
     public function handle()
     {
         $this->info('Running dependency security audit...');
-        
+
         // Composer audit
         $this->info('Checking Composer dependencies...');
         $composerResult = Process::path(base_path())->run('composer audit --format=json --no-interaction');
-        
+
         if ($composerResult->successful()) {
             $this->parseComposerAudit($composerResult->output());
         }
-        
+
         // NPM audit
         $this->info('Checking NPM dependencies...');
         $npmResult = Process::path(base_path())->run('npm audit --json');
-        
+
         if ($npmResult->successful()) {
             $this->parseNpmAudit($npmResult->output());
         }
-        
+
         $newCount = DependencyVulnerability::where('status', 'new')->count();
-        
+
         if ($newCount > 0) {
             $this->warn("Found {$newCount} new vulnerabilities!");
         } else {
             $this->info('No new vulnerabilities found.');
         }
-        
+
         return Command::SUCCESS;
     }
 
@@ -46,7 +47,7 @@ class SecurityAuditDependencies extends Command
     {
         try {
             $data = json_decode($json, true);
-            
+
             if (isset($data['advisories']) && count($data['advisories']) > 0) {
                 foreach ($data['advisories'] as $advisory) {
                     DependencyVulnerability::updateOrCreate(
@@ -66,7 +67,7 @@ class SecurityAuditDependencies extends Command
                 }
             }
         } catch (\Exception $e) {
-            $this->error('Failed to parse composer audit: ' . $e->getMessage());
+            $this->error('Failed to parse composer audit: '.$e->getMessage());
         }
     }
 
@@ -74,7 +75,7 @@ class SecurityAuditDependencies extends Command
     {
         try {
             $data = json_decode($json, true);
-            
+
             if (isset($data['vulnerabilities']) && count($data['vulnerabilities']) > 0) {
                 foreach ($data['vulnerabilities'] as $name => $vuln) {
                     DependencyVulnerability::updateOrCreate(
@@ -94,7 +95,7 @@ class SecurityAuditDependencies extends Command
                 }
             }
         } catch (\Exception $e) {
-            $this->error('Failed to parse npm audit: ' . $e->getMessage());
+            $this->error('Failed to parse npm audit: '.$e->getMessage());
         }
     }
 }

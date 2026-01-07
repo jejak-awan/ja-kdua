@@ -15,10 +15,10 @@ class NewsletterSeeder extends Seeder
         // Clear existing data
         NewsletterSubscriber::truncate();
 
-        $firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emily', 'Chris', 'Amanda', 'Robert', 'Lisa', 
-                       'James', 'Anna', 'William', 'Sophia', 'Daniel', 'Olivia', 'Matthew', 'Emma', 'Andrew', 'Mia'];
+        $firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emily', 'Chris', 'Amanda', 'Robert', 'Lisa',
+            'James', 'Anna', 'William', 'Sophia', 'Daniel', 'Olivia', 'Matthew', 'Emma', 'Andrew', 'Mia'];
         $lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
-                      'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Jackson', 'Martin', 'Lee', 'White', 'Harris'];
+            'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Jackson', 'Martin', 'Lee', 'White', 'Harris'];
         $domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'company.com', 'mail.com'];
         $sources = ['homepage', 'blog', 'footer', 'popup', 'landing-page', 'social-media', 'referral', 'api'];
         $userAgents = [
@@ -35,23 +35,23 @@ class NewsletterSeeder extends Seeder
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             $domain = $domains[array_rand($domains)];
-            $email = strtolower($firstName . '.' . $lastName . rand(1, 999) . '@' . $domain);
-            
+            $email = strtolower($firstName.'.'.$lastName.rand(1, 999).'@'.$domain);
+
             // 80% subscribed, 20% unsubscribed
             $isSubscribed = rand(1, 100) <= 80;
             $status = $isSubscribed ? 'subscribed' : 'unsubscribed';
-            
+
             $subscribedAt = now()->subDays(rand(1, 180))->subHours(rand(0, 23))->subMinutes(rand(0, 59));
-            $unsubscribedAt = !$isSubscribed ? $subscribedAt->copy()->addDays(rand(1, 30)) : null;
+            $unsubscribedAt = ! $isSubscribed ? $subscribedAt->copy()->addDays(rand(1, 30)) : null;
 
             $subscribers[] = [
                 'email' => $email,
-                'name' => rand(1, 100) <= 70 ? $firstName . ' ' . $lastName : null, // 70% have names
+                'name' => rand(1, 100) <= 70 ? $firstName.' '.$lastName : null, // 70% have names
                 'status' => $status,
                 'subscribed_at' => $subscribedAt,
                 'unsubscribed_at' => $unsubscribedAt,
                 'source' => $sources[array_rand($sources)],
-                'ip_address' => rand(1, 255) . '.' . rand(1, 255) . '.' . rand(1, 255) . '.' . rand(1, 255),
+                'ip_address' => rand(1, 255).'.'.rand(1, 255).'.'.rand(1, 255).'.'.rand(1, 255),
                 'user_agent' => $userAgents[array_rand($userAgents)],
                 'created_at' => $subscribedAt,
                 'updated_at' => $unsubscribedAt ?? $subscribedAt,
@@ -62,7 +62,7 @@ class NewsletterSeeder extends Seeder
         NewsletterSubscriber::insert($subscribers);
 
         $this->command->info('Created 50 newsletter subscribers');
-        $this->command->info('- Subscribed: ' . NewsletterSubscriber::where('status', 'subscribed')->count());
-        $this->command->info('- Unsubscribed: ' . NewsletterSubscriber::where('status', 'unsubscribed')->count());
+        $this->command->info('- Subscribed: '.NewsletterSubscriber::where('status', 'subscribed')->count());
+        $this->command->info('- Unsubscribed: '.NewsletterSubscriber::where('status', 'unsubscribed')->count());
     }
 }

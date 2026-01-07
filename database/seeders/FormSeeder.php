@@ -273,43 +273,43 @@ class FormSeeder extends Seeder
 
         for ($i = 0; $i < $count; $i++) {
             $name = $names[array_rand($names)];
-            $email = strtolower(str_replace(' ', '.', $name)) . rand(1, 999) . '@' . $domains[array_rand($domains)];
+            $email = strtolower(str_replace(' ', '.', $name)).rand(1, 999).'@'.$domains[array_rand($domains)];
 
             $data = [];
             foreach ($form->fields as $field) {
                 switch ($field->type) {
                     case 'text':
-                        $data[$field->name] = $field->name === 'name' ? $name : 'Sample ' . $field->label;
+                        $data[$field->name] = $field->name === 'name' ? $name : 'Sample '.$field->label;
                         break;
                     case 'email':
                         $data[$field->name] = $email;
                         break;
                     case 'tel':
-                        $data[$field->name] = '+1-' . rand(200, 999) . '-' . rand(100, 999) . '-' . rand(1000, 9999);
+                        $data[$field->name] = '+1-'.rand(200, 999).'-'.rand(100, 999).'-'.rand(1000, 9999);
                         break;
                     case 'textarea':
                         $data[$field->name] = $messages[array_rand($messages)];
                         break;
                     case 'select':
                         $options = $field->options ?? [];
-                        $data[$field->name] = !empty($options) ? $options[array_rand($options)] : '';
+                        $data[$field->name] = ! empty($options) ? $options[array_rand($options)] : '';
                         break;
                     case 'radio':
                         $options = $field->options ?? [];
-                        $data[$field->name] = !empty($options) ? $options[array_rand($options)] : '';
+                        $data[$field->name] = ! empty($options) ? $options[array_rand($options)] : '';
                         break;
                     case 'checkbox':
                         $options = $field->options ?? [];
-                        $data[$field->name] = !empty($options) ? array_slice($options, 0, rand(1, count($options))) : [];
+                        $data[$field->name] = ! empty($options) ? array_slice($options, 0, rand(1, count($options))) : [];
                         break;
                     case 'number':
                         $data[$field->name] = rand(1, 15);
                         break;
                     case 'url':
-                        $data[$field->name] = 'https://example.com/' . Str::slug($name);
+                        $data[$field->name] = 'https://example.com/'.Str::slug($name);
                         break;
                     default:
-                        $data[$field->name] = 'Value for ' . $field->name;
+                        $data[$field->name] = 'Value for '.$field->name;
                 }
             }
 
@@ -317,7 +317,7 @@ class FormSeeder extends Seeder
                 'form_id' => $form->id,
                 'user_id' => rand(0, 1) ? $user?->id : null,
                 'data' => $data,
-                'ip_address' => rand(1, 255) . '.' . rand(0, 255) . '.' . rand(0, 255) . '.' . rand(1, 255),
+                'ip_address' => rand(1, 255).'.'.rand(0, 255).'.'.rand(0, 255).'.'.rand(1, 255),
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'status' => $statuses[array_rand($statuses)],
                 'created_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 23)),

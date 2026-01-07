@@ -2,11 +2,10 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\File;
-
 class ThemeManifest
 {
     protected array $manifest;
+
     protected string $path;
 
     public function __construct(string $themePath)
@@ -21,8 +20,8 @@ class ThemeManifest
     public function load(): void
     {
         $manifestPath = "{$this->path}/theme.json";
-        
-        if (!file_exists($manifestPath)) {
+
+        if (! file_exists($manifestPath)) {
             throw new \Exception("Theme manifest not found: {$manifestPath}");
         }
 
@@ -30,7 +29,7 @@ class ThemeManifest
         $manifest = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception("Invalid theme.json: " . json_last_error_msg());
+            throw new \Exception('Invalid theme.json: '.json_last_error_msg());
         }
 
         $this->manifest = $manifest;
@@ -198,34 +197,34 @@ class ThemeManifest
         // Required fields
         $required = ['name', 'version'];
         foreach ($required as $field) {
-            if (!isset($this->manifest[$field])) {
+            if (! isset($this->manifest[$field])) {
                 $errors[] = "Missing required field: {$field}";
             }
         }
 
         // Validate version format (semver)
         if (isset($this->manifest['version'])) {
-            if (!preg_match('/^\d+\.\d+\.\d+$/', $this->manifest['version'])) {
-                $errors[] = "Invalid version format. Expected semver (e.g., 1.0.0)";
+            if (! preg_match('/^\d+\.\d+\.\d+$/', $this->manifest['version'])) {
+                $errors[] = 'Invalid version format. Expected semver (e.g., 1.0.0)';
             }
         }
 
         // Validate type
         if (isset($this->manifest['type'])) {
             $validTypes = ['frontend', 'admin', 'email'];
-            if (!in_array($this->manifest['type'], $validTypes)) {
-                $errors[] = "Invalid type. Must be one of: " . implode(', ', $validTypes);
+            if (! in_array($this->manifest['type'], $validTypes)) {
+                $errors[] = 'Invalid type. Must be one of: '.implode(', ', $validTypes);
             }
         }
 
         // Validate assets paths exist
         if (isset($this->manifest['assets'])) {
             $assets = $this->manifest['assets'];
-            
+
             if (isset($assets['css'])) {
                 foreach ($assets['css'] as $cssFile) {
                     $cssPath = "{$this->path}/{$cssFile}";
-                    if (!file_exists($cssPath)) {
+                    if (! file_exists($cssPath)) {
                         $errors[] = "CSS file not found: {$cssFile}";
                     }
                 }
@@ -234,7 +233,7 @@ class ThemeManifest
             if (isset($assets['js'])) {
                 foreach ($assets['js'] as $jsFile) {
                     $jsPath = "{$this->path}/{$jsFile}";
-                    if (!file_exists($jsPath)) {
+                    if (! file_exists($jsPath)) {
                         $errors[] = "JS file not found: {$jsFile}";
                     }
                 }
@@ -245,16 +244,16 @@ class ThemeManifest
         if (isset($this->manifest['settings_schema'])) {
             $schema = $this->manifest['settings_schema'];
             foreach ($schema as $key => $setting) {
-                if (!isset($setting['type'])) {
+                if (! isset($setting['type'])) {
                     $errors[] = "Setting '{$key}' missing type";
                 }
 
                 $validTypes = ['text', 'textarea', 'number', 'email', 'url', 'color', 'select', 'checkbox', 'radio'];
-                if (isset($setting['type']) && !in_array($setting['type'], $validTypes)) {
+                if (isset($setting['type']) && ! in_array($setting['type'], $validTypes)) {
                     $errors[] = "Setting '{$key}' has invalid type: {$setting['type']}";
                 }
 
-                if (isset($setting['type']) && $setting['type'] === 'select' && !isset($setting['options'])) {
+                if (isset($setting['type']) && $setting['type'] === 'select' && ! isset($setting['options'])) {
                     $errors[] = "Setting '{$key}' (select) missing options";
                 }
             }
@@ -298,7 +297,7 @@ class ThemeManifest
     {
         $screenshot = $this->manifest['screenshot'] ?? 'screenshot.png';
         $screenshotPath = "{$this->path}/{$screenshot}";
-        
+
         return file_exists($screenshotPath) ? $screenshotPath : null;
     }
 
@@ -308,10 +307,9 @@ class ThemeManifest
     public static function create(string $themePath, array $data): bool
     {
         $manifestPath = "{$themePath}/theme.json";
-        
+
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        
+
         return file_put_contents($manifestPath, $json) !== false;
     }
 }
-

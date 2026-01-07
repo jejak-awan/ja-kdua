@@ -4,16 +4,16 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Content;
-use App\Models\Tag;
-use App\Models\Media;
 use App\Models\Language;
+use App\Models\Media;
+use App\Models\Tag;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Cache Warming Service
- * 
+ *
  * Pre-caches frequently accessed data to improve performance
  */
 class CacheWarmingService
@@ -22,21 +22,32 @@ class CacheWarmingService
      * Cache key prefixes
      */
     const PREFIX_CONTENT = 'content:';
+
     const PREFIX_CONTENT_LIST = 'contents:list:';
+
     const PREFIX_CATEGORY = 'category:';
+
     const PREFIX_CATEGORY_LIST = 'categories:list';
+
     const PREFIX_TAG = 'tag:';
+
     const PREFIX_TAG_LIST = 'tags:list';
+
     const PREFIX_MEDIA = 'media:';
+
     const PREFIX_LANGUAGE = 'languages:active';
+
     const PREFIX_STATISTICS = 'statistics:';
 
     /**
      * Default TTL in seconds
      */
     const TTL_SHORT = 300;      // 5 minutes
+
     const TTL_MEDIUM = 1800;    // 30 minutes
+
     const TTL_LONG = 3600;      // 1 hour
+
     const TTL_VERY_LONG = 86400; // 24 hours
 
     /**
@@ -94,7 +105,7 @@ class CacheWarmingService
 
             Log::info("Cache warmed: {$count} content items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm content cache: ' . $e->getMessage());
+            Log::error('Failed to warm content cache: '.$e->getMessage());
         }
 
         return $count;
@@ -105,7 +116,7 @@ class CacheWarmingService
      */
     private function cacheContentList(string $status, int $page, int $perPage): void
     {
-        $key = self::PREFIX_CONTENT_LIST . "{$status}:page:{$page}:per_page:{$perPage}";
+        $key = self::PREFIX_CONTENT_LIST."{$status}:page:{$page}:per_page:{$perPage}";
 
         Cache::remember($key, self::TTL_MEDIUM, function () use ($status, $page, $perPage) {
             $query = Content::with(['author', 'category', 'tags']);
@@ -128,7 +139,7 @@ class CacheWarmingService
      */
     private function cacheContent(Content $content): void
     {
-        $key = self::PREFIX_CONTENT . $content->id;
+        $key = self::PREFIX_CONTENT.$content->id;
 
         Cache::remember($key, self::TTL_LONG, function () use ($content) {
             return $content->load(['author', 'category', 'tags', 'comments']);
@@ -136,7 +147,7 @@ class CacheWarmingService
 
         // Also cache by slug
         if ($content->slug) {
-            $slugKey = self::PREFIX_CONTENT . "slug:{$content->slug}";
+            $slugKey = self::PREFIX_CONTENT."slug:{$content->slug}";
             Cache::remember($slugKey, self::TTL_LONG, function () use ($content) {
                 return $content->load(['author', 'category', 'tags', 'comments']);
             });
@@ -161,7 +172,7 @@ class CacheWarmingService
 
             // Cache individual categories
             foreach ($categories as $category) {
-                $key = self::PREFIX_CATEGORY . $category->id;
+                $key = self::PREFIX_CATEGORY.$category->id;
                 Cache::remember($key, self::TTL_VERY_LONG, function () use ($category) {
                     return $category->load('parent');
                 });
@@ -169,7 +180,7 @@ class CacheWarmingService
             }
 
             // Cache category tree
-            $treeKey = self::PREFIX_CATEGORY_LIST . ':tree';
+            $treeKey = self::PREFIX_CATEGORY_LIST.':tree';
             Cache::remember($treeKey, self::TTL_VERY_LONG, function () {
                 return Category::where('is_active', true)
                     ->with('children')
@@ -181,7 +192,7 @@ class CacheWarmingService
 
             Log::info("Cache warmed: {$count} category items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm categories cache: ' . $e->getMessage());
+            Log::error('Failed to warm categories cache: '.$e->getMessage());
         }
 
         return $count;
@@ -209,13 +220,13 @@ class CacheWarmingService
                 ->limit(20)
                 ->get();
 
-            $popularKey = self::PREFIX_TAG_LIST . ':popular';
+            $popularKey = self::PREFIX_TAG_LIST.':popular';
             Cache::put($popularKey, $popularTags, self::TTL_MEDIUM);
             $count++;
 
             Log::info("Cache warmed: {$count} tag items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm tags cache: ' . $e->getMessage());
+            Log::error('Failed to warm tags cache: '.$e->getMessage());
         }
 
         return $count;
@@ -235,7 +246,7 @@ class CacheWarmingService
                 ->get();
 
             foreach ($recentMedia as $media) {
-                $key = self::PREFIX_MEDIA . $media->id;
+                $key = self::PREFIX_MEDIA.$media->id;
                 Cache::remember($key, self::TTL_MEDIUM, function () use ($media) {
                     return $media->load(['folder', 'usages']);
                 });
@@ -244,7 +255,7 @@ class CacheWarmingService
 
             Log::info("Cache warmed: {$count} media items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm media cache: ' . $e->getMessage());
+            Log::error('Failed to warm media cache: '.$e->getMessage());
         }
 
         return $count;
@@ -267,7 +278,7 @@ class CacheWarmingService
 
             Log::info("Cache warmed: {$count} language items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm languages cache: ' . $e->getMessage());
+            Log::error('Failed to warm languages cache: '.$e->getMessage());
         }
 
         return $count;
@@ -291,12 +302,12 @@ class CacheWarmingService
                 'total_users' => DB::table('users')->count(),
             ];
 
-            Cache::put(self::PREFIX_STATISTICS . 'overview', $stats, self::TTL_SHORT);
+            Cache::put(self::PREFIX_STATISTICS.'overview', $stats, self::TTL_SHORT);
             $count++;
 
             Log::info("Cache warmed: {$count} statistics items");
         } catch (\Exception $e) {
-            Log::error('Failed to warm statistics cache: ' . $e->getMessage());
+            Log::error('Failed to warm statistics cache: '.$e->getMessage());
         }
 
         return $count;
@@ -341,15 +352,15 @@ class CacheWarmingService
         try {
             if (config('cache.default') === 'redis') {
                 $redis = Cache::getRedis();
-                $pattern = config('cache.prefix') . ':' . $prefix . '*';
+                $pattern = config('cache.prefix').':'.$prefix.'*';
                 $keys = $redis->keys($pattern);
+
                 return count($keys);
             }
         } catch (\Exception $e) {
-            Log::warning('Failed to count cache keys: ' . $e->getMessage());
+            Log::warning('Failed to count cache keys: '.$e->getMessage());
         }
 
         return 0;
     }
 }
-

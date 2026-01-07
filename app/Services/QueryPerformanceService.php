@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class QueryPerformanceService
 {
@@ -27,7 +27,7 @@ class QueryPerformanceService
     /**
      * Analyze query performance
      */
-    public function analyzeQueries(array $queries = null): array
+    public function analyzeQueries(?array $queries = null): array
     {
         $queries = $queries ?? $this->getQueryLog();
 
@@ -86,7 +86,7 @@ class QueryPerformanceService
         foreach ($selectQueries as $query) {
             // Extract table name and basic pattern
             $pattern = $this->extractQueryPattern($query['query']);
-            if (!isset($patternCounts[$pattern])) {
+            if (! isset($patternCounts[$pattern])) {
                 $patternCounts[$pattern] = 0;
             }
             $patternCounts[$pattern]++;
@@ -139,7 +139,7 @@ class QueryPerformanceService
             }
         }
 
-        if (!empty($slowQueries)) {
+        if (! empty($slowQueries)) {
             Log::warning('Slow queries detected', [
                 'count' => count($slowQueries),
                 'queries' => $slowQueries,
@@ -164,7 +164,7 @@ class QueryPerformanceService
         }
 
         $totalTime = array_sum(array_column($queries, 'time'));
-        $slowQueries = array_filter($queries, fn($q) => ($q['time'] ?? 0) > 100);
+        $slowQueries = array_filter($queries, fn ($q) => ($q['time'] ?? 0) > 100);
 
         return [
             'total_queries' => count($queries),
@@ -192,4 +192,3 @@ class QueryPerformanceService
         return Cache::get("query_performance:{$key}");
     }
 }
-

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Models\RedisSetting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 
 class RedisController extends BaseApiController
@@ -67,7 +66,7 @@ class RedisController extends BaseApiController
         try {
             $start = microtime(true);
             $redis = Redis::connection();
-            
+
             // Check if Redis requires authentication
             try {
                 $pong = $redis->ping();
@@ -77,13 +76,13 @@ class RedisController extends BaseApiController
                 }
                 throw $e;
             }
-            
+
             $duration = round((microtime(true) - $start) * 1000, 2);
 
             if ($pong) {
                 return $this->success([
                     'connected' => true,
-                    'response_time' => $duration . 'ms',
+                    'response_time' => $duration.'ms',
                     'message' => 'Redis connection successful',
                 ], 'Connection test passed');
             }
@@ -94,7 +93,8 @@ class RedisController extends BaseApiController
             if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
                 return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
             }
-            return $this->error('Redis connection error: ' . $message, 500);
+
+            return $this->error('Redis connection error: '.$message, 500);
         }
     }
 
@@ -105,7 +105,7 @@ class RedisController extends BaseApiController
     {
         try {
             $redis = Redis::connection();
-            
+
             // Check if Redis requires authentication
             try {
                 $redis->ping();
@@ -115,13 +115,13 @@ class RedisController extends BaseApiController
                 }
                 throw $e;
             }
-            
+
             $info = $redis->info();
 
             // Get some key metrics (Redis returns flat array)
             $stats = [
                 'version' => $info['redis_version'] ?? 'Unknown',
-                'uptime_days' => isset($info['uptime_in_days']) ? $info['uptime_in_days'] . ' days' : 'Unknown',
+                'uptime_days' => isset($info['uptime_in_days']) ? $info['uptime_in_days'].' days' : 'Unknown',
                 'connected_clients' => $info['connected_clients'] ?? 0,
                 'used_memory' => $info['used_memory_human'] ?? 'Unknown',
                 'total_keys' => $this->getTotalKeys(),
@@ -138,7 +138,8 @@ class RedisController extends BaseApiController
             if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
                 return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
             }
-            return $this->error('Failed to retrieve Redis info: ' . $message, 500);
+
+            return $this->error('Failed to retrieve Redis info: '.$message, 500);
         }
     }
 
@@ -175,7 +176,7 @@ class RedisController extends BaseApiController
 
             return $this->success(null, 'Cache cleared successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to flush cache: ' . $e->getMessage(), 500);
+            return $this->error('Failed to flush cache: '.$e->getMessage(), 500);
         }
     }
 
@@ -186,7 +187,7 @@ class RedisController extends BaseApiController
     {
         try {
             $redis = Redis::connection('cache');
-            
+
             // Check if Redis requires authentication
             try {
                 $redis->ping();
@@ -196,11 +197,11 @@ class RedisController extends BaseApiController
                 }
                 throw $e;
             }
-            
+
             $keys = $redis->keys('*');
 
             $prefix = config('database.redis.options.prefix');
-            
+
             $stats = [
                 'total_keys' => count($keys),
                 'cache_size' => $this->getCacheSize($redis, $keys, $prefix),
@@ -214,7 +215,8 @@ class RedisController extends BaseApiController
             if (str_contains($message, 'NOAUTH') || str_contains($message, 'Authentication required')) {
                 return $this->error('Redis authentication required. Please configure REDIS_PASSWORD in your .env file.', 401, [], 'REDIS_AUTH_REQUIRED');
             }
-            return $this->error('Failed to retrieve cache stats: ' . $message, 500);
+
+            return $this->error('Failed to retrieve cache stats: '.$message, 500);
         }
     }
 
@@ -228,11 +230,13 @@ class RedisController extends BaseApiController
             // Try to count keys from both default and cache connections
             try {
                 $count += count(Redis::connection('default')->keys('*'));
-            } catch (\Exception $e) {}
-            
+            } catch (\Exception $e) {
+            }
+
             try {
                 $count += count(Redis::connection('cache')->keys('*'));
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
 
             return $count;
         } catch (\Exception $e) {
@@ -253,7 +257,7 @@ class RedisController extends BaseApiController
             return '0%';
         }
 
-        return round(($hits / $total) * 100, 2) . '%';
+        return round(($hits / $total) * 100, 2).'%';
     }
 
     /**
@@ -265,10 +269,10 @@ class RedisController extends BaseApiController
             $size = 0;
             foreach (array_slice($keys, 0, 100) as $key) { // Sample first 100 keys
                 // Strip prefix if present to avoid double prefixing by the client
-                $lookupKey = ($prefix && str_starts_with($key, $prefix)) 
-                    ? substr($key, strlen($prefix)) 
+                $lookupKey = ($prefix && str_starts_with($key, $prefix))
+                    ? substr($key, strlen($prefix))
                     : $key;
-                    
+
                 $size += strlen($redis->get($lookupKey) ?? '');
             }
 
@@ -289,7 +293,7 @@ class RedisController extends BaseApiController
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
 
-        return round($bytes, 2) . ' ' . $units[$pow];
+        return round($bytes, 2).' '.$units[$pow];
     }
 
     /**
@@ -316,8 +320,8 @@ class RedisController extends BaseApiController
         foreach (array_slice($keys, 0, min(count($keys), 100)) as $key) {
             try {
                 // Strip prefix for lookup
-                $lookupKey = ($prefix && str_starts_with($key, $prefix)) 
-                    ? substr($key, strlen($prefix)) 
+                $lookupKey = ($prefix && str_starts_with($key, $prefix))
+                    ? substr($key, strlen($prefix))
                     : $key;
 
                 $ttl = $redis->ttl($lookupKey);
@@ -326,7 +330,7 @@ class RedisController extends BaseApiController
                 $topKeys[] = [
                     'key' => $key, // Show full key for display
                     'size' => $this->formatBytes($size),
-                    'ttl' => $ttl > 0 ? $ttl . 's' : ($ttl === -1 ? 'Never' : 'Expired'),
+                    'ttl' => $ttl > 0 ? $ttl.'s' : ($ttl === -1 ? 'Never' : 'Expired'),
                 ];
             } catch (\Exception $e) {
                 continue;
@@ -340,6 +344,7 @@ class RedisController extends BaseApiController
 
         return array_slice($topKeys, 0, $limit);
     }
+
     /**
      * Warm up cache (optimize).
      */
@@ -353,7 +358,7 @@ class RedisController extends BaseApiController
 
             return $this->success(null, 'Cache warmed successfully');
         } catch (\Exception $e) {
-            return $this->error('Failed to warm cache: ' . $e->getMessage(), 500);
+            return $this->error('Failed to warm cache: '.$e->getMessage(), 500);
         }
     }
 }

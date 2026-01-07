@@ -16,7 +16,6 @@ class GeoIpService
     /**
      * Get location data for an IP address
      *
-     * @param string $ipAddress
      * @return array{country: string|null, city: string|null, country_code: string|null}
      */
     public function getLocation(string $ipAddress): array
@@ -29,25 +28,22 @@ class GeoIpService
         // Check cache first
         $cacheKey = "geoip:{$ipAddress}";
         $cached = Cache::get($cacheKey);
-        
+
         if ($cached !== null) {
             return $cached;
         }
 
         // Fetch from API
         $location = $this->fetchFromApi($ipAddress);
-        
+
         // Cache the result
         Cache::put($cacheKey, $location, $this->cacheTtl);
-        
+
         return $location;
     }
 
     /**
      * Fetch location data from ip-api.com
-     *
-     * @param string $ipAddress
-     * @return array
      */
     protected function fetchFromApi(string $ipAddress): array
     {
@@ -59,7 +55,7 @@ class GeoIpService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 if (($data['status'] ?? '') === 'success') {
                     return [
                         'country' => $data['country'] ?? null,
@@ -80,9 +76,6 @@ class GeoIpService
 
     /**
      * Check if IP is local/private
-     *
-     * @param string $ipAddress
-     * @return bool
      */
     protected function isLocalIp(string $ipAddress): bool
     {
@@ -107,7 +100,7 @@ class GeoIpService
             [$subnet, $mask] = explode('/', $range);
             $subnetLong = ip2long($subnet);
             $maskLong = ~((1 << (32 - $mask)) - 1);
-            
+
             if (($ip & $maskLong) === ($subnetLong & $maskLong)) {
                 return true;
             }
@@ -118,8 +111,6 @@ class GeoIpService
 
     /**
      * Get default location (when lookup fails or IP is local)
-     *
-     * @return array
      */
     protected function getDefaultLocation(): array
     {
@@ -132,9 +123,6 @@ class GeoIpService
 
     /**
      * Clear GeoIP cache for a specific IP
-     *
-     * @param string $ipAddress
-     * @return void
      */
     public function clearCache(string $ipAddress): void
     {

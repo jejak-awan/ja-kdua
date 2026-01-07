@@ -12,7 +12,7 @@ class CaptchaController extends BaseApiController
      */
     public function generate(): JsonResponse
     {
-        $service = new CaptchaService();
+        $service = new CaptchaService;
         $captcha = $service->generate();
 
         return $this->success($captcha, 'Captcha generated successfully');
@@ -28,10 +28,10 @@ class CaptchaController extends BaseApiController
             'answer' => 'required|string',
         ]);
 
-        $service = new CaptchaService();
+        $service = new CaptchaService;
         $valid = $service->verify($request->token, $request->answer, false); // Don't consume on dry-run verify
 
-        if (!$valid) {
+        if (! $valid) {
             return $this->error('Invalid captcha', 422);
         }
 

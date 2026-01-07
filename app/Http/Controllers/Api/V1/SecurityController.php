@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\SecurityLog;
-use App\Services\SecurityService;
 use App\Services\SecurityAlertService;
+use App\Services\SecurityService;
 use Illuminate\Http\Request;
 
 class SecurityController extends BaseApiController
 {
     protected $securityService;
+
     protected $alertService;
 
     public function __construct(SecurityService $securityService, SecurityAlertService $alertService)
@@ -78,10 +79,11 @@ class SecurityController extends BaseApiController
     // =====================
     // Blocklist Management
     // =====================
-    
+
     public function getBlocklist()
     {
         $blocklist = $this->securityService->getBlocklist();
+
         return $this->success($blocklist, 'Blocklist retrieved successfully');
     }
 
@@ -101,8 +103,8 @@ class SecurityController extends BaseApiController
             $seconds = $this->securityService->blockIpTemporarily($request->ip_address, $request->reason);
             $result = $seconds > 0;
         }
-        
-        if (!$result) {
+
+        if (! $result) {
             return $this->error('Cannot block whitelisted or protected IP address', 400);
         }
 
@@ -119,7 +121,7 @@ class SecurityController extends BaseApiController
 
         return $this->success(null, 'IP address unblocked successfully');
     }
-    
+
     public function bulkBlock(Request $request)
     {
         $request->validate([
@@ -127,10 +129,10 @@ class SecurityController extends BaseApiController
             'ip_addresses.*' => 'required|ip',
             'reason' => 'nullable|string',
         ]);
-        
+
         $blocked = 0;
         $skipped = 0;
-        
+
         foreach ($request->ip_addresses as $ip) {
             if ($this->securityService->blockIp($ip, $request->reason)) {
                 $blocked++;
@@ -138,37 +140,38 @@ class SecurityController extends BaseApiController
                 $skipped++;
             }
         }
-        
+
         return $this->success([
             'blocked' => $blocked,
             'skipped' => $skipped,
         ], "{$blocked} IP addresses blocked, {$skipped} skipped (whitelisted)");
     }
-    
+
     public function bulkUnblock(Request $request)
     {
         $request->validate([
             'ip_addresses' => 'required|array',
             'ip_addresses.*' => 'required|ip',
         ]);
-        
+
         foreach ($request->ip_addresses as $ip) {
             $this->securityService->unblockIp($ip);
         }
-        
-        return $this->success(null, count($request->ip_addresses) . ' IP addresses unblocked');
+
+        return $this->success(null, count($request->ip_addresses).' IP addresses unblocked');
     }
 
     // =====================
     // Whitelist Management
     // =====================
-    
+
     public function getWhitelist()
     {
         $whitelist = $this->securityService->getWhitelist();
+
         return $this->success($whitelist, 'Whitelist retrieved successfully');
     }
-    
+
     public function addToWhitelist(Request $request)
     {
         $request->validate([
@@ -180,7 +183,7 @@ class SecurityController extends BaseApiController
 
         return $this->success(null, 'IP address added to whitelist');
     }
-    
+
     public function removeFromWhitelist(Request $request)
     {
         $request->validate([
@@ -191,7 +194,7 @@ class SecurityController extends BaseApiController
 
         return $this->success(null, 'IP address removed from whitelist');
     }
-    
+
     public function bulkWhitelist(Request $request)
     {
         $request->validate([
@@ -199,26 +202,26 @@ class SecurityController extends BaseApiController
             'ip_addresses.*' => 'required|ip',
             'reason' => 'nullable|string',
         ]);
-        
+
         foreach ($request->ip_addresses as $ip) {
             $this->securityService->addToWhitelist($ip, $request->reason);
         }
-        
-        return $this->success(null, count($request->ip_addresses) . ' IP addresses added to whitelist');
+
+        return $this->success(null, count($request->ip_addresses).' IP addresses added to whitelist');
     }
-    
+
     public function bulkRemoveWhitelist(Request $request)
     {
         $request->validate([
             'ip_addresses' => 'required|array',
             'ip_addresses.*' => 'required|ip',
         ]);
-        
+
         foreach ($request->ip_addresses as $ip) {
             $this->securityService->removeFromWhitelist($ip);
         }
-        
-        return $this->success(null, count($request->ip_addresses) . ' IP addresses removed from whitelist');
+
+        return $this->success(null, count($request->ip_addresses).' IP addresses removed from whitelist');
     }
 
     // =====================
@@ -242,18 +245,18 @@ class SecurityController extends BaseApiController
     public function clearFailedAttempts(Request $request)
     {
         $ipAddress = $request->input('ip_address', \App\Helpers\IpHelper::getClientIp($request));
-        
+
         // Clear all security cache for IP
         $this->securityService->clearSecurityCache($ipAddress);
         $this->securityService->unblockIp($ipAddress);
-        
+
         // Also clear email-based locks if provided
         if ($request->has('email')) {
             $this->securityService->clearSecurityCache($request->email, 'email');
             $this->securityService->unlockAccount($request->email);
         }
 
-        return $this->success(null, 'Security cache cleared for IP: ' . $ipAddress);
+        return $this->success(null, 'Security cache cleared for IP: '.$ipAddress);
     }
 
     public function clear(Request $request)
@@ -263,18 +266,21 @@ class SecurityController extends BaseApiController
             // Assuming App\Models\SecurityLog is available or use full path.
             // Wait, SecurityLog is imported? Let's check imports in file view (Step 1089).
             // It uses App\Models\SecurityLog in `show` method type hint, so likely imported.
-            
+
             $retainDays = $request->input('retain_days');
 
             if ($retainDays) {
                 $count = \App\Models\SecurityLog::where('created_at', '<', now()->subDays($retainDays))->delete();
+
                 return $this->success(null, "Cleared $count security logs older than $retainDays days");
             }
 
             \App\Models\SecurityLog::truncate();
+
             return $this->success(null, 'All security logs cleared successfully');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Security logs clear error: '.$e->getMessage());
+
             return $this->error('Failed to clear security logs', 500);
         }
     }

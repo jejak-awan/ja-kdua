@@ -230,7 +230,6 @@ const { confirm } = useConfirm();
 
 // Toggle expand/collapse
 const toggleExpand = (id) => {
-    console.log('Toggle expand called for ID:', id, 'Current expandedIds:', expandedIds.value);
     const index = expandedIds.value.indexOf(id);
     if (index > -1) {
         expandedIds.value.splice(index, 1);
@@ -238,7 +237,6 @@ const toggleExpand = (id) => {
         expandedIds.value.push(id);
     }
     expandedIds.value = [...expandedIds.value];
-    console.log('After toggle, expandedIds:', expandedIds.value);
 };
 
 // Helper to check if category has children

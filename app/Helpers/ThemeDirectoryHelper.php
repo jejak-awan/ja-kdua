@@ -21,7 +21,7 @@ class ThemeDirectoryHelper
 
             foreach ($directories as $dir) {
                 $fullPath = "{$themePath}/{$dir}";
-                if (!File::isDirectory($fullPath)) {
+                if (! File::isDirectory($fullPath)) {
                     File::makeDirectory($fullPath, 0755, true);
                 }
             }
@@ -135,7 +135,8 @@ README;
 
             return true;
         } catch (\Exception $e) {
-            \Log::error("Failed to create theme structure: " . $e->getMessage());
+            \Log::error('Failed to create theme structure: '.$e->getMessage());
+
             return false;
         }
     }
@@ -151,7 +152,7 @@ README;
             'files' => [],
         ];
 
-        if (!$info['exists']) {
+        if (! $info['exists']) {
             return $info;
         }
 
@@ -177,27 +178,27 @@ README;
     {
         $errors = [];
 
-        if (!is_dir($themePath)) {
-            $errors[] = "Theme directory does not exist";
+        if (! is_dir($themePath)) {
+            $errors[] = 'Theme directory does not exist';
+
             return $errors;
         }
 
         // Check for theme.json
-        if (!file_exists("{$themePath}/theme.json")) {
-            $errors[] = "theme.json not found";
+        if (! file_exists("{$themePath}/theme.json")) {
+            $errors[] = 'theme.json not found';
         }
 
         // Check for assets directory
-        if (!is_dir("{$themePath}/assets")) {
-            $errors[] = "assets directory not found";
+        if (! is_dir("{$themePath}/assets")) {
+            $errors[] = 'assets directory not found';
         }
 
         // Check for templates directory
-        if (!is_dir("{$themePath}/templates")) {
-            $errors[] = "templates directory not found";
+        if (! is_dir("{$themePath}/templates")) {
+            $errors[] = 'templates directory not found';
         }
 
         return $errors;
     }
 }
-

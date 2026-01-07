@@ -26,27 +26,27 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'subtitle' => 'Unleash the power of next-gen intelligence with our seamless platform. Built for 2026 and beyond.',
                             'bgImage' => '',
                             'bgColor' => 'bg-slate-950', // Tailwind class directly? No, usually hex or class. Hero block supports classes? Wait, let's use a class if supported or a hex. Hero definition says bgColor is color input. Let's assume transparency and use a container approach if needed. Actually, let's use a dark hex 'bg-slate-950' isn't valid for color input usually. Let's use '#020617'.
-                            'bgColor' => '#020617', 
+                            'bgColor' => '#020617',
                             'padding' => 'py-32',
-                            'animation' => 'animate-in fade-in zoom-in-95 duration-1000'
-                        ]
-                    ], 
-                    // I need to be careful with JSON structure here. 
+                            'animation' => 'animate-in fade-in zoom-in-95 duration-1000',
+                        ],
+                    ],
+                    // I need to be careful with JSON structure here.
                     // To follow the plan "bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900", I might need a wrapper section or if I can pass classes.
-                    // The Hero block has 'bgColor' (color picker) and 'bgImage'. 
+                    // The Hero block has 'bgColor' (color picker) and 'bgImage'.
                     // It doesn't seem to support arbitrary classes easily unless I use 'Advanced -> CSS Classes'.
                     // Let's use CSS Classes for the gradient!
                     [
-                         'id' => 'hero-pro',
-                         'type' => 'hero',
-                         'settings' => [
-                             'title' => 'The Future of AI is Here',
-                             'subtitle' => 'Unleash the power of next-gen intelligence with our seamless platform.',
-                             'padding' => 'py-32',
-                             'radius' => 'rounded-3xl',
-                             '_css_class' => 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white shadow-2xl mx-4',
-                             'animation' => 'animate-in fade-in duration-1000'
-                         ]
+                        'id' => 'hero-pro',
+                        'type' => 'hero',
+                        'settings' => [
+                            'title' => 'The Future of AI is Here',
+                            'subtitle' => 'Unleash the power of next-gen intelligence with our seamless platform.',
+                            'padding' => 'py-32',
+                            'radius' => 'rounded-3xl',
+                            '_css_class' => 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white shadow-2xl mx-4',
+                            'animation' => 'animate-in fade-in duration-1000',
+                        ],
                     ],
                     [
                         'id' => 'feature-bento-1',
@@ -61,8 +61,8 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             ],
                             'padding' => 'py-20',
                             'bgColor' => 'transparent',
-                            '_css_class' => 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white' 
-                        ]
+                            '_css_class' => 'bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white',
+                        ],
                     ],
                     [
                         'id' => 'cta-1',
@@ -71,9 +71,9 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'title' => 'Ready to transform your workflow?',
                             'buttonText' => 'Start Your Free Trial',
                             'buttonUrl' => '/register',
-                             '_css_class' => 'bg-slate-100 dark:bg-slate-900 my-8 rounded-2xl mx-4 shadow-lg'
-                        ]
-                    ]
+                            '_css_class' => 'bg-slate-100 dark:bg-slate-900 my-8 rounded-2xl mx-4 shadow-lg',
+                        ],
+                    ],
                 ]),
             ],
             // 2. Creative Portfolio Bento (Pro)
@@ -92,17 +92,17 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'subtitle' => 'Award-winning digital studio based in Tokyo.',
                             'bgColor' => 'transparent',
                             'padding' => 'py-24',
-                            '_css_class' => 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100'
-                        ]
+                            '_css_class' => 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100',
+                        ],
                     ],
                     [
                         'id' => 'works-grid',
                         'type' => 'portfolio',
                         'settings' => [
                             'columns' => 2,
-                            'title' => 'Selected Works'
-                        ]
-                    ]
+                            'title' => 'Selected Works',
+                        ],
+                    ],
                 ]),
             ],
             // 3. Modern Stats Section (Pro)
@@ -122,22 +122,22 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'columns' => [
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-1', 'type' => 'counter', 'settings' => ['number' => 500, 'label' => 'Customers', 'prefix' => '', '_css_class' => 'text-primary']]
-                                    ]
+                                        ['id' => 'count-1', 'type' => 'counter', 'settings' => ['number' => 500, 'label' => 'Customers', 'prefix' => '', '_css_class' => 'text-primary']],
+                                    ],
                                 ],
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-2', 'type' => 'counter', 'settings' => ['number' => 120, 'label' => 'Projects', 'prefix' => '', '_css_class' => 'text-primary']]
-                                    ]
+                                        ['id' => 'count-2', 'type' => 'counter', 'settings' => ['number' => 120, 'label' => 'Projects', 'prefix' => '', '_css_class' => 'text-primary']],
+                                    ],
                                 ],
                                 [
                                     'blocks' => [
-                                        ['id' => 'count-3', 'type' => 'counter', 'settings' => ['number' => 24, 'label' => 'Countries', 'prefix' => '', '_css_class' => 'text-primary']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                        ['id' => 'count-3', 'type' => 'counter', 'settings' => ['number' => 24, 'label' => 'Countries', 'prefix' => '', '_css_class' => 'text-primary']],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ]),
             ],
             // 4. Glassmorphism Pricing (Pro)
@@ -157,12 +157,12 @@ class ModernLayoutTemplatesSeeder extends Seeder
                             'items' => [
                                 ['name' => 'Starter', 'price' => '$0', 'features' => ['Basic Tools', '1 Project'], 'buttonText' => 'Get Started'],
                                 ['name' => 'Pro', 'price' => '$49', 'features' => ['Everything', 'Unlimited'], 'buttonText' => 'Go Pro'],
-                                ['name' => 'Biz', 'price' => '$199', 'features' => ['Enterprise', '24/7'], 'buttonText' => 'Contact']
-                            ]
-                        ]
-                    ]
+                                ['name' => 'Biz', 'price' => '$199', 'features' => ['Enterprise', '24/7'], 'buttonText' => 'Contact'],
+                            ],
+                        ],
+                    ],
                 ]),
-            ]
+            ],
         ];
 
         foreach ($templates as $template) {
