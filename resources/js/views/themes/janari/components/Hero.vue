@@ -36,13 +36,13 @@
         >
           Explore Content
         </router-link>
-        <a 
+        <router-link 
             v-if="isAuthenticated"
-            href="/admin" 
+            to="/admin" 
             class="px-8 py-3 rounded-lg border-2 border-white text-white font-bold hover:bg-white/10 transition-all"
         >
             Dashboard
-        </a>
+        </router-link>
         <router-link 
             v-else
             to="/login"

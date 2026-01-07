@@ -75,9 +75,11 @@ class ContentController extends BaseApiController
             }
         }
 
+        $urlPrefix = $content->type === 'post' ? 'blog/' : '';
+        
         return $this->success([
             'content' => $content->load(['author', 'category', 'tags', 'customFields.customField']),
-            'preview_url' => rtrim(config('app.frontend_url'), '/').'/'.ltrim($content->slug, '/'),
+            'preview_url' => rtrim(config('app.frontend_url'), '/').'/'.$urlPrefix.ltrim($content->slug, '/'),
         ], 'Content preview retrieved successfully');
     }
 
