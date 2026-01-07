@@ -91,35 +91,77 @@
                                     class="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-4"
                                     :class="getMegaMenuLayoutClasses(item)"
                                 >
-                                    <router-link
-                                        v-for="child in item.children"
-                                        :key="child.id"
-                                        :to="child.url || '/'"
-                                        :target="child.open_in_new_tab ? '_blank' : null"
-                                        class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
-                                    >
+                                    <!-- CASE A: Explicit Columns (Grid/Full) -->
+                                    <template v-if="item.mega_menu_layout && item.mega_menu_layout !== 'default'">
                                         <div 
-                                            v-if="child.icon"
-                                            class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                            v-for="(colItems, colIndex) in groupItemsByColumn(item.children, item.mega_menu_layout)" 
+                                            :key="colIndex" 
+                                            class="flex flex-col gap-2"
                                         >
-                                            <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
-                                                <span 
-                                                    v-if="child.badge"
-                                                    class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
-                                                    :class="getBadgeClasses(child.badge_color)"
+                                            <router-link
+                                                v-for="child in colItems"
+                                                :key="child.id"
+                                                :to="child.url || '/'"
+                                                :target="child.open_in_new_tab ? '_blank' : null"
+                                                class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                            >
+                                                <div 
+                                                    v-if="child.icon"
+                                                    class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
                                                 >
-                                                    {{ child.badge }}
-                                                </span>
-                                            </div>
-                                            <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                                {{ child.description }}
-                                            </p>
+                                                    <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                        <span 
+                                                            v-if="child.badge"
+                                                            class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                                            :class="getBadgeClasses(child.badge_color)"
+                                                        >
+                                                            {{ child.badge }}
+                                                        </span>
+                                                    </div>
+                                                    <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                                        {{ child.description }}
+                                                    </p>
+                                                </div>
+                                            </router-link>
                                         </div>
-                                    </router-link>
+                                    </template>
+
+                                    <!-- CASE B: Default Flat List -->
+                                    <template v-else>
+                                        <router-link
+                                            v-for="child in item.children"
+                                            :key="child.id"
+                                            :to="child.url || '/'"
+                                            :target="child.open_in_new_tab ? '_blank' : null"
+                                            class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                        >
+                                            <div 
+                                                v-if="child.icon"
+                                                class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                            >
+                                                <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                    <span 
+                                                        v-if="child.badge"
+                                                        class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                                        :class="getBadgeClasses(child.badge_color)"
+                                                    >
+                                                        {{ child.badge }}
+                                                    </span>
+                                                </div>
+                                                <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                                    {{ child.description }}
+                                                </p>
+                                            </div>
+                                        </router-link>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -367,6 +409,36 @@ const getMegaMenuLayoutClasses = (item) => {
             if (childCount > 5) return 'grid grid-cols-2 gap-4 min-w-[500px]';
             return 'flex flex-col gap-1 min-w-[280px]';
     }
+};
+
+const groupItemsByColumn = (items, layout) => {
+    // Determine max columns based on layout
+    // grid-2 = 2, grid-3 = 3, full = 4 (assumed)
+    let maxCols = 1;
+    if (layout === 'grid-2') maxCols = 2;
+    if (layout === 'grid-3') maxCols = 3;
+    if (layout === 'full') maxCols = 4;
+    
+    // Create an array of arrays [[], [], ...]
+    const groups = Array.from({length: maxCols}, () => []);
+    
+    items.forEach(item => {
+        let colIndex = item.mega_menu_column; // 1-based index from DB
+        
+        // Handle Auto (0) or invalid
+        if (!colIndex || colIndex < 1) {
+            // For now, put unassigned items in Column 1 (or implement round-robin)
+            colIndex = 1; 
+        }
+        
+        // Cap at max columns
+        if (colIndex > maxCols) colIndex = maxCols;
+        
+        // Push to group (convert 1-based to 0-based)
+        groups[colIndex - 1].push(item);
+    });
+    
+    return groups;
 };
 
 import { useRoute } from 'vue-router'; // Import useRoute manually since it might not be auto-imported

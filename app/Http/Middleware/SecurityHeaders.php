@@ -17,14 +17,14 @@ class SecurityHeaders
     public function handle(Request $request, Closure $next): Response
     {
         // Generate nonce and share with views BEFORE handling request
-        $nonce = Str::random(32);
-        View::share('cspNonce', $nonce);
-        Vite::useCspNonce($nonce);
+        // $nonce = Str::random(32);
+        // View::share('cspNonce', $nonce);
+        // Vite::useCspNonce($nonce); // Disabled to fix unsafe-inline blocking issues
 
         $response = $next($request);
 
         // Content Security Policy
-        $csp = $this->getContentSecurityPolicy($nonce);
+        $csp = $this->getContentSecurityPolicy(''); // Pass empty nonce
         $response->headers->set('Content-Security-Policy', $csp);
 
         // Remove server signature

@@ -152,13 +152,30 @@
 
                     <!-- Row 2: Mega Menu Fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-1.5">
-                            <Label class="text-xs font-medium">Description (Mega Menu)</Label>
-                            <Textarea 
-                                v-model="element.description" 
-                                class="min-h-[60px] bg-background text-sm"
-                                placeholder="Optional subtitle for mega menu dropdown..."
-                            />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2 space-y-1.5">
+                                <Label class="text-xs font-medium">Description</Label>
+                                <Textarea 
+                                    v-model="element.description" 
+                                    class="min-h-[60px] bg-background text-sm"
+                                    placeholder="Subtitle text..."
+                                />
+                            </div>
+                             <div class="space-y-1.5">
+                                <Label class="text-xs font-medium">Target Column</Label>
+                                <Select v-model="element.mega_menu_column">
+                                    <SelectTrigger class="h-8 bg-background">
+                                        <SelectValue placeholder="Auto" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem :value="0">Auto</SelectItem>
+                                        <SelectItem :value="1">Column 1</SelectItem>
+                                        <SelectItem :value="2">Column 2</SelectItem>
+                                        <SelectItem :value="3">Column 3</SelectItem>
+                                        <SelectItem :value="4">Column 4</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                         
                         <div class="space-y-4">
