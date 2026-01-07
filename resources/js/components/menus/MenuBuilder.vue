@@ -213,8 +213,10 @@
                             
                             <MenuItemTree
                                 :items="nestedItems"
+                                :all-items="flatItemsList"
                                 @delete="deleteMenuItem"
                                 @change="handleTreeChange"
+                                @parent-change="handleParentChange"
                                 class="min-h-[300px] w-full z-10 relative"
                             />
                         </CardContent>
@@ -476,6 +478,51 @@ const removeItemFromTree = (items, id) => {
 
 const handleTreeChange = (newItems) => {
     nestedItems.value = newItems;
+};
+
+// Flat list of all items for parent selector
+const flatItemsList = computed(() => {
+    const flatten = (items, depth = 0) => {
+        let result = [];
+        for (const item of items) {
+            result.push({ ...item, _depth: depth });
+            if (item.children && item.children.length > 0) {
+                result = result.concat(flatten(item.children, depth + 1));
+            }
+        }
+        return result;
+    };
+    return flatten(nestedItems.value);
+});
+
+// Handle parent change from dropdown
+const handleParentChange = ({ item, newParentId }) => {
+    const itemId = item.id || item._temp_id;
+    
+    // Remove item from current position
+    removeItemFromTree(nestedItems.value, itemId);
+    
+    if (!newParentId || newParentId === 'root') {
+        // Move to root
+        nestedItems.value.push(item);
+    } else {
+        // Find new parent and add as child
+        const addToParent = (items) => {
+            for (const i of items) {
+                if ((i.id && i.id.toString() === newParentId.toString()) || 
+                    (i._temp_id && i._temp_id === newParentId)) {
+                    if (!i.children) i.children = [];
+                    i.children.push(item);
+                    return true;
+                }
+                if (i.children && addToParent(i.children)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        addToParent(nestedItems.value);
+    }
 };
 
 const locationOptions = ref([]);

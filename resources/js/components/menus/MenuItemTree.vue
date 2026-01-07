@@ -77,6 +77,43 @@
 
                 <!-- Inline Edit Form (Accordion Body) -->
                 <div v-if="element._isEditing" class="border-t border-border p-4 bg-muted/10 space-y-4">
+                    <!-- Parent Selector -->
+                    <div class="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 space-y-1.5">
+                                <Label class="text-xs font-medium flex items-center gap-2">
+                                    <FolderTree class="w-3.5 h-3.5" />
+                                    Parent Item
+                                </Label>
+                                <Select 
+                                    :model-value="getCurrentParentId(element)" 
+                                    @update:model-value="(val) => changeParent(element, val)"
+                                >
+                                    <SelectTrigger class="h-8 bg-background">
+                                        <SelectValue placeholder="Select parent..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="root">
+                                            <span class="flex items-center gap-2">
+                                                <Home class="w-3.5 h-3.5" />
+                                                Root Level (No Parent)
+                                            </span>
+                                        </SelectItem>
+                                        <template v-for="parentItem in getAvailableParents(element)" :key="parentItem.id || parentItem._temp_id">
+                                            <SelectItem :value="(parentItem.id || parentItem._temp_id).toString()">
+                                                <span class="flex items-center gap-2">
+                                                    <span :style="{ paddingLeft: (parentItem._depth || 0) * 12 + 'px' }">
+                                                        {{ '└ '.repeat(parentItem._depth || 0) }}{{ parentItem.title }}
+                                                    </span>
+                                                </span>
+                                            </SelectItem>
+                                        </template>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Row 1: Basic Info -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="space-y-1.5">
@@ -272,7 +309,7 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import IconPicker from '../ui/icon-picker.vue';
-import { GripVertical, Trash2, ChevronDown, CornerDownRight } from 'lucide-vue-next';
+import { GripVertical, Trash2, ChevronDown, CornerDownRight, FolderTree, Home } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -282,9 +319,13 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    allItems: {
+        type: Array,
+        default: () => [],
+    },
 });
 
-const emit = defineEmits(['delete', 'change']);
+const emit = defineEmits(['delete', 'change', 'parent-change']);
 
 const getItemKey = (item) => {
     return item.id || item._temp_id || `temp_${Math.random()}`;
@@ -310,6 +351,48 @@ const toggleEdit = (element) => {
         element._isEditing = false;
     }
     element._isEditing = !element._isEditing;
+};
+
+// Parent selector helpers
+const getCurrentParentId = (element) => {
+    // Check if this element is nested (has a parent)
+    const findParent = (items, targetId, parent = null) => {
+        for (const item of items) {
+            const itemId = item.id || item._temp_id;
+            if (itemId === targetId) {
+                return parent ? (parent.id || parent._temp_id).toString() : 'root';
+            }
+            if (item.children && item.children.length > 0) {
+                const found = findParent(item.children, targetId, item);
+                if (found !== null) return found;
+            }
+        }
+        return null;
+    };
+    const targetId = element.id || element._temp_id;
+    return findParent(props.items, targetId) || 'root';
+};
+
+const getAvailableParents = (element) => {
+    const elementId = element.id || element._temp_id;
+    // Return all items except self and descendants
+    const isDescendant = (item, targetId) => {
+        if ((item.id || item._temp_id) === targetId) return true;
+        if (item.children) {
+            for (const child of item.children) {
+                if (isDescendant(child, targetId)) return true;
+            }
+        }
+        return false;
+    };
+    return props.allItems.filter(item => {
+        const itemId = item.id || item._temp_id;
+        return itemId !== elementId && !isDescendant(element, itemId);
+    });
+};
+
+const changeParent = (element, newParentId) => {
+    emit('parent-change', { item: element, newParentId });
 };
 </script>
 
