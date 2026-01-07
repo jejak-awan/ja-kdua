@@ -37,6 +37,13 @@
                                 >
                                     {{ element.badge }}
                                 </Badge>
+                                <Badge 
+                                    v-if="level === 1 && element.mega_menu_column" 
+                                    variant="outline"
+                                    class="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary bg-primary/5"
+                                >
+                                    Col {{ element.mega_menu_column }}
+                                </Badge>
                             </div>
                             <div v-if="element.description" class="text-[10px] text-muted-foreground truncate max-w-[200px]">
                                 {{ element.description }}
@@ -116,7 +123,7 @@
 
                     <!-- Row 1: Basic Info & Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="space-y-1.5 md:col-span-1">
+                        <div class="space-y-1.5 md:col-span-1" v-if="level !== 1">
                             <Label class="text-xs font-medium">{{ t('features.menus.form.label') }}</Label>
                             <Input v-model="element.title" class="h-8 bg-background" />
                         </div>
@@ -160,6 +167,10 @@
                                     class="min-h-[60px] bg-background text-sm"
                                     placeholder="Subtitle text..."
                                 />
+                            </div>
+                             <div class="col-span-2 space-y-1.5" v-if="level === 1">
+                                <Label class="text-xs font-medium">Group Name</Label>
+                                <Input v-model="element.title" class="h-8 bg-background" placeholder="Group Name (e.g. Products)" />
                             </div>
                              <div class="space-y-1.5" v-if="level === 1">
                                 <Label class="text-xs font-medium">Target Column</Label>
