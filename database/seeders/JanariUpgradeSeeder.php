@@ -49,18 +49,18 @@ class JanariUpgradeSeeder extends Seeder
                                                 '_css_class' => 'opacity-50 uppercase tracking-widest text-xs mb-8'
                                             ]
                                         ],
-                                        // Since we don't have a specific LogoCloud block, we can use columns or a custom class on IconList
                                         [
-                                            'id' => 'logo-grid',
-                                            'type' => 'columns',
+                                            'id' => 'trust-icons',
+                                            'type' => 'icon_list',
                                             'settings' => [
-                                                'layout' => '1-1-1-1',
-                                                'columns' => [
-                                                    ['blocks' => [['type' => 'image', 'settings' => ['url' => '/sample-logo-1.png', '_css_class' => 'grayscale opacity-50 hover:opacity-100 transition-opacity']]]],
-                                                    ['blocks' => [['type' => 'image', 'settings' => ['url' => '/sample-logo-2.png', '_css_class' => 'grayscale opacity-50 hover:opacity-100 transition-opacity']]]],
-                                                    ['blocks' => [['type' => 'image', 'settings' => ['url' => '/sample-logo-3.png', '_css_class' => 'grayscale opacity-50 hover:opacity-100 transition-opacity']]]],
-                                                    ['blocks' => [['type' => 'image', 'settings' => ['url' => '/sample-logo-4.png', '_css_class' => 'grayscale opacity-50 hover:opacity-100 transition-opacity']]]],
-                                                ]
+                                                'items' => [
+                                                    ['icon' => 'building', 'text' => 'StartupXYZ'],
+                                                    ['icon' => 'building', 'text' => 'TechCorp'],
+                                                    ['icon' => 'building', 'text' => 'CloudBase'],
+                                                    ['icon' => 'building', 'text' => 'DataFlow'],
+                                                ],
+                                                'layout' => 'inline',
+                                                '_css_class' => 'justify-center opacity-40'
                                             ]
                                         ]
                                     ]

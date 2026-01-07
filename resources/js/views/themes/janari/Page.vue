@@ -49,9 +49,17 @@ const pageData = ref(null);
 const loading = ref(true);
 
 const fetchPage = async () => {
+  const slug = route.params.slug;
+  
+  // Guard: Don't fetch if slug is undefined
+  if (!slug) {
+    loading.value = false;
+    pageData.value = null;
+    return;
+  }
+  
   loading.value = true;
   try {
-    const slug = route.params.slug;
     const response = await api.get(`/cms/contents/${slug}`);
     pageData.value = response.data.data || response.data;
   } catch (error) {
