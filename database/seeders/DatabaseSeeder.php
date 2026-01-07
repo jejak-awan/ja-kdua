@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             // Optionally seed sample data in development
             $this->call(SampleDataSeeder::class);
             $this->call(ContentTemplateSeeder::class);
+            $this->call(JanariUpgradeSeeder::class);
         }
 
         $this->command->info('Database seeded successfully!');

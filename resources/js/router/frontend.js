@@ -71,7 +71,7 @@ const frontendRoutes = [
         path: ':slug',
         name: 'page',
         component: ThemePageResolver,
-        props: { page: 'Post' }, // Reusing Post component for generic Pages usually
+        props: { page: 'Page' }, // Using dedicated Page component for builder pages
       },
     ]
   },
