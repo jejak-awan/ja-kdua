@@ -161,21 +161,6 @@
                                     placeholder="Subtitle text..."
                                 />
                             </div>
-                             <div class="space-y-1.5">
-                                <Label class="text-xs font-medium">Target Column</Label>
-                                <Select v-model="element.mega_menu_column">
-                                    <SelectTrigger class="h-8 bg-background">
-                                        <SelectValue placeholder="Auto" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem :value="0">Auto</SelectItem>
-                                        <SelectItem :value="1">Column 1</SelectItem>
-                                        <SelectItem :value="2">Column 2</SelectItem>
-                                        <SelectItem :value="3">Column 3</SelectItem>
-                                        <SelectItem :value="4">Column 4</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                         </div>
                         
                         <div class="space-y-4">
@@ -291,6 +276,19 @@
                                             <div class="space-y-1">
                                                 <Label class="text-[10px]">Description</Label>
                                                 <Input v-model="child.description" class="h-7 text-xs" placeholder="Subtitle..." />
+                                            </div>
+                                            <div class="space-y-1">
+                                                <Label class="text-[10px]">Target Column</Label>
+                                                <Select v-model="child.mega_menu_column">
+                                                    <SelectTrigger class="h-7 text-xs"><SelectValue placeholder="Auto" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem :value="0">Auto</SelectItem>
+                                                        <SelectItem :value="1">Col 1</SelectItem>
+                                                        <SelectItem :value="2">Col 2</SelectItem>
+                                                        <SelectItem :value="3">Col 3</SelectItem>
+                                                        <SelectItem :value="4">Col 4</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-3 gap-3">
