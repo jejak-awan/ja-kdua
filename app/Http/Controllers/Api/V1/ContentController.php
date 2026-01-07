@@ -165,6 +165,7 @@ class ContentController extends BaseApiController
             'pending' => (clone $query)->where('status', 'pending')->count(),
             'draft' => (clone $query)->where('status', 'draft')->count(),
             'archived' => (clone $query)->where('status', 'archived')->count(),
+            'trashed' => (clone $query)->onlyTrashed()->count(),
         ];
 
         return $this->success($stats, 'Content statistics retrieved successfully');

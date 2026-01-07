@@ -130,7 +130,7 @@ const handleSubmit = async () => {
         await api.post(`/admin/cms/categories/${props.category.id}/move`, {
             parent_id: selectedParentId.value,
         });
-        toast.success.default(t('features.categories.messages.moveSuccess'));
+        toast.success.action(t('features.categories.messages.moveSuccess'));
         emit('moved');
     } catch (error) {
         if (error.response?.status === 422) {

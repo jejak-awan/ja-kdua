@@ -93,7 +93,8 @@
         "published": "Diterbitkan",
         "scheduled": "Dijadwalkan",
         "archived": "Diarsipkan",
-        "pending": "Menunggu Tinjauan"
+        "pending": "Menunggu Tinjauan",
+        "trashed": "Sampah"
     },
     "actions": {
         "publishNow": "Terbitkan Sekarang",

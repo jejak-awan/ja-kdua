@@ -63,6 +63,24 @@ const routes = [
                 component: () => import('../views/admin/contents/Calendar.vue'),
             },
             {
+                path: 'content-templates',
+                name: 'content-templates',
+                component: () => import('../views/admin/content-templates/Index.vue'),
+                meta: { permission: 'view content templates' },
+            },
+            {
+                path: 'content-templates/create',
+                name: 'content-templates.create',
+                component: () => import('../views/admin/content-templates/Create.vue'),
+                meta: { permission: 'create content templates' },
+            },
+            {
+                path: 'content-templates/:id/edit',
+                name: 'content-templates.edit',
+                component: () => import('../views/admin/content-templates/Edit.vue'),
+                meta: { permission: 'edit content templates' },
+            },
+            {
                 path: 'contents/create',
                 name: 'contents.create',
                 component: () => import('../views/admin/contents/Create.vue'),

@@ -35,23 +35,11 @@ const contentStore = useContentStore()
 // Hide breadcrumbs on homepage
 const isHomePage = computed(() => route.path === '/')
 
-const handleRouteChange = () => {
-    // Fetch Content if available (for dynamic pages)
-    if (route.params.slug) {
-        contentStore.fetchContent(route.params.slug)
-    } else {
-        contentStore.clearContent()
-    }
-}
-
 onMounted(async () => {
   if (!activeTheme.value) {
     await loadActiveTheme()
   }
-  handleRouteChange()
 })
-
-watch(() => route.path, handleRouteChange)
 </script>
 
 <style scoped>

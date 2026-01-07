@@ -1,316 +1,44 @@
-<template>
-    <div>
-        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.title') }}</h1>
-                <p class="text-muted-foreground">{{ $t('features.content.list.description') }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <Button variant="outline" asChild v-if="authStore.hasPermission('manage content templates')">
-                    <router-link :to="{ name: 'content-templates' }" class="flex items-center gap-2">
-                        <LayoutTemplate class="w-4 h-4" />
-                        {{ $t('features.content.list.templates') }}
-                    </router-link>
-                </Button>
-                <Button asChild class="shadow-sm" v-if="authStore.hasPermission('create content')">
-                    <router-link :to="{ name: 'contents.create' }" class="flex items-center gap-2">
-                        <Plus class="w-4 h-4" />
-                        {{ $t('features.content.list.createNew') }}
-                    </router-link>
-                </Button>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
-            <!-- Total Contents -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.dashboard.stats.totalContents') }}</p>
-                            <p class="text-2xl font-bold text-foreground">{{ stats.total }}</p>
-                        </div>
-                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
-                            <FileText class="w-5 h-5" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Published -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.published') }}</p>
-                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.published }}</p>
-                        </div>
-                        <div class="p-2.5 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
-                            <CheckCircle2 class="w-5 h-5" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Pending Review -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.pending') }}</p>
-                            <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.pending || 0 }}</p>
-                        </div>
-                        <div class="p-2.5 bg-amber-500/10 dark:bg-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
-                            <Clock3 class="w-5 h-5" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Drafts -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.draft') }}</p>
-                            <p class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ stats.draft }}</p>
-                        </div>
-                        <div class="p-2.5 bg-slate-500/10 dark:bg-slate-500/20 rounded-xl text-slate-600 dark:text-slate-400">
-                            <FileEdit class="w-5 h-5" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Archived -->
-            <Card class="hover:shadow-md transition-shadow duration-300">
-                <CardContent class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{{ $t('features.content.status.archived') }}</p>
-                            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ stats.archived }}</p>
-                        </div>
-                        <div class="p-2.5 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400">
-                            <Archive class="w-5 h-5" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-
-        <Card class="overflow-hidden">
-            <div class="px-6 py-4 border-b border-border">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="relative w-full md:w-72">
-                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                v-model="search"
-                                type="text"
-                                :placeholder="$t('features.comments.filter.searchPlaceholder')"
-                                class="pl-9"
-                            />
-                        </div>
-                        <Select
-                            v-model="statusFilter"
-                            @update:model-value="fetchContents"
-                        >
-                            <SelectTrigger class="w-[160px]">
-                                <SelectValue :placeholder="$t('features.comments.filter.allStatus')" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">{{ $t('features.comments.filter.allStatus') }}</SelectItem>
-                                <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
-                                <SelectItem value="pending">{{ $t('features.content.status.pending') }}</SelectItem>
-                                <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
-                                <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
-                                <SelectItem value="trashed">{{ $t('common.labels.trash') || 'Trash' }}</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    
-                    <div v-if="selectedContents.length > 0" class="flex items-center gap-3 p-1.5 px-3 rounded-lg bg-primary/5 border border-primary/10 transition-all animate-in fade-in slide-in-from-top-1">
-                        <span class="text-sm font-medium text-primary">
-                            {{ $t('features.content.list.selected', { count: selectedContents.length }) }}
-                        </span>
-                        <div class="h-4 w-px bg-primary/20"></div>
-                        <Select
-                            v-model="bulkAction"
-                            @update:model-value="handleBulkAction"
-                        >
-                            <SelectTrigger class="w-[160px] h-8 border-primary/20">
-                                <SelectValue :placeholder="$t('features.content.list.bulkActions')" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="publish" v-if="authStore.hasPermission('publish content')">{{ $t('features.content.actions.publishNow') }}</SelectItem>
-                                <SelectItem value="approve" v-if="authStore.hasPermission('approve content')">{{ $t('features.content.actions.approve') }}</SelectItem>
-                                <SelectItem value="reject" v-if="authStore.hasPermission('approve content')">{{ $t('features.content.actions.reject') }}</SelectItem>
-                                <SelectItem value="draft">{{ $t('features.content.actions.saveDraft') }}</SelectItem>
-                                <SelectItem value="archive">{{ $t('features.content.status.archived') }}</SelectItem>
-                                <SelectItem value="delete" class="text-destructive focus:text-destructive" v-if="authStore.hasPermission('delete content')">{{ $t('features.languages.actions.delete') }}</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="loading && contents.length === 0" class="flex flex-col items-center justify-center py-24 text-muted-foreground space-y-4">
-                <Loader2 class="w-10 h-10 animate-spin opacity-20" />
-                <p class="text-sm font-medium animate-pulse">{{ $t('common.messages.loading.default') }}</p>
-            </div>
-
-            <div v-else-if="contents.length === 0" class="flex flex-col items-center justify-center py-24 text-muted-foreground space-y-4">
-                <div class="p-4 rounded-full bg-muted/30">
-                    <FileX2 class="w-10 h-10 opacity-20" />
-                </div>
-                <p class="text-sm font-medium">{{ $t('features.content.list.empty') }}</p>
-            </div>
-
-            <div v-else class="relative overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow class="hover:bg-muted/50 border-b border-border">
-                            <TableHead class="w-12 px-6">
-                                <Checkbox
-                                    :checked="allSelected"
-                                    @update:checked="toggleSelectAll"
-                                />
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
-                                {{ $t('features.content.form.title') }}
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
-                                {{ $t('features.comments.detail.author') }}
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
-                                {{ $t('common.labels.status') }}
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
-                                {{ $t('features.content.form.featured') }}
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">
-                                {{ $t('features.content.form.publishDate') }}
-                            </TableHead>
-                            <TableHead class="px-6 py-4 text-center text-xs font-bold text-muted-foreground">
-                                {{ $t('features.languages.list.headers.actions') }}
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 border-b border-border">
-                            <TableCell class="px-6">
-                                <Checkbox
-                                    :checked="selectedContents.includes(content.id)"
-                                    @update:checked="(checked) => {
-                                        if (checked) selectedContents.push(content.id)
-                                        else selectedContents = selectedContents.filter(id => id !== content.id)
-                                    }"
-                                />
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex flex-col gap-0.5">
-                                    <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
-                                    <span class="text-xs text-muted-foreground/70 font-mono">{{ content.slug }}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                                        {{ getUserInitials(content.author?.name) }}
-                                    </div>
-                                    <span class="text-sm text-foreground/80">{{ content.author?.name }}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <Badge
-                                    variant="outline"
-                                    :class="getStatusBadgeClass(content.status)"
-                                    class="capitalize border-none px-2 py-0.5"
-                                >
-                                    {{ content.status }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell class="px-6 py-4">
-                                <Switch
-                                    :checked="!!content.is_featured"
-                                    @update:checked="toggleFeatured(content)"
-                                />
-                            </TableCell>
-                            <TableCell class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                    <Calendar class="w-3.5 h-3.5" />
-                                    {{ formatDate(content.created_at) }}
-                                </div>
-                            </TableCell>
-                            <TableCell class="px-6 py-4 text-right">
-                                <div v-if="statusFilter === 'trashed'" class="flex justify-end items-center gap-1">
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10" @click="handleRestore(content)" :title="$t('common.actions.restore') || 'Restore'">
-                                        <RotateCcw class="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleForceDelete(content)" :title="$t('common.actions.deletePermanently') || 'Delete Permanently'">
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                                <div v-else class="flex justify-end items-center gap-1">
-                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-500/10" @click="handleApprove(content)" :title="$t('features.content.actions.approve')">
-                                        <CheckCircle2 class="w-4 h-4" />
-                                    </Button>
-                                    <Button v-if="content.status === 'pending' && authStore.hasPermission('approve content')" variant="ghost" size="icon" class="h-8 w-8 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10" @click="handleReject(content)" :title="$t('features.content.actions.reject')">
-                                        <XCircle class="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-500/10" @click="handlePreview(content)" :title="$t('features.content.form.preview')">
-                                        <Eye class="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" @click="handleDuplicate(content)" :title="$t('features.content.actions.duplicate')" v-if="authStore.hasPermission('create content')">
-                                        <Copy class="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-500/10" asChild :title="$t('features.content.list.revisions')" v-if="authStore.hasPermission('edit content')">
-                                        <router-link :to="{ name: 'contents.revisions', params: { id: content.id } }">
-                                            <History class="w-4 h-4" />
-                                        </router-link>
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-500/10" asChild :title="$t('common.actions.edit')" v-if="authStore.hasPermission('edit content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
-                                        <router-link :to="{ name: 'contents.edit', params: { id: content.id } }">
-                                            <Edit2 class="w-4 h-4" />
-                                        </router-link>
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" @click="handleDelete(content)" :title="$t('features.languages.actions.delete')" v-if="authStore.hasPermission('delete content') && (authStore.hasPermission('manage content') || content.author_id === authStore.user?.id)">
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
-
-            <!-- Pagination -->
-            <Pagination
-                v-if="pagination && pagination.total > 0"
-                :current-page="pagination.current_page"
-                :total-items="pagination.total"
-                :per-page="Number(perPage)"
-                @page-change="fetchContents"
-                @update:per-page="(val) => { perPage = String(val); fetchContents(1); }"
-            />
-        </Card>
-    </div>
-</template>
-
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { parseResponse, parseSingleResponse } from '../../../utils/responseParser';
-import Card from '@/components/ui/card.vue';
-import CardContent from '@/components/ui/card-content.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useHead } from '@vueuse/head';
+import { 
+    Plus, 
+    Search, 
+    Filter, 
+    MoreHorizontal, 
+    FileText, 
+    Calendar,
+    CheckCircle2,
+    XCircle,
+    Clock3,
+    AlertCircle,
+    FileEdit,
+    Archive,
+    RotateCcw,
+    Trash2,
+    Eye,
+    Copy,
+    LayoutTemplate,
+    History,
+    Edit2,
+    FileX2,
+    Loader2
+} from 'lucide-vue-next';
+import { useAuthStore } from '@/stores/auth';
+import { useConfirm } from '@/composables/useConfirm';
+import { useToast } from '@/composables/useToast';
+import api from '@/services/api';
+
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
 import Badge from '@/components/ui/badge.vue';
+import Card from '@/components/ui/card.vue';
+import CardContent from '@/components/ui/card-content.vue';
 import Checkbox from '@/components/ui/checkbox.vue';
 import Switch from '@/components/ui/switch.vue';
+import Pagination from '@/components/ui/pagination.vue';
 import Select from '@/components/ui/select.vue';
 import SelectContent from '@/components/ui/select-content.vue';
 import SelectItem from '@/components/ui/select-item.vue';
@@ -322,244 +50,148 @@ import TableCell from '@/components/ui/table-cell.vue';
 import TableHead from '@/components/ui/table-head.vue';
 import TableHeader from '@/components/ui/table-header.vue';
 import TableRow from '@/components/ui/table-row.vue';
-import Pagination from '@/components/ui/pagination.vue';
-import { 
-    Plus, 
-    LayoutTemplate, 
-    Search, 
-    Loader2, 
-    FileX2, 
-    Eye, 
-    Copy, 
-    History, 
-    Edit2, 
-    Trash2,
-    Calendar,
-    FileText,
-    CheckCircle2,
-    Clock,
-    Archive,
-    Clock3,
-    XCircle,
-    FileEdit,
-    RotateCcw
-} from 'lucide-vue-next';
-import { useAuthStore } from '../../../stores/auth';
-import { useConfirm } from '../../../composables/useConfirm';
-import { useToast } from '../../../composables/useToast';
 
 const { t } = useI18n();
-const router = useRouter();
 const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const confirm = useConfirm();
 const toast = useToast();
+
+useHead({
+    title: computed(() => `${t('features.content.list.title')} | ${t('app.name')}`)
+});
+
+const loading = ref(true);
 const contents = ref([]);
-const loading = ref(false);
+const pagination = ref({});
 const search = ref('');
-const statusFilter = ref('');
+const statusFilter = ref('all');
+const perPage = ref('10');
 const selectedContents = ref([]);
 const bulkAction = ref('');
-const pagination = ref(null);
-const perPage = ref('10');
+
 const stats = ref({
     total: 0,
     published: 0,
-    pending: 0,
     draft: 0,
-    archived: 0
+    pending: 0,
+    archived: 0,
+    trashed: 0
 });
-const authStore = useAuthStore();
-
-const allSelected = computed(() => {
-    return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
-});
-
-const fetchStats = async () => {
-    try {
-        // Fetch stats if user can manage or create content
-        if (!authStore.hasPermission('manage content') && !authStore.hasPermission('create content') && !authStore.hasPermission('edit content')) return;
-
-        // Use dedicated content stats endpoint
-        const response = await api.get('/admin/cms/contents/stats');
-        const data = parseSingleResponse(response);
-        
-        if (data) {
-            stats.value = {
-                total: data.total || 0,
-                published: data.published || 0,
-                pending: data.pending || 0,
-                draft: data.draft || 0,
-                archived: data.archived || 0
-            };
-        }
-    } catch (error) {
-        console.error('Failed to fetch stats:', error);
-    }
-};
 
 const fetchContents = async (page = 1) => {
     loading.value = true;
     try {
-        const params = { 
+        const params = {
             page,
-            per_page: perPage.value 
+            per_page: perPage.value,
+            sort: 'created_at',
+            order: 'desc',
         };
-        
-        if (statusFilter.value && statusFilter.value !== 'all') {
-            params.status = statusFilter.value;
-        }
 
-        if (search.value) {
-            params.search = search.value;
+        if (search.value) params.search = search.value;
+        if (statusFilter.value && statusFilter.value !== 'all') {
+            if (statusFilter.value === 'trashed') {
+                params.trashed = true;
+            } else {
+                params.status = statusFilter.value;
+            }
         }
 
         const response = await api.get('/admin/cms/contents', { params });
-        const { data: parsedData, pagination: parsedPagination } = parseResponse(response);
         
-        contents.value = parsedData || [];
-        pagination.value = parsedPagination;
-        selectedContents.value = [];
+        // Handle Laravel Pagination Structure
+        const rawData = response.data.data;
+        let items = [];
+        let meta = {};
+
+        if (Array.isArray(rawData)) {
+            // Direct array
+            items = rawData;
+            meta = response.data.meta || {};
+        } else if (rawData && typeof rawData === 'object') {
+            // Paginated Object (standard Laravel paginate() response wrapped in resource)
+            items = rawData.data || [];
+            // Use the paginator object itself as meta since it contains current_page, total, etc.
+            meta = rawData;
+        }
+
+        contents.value = items;
+        pagination.value = meta;
+        
     } catch (error) {
         console.error('Failed to fetch contents:', error);
+        toast.error.action(error);
+        contents.value = [];
+        pagination.value = {};
     } finally {
         loading.value = false;
     }
 };
 
-const getStatusBadgeClass = (status) => {
-    const s = status?.toLowerCase();
-    if (s === 'published') return 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400';
-    if (s === 'pending') return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400';
-    if (s === 'draft') return 'bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400';
-    if (s === 'archived') return 'bg-muted text-muted-foreground';
-    return 'bg-secondary text-secondary-foreground';
+const fetchStats = async () => {
+    try {
+        const response = await api.get('/admin/cms/contents/stats');
+        stats.value = response.data.data || {
+            total: 0,
+            published: 0,
+            draft: 0,
+            pending: 0,
+            archived: 0,
+            trashed: 0
+        };
+    } catch (error) {
+        console.error('Failed to fetch stats:', error);
+    }
 };
 
-const getUserInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-};
+const allSelected = computed(() => {
+    return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
+});
 
-const toggleSelectAll = () => {
-    if (allSelected.value) {
-        selectedContents.value = [];
-    } else {
+const toggleSelectAll = (checked) => {
+    if (checked) {
         selectedContents.value = contents.value.map(c => c.id);
+    } else {
+        selectedContents.value = [];
     }
 };
 
 const toggleFeatured = async (content) => {
-    const originalState = content.is_featured;
-    // Optimistic update
-    content.is_featured = !originalState;
+    const previousState = content.is_featured;
+    content.is_featured = !content.is_featured;
+
+    try {
+        await api.patch(`/admin/cms/contents/${content.id}/toggle-featured`);
+        toast.success.action(t('common.messages.success.updated'));
+    } catch (error) {
+        content.is_featured = previousState;
+        toast.error.action(error);
+    }
+};
+
+const getStatusBadgeClass = (status) => {
+    switch (status) {
+        case 'published': return 'bg-emerald-500/10 text-emerald-500 border-emerald-200 dark:border-emerald-500/20';
+        case 'draft': return 'bg-slate-500/10 text-slate-500 border-slate-200 dark:border-slate-500/20';
+        case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-200 dark:border-amber-500/20';
+        case 'archived': return 'bg-rose-500/10 text-rose-500 border-rose-200 dark:border-rose-500/20';
+        default: return 'bg-gray-500/10 text-gray-500 border-gray-200 dark:border-gray-500/20';
+    }
+};
+
+const getUserInitials = (name) => {
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+};
+
+const handleBulkAction = async (action) => {
+    if (!action) return;
     
-    try {
-        await api.post(`/admin/cms/contents/${content.id}/toggle-featured`);
-        toast.success.update();
-    } catch (error) {
-        console.error('Failed to toggle featured status:', error);
-        // Revert on failure
-        content.is_featured = originalState;
-        toast.error.update(error);
-    }
-};
-
-const { confirm } = useConfirm();
-
-const handleApprove = async (content) => {
-    const confirmed = await confirm({
-        title: t('features.content.actions.approve'),
-        message: t('common.messages.confirm.approve', { item: content.title }),
-        confirmText: t('features.content.actions.approve'),
-        variant: 'success'
-    });
-    
-    if (!confirmed) return;
-    
-    try {
-        await api.put(`/admin/cms/contents/${content.id}/approve`);
-        await fetchContents();
-        await fetchStats();
-        toast.success.approve();
-    } catch (error) {
-        console.error('Failed to approve content:', error);
-        toast.error.approve(error);
-    }
-};
-
-const handleReject = async (content) => {
-    const confirmed = await confirm({
-        title: t('features.content.actions.reject'),
-        message: t('common.messages.confirm.reject', { item: content.title }),
-        confirmText: t('features.content.actions.reject'),
-        variant: 'destructive'
-    });
-
-    if (!confirmed) return;
-
-    try {
-        await api.put(`/admin/cms/contents/${content.id}/reject`);
-        await fetchContents();
-        await fetchStats();
-        toast.success.reject();
-    } catch (error) {
-        console.error('Failed to reject content:', error);
-        toast.error.reject(error);
-    }
-};
-
-const handleDuplicate = async (content) => {
-    const confirmed = await confirm({
-        title: t('features.content.actions.duplicate'),
-        message: t('common.messages.confirm.duplicate', { item: content.title }),
-        confirmText: t('features.content.actions.duplicate'),
-    });
-
-    if (!confirmed) return;
-
-    try {
-        const response = await api.post(`/admin/cms/contents/${content.id}/duplicate`);
-        const duplicatedContent = response.data.data || response.data;
-        toast.success.duplicate();
-        router.push({ name: 'contents.edit', params: { id: duplicatedContent.id } });
-    } catch (error) {
-        console.error('Failed to duplicate content:', error);
-        toast.error.duplicate(error);
-    }
-};
-
-const handlePreview = async (content) => {
-    try {
-        const response = await api.get(`/admin/cms/contents/${content.id}/preview`);
-        // Handle data wrapped in "data" key from BaseApiController
-        const data = response.data?.data || response.data;
-        const previewUrl = data?.url || data?.preview_url;
-        
-        if (previewUrl) {
-            window.open(previewUrl, '_blank');
-        } else {
-            // Fallback: open content URL if preview URL not available
-            window.open(`/${content.slug}`, '_blank');
-        }
-    } catch (error) {
-        console.error('Failed to get preview URL:', error);
-        // Fallback: open content URL
-        window.open(`/${content.slug}`, '_blank');
-    }
-};
-
-const handleBulkAction = async () => {
-    if (!bulkAction.value || selectedContents.value.length === 0) {
-        bulkAction.value = '';
-        return;
-    }
-
-    const action = bulkAction.value;
-    const count = selectedContents.value.length;
-    
-    let confirmConfig = {
+    const confirmConfig = {
         title: t('features.content.list.bulkActions'),
-        message: t('common.messages.confirm.bulkAction', { action: action, count: count }),
-        confirmText: t('common.actions.confirm'),
+        message: t('common.messages.confirm.bulkAction', { action: action, count: selectedContents.value.length }),
     };
     
     if (action === 'delete') {
@@ -603,9 +235,7 @@ const handleDelete = async (content) => {
         confirmText: t('common.actions.delete'),
         variant: 'destructive'
     });
-
     if (!confirmed) return;
-
     try {
         await api.delete(`/admin/cms/contents/${content.id}`);
         await fetchContents();
@@ -621,7 +251,7 @@ const handleRestore = async (content) => {
         await api.put(`/admin/cms/contents/${content.id}/restore`);
         await fetchContents();
         await fetchStats();
-        toast.success.default(t('common.messages.success.restored') || 'Content restored');
+        toast.success.action(t('common.messages.success.restored') || 'Content restored');
     } catch (error) {
         console.error('Failed to restore content:', error);
         toast.error(error);
@@ -635,15 +265,67 @@ const handleForceDelete = async (content) => {
         confirmText: t('common.actions.delete'),
         variant: 'destructive'
     });
-
     if (!confirmed) return;
-
     try {
         await api.delete(`/admin/cms/contents/${content.id}/force-delete`);
         await fetchContents();
         await fetchStats();
     } catch (error) {
         console.error('Failed to force delete content:', error);
+        toast.error(error);
+    }
+};
+
+const handleEdit = (content) => {
+    router.push({ name: 'contents.edit', params: { id: content.id } });
+};
+
+const handlePreview = (content) => {
+    const routeData = router.resolve({ name: 'posts.show', params: { slug: content.slug } });
+    window.open(routeData.href, '_blank');
+};
+
+const handleDuplicate = async (content) => {
+    try {
+        await api.post(`/admin/cms/contents/${content.id}/duplicate`);
+        await fetchContents();
+        await fetchStats();
+        toast.success.action(t('common.messages.success.duplicated') || 'Content duplicated');
+    } catch (error) {
+        console.error('Failed to duplicate content:', error);
+        toast.error(error);
+    }
+};
+
+const handleApprove = async (content) => {
+    try {
+        await api.patch(`/admin/cms/contents/${content.id}/approve`);
+        await fetchContents();
+        await fetchStats();
+        toast.success.action(t('features.content.messages.approved') || 'Content approved');
+    } catch (error) {
+        console.error('Failed to approve content:', error);
+        toast.error(error);
+    }
+};
+
+const handleReject = async (content) => {
+    const reason = await confirm({
+        title: t('features.content.actions.reject'),
+        message: t('features.content.messages.rejectReason'),
+        input: true,
+        inputPlaceholder: t('features.content.placeholders.rejectionReason'),
+        confirmText: t('features.content.actions.reject'),
+        variant: 'destructive'
+    });
+    if (reason === false) return;
+    try {
+        await api.patch(`/admin/cms/contents/${content.id}/reject`, { reason_for_rejection: reason });
+        await fetchContents();
+        await fetchStats();
+        toast.success.action(t('features.content.messages.rejected') || 'Content rejected');
+    } catch (error) {
+        console.error('Failed to reject content:', error);
         toast.error(error);
     }
 };
@@ -656,9 +338,7 @@ watch([search, statusFilter], () => {
     fetchContents();
 });
 
-
 onMounted(() => {
-    // Check for search query param from Global Search
     if (route.query.q) {
         search.value = route.query.q;
     }
@@ -667,3 +347,249 @@ onMounted(() => {
 });
 </script>
 
+<template>
+    <div class="container mx-auto p-6 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-bold tracking-tight">{{ $t('features.content.list.title') }}</h1>
+                <p class="text-muted-foreground">{{ $t('features.content.list.description') }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <Button variant="outline" v-if="authStore.hasPermission('manage content templates')" @click="router.push({ name: 'content-templates' })">
+                    <LayoutTemplate class="w-4 h-4 mr-2" />
+                    {{ $t('features.content.list.templates') }}
+                </Button>
+                <Button class="shadow-sm" v-if="authStore.hasPermission('create content')" @click="router.push({ name: 'contents.create' })">
+                    <Plus class="w-4 h-4 mr-2" />
+                    {{ $t('features.content.list.createNew') }}
+                </Button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+            <!-- Total Contents -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.dashboard.stats.totalContents') }}</p>
+                            <p class="text-2xl font-bold text-foreground">{{ stats.total || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
+                            <FileText class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Published -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.published') }}</p>
+                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.published || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
+                            <CheckCircle2 class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Draft -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.draft') }}</p>
+                            <p class="text-2xl font-bold text-slate-600 dark:text-slate-400">{{ stats.draft || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-500/10 dark:bg-slate-500/20 rounded-xl text-slate-600 dark:text-slate-400">
+                            <FileEdit class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Pending -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.pending') }}</p>
+                            <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.pending || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-amber-500/10 dark:bg-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
+                            <Clock3 class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Archived -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.archived') }}</p>
+                            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ stats.archived || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400">
+                            <Archive class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Trashed -->
+            <Card class="hover:shadow-md transition-shadow duration-300">
+                <CardContent class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-muted-foreground">{{ $t('features.content.status.trashed') }}</p>
+                            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.trashed || 0 }}</p>
+                        </div>
+                        <div class="p-2.5 bg-red-500/10 dark:bg-red-500/20 rounded-xl text-red-600 dark:text-red-400">
+                            <Trash2 class="w-5 h-5" />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+
+        <Card class="overflow-hidden">
+            <!-- Filters -->
+            <div class="px-6 py-4 border-b border-border">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-2" v-if="selectedContents.length > 0">
+                        <span class="text-sm text-muted-foreground">{{ $t('features.content.list.selected', { count: selectedContents.length }) }}</span>
+                        <div class="flex items-center gap-2 border-l border-border pl-2">
+                            <Button variant="outline" size="sm" @click="handleBulkAction('approve')" v-if="authStore.hasPermission('approve content')">
+                                <CheckCircle2 class="w-4 h-4 mr-2 text-emerald-500" />
+                                {{ $t('features.content.actions.approve') }}
+                            </Button>
+                            <Button variant="outline" size="sm" @click="handleBulkAction('reject')" v-if="authStore.hasPermission('approve content')">
+                                <XCircle class="w-4 h-4 mr-2 text-rose-500" />
+                                {{ $t('features.content.actions.reject') }}
+                            </Button>
+                            <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('delete')" v-if="authStore.hasPermission('delete content')">
+                                <Trash2 class="w-4 h-4 mr-2" />
+                                {{ $t('common.actions.delete') }}
+                            </Button>
+                        </div>
+                    </div>
+                    <div class="relative w-full md:w-72" v-else>
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                            v-model="search"
+                            type="text"
+                            :placeholder="$t('features.comments.filter.searchPlaceholder')"
+                            class="pl-9"
+                        />
+                    </div>
+                    <div class="flex items-center gap-2" v-if="selectedContents.length === 0">
+                         <Select v-model="statusFilter">
+                            <SelectTrigger class="w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="published">Published</SelectItem>
+                                <SelectItem value="draft">Draft</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="archived">Archived</SelectItem>
+                                <SelectItem value="trashed">Trashed</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="relative overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow class="hover:bg-muted/50 border-b border-border">
+                            <TableHead class="w-12 px-6">
+                                <Checkbox
+                                    :checked="allSelected"
+                                    @update:checked="toggleSelectAll"
+                                />
+                            </TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Title</TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Author</TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Status</TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Featured</TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Date</TableHead>
+                            <TableHead class="px-6 py-4 text-center text-xs font-bold text-muted-foreground">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="content in contents" :key="content.id" class="group hover:bg-muted/50 border-b border-border">
+                            <TableCell class="px-6">
+                                <Checkbox
+                                    :checked="selectedContents.includes(content.id)"
+                                    @update:checked="(checked) => {
+                                        if (checked) selectedContents.push(content.id)
+                                        else selectedContents = selectedContents.filter(id => id !== content.id)
+                                    }"
+                                />
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
+                                    <span class="text-xs text-muted-foreground/70 font-mono">{{ content.slug }}</span>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                        {{ getUserInitials(content.author?.name) }}
+                                    </div>
+                                    <span class="text-sm text-foreground/80">{{ content.author?.name }}</span>
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <Badge variant="outline" :class="getStatusBadgeClass(content.status)" class="capitalize border-none px-2 py-0.5">
+                                    {{ content.status }}
+                                </Badge>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <Switch :checked="!!content.is_featured" @update:checked="toggleFeatured(content)" />
+                            </TableCell>
+                            <TableCell class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <Calendar class="w-3.5 h-3.5" />
+                                    {{ formatDate(content.created_at) }}
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4 text-right">
+                                <div class="flex justify-end items-center gap-1">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="handleEdit(content)" v-if="authStore.hasPermission('edit content')">
+                                        <Edit2 class="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleDelete(content)" v-if="authStore.hasPermission('delete content')">
+                                        <Trash2 class="w-4 h-4" />
+                                    </Button>
+                                    <!-- DropdownMenu removed -->
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-border">
+                <Pagination
+                    :total-items="pagination.total || 0"
+                    :per-page="parseInt(perPage)"
+                    :current-page="pagination.current_page || 1"
+                    @update:page="fetchContents"
+                    @update:per-page="(val) => { perPage = String(val); fetchContents(1); }"
+                />
+            </div>
+        </Card>
+    </div>
+</template>

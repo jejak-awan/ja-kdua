@@ -1,0 +1,195 @@
+<template>
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.form.createTitle') }}</h1>
+            <Button variant="ghost" @click="router.push({ name: 'content-templates' })">
+                <ChevronLeft class="w-4 h-4 mr-2" />
+                {{ t('features.content_templates.form.back') }}
+            </Button>
+        </div>
+
+        <form @submit.prevent="handleSubmit" class="pb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Content (Left) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.content') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="title">
+                                    {{ t('features.content_templates.form.titleLabel') }}
+                                </Label>
+                                <Input
+                                    id="title"
+                                    v-model="form.title"
+                                    :placeholder="t('features.content_templates.form.titlePlaceholder')"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label>
+                                    {{ t('features.content_templates.form.body') }}
+                                </Label>
+                                <TiptapEditor
+                                    :model-value="form.body"
+                                    @update:model-value="(val) => form.body = val"
+                                    :placeholder="t('features.content_templates.form.bodyPlaceholder')"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label for="excerpt">
+                                    {{ t('features.content_templates.form.excerpt') }}
+                                </Label>
+                                <Textarea
+                                    id="excerpt"
+                                    v-model="form.excerpt"
+                                    rows="3"
+                                    :placeholder="t('features.content_templates.form.excerptPlaceholder')"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Sidebar (Right) -->
+                <div class="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="text-lg font-semibold">{{ t('features.content_templates.form.details') }}</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="name">
+                                    {{ t('features.content_templates.form.name') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    v-model="form.name"
+                                    required
+                                    :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
+                                    :placeholder="t('features.content_templates.form.namePlaceholder')"
+                                />
+                                <p v-if="errors.name" class="text-sm text-destructive">
+                                    {{ Array.isArray(errors.name) ? errors.name[0] : errors.name }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label for="description">
+                                    {{ t('features.content_templates.form.description') }}
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    v-model="form.description"
+                                    rows="3"
+                                    :placeholder="t('features.content_templates.form.descriptionPlaceholder')"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label for="type">
+                                    {{ t('features.content_templates.form.type') }} <span class="text-destructive">*</span>
+                                </Label>
+                                <Select v-model="form.type" required>
+                                    <SelectTrigger id="type">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="post">Post</SelectItem>
+                                        <SelectItem value="page">Page</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div class="flex items-center gap-2">
+                         <div class="flex-1"></div>
+                         <Button variant="outline" as-child>
+                            <router-link :to="{ name: 'content-templates' }">
+                                {{ t('features.content_templates.form.cancel') }}
+                            </router-link>
+                        </Button>
+                        <Button type="submit" :disabled="saving || !isValid">
+                            <Loader2 v-if="saving" class="w-4 h-4 mr-2 animate-spin" />
+                            <Save v-else class="w-4 h-4 mr-2" />
+                            {{ saving ? t('features.content_templates.form.saving') : t('features.content_templates.form.save') }}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import api from '../../../services/api';
+import { useToast } from '../../../composables/useToast';
+import { useFormValidation } from '../../../composables/useFormValidation';
+import { contentTemplateSchema } from '../../../schemas';
+import Card from '../../../components/ui/card.vue';
+import CardHeader from '../../../components/ui/card-header.vue';
+import CardTitle from '../../../components/ui/card-title.vue';
+import CardContent from '../../../components/ui/card-content.vue';
+import Button from '../../../components/ui/button.vue';
+import Input from '../../../components/ui/input.vue';
+import Label from '../../../components/ui/label.vue';
+import Textarea from '../../../components/ui/textarea.vue';
+import Select from '../../../components/ui/select.vue';
+import SelectTrigger from '../../../components/ui/select-trigger.vue';
+import SelectValue from '../../../components/ui/select-value.vue';
+import SelectContent from '../../../components/ui/select-content.vue';
+import SelectItem from '../../../components/ui/select-item.vue';
+import TiptapEditor from '@/components/TiptapEditor.vue';
+import { 
+    ChevronLeft, 
+    Save, 
+    Loader2 
+} from 'lucide-vue-next';
+
+const { t } = useI18n();
+const router = useRouter();
+const toast = useToast();
+const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentTemplateSchema);
+const saving = ref(false);
+
+const form = ref({
+    name: '',
+    description: '',
+    type: 'post',
+    title: '',
+    body: '',
+    excerpt: '',
+});
+
+const isValid = computed(() => {
+    return form.value.name?.trim() && form.value.type;
+});
+
+const handleSubmit = async () => {
+    if (!validateWithZod(form.value)) return;
+
+    saving.value = true;
+    clearErrors();
+    try {
+        await api.post('/admin/cms/content-templates', form.value);
+        toast.success.create('Template');
+        router.push({ name: 'content-templates' });
+    } catch (error) {
+        if (error.response?.status === 422) {
+            setErrors(error.response.data.errors || {});
+        } else {
+            toast.error.fromResponse(error);
+        }
+    } finally {
+        saving.value = false;
+    }
+};
+</script>

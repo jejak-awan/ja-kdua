@@ -93,7 +93,8 @@
         "published": "Published",
         "scheduled": "Scheduled",
         "archived": "Archived",
-        "pending": "Pending Review"
+        "pending": "Pending Review",
+        "trashed": "Trashed"
     },
     "actions": {
         "publishNow": "Publish Now",

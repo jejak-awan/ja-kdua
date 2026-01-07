@@ -1,9 +1,9 @@
-<template>
-  <DialogTrigger as-child>
-    <slot />
-  </DialogTrigger>
-</template>
-
 <script setup>
-import { DialogTrigger } from 'radix-vue';
+import { DialogTrigger as RadixDialogTrigger } from 'radix-vue';
 </script>
+
+<template>
+  <RadixDialogTrigger as-child>
+    <slot />
+  </RadixDialogTrigger>
+</template>

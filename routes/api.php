@@ -133,6 +133,7 @@ Route::prefix('v1')->group(function () {
         Route::put('contents/{content}/approve', [App\Http\Controllers\Api\V1\ContentController::class, 'approve'])->middleware('permission:approve content');
         Route::put('contents/{content}/reject', [App\Http\Controllers\Api\V1\ContentController::class, 'reject'])->middleware('permission:approve content');
         Route::put('contents/{id}/restore', [App\Http\Controllers\Api\V1\ContentController::class, 'restore'])->middleware('permission:delete content');
+        Route::patch('contents/{content}/toggle-featured', [App\Http\Controllers\Api\V1\ContentController::class, 'toggleFeatured'])->middleware('permission:edit content');
         Route::delete('contents/{id}/force-delete', [App\Http\Controllers\Api\V1\ContentController::class, 'forceDelete'])->middleware('permission:delete content');
 
         // Newsletter
@@ -157,6 +158,13 @@ Route::prefix('v1')->group(function () {
         // Categories
         Route::apiResource('categories', App\Http\Controllers\Api\V1\CategoryController::class)->middleware('permission:view categories');
         Route::post('categories/{category}/move', [App\Http\Controllers\Api\V1\CategoryController::class, 'move'])->middleware('permission:edit categories');
+
+        // Content Templates
+        Route::post('content-templates/bulk-action', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'bulkAction'])->middleware('permission:edit content templates');
+        Route::put('content-templates/{id}/restore', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'restore'])->middleware('permission:edit content templates');
+        Route::delete('content-templates/{id}/force-delete', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'forceDelete'])->middleware('permission:delete content templates');
+        Route::post('content-templates/{content_template}/create-content', [App\Http\Controllers\Api\V1\ContentTemplateController::class, 'createContent'])->middleware('permission:create content');
+        Route::apiResource('content-templates', App\Http\Controllers\Api\V1\ContentTemplateController::class)->middleware('permission:view content templates');
 
         // Tags
         // Statistics and bulk-delete routes must be defined before apiResource to avoid route conflict

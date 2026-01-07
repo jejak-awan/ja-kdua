@@ -245,7 +245,7 @@ const previewTemplate = async () => {
 const handleSendTest = async () => {
     try {
         await api.post(`/admin/cms/email-templates/${templateId}/send-test`);
-        toast.success.default(t('features.email_templates.form.testSent'));
+        toast.success.action(t('features.email_templates.form.testSent'));
     } catch (error) {
         console.error('Failed to send test email:', error);
         toast.error.default(error.response?.data?.message || t('features.email_templates.form.testFailed'));
