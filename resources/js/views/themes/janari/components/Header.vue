@@ -70,7 +70,8 @@
                         <!-- Item with children = Dropdown/Mega Menu -->
                         <div 
                             v-if="item.children && item.children.length > 0"
-                            class="relative group"
+                            class="group"
+                            :class="item.mega_menu_layout === 'full' ? 'static' : 'relative'"
                         >
                             <button :class="getNavItemClasses(false)">
                                 <component 
@@ -402,7 +403,7 @@ const getMegaMenuLayoutClasses = (item) => {
         case 'grid-3':
             return 'grid grid-cols-3 gap-6 min-w-[750px]';
         case 'full':
-            return 'grid grid-cols-4 gap-8 p-6 w-full';
+            return 'grid grid-cols-4 gap-8 p-6 w-full max-w-7xl mx-auto';
         case 'default':
         default:
             // Auto grid for large items

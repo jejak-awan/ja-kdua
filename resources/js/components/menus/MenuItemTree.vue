@@ -202,6 +202,11 @@
                                 </div>
                             </div>
 
+                            <div class="space-y-1.5">
+                                <Label class="text-xs font-medium">Image URL (Mega Menu)</Label>
+                                <Input v-model="element.image" class="h-8 bg-background" placeholder="https://..." />
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-1.5">
                                     <Label class="text-xs font-medium">{{ t('features.menus.form.cssClasses') }}</Label>

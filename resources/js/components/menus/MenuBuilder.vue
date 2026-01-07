@@ -409,6 +409,9 @@ const saveTree = async (items, parentId) => {
                 badge_color: item.badge_color || 'primary',
                 open_in_new_tab: item.open_in_new_tab || false,
                 is_active: item.is_active || 1,
+                image: item.image || null,
+                mega_menu_layout: item.mega_menu_layout || 'default',
+                mega_menu_column: item.mega_menu_column || 0,
                 sort_order: i, 
             };
             
@@ -581,7 +584,11 @@ const cloneSourceItem = (item, type) => {
         type: type,
         target_id: item.id || null, 
         url: item.url || null,
+        url: item.url || null,
         children: [],
+        mega_menu_layout: 'default',
+        mega_menu_column: 0,
+        image: null,
         is_active: 1, 
         _temp_id: 'temp_' + Date.now() + Math.random().toString(36).substr(2, 9)
     };
