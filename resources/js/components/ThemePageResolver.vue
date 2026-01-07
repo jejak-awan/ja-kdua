@@ -30,18 +30,18 @@ const resolvedComponent = shallowRef(null)
 const viewModules = import.meta.glob('../views/themes/**/*.vue')
 
 async function resolveView() {
-  const themeSlug = activeTheme.value?.slug || 'default'
+  const themeSlug = activeTheme.value?.slug || 'janari'
   const pageName = props.page
   
   // 1. Try Active Theme
   const targetPath = `../views/themes/${themeSlug}/${pageName}.vue`
   
-  // 2. Fallback to Default Theme
-  const fallbackPath = `../views/themes/default/${pageName}.vue`
+  // 2. Fallback to Janari Theme
+  const fallbackPath = `../views/themes/janari/${pageName}.vue`
   
   let loader = viewModules[targetPath]
   
-  if (!loader && themeSlug !== 'default') {
+  if (!loader && themeSlug !== 'janari') {
     loader = viewModules[fallbackPath]
   }
   

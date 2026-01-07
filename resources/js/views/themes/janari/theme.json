@@ -1,9 +1,9 @@
 {
-    "name": "Default Theme",
-    "slug": "default",
-    "version": "2.0.0",
+    "name": "Janari",
+    "slug": "janari",
+    "version": "V.1.0",
     "type": "frontend",
-    "description": "JA-CMS Default Theme - A clean, modern, and professional Vue-based theme with extensive features.",
+    "description": "Janari Theme - A modern, elegant theme for JA-CMS",
     "author": "Jejakawan",
     "settings_schema": {
         "site_title": {
