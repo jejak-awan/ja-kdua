@@ -27,6 +27,12 @@ class SecurityHeaders
         $csp = $this->getContentSecurityPolicy();
         $response->headers->set('Content-Security-Policy', $csp);
 
+        // Standard Security Headers
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $response->headers->set('X-XSS-Protection', '1; mode=block');
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
         // Remove server signature
         $response->headers->remove('X-Powered-By');
 
