@@ -64,18 +64,88 @@
                     </div>
                 </router-link>
 
-                <!-- Desktop Nav -->
-                <nav class="hidden md:flex items-center gap-8">
-                    <router-link 
-                        v-for="item in navItems" 
-                        :key="item.id" 
-                        :to="item.url || '/'"
-                        class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group py-2"
-                        active-class="text-primary"
-                    >
-                        {{ item.title }}
-                        <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-                    </router-link>
+                <!-- Desktop Nav with Mega Menu Support -->
+                <nav class="hidden md:flex items-center gap-1">
+                    <template v-for="item in navItems" :key="item.id">
+                        <!-- Item with children = Dropdown/Mega Menu -->
+                        <div 
+                            v-if="item.children && item.children.length > 0"
+                            class="relative group"
+                        >
+                            <button 
+                                class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted/50"
+                            >
+                                <component 
+                                    v-if="item.icon" 
+                                    :is="getIconComponent(item.icon)" 
+                                    class="w-4 h-4" 
+                                />
+                                {{ item.title }}
+                                <ChevronDown class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />
+                            </button>
+                            
+                            <!-- Mega Menu Dropdown -->
+                            <div class="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div 
+                                    class="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-4 min-w-[280px]"
+                                    :class="{ 'grid grid-cols-2 gap-4 min-w-[500px]': item.children.length > 3 }"
+                                >
+                                    <router-link
+                                        v-for="child in item.children"
+                                        :key="child.id"
+                                        :to="child.url || '/'"
+                                        :target="child.open_in_new_tab ? '_blank' : null"
+                                        class="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
+                                    >
+                                        <div 
+                                            v-if="child.icon"
+                                            class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary/20 transition-colors"
+                                        >
+                                            <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
+                                                <span 
+                                                    v-if="child.badge"
+                                                    class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                                    :class="getBadgeClasses(child.badge_color)"
+                                                >
+                                                    {{ child.badge }}
+                                                </span>
+                                            </div>
+                                            <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                                {{ child.description }}
+                                            </p>
+                                        </div>
+                                    </router-link>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Simple nav item (no children) -->
+                        <router-link 
+                            v-else
+                            :to="item.url || '/'"
+                            :target="item.open_in_new_tab ? '_blank' : null"
+                            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted/50"
+                            active-class="text-primary bg-muted/50"
+                        >
+                            <component 
+                                v-if="item.icon" 
+                                :is="getIconComponent(item.icon)" 
+                                class="w-4 h-4" 
+                            />
+                            {{ item.title }}
+                            <span 
+                                v-if="item.badge"
+                                class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                :class="getBadgeClasses(item.badge_color)"
+                            >
+                                {{ item.badge }}
+                            </span>
+                        </router-link>
+                    </template>
                 </nav>
 
                 <!-- Actions -->
@@ -165,6 +235,8 @@ import { useMenu } from '../../../../composables/useMenu';
 import { useCmsStore } from '../../../../stores/cms';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
 import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
+import { ChevronDown } from 'lucide-vue-next';
+import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
 const { getSetting } = useTheme();
@@ -196,6 +268,23 @@ const headerStyleClasses = computed(() => {
             return 'bg-background/80 backdrop-blur-md border-b border-border';
     }
 });
+
+// Mega Menu Helpers
+const getIconComponent = (iconName) => {
+    return LucideIcons[iconName] || null;
+};
+
+const getBadgeClasses = (color) => {
+    const colorMap = {
+        primary: 'bg-primary text-primary-foreground',
+        secondary: 'bg-secondary text-secondary-foreground',
+        destructive: 'bg-destructive text-destructive-foreground',
+        success: 'bg-emerald-500 text-white',
+        warning: 'bg-amber-500 text-white',
+        default: 'bg-muted text-muted-foreground',
+    };
+    return colorMap[color] || colorMap.default;
+};
 
 onMounted(() => {
     fetchMenuByLocation('header');
