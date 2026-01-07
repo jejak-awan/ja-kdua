@@ -269,7 +269,7 @@ const {
 const fetchContent = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/contents/${contentId}`);
+        const response = await api.get(`/admin/ja/contents/${contentId}`);
         const content = parseSingleResponse(response) || {};
         
         form.value = {
@@ -335,7 +335,7 @@ const fetchContent = async () => {
 
 const lockContent = async () => {
     try {
-        const response = await api.post(`/admin/cms/contents/${contentId}/lock`);
+        const response = await api.post(`/admin/ja/contents/${contentId}/lock`);
         lockStatus.value = parseSingleResponse(response) || {};
         
         // Refresh lock status every 30 seconds
@@ -350,7 +350,7 @@ const lockContent = async () => {
 
 const checkLockStatus = async () => {
     try {
-        const response = await api.get(`/admin/cms/contents/${contentId}`);
+        const response = await api.get(`/admin/ja/contents/${contentId}`);
         const content = parseSingleResponse(response) || {};
         if (content.lock_status) {
             lockStatus.value = content.lock_status;
@@ -362,7 +362,7 @@ const checkLockStatus = async () => {
 
 const handleUnlock = async () => {
     try {
-        await api.post(`/admin/cms/contents/${contentId}/unlock`);
+        await api.post(`/admin/ja/contents/${contentId}/unlock`);
         lockStatus.value = { is_locked: false };
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
@@ -410,7 +410,7 @@ const formatDateTimeLocal = (dateString) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories');
+        const response = await api.get('/admin/ja/categories');
         const data = response.data?.data || response.data || [];
         categories.value = Array.isArray(data) ? data : [];
     } catch (error) {
@@ -421,7 +421,7 @@ const fetchCategories = async () => {
 
 const fetchTags = async () => {
     try {
-        const response = await api.get('/admin/cms/tags');
+        const response = await api.get('/admin/ja/tags');
         const data = response.data?.data || response.data || [];
         tags.value = Array.isArray(data) ? data : [];
     } catch (error) {
@@ -431,7 +431,7 @@ const fetchTags = async () => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/admin/cms/menus');
+        const response = await api.get('/admin/ja/menus');
         const data = response.data?.data || response.data || [];
         menus.value = Array.isArray(data) ? data : [];
     } catch (error) {
@@ -475,7 +475,7 @@ const handleSubmit = async () => {
             new_tags: newTags,
         };
 
-        const response = await api.put(`/admin/cms/contents/${contentId}`, payload);
+        const response = await api.put(`/admin/ja/contents/${contentId}`, payload);
         const updatedContent = parseSingleResponse(response);
         
         if (updatedContent) {

@@ -154,10 +154,10 @@ const handleSubmit = async () => {
     isSubmitting.value = true;
     try {
         if (props.redirect) {
-            await api.put(`/admin/cms/redirects/${props.redirect.id}`, form.value);
+            await api.put(`/admin/ja/redirects/${props.redirect.id}`, form.value);
             toast.success.update(t('features.redirects.title'));
         } else {
-            await api.post('/admin/cms/redirects', form.value);
+            await api.post('/admin/ja/redirects', form.value);
             toast.success.create(t('features.redirects.title'));
         }
         emit('saved');

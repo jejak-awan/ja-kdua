@@ -344,9 +344,9 @@ const formatDate = (date) => {
 const fetchData = async () => {
     try {
         const [rolesRes, usersRes, healthRes] = await Promise.all([
-            api.get('/admin/cms/roles'),
-            api.get('/admin/cms/users'),
-            api.get('/admin/cms/system/info')
+            api.get('/admin/ja/roles'),
+            api.get('/admin/ja/users'),
+            api.get('/admin/ja/system/info')
         ]);
         roles.value = parseResponse(rolesRes).data;
         users.value = parseResponse(usersRes).data;
@@ -358,7 +358,7 @@ const fetchData = async () => {
 
 const fetchHistory = async (page = 1) => {
     try {
-        const res = await api.get('/admin/cms/notifications/system', {
+        const res = await api.get('/admin/ja/notifications/system', {
             params: { page, limit: 10 }
         });
         const parsed = parseResponse(res);
@@ -430,7 +430,7 @@ const handleBulkRevoke = async () => {
 
     bulkRevoking.value = true;
     try {
-        await api.post('/admin/cms/notifications/system/bulk-revoke', {
+        await api.post('/admin/ja/notifications/system/bulk-revoke', {
             broadcasts: selectedItems.value
         });
         toast.success(t('features.system.notifications.messages.revoked'));
@@ -456,7 +456,7 @@ const handleRevoke = async (notification) => {
 
     revoking.value = notification.id;
     try {
-        await api.delete('/admin/cms/notifications/system/revoke', {
+        await api.delete('/admin/ja/notifications/system/revoke', {
             data: {
                 title: notification.title,
                 message: notification.message,
@@ -495,7 +495,7 @@ const handleSend = async () => {
 
     sending.value = true;
     try {
-        await api.post('/admin/cms/notifications/broadcast', form);
+        await api.post('/admin/ja/notifications/broadcast', form);
         toast.success(form.is_async 
             ? t('features.system.notifications.messages.sent') 
             : 'Notifikasi berhasil dikirim secara langsung'

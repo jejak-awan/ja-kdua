@@ -265,7 +265,7 @@ const slugify = (text) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories', { params: { tree: true } });
+        const response = await api.get('/admin/ja/categories', { params: { tree: true } });
         categories.value = response.data?.data || response.data || [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -274,7 +274,7 @@ const fetchCategories = async () => {
 
 const fetchCategory = async () => {
     try {
-        const response = await api.get(`/admin/cms/categories/${route.params.id}`);
+        const response = await api.get(`/admin/ja/categories/${route.params.id}`);
         const data = response.data?.data || response.data;
         currentCategory.value = data;
         form.value = {
@@ -305,7 +305,7 @@ const handleSubmit = async () => {
         if (payload.parent_id === 'null_value' || !payload.parent_id) {
             payload.parent_id = null;
         }
-        await api.put(`/admin/cms/categories/${route.params.id}`, payload);
+        await api.put(`/admin/ja/categories/${route.params.id}`, payload);
         
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Category');

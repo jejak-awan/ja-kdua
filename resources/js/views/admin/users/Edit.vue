@@ -283,7 +283,7 @@ const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
 const fetchRoles = async () => {
     loadingRoles.value = true;
     try {
-        const response = await api.get('/admin/cms/roles');
+        const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
     } catch (error) {
@@ -297,7 +297,7 @@ const fetchUser = async () => {
     loading.value = true;
     try {
         const userId = route.params.id;
-        const response = await api.get(`/admin/cms/users/${userId}`);
+        const response = await api.get(`/admin/ja/users/${userId}`);
         const data = parseSingleResponse(response);
         
         // Guard: hierarchy check
@@ -349,7 +349,7 @@ const handleSubmit = async () => {
         const payload = { ...form.value };
         if (!payload.password) delete payload.password;
         
-        await api.put(`/admin/cms/users/${route.params.id}`, payload);
+        await api.put(`/admin/ja/users/${route.params.id}`, payload);
         
         // Refresh auth user if updating self
         if (authStore.user?.id === Number(route.params.id)) {

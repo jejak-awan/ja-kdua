@@ -111,7 +111,7 @@ const statusBadgeClass = computed(() => {
 
 const fetchStats = async () => {
   try {
-    const response = await api.get('/admin/cms/system/statistics');
+    const response = await api.get('/admin/ja/system/statistics');
     const data = parseSingleResponse(response);
     if (data && data.email) {
       stats.value = data.email;
@@ -123,7 +123,7 @@ const fetchStats = async () => {
 
 const fetchLogs = async () => {
   try {
-    const response = await api.get('/admin/cms/email-test/recent-logs?limit=5');
+    const response = await api.get('/admin/ja/email-test/recent-logs?limit=5');
     const { data } = parseResponse(response);
     logs.value = data.logs || [];
   } catch (error) {

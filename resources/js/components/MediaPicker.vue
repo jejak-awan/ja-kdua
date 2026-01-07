@@ -374,8 +374,8 @@ const fetchMedia = async () => {
         
         // Fetch both folders and media in parallel
         const [foldersRes, mediaRes] = await Promise.all([
-             api.get('/admin/cms/media-folders', { params: { parent_id: folderId || 'null' } }),
-             api.get('/admin/cms/media', { params })
+             api.get('/admin/ja/media-folders', { params: { parent_id: folderId || 'null' } }),
+             api.get('/admin/ja/media', { params })
         ]);
 
         // Filter out any potential nulls

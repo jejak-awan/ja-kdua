@@ -60,7 +60,6 @@ const discussionSettingsGrouped = computed(() => {
     const discussionSettings = props.settings.filter(s => s && s.group === 'comments')
     
     // Debugging: Log settings to ensure we are receiving them
-    console.log('Discussion Settings:', discussionSettings);
 
     const groups = [
         {

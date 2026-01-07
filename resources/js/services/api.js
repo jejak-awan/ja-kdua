@@ -81,6 +81,7 @@ api.interceptors.request.use(
             config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken);
         }
 
+
         return config;
     },
     (error) => {

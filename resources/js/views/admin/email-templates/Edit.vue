@@ -210,7 +210,7 @@ const variables = ref([
 const fetchTemplate = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/email-templates/${templateId}`);
+        const response = await api.get(`/admin/ja/email-templates/${templateId}`);
         const template = parseSingleResponse(response) || {};
         
         form.value = {
@@ -231,7 +231,7 @@ const fetchTemplate = async () => {
 
 const previewTemplate = async () => {
     try {
-        const response = await api.post('/admin/cms/email-templates/preview', form.value);
+        const response = await api.post('/admin/ja/email-templates/preview', form.value);
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
@@ -244,7 +244,7 @@ const previewTemplate = async () => {
 
 const handleSendTest = async () => {
     try {
-        await api.post(`/admin/cms/email-templates/${templateId}/send-test`);
+        await api.post(`/admin/ja/email-templates/${templateId}/send-test`);
         toast.success.action(t('features.email_templates.form.testSent'));
     } catch (error) {
         console.error('Failed to send test email:', error);
@@ -259,7 +259,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.put(`/admin/cms/email-templates/${templateId}`, form.value);
+        await api.put(`/admin/ja/email-templates/${templateId}`, form.value);
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Email Template');
         router.push({ name: 'email-templates' });

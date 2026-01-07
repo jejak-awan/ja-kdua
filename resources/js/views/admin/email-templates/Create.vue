@@ -192,7 +192,7 @@ const variables = ref([
 
 const previewTemplate = async () => {
     try {
-        const response = await api.post('/admin/cms/email-templates/preview', form.value);
+        const response = await api.post('/admin/ja/email-templates/preview', form.value);
         const previewWindow = window.open('', '_blank');
         if (previewWindow) {
             previewWindow.document.write(response.data.html);
@@ -211,7 +211,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.post('/admin/cms/email-templates', form.value);
+        await api.post('/admin/ja/email-templates', form.value);
         toast.success.create('Email Template');
         router.push({ name: 'email-templates' });
     } catch (error) {

@@ -192,7 +192,7 @@ const {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories');
+        const response = await api.get('/admin/ja/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error) {
@@ -203,7 +203,7 @@ const fetchCategories = async () => {
 
 const fetchTags = async () => {
     try {
-        const response = await api.get('/admin/cms/tags');
+        const response = await api.get('/admin/ja/tags');
         const { data } = parseResponse(response);
         tags.value = ensureArray(data);
     } catch (error) {
@@ -213,7 +213,7 @@ const fetchTags = async () => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/admin/cms/menus');
+        const response = await api.get('/admin/ja/menus');
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
     } catch (error) {
@@ -250,8 +250,8 @@ const handleSubmit = async () => {
 
         // If content was auto-saved, use update endpoint
         const endpoint = contentId.value
-            ? `/admin/cms/contents/${contentId.value}`
-            : '/admin/cms/contents';
+            ? `/admin/ja/contents/${contentId.value}`
+            : '/admin/ja/contents';
         const method = contentId.value ? 'put' : 'post';
 
         const response = await method === 'put'

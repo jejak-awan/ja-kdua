@@ -200,7 +200,7 @@ const canManageMedia = authStore.hasPermission('manage media');
 
 const fetchFolders = async () => {
     try {
-        const response = await api.get('/admin/cms/media-folders');
+        const response = await api.get('/admin/ja/media-folders');
         folders.value = response.data.data || response.data || [];
     } catch (error) {
         // console.error('Failed to fetch folders:', error);
@@ -227,7 +227,7 @@ const loadMedia = () => {
 const handleSubmit = async () => {
     saving.value = true;
     try {
-        await api.put(`/admin/cms/media/${props.media.id}`, {
+        await api.put(`/admin/ja/media/${props.media.id}`, {
             name: form.value.name,
             alt: form.value.alt,
             description: form.value.description,

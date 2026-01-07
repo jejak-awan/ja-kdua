@@ -151,7 +151,7 @@ const slugify = (text) => {
 
 const fetchTag = async () => {
     try {
-        const response = await api.get(`/admin/cms/tags/${tagId}`);
+        const response = await api.get(`/admin/ja/tags/${tagId}`);
         const data = response.data?.data || response.data;
         form.value = {
             name: data.name || '',
@@ -174,7 +174,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.put(`/admin/cms/tags/${tagId}`, form.value);
+        await api.put(`/admin/ja/tags/${tagId}`, form.value);
         
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Tag');

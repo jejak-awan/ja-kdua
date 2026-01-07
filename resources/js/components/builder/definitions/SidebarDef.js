@@ -12,7 +12,7 @@ export default {
             key: 'location',
             type: 'data_select',
             label: 'Widget Area',
-            source: '/admin/cms/widgets/locations',
+            source: '/admin/ja/widgets/locations',
             description: 'Select which widget area to display here.',
             default: 'sidebar-1'
         },

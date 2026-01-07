@@ -595,7 +595,7 @@ const saveImage = async () => {
             formData.append('custom_filename', customFilename.value);
         }
 
-        await api.post(`/admin/cms/media/${props.media.id}/edit`, formData, {
+        await api.post(`/admin/ja/media/${props.media.id}/edit`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

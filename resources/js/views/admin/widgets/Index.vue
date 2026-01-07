@@ -103,7 +103,7 @@ const editingWidget = ref(null);
 const fetchWidgets = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/widgets');
+        const response = await api.get('/admin/ja/widgets');
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
     } catch (error) {
@@ -129,7 +129,7 @@ const deleteWidget = async (widget) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/widgets/${widget.id}`);
+        await api.delete(`/admin/ja/widgets/${widget.id}`);
         toast.success.delete(t('features.widgets.title'));
         fetchWidgets();
     } catch (error) {

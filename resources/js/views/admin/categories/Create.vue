@@ -254,7 +254,7 @@ const slugify = (text) => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories', { params: { tree: true } });
+        const response = await api.get('/admin/ja/categories', { params: { tree: true } });
         categories.value = response.data?.data || response.data || [];
     } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -273,7 +273,7 @@ const handleSubmit = async () => {
             payload.parent_id = null;
         }
         
-        await api.post('/admin/cms/categories', payload);
+        await api.post('/admin/ja/categories', payload);
         toast.success.create('Category');
         router.push({ name: 'categories' });
     } catch (error) {

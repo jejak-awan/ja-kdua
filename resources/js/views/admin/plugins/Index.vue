@@ -54,7 +54,7 @@ const selectedPlugin = ref(null);
 const fetchPlugins = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/plugins');
+        const response = await api.get('/admin/ja/plugins');
         const { data } = parseResponse(response);
         plugins.value = ensureArray(data);
     } catch (error) {
@@ -68,11 +68,11 @@ const fetchPlugins = async () => {
 const togglePlugin = async (plugin) => {
     try {
         if (plugin.is_active) {
-            await api.post(`/admin/cms/plugins/${plugin.id}/deactivate`);
+            await api.post(`/admin/ja/plugins/${plugin.id}/deactivate`);
             plugin.is_active = false;
             toast.success.action(t('features.developer.plugins.messages.deactivated'));
         } else {
-            await api.post(`/admin/cms/plugins/${plugin.id}/activate`);
+            await api.post(`/admin/ja/plugins/${plugin.id}/activate`);
             plugin.is_active = true;
             toast.success.action(t('features.developer.plugins.messages.activated'));
         }

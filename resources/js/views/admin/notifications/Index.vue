@@ -229,7 +229,7 @@ const fetchNotifications = async () => {
     }
     
     try {
-        const response = await api.get('/admin/cms/notifications');
+        const response = await api.get('/admin/ja/notifications');
         let data = [];
         
         // Handle paginated response structure: { success: true, data: { data: [...] } }
@@ -259,7 +259,7 @@ const fetchNotifications = async () => {
 
 const markAsRead = async (notification) => {
     try {
-        await api.put(`/admin/cms/notifications/${notification.id}/read`);
+        await api.put(`/admin/ja/notifications/${notification.id}/read`);
         toast.success(t('features.notifications.messages.markReadSuccess'));
         
         // Optimistic update
@@ -276,7 +276,7 @@ const markAsRead = async (notification) => {
 
 const markAllAsRead = async () => {
     try {
-        await api.put('/admin/cms/notifications/read-all');
+        await api.put('/admin/ja/notifications/read-all');
         toast.success(t('features.notifications.messages.markAllReadSuccess'));
         fetchNotifications();
     } catch (error) {
@@ -296,7 +296,7 @@ const deleteNotification = async (notification) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/notifications/${notification.id}`);
+        await api.delete(`/admin/ja/notifications/${notification.id}`);
         toast.success(t('features.notifications.messages.deleteSuccess'));
         
         // Optimistic update

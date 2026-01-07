@@ -218,7 +218,7 @@ const allSelected = computed(() => {
 async function fetchReports() {
   loading.value = true;
   try {
-    const response = await api.get('/admin/cms/security/csp-reports', { params: filters.value });
+    const response = await api.get('/admin/ja/security/csp-reports', { params: filters.value });
     reports.value = response.data.data.data;
     pagination.value = {
       total: response.data.data.total,
@@ -238,7 +238,7 @@ async function fetchReports() {
 
 async function fetchStatistics() {
   try {
-    const response = await api.get('/admin/cms/security/csp-reports/statistics');
+    const response = await api.get('/admin/ja/security/csp-reports/statistics');
     stats.value = response.data.data;
   } catch (error) {
     console.error('Failed to load statistics', error);
@@ -282,7 +282,7 @@ async function bulkAction(action) {
   if (!confirmed) return;
 
   try {
-    await api.post('/admin/cms/security/csp-reports/bulk-action', {
+    await api.post('/admin/ja/security/csp-reports/bulk-action', {
       ids: selectedReports.value,
       action,
     });

@@ -219,7 +219,7 @@ const { confirm } = useConfirm();
 const fetchRevisions = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/contents/${contentId}/revisions`);
+        const response = await api.get(`/admin/ja/contents/${contentId}/revisions`);
         revisions.value = response.data.data || response.data;
         
         // Get content title from first revision or fetch content
@@ -227,7 +227,7 @@ const fetchRevisions = async () => {
             contentTitle.value = revisions.value[0].data.title;
         } else {
             try {
-                const contentResponse = await api.get(`/admin/cms/contents/${contentId}`);
+                const contentResponse = await api.get(`/admin/ja/contents/${contentId}`);
                 contentTitle.value = contentResponse.data.data?.title || contentResponse.data.title || 'Content';
             } catch (error) {
                 contentTitle.value = 'Content';
@@ -242,7 +242,7 @@ const fetchRevisions = async () => {
 
 const viewRevision = async (revision) => {
     try {
-        const response = await api.get(`/admin/cms/contents/${contentId}/revisions/${revision.id}`);
+        const response = await api.get(`/admin/ja/contents/${contentId}/revisions/${revision.id}`);
         viewingRevision.value = response.data.data || response.data;
     } catch (error) {
         console.error('Failed to fetch revision detail:', error);
@@ -263,7 +263,7 @@ const restoreRevision = async (revision) => {
     }
 
     try {
-        await api.post(`/admin/cms/contents/${contentId}/revisions/${revision.id}/restore`);
+        await api.post(`/admin/ja/contents/${contentId}/revisions/${revision.id}/restore`);
         toast.success(t('common.messages.success.restored', { item: `v${revision.version}` }));
         router.push({ name: 'contents.edit', params: { id: contentId } });
     } catch (error) {

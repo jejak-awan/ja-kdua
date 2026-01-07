@@ -161,7 +161,7 @@ const groupedPermissions = computed(() => permissions.value);
 
 const fetchPermissions = async () => {
     try {
-        const response = await api.get('/admin/cms/roles/permissions');
+        const response = await api.get('/admin/ja/roles/permissions');
         permissions.value = response.data?.data || response.data || {};
     } catch (error) {
         console.error('Failed to fetch permissions:', error);
@@ -171,7 +171,7 @@ const fetchPermissions = async () => {
 
 const fetchRole = async () => {
     try {
-        const response = await api.get(`/admin/cms/roles/${route.params.id}`);
+        const response = await api.get(`/admin/ja/roles/${route.params.id}`);
         const role = response.data?.data || response.data;
         
         form.value = {
@@ -236,7 +236,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.put(`/admin/cms/roles/${route.params.id}`, form.value);
+        await api.put(`/admin/ja/roles/${route.params.id}`, form.value);
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Role');
         router.push({ name: 'roles' });

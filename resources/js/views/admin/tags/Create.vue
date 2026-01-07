@@ -144,7 +144,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.post('/admin/cms/tags', form.value);
+        await api.post('/admin/ja/tags', form.value);
         toast.success.create('Tag');
         router.push({ name: 'tags.index' });
     } catch (error) {

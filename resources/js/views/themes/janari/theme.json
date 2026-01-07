@@ -22,6 +22,26 @@
             "type": "media",
             "category": "General"
         },
+        "branding_display": {
+            "label": "Branding Display",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Logo only",
+                    "value": "logo_only"
+                },
+                {
+                    "label": "Site name only",
+                    "value": "text_only"
+                },
+                {
+                    "label": "Logo + Site name",
+                    "value": "both"
+                }
+            ],
+            "default": "logo_only",
+            "category": "General"
+        },
         "color_primary": {
             "label": "Primary Color",
             "type": "color",

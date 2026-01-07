@@ -241,7 +241,7 @@ const fetchSubscribers = async () => {
         if (params.trashed === 'without') {
             delete params.trashed;
         }
-        const response = await api.get('/admin/cms/newsletter/subscribers', { params });
+        const response = await api.get('/admin/ja/newsletter/subscribers', { params });
         const { data, pagination: pag } = parseResponse(response);
         subscribers.value = data;
         if (pag) {
@@ -286,10 +286,10 @@ const deleteSubscriber = async (subscriber) => {
 
     try {
         if (isTrashed) {
-             await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}/force-delete`);
+             await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}/force-delete`);
              toast.success.action(t('common.messages.success.deleted', { item: 'Subscriber' }));
         } else {
-            await api.delete(`/admin/cms/newsletter/subscribers/${subscriber.id}`);
+            await api.delete(`/admin/ja/newsletter/subscribers/${subscriber.id}`);
             toast.success.delete('Subscriber');
         }
         fetchSubscribers();
@@ -310,7 +310,7 @@ const restoreSubscriber = async (subscriber) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/cms/newsletter/subscribers/${subscriber.id}/restore`);
+        await api.post(`/admin/ja/newsletter/subscribers/${subscriber.id}/restore`);
         toast.success.restore('Subscriber');
         fetchSubscribers();
     } catch (error) {
@@ -321,7 +321,7 @@ const restoreSubscriber = async (subscriber) => {
 
 const exportCsv = async () => {
     try {
-        const response = await api.get('/admin/cms/newsletter/export', {
+        const response = await api.get('/admin/ja/newsletter/export', {
             params: { status: filters.value.status },
             responseType: 'blob',
         });
@@ -402,7 +402,7 @@ const bulkAction = async (action) => {
          }
 
          try {
-             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: action
              });
@@ -414,7 +414,7 @@ const bulkAction = async (action) => {
          }
     } else if (action === 'restore') {
          try {
-             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: 'restore'
              });
@@ -426,7 +426,7 @@ const bulkAction = async (action) => {
          }
     } else if (action === 'unsubscribe' || action === 'subscribe') {
          try {
-             await api.post('/admin/cms/newsletter/subscribers/bulk-action', {
+             await api.post('/admin/ja/newsletter/subscribers/bulk-action', {
                  ids: selectedIds.value,
                  action: action
              });

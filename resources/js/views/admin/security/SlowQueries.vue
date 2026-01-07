@@ -160,7 +160,7 @@ const pagination = ref({ total: 0, from: 0, to: 0, current_page: 1, last_page: 1
 async function fetchQueries() {
   loading.value = true;
   try {
-    const response = await api.get('/admin/cms/security/slow-queries', { params: filters.value });
+    const response = await api.get('/admin/ja/security/slow-queries', { params: filters.value });
     queries.value = response.data.data.data || [];
     pagination.value = {
       total: response.data.data.total || 0,
@@ -178,7 +178,7 @@ async function fetchQueries() {
 
 async function fetchStats() {
   try {
-    const response = await api.get('/admin/cms/security/slow-queries/statistics');
+    const response = await api.get('/admin/ja/security/slow-queries/statistics');
     stats.value = response.data.data || {};
   } catch (error) {
     console.error('Failed to fetch stats:', error);

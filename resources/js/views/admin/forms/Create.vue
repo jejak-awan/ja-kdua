@@ -240,7 +240,7 @@ const handleSubmit = async () => {
                 sort_order: index
             }))
         };
-        await api.post('/admin/cms/forms', payload);
+        await api.post('/admin/ja/forms', payload);
         toast.success.create('Form');
         router.push({ name: 'forms.index' });
     } catch (error) {

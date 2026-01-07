@@ -29,17 +29,39 @@
 
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <router-link to="/" class="flex items-center gap-2 group">
-                    <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'Janari')">
-                    <template v-else>
-                        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:bg-primary/90 transition-colors">
-                            {{ getSetting('site_title', 'Janari').substring(0, 2).toUpperCase() }}
+                <!-- Logo & Branding -->
+                <router-link to="/" class="flex items-center gap-3 group">
+                    <!-- Logo / Stylized Box -->
+                    <div 
+                        v-if="brandingDisplay !== 'text_only'"
+                        class="relative flex items-center justify-center overflow-hidden"
+                    >
+                        <img 
+                            v-if="siteLogo" 
+                            :src="siteLogo" 
+                            class="h-8 w-auto object-contain" 
+                            :alt="siteName"
+                        >
+                        <div 
+                            v-else
+                            class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:bg-primary/90 transition-colors"
+                        >
+                            {{ siteName.substring(0, 2).toUpperCase() }}
                         </div>
-                        <span class="text-xl font-bold text-foreground">
-                            {{ getSetting('site_title', 'Janari').substring(2) }}
+                    </div>
+
+                    <!-- Site Name -->
+                    <div 
+                        v-if="brandingDisplay !== 'logo_only'"
+                        class="flex flex-col"
+                    >
+                        <span class="text-xl font-bold text-foreground leading-none">
+                            {{ siteName }}
                         </span>
-                    </template>
+                        <span v-if="brandingDisplay === 'both'" class="text-[10px] font-medium text-muted-foreground mt-0.5">
+                            {{ siteVersion }}
+                        </span>
+                    </div>
                 </router-link>
 
                 <!-- Desktop Nav -->
@@ -140,6 +162,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
+import { useCmsStore } from '../../../../stores/cms';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
 import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
 
@@ -151,6 +174,14 @@ const isOpen = ref(false);
 
 const headerSticky = computed(() => getSetting('header_sticky', true));
 const headerStyle = computed(() => getSetting('header_style', 'glass'));
+const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only'));
+
+// Dynamic Branding Fallbacks
+const cmsStore = useCmsStore();
+const { siteSettings } = cmsStore;
+const siteName = computed(() => getSetting('site_title') || siteSettings?.site_name || 'Janari');
+const siteLogo = computed(() => getSetting('brand_logo') || siteSettings?.site_logo || '');
+const siteVersion = computed(() => siteSettings?.site_version || 'v1.0 Janari');
 
 const headerStyleClasses = computed(() => {
     switch (headerStyle.value) {

@@ -314,7 +314,7 @@ const stopDrag = () => {
 const fetchUsageDetail = async () => {
     loadingUsage.value = true;
     try {
-        const response = await api.get(`/admin/cms/media/${props.media.id}/usage`);
+        const response = await api.get(`/admin/ja/media/${props.media.id}/usage`);
         usageDetail.value = response.data.data || response.data || [];
     } catch (error) {
         console.error('Failed to fetch usage detail:', error);
@@ -327,7 +327,7 @@ const fetchUsageDetail = async () => {
 const generateThumbnail = async () => {
     generatingThumbnail.value = true;
     try {
-        await api.post(`/admin/cms/media/${props.media.id}/thumbnail`);
+        await api.post(`/admin/ja/media/${props.media.id}/thumbnail`);
         toast.success.thumbnail();
         emit('updated');
     } catch (error) {

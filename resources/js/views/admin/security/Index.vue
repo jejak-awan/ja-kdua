@@ -1091,7 +1091,7 @@ const paginatedWhitelist = computed(() => whitelist.value.slice(whitelistStartIn
 const fetchLogs = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/security/logs', {
+        const response = await api.get('/admin/ja/security/logs', {
             params: { per_page: logsPerPage.value }
         });
         const result = parseResponse(response);
@@ -1114,7 +1114,7 @@ const clearLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.delete('/admin/cms/security/logs');
+        await api.delete('/admin/ja/security/logs');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error) {
@@ -1125,7 +1125,7 @@ const clearLogs = async () => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/cms/security/stats');
+        const response = await api.get('/admin/ja/security/stats');
         statistics.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -1134,7 +1134,7 @@ const fetchStats = async () => {
 
 const fetchBlocklist = async () => {
     try {
-        const response = await api.get('/admin/cms/security/blocklist');
+        const response = await api.get('/admin/ja/security/blocklist');
         blocklist.value = ensureArray(parseSingleResponse(response));
     } catch (error) {
         console.error('Failed to fetch blocklist:', error);
@@ -1143,7 +1143,7 @@ const fetchBlocklist = async () => {
 
 const fetchWhitelist = async () => {
     try {
-        const response = await api.get('/admin/cms/security/whitelist');
+        const response = await api.get('/admin/ja/security/whitelist');
         whitelist.value = ensureArray(parseSingleResponse(response));
     } catch (error) {
         console.error('Failed to fetch whitelist:', error);
@@ -1167,7 +1167,7 @@ const blockIP = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/block-ip', { ip_address: ipToBlock.value });
+        await api.post('/admin/ja/security/block-ip', { ip_address: ipToBlock.value });
         toast.success.action(t('features.security.messages.blockSuccess'));
         ipToBlock.value = '';
         await fetchBlocklist();
@@ -1185,7 +1185,7 @@ const checkIPStatus = async () => {
     }
 
     try {
-        const response = await api.get('/admin/cms/security/check-ip', { params: { ip_address: ipToCheck.value } });
+        const response = await api.get('/admin/ja/security/check-ip', { params: { ip_address: ipToCheck.value } });
         ipStatus.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to check IP status:', error);
@@ -1209,8 +1209,8 @@ const unblockIP = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/unblock-ip', { ip_address: ipToUnblock.value });
-        await api.post('/admin/cms/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
+        await api.post('/admin/ja/security/unblock-ip', { ip_address: ipToUnblock.value });
+        await api.post('/admin/ja/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         ipToUnblock.value = '';
         await fetchBlocklist();
@@ -1232,7 +1232,7 @@ const blockIPFromLog = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/block-ip', { ip_address: ip });
+        await api.post('/admin/ja/security/block-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
@@ -1256,7 +1256,7 @@ const bulkBlockFromLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/bulk-block', { ips: selectedLogIds.value });
+        await api.post('/admin/ja/security/bulk-block', { ips: selectedLogIds.value });
         toast.success.action(t('features.security.messages.bulkBlockSuccess'));
         selectedLogIds.value = [];
         await fetchBlocklist();
@@ -1295,7 +1295,7 @@ const removeFromBlocklist = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/unblock-ip', { ip_address: ip });
+        await api.post('/admin/ja/security/unblock-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         await fetchBlocklist();
     } catch (error) {
@@ -1315,8 +1315,8 @@ const moveToWhitelist = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/unblock-ip', { ip_address: ip });
-        await api.post('/admin/cms/security/whitelist-ip', { ip_address: ip });
+        await api.post('/admin/ja/security/unblock-ip', { ip_address: ip });
+        await api.post('/admin/ja/security/whitelist-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.movedToWhitelist'));
         await fetchBlocklist();
         await fetchWhitelist();
@@ -1339,7 +1339,7 @@ const bulkUnblock = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/bulk-unblock', { ips: selectedBlocklistIds.value });
+        await api.post('/admin/ja/security/bulk-unblock', { ips: selectedBlocklistIds.value });
         toast.success.action(t('features.security.messages.bulkUnblockSuccess'));
         selectedBlocklistIds.value = [];
         await fetchBlocklist();
@@ -1373,7 +1373,7 @@ const addToWhitelist = async (ip) => {
     }
 
     try {
-        await api.post('/admin/cms/security/whitelist-ip', { ip_address: ip });
+        await api.post('/admin/ja/security/whitelist-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.whitelistSuccess'));
         ipToWhitelist.value = '';
         await fetchWhitelist();
@@ -1394,7 +1394,7 @@ const removeFromWhitelist = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/remove-whitelist', { data: { ip_address: ip } });
+        await api.post('/admin/ja/security/remove-whitelist', { data: { ip_address: ip } });
         toast.success.action(t('features.security.messages.whitelistRemoveSuccess'));
         await fetchWhitelist();
     } catch (error) {
@@ -1416,7 +1416,7 @@ const bulkRemoveWhitelist = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/security/bulk-remove-whitelist', { ips: selectedWhitelistIds.value });
+        await api.post('/admin/ja/security/bulk-remove-whitelist', { ips: selectedWhitelistIds.value });
         toast.success.action(t('features.security.messages.bulkWhitelistRemoveSuccess'));
         selectedWhitelistIds.value = [];
         await fetchWhitelist();
@@ -1522,7 +1522,7 @@ const fetchCspReports = async () => {
         const params = { ...cspFilters.value };
         if (params.status === 'all') params.status = '';
         
-        const response = await api.get('/admin/cms/security/csp-reports', { params });
+        const response = await api.get('/admin/ja/security/csp-reports', { params });
         const result = response.data?.data ? response.data.data : response.data;
         cspReports.value = result.data || [];
         cspPagination.value = {
@@ -1539,7 +1539,7 @@ const fetchCspReports = async () => {
 
 const fetchCspStats = async () => {
     try {
-        const response = await api.get('/admin/cms/security/csp-reports/statistics');
+        const response = await api.get('/admin/ja/security/csp-reports/statistics');
         cspStats.value = response.data?.data || {};
     } catch (error) {
         console.error('Failed to fetch CSP stats:', error);
@@ -1571,7 +1571,7 @@ const cspBulkAction = async (action) => {
     });
     if (!confirmed) return;
     try {
-        await api.post('/admin/cms/security/csp-reports/bulk-action', { ids: selectedCspReports.value, action });
+        await api.post('/admin/ja/security/csp-reports/bulk-action', { ids: selectedCspReports.value, action });
         toast.success.action(t('common.messages.success.actionSuccess', { item: 'Reports', action: action.replace('_', ' ') }));
         selectedCspReports.value = [];
         fetchCspReports();
@@ -1603,7 +1603,7 @@ const slowQueryPagination = ref({ total: 0, current_page: 1, last_page: 1 });
 const fetchSlowQueries = async () => {
     slowQueryLoading.value = true;
     try {
-        const response = await api.get('/admin/cms/security/slow-queries', { params: slowQueryFilters.value });
+        const response = await api.get('/admin/ja/security/slow-queries', { params: slowQueryFilters.value });
         slowQueries.value = response.data?.data?.data || [];
         slowQueryPagination.value = {
             total: response.data?.data?.total || 0,
@@ -1619,7 +1619,7 @@ const fetchSlowQueries = async () => {
 
 const fetchSlowQueryStats = async () => {
     try {
-        const response = await api.get('/admin/cms/security/slow-queries/statistics');
+        const response = await api.get('/admin/ja/security/slow-queries/statistics');
         slowQueryStats.value = response.data?.data || {};
     } catch (error) {
         console.error('Failed to fetch slow query stats:', error);
@@ -1654,7 +1654,7 @@ const vulnStats = ref({
 
 const fetchVulnStats = async () => {
     try {
-        const response = await api.get('/admin/cms/security/dependency-vulnerabilities/statistics');
+        const response = await api.get('/admin/ja/security/dependency-vulnerabilities/statistics');
         vulnStats.value = response.data?.data || {};
     } catch (error) {
         console.error('Failed to fetch vulnerability stats:', error);
@@ -1669,7 +1669,7 @@ const fetchVulnerabilities = async () => {
         if (params.severity === 'all') params.severity = '';
         if (params.status === 'all') params.status = '';
 
-        const response = await api.get('/admin/cms/security/dependency-vulnerabilities', { params });
+        const response = await api.get('/admin/ja/security/dependency-vulnerabilities', { params });
         const result = response.data?.data ? response.data.data : response.data;
         vulnerabilities.value = result.data || [];
         vulnPagination.value = {
@@ -1687,7 +1687,7 @@ const fetchVulnerabilities = async () => {
 const runDependencyAudit = async () => {
     auditRunning.value = true;
     try {
-        await api.post('/admin/cms/security/run-dependency-audit');
+        await api.post('/admin/ja/security/run-dependency-audit');
         toast.success.action(t('features.security.vulnerabilities.auditCompleted'));
         fetchVulnerabilities();
         fetchVulnStats();
@@ -1700,7 +1700,7 @@ const runDependencyAudit = async () => {
 
 const updateVulnStatus = async (vuln, status) => {
     try {
-        await api.put(`/admin/cms/security/dependency-vulnerabilities/${vuln.id}`, { status });
+        await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
         vuln.status = status;
         toast.success.action(t('common.messages.success.updated', { item: 'Status' }));
     } catch (error) {

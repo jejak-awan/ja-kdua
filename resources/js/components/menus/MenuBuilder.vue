@@ -304,7 +304,7 @@ const fetchMenu = async () => {
 
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/menus/${props.menuId}`);
+        const response = await api.get(`/admin/ja/menus/${props.menuId}`);
         menu.value = parseSingleResponse(response) || {};
         menuForm.value = {
             name: menu.value.name || '',
@@ -313,7 +313,7 @@ const fetchMenu = async () => {
         initialMenuForm.value = JSON.parse(JSON.stringify(menuForm.value));
         
         // Fetch menu items and build tree
-        const itemsResponse = await api.get(`/admin/cms/menus/${props.menuId}/items`);
+        const itemsResponse = await api.get(`/admin/ja/menus/${props.menuId}/items`);
         const { data } = parseResponse(itemsResponse);
         const flatItems = ensureArray(data);
         nestedItems.value = buildTree(flatItems);
@@ -360,7 +360,7 @@ const saveMenu = async () => {
             ...menuForm.value,
             location: menuForm.value.location === 'none' ? '' : menuForm.value.location
         };
-        await api.put(`/admin/cms/menus/${props.menuId}`, payload);
+        await api.put(`/admin/ja/menus/${props.menuId}`, payload);
         await saveTree(nestedItems.value, null);
         
         initialMenuForm.value = JSON.parse(JSON.stringify(menuForm.value));
@@ -394,7 +394,7 @@ const saveTree = async (items, parentId) => {
                 sort_order: i, 
             };
             
-            const response = await api.post(`/admin/cms/menus/${props.menuId}/items`, payload);
+            const response = await api.post(`/admin/ja/menus/${props.menuId}/items`, payload);
             const newItem = response.data?.data || response.data;
             item.id = newItem.id; 
         }
@@ -404,7 +404,7 @@ const saveTree = async (items, parentId) => {
         }
     }
     const reordered = flattenTree(nestedItems.value);
-    await api.post(`/admin/cms/menus/${props.menuId}/reorder`, { items: reordered });
+    await api.post(`/admin/ja/menus/${props.menuId}/reorder`, { items: reordered });
 };
 
 const addMenuItem = () => {
@@ -436,7 +436,7 @@ const deleteMenuItem = async (item) => {
 
     try {
         if (item.id && !item.id.toString().startsWith('temp_')) {
-            await api.delete(`/admin/cms/menus/${props.menuId}/items/${item.id}`);
+            await api.delete(`/admin/ja/menus/${props.menuId}/items/${item.id}`);
         }
         removeItemFromTree(nestedItems.value, item.id || item._temp_id);
         toast.success.action(t('features.menus.messages.itemDeleted'));
@@ -468,7 +468,7 @@ const locationOptions = ref([]);
 
 const fetchLocations = async () => {
     try {
-        const response = await api.get('/admin/cms/themes/active/locations');
+        const response = await api.get('/admin/ja/themes/active/locations');
         const data = response.data?.data || response.data || {};
         
         locationOptions.value = Object.entries(data).map(([key, label]) => ({
@@ -483,7 +483,7 @@ const fetchLocations = async () => {
 const fetchPages = async () => {
     try {
         // Updated to use same API logic as Edit.vue
-        const response = await api.get('/admin/cms/contents?type=page&status=published');
+        const response = await api.get('/admin/ja/contents?type=page&status=published');
         const { data } = parseResponse(response);
         pages.value = ensureArray(data);
     } catch (error) {
@@ -493,7 +493,7 @@ const fetchPages = async () => {
 
 const fetchPosts = async () => {
     try {
-        const response = await api.get('/admin/cms/contents?type=post&status=published');
+        const response = await api.get('/admin/ja/contents?type=post&status=published');
         const { data } = parseResponse(response);
         posts.value = ensureArray(data);
     } catch (error) {
@@ -503,7 +503,7 @@ const fetchPosts = async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories');
+        const response = await api.get('/admin/ja/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error) {

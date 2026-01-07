@@ -27,6 +27,7 @@ import {
     Loader2
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
+import { useCmsStore } from '@/stores/cms';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
@@ -56,11 +57,12 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const cmsStore = useCmsStore();
 const { confirm } = useConfirm();
 const toast = useToast();
 
 useHead({
-    title: computed(() => `${t('features.content.list.title')} | ${t('app.name')}`)
+    title: computed(() => `${t('features.content.list.title')} | ${cmsStore.siteSettings?.site_name || t('app.name')}`)
 });
 
 const loading = ref(true);
@@ -96,7 +98,7 @@ const fetchContents = async (page = 1) => {
             params.status = statusFilter.value;
         }
 
-        const response = await api.get('/admin/cms/contents', { params });
+        const response = await api.get('/admin/ja/contents', { params });
         
         const { data, pagination: meta } = parseResponse(response);
         
@@ -115,7 +117,7 @@ const fetchContents = async (page = 1) => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/cms/contents/stats');
+        const response = await api.get('/admin/ja/contents/stats');
         stats.value = response.data.data || {
             total: 0,
             published: 0,
@@ -146,7 +148,7 @@ const toggleFeatured = async (content) => {
     content.is_featured = !content.is_featured;
 
     try {
-        await api.patch(`/admin/cms/contents/${content.id}/toggle-featured`);
+        await api.patch(`/admin/ja/contents/${content.id}/toggle-featured`);
         toast.success.action(t('common.messages.success.updated'));
     } catch (error) {
         content.is_featured = previousState;
@@ -197,7 +199,7 @@ const handleBulkAction = async (action) => {
     }
 
     try {
-        await api.post('/admin/cms/contents/bulk-action', {
+        await api.post('/admin/ja/contents/bulk-action', {
             action: action,
             content_ids: selectedContents.value,
         });
@@ -221,7 +223,7 @@ const handleDelete = async (content) => {
     });
     if (!confirmed) return;
     try {
-        await api.delete(`/admin/cms/contents/${content.id}`);
+        await api.delete(`/admin/ja/contents/${content.id}`);
         await fetchContents();
         await fetchStats();
     } catch (error) {
@@ -241,7 +243,7 @@ const handleRestore = async (content) => {
     if (!confirmed) return;
 
     try {
-        await api.put(`/admin/cms/contents/${content.id}/restore`);
+        await api.put(`/admin/ja/contents/${content.id}/restore`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.restored') || 'Content restored');
@@ -260,7 +262,7 @@ const handleForceDelete = async (content) => {
     });
     if (!confirmed) return;
     try {
-        await api.delete(`/admin/cms/contents/${content.id}/force-delete`);
+        await api.delete(`/admin/ja/contents/${content.id}/force-delete`);
         await fetchContents();
         await fetchStats();
     } catch (error) {
@@ -280,7 +282,7 @@ const handlePreview = (content) => {
 
 const handleDuplicate = async (content) => {
     try {
-        await api.post(`/admin/cms/contents/${content.id}/duplicate`);
+        await api.post(`/admin/ja/contents/${content.id}/duplicate`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.duplicated') || 'Content duplicated');
@@ -292,7 +294,7 @@ const handleDuplicate = async (content) => {
 
 const handleApprove = async (content) => {
     try {
-        await api.patch(`/admin/cms/contents/${content.id}/approve`);
+        await api.patch(`/admin/ja/contents/${content.id}/approve`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('features.content.messages.approved') || 'Content approved');
@@ -313,7 +315,7 @@ const handleReject = async (content) => {
     });
     if (reason === false) return;
     try {
-        await api.patch(`/admin/cms/contents/${content.id}/reject`, { reason_for_rejection: reason });
+        await api.patch(`/admin/ja/contents/${content.id}/reject`, { reason_for_rejection: reason });
         await fetchContents();
         await fetchStats();
         toast.success.action(t('features.content.messages.rejected') || 'Content rejected');

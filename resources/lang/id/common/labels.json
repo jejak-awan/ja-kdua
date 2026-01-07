@@ -64,5 +64,8 @@
     "deleted": "Dihapus",
     "loading": "Memuat",
     "warning": "Peringatan",
-    "trash": "Sampah"
+    "trash": "Sampah",
+    "app": {
+        "name": "JA CMS"
+    }
 }

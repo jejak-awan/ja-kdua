@@ -147,7 +147,7 @@ const handleEventDrop = async (info) => {
     const newDate = info.event.start;
 
     try {
-        await api.put(`/admin/cms/contents/${contentId}`, {
+        await api.put(`/admin/ja/contents/${contentId}`, {
             published_at: newDate.toISOString().split('T')[0],
         });
         await fetchContents();
@@ -171,7 +171,7 @@ const handleDateClick = (info) => {
 
 const fetchContents = async () => {
     try {
-        const response = await api.get('/admin/cms/contents', {
+        const response = await api.get('/admin/ja/contents', {
             params: {
                 per_page: 1000, // Get all for calendar
             },
@@ -186,7 +186,7 @@ const fetchContents = async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await api.get('/admin/cms/categories');
+        const response = await api.get('/admin/ja/categories');
         const { data } = parseResponse(response);
         categories.value = ensureArray(data);
     } catch (error) {

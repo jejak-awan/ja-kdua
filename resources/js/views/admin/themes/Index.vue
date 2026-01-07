@@ -255,7 +255,7 @@ const selectedTheme = ref(null);
 const fetchThemes = async () => {
     try {
         const params = selectedType.value ? { type: selectedType.value } : {};
-        const response = await api.get('/admin/cms/themes', { params });
+        const response = await api.get('/admin/ja/themes', { params });
         const { data } = parseResponse(response);
         themes.value = ensureArray(data);
     } catch (error) {
@@ -267,7 +267,7 @@ const fetchThemes = async () => {
 const scanThemes = async () => {
     scanning.value = true;
     try {
-        const response = await api.post('/admin/cms/themes/scan');
+        const response = await api.post('/admin/ja/themes/scan');
         await fetchThemes();
         const count = response.data?.data?.count || 0;
         toast.success(t('features.themes.messages.scanSuccess', { count }));
@@ -290,7 +290,7 @@ const activateTheme = async (theme) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/cms/themes/${theme.id}/activate`);
+        await api.post(`/admin/ja/themes/${theme.id}/activate`);
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error) {
@@ -301,7 +301,7 @@ const activateTheme = async (theme) => {
 
 const validateTheme = async (theme) => {
     try {
-        const response = await api.post(`/admin/cms/themes/${theme.id}/validate`);
+        const response = await api.post(`/admin/ja/themes/${theme.id}/validate`);
         const data = response.data?.data || response.data;
         
         if (data.valid) {
@@ -332,7 +332,6 @@ const openCustomizer = (theme) => {
 
 const handleCustomizerSaved = () => {
     fetchThemes();
-    showCustomizerModal.value = false;
 };
 
 onMounted(() => {

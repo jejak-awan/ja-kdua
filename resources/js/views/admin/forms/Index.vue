@@ -414,7 +414,7 @@ const fetchForms = async () => {
             params.trashed = trashedFilter.value;
         }
 
-        const response = await api.get('/admin/cms/forms', { params });
+        const response = await api.get('/admin/ja/forms', { params });
         const { data } = parseResponse(response);
         forms.value = ensureArray(data);
     } catch (error) {
@@ -435,7 +435,7 @@ const viewSubmissions = (form) => {
 
 const toggleFormStatus = async (form) => {
     try {
-        const response = await api.put(`/admin/cms/forms/${form.id}`, {
+        const response = await api.put(`/admin/ja/forms/${form.id}`, {
             is_active: !form.is_active
         });
         const updatedForm = response.data?.data || response.data;
@@ -461,7 +461,7 @@ const deleteForm = async (form) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/forms/${form.id}`);
+        await api.delete(`/admin/ja/forms/${form.id}`);
         toast.success.delete('Form');
         fetchForms();
     } catch (error) {
@@ -483,7 +483,7 @@ const bulkDelete = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/forms/bulk-action', { 
+        await api.post('/admin/ja/forms/bulk-action', { 
             ids: selectedIds.value,
             action: 'delete'
         });
@@ -498,7 +498,7 @@ const bulkDelete = async () => {
 
 const duplicateForm = async (form) => {
     try {
-        await api.post(`/admin/cms/forms/${form.id}/duplicate`);
+        await api.post(`/admin/ja/forms/${form.id}/duplicate`);
         toast.success.duplicate('Form');
         fetchForms();
     } catch (error) {
@@ -518,7 +518,7 @@ const restoreForm = async (form) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/cms/forms/${form.id}/restore`);
+        await api.post(`/admin/ja/forms/${form.id}/restore`);
         toast.success.restore('Form');
         fetchForms();
     } catch (error) {
@@ -538,7 +538,7 @@ const forceDeleteForm = async (form) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/forms/${form.id}/force-delete`);
+        await api.delete(`/admin/ja/forms/${form.id}/force-delete`);
         toast.success.action(t('common.messages.success.deleted', { item: 'Form' }));
         fetchForms();
     } catch (error) {
@@ -606,7 +606,7 @@ const handleBulkAction = async (value) => {
 
 const performBulkAction = async (action) => {
     try {
-        await api.post('/admin/cms/forms/bulk-action', { 
+        await api.post('/admin/ja/forms/bulk-action', { 
             ids: selectedIds.value,
             action: action
         });

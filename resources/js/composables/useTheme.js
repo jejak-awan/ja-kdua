@@ -32,7 +32,7 @@ export function useTheme() {
             // Use public endpoint for frontend theme (no auth required)
             const endpoint = type === 'frontend'
                 ? `/cms/themes/active?type=${type}`
-                : `/admin/cms/themes/active?type=${type}`;
+                : `/admin/ja/themes/active?type=${type}`;
 
             const response = await api.get(endpoint);
             const data = response.data?.data || response.data;

@@ -288,7 +288,7 @@ const isDirty = computed(() => {
 
 const fetchRobotsTxt = async () => {
     try {
-        const response = await api.get('/admin/cms/seo/robots-txt');
+        const response = await api.get('/admin/ja/seo/robots-txt');
         const data = parseSingleResponse(response) || {};
         robotsContent.value = data.content || '';
         initialRobotsContent.value = robotsContent.value;
@@ -300,7 +300,7 @@ const fetchRobotsTxt = async () => {
 const saveRobotsTxt = async () => {
     savingRobots.value = true;
     try {
-        await api.put('/admin/cms/seo/robots-txt', { content: robotsContent.value });
+        await api.put('/admin/ja/seo/robots-txt', { content: robotsContent.value });
         initialRobotsContent.value = robotsContent.value;
         toast.success.save();
     } catch (error) {
@@ -314,7 +314,7 @@ const saveRobotsTxt = async () => {
 const generateSitemap = async () => {
     generatingSitemap.value = true;
     try {
-        await api.get('/admin/cms/seo/sitemap');
+        await api.get('/admin/ja/seo/sitemap');
         toast.success.action(t('features.seo.sitemap.generated'));
     } catch (error) {
         console.error('Failed to generate sitemap:', error);
@@ -331,7 +331,7 @@ const copySitemapUrl = () => {
 
 const fetchContents = async () => {
     try {
-        const response = await api.get('/admin/cms/contents');
+        const response = await api.get('/admin/ja/contents');
         const { data } = parseResponse(response);
         contents.value = ensureArray(data);
     } catch (error) {
@@ -345,7 +345,7 @@ const runAnalysis = async () => {
     
     analyzing.value = true;
     try {
-        const response = await api.get(`/admin/cms/contents/${selectedContentId.value}/seo-analysis`);
+        const response = await api.get(`/admin/ja/contents/${selectedContentId.value}/seo-analysis`);
         analysisResults.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to run SEO analysis:', error);
@@ -360,7 +360,7 @@ const generateSchema = async () => {
     
     generatingSchema.value = true;
     try {
-        const response = await api.get(`/admin/cms/contents/${selectedContentForSchema.value}/schema`);
+        const response = await api.get(`/admin/ja/contents/${selectedContentForSchema.value}/schema`);
         const schema = parseSingleResponse(response) || {};
         schemaJson.value = JSON.stringify(schema, null, 2);
     } catch (error) {

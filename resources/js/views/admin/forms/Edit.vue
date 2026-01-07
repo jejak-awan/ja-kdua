@@ -210,7 +210,7 @@ const isDirty = computed(() => {
 const fetchForm = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/forms/${route.params.id}`);
+        const response = await api.get(`/admin/ja/forms/${route.params.id}`);
         const data = response.data?.data || response.data;
         formId.value = data.id;
         Object.assign(formData, {
@@ -258,7 +258,7 @@ const handleSubmit = async () => {
                 sort_order: index
             }))
         };
-        await api.put(`/admin/cms/forms/${route.params.id}`, payload);
+        await api.put(`/admin/ja/forms/${route.params.id}`, payload);
         initialForm.value = JSON.parse(JSON.stringify(formData));
         toast.success.update('Form');
         router.push({ name: 'forms.index' });

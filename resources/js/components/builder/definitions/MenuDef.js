@@ -12,7 +12,7 @@ export default {
             key: 'menu_id',
             type: 'data_select',
             label: 'System Menu',
-            source: '/admin/cms/menus',
+            source: '/admin/ja/menus',
             description: 'Select a menu managed in the Menu Builder.',
             default: null
         },

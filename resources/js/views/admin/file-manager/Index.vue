@@ -1125,7 +1125,7 @@ const paginatedFiles = computed(() => {
 const fetchFiles = async (path = currentPath.value) => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/file-manager', {
+        const response = await api.get('/admin/ja/file-manager', {
             params: { path },
         });
         const data = parseSingleResponse(response) || {};
@@ -1167,7 +1167,7 @@ const fetchFiles = async (path = currentPath.value) => {
 const fetchCurrentPath = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/file-manager', {
+        const response = await api.get('/admin/ja/file-manager', {
             params: { path: currentPath.value },
         });
         const data = parseSingleResponse(response) || {};
@@ -1371,7 +1371,7 @@ const showBackgroundContextMenu = (event) => {
 const extractFile = async (file) => {
     loading.value = true;
     try {
-        await api.post('/admin/cms/file-manager/extract', {
+        await api.post('/admin/ja/file-manager/extract', {
             path: file.path
         });
         
@@ -1393,7 +1393,7 @@ const extractFile = async (file) => {
 const compressItems = async (paths) => {
     loading.value = true;
     try {
-        await api.post('/admin/cms/file-manager/compress', {
+        await api.post('/admin/ja/file-manager/compress', {
             paths: paths
         });
         
@@ -1426,7 +1426,7 @@ const pasteFromClipboard = async (destinationPath) => {
     loading.value = true;
     try {
         const promises = clipboard.value.items.map(async (item) => {
-            const endpoint = clipboard.value.action === 'move' ? '/admin/cms/file-manager/move' : '/admin/cms/file-manager/copy';
+            const endpoint = clipboard.value.action === 'move' ? '/admin/ja/file-manager/move' : '/admin/ja/file-manager/copy';
             
             // For move/copy ops
             return api.post(endpoint, {
@@ -1523,7 +1523,7 @@ const onDrop = async (event, targetFolder) => {
 
 const moveItem = async (sourcePath, destinationPath, type) => {
     try {
-        await api.post('/admin/cms/file-manager/move', {
+        await api.post('/admin/ja/file-manager/move', {
             source: sourcePath.replace(/^\//, ''),
             destination: destinationPath === '/' ? '' : destinationPath.replace(/^\//, ''),
             type: type
@@ -1553,7 +1553,7 @@ const deleteFolderAction = async (folder) => {
     if (!confirmed) return;
     
     try {
-        await api.delete('/admin/cms/file-manager/folder', {
+        await api.delete('/admin/ja/file-manager/folder', {
             params: { path: folder.path.replace(/^\//, '') },
         });
         
@@ -1579,7 +1579,7 @@ const deleteFileAction = async (file) => {
     if (!confirmed) return;
     
     try {
-        await api.delete('/admin/cms/file-manager', {
+        await api.delete('/admin/ja/file-manager', {
             params: { path: file.path.replace(/^\//, '') },
         });
         await fetchFiles();
@@ -1661,13 +1661,13 @@ const bulkDelete = async () => {
             const isFolder = allFolders.value.find(f => f.path === path);
             
             if (isFolder) {
-                await api.delete('/admin/cms/file-manager/folder', {
+                await api.delete('/admin/ja/file-manager/folder', {
                     params: { path: path.replace(/^\//, '') },
                 });
                 // Remove from cache
                 allFolders.value = allFolders.value.filter(f => f.path !== path);
             } else {
-                await api.delete('/admin/cms/file-manager', {
+                await api.delete('/admin/ja/file-manager', {
                     params: { path: path.replace(/^\//, '') },
                 });
             }
@@ -1719,7 +1719,7 @@ const formatFileSize = (bytes) => {
 const fetchTrash = async () => {
     trashLoading.value = true;
     try {
-        const response = await api.get('/admin/cms/file-manager/trash');
+        const response = await api.get('/admin/ja/file-manager/trash');
         const data = parseSingleResponse(response.data);
         trashItems.value = data.items || [];
     } catch (error) {
@@ -1733,7 +1733,7 @@ const fetchTrash = async () => {
 // Restore item from trash
 const restoreItem = async (item) => {
     try {
-        await api.post('/admin/cms/file-manager/restore', { id: item.id });
+        await api.post('/admin/ja/file-manager/restore', { id: item.id });
         // Refresh trash and files
         await fetchTrash();
         filesCache.value.clear();
@@ -1758,7 +1758,7 @@ const emptyTrash = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/file-manager/trash/empty');
+        await api.post('/admin/ja/file-manager/trash/empty');
         toast.success(t('features.file_manager.messages.trashEmptied'));
         fetchTrashItems();
     } catch (error) {
@@ -1780,10 +1780,10 @@ const permanentDelete = async (item) => {
 
     try {
         if (item.type === 'folder') {
-            await api.delete(`/admin/cms/file-manager/trash/folder/${item.id}`);
+            await api.delete(`/admin/ja/file-manager/trash/folder/${item.id}`);
             toast.success(t('features.file_manager.messages.folderDeleted'));
         } else {
-            await api.delete(`/admin/cms/file-manager/trash/${item.id}`);
+            await api.delete(`/admin/ja/file-manager/trash/${item.id}`);
             toast.success(t('features.file_manager.messages.fileDeleted'));
         }
         fetchTrashItems();

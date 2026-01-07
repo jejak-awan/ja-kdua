@@ -586,7 +586,7 @@ const fetchMenuParentItems = async (menuId) => {
     
     loadingParentItems.value = true;
     try {
-        const response = await api.get(`/admin/cms/menus/${menuId}/items`);
+        const response = await api.get(`/admin/ja/menus/${menuId}/items`);
         const data = response.data?.data || response.data || [];
         // Flatten logic or just basic list? Usually API returns tree or flat.
         // Assuming flat list or need flattening. If tree, need to flatten for select.

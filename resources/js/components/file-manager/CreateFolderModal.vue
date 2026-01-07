@@ -81,7 +81,7 @@ const handleSubmit = async () => {
     creating.value = true;
     clearErrors();
     try {
-        await api.post('/admin/cms/file-manager/folder', {
+        await api.post('/admin/ja/file-manager/folder', {
             name: folderName.value,
             path: props.path,
         });

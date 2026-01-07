@@ -425,7 +425,7 @@ const fetchRoles = async (page = 1) => {
             search: search.value,
             limit: 12 // Adjust generic limit
         };
-        const response = await api.get('/admin/cms/roles', { params });
+        const response = await api.get('/admin/ja/roles', { params });
         
         // Handle pagination response structure
         const data = response.data?.data || response.data || [];
@@ -512,7 +512,7 @@ const handleBulkAction = async (action) => {
         }
 
         try {
-            await api.post('/admin/cms/roles/bulk-action', {
+            await api.post('/admin/ja/roles/bulk-action', {
                 action: 'delete',
                 ids: selectedRoles.value
             });
@@ -543,7 +543,7 @@ const deleteRole = async (role) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/roles/${role.id}`);
+        await api.delete(`/admin/ja/roles/${role.id}`);
         toast.success.delete('Role');
          fetchRoles(pagination.value.current_page);
     } catch (error) {
@@ -554,7 +554,7 @@ const deleteRole = async (role) => {
 
 const duplicateRole = async (role) => {
     try {
-        await api.post(`/admin/cms/roles/${role.id}/duplicate`);
+        await api.post(`/admin/ja/roles/${role.id}/duplicate`);
         toast.success.duplicate();
         fetchRoles(pagination.value.current_page);
     } catch (error) {

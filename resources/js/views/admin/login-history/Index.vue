@@ -213,7 +213,7 @@ const fetchHistory = async (page = 1) => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 
-        const response = await api.get(`/admin/cms/login-history?${params.toString()}`);
+        const response = await api.get(`/admin/ja/login-history?${params.toString()}`);
         
         // Parse nested response
         let data = [];
@@ -234,7 +234,7 @@ const fetchHistory = async (page = 1) => {
 
 const fetchStatistics = async () => {
     try {
-        const response = await api.get('/admin/cms/login-history/statistics');
+        const response = await api.get('/admin/ja/login-history/statistics');
         statistics.value = response.data?.data || response.data;
     } catch (error) {
         console.error('Failed to fetch statistics:', error);
@@ -243,7 +243,7 @@ const fetchStatistics = async () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await api.get('/admin/cms/users');
+        const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error) {
@@ -268,7 +268,7 @@ const clearLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/login-history/clear');
+        await api.post('/admin/ja/login-history/clear');
         await fetchHistory();
         await fetchStatistics();
         toast.success.action(t('features.system.logs.messages.cleared') || 'Logs cleared successfully');
@@ -287,7 +287,7 @@ const exportHistory = async () => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
 
-        const response = await api.get(`/admin/cms/login-history/export?${params.toString()}`, {
+        const response = await api.get(`/admin/ja/login-history/export?${params.toString()}`, {
             responseType: 'blob'
         });
 

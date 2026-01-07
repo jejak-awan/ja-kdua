@@ -210,7 +210,7 @@ const uploadFile = async () => {
     if (effectiveConstraints.value.maxHeight) formData.append('max_height', effectiveConstraints.value.maxHeight);
 
     try {
-        const response = await api.post('/admin/cms/media/upload', formData, {
+        const response = await api.post('/admin/ja/media/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

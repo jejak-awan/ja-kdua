@@ -977,7 +977,7 @@ const fetchMedia = async () => {
             params.usage = usageFilter.value;
         }
 
-        const response = await api.get('/admin/cms/media', { params });
+        const response = await api.get('/admin/ja/media', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         mediaList.value = ensureArray(data);
         if (paginationData) {
@@ -992,7 +992,7 @@ const fetchMedia = async () => {
 
 const fetchStatistics = async () => {
     try {
-        const response = await api.get('/admin/cms/media/statistics');
+        const response = await api.get('/admin/ja/media/statistics');
         statistics.value = response.data?.data || response.data;
     } catch (error) {
         // console.error('Failed to fetch media statistics:', error);
@@ -1003,7 +1003,7 @@ const fetchFolders = async () => {
     try {
         // For sidebar: only fetch active folders (not trashed)
         // Trashed folders will be handled separately with media in trash mode
-        const response = await api.get('/admin/cms/media-folders', { 
+        const response = await api.get('/admin/ja/media-folders', { 
             params: { 
                 tree: true
                 // Don't include trashed: 'with' - we want clean sidebar
@@ -1031,7 +1031,7 @@ const fetchFolders = async () => {
 
 const restoreMedia = async (media) => {
     try {
-        await api.post(`/admin/cms/media/${media.id}/restore`);
+        await api.post(`/admin/ja/media/${media.id}/restore`);
         await fetchMedia();
         fetchStatistics();
     } catch (error) {
@@ -1053,7 +1053,7 @@ const emptyTrash = async () => {
     }
     
     try {
-        await api.delete('/admin/cms/media/empty-trash');
+        await api.delete('/admin/ja/media/empty-trash');
         await fetchMedia();
         await fetchFolders();
         fetchStatistics();
@@ -1121,7 +1121,7 @@ const handleBulkAction = async () => {
         bulkProcessing.value = true;
         bulkProgress.value = 0;
         try {
-            await api.post('/admin/cms/media/bulk-action', {
+            await api.post('/admin/ja/media/bulk-action', {
                 action: 'delete',
                 ids: selectedMedia.value,
             });
@@ -1140,7 +1140,7 @@ const handleBulkAction = async () => {
     } else if (action === 'restore') {
         bulkProcessing.value = true;
         try {
-            await api.post('/admin/cms/media/bulk-action', {
+            await api.post('/admin/ja/media/bulk-action', {
                 action: 'restore',
                 ids: selectedMedia.value,
             });
@@ -1169,7 +1169,7 @@ const handleBulkAction = async () => {
         }
         bulkProcessing.value = true;
         try {
-            await api.post('/admin/cms/media/bulk-action', {
+            await api.post('/admin/ja/media/bulk-action', {
                 action: 'delete_permanent',
                 ids: selectedMedia.value,
             });
@@ -1193,7 +1193,7 @@ const handleBulkAction = async () => {
         try {
             // Download ZIP file
             const response = await api.post(
-                '/admin/cms/media/download-zip',
+                '/admin/ja/media/download-zip',
                 { ids: selectedMedia.value },
                 { responseType: 'blob' }
             );
@@ -1229,7 +1229,7 @@ const handleMoveToFolder = async (folderId) => {
     bulkProcessing.value = true;
     bulkProgress.value = 0;
     try {
-        await api.post('/admin/cms/media/bulk-action', {
+        await api.post('/admin/ja/media/bulk-action', {
             action: 'move',
             ids: selectedMedia.value,
             folder_id: folderId,
@@ -1257,7 +1257,7 @@ const handleUpdateAltText = async () => {
     bulkProcessing.value = true;
     bulkProgress.value = 0;
     try {
-        await api.post('/admin/cms/media/bulk-action', {
+        await api.post('/admin/ja/media/bulk-action', {
             action: 'update_alt',
             ids: selectedMedia.value,
             alt_text: bulkAltText.value,
@@ -1310,10 +1310,10 @@ const deleteMedia = async (media) => {
     try {
         if (isPermanent) {
             // Use force-delete endpoint for permanent deletion
-            await api.delete(`/admin/cms/media/${media.id}/force-delete`);
+            await api.delete(`/admin/ja/media/${media.id}/force-delete`);
         } else {
             // Regular soft delete
-            await api.delete(`/admin/cms/media/${media.id}`);
+            await api.delete(`/admin/ja/media/${media.id}`);
         }
         await fetchMedia();
         fetchStatistics();
@@ -1343,7 +1343,7 @@ const deleteFolder = async (folder) => {
     }
 
     try {
-        await api.delete(`/admin/cms/media-folders/${folder.id}`, {
+        await api.delete(`/admin/ja/media-folders/${folder.id}`, {
             params: { permanent: isPermanent ? 1 : 0 }
         });
         await fetchFolders(); // Refresh tree

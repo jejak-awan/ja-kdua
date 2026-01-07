@@ -236,7 +236,7 @@ const fetchStats = async () => {
     try {
         // If user can manage system, get system-wide statistics
         if (authStore.hasPermission('manage system')) {
-            const response = await api.get('/admin/cms/system/statistics');
+            const response = await api.get('/admin/ja/system/statistics');
             const data = parseSingleResponse(response);
             
             if (data) {
@@ -257,7 +257,7 @@ const fetchStats = async () => {
         } 
         // Otherwise, if they can at least view content, get their personal content stats
         else if (authStore.hasPermission('view content')) {
-            const response = await api.get('/admin/cms/contents/stats');
+            const response = await api.get('/admin/ja/contents/stats');
             const data = parseSingleResponse(response);
             
             if (data) {
@@ -271,7 +271,7 @@ const fetchStats = async () => {
             // Also try to get media stats if allowed
             if (authStore.hasPermission('view media')) {
                 try {
-                    const mediaResponse = await api.get('/admin/cms/media/statistics');
+                    const mediaResponse = await api.get('/admin/ja/media/statistics');
                     const mediaData = parseSingleResponse(mediaResponse);
                     if (mediaData) {
                         stats.value.media = { total: mediaData.total_count ?? 0 };
@@ -304,7 +304,7 @@ const fetchTraffic = async () => {
             date_to: endDate.toISOString().split('T')[0],
         };
 
-        const response = await api.get('/admin/cms/analytics/visits', { params });
+        const response = await api.get('/admin/ja/analytics/visits', { params });
         const data = parseResponse(response);
         const totalVisits = ensureArray(data.data);
         

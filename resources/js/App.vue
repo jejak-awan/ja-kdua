@@ -33,8 +33,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useAuthStore } from './stores/auth';
+import { useCmsStore } from './stores/cms';
 import { useTheme } from './composables/useTheme';
 import { useSessionTimeout } from './composables/useSessionTimeout';
 import { useLanguage } from './composables/useLanguage';
@@ -48,6 +49,7 @@ import GlobalErrorModal from './components/GlobalErrorModal.vue';
 import { setToastInstance } from './services/toast';
 
 const authStore = useAuthStore();
+const cmsStore = useCmsStore();
 const { loadActiveTheme } = useTheme();
 const { initializeLanguage } = useLanguage();
 const { confirmState } = useConfirm();
@@ -62,6 +64,34 @@ const {
     extendSession,
     manualLogout,
 } = useSessionTimeout();
+
+const { themeSettings } = useTheme();
+
+// Watch for favicon changes to update browser tab dynamically
+watch(
+    [() => themeSettings.value?.brand_favicon, () => cmsStore.siteSettings?.site_favicon],
+    ([themeFav, siteFav]) => {
+        const activeFavicon = themeFav || siteFav || '/favicon.svg';
+        
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = activeFavicon;
+        
+        // Also update standard favicon.ico if it exists to be safe
+        const icoLink = document.querySelector("link[href$='favicon.ico']");
+        if (icoLink) icoLink.href = activeFavicon;
+    }, 
+    { immediate: true }
+);
+
+// Watch for site name changes to update browser tab title dynamically
+watch(() => cmsStore.siteSettings?.site_name, (newName) => {
+    document.title = newName || 'JA CMS';
+}, { immediate: true });
 
 // Initialize dark mode from localStorage or system preference
 const initDarkMode = () => {
@@ -119,6 +149,11 @@ onMounted(async () => {
     // Theme loading failure shouldn't prevent app from loading
     loadActiveTheme('frontend').catch(err => {
         console.warn('Theme loading failed, continuing without theme:', err);
+    });
+
+    // Fetch public site settings for dynamic branding
+    cmsStore.fetchPublicSettings().catch(err => {
+        console.warn('Public settings fetch failed:', err);
     });
     
     if (authStore.isAuthenticated) {

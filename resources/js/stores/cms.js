@@ -9,6 +9,15 @@ export const useCmsStore = defineStore('cms', {
         tags: [],
         media: [],
         settings: {}, // Store settings by group or flat key-value
+        siteSettings: {
+            site_name: 'JA-CMS',
+            site_description: '',
+            site_url: '',
+            admin_email: '',
+            site_version: 'v1.0 Janari',
+            site_logo: '',
+            site_favicon: '/favicon.svg'
+        },
         currentContent: null,
         loading: false,
         loadingGroups: {}, // To track loading state for specific settings groups
@@ -28,7 +37,7 @@ export const useCmsStore = defineStore('cms', {
             // Create and store the promise for this fetch operation
             const promise = (async () => {
                 try {
-                    const response = await api.get(`/admin/cms/settings/group/${group}`);
+                    const response = await api.get(`/admin/ja/settings/group/${group}`);
                     // Settings endpoint returns: { success: true, data: { key: value, ... } }
                     // Extract the data object directly (not using parseResponse which is for arrays)
                     const settingsData = response.data?.data || response.data || {};
@@ -49,6 +58,18 @@ export const useCmsStore = defineStore('cms', {
 
             this.settingsPromises = { ...this.settingsPromises, [group]: promise };
             return promise;
+        },
+
+        async fetchPublicSettings() {
+            try {
+                const response = await api.get('/public/settings');
+                const settingsData = response.data?.data || {};
+                this.siteSettings = { ...this.siteSettings, ...settingsData };
+                return settingsData;
+            } catch (error) {
+                console.error('Error fetching public settings:', error);
+                return this.siteSettings;
+            }
         },
 
         async fetchContents(params = {}) {

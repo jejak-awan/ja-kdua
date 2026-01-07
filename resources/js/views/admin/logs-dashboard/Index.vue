@@ -166,19 +166,19 @@ const recentSecurity = ref([]);
 const fetchStats = async () => {
     try {
         // Fetch activity logs stats
-        const activityStats = await api.get('/admin/cms/activity-logs/statistics').catch(() => ({ data: {} }));
+        const activityStats = await api.get('/admin/ja/activity-logs/statistics').catch(() => ({ data: {} }));
         stats.value.activity = activityStats.data?.data || activityStats.data || {};
 
         // Fetch security stats
-        const securityStats = await api.get('/admin/cms/security/statistics').catch(() => ({ data: {} }));
+        const securityStats = await api.get('/admin/ja/security/statistics').catch(() => ({ data: {} }));
         stats.value.security = securityStats.data?.data || securityStats.data || {};
 
         // Fetch login history stats
-        const loginStats = await api.get('/admin/cms/login-history/statistics').catch(() => ({ data: {} }));
+        const loginStats = await api.get('/admin/ja/login-history/statistics').catch(() => ({ data: {} }));
         stats.value.login = loginStats.data?.data || loginStats.data || {};
 
         // Fetch system logs
-        const systemLogs = await api.get('/admin/cms/system/logs').catch(() => ({ data: {} }));
+        const systemLogs = await api.get('/admin/ja/system/logs').catch(() => ({ data: {} }));
         stats.value.system = { files: (systemLogs.data?.data || []).length };
     } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -188,11 +188,11 @@ const fetchStats = async () => {
 const fetchRecentLogs = async () => {
     try {
         // Fetch recent activity
-        const activityResponse = await api.get('/admin/cms/activity-logs/recent?limit=10').catch(() => ({ data: {} }));
+        const activityResponse = await api.get('/admin/ja/activity-logs/recent?limit=10').catch(() => ({ data: {} }));
         recentActivity.value = activityResponse.data?.data || [];
 
         // Fetch recent security
-        const securityResponse = await api.get('/admin/cms/security/logs?per_page=10').catch(() => ({ data: {} }));
+        const securityResponse = await api.get('/admin/ja/security/logs?per_page=10').catch(() => ({ data: {} }));
         const secData = securityResponse.data?.data?.data || securityResponse.data?.data || [];
         recentSecurity.value = Array.isArray(secData) ? secData : [];
     } catch (error) {

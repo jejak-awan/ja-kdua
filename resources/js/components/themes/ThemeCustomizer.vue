@@ -290,7 +290,7 @@ const handleMediaSelect = (media) => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/admin/cms/menus');
+        const response = await api.get('/admin/ja/menus');
         const data = response.data.data || response.data;
         availableMenus.value = (Array.isArray(data) ? data : []).map(m => ({
             value: m.id,
@@ -313,7 +313,7 @@ const isDirty = computed(() => {
 const fetchThemeDetails = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/themes/${props.theme.id}`);
+        const response = await api.get(`/admin/ja/themes/${props.theme.id}`);
         // Handle both wrapped and unwrapped responses typically from Laravel resources
         const data = response.data.data || response.data;
         fullTheme.value = data;
@@ -442,9 +442,9 @@ const resetSettings = async () => {
 const saveSettings = async () => {
     saving.value = true;
     try {
-        await api.put(`/admin/cms/themes/${props.theme.id}/settings`, { settings: formValues.value });
+        await api.put(`/admin/ja/themes/${props.theme.id}/settings`, { settings: formValues.value });
         if (customCss.value !== fullTheme.value.custom_css) {
-            await api.put(`/admin/cms/themes/${props.theme.id}/custom-css`, { custom_css: customCss.value });
+            await api.put(`/admin/ja/themes/${props.theme.id}/custom-css`, { custom_css: customCss.value });
         }
         toast.success('Success', 'Theme settings saved successfully.');
         initialSettings.value = JSON.parse(JSON.stringify(formValues.value));

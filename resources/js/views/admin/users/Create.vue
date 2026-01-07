@@ -260,7 +260,7 @@ const isValid = computed(() => {
 const fetchRoles = async () => {
     loadingRoles.value = true;
     try {
-        const response = await api.get('/admin/cms/roles');
+        const response = await api.get('/admin/ja/roles');
         const { data } = parseResponse(response);
         availableRoles.value = ensureArray(data);
     } catch (error) {
@@ -285,7 +285,7 @@ const handleSubmit = async () => {
     clearErrors();
     
     try {
-        await api.post('/admin/cms/users', form.value);
+        await api.post('/admin/ja/users', form.value);
         toast.success.create('User');
         router.push({ name: 'users.index' });
     } catch (error) {

@@ -140,7 +140,7 @@ const performSearch = async () => {
     loading.value = true;
     
     try {
-        const response = await api.get('/admin/cms/search', {
+        const response = await api.get('/admin/ja/search', {
             params: { q: query.value },
         });
         const { data } = parseResponse(response);

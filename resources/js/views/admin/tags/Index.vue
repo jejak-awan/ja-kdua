@@ -254,7 +254,7 @@ const fetchTags = async (page = 1) => {
             usage: filterUsage.value !== 'all' ? filterUsage.value : undefined
         };
 
-        const response = await api.get('/admin/cms/tags', { params });
+        const response = await api.get('/admin/ja/tags', { params });
         const { data, pagination: meta } = parseResponse(response);
         
         tags.value = data;
@@ -267,7 +267,7 @@ const fetchTags = async (page = 1) => {
 
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/cms/tags/statistics');
+            const statsResponse = await api.get('/admin/ja/tags/statistics');
             statistics.value = statsResponse.data.data || statsResponse.data;
         } catch (error) {
             // Fallback: simple stats from current page or rough estimate
@@ -326,7 +326,7 @@ const bulkDelete = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/tags/bulk-delete', { ids: selectedIds.value });
+        await api.post('/admin/ja/tags/bulk-delete', { ids: selectedIds.value });
         selectedIds.value = [];
         await fetchTags(pagination.value.current_page);
         toast.success.delete('Tags');
@@ -351,7 +351,7 @@ const deleteTag = async (tag) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/tags/${tag.id}`);
+        await api.delete(`/admin/ja/tags/${tag.id}`);
         await fetchTags();
         toast.success.delete('Tag');
     } catch (error) {

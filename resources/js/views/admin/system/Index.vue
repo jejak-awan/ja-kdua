@@ -282,12 +282,12 @@ const displayDisk = computed(() => {
 const fetchSystemInfo = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/system/info');
+        const response = await api.get('/admin/ja/system/info');
         systemInfo.value = parseSingleResponse(response) || {};
         
         // Fetch cache status
         try {
-            const cacheResponse = await api.get('/admin/cms/system/cache-status');
+            const cacheResponse = await api.get('/admin/ja/system/cache-status');
             const cacheData = parseSingleResponse(cacheResponse) || {};
             cacheStatus.value = cacheData.status || 'Active';
         } catch (error) {

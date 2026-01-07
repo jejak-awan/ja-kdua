@@ -198,13 +198,13 @@ const filteredRedirects = computed(() => {
 const fetchRedirects = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/redirects');
+        const response = await api.get('/admin/ja/redirects');
         const { data } = parseResponse(response);
         redirects.value = ensureArray(data);
         
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/cms/redirects/statistics');
+            const statsResponse = await api.get('/admin/ja/redirects/statistics');
             statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from redirects if endpoint doesn't exist
@@ -237,7 +237,7 @@ const deleteRedirect = async (redirect) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/redirects/${redirect.id}`);
+        await api.delete(`/admin/ja/redirects/${redirect.id}`);
         toast.success.delete(t('features.redirects.title'));
         fetchRedirects();
     } catch (error) {

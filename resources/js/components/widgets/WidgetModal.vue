@@ -125,10 +125,10 @@ const handleSubmit = async () => {
 
     try {
         if (props.widget) {
-            await api.put(`/admin/cms/widgets/${props.widget.id}`, form.value);
+            await api.put(`/admin/ja/widgets/${props.widget.id}`, form.value);
             toast.success.update(t('features.widgets.title'));
         } else {
-            await api.post('/admin/cms/widgets', form.value);
+            await api.post('/admin/ja/widgets', form.value);
             toast.success.create(t('features.widgets.title'));
         }
         emit('saved');

@@ -305,7 +305,7 @@ const fetchLogs = async (page = 1) => {
         if (dateTo.value) params.date_to = dateTo.value;
         if (search.value) params.search = search.value;
         
-        const response = await api.get('/admin/cms/activity-logs', { params });
+        const response = await api.get('/admin/ja/activity-logs', { params });
         const { data, pagination: pag } = parseResponse(response);
         
         logs.value = ensureArray(data);
@@ -313,7 +313,7 @@ const fetchLogs = async (page = 1) => {
         
         // Fetch statistics (only on first load or if needed)
         try {
-            const statsResponse = await api.get('/admin/cms/activity-logs/statistics');
+            const statsResponse = await api.get('/admin/ja/activity-logs/statistics');
             statistics.value = statsResponse.data?.data || statsResponse.data;
         } catch (error) {
             // Fallback stats if endpoint fails
@@ -348,7 +348,7 @@ const clearLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/cms/activity-logs/clear');
+        await api.post('/admin/ja/activity-logs/clear');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error) {
@@ -365,7 +365,7 @@ const exportLogs = async () => {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
         
-        const response = await api.get(`/admin/cms/activity-logs/export?${params.toString()}`, {
+        const response = await api.get(`/admin/ja/activity-logs/export?${params.toString()}`, {
             responseType: 'blob'
         });
         
@@ -389,7 +389,7 @@ const exportLogs = async () => {
 
 const fetchUsers = async () => {
     try {
-        const response = await api.get('/admin/cms/users');
+        const response = await api.get('/admin/ja/users');
         const data = response.data?.data?.data || response.data?.data || response.data || [];
         users.value = Array.isArray(data) ? data : [];
     } catch (error) {

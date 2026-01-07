@@ -6,7 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'JA CMS') }}</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    @php
+        $themeService = app(\App\Services\ThemeService::class);
+        $activeTheme = $themeService->getActiveTheme('frontend');
+        $favicon = $activeTheme ? $themeService->getThemeSetting($activeTheme, 'brand_favicon') : null;
+        
+        // Use default if no theme favicon is set
+        $faviconUrl = $favicon ?: '/favicon.svg';
+    @endphp
+    <link rel="icon" href="{{ $faviconUrl }}">
 
     {{-- Blocking script - Apply dark mode class immediately BEFORE any CSS --}}
     <script nonce="{{ $cspNonce ?? '' }}">

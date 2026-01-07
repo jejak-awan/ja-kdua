@@ -147,7 +147,7 @@ const groupedPermissions = computed(() => permissions.value);
 const fetchPermissions = async () => {
     loadingPermissions.value = true;
     try {
-        const response = await api.get('/admin/cms/roles/permissions');
+        const response = await api.get('/admin/ja/roles/permissions');
         permissions.value = response.data?.data || response.data || {};
     } catch (error) {
         console.error('Failed to fetch permissions:', error);
@@ -207,7 +207,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.post('/admin/cms/roles', form.value);
+        await api.post('/admin/ja/roles', form.value);
         toast.success.create('Role');
         router.push({ name: 'roles' });
     } catch (error) {

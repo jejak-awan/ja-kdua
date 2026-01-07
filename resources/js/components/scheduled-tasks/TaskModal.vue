@@ -155,10 +155,10 @@ const handleSubmit = async () => {
     clearErrors();
     try {
         if (props.task) {
-            await api.put(`/admin/cms/scheduled-tasks/${props.task.id}`, form.value);
+            await api.put(`/admin/ja/scheduled-tasks/${props.task.id}`, form.value);
             toast.success.update('Scheduled Task');
         } else {
-            await api.post('/admin/cms/scheduled-tasks', form.value);
+            await api.post('/admin/ja/scheduled-tasks', form.value);
             toast.success.create('Scheduled Task');
         }
         emit('saved');

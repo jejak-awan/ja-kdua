@@ -228,7 +228,7 @@ const currentSettings = computed(() => {
 const fetchSettings = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/settings');
+        const response = await api.get('/admin/ja/settings');
         const { data } = parseResponse(response);
         settings.value = ensureArray(data);
 
@@ -349,7 +349,7 @@ const handleSubmit = async () => {
             };
         });
 
-        await api.post('/admin/cms/settings/bulk-update', {
+        await api.post('/admin/ja/settings/bulk-update', {
             settings: settingsToUpdate,
         });
         
@@ -379,7 +379,7 @@ const validateEmailConfig = async () => {
     validatingConfig.value = true;
     configValidation.value = null;
     try {
-        const response = await api.get('/admin/cms/email-test/validate-config');
+        const response = await api.get('/admin/ja/email-test/validate-config');
         const { data } = parseResponse(response);
         configValidation.value = data;
     } catch (error) {
@@ -397,7 +397,7 @@ const testSmtpConnection = async () => {
     testingConnection.value = true;
     connectionResult.value = null;
     try {
-        const response = await api.post('/admin/cms/email-test/test-connection');
+        const response = await api.post('/admin/ja/email-test/test-connection');
         const { data } = parseResponse(response);
         connectionResult.value = data;
     } catch (error) {
@@ -424,7 +424,7 @@ const sendTestEmail = async () => {
     sendingTestEmail.value = true;
     testEmailResult.value = null;
     try {
-        const response = await api.post('/admin/cms/email-test/send-test', {
+        const response = await api.post('/admin/ja/email-test/send-test', {
             to: testEmail.value.to,
             subject: testEmail.value.subject || undefined,
             message: testEmail.value.message || undefined,
@@ -452,7 +452,7 @@ const sendTestEmail = async () => {
 const getQueueStatus = async () => {
     loadingQueueStatus.value = true;
     try {
-        const response = await api.get('/admin/cms/email-test/queue-status');
+        const response = await api.get('/admin/ja/email-test/queue-status');
         const { data } = parseResponse(response);
         queueStatus.value = data;
     } catch (error) {
@@ -470,7 +470,7 @@ const getQueueStatus = async () => {
 const getRecentLogs = async () => {
     loadingLogs.value = true;
     try {
-        const response = await api.get('/admin/cms/email-test/recent-logs?limit=10');
+        const response = await api.get('/admin/ja/email-test/recent-logs?limit=10');
         const { data } = parseResponse(response);
         emailLogs.value = data.logs || [];
     } catch (error) {
@@ -484,7 +484,7 @@ const getRecentLogs = async () => {
 const getCacheStatus = async () => {
     loadingCacheStatus.value = true;
     try {
-        const response = await api.get('/admin/cms/system/cache-status');
+        const response = await api.get('/admin/ja/system/cache-status');
         cacheStatus.value = parseSingleResponse(response);
     } catch (error) {
         console.error('Failed to get cache status:', error);
@@ -505,7 +505,7 @@ const clearSystemCache = async () => {
     
     clearingCache.value = true;
     try {
-        await api.post('/admin/cms/system/cache/clear');
+        await api.post('/admin/ja/system/cache/clear');
         toast.success.action(t('features.settings.cache.cleared'));
         getCacheStatus();
     } catch (error) {
@@ -518,7 +518,7 @@ const clearSystemCache = async () => {
 const warmSystemCache = async () => {
     warmingCache.value = true;
     try {
-        await api.post('/admin/cms/system/cache/warm');
+        await api.post('/admin/ja/system/cache/warm');
         toast.success.action(t('features.settings.cache.warmed'));
         getCacheStatus();
     } catch (error) {

@@ -211,7 +211,7 @@ const stats = computed(() => {
 async function fetchVulnerabilities() {
   loading.value = true;
   try {
-    const response = await api.get('/admin/cms/security/dependency-vulnerabilities', { params: filters.value });
+    const response = await api.get('/admin/ja/security/dependency-vulnerabilities', { params: filters.value });
     vulnerabilities.value = response.data.data.data || [];
     pagination.value = {
       total: response.data.data.total || 0,
@@ -230,7 +230,7 @@ async function fetchVulnerabilities() {
 async function runAudit() {
   auditing.value = true;
   try {
-    await api.post('/admin/cms/security/run-dependency-audit');
+    await api.post('/admin/ja/security/run-dependency-audit');
     toast.success.action('Dependency audit completed');
     fetchVulnerabilities();
   } catch (error) {
@@ -243,7 +243,7 @@ async function runAudit() {
 
 async function updateStatus(vuln, status) {
   try {
-    await api.put(`/admin/cms/security/dependency-vulnerabilities/${vuln.id}`, { status });
+    await api.put(`/admin/ja/security/dependency-vulnerabilities/${vuln.id}`, { status });
     vuln.status = status;
     toast.success.action('Status updated');
   } catch (error) {

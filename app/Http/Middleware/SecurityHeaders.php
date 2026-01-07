@@ -25,10 +25,6 @@ class SecurityHeaders
 
         // Content Security Policy
         $csp = $this->getContentSecurityPolicy($nonce);
-
-        // ONLY set the standard CSP header.
-        // Do NOT set Report-Only here as it might cause duplicate headers if
-        // an external proxy (Cloudflare) is also setting one, leading to 502 errors.
         $response->headers->set('Content-Security-Policy', $csp);
 
         // Remove server signature

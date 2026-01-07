@@ -551,7 +551,7 @@ async function fetchTasks(page = 1) {
         search: search.value,
         limit: 10
     }
-    const response = await api.get('/admin/cms/scheduled-tasks', { params });
+    const response = await api.get('/admin/ja/scheduled-tasks', { params });
     
     // Handle both paginated and non-paginated responses for compatibility
     if (response.data?.meta) {
@@ -581,7 +581,7 @@ async function fetchTasks(page = 1) {
 
 async function fetchAllowedCommands() {
   try {
-    const response = await api.get('/admin/cms/scheduled-tasks/allowed-commands');
+    const response = await api.get('/admin/ja/scheduled-tasks/allowed-commands');
     allowedCommands.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch allowed commands:', error);
@@ -635,11 +635,11 @@ const handleBulkAction = async (action) => {
         try {
             // Check if backend supports bulk action, otherwise loop
             // Assuming we might not have a bulk endpoint, we can loop for now or try common pattern
-            // Ideally: await api.post('/admin/cms/scheduled-tasks/bulk-action', { action: 'delete', ids: selectedTasks.value });
+            // Ideally: await api.post('/admin/ja/scheduled-tasks/bulk-action', { action: 'delete', ids: selectedTasks.value });
             
             // Implementing Client-Side Loop fallback if needed, but best to assume we need a bulk endpoint or add it.
             // For now, let's try parallel deletion to be safe without backend changes if possible
-            const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/cms/scheduled-tasks/${id}`));
+            const deletePromises = selectedTasks.value.map(id => api.delete(`/admin/ja/scheduled-tasks/${id}`));
             await Promise.all(deletePromises);
             
             toast.success.delete(`${selectedTasks.value.length} Tasks`);
@@ -693,10 +693,10 @@ async function saveTask() {
     errors.value = {};
     
     if (editingTask.value) {
-      await api.put(`/admin/cms/scheduled-tasks/${editingTask.value.id}`, form.value);
+      await api.put(`/admin/ja/scheduled-tasks/${editingTask.value.id}`, form.value);
       toast.success.update('Scheduled Task');
     } else {
-      await api.post('/admin/cms/scheduled-tasks', form.value);
+      await api.post('/admin/ja/scheduled-tasks', form.value);
       toast.success.create('Scheduled Task');
     }
     
@@ -726,7 +726,7 @@ async function runTask(task) {
 
   try {
     running.value = task.id;
-    const response = await api.post(`/admin/cms/scheduled-tasks/${task.id}/run`);
+    const response = await api.post(`/admin/ja/scheduled-tasks/${task.id}/run`);
     
     toast.success.action(t('features.scheduled_tasks.messages.executed') || 'Task executed successfully');
 
@@ -744,7 +744,7 @@ async function runTask(task) {
 
 async function toggleActive(task) {
   try {
-    await api.put(`/admin/cms/scheduled-tasks/${task.id}`, {
+    await api.put(`/admin/ja/scheduled-tasks/${task.id}`, {
       is_active: !task.is_active
     });
     
@@ -771,7 +771,7 @@ async function confirmDelete(task) {
   if (!confirmed) return;
 
   try {
-    await api.delete(`/admin/cms/scheduled-tasks/${task.id}`);
+    await api.delete(`/admin/ja/scheduled-tasks/${task.id}`);
     toast.success.delete();
     await fetchTasks(pagination.value.current_page);
   } catch (error) {
@@ -812,7 +812,7 @@ async function runAdhocCommand() {
     adhocOutput.value = '';
 
     // Create a temporary task
-    const createResponse = await api.post('/admin/cms/scheduled-tasks', {
+    const createResponse = await api.post('/admin/ja/scheduled-tasks', {
       name: `Temp Command - ${Date.now()}`,
       command: fullCommand,
       schedule: '0 0 1 1 *', // Default invalid schedule
@@ -823,12 +823,12 @@ async function runAdhocCommand() {
     const taskId = createResponse.data.data.id;
 
     // Run the task
-    const runResponse = await api.post(`/admin/cms/scheduled-tasks/${taskId}/run`);
+    const runResponse = await api.post(`/admin/ja/scheduled-tasks/${taskId}/run`);
 
     adhocOutput.value = runResponse.data.data.output || 'No output';
     
     // Delete temporary task
-    await api.delete(`/admin/cms/scheduled-tasks/${taskId}`);
+    await api.delete(`/admin/ja/scheduled-tasks/${taskId}`);
     
     // Check exit code if available, but for now just show output
     if(runResponse.data.data.exit_code !== 0) {

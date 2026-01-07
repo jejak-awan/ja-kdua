@@ -179,7 +179,7 @@ const handleSubmit = async () => {
     saving.value = true;
     clearErrors();
     try {
-        await api.post('/admin/cms/content-templates', form.value);
+        await api.post('/admin/ja/content-templates', form.value);
         toast.success.create('Template');
         router.push({ name: 'content-templates' });
     } catch (error) {

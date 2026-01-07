@@ -213,13 +213,13 @@ const filteredWebhooks = computed(() => {
 const fetchWebhooks = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/webhooks');
+        const response = await api.get('/admin/ja/webhooks');
         const { data } = parseResponse(response);
         webhooks.value = ensureArray(data);
         
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/cms/webhooks/statistics');
+            const statsResponse = await api.get('/admin/ja/webhooks/statistics');
             statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from webhooks if endpoint doesn't exist
@@ -244,7 +244,7 @@ const editWebhook = (webhook) => {
 
 const testWebhook = async (webhook) => {
     try {
-        await api.post(`/admin/cms/webhooks/${webhook.id}/test`);
+        await api.post(`/admin/ja/webhooks/${webhook.id}/test`);
         toast.success.action(t('features.developer.webhooks.messages.test_success'));
     } catch (error) {
         console.error('Failed to test webhook:', error);
@@ -263,7 +263,7 @@ const deleteWebhook = async (webhook) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/webhooks/${webhook.id}`);
+        await api.delete(`/admin/ja/webhooks/${webhook.id}`);
         toast.success.delete('Webhook');
         fetchWebhooks();
     } catch (error) {

@@ -22,7 +22,7 @@
                                 handle=".drag-handle"
                                 class="min-h-[100px] h-full border-2 border-dashed border-transparent hover:border-sidebar-border/50 rounded-xl transition-colors p-2"
                                 ghost-class="block-ghost"
-                                :class="column.blocks.length === 0 ? 'bg-muted/30 border-muted-foreground/10' : ''"
+                                :class="(!column.blocks || column.blocks.length === 0) ? 'bg-muted/30 border-muted-foreground/10' : ''"
                             >
                                 <template #item="{ element: block, index: blockIndex }">
                                     <BlockWrapper 
@@ -39,7 +39,7 @@
                                 </template>
                                 
                                 <template #footer>
-                                     <div v-if="column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
+                                     <div v-if="!column.blocks || column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
                                         <div 
                                             @click.stop.prevent="openBlockPicker(index)"
                                             class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn cursor-pointer"
@@ -58,7 +58,7 @@
                             <!-- Live Mode -->
                             <div v-else class="h-full">
                                 <BlockRenderer 
-                                    :blocks="column.blocks" 
+                                    :blocks="column.blocks || []" 
                                     :context="context" 
                                     :is-preview="true"
                                 />
@@ -131,6 +131,9 @@ const openBlockPicker = (colIndex) => {
 
 const handleAddBlock = (newBlock) => {
     if (activeColumnIndex.value !== null && props.columns[activeColumnIndex.value]) {
+        if (!props.columns[activeColumnIndex.value].blocks) {
+            props.columns[activeColumnIndex.value].blocks = [];
+        }
         props.columns[activeColumnIndex.value].blocks.push(newBlock);
         builder.takeSnapshot();
     }
@@ -155,6 +158,11 @@ watch(() => props.layout, (newLayout) => {
             props.columns.push({ blocks: [] });
         }
     }
+    
+    // Ensure all columns have blocks array
+    props.columns.forEach(col => {
+        if (!col.blocks) col.blocks = [];
+    });
     
     // Update customWidths if layout matches presets
     if (newLayout === '1-1') updateCustomWidths([50, 50]);

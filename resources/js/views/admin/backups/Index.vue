@@ -348,13 +348,13 @@ const filteredBackups = computed(() => {
 const fetchBackups = async () => {
     loading.value = true;
     try {
-        const response = await api.get('/admin/cms/backups');
+        const response = await api.get('/admin/ja/backups');
         const { data } = parseResponse(response);
         backups.value = ensureArray(data);
         
         // Fetch statistics
         try {
-            const statsResponse = await api.get('/admin/cms/backups/statistics');
+            const statsResponse = await api.get('/admin/ja/backups/statistics');
             statistics.value = parseSingleResponse(statsResponse);
         } catch (error) {
             // Calculate from backups if endpoint doesn't exist
@@ -375,7 +375,7 @@ const fetchBackups = async () => {
 const createBackup = async () => {
     creating.value = true;
     try {
-        await api.post('/admin/cms/backups');
+        await api.post('/admin/ja/backups');
         toast.success.action(t('features.system.backups.messages.created'));
         await fetchBackups();
     } catch (error) {
@@ -388,7 +388,7 @@ const createBackup = async () => {
 
 const downloadBackup = async (backup) => {
     try {
-        const response = await api.get(`/admin/cms/backups/${backup.id}/download`, {
+        const response = await api.get(`/admin/ja/backups/${backup.id}/download`, {
             responseType: 'blob',
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -424,7 +424,7 @@ const restoreBackup = async (backup) => {
     if (!doubleConfirmed) return;
 
     try {
-        await api.post(`/admin/cms/backups/${backup.id}/restore`);
+        await api.post(`/admin/ja/backups/${backup.id}/restore`);
         toast.success.action(t('features.system.backups.messages.restored'));
         setTimeout(() => {
             window.location.reload();
@@ -446,7 +446,7 @@ const deleteBackup = async (backup) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/backups/${backup.id}`);
+        await api.delete(`/admin/ja/backups/${backup.id}`);
         toast.success.delete();
         await fetchBackups();
     } catch (error) {
@@ -466,7 +466,7 @@ const formatFileSize = (bytes) => {
 const saveSchedule = async () => {
     savingSchedule.value = true;
     try {
-        await api.post('/admin/cms/backups/schedule', scheduleForm.value);
+        await api.post('/admin/ja/backups/schedule', scheduleForm.value);
         showScheduleModal.value = false;
         await fetchBackups(); // Refresh statistics
         toast.success.save();

@@ -321,7 +321,7 @@ const fetchNotifications = async () => {
     
     loadingNotifications.value = true;
     try {
-        const response = await api.get('/admin/cms/notifications?limit=5');
+        const response = await api.get('/admin/ja/notifications?limit=5');
         
         let data = [];
         // Handle paginated response structure: { success: true, data: { data: [...] } }
@@ -348,7 +348,7 @@ const fetchNotifications = async () => {
 const handleNotificationClick = async (notification) => {
     if (!notification.read_at) {
         try {
-            await api.put(`/admin/cms/notifications/${notification.id}/read`);
+            await api.put(`/admin/ja/notifications/${notification.id}/read`);
             notification.read_at = new Date().toISOString();
         } catch (error) {
             console.error('Failed to mark notification as read:', error);

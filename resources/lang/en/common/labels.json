@@ -64,5 +64,8 @@
     "deleted": "Deleted",
     "loading": "Loading",
     "warning": "Warning",
-    "trash": "Trash"
+    "trash": "Trash",
+    "app": {
+        "name": "JA CMS"
+    }
 }

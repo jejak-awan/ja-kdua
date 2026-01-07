@@ -137,10 +137,10 @@ const handleSubmit = async () => {
     saving.value = true;
     try {
         if (props.fieldGroup) {
-            await api.put(`/admin/cms/field-groups/${props.fieldGroup.id}`, form.value);
+            await api.put(`/admin/ja/field-groups/${props.fieldGroup.id}`, form.value);
             toast.success.update(t('features.developer.custom_fields.tabs.groups'));
         } else {
-            await api.post('/admin/cms/field-groups', form.value);
+            await api.post('/admin/ja/field-groups', form.value);
             toast.success.create(t('features.developer.custom_fields.tabs.groups'));
         }
         emit('saved');

@@ -173,7 +173,7 @@ const fetchMenus = async () => {
             params.trashed = trashedFilter.value;
         }
 
-        const response = await api.get('/admin/cms/menus', { params });
+        const response = await api.get('/admin/ja/menus', { params });
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
         
@@ -229,10 +229,10 @@ const deleteCurrentMenu = async () => {
 
     try {
         if (isTrashed) {
-             await api.delete(`/admin/cms/menus/${selectedMenuId.value}/force-delete`);
+             await api.delete(`/admin/ja/menus/${selectedMenuId.value}/force-delete`);
              toast.success.action(t('common.messages.success.deleted', { item: 'Menu' }));
         } else {
-            await api.delete(`/admin/cms/menus/${selectedMenuId.value}`);
+            await api.delete(`/admin/ja/menus/${selectedMenuId.value}`);
             toast.success.delete(t('features.menus.title'));
         }
         selectedMenuId.value = null;
@@ -256,7 +256,7 @@ const restoreCurrentMenu = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/cms/menus/${selectedMenuId.value}/restore`);
+        await api.post(`/admin/ja/menus/${selectedMenuId.value}/restore`);
         toast.success.restore('Menu');
         await fetchMenus();
     } catch (error) {

@@ -4,14 +4,36 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
                 <!-- Brand -->
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'Janari')">
-                        <template v-else>
-                            <div class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                                {{ getSetting('site_title', 'Janari').substring(0, 2).toUpperCase() }}
+                    <div class="flex items-center gap-3">
+                        <!-- Logo / Stylized Box -->
+                        <div 
+                            v-if="brandingDisplay !== 'text_only'"
+                            class="relative flex items-center justify-center overflow-hidden"
+                        >
+                            <img 
+                                v-if="siteLogo" 
+                                :src="siteLogo" 
+                                class="h-8 w-auto object-contain" 
+                                :alt="siteName"
+                            >
+                            <div 
+                                v-else
+                                class="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold"
+                            >
+                                {{ siteName.substring(0, 2).toUpperCase() }}
                             </div>
-                            <span class="text-xl font-bold">{{ getSetting('site_title', 'Janari') }}</span>
-                        </template>
+                        </div>
+
+                        <!-- Site Name -->
+                        <div 
+                            v-if="brandingDisplay !== 'logo_only'"
+                            class="flex flex-col"
+                        >
+                            <span class="text-xl font-bold leading-none">{{ siteName }}</span>
+                            <span v-if="brandingDisplay === 'both'" class="text-[10px] font-medium text-muted-foreground mt-0.5">
+                                {{ siteVersion }}
+                            </span>
+                        </div>
                     </div>
                     <p class="text-muted-foreground text-sm">
                         {{ getSetting('site_description', 'Modern Content Management System built with Laravel and Vue.js') }}
@@ -116,6 +138,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from '../../../../composables/useTheme'
 import { useMenu } from '../../../../composables/useMenu'
+import { useCmsStore } from '../../../../stores/cms'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
 import { newsletterSchema } from '../../../../schemas'
@@ -138,6 +161,16 @@ onMounted(() => {
 const footerCol1Items = computed(() => menus.value['footer_col_1']?.items || [])
 const footerCol2Items = computed(() => menus.value['footer_col_2']?.items || [])
 const footerItems = computed(() => menus.value['footer']?.items || [])
+
+const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only'));
+
+// Dynamic Branding Fallbacks
+const cmsStore = useCmsStore();
+const siteSettings = computed(() => cmsStore.siteSettings);
+
+const siteName = computed(() => getSetting('site_title') || siteSettings.value?.site_name || 'Janari');
+const siteLogo = computed(() => getSetting('brand_logo') || siteSettings.value?.site_logo || '');
+const siteVersion = computed(() => siteSettings.value?.site_version || 'v1.0 Janari');
 
 const submitNewsletter = async () => {
     if (!validateWithZod({ email: email.value })) return

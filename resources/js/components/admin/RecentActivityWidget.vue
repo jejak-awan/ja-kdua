@@ -109,7 +109,7 @@ const fetchActivities = async () => {
     }
     
     try {
-        const response = await api.get('/admin/cms/activity-logs', { params: { per_page: 6 } });
+        const response = await api.get('/admin/ja/activity-logs', { params: { per_page: 6 } });
         const { data } = parseResponse(response);
         activities.value = data || [];
     } catch (error) {

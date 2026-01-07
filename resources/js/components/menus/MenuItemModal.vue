@@ -172,9 +172,9 @@ const fetchOptions = async () => {
     loadingOptions.value = true;
     try {
         const [pagesRes, catsRes, contentsRes] = await Promise.all([
-            api.get('/admin/cms/contents?type=page&per_page=100'),
-            api.get('/admin/cms/categories?per_page=100'),
-            api.get('/admin/cms/contents?type=post&per_page=50')
+            api.get('/admin/ja/contents?type=page&per_page=100'),
+            api.get('/admin/ja/categories?per_page=100'),
+            api.get('/admin/ja/contents?type=post&per_page=50')
         ]);
 
         const parsedPages = parseResponse(pagesRes);
@@ -231,10 +231,10 @@ const handleSubmit = async () => {
 
         const payload = { ...form.value, menu_id: props.menuId };
         if (props.item) {
-            await api.put(`/admin/cms/menu-items/${props.item.id}`, payload);
+            await api.put(`/admin/ja/menu-items/${props.item.id}`, payload);
             toast.success.update('Menu Item');
         } else {
-            await api.post('/admin/cms/menu-items', payload);
+            await api.post('/admin/ja/menu-items', payload);
             toast.success.create('Menu Item');
         }
         emit('saved');

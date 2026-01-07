@@ -66,7 +66,7 @@ let pollInterval = null;
 
 const fetchAlerts = async () => {
     try {
-        const response = await api.get('/admin/cms/security/alerts');
+        const response = await api.get('/admin/ja/security/alerts');
         alerts.value = response.data?.data?.alerts || [];
     } catch (error) {
         // Silently fail

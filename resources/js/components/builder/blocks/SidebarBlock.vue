@@ -28,7 +28,7 @@ const fetchWidgets = async () => {
 
     loading.value = true;
     try {
-        const response = await api.get(`/admin/cms/widgets/location/${props.location}`);
+        const response = await api.get(`/admin/ja/widgets/location/${props.location}`);
         const { data } = parseResponse(response);
         widgets.value = ensureArray(data);
     } catch (error) {

@@ -238,7 +238,7 @@ class MenuController extends BaseApiController
         $menu = Menu::getByLocation($location);
 
         if (! $menu) {
-            return $this->notFound('Menu');
+            return $this->success(null, 'No menu assigned to this location');
         }
 
         return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');

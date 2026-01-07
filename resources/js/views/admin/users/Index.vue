@@ -465,7 +465,7 @@ const fetchUsers = async () => {
             params.active = 1;
         }
 
-        const response = await api.get('/admin/cms/users', { params });
+        const response = await api.get('/admin/ja/users', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         // Ensure each user has roles array
         users.value = ensureArray(data).map(user => ({
@@ -484,7 +484,7 @@ const fetchUsers = async () => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/cms/users/stats');
+        const response = await api.get('/admin/ja/users/stats');
         // The BaseApiController returns { success: true, data: { ... }, message: ... }
         // parseResponse returns { data: [...], pagination: ... } which is for lists.
         // We just need the raw data object here.
@@ -517,7 +517,7 @@ const clearFilters = () => {
 
 const fetchRoles = async () => {
     try {
-        const response = await api.get('/admin/cms/roles').catch(() => null);
+        const response = await api.get('/admin/ja/roles').catch(() => null);
         if (response) {
             const { data: rolesData } = parseResponse(response);
             roles.value = ensureArray(rolesData);
@@ -570,7 +570,7 @@ const deleteUser = async (user) => {
     }
 
     try {
-        await api.delete(`/admin/cms/users/${user.id}`);
+        await api.delete(`/admin/ja/users/${user.id}`);
         await fetchUsers();
         toast.success.delete('User');
     } catch (error) {
@@ -592,7 +592,7 @@ const forceLogoutUser = async (user) => {
     }
 
     try {
-        const response = await api.post(`/admin/cms/users/${user.id}/force-logout`);
+        const response = await api.post(`/admin/ja/users/${user.id}/force-logout`);
         const { data } = parseResponse(response);
         
         toast.success.action('User forced logout');
@@ -604,7 +604,7 @@ const forceLogoutUser = async (user) => {
 
 const verifyUser = async (user) => {
     try {
-        await api.post(`/admin/cms/users/${user.id}/verify`);
+        await api.post(`/admin/ja/users/${user.id}/verify`);
         toast.success.action('User verified');
         await fetchUsers();
     } catch (error) {
@@ -624,7 +624,7 @@ const restoreUser = async (user) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/cms/users/${user.id}/restore`);
+        await api.post(`/admin/ja/users/${user.id}/restore`);
         toast.success.action('User restored');
         await fetchUsers();
     } catch (error) {
@@ -644,7 +644,7 @@ const forceDeleteUser = async (user) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/users/${user.id}/force-delete`);
+        await api.delete(`/admin/ja/users/${user.id}/force-delete`);
         toast.success.action('User permanently deleted');
         await fetchUsers();
     } catch (error) {
@@ -724,7 +724,7 @@ const bulkAction = async (action) => {
     }
 
     try {
-        const response = await api.post('/admin/cms/users/bulk-action', {
+        const response = await api.post('/admin/ja/users/bulk-action', {
             ids: selectedIds.value,
             action: action
         });

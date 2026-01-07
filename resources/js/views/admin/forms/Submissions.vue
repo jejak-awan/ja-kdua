@@ -251,7 +251,7 @@ const fetchSubmissions = async (page = 1) => {
             ...(dateFrom.value && { date_from: dateFrom.value }),
             ...(dateTo.value && { date_to: dateTo.value })
         };
-        const response = await api.get(`/admin/cms/forms/${props.form.id}/submissions`, { params });
+        const response = await api.get(`/admin/ja/forms/${props.form.id}/submissions`, { params });
         submissions.value = response.data.data || response.data;
         pagination.value = response.data;
     } catch (error) {
@@ -263,7 +263,7 @@ const fetchSubmissions = async (page = 1) => {
 
 const fetchStatistics = async () => {
     try {
-        const response = await api.get(`/admin/cms/forms/${props.form.id}/submissions/statistics`);
+        const response = await api.get(`/admin/ja/forms/${props.form.id}/submissions/statistics`);
         statistics.value = response.data?.data || response.data;
     } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -276,7 +276,7 @@ const loadPage = (page) => {
 
 const viewSubmission = async (submission) => {
     try {
-        const response = await api.get(`/admin/cms/form-submissions/${submission.id}`);
+        const response = await api.get(`/admin/ja/form-submissions/${submission.id}`);
         selectedSubmission.value = response.data;
         if (submission.status === 'new') {
             markAsRead(submission, false);
@@ -289,7 +289,7 @@ const viewSubmission = async (submission) => {
 
 const markAsRead = async (submission, refresh = true) => {
     try {
-        await api.put(`/admin/cms/form-submissions/${submission.id}/read`);
+        await api.put(`/admin/ja/form-submissions/${submission.id}/read`);
         if (refresh) {
             fetchSubmissions(pagination.value?.current_page || 1);
             fetchStatistics();
@@ -312,7 +312,7 @@ const deleteSubmission = async (submission) => {
     if (!confirmed) return;
 
     try {
-        await api.delete(`/admin/cms/forms/${props.form.id}/submissions/${submission.id}`);
+        await api.delete(`/admin/ja/forms/${props.form.id}/submissions/${submission.id}`);
         toast.success(t('features.forms.submissions.messages.deleteSuccess'));
         fetchSubmissions();
     } catch (error) {
@@ -330,7 +330,7 @@ const exportSubmissions = async () => {
         });
 
         const baseUrl = import.meta.env.VITE_API_URL || '';
-        const exportUrl = `${baseUrl}/api/v1/admin/cms/forms/${props.form.id}/submissions/export?${params.toString()}`;
+        const exportUrl = `${baseUrl}/api/v1/admin/ja/forms/${props.form.id}/submissions/export?${params.toString()}`;
         
         const link = document.createElement('a');
         link.href = exportUrl;

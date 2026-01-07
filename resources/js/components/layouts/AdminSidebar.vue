@@ -19,12 +19,7 @@
         <div class="flex flex-col h-full">
             <!-- Logo -->
             <div class="flex items-center justify-between h-16 px-4 border-b border-border">
-                <div v-if="!sidebarMinimized" class="flex items-center">
-                    <h1 class="text-xl font-bold">JA CMS</h1>
-                </div>
-                <div v-else class="flex items-center justify-center w-full">
-                    <span class="text-xl font-bold">JA</span>
-                </div>
+                <AdminLogo :minimized="sidebarMinimized" />
                 <div class="flex items-center gap-2">
                     <!-- Mobile Close Button -->
                     <button
@@ -173,6 +168,8 @@ import { useI18n } from 'vue-i18n';
 import { navigationGroups } from '../../utils/navigation';
 import { getIcon } from '../../utils/icons';
 import { useAuthStore } from '../../stores/auth';
+import { useCmsStore } from '../../stores/cms';
+import AdminLogo from './AdminLogo.vue';
 import { 
     ChevronLeft, 
     ChevronRight, 
@@ -209,6 +206,7 @@ defineEmits(['toggle-minimize', 'close', 'logout']);
 const { t, te } = useI18n();
 const $route = useRoute();
 const authStore = useAuthStore();
+const cmsStore = useCmsStore();
 
 // Section definitions with icons
 const sidebarSections = [
@@ -222,6 +220,7 @@ const sidebarSections = [
     { key: 'system', labelKey: 'common.navigation.sections.system', icon: Settings },
     { key: 'developer', labelKey: 'common.navigation.sections.developer', icon: Code },
 ];
+
 
 const expandedSections = ref({});
 const activePopup = ref(null);
