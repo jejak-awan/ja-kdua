@@ -1,16 +1,43 @@
 <template>
-    <header class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+    <header 
+        :class="[
+            headerSticky ? 'sticky top-0 z-40' : 'relative z-40',
+            headerStyleClasses
+        ]"
+    >
+        <!-- Header Top -->
+        <div v-if="headerTopItems.length > 0" class="bg-primary/5 border-b border-border/50 py-2 hidden md:block">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center text-xs">
+                    <div class="flex items-center gap-6">
+                        <router-link 
+                            v-for="item in headerTopItems" 
+                            :key="item.id" 
+                            :to="item.url || '/'"
+                            class="text-muted-foreground hover:text-primary transition-colors"
+                        >
+                            {{ item.title }}
+                        </router-link>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <a v-if="getSetting('social_twitter')" :href="getSetting('social_twitter')" target="_blank" class="text-muted-foreground hover:text-primary">Twitter</a>
+                        <a v-if="getSetting('social_github')" :href="getSetting('social_github')" target="_blank" class="text-muted-foreground hover:text-primary">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <router-link to="/" class="flex items-center gap-2 group">
-                    <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'JA-CMS')">
+                    <img v-if="getSetting('brand_logo')" :src="getSetting('brand_logo')" class="h-8 w-auto object-contain" :alt="getSetting('site_title', 'Janari')">
                     <template v-else>
                         <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg group-hover:bg-primary/90 transition-colors">
-                            JA
+                            {{ getSetting('site_title', 'Janari').substring(0, 2).toUpperCase() }}
                         </div>
                         <span class="text-xl font-bold text-foreground">
-                            CMS
+                            {{ getSetting('site_title', 'Janari').substring(2) }}
                         </span>
                     </template>
                 </router-link>
@@ -122,9 +149,26 @@ const { menus, fetchMenuByLocation } = useMenu();
 
 const isOpen = ref(false);
 
+const headerSticky = computed(() => getSetting('header_sticky', true));
+const headerStyle = computed(() => getSetting('header_style', 'glass'));
+
+const headerStyleClasses = computed(() => {
+    switch (headerStyle.value) {
+        case 'solid':
+            return 'bg-background border-b border-border';
+        case 'transparent':
+            return 'bg-transparent';
+        case 'glass':
+        default:
+            return 'bg-background/80 backdrop-blur-md border-b border-border';
+    }
+});
+
 onMounted(() => {
     fetchMenuByLocation('header');
+    fetchMenuByLocation('header_top');
 });
 
 const navItems = computed(() => menus.value['header']?.items || []);
+const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 </script>

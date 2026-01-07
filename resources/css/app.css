@@ -49,19 +49,18 @@
 
 
     :root {
-        /* Light mode - Clean & Crisp (Notion/Cursor Style) */
-        --background: 0 0% 100%;
-        /* Pure White Canvas */
+        /* Janari Theme Integration - Using variables from useTheme.js */
+        --primary: var(--theme-color-primary-hsl, 240 5.9% 10%);
+        --background: var(--theme-color-background-hsl, 0 0% 100%);
+        --card: var(--theme-color-background-hsl, 0 0% 100%);
+        
+        /* Shadcn UI Design Tokens - Premium Enterprise Grade */
         --foreground: 240 10% 3.9%;
-
-        --card: 0 0% 100%;
-        /* White Cards */
         --card-foreground: 240 10% 3.9%;
 
         --popover: 0 0% 100%;
         --popover-foreground: 240 10% 3.9%;
 
-        --primary: 240 5.9% 10%;
         --primary-foreground: 0 0% 98%;
 
         --secondary: 240 4.8% 95.9%;
@@ -77,14 +76,11 @@
         --destructive-foreground: 0 0% 98%;
 
         --border: 240 8% 89%;
-        /* Crisper borders for better definition */
         --input: 240 8% 87%;
-        /* Slightly darker for input fields */
         --ring: 240 10% 3.9%;
 
         --radius: 0.5rem;
 
-        /* Sidebar - Slight Contrast */
         --sidebar: 240 4.8% 98%;
         --sidebar-foreground: 240 5.9% 10%;
         --sidebar-accent: 240 4.8% 95.9%;
