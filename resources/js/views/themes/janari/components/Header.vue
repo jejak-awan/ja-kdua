@@ -270,45 +270,55 @@ const headerStyleClasses = computed(() => {
 });
 
 // Navigation Style
-const navStyle = computed(() => getSetting('nav_style', 'pill'));
+const navStyle = computed(() => getSetting('nav_style', 'glass'));
 
 const getNavItemClasses = (isActive) => {
-    const baseClasses = 'flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all duration-200 relative';
+    const baseClasses = 'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all duration-300 relative';
     
     const styles = {
-        // Minimal - Clean, subtle hover
-        minimal: {
-            base: `${baseClasses} text-muted-foreground hover:text-foreground`,
-            active: 'text-foreground font-semibold'
+        // Glass Morph - Modern blur with transparency (Default)
+        glass: {
+            base: `${baseClasses} text-foreground/70 hover:text-foreground rounded-xl hover:bg-white/10 hover:backdrop-blur-sm hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] dark:hover:bg-white/5`,
+            active: 'text-foreground bg-white/15 backdrop-blur-sm rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] font-semibold'
         },
-        // Pill - Rounded background on hover
+        // Spotlight - Focus highlight like Apple
+        spotlight: {
+            base: `${baseClasses} text-muted-foreground hover:text-foreground rounded-lg nav-spotlight`,
+            active: 'text-foreground font-semibold nav-spotlight-active'
+        },
+        // Magnetic - Hover attraction effect
+        magnetic: {
+            base: `${baseClasses} text-muted-foreground hover:text-primary rounded-lg nav-magnetic hover:scale-105 hover:-translate-y-0.5`,
+            active: 'text-primary font-semibold scale-105'
+        },
+        // Floating - 3D shadow depth
+        floating: {
+            base: `${baseClasses} text-muted-foreground hover:text-foreground rounded-xl hover:bg-card hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 dark:hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.4)]`,
+            active: 'text-foreground bg-card rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] -translate-y-1 font-semibold'
+        },
+        // Slide - Text reveal animation
+        slide: {
+            base: `${baseClasses} text-muted-foreground hover:text-primary rounded-lg overflow-hidden nav-slide`,
+            active: 'text-primary font-semibold nav-slide-active'
+        },
+        // Pill Modern - Soft gradient fill
         pill: {
-            base: `${baseClasses} text-muted-foreground hover:text-primary rounded-full hover:bg-primary/10`,
-            active: 'text-primary bg-primary/10 rounded-full font-semibold'
+            base: `${baseClasses} text-muted-foreground hover:text-primary-foreground rounded-full hover:bg-gradient-to-r hover:from-primary hover:to-primary/80 hover:shadow-lg hover:shadow-primary/25`,
+            active: 'text-primary-foreground bg-gradient-to-r from-primary to-primary/80 rounded-full shadow-lg shadow-primary/25 font-semibold'
         },
-        // Underline - Animated bottom border
+        // Underline Grow - Expanding bottom border
         underline: {
             base: `${baseClasses} text-muted-foreground hover:text-foreground nav-underline-item`,
-            active: 'text-foreground nav-underline-active'
+            active: 'text-foreground nav-underline-active font-semibold'
         },
-        // Glow - Neon glow effect
+        // Neon Glow - Cyberpunk style
         glow: {
-            base: `${baseClasses} text-muted-foreground hover:text-primary hover:drop-shadow-[0_0_8px_hsl(var(--primary))]`,
-            active: 'text-primary drop-shadow-[0_0_12px_hsl(var(--primary))] font-semibold'
-        },
-        // Boxed - Bordered container
-        boxed: {
-            base: `${baseClasses} text-muted-foreground hover:text-foreground border border-transparent hover:border-border rounded-lg hover:bg-muted/30`,
-            active: 'text-foreground border-primary/50 bg-primary/5 rounded-lg'
-        },
-        // Gradient - Color shift gradient
-        gradient: {
-            base: `${baseClasses} text-muted-foreground hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-primary hover:to-purple-500 rounded-lg hover:bg-primary/5`,
-            active: 'text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 font-semibold'
+            base: `${baseClasses} text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/5 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)] nav-glow`,
+            active: 'text-primary bg-primary/10 rounded-lg shadow-[0_0_25px_rgba(var(--primary-rgb),0.5)] font-semibold'
         }
     };
     
-    const currentStyle = styles[navStyle.value] || styles.pill;
+    const currentStyle = styles[navStyle.value] || styles.glass;
     return isActive ? currentStyle.active : currentStyle.base;
 };
 
@@ -339,7 +349,9 @@ const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 </script>
 
 <style scoped>
-/* Underline Navigation Style */
+/* ====== MODERN NAV STYLES 2024-2026 ====== */
+
+/* Underline Grow Animation */
 .nav-underline-item::after {
     content: '';
     position: absolute;
@@ -348,39 +360,96 @@ const headerTopItems = computed(() => menus.value['header_top']?.items || []);
     width: 0;
     height: 2px;
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(-50%);
     border-radius: 2px;
 }
 
 .nav-underline-item:hover::after {
-    width: 100%;
+    width: 80%;
 }
 
 .nav-underline-active::after {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 0;
-    width: 100%;
+    left: 10%;
+    width: 80%;
     height: 2px;
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
     border-radius: 2px;
 }
 
-.nav-underline {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: hsl(var(--primary));
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
+/* Spotlight Effect - Radial gradient follows mouse conceptually */
+.nav-spotlight {
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), transparent 0%, transparent 100%);
 }
 
-.router-link-active .nav-underline,
-:hover > .nav-underline {
-    width: 80%;
+.nav-spotlight:hover {
+    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 0%, transparent 70%);
+}
+
+.nav-spotlight-active {
+    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.2) 0%, transparent 70%);
+}
+
+/* Magnetic Effect - Already handled by Tailwind transform classes */
+.nav-magnetic {
+    will-change: transform;
+}
+
+/* Slide Text Effect */
+.nav-slide::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary));
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-slide:hover {
+    color: transparent;
+}
+
+.nav-slide:hover::before {
+    top: 0;
+}
+
+.nav-slide-active {
+    color: hsl(var(--primary));
+}
+
+/* Neon Glow Pulse Animation */
+.nav-glow {
+    --primary-rgb: 124, 58, 237; /* Default purple, will be overridden by theme */
+}
+
+.nav-glow:hover {
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.6);
+    }
+}
+
+/* Smooth transitions for all nav items */
+nav a, nav button {
+    will-change: transform, box-shadow, background-color;
+}
+
+/* Dark mode adjustments */
+:root.dark .nav-spotlight:hover {
+    background: radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.2) 0%, transparent 70%);
 }
 </style>

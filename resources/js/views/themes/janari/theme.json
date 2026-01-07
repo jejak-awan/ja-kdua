@@ -121,31 +121,39 @@
             "type": "select",
             "options": [
                 {
-                    "label": "Minimal (Clean)",
-                    "value": "minimal"
+                    "label": "✨ Glass Morph (Blur + Transparency)",
+                    "value": "glass"
                 },
                 {
-                    "label": "Pill (Rounded Background)",
+                    "label": "🎯 Spotlight (Focus Highlight)",
+                    "value": "spotlight"
+                },
+                {
+                    "label": "🧲 Magnetic (Hover Attraction)",
+                    "value": "magnetic"
+                },
+                {
+                    "label": "💫 Floating (3D Shadow)",
+                    "value": "floating"
+                },
+                {
+                    "label": "🌊 Slide (Text Reveal)",
+                    "value": "slide"
+                },
+                {
+                    "label": "💊 Pill Modern (Soft Fill)",
                     "value": "pill"
                 },
                 {
-                    "label": "Underline (Animated)",
+                    "label": "📏 Underline Grow (Expand)",
                     "value": "underline"
                 },
                 {
-                    "label": "Glow (Neon Effect)",
+                    "label": "🔥 Neon Glow (Cyberpunk)",
                     "value": "glow"
-                },
-                {
-                    "label": "Boxed (Bordered)",
-                    "value": "boxed"
-                },
-                {
-                    "label": "Gradient (Color Shift)",
-                    "value": "gradient"
                 }
             ],
-            "default": "pill",
+            "default": "glass",
             "category": "Layout"
         },
         "hero_title": {
