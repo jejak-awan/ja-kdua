@@ -35,9 +35,16 @@
                         :errors="errors"
                     />
 
-                    <!-- Security Tab (New Component) -->
                     <SecurityTab
                         v-else-if="activeTab === 'security'"
+                        :settings="settings"
+                        :form-data="formData"
+                        :errors="errors"
+                    />
+
+                    <!-- Discussion Tab (New Component) -->
+                    <DiscussionTab
+                        v-else-if="activeTab === 'comments'"
                         :settings="settings"
                         :form-data="formData"
                         :errors="errors"
@@ -147,6 +154,7 @@ import SeoTab from './tabs/SeoTab.vue';
 import MediaTab from './tabs/MediaTab.vue';
 import SecurityTab from './tabs/SecurityTab.vue';
 import PerformanceTab from './tabs/PerformanceTab.vue';
+import DiscussionTab from './tabs/DiscussionTab.vue';
 import EmailTestSection from './EmailTestSection.vue';
 
 const { t } = useI18n();
@@ -157,7 +165,7 @@ const route = useRoute();
 const loading = ref(false);
 const saving = ref(false);
 // Initialize tab from query param if present (e.g., ?tab=performance)
-const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media'];
+const validTabs = ['general', 'email', 'seo', 'security', 'performance', 'media', 'comments'];
 const initialTab = validTabs.includes(route.query.tab) ? route.query.tab : 'general';
 const activeTab = ref(initialTab);
 const settings = ref([]);
@@ -202,6 +210,7 @@ const warmingCache = ref(false);
 const tabs = [
     { id: 'general', label: 'General' },
     { id: 'email', label: 'Email' },
+    { id: 'comments', label: 'Discussion' },
     { id: 'seo', label: 'SEO' },
     { id: 'security', label: 'Security' },
     { id: 'performance', label: 'Performance' },

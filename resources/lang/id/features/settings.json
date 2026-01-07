@@ -8,6 +8,7 @@
         "email": "Email",
         "seo": "SEO",
         "security": "Keamanan",
+        "comments": "Diskusi",
         "performance": "Performa",
         "media": "Media"
     },
@@ -63,6 +64,14 @@
         "imageProcessing": {
             "title": "Pemrosesan Gambar",
             "description": "Pengaturan pembuatan thumbnail dan watermark"
+        },
+        "discussion": {
+            "title": "Pengaturan Diskusi",
+            "description": "Konfigurasi sistem komentar"
+        },
+        "moderation": {
+            "title": "Moderasi",
+            "description": "Keamanan konten dan perlindungan spam"
         }
     },
     "enabled": "Aktif",
@@ -321,6 +330,16 @@
         "enable_cache": "Aktifkan Cache",
         "cache_driver": "Driver Cache",
         "cache_ttl": "Masa Berlaku Cache (detik)",
+        "comments": {
+            "security": {
+                "enable_reply": "Aktifkan Balasan",
+                "allow_guests": "Izinkan Komentar Tamu",
+                "moderation_enabled": "Aktifkan Moderasi",
+                "guest_captcha": "Captcha Tamu",
+                "max_links": "Maksimal Tautan",
+                "banned_words": "Kata-kata Terlarang"
+            }
+        },
         "enable_image_optimization": "Optimasi Gambar",
         "enable_lazy_loading": "Lazy Loading",
         "enable_cdn": "Aktifkan CDN",
@@ -390,6 +409,16 @@
         "thumbnail_height": "Tinggi yang digunakan saat menghasilkan thumbnail",
         "enable_watermark": "Tambahkan tanda air teks ke gambar saat diunggah",
         "watermark_text": "Teks yang akan ditampilkan pada tanda air",
-        "storage_driver": "Sistem yang digunakan untuk menyimpan file unggahan (lokal atau eksternal)"
+        "storage_driver": "Sistem yang digunakan untuk menyimpan file unggahan (lokal atau eksternal)",
+        "comments": {
+            "security": {
+                "enable_reply": "Izinkan pengguna untuk membalas komentar lain",
+                "allow_guests": "Izinkan pengguna berkomentar tanpa login",
+                "moderation_enabled": "Komentar baru memerlukan persetujuan admin sebelum muncul",
+                "guest_captcha": "Wajibkan tamu menyelesaikan captcha untuk memposting",
+                "max_links": "Jumlah maksimum tautan yang diperbolehkan dalam satu komentar (0 untuk tidak terbatas)",
+                "banned_words": "Daftar kata yang akan menyebabkan komentar ditandai sebagai spam (array JSON)"
+            }
+        }
     }
 }

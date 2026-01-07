@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CommentSecurityServiceTest extends TestCase
 {
-    use RefreshDatabase;
+
 
     protected CommentSecurityService $service;
 

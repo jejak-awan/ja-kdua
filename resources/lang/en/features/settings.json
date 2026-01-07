@@ -8,6 +8,7 @@
         "email": "Email",
         "seo": "SEO",
         "security": "Security",
+        "comments": "Discussion",
         "performance": "Performance",
         "media": "Media"
     },
@@ -63,6 +64,14 @@
         "imageProcessing": {
             "title": "Image Processing",
             "description": "Thumbnail generation and watermark settings"
+        },
+        "discussion": {
+            "title": "Discussion Settings",
+            "description": "Configure comment system behavior"
+        },
+        "moderation": {
+            "title": "Moderation",
+            "description": "Content safety and spam protection"
         }
     },
     "enabled": "Enabled",
@@ -359,7 +368,17 @@
         "ftp_root": "FTP Root Path",
         "ftp_port": "FTP Port",
         "ftp_ssl": "Use SSL/TLS",
-        "dropbox_authorization_token": "Dropbox Auth Token"
+        "dropbox_authorization_token": "Dropbox Auth Token",
+        "comments": {
+            "security": {
+                "enable_reply": "Enable Replies",
+                "allow_guests": "Allow Guest Comments",
+                "moderation_enabled": "Enable Moderation",
+                "guest_captcha": "Guest Captcha",
+                "max_links": "Max Links Allowed",
+                "banned_words": "Banned Words"
+            }
+        }
     },
     "descriptions": {
         "site_name": "The name of your application displayed throughout the site",
@@ -435,6 +454,16 @@
         "ftp_root": "Root directory for file storage (e.g. /public_html)",
         "ftp_port": "FTP connection port (default 21)",
         "ftp_ssl": "Enable secure connection (FTPS)",
-        "dropbox_authorization_token": "Generated Access Token from Dropbox App Console"
+        "dropbox_authorization_token": "Generated Access Token from Dropbox App Console",
+        "comments": {
+            "security": {
+                "enable_reply": "Allow users to reply to other comments",
+                "allow_guests": "Allow users to comment without logging in",
+                "moderation_enabled": "New comments require admin approval before appearing",
+                "guest_captcha": "Require guests to solve a captcha to post",
+                "max_links": "Maximum number of links allowed in a comment (0 for unlimited)",
+                "banned_words": "List of words that will cause a comment to be marked as spam (JSON array)"
+            }
+        }
     }
 }

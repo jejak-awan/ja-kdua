@@ -41,6 +41,22 @@ class CommentSecuritySettingsSeeder extends Seeder
                 'group' => 'comments',
                 'description' => 'Enable nested replies.',
                 'is_public' => true,
+            ],
+            [
+                'key' => 'comments.security.allow_guests',
+                'value' => true,
+                'type' => 'boolean',
+                'group' => 'comments',
+                'description' => 'Allow guests to post comments.',
+                'is_public' => true,
+            ],
+            [
+                'key' => 'comments.security.guest_captcha',
+                'value' => true,
+                'type' => 'boolean',
+                'group' => 'comments',
+                'description' => 'Require Captcha for guest comments.',
+                'is_public' => true,
             ]
         ];
 

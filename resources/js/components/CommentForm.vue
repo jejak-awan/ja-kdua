@@ -26,6 +26,14 @@
                     </div>
                 </div>
 
+                <div v-if="!authStore.isAuthenticated" class="space-y-2">
+                    <Label>{{ $t('features.settings.labels.enable_captcha') }}</Label>
+                    <CaptchaWrapper 
+                        action="comment" 
+                        @verified="handleCaptchaVerified" 
+                    />
+                </div>
+
                 <div class="space-y-2">
                     <Label for="body">{{ $t('features.comments.comment') }}</Label>
                     <Textarea
@@ -55,6 +63,7 @@ import { useI18n } from 'vue-i18n';
 import api from '../services/api';
 import { useAuthStore } from '../stores/auth';
 import { Loader2 } from 'lucide-vue-next';
+import CaptchaWrapper from './captcha/CaptchaWrapper.vue';
 import Card from './ui/card.vue';
 import CardHeader from './ui/card-header.vue';
 import CardTitle from './ui/card-title.vue';
@@ -88,8 +97,16 @@ const form = ref({
     name: '',
     email: '',
     body: '',
+    body: '',
     parent_id: props.parentId,
+    captcha_token: '',
+    captcha_input: '',
 });
+
+const handleCaptchaVerified = (payload) => {
+    form.value.captcha_token = payload.token;
+    form.value.captcha_input = payload.answer || payload.position || payload.code; // Handle varies payload keys from different captchas
+};
 
 const loading = ref(false);
 

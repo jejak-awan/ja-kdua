@@ -36,7 +36,16 @@ const fetchSettings = async () => {
         const response = await api.get('/captcha/settings')
         const data = response.data?.data || response.data
         
-        enabled.value = props.action === 'login' ? data.enabled_login : data.enabled_register
+        if (props.action === 'login') {
+            enabled.value = data.enabled_login
+        } else if (props.action === 'register') {
+            enabled.value = data.enabled_register
+        } else if (props.action === 'comment') {
+            enabled.value = data.enabled_comment
+        } else {
+            enabled.value = false
+        }
+        
         method.value = data.method
     } catch (e) {
         console.error('Failed to fetch captcha settings:', e)

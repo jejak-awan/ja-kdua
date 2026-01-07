@@ -52,11 +52,25 @@ class CommentController extends BaseApiController
             $validated['user_id'] = $request->user()->id;
             $authorEmail = $request->user()->email;
         } else {
+            // Check if guests are allowed
+            if (!\App\Models\Setting::getValue('comments.security.allow_guests', true)) {
+                return $this->error('Guest comments are disabled', 403);
+            }
+
             // For guest comments, name and email are required
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
             ]);
+
+            // Captcha Validation for Guests
+            if (\App\Models\Setting::getValue('comments.security.guest_captcha', true)) {
+                $captchaService = app(\App\Services\CaptchaService::class);
+                if (!$captchaService->verify($request->input('captcha_token'), $request->input('captcha_input'))) {
+                    return $this->error('Invalid captcha', 422);
+                }
+            }
+
             $authorEmail = $validated['email'];
         }
 

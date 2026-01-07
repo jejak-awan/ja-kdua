@@ -203,7 +203,7 @@ const isPassword = computed(() => {
 })
 
 const isTextarea = computed(() => {
-    return props.type === 'text'
+    return props.type === 'text' || props.type === 'json'
 })
 
 // Update parent

@@ -68,6 +68,7 @@ class CaptchaService
         return match ($action) {
             'login' => (bool) Setting::get('captcha_on_login', true),
             'register' => (bool) Setting::get('captcha_on_register', true),
+            'comment' => (bool) Setting::getValue('comments.security.guest_captcha', true),
             default => true,
         };
     }

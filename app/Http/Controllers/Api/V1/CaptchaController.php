@@ -47,6 +47,7 @@ class CaptchaController extends BaseApiController
             'enabled' => CaptchaService::isEnabled('login'),
             'enabled_login' => CaptchaService::isEnabled('login'),
             'enabled_register' => CaptchaService::isEnabled('register'),
+            'enabled_comment' => CaptchaService::isEnabled('comment'),
             'method' => CaptchaService::getMethod(),
         ], 'Captcha settings retrieved');
     }
