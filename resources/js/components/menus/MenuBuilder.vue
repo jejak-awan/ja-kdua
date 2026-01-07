@@ -351,6 +351,7 @@ const flattenTree = (items, parentId = null) => {
             description: item.description || null,
             badge: item.badge || null,
             badge_color: item.badge_color || 'primary',
+            mega_menu_layout: item.mega_menu_layout || 'default',
             open_in_new_tab: item.open_in_new_tab || false,
         });
         if (item.children && item.children.length > 0) {

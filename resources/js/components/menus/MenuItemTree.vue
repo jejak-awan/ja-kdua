@@ -114,21 +114,39 @@
                         </div>
                     </div>
 
-                    <!-- Row 1: Basic Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="space-y-1.5">
+                    <!-- Row 1: Basic Info & Layout -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="space-y-1.5 md:col-span-1">
                             <Label class="text-xs font-medium">{{ t('features.menus.form.label') }}</Label>
                             <Input v-model="element.title" class="h-8 bg-background" />
                         </div>
                         
-                        <div class="space-y-1.5" v-if="element.type === 'custom'">
+                        <div class="space-y-1.5 md:col-span-1" v-if="element.type === 'custom'">
                             <Label class="text-xs font-medium">{{ t('features.menus.form.url') }}</Label>
                             <Input v-model="element.url" class="h-8 bg-background" />
                         </div>
+                        <div class="space-y-1.5 md:col-span-1" v-else>
+                             <!-- Spacer if not custom url -->
+                        </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5 md:col-span-1">
                             <Label class="text-xs font-medium">Icon</Label>
                             <IconPicker v-model="element.icon" placeholder="Choose icon..." />
+                        </div>
+
+                        <div class="space-y-1.5 md:col-span-1">
+                            <Label class="text-xs font-medium">Layout</Label>
+                             <Select v-model="element.mega_menu_layout">
+                                <SelectTrigger class="h-8 bg-background">
+                                    <SelectValue placeholder="Default" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="default">Default (List)</SelectItem>
+                                    <SelectItem value="grid-2">Grid 2 Cols</SelectItem>
+                                    <SelectItem value="grid-3">Grid 3 Cols</SelectItem>
+                                    <SelectItem value="full">Full Width</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 

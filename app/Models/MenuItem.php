@@ -27,6 +27,7 @@ class MenuItem extends Model
         'badge',
         'badge_color',
         'image',
+        'mega_menu_layout',
         'sort_order',
         'open_in_new_tab',
         'is_active',

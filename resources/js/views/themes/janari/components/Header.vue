@@ -83,10 +83,13 @@
                             </button>
                             
                             <!-- Mega Menu Dropdown -->
-                            <div class="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div 
+                                class="absolute top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                :class="getDropdownPositionClasses(item.mega_menu_layout)"
+                            >
                                 <div 
-                                    class="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-4 min-w-[280px]"
-                                    :class="{ 'grid grid-cols-2 gap-4 min-w-[500px]': item.children.length > 3 }"
+                                    class="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-4"
+                                    :class="getMegaMenuLayoutClasses(item)"
                                 >
                                     <router-link
                                         v-for="child in item.children"
@@ -337,6 +340,33 @@ const getBadgeClasses = (color) => {
         default: 'bg-muted text-muted-foreground',
     };
     return colorMap[color] || colorMap.default;
+};
+
+// Mega Menu Layout Helpers
+const getDropdownPositionClasses = (layout) => {
+    if (layout === 'full') {
+        return 'left-0 right-0 w-full fixed mt-2 px-4 container mx-auto transform -translate-x-1/2 left-1/2';
+    }
+    return 'left-0 min-w-[280px]';
+};
+
+const getMegaMenuLayoutClasses = (item) => {
+    const layout = item.mega_menu_layout || 'default';
+    const childCount = item.children?.length || 0;
+    
+    switch (layout) {
+        case 'grid-2':
+            return 'grid grid-cols-2 gap-4 min-w-[500px]';
+        case 'grid-3':
+            return 'grid grid-cols-3 gap-6 min-w-[750px]';
+        case 'full':
+            return 'grid grid-cols-4 gap-8 p-6 w-full';
+        case 'default':
+        default:
+            // Auto grid for large items
+            if (childCount > 5) return 'grid grid-cols-2 gap-4 min-w-[500px]';
+            return 'flex flex-col gap-1 min-w-[280px]';
+    }
 };
 
 onMounted(() => {
