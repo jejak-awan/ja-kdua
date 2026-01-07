@@ -30,6 +30,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
 
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -55,7 +56,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const confirm = useConfirm();
+const { confirm } = useConfirm();
 const toast = useToast();
 
 useHead({
@@ -92,33 +93,15 @@ const fetchContents = async (page = 1) => {
 
         if (search.value) params.search = search.value;
         if (statusFilter.value && statusFilter.value !== 'all') {
-            if (statusFilter.value === 'trashed') {
-                params.trashed = true;
-            } else {
-                params.status = statusFilter.value;
-            }
+            params.status = statusFilter.value;
         }
 
         const response = await api.get('/admin/cms/contents', { params });
         
-        // Handle Laravel Pagination Structure
-        const rawData = response.data.data;
-        let items = [];
-        let meta = {};
-
-        if (Array.isArray(rawData)) {
-            // Direct array
-            items = rawData;
-            meta = response.data.meta || {};
-        } else if (rawData && typeof rawData === 'object') {
-            // Paginated Object (standard Laravel paginate() response wrapped in resource)
-            items = rawData.data || [];
-            // Use the paginator object itself as meta since it contains current_page, total, etc.
-            meta = rawData;
-        }
-
-        contents.value = items;
-        pagination.value = meta;
+        const { data, pagination: meta } = parseResponse(response);
+        
+        contents.value = ensureArray(data);
+        pagination.value = meta || {};
         
     } catch (error) {
         console.error('Failed to fetch contents:', error);
@@ -177,6 +160,7 @@ const getStatusBadgeClass = (status) => {
         case 'draft': return 'bg-slate-500/10 text-slate-500 border-slate-200 dark:border-slate-500/20';
         case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-200 dark:border-amber-500/20';
         case 'archived': return 'bg-rose-500/10 text-rose-500 border-rose-200 dark:border-rose-500/20';
+        case 'trashed': return 'bg-destructive/10 text-destructive border-destructive/20';
         default: return 'bg-gray-500/10 text-gray-500 border-gray-200 dark:border-gray-500/20';
     }
 };
@@ -247,6 +231,15 @@ const handleDelete = async (content) => {
 };
 
 const handleRestore = async (content) => {
+    const confirmed = await confirm({
+        title: t('common.actions.restore'),
+        message: t('common.messages.confirm.restore', { item: content.title }),
+        confirmText: t('common.actions.restore'),
+        variant: 'info'
+    });
+
+    if (!confirmed) return;
+
     try {
         await api.put(`/admin/cms/contents/${content.id}/restore`);
         await fetchContents();
@@ -539,7 +532,12 @@ onMounted(() => {
                             </TableCell>
                             <TableCell class="px-6 py-4">
                                 <div class="flex flex-col gap-0.5">
-                                    <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ content.title }}</span>
+                                        <Badge v-if="content.deleted_at" variant="destructive" class="h-4.5 text-[10px] px-1.5 uppercase font-bold tracking-wider">
+                                            {{ t('features.content.status.trashed') }}
+                                        </Badge>
+                                    </div>
                                     <span class="text-xs text-muted-foreground/70 font-mono">{{ content.slug }}</span>
                                 </div>
                             </TableCell>
@@ -567,13 +565,22 @@ onMounted(() => {
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-1">
-                                    <Button variant="ghost" size="icon" class="h-8 w-8" @click="handleEdit(content)" v-if="authStore.hasPermission('edit content')">
-                                        <Edit2 class="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleDelete(content)" v-if="authStore.hasPermission('delete content')">
-                                        <Trash2 class="w-4 h-4" />
-                                    </Button>
-                                    <!-- DropdownMenu removed -->
+                                    <template v-if="content.deleted_at">
+                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-emerald-600" @click="handleRestore(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.restore')">
+                                            <RotateCcw class="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleForceDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.deletePermanently')">
+                                            <Trash2 class="w-4 h-4" />
+                                        </Button>
+                                    </template>
+                                    <template v-else>
+                                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="handleEdit(content)" v-if="authStore.hasPermission('edit content')" :title="t('common.actions.edit')">
+                                            <Edit2 class="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.delete')">
+                                            <Trash2 class="w-4 h-4" />
+                                        </Button>
+                                    </template>
                                 </div>
                             </TableCell>
                         </TableRow>

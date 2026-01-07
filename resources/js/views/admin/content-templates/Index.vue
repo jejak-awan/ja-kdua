@@ -2,6 +2,9 @@
     <div>
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
+                <Button variant="ghost" size="icon" @click="router.push({ name: 'contents' })" class="h-9 w-9">
+                    <ChevronLeft class="w-5 h-5" />
+                </Button>
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ t('features.content_templates.title') }}</h1>
                     <p class="text-sm text-muted-foreground mt-1">{{ t('features.content_templates.description') }}</p>
@@ -233,7 +236,8 @@ import {
     Trash2,
     CopyPlus,
     Loader2,
-    RotateCcw
+    RotateCcw,
+    ChevronLeft
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
