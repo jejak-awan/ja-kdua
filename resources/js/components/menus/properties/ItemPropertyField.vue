@@ -105,7 +105,7 @@
             </div>
             <MediaPicker 
                 :label="value ? 'Change Image' : 'Select Image'"
-                @select="handleMediaSelect"
+                @selected="handleMediaSelect"
             />
         </div>
 
