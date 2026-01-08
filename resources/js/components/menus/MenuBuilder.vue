@@ -184,7 +184,7 @@
                 <!-- Left: Source Panel -->
                 <div 
                     class="transition-all duration-300"
-                    :class="isSidebarCollapsed ? 'col-span-1' : 'col-span-3'"
+                    :class="isSidebarCollapsed ? 'col-span-1' : 'col-span-2 lg:col-span-3'"
                 >
                     <Button 
                         v-if="isSidebarCollapsed"
@@ -223,7 +223,7 @@
                 <!-- Right: Properties Panel -->
                 <div 
                     class="sticky top-4 transition-all duration-300"
-                    :class="isPropertiesCollapsed ? 'col-span-1' : 'col-span-3'"
+                    :class="isPropertiesCollapsed ? 'col-span-1' : 'col-span-3 lg:col-span-4'"
                 >
                     <Button 
                         v-if="isPropertiesCollapsed"
@@ -340,18 +340,11 @@ const locations = ref([]);
 
 // Layout computation
 const centerColClass = computed(() => {
-    const leftW = isSidebarCollapsed.value ? 1 : 3;
-    const rightW = isPropertiesCollapsed.value ? 1 : 3;
-    const centerW = 12 - leftW - rightW; // 6, 8, or 10
+    const leftW = isSidebarCollapsed.value ? 1 : (window.innerWidth < 1024 ? 2 : 3);
+    const rightW = isPropertiesCollapsed.value ? 1 : (window.innerWidth < 1024 ? 3 : 4);
+    const centerW = 12 - leftW - rightW;
     
-    // Explicit map for Tailwind JIT
-    const widthMap = {
-        6: 'col-span-6',
-        8: 'col-span-8',
-        10: 'col-span-10'
-    };
-    
-    return widthMap[centerW] || 'col-span-6';
+    return `col-span-${centerW}`;
 });
 
 

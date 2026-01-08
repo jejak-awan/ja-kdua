@@ -565,6 +565,8 @@ const getImageSizeClasses = (size) => {
         case 'landscape_sm': return 'aspect-video h-24 lg:h-28 object-cover';
         case 'landscape_md': return 'aspect-video h-32 lg:h-36 object-cover';
         case 'landscape_lg': return 'aspect-video h-40 lg:h-48 object-cover';
+        case 'portrait_sm': return 'aspect-[3/4] h-48 lg:h-56 object-cover';
+        case 'portrait_md': return 'aspect-[3/4] h-64 lg:h-72 object-cover';
         case 'full': return 'aspect-video w-full object-cover';
         case 'auto':
         default: return 'aspect-video h-32 lg:h-36 object-cover';

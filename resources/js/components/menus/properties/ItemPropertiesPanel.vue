@@ -1,5 +1,5 @@
 <template>
-    <Card class="border-t-4 border-t-primary/20">
+    <Card class="border-border shadow-sm">
         <CardHeader class="pb-3">
             <div class="flex items-center justify-between">
                 <CardTitle class="text-base">

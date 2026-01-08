@@ -88,6 +88,8 @@ export default {
                 { label: 'Landscape Small', value: 'landscape_sm' },
                 { label: 'Landscape Medium', value: 'landscape_md' },
                 { label: 'Landscape Large', value: 'landscape_lg' },
+                { label: 'Portrait Small', value: 'portrait_sm' },
+                { label: 'Portrait Medium', value: 'portrait_md' },
                 { label: 'Full Width (16:9)', value: 'full' }
             ],
             default: 'auto',
