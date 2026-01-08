@@ -39,6 +39,15 @@ class MenuItem extends Model
         'show_heading_line',
     ];
 
+    /**
+     * Allowed models for polymorphic relationship
+     */
+    const ALLOWED_TARGET_TYPES = [
+        'App\Models\Content',
+        'App\Models\Category',
+        // Add other allowed models here
+    ];
+
     protected $casts = [
         'open_in_new_tab' => 'boolean',
         'is_active' => 'boolean',

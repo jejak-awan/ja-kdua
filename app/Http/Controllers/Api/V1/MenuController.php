@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends BaseApiController
 {
@@ -188,6 +189,11 @@ class MenuController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
+        // Security: Validate target_type against whitelist
+        if (!empty($validated['target_type']) && !in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+            return $this->error('Invalid target type', 422);
+        }
+
         // Auto-assign target_type based on type if not provided
         if (empty($validated['target_type']) && ! empty($validated['type'])) {
             if (in_array($validated['type'], ['page', 'post'])) {
@@ -241,6 +247,11 @@ class MenuController extends BaseApiController
             'is_active' => 'boolean',
         ]);
 
+        // Security: Validate target_type against whitelist
+        if (!empty($validated['target_type']) && !in_array($validated['target_type'], MenuItem::ALLOWED_TARGET_TYPES)) {
+            return $this->error('Invalid target type', 422);
+        }
+
         // Auto-assign target_type based on type if not provided
         if (empty($validated['target_type']) && ! empty($validated['type'])) {
             if (in_array($validated['type'], ['page', 'post'])) {
@@ -275,29 +286,31 @@ class MenuController extends BaseApiController
             'items.*.parent_id' => 'nullable|exists:menu_items,id',
         ]);
 
-        foreach ($request->items as $itemData) {
-            $updateData = [
-                'sort_order' => $itemData['sort_order'],
-                'parent_id' => $itemData['parent_id'] ?? null,
-            ];
+        DB::transaction(function () use ($request, $menu) {
+            foreach ($request->items as $itemData) {
+                $updateData = [
+                    'sort_order' => $itemData['sort_order'],
+                    'parent_id' => $itemData['parent_id'] ?? null,
+                ];
 
-            // Include optional mega menu fields if present
-            $optionalFields = [
-                'title', 'url', 'icon', 'css_class', 'description',
-                'badge', 'badge_color', 'open_in_new_tab', 'image', 'image_size',
-                'mega_menu_layout', 'mega_menu_column', 'mega_menu_show_dividers',
-                'hide_label', 'heading', 'show_heading_line',
-            ];
-            foreach ($optionalFields as $field) {
-                if (array_key_exists($field, $itemData)) {
-                    $updateData[$field] = $itemData[$field];
+                // Include optional mega menu fields if present
+                $optionalFields = [
+                    'title', 'url', 'icon', 'css_class', 'description',
+                    'badge', 'badge_color', 'open_in_new_tab', 'image', 'image_size',
+                    'mega_menu_layout', 'mega_menu_column', 'mega_menu_show_dividers',
+                    'hide_label', 'heading', 'show_heading_line',
+                ];
+                foreach ($optionalFields as $field) {
+                    if (array_key_exists($field, $itemData)) {
+                        $updateData[$field] = $itemData[$field];
+                    }
                 }
-            }
 
-            MenuItem::where('id', $itemData['id'])
-                ->where('menu_id', $menu->id)
-                ->update($updateData);
-        }
+                MenuItem::where('id', $itemData['id'])
+                    ->where('menu_id', $menu->id)
+                    ->update($updateData);
+            }
+        });
 
         return $this->success(null, 'Menu items reordered successfully');
     }
