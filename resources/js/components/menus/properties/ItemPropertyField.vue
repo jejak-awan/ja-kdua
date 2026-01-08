@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-1.5">
         <Label class="text-xs flex items-center gap-1">
-            {{ setting.label }}
+            {{ t(setting.label) }}
             <span v-if="setting.required" class="text-destructive">*</span>
         </Label>
 
@@ -9,7 +9,7 @@
         <Input 
             v-if="setting.type === 'text'"
             :model-value="value"
-            :placeholder="setting.placeholder"
+            :placeholder="setting.placeholder ? t(setting.placeholder) : ''"
             class="h-8"
             @update:model-value="$emit('update', $event)"
         />
@@ -18,7 +18,7 @@
         <Textarea 
             v-else-if="setting.type === 'textarea'"
             :model-value="value"
-            :placeholder="setting.placeholder"
+            :placeholder="setting.placeholder ? t(setting.placeholder) : ''"
             rows="2"
             @update:model-value="$emit('update', $event)"
         />
@@ -41,7 +41,7 @@
             @update:model-value="$emit('update', $event)"
         >
             <SelectTrigger class="h-8">
-                <SelectValue :placeholder="setting.placeholder || 'Select...'" />
+                <SelectValue :placeholder="setting.placeholder ? t(setting.placeholder) : t('common.placeholders.select')" />
             </SelectTrigger>
             <SelectContent>
                 <SelectItem 
@@ -49,7 +49,7 @@
                     :key="opt.value" 
                     :value="opt.value"
                 >
-                    {{ opt.label }}
+                    {{ t(opt.label) }}
                 </SelectItem>
             </SelectContent>
         </Select>
@@ -62,7 +62,7 @@
                 @update:checked="$emit('update', $event)"
             />
             <Label :for="setting.key" class="text-xs font-normal cursor-pointer">
-                {{ setting.label }}
+                {{ t(setting.label) }}
             </Label>
         </div>
 
@@ -142,8 +142,10 @@ import Button from '../../ui/button.vue';
 import IconPicker from '../../ui/icon-picker.vue';
 import MediaPicker from '../../MediaPicker.vue';
 
+import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 
+const { t } = useI18n();
 const emit = defineEmits(['update']);
 
 const handleMediaSelect = (media) => {

@@ -96,7 +96,53 @@
             "post": "Posts",
             "category": "Categories",
             "content": "Content",
-            "column_group": "Column Group"
-        }
+            "column_group": "Column Group",
+            "custom": "Custom Link"
+        },
+        "megaMenuLayout": "Mega Menu Layout",
+        "showDividers": "Show Column Dividers",
+        "columnNumber": "Column Number",
+        "columnHeading": "Column Heading",
+        "hideLabel": "Hide Label",
+        "badgeText": "Badge Text",
+        "badgeColor": "Badge Color",
+        "image": "Image",
+        "imageSize": "Image Size",
+        "promotionDescription": "Promotion Description (Quote)",
+        "groups": {
+            "mega_menu": "Mega Menu",
+            "badge": "Badge",
+            "appearance": "Appearance"
+        },
+        "options": {
+            "default": "Default (Dropdown)",
+            "grid2": "Grid (2 Columns)",
+            "grid3": "Grid (3 Columns)",
+            "full": "Full Width (4 Columns)",
+            "mega": "Mega Menu",
+            "primary": "Primary",
+            "secondary": "Secondary",
+            "success": "Success",
+            "warning": "Warning",
+            "danger": "Danger",
+            "auto169": "Auto (16:9)",
+            "landscape_sm": "Landscape Small",
+            "landscape_md": "Landscape Medium",
+            "landscape_lg": "Landscape Large",
+            "portrait_sm": "Portrait Small",
+            "portrait_md": "Portrait Medium",
+            "full169": "Full Width (16:9)",
+            "none": "None",
+            "blue": "Blue",
+            "purple": "Purple",
+            "orange": "Orange",
+            "emerald": "Emerald"
+        },
+        "icon": "Icon",
+        "selectPage": "Select Page",
+        "selectCategory": "Select Category",
+        "selectPost": "Select Post",
+        "heading": "Heading",
+        "showHeadingLine": "Show Heading Line"
     }
 }

@@ -96,7 +96,53 @@
             "post": "Postingan",
             "category": "Kategori",
             "content": "Konten",
-            "column_group": "Grup Kolom"
-        }
+            "column_group": "Grup Kolom",
+            "custom": "Tautan Kustom"
+        },
+        "megaMenuLayout": "Tata Letak Mega Menu",
+        "showDividers": "Tampilkan Pembatas Kolom",
+        "columnNumber": "Nomor Kolom",
+        "columnHeading": "Judul Kolom",
+        "hideLabel": "Sembunyikan Label",
+        "badgeText": "Teks Badge",
+        "badgeColor": "Warna Badge",
+        "image": "Gambar",
+        "imageSize": "Ukuran Gambar",
+        "promotionDescription": "Deskripsi Promosi (Quote)",
+        "groups": {
+            "mega_menu": "Mega Menu",
+            "badge": "Badge",
+            "appearance": "Tampilan"
+        },
+        "options": {
+            "default": "Default (Dropdown)",
+            "grid2": "Grid (2 Kolom)",
+            "grid3": "Grid (3 Kolom)",
+            "full": "Lebar Penuh (4 Kolom)",
+            "mega": "Mega Menu",
+            "primary": "Utama",
+            "secondary": "Sekunder",
+            "success": "Sukses",
+            "warning": "Peringatan",
+            "danger": "Bahaya",
+            "auto169": "Auto (16:9)",
+            "landscape_sm": "Lanskap Kecil",
+            "landscape_md": "Lanskap Sedang",
+            "landscape_lg": "Lanskap Besar",
+            "portrait_sm": "Potret Kecil",
+            "portrait_md": "Potret Sedang",
+            "full169": "Lebar Penuh (16:9)",
+            "none": "Tidak Ada",
+            "blue": "Biru",
+            "purple": "Ungu",
+            "orange": "Oranye",
+            "emerald": "Zamrud"
+        },
+        "icon": "Ikon",
+        "selectPage": "Pilih Halaman",
+        "selectCategory": "Pilih Kategori",
+        "selectPost": "Pilih Postingan",
+        "heading": "Judul",
+        "showHeadingLine": "Tampilkan Garis Judul"
     }
 }

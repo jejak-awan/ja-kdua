@@ -2,7 +2,7 @@ import { File } from 'lucide-vue-next';
 
 export default {
     name: 'post',
-    label: 'Post',
+    label: 'features.menus.form.types.post',
     category: 'content',
     icon: File,
     color: 'orange',
@@ -19,14 +19,14 @@ export default {
         {
             key: 'title',
             type: 'text',
-            label: 'Label',
+            label: 'features.menus.form.label',
             required: true,
-            placeholder: 'Menu item label'
+            placeholder: 'features.menus.form.labelPlaceholder'
         },
         {
             key: 'target_id',
             type: 'data_select',
-            label: 'Select Post',
+            label: 'features.menus.form.selectPost',
             required: true,
             source: '/admin/ja/contents?type=post&status=published',
             labelField: 'title',
@@ -35,39 +35,39 @@ export default {
         {
             key: 'open_in_new_tab',
             type: 'boolean',
-            label: 'Open in new tab',
+            label: 'features.menus.form.openInNewTab',
             default: false
         },
         {
             key: 'icon',
             type: 'icon_picker',
-            label: 'Icon',
+            label: 'features.menus.form.icon',
             default: null
         },
         {
             key: 'css_class',
             type: 'text',
-            label: 'CSS Classes',
-            placeholder: 'custom-class'
+            label: 'features.menus.form.cssClasses',
+            placeholder: 'features.menus.form.placeholders.cssClasses'
         },
         // Badge
         {
             key: 'badge',
             type: 'text',
-            label: 'Badge Text',
+            label: 'features.menus.form.badgeText',
             placeholder: 'New',
             group: 'badge'
         },
         {
             key: 'badge_color',
             type: 'select',
-            label: 'Badge Color',
+            label: 'features.menus.form.badgeColor',
             options: [
-                { label: 'Primary', value: 'primary' },
-                { label: 'Secondary', value: 'secondary' },
-                { label: 'Success', value: 'success' },
-                { label: 'Warning', value: 'warning' },
-                { label: 'Danger', value: 'danger' }
+                { label: 'features.menus.form.options.primary', value: 'primary' },
+                { label: 'features.menus.form.options.secondary', value: 'secondary' },
+                { label: 'features.menus.form.options.success', value: 'success' },
+                { label: 'features.menus.form.options.warning', value: 'warning' },
+                { label: 'features.menus.form.options.danger', value: 'danger' }
             ],
             default: 'primary',
             group: 'badge'
@@ -76,21 +76,21 @@ export default {
         {
             key: 'image',
             type: 'media',
-            label: 'Image',
+            label: 'features.menus.form.image',
             group: 'appearance'
         },
         {
             key: 'image_size',
             type: 'select',
-            label: 'Image Size',
+            label: 'features.menus.form.imageSize',
             options: [
-                { label: 'Auto (16:9)', value: 'auto' },
-                { label: 'Landscape Small', value: 'landscape_sm' },
-                { label: 'Landscape Medium', value: 'landscape_md' },
-                { label: 'Landscape Large', value: 'landscape_lg' },
-                { label: 'Portrait Small', value: 'portrait_sm' },
-                { label: 'Portrait Medium', value: 'portrait_md' },
-                { label: 'Full Width (16:9)', value: 'full' }
+                { label: 'features.menus.form.options.auto169', value: 'auto' },
+                { label: 'features.menus.form.options.landscape_sm', value: 'landscape_sm' },
+                { label: 'features.menus.form.options.landscape_md', value: 'landscape_md' },
+                { label: 'features.menus.form.options.landscape_lg', value: 'landscape_lg' },
+                { label: 'features.menus.form.options.portrait_sm', value: 'portrait_sm' },
+                { label: 'features.menus.form.options.portrait_md', value: 'portrait_md' },
+                { label: 'features.menus.form.options.full169', value: 'full' }
             ],
             default: 'auto',
             group: 'appearance'
@@ -98,14 +98,14 @@ export default {
         {
             key: 'description',
             type: 'textarea',
-            label: 'Promotion Description (Quote)',
+            label: 'features.menus.form.promotionDescription',
             placeholder: 'Add a quote or short description over the image',
             group: 'appearance'
         },
         {
             key: 'mega_menu_column',
             type: 'number',
-            label: 'Column Number',
+            label: 'features.menus.form.columnNumber',
             default: 0,
             min: 0,
             max: 6,
@@ -114,14 +114,14 @@ export default {
         {
             key: 'heading',
             type: 'text',
-            label: 'Column Heading',
+            label: 'features.menus.form.columnHeading',
             placeholder: 'Optional heading text',
             group: 'mega_menu'
         },
         {
             key: 'hide_label',
             type: 'boolean',
-            label: 'Hide Label (Show only children)',
+            label: 'features.menus.form.hideLabel',
             default: false,
             group: 'mega_menu'
         }

@@ -216,6 +216,9 @@ const typeDefinition = computed(() => {
 });
 
 const typeLabel = computed(() => {
+    const key = `features.menus.form.types.${selectedItem.value?.type}`;
+    const translated = t(key);
+    if (translated !== key) return translated;
     return typeDefinition.value?.label || selectedItem.value?.type || 'Unknown';
 });
 
@@ -252,6 +255,9 @@ const groupedSettings = computed(() => {
 });
 
 const formatGroupName = (name) => {
+    const key = `features.menus.form.groups.${name}`;
+    const translated = t(key);
+    if (translated !== key) return translated;
     return name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
