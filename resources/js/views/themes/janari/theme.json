@@ -78,6 +78,13 @@
             "default": "Inter",
             "category": "Typography"
         },
+        "breadcrumb_sticky": {
+            "label": "Sticky Breadcrumbs",
+            "type": "checkbox",
+            "default": false,
+            "category": "Layout",
+            "description": "Keep breadcrumbs visible while scrolling"
+        },
         "header_sticky": {
             "label": "Sticky Header",
             "type": "checkbox",
@@ -88,10 +95,26 @@
             "label": "Layout Style",
             "type": "select",
             "options": [
-                { "label": "Full Width", "value": "full" },
-                { "label": "Boxed", "value": "boxed" },
-                { "label": "Wide Container", "value": "wide" },
-                { "label": "Framed", "value": "framed" }
+                {
+                    "label": "Full Width (Default)",
+                    "value": "full"
+                },
+                {
+                    "label": "Boxed (Content in Box)",
+                    "value": "boxed"
+                },
+                {
+                    "label": "Wide (Wider Box)",
+                    "value": "wide"
+                },
+                {
+                    "label": "Framed (Floating Box)",
+                    "value": "framed"
+                },
+                {
+                    "label": "Hybrid (Header/Footer Full)",
+                    "value": "hybrid"
+                }
             ],
             "default": "full",
             "category": "Layout",
@@ -118,11 +141,26 @@
             "label": "Boxed Content Shadow",
             "type": "select",
             "options": [
-                { "label": "None", "value": "none" },
-                { "label": "Subtle", "value": "sm" },
-                { "label": "Medium", "value": "md" },
-                { "label": "Large", "value": "lg" },
-                { "label": "Extra Large", "value": "xl" }
+                {
+                    "label": "None",
+                    "value": "none"
+                },
+                {
+                    "label": "Subtle",
+                    "value": "sm"
+                },
+                {
+                    "label": "Medium",
+                    "value": "md"
+                },
+                {
+                    "label": "Large",
+                    "value": "lg"
+                },
+                {
+                    "label": "Extra Large",
+                    "value": "xl"
+                }
             ],
             "default": "lg",
             "category": "Layout"

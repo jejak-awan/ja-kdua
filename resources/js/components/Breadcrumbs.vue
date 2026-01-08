@@ -1,7 +1,7 @@
 <template>
   <nav 
     v-if="breadcrumbs.length > 0" 
-    :class="compact ? 'flex items-center' : 'py-3 px-4 mb-4 bg-card border-b border-border'"
+    :class="navClasses"
     aria-label="Breadcrumb"
   >
     <ol :class="compact ? 'flex items-center space-x-1 text-xs' : 'flex items-center flex-wrap space-x-2 text-sm'">
@@ -67,6 +67,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useBreadcrumbs } from '@/composables/useBreadcrumbs';
+import { useTheme } from '@/composables/useTheme';
 
 const props = defineProps({
   compact: {
@@ -77,7 +78,35 @@ const props = defineProps({
 
 const route = useRoute();
 const { getBreadcrumbs } = useBreadcrumbs();
+const { getSetting } = useTheme();
 
 const breadcrumbs = computed(() => getBreadcrumbs(route));
-</script>
 
+// Theme settings
+const isSticky = computed(() => getSetting('breadcrumb_sticky', false));
+const isHeaderSticky = computed(() => getSetting('header_sticky', true));
+
+const navClasses = computed(() => {
+  if (props.compact) {
+    return 'flex items-center';
+  }
+
+  const classes = [
+    'py-3 px-4 mb-4 bg-card/95', // Removed border-b, added /95 for transparency
+    'transition-all duration-300'
+  ];
+
+  if (isSticky.value) {
+    classes.push('sticky z-20 backdrop-blur-sm shadow-sm'); // Added shadow-sm for subtle separation & z-20 (below header z-40 usually)
+    
+    // Adjust top position based on header
+    if (isHeaderSticky.value) {
+      classes.push('top-16'); // Assuming header is h-16
+    } else {
+      classes.push('top-0');
+    }
+  }
+
+  return classes;
+});
+</script>
