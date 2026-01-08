@@ -145,7 +145,6 @@
                                                                     <span class="font-medium text-sm text-foreground">{{ subChild.title }}</span>
                                                                     <span v-if="subChild.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(subChild.badge_color)">{{ subChild.badge }}</span>
                                                                 </div>
-                                                                <p v-if="subChild.description" class="text-xs text-muted-foreground line-clamp-1">{{ subChild.description }}</p>
                                                             </div>
                                                         </router-link>
                                                     </div>
@@ -169,7 +168,6 @@
                                                             <span class="font-medium text-sm text-foreground">{{ child.heading || child.title }}</span>
                                                             <span v-if="child.badge" class="px-1.5 py-0.5 text-[10px] font-medium rounded-full" :class="getBadgeClasses(child.badge_color)">{{ child.badge }}</span>
                                                         </div>
-                                                        <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">{{ child.description }}</p>
                                                     </div>
                                                 </router-link>
                                             </template>
@@ -177,37 +175,60 @@
                                     </template>
                                 </div>
 
-                                        <!-- Promotional Images in Grid Layout -->
+                                        <!-- Promotional Sections in Grid Layout -->
                                         <div 
                                             v-if="hasPromotionalImages(item.children)" 
-                                            class="col-span-full mt-4 pt-4 border-t border-border"
+                                            class="col-span-full mt-6 pt-6 border-t border-border/50"
                                         >
-                                            <div class="grid grid-cols-2 gap-4">
+                                            <div class="space-y-8">
                                                 <template v-for="promoChild in getPromotionalItems(item.children)" :key="promoChild.id + '-promo-grid'">
-                                                    <router-link 
-                                                        :to="promoChild.url || '/'"
-                                                        class="relative group/promo rounded-xl overflow-hidden block shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
-                                                    >
-                                                        <img 
-                                                            :src="promoChild.image" 
-                                                            :alt="promoChild.title"
-                                                            class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
-                                                            :class="getImageSizeClasses(promoChild.image_size)"
-                                                        />
-                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
-                                                        <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
-                                                            <span class="text-white font-bold text-base block drop-shadow-md">{{ promoChild.title }}</span>
-                                                            <div v-if="promoChild.description" class="mt-1.5 pl-2 border-l-2 border-primary/70 italic text-white/90 text-xs line-clamp-2 leading-relaxed bg-black/5 py-0.5">
-                                                                {{ promoChild.description }}
+                                                    <div class="flex flex-col lg:flex-row gap-8 items-center bg-primary/[0.03] rounded-2xl p-6 border border-border/40 hover:bg-primary/[0.05] transition-colors">
+                                                        <router-link 
+                                                            :to="promoChild.url || '/'"
+                                                            class="relative group/promo rounded-xl overflow-hidden w-full lg:w-2/5 shadow-md hover:shadow-xl transition-all duration-500"
+                                                        >
+                                                            <img 
+                                                                :src="promoChild.image" 
+                                                                :alt="promoChild.title"
+                                                                class="w-full object-cover transition-transform duration-700 group-hover/promo:scale-110"
+                                                                :class="getImageSizeClasses(promoChild.image_size)"
+                                                            />
+                                                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-60 group-hover/promo:opacity-80 transition-opacity duration-300"></div>
+                                                            <div class="absolute bottom-4 left-5">
+                                                                <span class="text-white font-bold text-lg drop-shadow-md">{{ promoChild.title }}</span>
+                                                            </div>
+                                                            <span 
+                                                                v-if="promoChild.badge" 
+                                                                class="absolute top-4 right-4 px-2 py-1 text-[10px] font-bold tracking-widest uppercase rounded bg-primary text-primary-foreground shadow-lg"
+                                                            >
+                                                                {{ promoChild.badge }}
+                                                            </span>
+                                                        </router-link>
+
+                                                        <!-- Description in the "Empty Area" next to the image -->
+                                                        <div class="flex-1 space-y-4">
+                                                            <div v-if="promoChild.description" class="relative">
+                                                                <component 
+                                                                    v-if="getIconComponent('Quote')" 
+                                                                    :is="getIconComponent('Quote')" 
+                                                                    class="absolute -top-10 -left-6 w-16 h-16 text-primary/5 -z-10" 
+                                                                />
+                                                                <div class="pl-6 border-l-4 border-primary/20 italic text-muted-foreground/90 text-sm leading-relaxed max-w-md">
+                                                                    "{{ promoChild.description }}"
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex items-center gap-3">
+                                                                <div class="w-8 h-[1px] bg-border"></div>
+                                                                <router-link 
+                                                                    :to="promoChild.url || '/'"
+                                                                    class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary hover:text-primary/70 transition-colors inline-flex items-center gap-1 group/btn"
+                                                                >
+                                                                    Explore Now
+                                                                    <ArrowRight class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
+                                                                </router-link>
                                                             </div>
                                                         </div>
-                                                        <span 
-                                                            v-if="promoChild.badge" 
-                                                            class="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm"
-                                                        >
-                                                            {{ promoChild.badge }}
-                                                        </span>
-                                                    </router-link>
+                                                    </div>
                                                 </template>
                                             </div>
                                         </div>
@@ -228,7 +249,6 @@
                                             >
                                                 <component :is="getIconComponent(child.icon)" class="w-5 h-5 text-primary" />
                                             </div>
-                                            <div class="flex-1 min-w-0">
                                                 <div class="flex items-center gap-2">
                                                     <span class="font-medium text-sm text-foreground">{{ child.title }}</span>
                                                     <span 
@@ -239,40 +259,34 @@
                                                         {{ child.badge }}
                                                     </span>
                                                 </div>
-                                                <p v-if="child.description" class="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                                    {{ child.description }}
-                                                </p>
-                                            </div>
                                         </router-link>
 
-                                        <!-- Promotional Image Banner (Flat List Case) -->
+                                        <!-- Promotional Sections (Flat List Case) -->
                                         <div 
                                             v-if="hasPromotionalImages(item.children)" 
-                                            class="col-span-full mt-4 pt-4 border-t border-border/50"
+                                            class="col-span-full mt-6 pt-6 border-t border-border/50"
                                         >
-                                            <div class="grid grid-cols-2 gap-4">
+                                            <div class="space-y-6">
                                                 <template v-for="child in getPromotionalItems(item.children)" :key="child.id + '-promo'">
-                                                    <router-link 
-                                                        :to="child.url || '/'"
-                                                        class="relative group/promo rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
-                                                    >
-                                                        <img 
-                                                            :src="child.image" 
-                                                            :alt="child.title"
-                                                            class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
-                                                            :class="getImageSizeClasses(child.image_size)"
-                                                        />
-                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
-                                                        <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
-                                                            <span class="text-white font-semibold text-sm drop-shadow-md block mb-1">{{ child.title }}</span>
-                                                            <div v-if="child.description" class="mt-1 pl-2 border-l-2 border-primary/70 italic text-white/90 text-[10px] line-clamp-2 leading-tight bg-black/5 py-0.5">
-                                                                {{ child.description }}
+                                                    <div class="flex flex-col gap-4 bg-muted/20 rounded-xl p-4 border border-border/30">
+                                                        <router-link 
+                                                            :to="child.url || '/'"
+                                                            class="relative group/promo rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all h-40"
+                                                        >
+                                                            <img 
+                                                                :src="child.image" 
+                                                                :alt="child.title"
+                                                                class="w-full h-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
+                                                            />
+                                                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                            <div class="absolute bottom-3 left-3">
+                                                                <span class="text-white font-semibold text-sm drop-shadow-md">{{ child.title }}</span>
                                                             </div>
-                                                            <span v-if="child.badge" class="inline-block mt-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
-                                                                {{ child.badge }}
-                                                            </span>
+                                                        </router-link>
+                                                        <div v-if="child.description" class="px-2 italic text-muted-foreground text-xs leading-relaxed border-l-2 border-primary/30 ml-1">
+                                                            "{{ child.description }}"
                                                         </div>
-                                                    </router-link>
+                                                    </div>
                                                 </template>
                                             </div>
                                         </div>
@@ -393,7 +407,7 @@ import { useMenu } from '../../../../composables/useMenu';
 import { useCmsStore } from '../../../../stores/cms';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
 import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, ArrowRight, Quote } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();
