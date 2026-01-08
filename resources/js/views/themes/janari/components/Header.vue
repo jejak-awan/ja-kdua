@@ -154,6 +154,38 @@
                                                 </router-link>
                                             </template>
                                         </div>
+
+                                        <!-- Promotional Images in Grid Layout -->
+                                        <div 
+                                            v-if="hasPromotionalImages(item.children)" 
+                                            class="col-span-full mt-4 pt-4 border-t border-border"
+                                        >
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <template v-for="promoChild in getPromotionalItems(item.children)" :key="promoChild.id + '-promo-grid'">
+                                                    <router-link 
+                                                        :to="promoChild.url || '/'"
+                                                        class="relative group/promo rounded-xl overflow-hidden block"
+                                                    >
+                                                        <img 
+                                                            :src="promoChild.image" 
+                                                            :alt="promoChild.title"
+                                                            class="w-full h-36 object-cover transition-transform group-hover/promo:scale-105"
+                                                        />
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                                                        <div class="absolute bottom-3 left-4 right-4">
+                                                            <span class="text-white font-bold text-base block">{{ promoChild.title }}</span>
+                                                            <span v-if="promoChild.description" class="text-white/80 text-xs line-clamp-1">{{ promoChild.description }}</span>
+                                                        </div>
+                                                        <span 
+                                                            v-if="promoChild.badge" 
+                                                            class="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold rounded bg-primary text-primary-foreground"
+                                                        >
+                                                            {{ promoChild.badge }}
+                                                        </span>
+                                                    </router-link>
+                                                </template>
+                                            </div>
+                                        </div>
                                     </template>
 
                                     <!-- CASE B: Default Flat List -->
@@ -188,6 +220,34 @@
                                             </div>
                                         </router-link>
                                     </template>
+
+                                    <!-- Promotional Image Banner -->
+                                    <div 
+                                        v-if="hasPromotionalImages(item.children)" 
+                                        class="col-span-full mt-4 pt-4 border-t border-border"
+                                    >
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <template v-for="child in getPromotionalItems(item.children)" :key="child.id + '-promo'">
+                                                <router-link 
+                                                    :to="child.url || '/'"
+                                                    class="relative group/promo rounded-xl overflow-hidden"
+                                                >
+                                                    <img 
+                                                        :src="child.image" 
+                                                        :alt="child.title"
+                                                        class="w-full h-32 object-cover transition-transform group-hover/promo:scale-105"
+                                                    />
+                                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                    <div class="absolute bottom-3 left-3 right-3">
+                                                        <span class="text-white font-semibold text-sm">{{ child.title }}</span>
+                                                        <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
+                                                            {{ child.badge }}
+                                                        </span>
+                                                    </div>
+                                                </router-link>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -435,6 +495,17 @@ const getMegaMenuLayoutClasses = (item) => {
             if (childCount > 5) return 'grid grid-cols-2 gap-4 min-w-[500px]';
             return 'flex flex-col gap-1 min-w-[280px]';
     }
+};
+
+// Promotional image helpers
+const hasPromotionalImages = (items) => {
+    if (!items) return false;
+    return items.some(item => item.image);
+};
+
+const getPromotionalItems = (items) => {
+    if (!items) return [];
+    return items.filter(item => item.image);
 };
 
 const groupItemsByColumn = (items, layout) => {
