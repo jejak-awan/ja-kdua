@@ -42,7 +42,8 @@
         "enterUrlLabel": "Please enter label and URL",
         "customLinkAdded": "Custom link added",
         "itemDeleted": "Menu item deleted",
-        "noMenuSelected": "No Menu Selected"
+        "noMenuSelected": "No Menu Selected",
+        "previewDescription": "Preview how your menu will appear on the frontend"
     },
     "form": {
         "name": "Name",

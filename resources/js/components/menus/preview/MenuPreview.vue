@@ -26,7 +26,7 @@
             </div>
 
             <!-- Preview Area -->
-            <div class="flex-1 overflow-auto bg-background rounded-lg border border-border mt-4">
+            <div class="flex-1 min-h-[300px] bg-background rounded-lg border border-border mt-4 overflow-visible">
                 <!-- Desktop Header Preview -->
                 <div v-if="activeStyle === 'header'" class="bg-card border-b border-border">
                     <div class="px-6 py-4">
@@ -53,8 +53,8 @@
                                             <ChevronDown class="w-3 h-3" />
                                         </button>
                                         <!-- Dropdown Preview -->
-                                        <div class="absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                            <div class="bg-card border border-border rounded-lg shadow-lg p-2 min-w-[180px]">
+                                        <div class="absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
+                                            <div class="bg-card border border-border rounded-lg shadow-xl p-2 min-w-[200px]">
                                                 <template v-for="child in item.children" :key="child.id || child._temp_id">
                                                     <div class="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md cursor-pointer flex items-center gap-2">
                                                         <component v-if="child.icon" :is="getIcon(child.icon)" class="w-4 h-4" />

@@ -42,7 +42,8 @@
         "enterUrlLabel": "Harap masukkan label dan URL",
         "customLinkAdded": "Tautan kustom ditambahkan",
         "itemDeleted": "Item menu dihapus",
-        "noMenuSelected": "Tidak Ada Menu Dipilih"
+        "noMenuSelected": "Tidak Ada Menu Dipilih",
+        "previewDescription": "Pratinjau tampilan menu di frontend"
     },
     "form": {
         "name": "Nama",
