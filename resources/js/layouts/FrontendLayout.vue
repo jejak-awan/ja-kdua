@@ -53,10 +53,13 @@ onMounted(async () => {
   flex: 1;
 }
 
-/* Page transition */
-.fade-enter-active,
+/* Page transition - smoother fade */
+.fade-enter-active {
+  transition: opacity 0.2s ease-out;
+}
+
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.15s ease-in;
 }
 
 .fade-enter-from,

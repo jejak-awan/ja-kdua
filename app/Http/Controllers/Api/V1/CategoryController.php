@@ -228,4 +228,60 @@ class CategoryController extends BaseApiController
 
         return $this->success($category->load(['parent', 'children']), 'Category moved successfully');
     }
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:categories,id',
+        ]);
+
+        $ids = $validated['ids'];
+        $categories = Category::whereIn('id', $ids)->get();
+        $count = 0;
+        $errors = [];
+
+        foreach ($categories as $category) {
+            // Check ownership/permissions
+            if (! $request->user()->can('manage categories')) {
+                if ($category->author_id && $category->author_id !== $request->user()->id) {
+                    $errors[] = "Permission denied for category ID {$category->id}: Not owner.";
+                    continue;
+                }
+                if (is_null($category->author_id)) {
+                    $errors[] = "Permission denied for category ID {$category->id}: Cannot delete global category.";
+                    continue;
+                }
+            }
+
+            // Check children
+            if ($category->children()->count() > 0) {
+                $errors[] = "Category '{$category->name}' has sub-categories and cannot be deleted.";
+                continue;
+            }
+
+            // Check contents
+            if ($category->contents()->count() > 0) {
+                $errors[] = "Category '{$category->name}' has associated contents and cannot be deleted.";
+                continue;
+            }
+
+            $category->delete();
+            $count++;
+        }
+
+        // Clear caches
+        $cacheService = new CacheService;
+        $cacheService->clearCategoryCaches();
+        $cacheService->clearSeoCaches();
+
+        if (count($errors) > 0) {
+            // If partial success, we still return 200 but with messages
+            return $this->success([
+                'deleted_count' => $count,
+                'errors' => $errors
+            ], count($errors) === count($ids) ? 'Failed to delete categories' : 'Categories processed with some errors');
+        }
+
+        return $this->success(['deleted_count' => $count], 'Categories deleted successfully');
+    }
 }

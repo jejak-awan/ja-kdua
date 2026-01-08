@@ -34,7 +34,16 @@ class ContentController extends BaseApiController
             $q->where('status', 'approved')->latest();
         }])
             ->where('slug', $slug)
-            ->firstOrFail();
+            ->first();
+
+        // Graceful fallback for reserved page slugs if missing
+        if (! $content) {
+            $fallbackSlugs = ['home', 'about', 'blog', 'contact', 'page', 'search'];
+            if (in_array($slug, $fallbackSlugs)) {
+                return $this->success(null, ucfirst($slug) . ' content not found, using fallback');
+            }
+            abort(404);
+        }
 
         // Check if content is published
         $isPublished = $content->status === 'published' &&
@@ -478,9 +487,9 @@ class ContentController extends BaseApiController
     {
         try {
             $validated = $request->validate([
-                'action' => 'required|in:publish,approve,reject,draft,archive,delete,change_category',
+                'action' => 'required|in:publish,approve,reject,draft,archive,delete,change_category,restore,force_delete',
                 'content_ids' => 'required|array',
-                'content_ids.*' => 'exists:contents,id',
+                'content_ids.*' => 'integer', // Removed exists check to allow soft-deleted items, handled by query below
                 'category_id' => 'required_if:action,change_category|exists:categories,id',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -488,7 +497,8 @@ class ContentController extends BaseApiController
         }
 
         // Ownership and permission check for bulk actions
-        $query = Content::whereIn('id', $validated['content_ids']);
+        // Use withTrashed() to find soft-deleted items
+        $query = Content::withTrashed()->whereIn('id', $validated['content_ids']);
         if (! $request->user()->can('manage content') && ! $request->user()->can('publish content')) {
             $query->where('author_id', $request->user()->id);
 
@@ -573,4 +583,14 @@ class ContentController extends BaseApiController
         return $this->success(null, 'Content permanently deleted');
     }
 
+    public function emptyTrash(Request $request)
+    {
+        if (! $request->user()->can('delete content') || ! $request->user()->can('manage content')) {
+            return $this->forbidden('You do not have permission to empty trash');
+        }
+
+        $count = $this->contentService->emptyTrash();
+
+        return $this->success(['deleted_count' => $count], 'Trash emptied successfully');
+    }
 }

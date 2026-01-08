@@ -16,27 +16,30 @@
         <!-- Post Content -->
         <article v-else-if="post" class="pb-20">
             <!-- Header -->
-            <header class="py-16 md:py-24 bg-muted mb-12">
-                <div class="container mx-auto px-4 text-center max-w-4xl">
-                    <div class="flex items-center justify-center gap-2 mb-6">
-                        <span v-if="post.category" class="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-medium">
+<!-- Header -->
+            <header class="relative py-20 md:py-32 mb-12 overflow-hidden border-b border-border/40">
+                <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-background z-0"></div>
+                <div class="container mx-auto px-4 text-center max-w-4xl relative z-10">
+                    <div class="flex items-center justify-center gap-3 mb-8">
+                        <span v-if="post.category" class="px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-bold tracking-wider uppercase shadow-sm">
                             {{ post.category.name }}
                         </span>
-                        <span class="text-muted-foreground text-sm">
-                            {{ new Date(post.published_at).toLocaleDateString() }}
+                        <span class="text-muted-foreground text-sm font-medium flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            {{ new Date(post.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) }}
                         </span>
                     </div>
-                    <h1 class="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+                    <h1 class="text-4xl md:text-6xl font-bold text-foreground mb-8 leading-tight tracking-tight text-balance">
                         {{ post.title }}
                     </h1>
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="w-10 h-10 bg-muted rounded-full overflow-hidden">
+                    <div class="flex items-center justify-center gap-4">
+                        <div class="w-12 h-12 bg-muted rounded-full overflow-hidden ring-2 ring-background shadow-md">
                              <!-- Author Avatar placeholder -->
-                             <svg class="w-full h-full text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                             <svg class="w-full h-full text-muted-foreground bg-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                         </div>
                         <div class="text-left">
-                            <p class="text-sm font-medium text-foreground">{{ post.author?.name || 'Unknown Author' }}</p>
-                            <p class="text-xs text-muted-foreground">Editor</p>
+                            <p class="text-sm font-bold text-foreground">{{ post.author?.name || 'Janari Team' }}</p>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wider">Editor</p>
                         </div>
                     </div>
                 </div>

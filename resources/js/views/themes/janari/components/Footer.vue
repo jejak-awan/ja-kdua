@@ -158,9 +158,20 @@ onMounted(() => {
     fetchMenuByLocation('footer')
 })
 
-const footerCol1Items = computed(() => menus.value['footer_col_1']?.items || [])
-const footerCol2Items = computed(() => menus.value['footer_col_2']?.items || [])
-const footerItems = computed(() => menus.value['footer']?.items || [])
+const defaultCol1Items = [
+    { id: 'fb-about', title: 'About', url: '/about' },
+    { id: 'fb-blog', title: 'Blog', url: '/blog' },
+    { id: 'fb-contact', title: 'Contact', url: '/contact' },
+];
+
+const defaultCol2Items = [
+    { id: 'fb-docs', title: 'Documentation', url: '/docs' },
+    { id: 'fb-help', title: 'Help Center', url: '/help' },
+];
+
+const footerCol1Items = computed(() => menus.value['footer_col_1']?.items?.length > 0 ? menus.value['footer_col_1'].items : defaultCol1Items);
+const footerCol2Items = computed(() => menus.value['footer_col_2']?.items?.length > 0 ? menus.value['footer_col_2'].items : defaultCol2Items);
+const footerItems = computed(() => menus.value['footer']?.items || []);
 
 const brandingDisplay = computed(() => getSetting('branding_display', 'logo_only'));
 

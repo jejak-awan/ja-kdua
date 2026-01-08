@@ -296,6 +296,29 @@
                         </div>
                         
                         <!-- Simple nav item (no children) -->
+                        <!-- Anchor links (starting with #) use regular <a> tag -->
+                        <a 
+                            v-else-if="item.url && item.url.startsWith('#')"
+                            :href="item.url"
+                            :class="getNavItemClasses(false)"
+                            class="cursor-pointer"
+                        >
+                            <component 
+                                v-if="item.icon" 
+                                :is="getIconComponent(item.icon)" 
+                                class="w-4 h-4" 
+                            />
+                            {{ item.title }}
+                            <span 
+                                v-if="item.badge"
+                                class="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
+                                :class="getBadgeClasses(item.badge_color)"
+                            >
+                                {{ item.badge }}
+                            </span>
+                        </a>
+                        
+                        <!-- Regular route links use router-link -->
                         <router-link 
                             v-else
                             :to="item.url || '/'"
@@ -639,12 +662,66 @@ onMounted(() => {
 
 const navItems = computed(() => {
     const loc = currentMenuLocation.value;
-    // Return specific menu if exists and has items, otherwise fallback to 'header'
+    // Return specific menu if exists and has items
     if (menus.value[loc] && menus.value[loc].items && menus.value[loc].items.length > 0) {
         return menus.value[loc].items;
     }
-    return menus.value['header']?.items || [];
-    return menus.value['header']?.items || [];
+    
+    // Check default 'header' menu
+    if (menus.value['header']?.items?.length > 0) {
+        return menus.value['header'].items;
+    }
+
+    // Fallback JA-CMS Demo Menu
+    return [
+        { 
+            id: 'home-fallback', 
+            title: t('features.frontend.nav.home') || 'Home', 
+            url: '/', 
+            children: [] 
+        },
+        { 
+            id: 'about-fallback', 
+            title: 'Tentang', 
+            url: '/about', 
+            children: [] 
+        },
+        { 
+            id: 'features-fallback', 
+            title: 'Fitur', 
+            url: '#features',
+            children: [
+                { id: 'f1', title: 'Block Builder', url: '#features', icon: 'Layers' },
+                { id: 'f2', title: 'Theme System', url: '#features', icon: 'Palette' },
+                { id: 'f3', title: 'Multi-language', url: '#features', icon: 'Globe' },
+                { id: 'f4', title: 'API-First', url: '#features', icon: 'Code2' }
+            ]
+        },
+        { 
+            id: 'advantages-fallback', 
+            title: 'Keunggulan', 
+            url: '#advantages', 
+            children: [] 
+        },
+        { 
+            id: 'team-fallback', 
+            title: 'Tim Dev', 
+            url: '#team', 
+            children: [] 
+        },
+        { 
+            id: 'blog-fallback', 
+            title: 'Blog', 
+            url: '/blog', 
+            children: [] 
+        },
+        { 
+            id: 'contact-fallback', 
+            title: 'Kontak', 
+            url: '/contact', 
+            children: [] 
+        }
+    ];
 });
 
 const isParentActive = (item) => {

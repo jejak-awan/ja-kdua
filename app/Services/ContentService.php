@@ -353,7 +353,7 @@ class ContentService
      */
     public function bulkAction(string $action, array $contentIds, ?int $categoryId = null): int
     {
-        $contents = Content::whereIn('id', $contentIds)->get();
+        $contents = Content::withTrashed()->whereIn('id', $contentIds)->get();
 
         foreach ($contents as $content) {
             switch ($action) {
@@ -542,5 +542,17 @@ class ContentService
         $this->clearContentCaches($id);
 
         return true;
+    }
+    /**
+     * Empty trash
+     */
+    public function emptyTrash(): int
+    {
+        $count = Content::onlyTrashed()->count();
+        Content::onlyTrashed()->forceDelete();
+        
+        $this->cacheService->clearContentCaches();
+        
+        return $count;
     }
 }

@@ -21,10 +21,20 @@
         <div class="prose prose-lg max-w-none" v-html="pageData.body"></div>
       </div>
       
-      <!-- Empty State -->
-      <div v-else class="container mx-auto py-20 text-center">
-        <h1 class="text-2xl font-bold">{{ pageData.title }}</h1>
-        <p class="mt-4 text-muted-foreground">This page has no content yet.</p>
+<!-- Empty State -->
+      <div v-else class="min-h-screen flex items-center justify-center bg-background p-4">
+        <div class="text-center max-w-md mx-auto">
+             <div class="w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-8">
+                 <svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+             </div>
+             <h1 class="text-3xl font-bold mb-4">{{ pageData.title }}</h1>
+             <p class="text-muted-foreground leading-relaxed mb-8">
+                This page is currently being built. Check back soon for updates.
+             </p>
+             <router-link to="/" class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                Return Home
+             </router-link>
+        </div>
       </div>
     </template>
     

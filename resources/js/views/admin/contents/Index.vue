@@ -189,6 +189,12 @@ const handleBulkAction = async (action) => {
     } else if (action === 'reject') {
         confirmConfig.variant = 'destructive';
         confirmConfig.confirmText = t('features.content.actions.reject');
+    } else if (action === 'restore') {
+        confirmConfig.variant = 'default';
+        confirmConfig.confirmText = t('common.actions.restore');
+    } else if (action === 'force_delete') {
+        confirmConfig.variant = 'destructive';
+        confirmConfig.confirmText = t('common.actions.deletePermanently');
     }
 
     const confirmed = await confirm(confirmConfig);
@@ -203,6 +209,7 @@ const handleBulkAction = async (action) => {
             action: action,
             content_ids: selectedContents.value,
         });
+        selectedContents.value = []; // Clear selection
         await fetchContents();
         await fetchStats();
         toast.success.update();
@@ -211,6 +218,27 @@ const handleBulkAction = async (action) => {
         console.error('Failed to perform bulk action:', error);
         toast.error.action(error);
         bulkAction.value = '';
+    }
+};
+
+const handleEmptyTrash = async () => {
+    const confirmed = await confirm({
+        title: t('features.content.actions.emptyTrash') || 'Empty Trash',
+        message: t('common.messages.confirm.emptyTrash') || 'Are you sure you want to permanently delete all items in the trash? This action cannot be undone.',
+        confirmText: t('common.actions.deletePermanently'),
+        variant: 'destructive'
+    });
+
+    if (!confirmed) return;
+
+    try {
+        await api.delete('/admin/ja/contents/trash/empty');
+        await fetchContents();
+        await fetchStats();
+        toast.success.action(t('common.messages.success.deleted') || 'Trash emptied successfully');
+    } catch (error) {
+        console.error('Failed to empty trash:', error);
+        toast.error(error);
     }
 };
 
@@ -460,22 +488,45 @@ onMounted(() => {
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-2" v-if="selectedContents.length > 0">
                         <span class="text-sm text-muted-foreground">{{ $t('features.content.list.selected', { count: selectedContents.length }) }}</span>
-                        <div class="flex items-center gap-2 border-l border-border pl-2">
-                            <Button variant="outline" size="sm" @click="handleBulkAction('approve')" v-if="authStore.hasPermission('approve content')">
-                                <CheckCircle2 class="w-4 h-4 mr-2 text-emerald-500" />
-                                {{ $t('features.content.actions.approve') }}
-                            </Button>
-                            <Button variant="outline" size="sm" @click="handleBulkAction('reject')" v-if="authStore.hasPermission('approve content')">
-                                <XCircle class="w-4 h-4 mr-2 text-rose-500" />
-                                {{ $t('features.content.actions.reject') }}
-                            </Button>
-                            <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('delete')" v-if="authStore.hasPermission('delete content')">
-                                <Trash2 class="w-4 h-4 mr-2" />
-                                {{ $t('common.actions.delete') }}
-                            </Button>
+                    <div class="flex items-center gap-2 border-l border-border pl-2">
+                            <!-- Actions for Non-Trashed Items -->
+                            <template v-if="statusFilter !== 'trashed'">
+                                <Button variant="outline" size="sm" @click="handleBulkAction('approve')" v-if="authStore.hasPermission('approve content')">
+                                    <CheckCircle2 class="w-4 h-4 mr-2 text-emerald-500" />
+                                    {{ $t('features.content.actions.approve') }}
+                                </Button>
+                                <Button variant="outline" size="sm" @click="handleBulkAction('reject')" v-if="authStore.hasPermission('approve content')">
+                                    <XCircle class="w-4 h-4 mr-2 text-rose-500" />
+                                    {{ $t('features.content.actions.reject') }}
+                                </Button>
+                                <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('delete')" v-if="authStore.hasPermission('delete content')">
+                                    <Trash2 class="w-4 h-4 mr-2" />
+                                    {{ $t('common.actions.delete') }}
+                                </Button>
+                            </template>
+                            
+                            <!-- Actions for Trashed Items -->
+                            <template v-else>
+                                <Button variant="outline" size="sm" class="text-emerald-600 hover:text-emerald-700" @click="handleBulkAction('restore')" v-if="authStore.hasPermission('delete content')">
+                                    <RotateCcw class="w-4 h-4 mr-2" />
+                                    {{ $t('common.actions.restore') }}
+                                </Button>
+                                <Button variant="outline" size="sm" class="text-destructive hover:text-destructive" @click="handleBulkAction('force_delete')" v-if="authStore.hasPermission('delete content')">
+                                    <Trash2 class="w-4 h-4 mr-2" />
+                                    {{ $t('common.actions.deletePermanently') }}
+                                </Button>
+                            </template>
                         </div>
                     </div>
-                    <div class="relative w-full md:w-72" v-else>
+                    
+                    <div class="flex items-center gap-2" v-else-if="statusFilter === 'trashed' && stats.trashed > 0">
+                         <Button variant="destructive" size="sm" @click="handleEmptyTrash" v-if="authStore.hasPermission('delete content')">
+                            <Trash2 class="w-4 h-4 mr-2" />
+                            {{ $t('features.content.actions.emptyTrash') || 'Empty Trash' }}
+                        </Button>
+                    </div>
+
+                    <div class="relative w-full md:w-72" v-if="selectedContents.length === 0">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                             v-model="search"

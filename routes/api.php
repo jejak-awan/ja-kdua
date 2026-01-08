@@ -71,8 +71,8 @@ Route::prefix('v1')->group(function () {
     // Two-Factor Authentication Verification (for login, no auth required)
     Route::post('/two-factor/verify-code', [App\Http\Controllers\Api\V1\TwoFactorController::class, 'verifyCode'])->middleware('throttle:5,1');
 
-    // Public CMS API (with rate limiting: 100 requests per minute)
-    Route::prefix('cms')->middleware('throttle:100,1')->group(function () {
+    // Public CMS API (with rate limiting: 300 requests per minute)
+    Route::prefix('cms')->middleware('throttle:300,1')->group(function () {
         Route::get('/contents', [App\Http\Controllers\Api\V1\ContentController::class, 'index']);
         Route::get('/contents/{slug}', [App\Http\Controllers\Api\V1\ContentController::class, 'show']);
         Route::get('/contents/{slug}/related', [App\Http\Controllers\Api\V1\ContentController::class, 'related']);
@@ -112,8 +112,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/widgets/location/{location}', [App\Http\Controllers\Api\V1\WidgetController::class, 'getByLocation']);
     });
 
-    // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)
-    Route::prefix('analytics')->middleware('throttle:60,1')->group(function () {
+    // Analytics Event Tracking (public - with rate limiting: 120 requests per minute)
+    Route::prefix('analytics')->middleware('throttle:120,1')->group(function () {
         Route::post('/track-visit', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackVisit']);
         Route::post('/track', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackEvent']);
         Route::post('/track/batch', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'trackBatch']);
@@ -130,6 +130,7 @@ Route::prefix('v1')->group(function () {
         Route::put('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'update'])->middleware('permission:edit content');
         Route::patch('contents/{content}/autosave', [App\Http\Controllers\Api\V1\ContentController::class, 'autosave'])->middleware('permission:edit content');
         Route::delete('contents/{content}', [App\Http\Controllers\Api\V1\ContentController::class, 'destroy'])->middleware('permission:delete content');
+        Route::delete('contents/trash/empty', [App\Http\Controllers\Api\V1\ContentController::class, 'emptyTrash'])->middleware('permission:delete content');
         Route::post('contents/{content}/duplicate', [App\Http\Controllers\Api\V1\ContentController::class, 'duplicate'])->middleware('permission:create content');
         Route::post('contents/bulk-action', [App\Http\Controllers\Api\V1\ContentController::class, 'bulkAction'])->middleware('permission:edit content');
         Route::put('contents/{content}/approve', [App\Http\Controllers\Api\V1\ContentController::class, 'approve'])->middleware('permission:approve content');
@@ -158,6 +159,7 @@ Route::prefix('v1')->group(function () {
         Route::post('contents/{content}/unlock', [App\Http\Controllers\Api\V1\ContentController::class, 'unlock']);
 
         // Categories
+        Route::post('categories/bulk-destroy', [App\Http\Controllers\Api\V1\CategoryController::class, 'bulkDestroy'])->middleware('permission:edit categories');
         Route::apiResource('categories', App\Http\Controllers\Api\V1\CategoryController::class)->middleware('permission:view categories');
         Route::post('categories/{category}/move', [App\Http\Controllers\Api\V1\CategoryController::class, 'move'])->middleware('permission:edit categories');
 
