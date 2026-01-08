@@ -8,7 +8,7 @@
 
         <div v-else class="space-y-4">
             <!-- Full Toolbar -->
-            <Card class="bg-transparent">
+            <Card>
                 <CardContent class="p-2">
                     <div class="flex items-center justify-between gap-4">
                         <!-- Left: Menu Selector & New -->
