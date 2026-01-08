@@ -120,6 +120,13 @@ export default {
             ],
             default: 'auto',
             group: 'appearance'
+        },
+        {
+            key: 'description',
+            type: 'textarea',
+            label: 'Promotion Description (Quote)',
+            placeholder: 'Add a quote or short description over the image',
+            group: 'appearance'
         }
     ]
 };
