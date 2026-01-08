@@ -40,10 +40,12 @@
         "emptyDescription": "Create your first menu to start organizing your site navigation.",
         "enterUrlLabel": "Please enter label and URL",
         "customLinkAdded": "Custom link added",
-        "itemDeleted": "Menu item deleted"
+        "itemDeleted": "Menu item deleted",
+        "noMenuSelected": "No Menu Selected"
     },
     "form": {
         "name": "Name",
+        "namePlaceholder": "Enter menu name",
         "label": "Label",
         "type": "Type",
         "url": "URL",
@@ -65,6 +67,7 @@
         "editItemTitle": "Edit Menu Item",
         "placeholders": {
             "name": "Menu name",
+            "selectLocation": "Select location",
             "location": "header, footer, etc.",
             "selectPage": "Select page...",
             "selectCategory": "Select category...",
@@ -73,6 +76,7 @@
             "cssClasses": "e.g. mb-4"
         },
         "newLink": "New Link",
+        "menuStructure": "Menu Structure",
         "structure": "Menu Structure",
         "addItems": "Add Menu Items",
         "customLink": "Custom Link",
@@ -82,12 +86,15 @@
         "noCategories": "No categories found",
         "dragStart": "Drag items from the left sidebar to start building your menu",
         "dragHelp": "Drag items to reorder or nest",
+        "addColumnGroup": "Add Column Group",
+        "newColumnGroup": "New Column Group",
         "types": {
             "link": "Link",
             "page": "Pages",
             "post": "Posts",
             "category": "Categories",
-            "content": "Content"
+            "content": "Content",
+            "column_group": "Column Group"
         }
     }
 }

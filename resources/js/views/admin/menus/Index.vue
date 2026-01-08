@@ -1,86 +1,9 @@
 <template>
     <div class="h-full flex flex-col">
-        <!-- Header / Selection Area -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div class="flex flex-col gap-1 w-full sm:w-auto">
-                <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.title') }}</h1>
-                <p class="text-sm text-muted-foreground">{{ t('features.menus.subtitle') }}</p>
-            </div>
-            
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <div v-if="menus.length > 0" class="flex items-center gap-1.5 w-full sm:w-auto">
-                    <Select v-model="trashedFilter" class="w-[140px]">
-                         <SelectTrigger class="w-[140px]">
-                            <SelectValue :placeholder="t('common.labels.status')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                             <SelectItem value="without">{{ t('common.labels.activeOnly') }}</SelectItem>
-                             <SelectItem value="with">{{ t('common.labels.includesTrashed') }}</SelectItem>
-                             <SelectItem value="only">{{ t('common.labels.trashedOnly') }}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select v-model="selectedMenuId" :disabled="loading">
-                        <SelectTrigger class="w-full sm:w-[180px]">
-                            <SelectValue :placeholder="t('features.menus.actions.selectMenu')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem v-for="menu in menus" :key="menu.id" :value="menu.id.toString()">
-                                {{ menu.name }} <span v-if="menu.deleted_at">({{ t('common.labels.deleted') }})</span>
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <span class="text-xs text-muted-foreground whitespace-nowrap hidden lg:inline-block px-1">{{ t('features.menus.actions.or') }}</span>
-                </div>
-                
-                <Button @click="openCreateModal" variant="outline" class="whitespace-nowrap px-3 h-10 border-dashed">
-                    <Plus class="w-4 h-4 mr-2" />
-                    {{ t('features.menus.actions.create') }}
-                </Button>
-                
-                <!-- Integrated Builder Actions -->
-                <div v-if="selectedMenuId" class="flex items-center gap-2 border-l pl-2 ml-2">
-                     <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        @click="builderRef?.fetchMenu()"
-                        class="h-10 w-10 text-muted-foreground hover:text-foreground"
-                        :title="t('common.actions.refresh')"
-                    >
-                        <RotateCcw class="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                        @click="builderRef?.saveMenu()"
-                        :disabled="!builderRef || builderRef.saving || !builderRef.isDirty"
-                        class="h-10 px-4 shadow-sm"
-                    >
-                        <Loader2 v-if="builderRef?.saving" class="w-4 h-4 mr-2 animate-spin" />
-                        <Save v-else class="w-4 h-4 mr-2" />
-                        {{ builderRef?.saving ? t('features.menus.actions.saving') : t('features.menus.actions.save') }}
-                    </Button>
-
-                    <Button
-                        v-if="selectedMenu && selectedMenu.deleted_at"
-                        @click="restoreCurrentMenu"
-                        variant="ghost"
-                        size="icon"
-                        class="h-10 w-10 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                        :title="t('common.actions.restore')"
-                    >
-                        <RotateCcw class="w-4 h-4" />
-                    </Button>
-
-                    <Button
-                        @click="deleteCurrentMenu"
-                        variant="ghost"
-                        size="icon"
-                        class="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        :title="selectedMenu && selectedMenu.deleted_at ? t('common.actions.forceDelete') : t('features.menus.actions.delete')"
-                    >
-                        <Trash2 class="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
+        <!-- Header - Clean, just title -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-foreground">{{ t('features.menus.title') }}</h1>
+            <p class="text-sm text-muted-foreground">{{ t('features.menus.subtitle') }}</p>
         </div>
 
         <!-- Main Content Area -->
@@ -88,7 +11,7 @@
             <Loader2 class="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
 
-        <div v-else-if="menus.length === 0" class="flex-1 flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed border-border rounded-lg bg-muted/10">
+        <div v-else-if="menus.length === 0 && trashedFilter === 'without'" class="flex-1 flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed border-border rounded-lg bg-muted/10">
             <MenuSquare class="w-16 h-16 text-muted-foreground/20 mb-4" />
             <h3 class="text-lg font-medium mb-2">{{ t('features.menus.messages.empty') }}</h3>
             <p class="text-sm text-muted-foreground mb-6 text-center max-w-[400px]">
@@ -100,25 +23,22 @@
             </Button>
         </div>
 
-        <div v-else-if="selectedMenuId && selectedMenu && !selectedMenu.deleted_at" class="flex-1">
+        <div v-else class="flex-1">
             <MenuBuilder 
                 ref="builderRef"
                 :menu-id="selectedMenuId" 
                 :key="selectedMenuId"
+                :menus="menus"
+                :trashed-filter="trashedFilter"
+                :trashed-count="trashedCount"
+                :is-trashed="!!selectedMenu?.deleted_at"
                 @menu-updated="handleMenuUpdated"
+                @create-menu="openCreateModal"
+                @delete-menu="deleteCurrentMenu"
+                @restore-menu="restoreCurrentMenu"
+                @select-menu="handleSelectMenu"
+                @update:trashed-filter="trashedFilter = $event"
             />
-        </div>
-        
-        <div v-else-if="selectedMenuId && selectedMenu && selectedMenu.deleted_at" class="flex-1 flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed border-border rounded-lg bg-destructive/5">
-            <Trash2 class="w-16 h-16 text-destructive/20 mb-4" />
-            <h3 class="text-lg font-medium mb-2 text-destructive">{{ t('common.labels.deleted') }}</h3>
-            <p class="text-sm text-muted-foreground mb-6 text-center max-w-[400px]">
-                This menu has been deleted. Restore it to make changes.
-            </p>
-             <Button @click="restoreCurrentMenu" variant="outline" class="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                <RotateCcw class="w-4 h-4 mr-2" />
-                {{ t('common.actions.restore') }}
-            </Button>
         </div>
 
         <!-- Create Menu Modal -->
@@ -146,7 +66,7 @@ import SelectValue from '../../../components/ui/select-value.vue';
 import SelectContent from '../../../components/ui/select-content.vue';
 import SelectItem from '../../../components/ui/select-item.vue';
 import { 
-    Plus, Trash2, Loader2, MenuSquare, Save, RotateCcw
+    Plus, Trash2, Loader2, MenuSquare, Save, RotateCcw, Undo2, Redo2
 } from 'lucide-vue-next';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 
@@ -157,25 +77,48 @@ const toast = useToast();
 const { confirm } = useConfirm();
 
 const menus = ref([]);
-const loading = ref(false);
 const showCreateModal = ref(false);
 const selectedMenuId = ref(null);
+const isLoading = ref(true);
 const trashedFilter = ref('without');
+const trashedCount = ref(0);
 const builderRef = ref(null);
 
-const selectedMenu = computed(() => menus.value.find(m => m.id.toString() === selectedMenuId.value));
+// Computed
+const selectedMenu = computed(() => {
+    return menus.value.find(m => m.id.toString() === selectedMenuId.value?.toString());
+});
 
+// Fetch all menus
 const fetchMenus = async () => {
-    loading.value = true;
+    isLoading.value = true;
     try {
-        const params = {};
-         if (trashedFilter.value !== 'without') {
-            params.trashed = trashedFilter.value;
-        }
+        const response = await api.get('/admin/ja/menus', {
+            params: {
+                trashed: trashedFilter.value
+            }
+        });
+        
+        // Capture trashed count from meta
+        trashedCount.value = response.data?.meta?.trashed_count ?? 0;
 
-        const response = await api.get('/admin/ja/menus', { params });
         const { data } = parseResponse(response);
         menus.value = ensureArray(data);
+
+        // If a menu is selected but not in the list (e.g. filtered out), deselect it
+        // exception: if we are in 'with' mode?
+        if (selectedMenuId.value) {
+            const exists = menus.value.find(m => m.id.toString() === selectedMenuId.value?.toString());
+            if (!exists) {
+                // Try to keep selection if plausible? No, safer to deselect or let user reselect
+                // But don't auto-deselect if checking history?
+                // For now, if filtered out, it's gone.
+                // But wait, if I switch filter to 'trashed only', active menu disappears.
+                // selectedMenu becomes undefined.
+                // MenuBuilder handles !menuId.
+                // So valid.
+            }
+        }
         
         // Auto-select logic
         if (menus.value.length > 0) {
@@ -187,9 +130,9 @@ const fetchMenus = async () => {
         }
     } catch (error) {
         console.error('Failed to fetch menus:', error);
-        toast.error.load(error);
+        toast.error.action(t('features.menus.messages.loadingFailed') || 'Failed to load menus');
     } finally {
-        loading.value = false;
+        isLoading.value = false;
     }
 };
 
@@ -203,7 +146,11 @@ const handleMenuCreated = async (newMenu) => {
     if (newMenu && newMenu.id) {
         selectedMenuId.value = newMenu.id.toString();
     }
-    toast.success.create(t('features.menus.title'));
+    // Toast is already shown in MenuModal.vue
+};
+
+const handleSelectMenu = (menuId) => {
+    selectedMenuId.value = menuId;
 };
 
 const handleMenuUpdated = async () => {

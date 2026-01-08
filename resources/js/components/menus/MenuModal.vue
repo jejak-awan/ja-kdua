@@ -109,7 +109,7 @@ const fetchLocations = async () => {
         }));
     } catch (error) {
         console.error('Failed to fetch menu locations:', error);
-        toast.error.default('Failed to load menu locations');
+        toast.error.load(error);
     } finally {
         loadingLocations.value = false;
     }
@@ -132,8 +132,8 @@ const handleSubmit = async () => {
         const response = await api.post('/admin/ja/menus', form.value);
         const menu = response.data.data || response.data;
         toast.success.create('Menu');
-        emit('saved');
-        router.push({ name: 'menus.edit', params: { id: menu.id } });
+        emit('saved', menu);
+        emit('close');
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});

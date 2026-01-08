@@ -40,10 +40,12 @@
         "emptyDescription": "Buat menu pertama Anda untuk mulai mengatur navigasi situs.",
         "enterUrlLabel": "Harap masukkan label dan URL",
         "customLinkAdded": "Tautan kustom ditambahkan",
-        "itemDeleted": "Item menu dihapus"
+        "itemDeleted": "Item menu dihapus",
+        "noMenuSelected": "Tidak Ada Menu Dipilih"
     },
     "form": {
         "name": "Nama",
+        "namePlaceholder": "Masukkan nama menu",
         "label": "Label",
         "type": "Tipe",
         "url": "URL",
@@ -65,6 +67,7 @@
         "editItemTitle": "Edit Item Menu",
         "placeholders": {
             "name": "Nama menu",
+            "selectLocation": "Pilih lokasi",
             "location": "header, footer, dll.",
             "selectPage": "Pilih halaman...",
             "selectCategory": "Pilih kategori...",
@@ -73,6 +76,7 @@
             "cssClasses": "misal mb-4"
         },
         "newLink": "Tautan Baru",
+        "menuStructure": "Struktur Menu",
         "structure": "Struktur Menu",
         "addItems": "Tambah Item Menu",
         "customLink": "Tautan Kustom",
@@ -82,12 +86,15 @@
         "noCategories": "Tidak ada kategori ditemukan",
         "dragStart": "Tarik item dari sidebar kiri untuk mulai membuat menu Anda",
         "dragHelp": "Tarik item untuk mengatur ulang atau membuat sub-menu",
+        "addColumnGroup": "Tambah Grup Kolom",
+        "newColumnGroup": "Grup Kolom Baru",
         "types": {
             "link": "Tautan",
             "page": "Halaman",
             "post": "Postingan",
             "category": "Kategori",
-            "content": "Konten"
+            "content": "Konten",
+            "column_group": "Grup Kolom"
         }
     }
 }

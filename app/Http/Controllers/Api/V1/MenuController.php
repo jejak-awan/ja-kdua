@@ -27,26 +27,50 @@ class MenuController extends BaseApiController
         }
 
         $menus = $query->latest()->get();
+        $trashedCount = Menu::onlyTrashed()->count();
 
-        return $this->success($menus, 'Menus retrieved successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Menus retrieved successfully',
+            'data' => $menus,
+            'meta' => [
+                'trashed_count' => $trashedCount
+            ]
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:menus,slug',
+            'slug' => [
+                'nullable',
+                'string',
+                \Illuminate\Validation\Rule::unique('menus')->whereNull('deleted_at')
+            ],
             'location' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
+
+        // Auto-generate slug from name if not provided
+        if (empty($validated['slug'])) {
+            $baseSlug = \Illuminate\Support\Str::slug($validated['name']);
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Menu::withTrashed()->where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $counter++;
+            }
+            $validated['slug'] = $slug;
+        }
 
         $menu = Menu::create($validated);
 
         return $this->success($menu->load('items'), 'Menu created successfully', 201);
     }
 
-    public function show(Menu $menu)
+    public function show($id)
     {
+        $menu = Menu::withTrashed()->findOrFail($id);
         return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
     }
 
@@ -54,7 +78,12 @@ class MenuController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|unique:menus,slug,'.$menu->id,
+            'slug' => [
+                'sometimes',
+                'required',
+                'string',
+                \Illuminate\Validation\Rule::unique('menus')->ignore($menu->id)->whereNull('deleted_at')
+            ],
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -136,7 +165,7 @@ class MenuController extends BaseApiController
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'url' => 'nullable|string',
-            'type' => 'required|in:link,page,post,category,custom',
+            'type' => 'required|in:link,page,post,category,custom,column_group',
             'target_id' => 'nullable|integer',
             'target_type' => 'nullable|string',
             'parent_id' => 'nullable|exists:menu_items,id',
@@ -161,8 +190,9 @@ class MenuController extends BaseApiController
         return $this->success($item->load('children'), 'Menu item created successfully', 201);
     }
 
-    public function items(Menu $menu)
+    public function items($id)
     {
+        $menu = Menu::withTrashed()->findOrFail($id);
         // Return all items flattened, frontend will build the tree
         return $this->success($menu->allItems, 'Menu items retrieved successfully');
     }
@@ -176,7 +206,7 @@ class MenuController extends BaseApiController
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'url' => 'nullable|string',
-            'type' => 'sometimes|required|in:link,page,post,category,custom',
+            'type' => 'sometimes|required|in:link,page,post,category,custom,column_group',
             'target_id' => 'nullable|integer',
             'target_type' => 'nullable|string',
             'parent_id' => 'nullable|exists:menu_items,id',

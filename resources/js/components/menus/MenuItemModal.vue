@@ -187,7 +187,7 @@ const fetchOptions = async () => {
         contents.value = ensureArray(parsedContents.data || parsedContents);
     } catch (error) {
         console.error('Failed to fetch menu options:', error);
-        toast.error.default(t('features.menus.messages.fetchOptionsFailed'));
+        toast.error.load(error);
     } finally {
         loadingOptions.value = false;
     }
