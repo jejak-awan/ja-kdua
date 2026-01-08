@@ -169,7 +169,8 @@
                                                         <img 
                                                             :src="promoChild.image" 
                                                             :alt="promoChild.title"
-                                                            class="w-full h-36 object-cover transition-transform group-hover/promo:scale-105"
+                                                            class="w-full object-cover transition-transform group-hover/promo:scale-105"
+                                                            :class="getImageSizeClasses(promoChild.image_size)"
                                                         />
                                                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                                                         <div class="absolute bottom-3 left-4 right-4">
@@ -235,7 +236,8 @@
                                                     <img 
                                                         :src="child.image" 
                                                         :alt="child.title"
-                                                        class="w-full h-32 object-cover transition-transform group-hover/promo:scale-105"
+                                                        class="w-full object-cover transition-transform group-hover/promo:scale-105"
+                                                        :class="getImageSizeClasses(child.image_size)"
                                                     />
                                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                                     <div class="absolute bottom-3 left-3 right-3">
@@ -506,6 +508,18 @@ const hasPromotionalImages = (items) => {
 const getPromotionalItems = (items) => {
     if (!items) return [];
     return items.filter(item => item.image);
+};
+
+const getImageSizeClasses = (size) => {
+    switch (size) {
+        case 'sm': return 'h-24'; // 100px approx
+        case 'md': return 'h-36'; // 150px approx  
+        case 'lg': return 'h-48'; // 200px approx
+        case 'xl': return 'h-72'; // 300px approx
+        case 'full': return 'h-auto min-h-[200px]';
+        case 'auto':
+        default: return 'h-32'; // default
+    }
 };
 
 const groupItemsByColumn = (items, layout) => {
