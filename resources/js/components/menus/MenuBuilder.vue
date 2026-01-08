@@ -109,6 +109,17 @@
                                 variant="ghost" 
                                 size="icon" 
                                 class="h-9 w-9"
+                                @click="showPreview = true"
+                                :title="t('features.menus.actions.preview')"
+                                :disabled="items.length === 0"
+                            >
+                                <Eye class="w-4 h-4" />
+                            </Button>
+
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                class="h-9 w-9"
                                 @click="menuState.fetchMenu()"
                                 :title="t('common.actions.refresh')"
                             >
@@ -231,6 +242,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Preview Modal -->
+        <MenuPreview v-model:open="showPreview" :items="items" />
     </div>
 </template>
 
@@ -246,6 +260,7 @@ import { useToast } from '../../composables/useToast';
 import SourcePanel from './sidebar/SourcePanel.vue';
 import MenuTree from './canvas/MenuTree.vue';
 import ItemPropertiesPanel from './properties/ItemPropertiesPanel.vue';
+import MenuPreview from './preview/MenuPreview.vue';
 
 // UI Components
 import Card from '../ui/card.vue';
@@ -263,7 +278,7 @@ import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 
 import { 
-    Loader2, Save, Undo2, Redo2,
+    Loader2, Save, Undo2, Redo2, Eye,
     PanelLeftOpen, Plus, Trash2, RotateCcw, PanelRightOpen
 } from 'lucide-vue-next';
 
@@ -319,6 +334,7 @@ const {
 // Local state
 const isSidebarCollapsed = ref(false);
 const isPropertiesCollapsed = ref(false);
+const showPreview = ref(false);
 const locations = ref([]);
 
 

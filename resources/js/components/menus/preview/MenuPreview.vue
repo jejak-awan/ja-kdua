@@ -1,0 +1,219 @@
+<template>
+    <Dialog :open="open" @update:open="$emit('update:open', $event)">
+        <DialogContent class="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+                <DialogTitle class="flex items-center gap-2">
+                    <Eye class="w-5 h-5" />
+                    {{ t('features.menus.actions.preview') }}
+                </DialogTitle>
+                <DialogDescription>
+                    {{ t('features.menus.messages.previewDescription') || 'Preview how your menu will appear on the frontend' }}
+                </DialogDescription>
+            </DialogHeader>
+
+            <!-- Preview Controls -->
+            <div class="flex items-center gap-2 py-2 border-b border-border">
+                <Button 
+                    v-for="style in previewStyles" 
+                    :key="style.value"
+                    size="sm" 
+                    :variant="activeStyle === style.value ? 'default' : 'outline'"
+                    @click="activeStyle = style.value"
+                >
+                    <component :is="style.icon" class="w-4 h-4 mr-1" />
+                    {{ style.label }}
+                </Button>
+            </div>
+
+            <!-- Preview Area -->
+            <div class="flex-1 overflow-auto bg-background rounded-lg border border-border mt-4">
+                <!-- Desktop Header Preview -->
+                <div v-if="activeStyle === 'header'" class="bg-card border-b border-border">
+                    <div class="px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <!-- Fake Logo -->
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                                    JA
+                                </div>
+                                <span class="text-lg font-bold">Site Name</span>
+                            </div>
+
+                            <!-- Navigation -->
+                            <nav class="flex items-center gap-1">
+                                <template v-for="item in items" :key="item.id || item._temp_id">
+                                    <!-- Item with children -->
+                                    <div 
+                                        v-if="item.children && item.children.length > 0"
+                                        class="group relative"
+                                    >
+                                        <button class="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md flex items-center gap-1 transition-colors">
+                                            <component v-if="item.icon" :is="getIcon(item.icon)" class="w-4 h-4" />
+                                            {{ item.title || 'Untitled' }}
+                                            <ChevronDown class="w-3 h-3" />
+                                        </button>
+                                        <!-- Dropdown Preview -->
+                                        <div class="absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                            <div class="bg-card border border-border rounded-lg shadow-lg p-2 min-w-[180px]">
+                                                <template v-for="child in item.children" :key="child.id || child._temp_id">
+                                                    <div class="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md cursor-pointer flex items-center gap-2">
+                                                        <component v-if="child.icon" :is="getIcon(child.icon)" class="w-4 h-4" />
+                                                        {{ child.title || 'Untitled' }}
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Simple item -->
+                                    <button 
+                                        v-else
+                                        class="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md flex items-center gap-1 transition-colors"
+                                    >
+                                        <component v-if="item.icon" :is="getIcon(item.icon)" class="w-4 h-4" />
+                                        {{ item.title || 'Untitled' }}
+                                    </button>
+                                </template>
+                            </nav>
+
+                            <!-- Fake Actions -->
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-muted"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Preview -->
+                <div v-else-if="activeStyle === 'mobile'" class="bg-card max-w-sm mx-auto border-x border-border">
+                    <!-- Mobile Header -->
+                    <div class="flex items-center justify-between p-4 border-b border-border">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded bg-primary"></div>
+                            <span class="font-bold">Site</span>
+                        </div>
+                        <Menu class="w-5 h-5" />
+                    </div>
+                    <!-- Mobile Nav List -->
+                    <div class="p-2 space-y-1">
+                        <template v-for="item in items" :key="item.id || item._temp_id">
+                            <div 
+                                class="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-muted flex items-center justify-between cursor-pointer"
+                                @click="toggleMobileItem(item)"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <component v-if="item.icon" :is="getIcon(item.icon)" class="w-4 h-4" />
+                                    {{ item.title || 'Untitled' }}
+                                </div>
+                                <ChevronDown 
+                                    v-if="item.children && item.children.length > 0" 
+                                    class="w-4 h-4 transition-transform"
+                                    :class="{ 'rotate-180': expandedMobile.includes(item.id || item._temp_id) }"
+                                />
+                            </div>
+                            <!-- Mobile Submenu -->
+                            <div 
+                                v-if="item.children && item.children.length > 0 && expandedMobile.includes(item.id || item._temp_id)"
+                                class="ml-4 pl-3 border-l border-border space-y-1"
+                            >
+                                <div 
+                                    v-for="child in item.children" 
+                                    :key="child.id || child._temp_id"
+                                    class="px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-muted cursor-pointer flex items-center gap-2"
+                                >
+                                    <component v-if="child.icon" :is="getIcon(child.icon)" class="w-4 h-4" />
+                                    {{ child.title || 'Untitled' }}
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Footer Preview -->
+                <div v-else-if="activeStyle === 'footer'" class="bg-muted/30 p-8">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="grid grid-cols-4 gap-8">
+                            <template v-for="item in items" :key="item.id || item._temp_id">
+                                <div>
+                                    <h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                                        <component v-if="item.icon" :is="getIcon(item.icon)" class="w-4 h-4" />
+                                        {{ item.title || 'Untitled' }}
+                                    </h4>
+                                    <ul v-if="item.children && item.children.length > 0" class="space-y-2">
+                                        <li 
+                                            v-for="child in item.children" 
+                                            :key="child.id || child._temp_id"
+                                            class="text-sm text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-2"
+                                        >
+                                            <component v-if="child.icon" :is="getIcon(child.icon)" class="w-3 h-3" />
+                                            {{ child.title || 'Untitled' }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <DialogFooter class="mt-4">
+                <Button variant="outline" @click="$emit('update:open', false)">
+                    {{ t('common.actions.close') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import * as LucideIcons from 'lucide-vue-next';
+import { Eye, ChevronDown, Monitor, Smartphone, Menu, LayoutGrid } from 'lucide-vue-next';
+
+// UI Components
+import Dialog from '../../ui/dialog.vue';
+import DialogContent from '../../ui/dialog-content.vue';
+import DialogHeader from '../../ui/dialog-header.vue';
+import DialogTitle from '../../ui/dialog-title.vue';
+import DialogDescription from '../../ui/dialog-description.vue';
+import DialogFooter from '../../ui/dialog-footer.vue';
+import Button from '../../ui/button.vue';
+
+const { t } = useI18n();
+
+defineProps({
+    open: {
+        type: Boolean,
+        default: false
+    },
+    items: {
+        type: Array,
+        default: () => []
+    }
+});
+
+defineEmits(['update:open']);
+
+const activeStyle = ref('header');
+const expandedMobile = ref([]);
+
+const previewStyles = [
+    { value: 'header', label: 'Header', icon: Monitor },
+    { value: 'mobile', label: 'Mobile', icon: Smartphone },
+    { value: 'footer', label: 'Footer', icon: LayoutGrid }
+];
+
+const getIcon = (iconName) => {
+    return LucideIcons[iconName] || LucideIcons.Circle;
+};
+
+const toggleMobileItem = (item) => {
+    const id = item.id || item._temp_id;
+    const index = expandedMobile.value.indexOf(id);
+    if (index === -1) {
+        expandedMobile.value.push(id);
+    } else {
+        expandedMobile.value.splice(index, 1);
+    }
+};
+</script>
