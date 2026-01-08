@@ -30,11 +30,13 @@ class MenuItem extends Model
         'image_size',
         'mega_menu_layout',
         'mega_menu_column',
+        'mega_menu_show_dividers',
         'sort_order',
         'open_in_new_tab',
         'is_active',
         'hide_label',
         'heading',
+        'show_heading_line',
     ];
 
     protected $casts = [

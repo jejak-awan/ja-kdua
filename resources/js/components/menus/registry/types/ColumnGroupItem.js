@@ -40,6 +40,13 @@ export default {
             description: 'Show only children items'
         },
         {
+            key: 'show_heading_line',
+            type: 'boolean',
+            label: 'Show Line Under Heading',
+            default: false,
+            description: 'Show a separator line below the heading'
+        },
+        {
             key: 'css_class',
             type: 'text',
             label: 'CSS Classes',

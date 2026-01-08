@@ -95,16 +95,36 @@
                                     <!-- CASE A: Explicit Columns (Grid/Full) -->
                                     <template v-if="item.mega_menu_layout && item.mega_menu_layout !== 'default'">
                                         <div 
-                                            v-for="(colItems, colIndex) in groupItemsByColumn(item.children, item.mega_menu_layout)" 
-                                            :key="colIndex" 
-                                            class="flex flex-col gap-2"
+                                            class="grid" 
+                                            :class="[
+                                                getMegaMenuLayoutClasses(item),
+                                                item.mega_menu_show_dividers ? 'divide-x divide-border/40' : 'gap-x-12'
+                                            ]"
                                         >
-                                            <template v-for="child in colItems" :key="child.id">
+                                            <template v-for="(column, idx) in groupItemsByColumn(item.children, item.mega_menu_layout || 'default')" :key="idx">
+                                                <div class="flex flex-col gap-4" :class="item.mega_menu_show_dividers ? 'px-8 first:pl-0 last:pr-0' : ''">
+                                                    <template v-for="child in column" :key="child.id">
+                                                        <!-- Category/Heading with potential underline -->
+                                                        <div 
+                                                            v-if="child.type === 'category' || child.mega_menu_layout === 'mega'" 
+                                                            class="mb-2 pb-1"
+                                                            :class="child.show_heading_line ? 'border-b border-border/60' : ''"
+                                                        >
+                                                            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">{{ child.title }}</span>
+                                                        </div>
                                                 <!-- Group Item (Level 1 has children) -->
-                                                <div v-if="child.children && child.children.length > 0" class="mb-6 last:mb-0">
-                                                    <div v-if="!child.hide_label" class="flex items-center gap-2 mb-2 px-2">
-                                                        <component v-if="child.icon" :is="getIconComponent(child.icon)" class="w-4 h-4 text-primary" />
-                                                        <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ child.heading || child.title }}</span>
+                                                <div v-else-if="child.children && child.children.length > 0" class="mb-6 last:mb-0">
+                                                    <div 
+                                                        v-if="!child.hide_label" 
+                                                        class="mb-3"
+                                                    >
+                                                        <div 
+                                                            class="inline-flex items-center gap-2 pb-1.5 min-w-[60px]"
+                                                            :class="child.show_heading_line ? 'border-b border-border/80' : ''"
+                                                        >
+                                                            <component v-if="child.icon" :is="getIconComponent(child.icon)" class="w-4 h-4 text-primary" />
+                                                            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">{{ child.heading || child.title }}</span>
+                                                        </div>
                                                     </div>
                                                     <div class="flex flex-col gap-1">
                                                         <router-link
@@ -154,6 +174,8 @@
                                                 </router-link>
                                             </template>
                                         </div>
+                                    </template>
+                                </div>
 
                                         <!-- Promotional Images in Grid Layout -->
                                         <div 
@@ -220,36 +242,36 @@
                                                 </p>
                                             </div>
                                         </router-link>
-                                    </template>
 
-                                    <!-- Promotional Image Banner -->
-                                    <div 
-                                        v-if="hasPromotionalImages(item.children)" 
-                                        class="col-span-full mt-4 pt-4 border-t border-border/50"
-                                    >
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <template v-for="child in getPromotionalItems(item.children)" :key="child.id + '-promo'">
-                                                <router-link 
-                                                    :to="child.url || '/'"
-                                                    class="relative group/promo rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
-                                                >
-                                                    <img 
-                                                        :src="child.image" 
-                                                        :alt="child.title"
-                                                        class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
-                                                        :class="getImageSizeClasses(child.image_size)"
-                                                    />
-                                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
-                                                    <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
-                                                        <span class="text-white font-semibold text-sm drop-shadow-md">{{ child.title }}</span>
-                                                        <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
-                                                            {{ child.badge }}
-                                                        </span>
-                                                    </div>
-                                                </router-link>
-                                            </template>
+                                        <!-- Promotional Image Banner (Flat List Case) -->
+                                        <div 
+                                            v-if="hasPromotionalImages(item.children)" 
+                                            class="col-span-full mt-4 pt-4 border-t border-border/50"
+                                        >
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <template v-for="child in getPromotionalItems(item.children)" :key="child.id + '-promo'">
+                                                    <router-link 
+                                                        :to="child.url || '/'"
+                                                        class="relative group/promo rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
+                                                    >
+                                                        <img 
+                                                            :src="child.image" 
+                                                            :alt="child.title"
+                                                            class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
+                                                            :class="getImageSizeClasses(child.image_size)"
+                                                        />
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
+                                                        <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
+                                                            <span class="text-white font-semibold text-sm drop-shadow-md">{{ child.title }}</span>
+                                                            <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
+                                                                {{ child.badge }}
+                                                            </span>
+                                                        </div>
+                                                    </router-link>
+                                                </template>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -500,50 +522,52 @@ const getMegaMenuLayoutClasses = (item) => {
 // Promotional image helpers
 const hasPromotionalImages = (items) => {
     if (!items) return false;
-    return items.some(item => item.image);
+    for (const item of items) {
+        if (item.image) return true;
+        if (item.children && hasPromotionalImages(item.children)) return true;
+    }
+    return false;
 };
 
 const getPromotionalItems = (items) => {
     if (!items) return [];
-    return items.filter(item => item.image);
+    let promoItems = [];
+    items.forEach(item => {
+        if (item.image) promoItems.push(item);
+        if (item.children) {
+            promoItems = [...promoItems, ...getPromotionalItems(item.children)];
+        }
+    });
+    return promoItems;
 };
 
 const getImageSizeClasses = (size) => {
     switch (size) {
-        case 'sm': return 'h-24'; // 100px approx
-        case 'md': return 'h-36'; // 150px approx  
-        case 'lg': return 'h-48'; // 200px approx
-        case 'xl': return 'h-72'; // 300px approx
-        case 'full': return 'h-auto min-h-[200px]';
+        case 'sm': return 'h-24';
+        case 'md': return 'h-40';
+        case 'lg': return 'h-56';
+        case 'xl': return 'h-80';
+        case 'full': return 'h-64 lg:h-80 w-full object-cover';
         case 'auto':
-        default: return 'h-32'; // default
+        default: return 'h-40'; // Increased default for better presence
     }
 };
 
 const groupItemsByColumn = (items, layout) => {
-    // Determine max columns based on layout
-    // grid-2 = 2, grid-3 = 3, full = 4 (assumed)
     let maxCols = 1;
     if (layout === 'grid-2') maxCols = 2;
     if (layout === 'grid-3') maxCols = 3;
     if (layout === 'full') maxCols = 4;
     
-    // Create an array of arrays [[], [], ...]
     const groups = Array.from({length: maxCols}, () => []);
     
-    items.forEach(item => {
+    // Sort items by sort_order first to maintain order within columns
+    const sortedItems = [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    
+    sortedItems.forEach(item => {
         let colIndex = item.mega_menu_column; // 1-based index from DB
-        
-        // Handle Auto (0) or invalid
-        if (!colIndex || colIndex < 1) {
-            // For now, put unassigned items in Column 1 (or implement round-robin)
-            colIndex = 1; 
-        }
-        
-        // Cap at max columns
+        if (!colIndex || colIndex < 1) colIndex = 1; 
         if (colIndex > maxCols) colIndex = maxCols;
-        
-        // Push to group (convert 1-based to 0-based)
         groups[colIndex - 1].push(item);
     });
     

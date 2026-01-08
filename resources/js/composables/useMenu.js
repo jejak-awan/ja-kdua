@@ -205,8 +205,11 @@ export function useMenu(menuId) {
                 mega_menu_column: item.mega_menu_column || 0,
                 open_in_new_tab: item.open_in_new_tab || false,
                 image: item.image || null,
+                image_size: item.image_size || 'auto',
+                mega_menu_show_dividers: item.mega_menu_show_dividers || false,
                 hide_label: item.hide_label || false,
                 heading: item.heading || null,
+                show_heading_line: item.show_heading_line || false,
             });
             if (item.children && item.children.length > 0) {
                 result = result.concat(flattenTree(item.children, item.id));
@@ -466,10 +469,13 @@ export function useMenu(menuId) {
                     open_in_new_tab: item.open_in_new_tab || false,
                     is_active: item.is_active ?? 1,
                     image: item.image || null,
+                    image_size: item.image_size || 'auto',
                     mega_menu_layout: item.mega_menu_layout || 'default',
                     mega_menu_column: item.mega_menu_column || 0,
+                    mega_menu_show_dividers: item.mega_menu_show_dividers || false,
                     hide_label: item.hide_label || false,
                     heading: item.heading || null,
+                    show_heading_line: item.show_heading_line || false,
                     sort_order: i,
                 };
 
