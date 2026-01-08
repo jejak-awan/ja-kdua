@@ -111,12 +111,11 @@ export default {
             type: 'select',
             label: 'Image Size',
             options: [
-                { label: 'Auto', value: 'auto' },
-                { label: 'Small (100px)', value: 'sm' },
-                { label: 'Medium (150px)', value: 'md' },
-                { label: 'Large (200px)', value: 'lg' },
-                { label: 'Extra Large (300px)', value: 'xl' },
-                { label: 'Full Width', value: 'full' }
+                { label: 'Auto (16:9)', value: 'auto' },
+                { label: 'Landscape Small', value: 'landscape_sm' },
+                { label: 'Landscape Medium', value: 'landscape_md' },
+                { label: 'Landscape Large', value: 'landscape_lg' },
+                { label: 'Full Width (16:9)', value: 'full' }
             ],
             default: 'auto',
             group: 'appearance'

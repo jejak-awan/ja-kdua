@@ -562,13 +562,12 @@ const getPromotionalItems = (items) => {
 
 const getImageSizeClasses = (size) => {
     switch (size) {
-        case 'sm': return 'h-24';
-        case 'md': return 'h-40';
-        case 'lg': return 'h-56';
-        case 'xl': return 'h-80';
-        case 'full': return 'h-64 lg:h-80 w-full object-cover';
+        case 'landscape_sm': return 'aspect-video h-24 lg:h-28 object-cover';
+        case 'landscape_md': return 'aspect-video h-32 lg:h-36 object-cover';
+        case 'landscape_lg': return 'aspect-video h-40 lg:h-48 object-cover';
+        case 'full': return 'aspect-video w-full object-cover';
         case 'auto':
-        default: return 'h-40'; // Increased default for better presence
+        default: return 'aspect-video h-32 lg:h-36 object-cover';
     }
 };
 
