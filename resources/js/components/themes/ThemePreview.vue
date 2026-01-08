@@ -1,71 +1,23 @@
 <template>
-    <div class="theme-preview-container">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">Theme Preview</h3>
-            <div class="flex items-center gap-2">
-                <Select v-model="selectedDevice">
-                    <SelectTrigger class="h-8 w-[100px]">
-                        <SelectValue placeholder="Device" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="desktop">Desktop</SelectItem>
-                        <SelectItem value="tablet">Tablet</SelectItem>
-                        <SelectItem value="mobile">Mobile</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Button
-                    variant="secondary"
-                    size="icon"
-                    class="h-8 w-8"
-                    @click="refreshPreview"
-                    title="Refresh preview"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    class="h-8 w-8"
-                    @click="$emit('close')"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </Button>
-            </div>
-        </div>
+    <div class="w-full h-full bg-background" :class="{'opacity-50': loading, 'pointer-events-none': loading}">
+        <iframe
+            ref="previewFrame"
+            :src="previewUrl"
+            class="w-full h-full border-0"
+            @load="onPreviewLoad"
+        />
 
-        <div class="border border-input rounded-lg overflow-hidden bg-secondary" :class="deviceClasses">
-            <div class="bg-card" :style="iframeStyle">
-                <iframe
-                    ref="previewFrame"
-                    :src="previewUrl"
-                    class="w-full border-0"
-                    :style="iframeStyle"
-                    @load="onPreviewLoad"
-                />
-            </div>
-        </div>
-
-        <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-card bg-opacity-75">
-            <div class="text-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                <p class="mt-2 text-sm text-muted-foreground">Loading preview...</p>
+        <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+            <div class="flex flex-col items-center gap-2">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <!-- <p class="text-xs text-muted-foreground font-medium">Loading Preview...</p> -->
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import Button from '../ui/button.vue';
-import Select from '../ui/select.vue';
-import SelectContent from '../ui/select-content.vue';
-import SelectItem from '../ui/select-item.vue';
-import SelectTrigger from '../ui/select-trigger.vue';
-import SelectValue from '../ui/select-value.vue';
+import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({
     theme: {
@@ -81,33 +33,7 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const previewFrame = ref(null);
-const selectedDevice = ref('desktop');
 const loading = ref(true);
-
-const deviceClasses = computed(() => {
-    const classes = {
-        desktop: 'max-w-full',
-        tablet: 'max-w-3xl mx-auto',
-        mobile: 'max-w-sm mx-auto',
-    };
-    return classes[selectedDevice.value] || classes.desktop;
-});
-
-const iframeStyle = computed(() => {
-    const styles = {
-        desktop: { height: '800px' },
-        tablet: { height: '1024px', width: '768px' },
-        mobile: { height: '667px', width: '375px' },
-    };
-    return styles[selectedDevice.value] || styles.desktop;
-});
-
-const refreshPreview = () => {
-    if (previewFrame.value) {
-        loading.value = true;
-        previewFrame.value.src = previewFrame.value.src;
-    }
-};
 
 // Inject CSS variables and custom CSS into iframe
 const injectThemeStyles = () => {
@@ -214,33 +140,14 @@ watch(() => props.theme, () => {
     }
 }, { deep: true });
 
-watch(() => selectedDevice.value, () => {
-    // Device change doesn't need full refresh, just re-inject styles
-    setTimeout(() => {
-        injectThemeStyles();
-    }, 100);
-});
-
 onMounted(() => {
-    // Set initial preview URL with theme parameter
-    if (!props.previewUrl.includes('?')) {
-        // Add theme preview parameter if needed
-    }
+    // Set initial preview URL with theme parameter if needed
 });
 </script>
 
 <style scoped>
-.theme-preview-container {
-    position: relative;
-    background-color: hsl(var(--card));
-    border-radius: var(--radius);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    border: 1px solid hsl(var(--border));
-}
-
 iframe {
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease;
 }
 </style>
 
