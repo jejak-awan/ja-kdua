@@ -197,7 +197,9 @@
                                                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
                                                         <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
                                                             <span class="text-white font-bold text-base block drop-shadow-md">{{ promoChild.title }}</span>
-                                                            <span v-if="promoChild.description" class="text-white/80 text-xs line-clamp-1 mt-1">{{ promoChild.description }}</span>
+                                                            <div v-if="promoChild.description" class="mt-1.5 pl-2 border-l-2 border-primary/70 italic text-white/90 text-xs line-clamp-2 leading-relaxed bg-black/5 py-0.5">
+                                                                {{ promoChild.description }}
+                                                            </div>
                                                         </div>
                                                         <span 
                                                             v-if="promoChild.badge" 
@@ -262,8 +264,11 @@
                                                         />
                                                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
                                                         <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
-                                                            <span class="text-white font-semibold text-sm drop-shadow-md">{{ child.title }}</span>
-                                                            <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
+                                                            <span class="text-white font-semibold text-sm drop-shadow-md block mb-1">{{ child.title }}</span>
+                                                            <div v-if="child.description" class="mt-1 pl-2 border-l-2 border-primary/70 italic text-white/90 text-[10px] line-clamp-2 leading-tight bg-black/5 py-0.5">
+                                                                {{ child.description }}
+                                                            </div>
+                                                            <span v-if="child.badge" class="inline-block mt-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
                                                                 {{ child.badge }}
                                                             </span>
                                                         </div>
