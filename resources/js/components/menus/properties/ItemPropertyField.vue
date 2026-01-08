@@ -103,11 +103,9 @@
                     <X class="w-3 h-3" />
                 </Button>
             </div>
-            <Input 
-                :model-value="value"
-                placeholder="Image URL"
-                class="h-8"
-                @update:model-value="$emit('update', $event)"
+            <MediaPicker 
+                :label="value ? 'Change Image' : 'Select Image'"
+                @select="handleMediaSelect"
             />
         </div>
 
@@ -142,8 +140,17 @@ import SelectContent from '../../ui/select-content.vue';
 import SelectItem from '../../ui/select-item.vue';
 import Button from '../../ui/button.vue';
 import IconPicker from '../../ui/icon-picker.vue';
+import MediaPicker from '../../MediaPicker.vue';
 
 import { X } from 'lucide-vue-next';
+
+const emit = defineEmits(['update']);
+
+const handleMediaSelect = (media) => {
+    if (media && media.url) {
+        emit('update', media.url);
+    }
+};
 
 defineProps({
     setting: {
@@ -155,6 +162,4 @@ defineProps({
         default: null
     }
 });
-
-defineEmits(['update']);
 </script>
