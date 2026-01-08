@@ -262,7 +262,7 @@ class MenuController extends BaseApiController
             // Include optional mega menu fields if present
             $optionalFields = [
                 'title', 'url', 'icon', 'css_class', 'description',
-                'badge', 'badge_color', 'open_in_new_tab', 'image',
+                'badge', 'badge_color', 'open_in_new_tab', 'image', 'image_size',
                 'mega_menu_layout', 'mega_menu_column', 'hide_label', 'heading',
             ];
             foreach ($optionalFields as $field) {

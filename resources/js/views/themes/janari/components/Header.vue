@@ -164,22 +164,22 @@
                                                 <template v-for="promoChild in getPromotionalItems(item.children)" :key="promoChild.id + '-promo-grid'">
                                                     <router-link 
                                                         :to="promoChild.url || '/'"
-                                                        class="relative group/promo rounded-xl overflow-hidden block"
+                                                        class="relative group/promo rounded-xl overflow-hidden block shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
                                                     >
                                                         <img 
                                                             :src="promoChild.image" 
                                                             :alt="promoChild.title"
-                                                            class="w-full object-cover transition-transform group-hover/promo:scale-105"
+                                                            class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
                                                             :class="getImageSizeClasses(promoChild.image_size)"
                                                         />
-                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                                                        <div class="absolute bottom-3 left-4 right-4">
-                                                            <span class="text-white font-bold text-base block">{{ promoChild.title }}</span>
-                                                            <span v-if="promoChild.description" class="text-white/80 text-xs line-clamp-1">{{ promoChild.description }}</span>
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
+                                                        <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
+                                                            <span class="text-white font-bold text-base block drop-shadow-md">{{ promoChild.title }}</span>
+                                                            <span v-if="promoChild.description" class="text-white/80 text-xs line-clamp-1 mt-1">{{ promoChild.description }}</span>
                                                         </div>
                                                         <span 
                                                             v-if="promoChild.badge" 
-                                                            class="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold rounded bg-primary text-primary-foreground"
+                                                            class="absolute top-3 right-3 px-2 py-1 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm"
                                                         >
                                                             {{ promoChild.badge }}
                                                         </span>
@@ -225,24 +225,24 @@
                                     <!-- Promotional Image Banner -->
                                     <div 
                                         v-if="hasPromotionalImages(item.children)" 
-                                        class="col-span-full mt-4 pt-4 border-t border-border"
+                                        class="col-span-full mt-4 pt-4 border-t border-border/50"
                                     >
-                                        <div class="grid grid-cols-2 gap-3">
+                                        <div class="grid grid-cols-2 gap-4">
                                             <template v-for="child in getPromotionalItems(item.children)" :key="child.id + '-promo'">
                                                 <router-link 
                                                     :to="child.url || '/'"
-                                                    class="relative group/promo rounded-xl overflow-hidden"
+                                                    class="relative group/promo rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ring-1 ring-border/50 hover:ring-primary/50"
                                                 >
                                                     <img 
                                                         :src="child.image" 
                                                         :alt="child.title"
-                                                        class="w-full object-cover transition-transform group-hover/promo:scale-105"
+                                                        class="w-full object-cover transition-transform duration-500 group-hover/promo:scale-110"
                                                         :class="getImageSizeClasses(child.image_size)"
                                                     />
-                                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                                    <div class="absolute bottom-3 left-3 right-3">
-                                                        <span class="text-white font-semibold text-sm">{{ child.title }}</span>
-                                                        <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
+                                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/promo:opacity-100 transition-opacity duration-300"></div>
+                                                    <div class="absolute bottom-3 left-4 right-4 translate-y-0 group-hover/promo:-translate-y-1 transition-transform duration-300">
+                                                        <span class="text-white font-semibold text-sm drop-shadow-md">{{ child.title }}</span>
+                                                        <span v-if="child.badge" class="ml-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded bg-primary text-primary-foreground shadow-sm">
                                                             {{ child.badge }}
                                                         </span>
                                                     </div>
