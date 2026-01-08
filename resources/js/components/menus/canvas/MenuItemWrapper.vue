@@ -154,19 +154,14 @@ const typeColorClass = computed(() => {
 });
 
 const typeLabel = computed(() => {
-    // Try translation first
     const type = props.item.type;
-    const key = `features.menus.form.types.${type}`;
     
-    // We assume if translation returns the key, it's missing (default behavior often).
-    // Or we rely on the fact we added the keys.
-    // t() will return the translation.
-    
-    // For custom type, we might want "Custom Link" or "Link"
+    // Handle known types with translations
     if (type === 'custom') return t('features.menus.form.customLink');
     if (type === 'column_group') return t('features.menus.form.types.column_group');
     if (['page', 'post', 'category'].includes(type)) return t(`features.menus.form.types.${type}`);
 
+    // Fallback to registry or raw type
     const definition = menuItemRegistry.get(type);
     return definition?.label || type;
 });
@@ -180,6 +175,6 @@ const handleDuplicate = () => {
 };
 
 const handleDelete = () => {
-    menuContext.removeItem(itemId.value);
+    menuContext.deleteItem(itemId.value);
 };
 </script>

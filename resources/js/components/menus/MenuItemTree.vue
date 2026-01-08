@@ -274,7 +274,7 @@ import SelectValue from '../ui/select-value.vue';
 import SelectContent from '../ui/select-content.vue';
 import SelectItem from '../ui/select-item.vue';
 import IconPicker from '../ui/icon-picker.vue';
-import { GripVertical, Trash2, ChevronDown, CornerDownRight, FolderTree, Home } from 'lucide-vue-next';
+import { GripVertical, Trash2, ChevronDown, FolderTree, Home } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 
 const { t } = useI18n();

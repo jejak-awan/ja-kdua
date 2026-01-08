@@ -147,7 +147,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
-import { parseResponse, ensureArray, parseSingleResponse } from '../../utils/responseParser';
+import { parseResponse, ensureArray } from '../../utils/responseParser';
 
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuItemSchema);

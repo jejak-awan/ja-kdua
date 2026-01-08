@@ -161,13 +161,6 @@ const menuContext = useMenuContext();
 
 const selectedItem = computed(() => menuContext.selectedItem.value);
 
-// Helper to calculate depth for indentation
-const calculateDepth = (item, items = menuContext.items.value, depth = 0) => {
-    // This is expensive to calculate on fly if we don't have parent links.
-    // Simpler: when flattening, pass depth.
-    return depth;
-};
-
 // Flatten items with depth for select options
 const validParents = computed(() => {
     if (!selectedItem.value) return [];
@@ -274,6 +267,6 @@ const handleDuplicate = () => {
 
 const handleDelete = () => {
     const itemId = selectedItem.value.id || selectedItem.value._temp_id;
-    menuContext.removeItem(itemId);
+    menuContext.deleteItem(itemId);
 };
 </script>

@@ -238,7 +238,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
-import { parseResponse, ensureArray } from '../../utils/responseParser';
+
 import { useMenu, provideMenu } from '../../composables/useMenu';
 import { useToast } from '../../composables/useToast';
 

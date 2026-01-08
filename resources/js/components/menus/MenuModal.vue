@@ -59,7 +59,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import Dialog from '../ui/dialog.vue';
@@ -85,7 +85,6 @@ const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema);
 
 const emit = defineEmits(['close', 'saved']);
-const router = useRouter();
 
 const saving = ref(false);
 const form = ref({

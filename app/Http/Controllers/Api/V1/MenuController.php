@@ -34,8 +34,8 @@ class MenuController extends BaseApiController
             'message' => 'Menus retrieved successfully',
             'data' => $menus,
             'meta' => [
-                'trashed_count' => $trashedCount
-            ]
+                'trashed_count' => $trashedCount,
+            ],
         ]);
     }
 
@@ -46,7 +46,7 @@ class MenuController extends BaseApiController
             'slug' => [
                 'nullable',
                 'string',
-                \Illuminate\Validation\Rule::unique('menus')->whereNull('deleted_at')
+                \Illuminate\Validation\Rule::unique('menus')->whereNull('deleted_at'),
             ],
             'location' => 'nullable|string',
             'description' => 'nullable|string',
@@ -58,7 +58,7 @@ class MenuController extends BaseApiController
             $slug = $baseSlug;
             $counter = 1;
             while (Menu::withTrashed()->where('slug', $slug)->exists()) {
-                $slug = $baseSlug . '-' . $counter++;
+                $slug = $baseSlug.'-'.$counter++;
             }
             $validated['slug'] = $slug;
         }
@@ -71,6 +71,7 @@ class MenuController extends BaseApiController
     public function show($id)
     {
         $menu = Menu::withTrashed()->findOrFail($id);
+
         return $this->success($menu->load(['items.children']), 'Menu retrieved successfully');
     }
 
@@ -82,7 +83,7 @@ class MenuController extends BaseApiController
                 'sometimes',
                 'required',
                 'string',
-                \Illuminate\Validation\Rule::unique('menus')->ignore($menu->id)->whereNull('deleted_at')
+                \Illuminate\Validation\Rule::unique('menus')->ignore($menu->id)->whereNull('deleted_at'),
             ],
             'location' => 'nullable|string',
             'description' => 'nullable|string',
@@ -193,6 +194,7 @@ class MenuController extends BaseApiController
     public function items($id)
     {
         $menu = Menu::withTrashed()->findOrFail($id);
+
         // Return all items flattened, frontend will build the tree
         return $this->success($menu->allItems, 'Menu items retrieved successfully');
     }
@@ -259,9 +261,9 @@ class MenuController extends BaseApiController
 
             // Include optional mega menu fields if present
             $optionalFields = [
-                'title', 'url', 'icon', 'css_class', 'description', 
+                'title', 'url', 'icon', 'css_class', 'description',
                 'badge', 'badge_color', 'open_in_new_tab', 'image',
-                'mega_menu_layout', 'mega_menu_column', 'hide_label', 'heading'
+                'mega_menu_layout', 'mega_menu_column', 'hide_label', 'heading',
             ];
             foreach ($optionalFields as $field) {
                 if (array_key_exists($field, $itemData)) {

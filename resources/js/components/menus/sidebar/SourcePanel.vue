@@ -192,7 +192,7 @@
                             size="sm" 
                             variant="outline" 
                             class="w-full border-dashed"
-                            @click="addColumnGroup"
+                            @click.prevent="addColumnGroup"
                         >
                             <Columns class="w-3.5 h-3.5 mr-2" />
                             {{ t('features.menus.form.addColumnGroup') }}
