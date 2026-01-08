@@ -85,6 +85,21 @@ export default {
             label: 'Image',
             group: 'appearance'
         },
+        {
+            key: 'image_size',
+            type: 'select',
+            label: 'Image Size',
+            options: [
+                { label: 'Auto', value: 'auto' },
+                { label: 'Small (100px)', value: 'sm' },
+                { label: 'Medium (150px)', value: 'md' },
+                { label: 'Large (200px)', value: 'lg' },
+                { label: 'Extra Large (300px)', value: 'xl' },
+                { label: 'Full Width', value: 'full' }
+            ],
+            default: 'auto',
+            group: 'appearance'
+        },
         // Mega Menu
         {
             key: 'mega_menu_layout',
