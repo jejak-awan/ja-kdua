@@ -180,11 +180,11 @@
             </div>
 
             <!-- Main Layout -->
-            <div v-else class="grid grid-cols-12 gap-6 items-start" :class="{ 'opacity-60 pointer-events-none': isTrashed }">
+            <div v-else class="flex gap-6 items-start h-full" :class="{ 'opacity-60 pointer-events-none': isTrashed }">
                 <!-- Left: Source Panel -->
                 <div 
-                    class="transition-all duration-300"
-                    :class="isSidebarCollapsed ? 'col-span-1' : 'col-span-2 lg:col-span-3'"
+                    class="transition-all duration-300 shrink-0"
+                    :style="{ width: isSidebarCollapsed ? '48px' : '300px' }"
                 >
                     <Button 
                         v-if="isSidebarCollapsed"
@@ -202,7 +202,7 @@
                 </div>
 
                 <!-- Center: Menu Tree -->
-                <div :class="centerColClass">
+                <div class="flex-1 min-w-0">
                     <Card>
                         <CardHeader class="pb-3">
                             <div class="flex items-center justify-between">
@@ -220,10 +220,19 @@
                     </Card>
                 </div>
 
+                <!-- Resizer Handle -->
+                <div 
+                    v-if="!isPropertiesCollapsed"
+                    class="w-1.5 hover:w-1.5 bg-transparent hover:bg-primary/30 cursor-col-resize self-stretch transition-colors relative z-10"
+                    @mousedown="startResizing"
+                >
+                    <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-border/50 group-hover:bg-primary/50"></div>
+                </div>
+
                 <!-- Right: Properties Panel -->
                 <div 
-                    class="sticky top-4 transition-all duration-300"
-                    :class="isPropertiesCollapsed ? 'col-span-1' : 'col-span-3 lg:col-span-4'"
+                    class="sticky top-4 transition-all duration-300 shrink-0"
+                    :style="{ width: isPropertiesCollapsed ? '48px' : propertiesWidth + 'px' }"
                 >
                     <Button 
                         v-if="isPropertiesCollapsed"
@@ -338,14 +347,33 @@ const showPreview = ref(false);
 const locations = ref([]);
 
 
-// Layout computation
-const centerColClass = computed(() => {
-    const leftW = isSidebarCollapsed.value ? 1 : (window.innerWidth < 1024 ? 2 : 3);
-    const rightW = isPropertiesCollapsed.value ? 1 : (window.innerWidth < 1024 ? 3 : 4);
-    const centerW = 12 - leftW - rightW;
+// Draggable Resize State
+const propertiesWidth = ref(400); // Default width
+const isResizing = ref(false);
+
+const startResizing = (e) => {
+    isResizing.value = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+};
+
+const stopResizing = () => {
+    isResizing.value = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+};
+
+const doResizing = (e) => {
+    if (!isResizing.value) return;
     
-    return `col-span-${centerW}`;
-});
+    // Calculate new width based on mouse position from the right
+    const newWidth = window.innerWidth - e.clientX - 24; // 24 is approximate gap/margin
+    
+    // Constraints
+    if (newWidth > 250 && newWidth < 800) {
+        propertiesWidth.value = newWidth;
+    }
+};
 
 
 
@@ -462,9 +490,13 @@ defineExpose({
 onMounted(() => {
     fetchLocations();
     window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('mousemove', doResizing);
+    window.addEventListener('mouseup', stopResizing);
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener('mousemove', doResizing);
+    window.removeEventListener('mouseup', stopResizing);
 });
 </script>
