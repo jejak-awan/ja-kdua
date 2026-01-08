@@ -94,8 +94,41 @@ const injectThemeStyles = () => {
 
             // Layout
             if (settings.container_width) {
-                css += `.container, .max-w-\\[1280px\\] { max-width: ${settings.container_width}; }\n`;
+                 css += `.container, .max-w-\\[1280px\\] { max-width: ${settings.container_width}; }\n`;
             }
+
+            // Buttons
+            if (settings.button_radius) {
+                css += `:root { --btn-radius: ${settings.button_radius}; }\n`;
+            }
+            if (settings.button_border_width) {
+                css += `:root { --btn-border-width: ${settings.button_border_width}px; }\n`;
+            }
+            if (settings.button_shadow) {
+                // If value contains var(--theme-primary-color), it works because we defined it above
+                css += `:root { --btn-shadow: ${settings.button_shadow}; }\n`;
+            }
+
+            // Inject Global Button Override Styles
+            // We need to be aggressive to override Tailwind utilities
+            css += `
+                button, 
+                .btn, 
+                .button,
+                a[class*="bg-primary"],
+                a[class*="bg-white"],
+                a[class*="border-2"],
+                a[class*="px-"][class*="py-"] {
+                    border-radius: var(--btn-radius, 8px) !important;
+                    border-width: var(--btn-border-width, 1px) !important;
+                    box-shadow: var(--btn-shadow, 0 1px 2px 0 rgb(0 0 0 / 0.05)) !important;
+                }
+                
+                /* Override specific Tailwind rounded utilities if they collide */
+                [class*="rounded-"] {
+                     border-radius: var(--btn-radius, 8px) !important;
+                }
+            `;
         }
 
         // Add custom CSS

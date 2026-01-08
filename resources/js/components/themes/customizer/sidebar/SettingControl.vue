@@ -75,15 +75,15 @@
         ></textarea>
 
         <!-- Toggle Switch -->
-        <label v-else-if="setting.type === 'checkbox'" class="flex items-center cursor-pointer gap-3 p-2 border rounded-lg bg-background/50 hover:bg-background transition-colors">
-            <div class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2" :class="modelValue ? 'bg-primary' : 'bg-muted'">
+        <label v-else-if="setting.type === 'checkbox'" class="flex items-center cursor-pointer gap-3 p-2 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+            <div class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2" :class="modelValue ? 'bg-primary' : 'bg-input'">
                 <input 
                     type="checkbox" 
                     class="sr-only" 
                     :checked="modelValue"
                     @change="handleInput($event.target.checked); $emit('change')"
                 >
-                <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-white transition-transform" :class="modelValue ? 'translate-x-5' : 'translate-x-1'"></span>
+                <span class="translate-x-1 inline-block h-3 w-3 transform rounded-full bg-background shadow-sm transition-transform" :class="modelValue ? 'translate-x-5' : 'translate-x-1'"></span>
             </div>
             <span class="text-sm font-medium text-foreground select-none">{{ modelValue ? 'Enabled' : 'Disabled' }}</span>
         </label>

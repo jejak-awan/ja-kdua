@@ -279,10 +279,81 @@
             "default": "bg-gradient-to-r from-blue-600 to-indigo-700",
             "category": "Hero Section"
         },
+        "button_radius": {
+            "label": "Button Roundedness",
+            "type": "select",
+            "options": [
+                {
+                    "label": "Square (0px)",
+                    "value": "0px"
+                },
+                {
+                    "label": "Slight (4px)",
+                    "value": "4px"
+                },
+                {
+                    "label": "Standard (8px)",
+                    "value": "8px"
+                },
+                {
+                    "label": "Rounded (12px)",
+                    "value": "12px"
+                },
+                {
+                    "label": "Pill (Full)",
+                    "value": "9999px"
+                }
+            ],
+            "default": "8px",
+            "category": "Buttons"
+        },
+        "button_border_width": {
+            "label": "Button Border Width",
+            "type": "range",
+            "min": 0,
+            "max": 4,
+            "step": 1,
+            "default": 1,
+            "category": "Buttons"
+        },
+        "button_shadow": {
+            "label": "Button Shadow",
+            "type": "select",
+            "options": [
+                {
+                    "label": "None",
+                    "value": "none"
+                },
+                {
+                    "label": "Subtle",
+                    "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+                },
+                {
+                    "label": "Medium",
+                    "value": "0 4px 6px -1px rgb(0 0 0 / 0.1)"
+                },
+                {
+                    "label": "Strong",
+                    "value": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+                },
+                {
+                    "label": "Glow (Primary)",
+                    "value": "0 0 15px var(--theme-primary-color)"
+                }
+            ],
+            "default": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+            "category": "Buttons"
+        },
         "footer_text": {
             "label": "Copyright Text",
             "type": "text",
             "default": "© 2025 JA-CMS. All rights reserved.",
+            "category": "Footer"
+        },
+        "back_to_top": {
+            "label": "Enable Back to Top",
+            "type": "checkbox",
+            "default": true,
             "category": "Footer"
         },
         "social_twitter": {

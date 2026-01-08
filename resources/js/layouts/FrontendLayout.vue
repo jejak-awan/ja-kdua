@@ -57,11 +57,24 @@
       </div>
     </div>
 
+    <!-- Back to Top Button -->
+    <button
+      v-if="showBackToTop"
+      @click="scrollToTop"
+      class="fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      :class="layoutStyle === 'framed' ? 'bg-primary text-primary-foreground' : 'bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary'"
+      title="Back to Top"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
+
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 import ThemePageResolver from '@/components/ThemePageResolver.vue'
@@ -123,10 +136,30 @@ const hybridContentStyles = computed(() => {
   return {}
 })
 
+const enableBackToTop = computed(() => getSetting('back_to_top', true))
+const showBackToTop = ref(false)
+
+const handleScroll = () => {
+  if (window.scrollY > 300 && enableBackToTop.value) {
+    showBackToTop.value = true
+  } else {
+    showBackToTop.value = false
+  }
+}
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 onMounted(async () => {
   if (!activeTheme.value) {
     await loadActiveTheme()
   }
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
