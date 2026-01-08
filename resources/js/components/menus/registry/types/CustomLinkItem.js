@@ -25,12 +25,6 @@ export default {
             placeholder: 'https://...'
         },
         {
-            key: 'description',
-            type: 'textarea',
-            label: 'Description',
-            placeholder: 'Optional description for mega menus'
-        },
-        {
             key: 'open_in_new_tab',
             type: 'boolean',
             label: 'Open in new tab',

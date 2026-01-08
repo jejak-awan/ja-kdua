@@ -33,12 +33,6 @@ export default {
             valueField: 'id'
         },
         {
-            key: 'description',
-            type: 'textarea',
-            label: 'Description',
-            placeholder: 'Optional description for mega menus'
-        },
-        {
             key: 'open_in_new_tab',
             type: 'boolean',
             label: 'Open in new tab',
@@ -100,32 +94,11 @@ export default {
             default: 'auto',
             group: 'appearance'
         },
-        // Mega Menu
         {
-            key: 'mega_menu_layout',
-            type: 'select',
-            label: 'Mega Menu Layout',
-            options: [
-                { label: 'Default (Dropdown)', value: 'default' },
-                { label: 'Grid (2 Columns)', value: 'grid-2' },
-                { label: 'Grid (3 Columns)', value: 'grid-3' },
-                { label: 'Full Width (4 Columns)', value: 'full' }
-            ],
-            default: 'default',
-            group: 'mega_menu'
-        },
-        {
-            key: 'mega_menu_show_dividers',
-            type: 'boolean',
-            label: 'Show Column Dividers',
-            default: false,
-            group: 'mega_menu'
-        },
-        {
-            key: 'show_heading_line',
-            type: 'boolean',
-            label: 'Show Line Under Heading',
-            default: false,
+            key: 'description',
+            type: 'textarea',
+            label: 'Promotion Description (Quote)',
+            placeholder: 'Add a quote or short description over the image',
             group: 'appearance'
         },
         {

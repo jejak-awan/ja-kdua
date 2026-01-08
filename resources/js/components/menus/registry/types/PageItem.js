@@ -34,12 +34,6 @@ export default {
             valueField: 'id'
         },
         {
-            key: 'description',
-            type: 'textarea',
-            label: 'Description',
-            placeholder: 'Optional description for mega menus'
-        },
-        {
             key: 'open_in_new_tab',
             type: 'boolean',
             label: 'Open in new tab',
@@ -77,13 +71,6 @@ export default {
             label: 'Show Column Dividers',
             default: false,
             group: 'mega_menu'
-        },
-        {
-            key: 'show_heading_line',
-            type: 'boolean',
-            label: 'Show Line Under Heading',
-            default: false,
-            group: 'appearance'
         },
         {
             key: 'mega_menu_column',
