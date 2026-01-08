@@ -73,7 +73,7 @@
                             class="group"
                             :class="item.mega_menu_layout === 'full' ? 'static' : 'relative'"
                         >
-                            <button :class="getNavItemClasses(false)">
+                            <button :class="getNavItemClasses(isParentActive(item))">
                                 <component 
                                     v-if="item.icon" 
                                     :is="getIconComponent(item.icon)" 
@@ -275,8 +275,6 @@
                             >
                                 {{ item.badge }}
                             </span>
-                            <!-- Underline indicator -->
-                            <span v-if="navStyle === 'underline'" class="nav-underline"></span>
                         </router-link>
                     </template>
                 </nav>
@@ -602,7 +600,29 @@ const navItems = computed(() => {
         return menus.value[loc].items;
     }
     return menus.value['header']?.items || [];
+    return menus.value['header']?.items || [];
 });
+
+const isParentActive = (item) => {
+    if (!item.children || item.children.length === 0) return false;
+    // Check if any child URL matches current path (or is parent of current path)
+    return item.children.some(child => {
+        const childUrl = child.url || '/';
+        const currentPath = route.path;
+        
+        // Skip home link unless we are exactly at home
+        if (childUrl === '/' && currentPath !== '/') return false;
+        
+        // Exact match
+        if (currentPath === childUrl) return true;
+        
+        // Prefix match (e.g. /category/design matches child /category)
+        // Be careful with short paths
+        if (childUrl.length > 1 && currentPath.startsWith(childUrl)) return true;
+        
+        return false;
+    });
+};
 
 const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 </script>
@@ -617,6 +637,7 @@ const headerTopItems = computed(() => menus.value['header_top']?.items || []);
     bottom: 0;
     left: 50%;
     width: 0;
+    opacity: 0;
     height: 2px;
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -626,17 +647,20 @@ const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 
 .nav-underline-item:hover::after {
     width: 80%;
+    opacity: 1;
 }
 
 .nav-underline-active::after {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 10%;
+    left: 50%;
     width: 80%;
+    opacity: 1;
     height: 2px;
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
     border-radius: 2px;
+    transform: translateX(-50%);
 }
 
 /* Spotlight Effect - Radial gradient follows mouse conceptually */

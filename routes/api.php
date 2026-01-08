@@ -107,6 +107,9 @@ Route::prefix('v1')->group(function () {
         // Menus (public)
         Route::get('/menus/location/{location}', [App\Http\Controllers\Api\V1\MenuController::class, 'getByLocation']);
         Route::get('/menus/{menu}', [App\Http\Controllers\Api\V1\MenuController::class, 'show']);
+
+        // Widgets (public)
+        Route::get('/widgets/location/{location}', [App\Http\Controllers\Api\V1\WidgetController::class, 'getByLocation']);
     });
 
     // Analytics Event Tracking (public - with rate limiting: 60 requests per minute)
