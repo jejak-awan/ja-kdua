@@ -84,6 +84,59 @@
             "default": true,
             "category": "Layout"
         },
+        "layout_style": {
+            "label": "Layout Style",
+            "type": "select",
+            "options": [
+                { "label": "Full Width", "value": "full" },
+                { "label": "Boxed", "value": "boxed" },
+                { "label": "Wide Container", "value": "wide" },
+                { "label": "Framed", "value": "framed" }
+            ],
+            "default": "full",
+            "category": "Layout",
+            "description": "Choose overall page layout style"
+        },
+        "container_max_width": {
+            "label": "Container Max Width",
+            "type": "range",
+            "min": 1200,
+            "max": 1920,
+            "step": 40,
+            "default": 1400,
+            "category": "Layout",
+            "description": "Max width in pixels (for Boxed/Wide/Framed)"
+        },
+        "boxed_bg_color": {
+            "label": "Page Background Color",
+            "type": "color",
+            "default": "#f1f5f9",
+            "category": "Layout",
+            "description": "Background visible outside boxed content"
+        },
+        "boxed_shadow": {
+            "label": "Boxed Content Shadow",
+            "type": "select",
+            "options": [
+                { "label": "None", "value": "none" },
+                { "label": "Subtle", "value": "sm" },
+                { "label": "Medium", "value": "md" },
+                { "label": "Large", "value": "lg" },
+                { "label": "Extra Large", "value": "xl" }
+            ],
+            "default": "lg",
+            "category": "Layout"
+        },
+        "framed_padding": {
+            "label": "Frame Padding",
+            "type": "range",
+            "min": 8,
+            "max": 48,
+            "step": 4,
+            "default": 16,
+            "category": "Layout",
+            "description": "Padding around framed layout (px)"
+        },
         "header_style": {
             "label": "Header Style",
             "type": "select",
