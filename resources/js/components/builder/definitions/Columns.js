@@ -58,6 +58,7 @@ export default {
                 { label: '↑', value: 'column-reverse' }
             ],
             default: 'column',
+            condition: (settings) => settings.stackOn !== 'never',
             tab: 'style'
         },
         {

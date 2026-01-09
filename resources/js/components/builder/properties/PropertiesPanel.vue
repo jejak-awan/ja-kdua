@@ -146,6 +146,7 @@
                         <TabsContent value="content" class="space-y-4">
                             <template v-for="field in getContentFields(selectedBlock)" :key="field.key">
                                 <PropertyField 
+                                    v-if="shouldShowField(field, selectedBlock.settings)"
                                     :field="field" 
                                     :block="selectedBlock"
                                     v-model="selectedBlock.settings[field.key]"
@@ -163,6 +164,7 @@
                                 <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">General</div>
                                 <template v-for="field in getStyleFields(selectedBlock)" :key="field.key">
                                     <PropertyField 
+                                        v-if="shouldShowField(field, activeSettings)"
                                         :field="field" 
                                         :block="selectedBlock"
                                         v-model="activeSettings[field.key]"
@@ -232,6 +234,7 @@
                              <!-- Block Specific Advanced Fields -->
                              <template v-for="field in getAdvancedFields(selectedBlock)" :key="field.key">
                                 <PropertyField 
+                                    v-if="shouldShowField(field, selectedBlock.settings)"
                                     :field="field" 
                                     :block="selectedBlock"
                                     v-model="selectedBlock.settings[field.key]"
@@ -531,6 +534,14 @@ const getStyleFields = (block) => {
 const getAdvancedFields = (block) => {
     const settings = getBlockDefinition(block.type).settings || [];
     return settings.filter(s => s.tab === 'advanced');
+};
+
+const shouldShowField = (field, settings) => {
+    if (!field.condition) return true;
+    if (typeof field.condition === 'function') {
+        return field.condition(settings);
+    }
+    return true;
 };
 
 // Advanced Design Suite Field Definitions
