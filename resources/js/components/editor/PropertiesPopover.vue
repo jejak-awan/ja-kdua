@@ -358,7 +358,7 @@ const form = ref({
     title: '',
     className: '',
     // Icon specific
-    size: '1em',
+    name: '',
     size: '1em',
     color: 'currentColor',
     strokeWidth: 2,
@@ -402,7 +402,7 @@ watch(() => props.open, (isOpen) => {
                 className: attrs.class || '',
 
                 // Icon attrs
-                // Icon attrs
+                name: attrs.name || 'Circle',
                 size: attrs.size || '1em',
                 color: attrs.color || 'currentColor',
                 strokeWidth: attrs.strokeWidth || 2,
@@ -551,6 +551,7 @@ const emitChanges = () => {
             }
         }
     } else if (isIconNode.value) {
+        baseAttrs.name = form.value.name
         baseAttrs.size = form.value.size
         baseAttrs.color = form.value.color
         baseAttrs.strokeWidth = form.value.strokeWidth
