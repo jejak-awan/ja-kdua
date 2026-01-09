@@ -13,8 +13,30 @@
                 :style="flexStyles"
                 ref="gridRef"
             >
-                <template v-for="(column, index) in columns" :key="index">
+                <template v-for="(column, index) in computedColumns" :key="column.id || index">
+                    <!-- Modern Column Block -->
+                    <ColumnBlock 
+                        v-if="isModern"
+                        :id="column.id"
+                        :direction="column.settings?.direction"
+                        :justify="column.settings?.justify"
+                        :align="column.settings?.align"
+                        :padding="column.settings?.padding"
+                        :bg-color="column.settings?.bgColor"
+                        :border-width="column.settings?.borderWidth"
+                        :border-color="column.settings?.borderColor"
+                        :radius="column.settings?.radius"
+                        :blocks="column.settings?.blocks"
+                        :context="context"
+                        :is-preview="isPreview"
+                        class="column-container relative flex items-stretch"
+                        :class="getColumnClasses()"
+                        :style="{ '--desktop-width': colWidths[index] }"
+                    />
+
+                    <!-- Legacy Column Render -->
                     <div 
+                        v-else
                         class="column-container relative flex items-stretch"
                         :class="getColumnClasses()"
                         :style="{ '--desktop-width': colWidths[index] }"
@@ -110,7 +132,7 @@ defineOptions({
   inheritAttrs: false
 });
 
-import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, inject, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue';
 import draggable from 'vuedraggable';
 import { Plus, Trash2 } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
@@ -118,9 +140,12 @@ import BlockRenderer from './BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
 import { generateUUID } from '../utils';
 
+const ColumnBlock = defineAsyncComponent(() => import('./ColumnBlock.vue'));
+
 const props = defineProps({
     id: String,
-    columns: { type: Array, default: () => [{ blocks: [] }, { blocks: [] }] },
+    columns: { type: Array, default: () => [] }, // Legacy
+    blocks: { type: Array, default: () => [] }, // Modern
     layout: { type: String, default: '1-1' },
     customWidths: { type: Array, default: () => [50, 50] },
     stackOn: { type: String, default: 'sm' },
@@ -142,7 +167,49 @@ const isResizing = ref(false);
 const activeResizer = ref(null);
 const showBlockPicker = ref(false);
 const activeColumnIndex = ref(null);
-const rafId = ref(null); // For throttling resize updates
+const rafId = ref(null);
+
+const isModern = computed(() => props.blocks && props.blocks.length > 0);
+
+const computedColumns = computed(() => {
+    if (isModern.value) return props.blocks;
+    return props.columns;
+});
+
+// Migration Logic
+onMounted(() => {
+    const block = builder ? builder.findBlockById(props.id) : null;
+    if (block && block.settings) {
+        // regenerate IDs if default
+        if (block.settings.blocks) {
+             block.settings.blocks.forEach(col => {
+                 if (col.id && col.id.startsWith('default-col')) {
+                     col.id = generateUUID();
+                 }
+             });
+        }
+
+        // Migrate Legacy to Modern
+        if (block.settings.columns && block.settings.columns.length > 0 && (!block.settings.blocks || block.settings.blocks.length === 0)) {
+            console.log('Migrating Columns to Child Blocks...');
+            const newChildren = block.settings.columns.map(col => ({
+                id: generateUUID(),
+                type: 'column',
+                settings: {
+                    blocks: col.blocks || [],
+                    // Legacy defaults
+                    padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                    bgColor: 'transparent'
+                }
+            }));
+            
+            block.settings.blocks = newChildren;
+            // keep columns? verify deletion safety
+            delete block.settings.columns; 
+            builder.takeSnapshot();
+        }
+    }
+});
 
 const openBlockPicker = (colIndex) => {
     activeColumnIndex.value = colIndex;
@@ -166,43 +233,39 @@ const handleAddBlock = (newBlock) => {
  * Only allowed when column is empty and there are more than 1 columns
  */
 const removeColumn = (columnIndex) => {
-    if (props.columns.length <= 1) return;
+    if (computedColumns.value.length <= 1) return;
     
-    const column = props.columns[columnIndex];
-    if (column.blocks && column.blocks.length > 0) {
-        // Don't allow removing columns with content
-        return;
-    }
+    // Check if empty
+    const column = computedColumns.value[columnIndex];
+    // Modern: column.settings.blocks, Legacy: column.blocks
+    const blocks = isModern.value ? column.settings?.blocks : column.blocks;
     
-    // Find the block in builder state - search recursively
+    if (blocks && blocks.length > 0) return;
+    
+    // Find block
     const block = builder.findBlockById(props.id);
-    if (!block || !block.settings) {
-        console.warn('Could not find Columns block in builder state:', props.id);
-        return;
+    if (!block || !block.settings) return;
+
+    if (isModern.value) {
+        if (!block.settings.blocks) block.settings.blocks = [];
+        block.settings.blocks.splice(columnIndex, 1);
+        
+        // Recalculate
+        const numColumns = block.settings.blocks.length;
+        if (numColumns > 0) {
+            block.settings.customWidths = Array(numColumns).fill(100 / numColumns);
+        }
+    } else {
+        // Legacy
+         if (!block.settings.columns) return;
+         block.settings.columns.splice(columnIndex, 1);
+         const numColumns = block.settings.columns.length;
+         if (numColumns > 0) {
+            block.settings.customWidths = Array(numColumns).fill(100 / numColumns);
+        }
     }
     
-    // Ensure columns array exists
-    if (!Array.isArray(block.settings.columns)) {
-        console.warn('Block settings.columns is not an array');
-        return;
-    }
-    
-    // Remove the column from the settings
-    block.settings.columns.splice(columnIndex, 1);
-    
-    // Recalculate widths - distribute evenly
-    const numColumns = block.settings.columns.length;
-    if (numColumns > 0) {
-        const evenWidth = 100 / numColumns;
-        block.settings.customWidths = Array(numColumns).fill(evenWidth);
-    }
-    
-    // Update layout to custom since we manually changed columns
     block.settings.layout = 'custom';
-    
-    // Force Vue reactivity by triggering blocks update
-    builder.blocks.value = [...builder.blocks.value];
-    
     builder.takeSnapshot();
 };
 
@@ -217,19 +280,32 @@ const getColumnCount = (layout) => {
 
 watch(() => props.layout, (newLayout) => {
     const target = getColumnCount(newLayout);
-    if (props.columns.length < target) {
-        const diff = target - props.columns.length;
+    const currentLength = computedColumns.value.length;
+    
+    if (currentLength < target) {
+        const diff = target - currentLength;
+        // Find block to update settings
+        const block = builder.findBlockById(props.id);
+        
         for (let i = 0; i < diff; i++) {
-            props.columns.push({ blocks: [] });
+            if (isModern.value) {
+                // Add new Column Block
+                if (!block.settings.blocks) block.settings.blocks = [];
+                block.settings.blocks.push({
+                    id: generateUUID(),
+                    type: 'column',
+                    settings: { blocks: [] }
+                });
+            } else {
+                // Legacy
+                 if (!block.settings.columns) block.settings.columns = [];
+                 block.settings.columns.push({ blocks: [] });
+            }
         }
     }
     
-    // Ensure all columns have blocks array
-    props.columns.forEach(col => {
-        if (!col.blocks) col.blocks = [];
-    });
-    
-    // Update customWidths if layout matches presets
+    // Update widths...
+    // Note: Update customWidths immediately
     if (newLayout === '1-1') updateCustomWidths([50, 50]);
     if (newLayout === '1-2') updateCustomWidths([33.33, 66.66]);
     if (newLayout === '2-1') updateCustomWidths([66.66, 33.33]);
@@ -259,7 +335,7 @@ const flexStyles = computed(() => {
 
 // Calculate column widths accounting for gap
 const colWidths = computed(() => {
-    const numCols = props.columns.length;
+    const numCols = computedColumns.value.length;
     if (numCols === 0) return [];
 
     let widths = [];
@@ -371,7 +447,7 @@ const doResize = (event) => {
         
         // Percentage from left
         const percentage = (mouseX / gridWidth) * 100;
-        const numColumns = props.columns.length;
+        const numColumns = computedColumns.value.length;
         const resizerIndex = activeResizer.value;
         
         // Get current widths or initialize evenly
