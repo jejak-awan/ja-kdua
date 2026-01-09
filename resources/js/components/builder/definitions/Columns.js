@@ -26,12 +26,12 @@ export default {
             type: 'select',
             label: 'Stack Columns On',
             options: [
+                { label: 'Never', value: 'never' },
                 { label: 'Mobile Only', value: 'sm' },
                 { label: 'Mobile & Tablet', value: 'md' },
-                { label: 'All Screens', value: 'lg' },
-                { label: 'Never', value: 'never' }
+                { label: 'All Screens', value: 'lg' }
             ],
-            default: 'sm',
+            default: 'never',
             tab: 'style'
         },
         {
