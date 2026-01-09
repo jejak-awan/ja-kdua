@@ -283,6 +283,13 @@ const onDrag = (e) => {
     dragOffset.y = e.clientY - startY
 }
 
+const stopDrag = () => {
+    isDragging = false
+    document.removeEventListener('pointermove', onDrag)
+    document.removeEventListener('pointerup', stopDrag)
+    document.body.style.userSelect = ''
+}
+
 const isVideoNode = computed(() => props.node?.type === 'video')
 const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
 const isIconNode = computed(() => props.node?.type === 'icon')
