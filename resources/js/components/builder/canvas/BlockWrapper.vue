@@ -176,26 +176,36 @@ watch(() => props.block.settings, () => {
 
 <style scoped>
 .builder-block-content {
-    max-height: 400px;
+    /* Ensure blocks adapt to container width */
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Remove vertical scroll - allow natural height */
+    overflow-y: visible;
+}
+
+/* For blocks that explicitly need height constraint */
+.builder-block-content.has-overflow {
+    max-height: 500px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
 }
 
-.builder-block-content::-webkit-scrollbar {
+.builder-block-content.has-overflow::-webkit-scrollbar {
     width: 4px;
 }
 
-.builder-block-content::-webkit-scrollbar-track {
+.builder-block-content.has-overflow::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.builder-block-content::-webkit-scrollbar-thumb {
+.builder-block-content.has-overflow::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.3);
     border-radius: 4px;
 }
 
-.builder-block-content::-webkit-scrollbar-thumb:hover {
+.builder-block-content.has-overflow::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
 }
 </style>

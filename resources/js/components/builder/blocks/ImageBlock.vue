@@ -135,12 +135,9 @@ const alignmentClass = computed(() => ({
 
 const wrapperStyle = computed(() => {
     const style = {
-        maxWidth: props.maxWidth === 'max-w-full' ? '100%' : 
-                 props.maxWidth === 'max-w-5xl' ? '64rem' :
-                 props.maxWidth === 'max-w-3xl' ? '48rem' :
-                 props.maxWidth === 'max-w-xl' ? '36rem' :
-                 props.maxWidth === 'max-w-sm' ? '24rem' : '100%',
-        width: `${props.width}px`
+        // Use max-width to ensure image doesn't overflow container
+        maxWidth: props.width ? `min(${props.width}px, 100%)` : '100%',
+        width: '100%' // Always fill available space up to max-width
     };
 
     if (props.aspectRatio && props.aspectRatio !== 'auto') {
