@@ -2,6 +2,7 @@
 import Section from './Section';
 import Container from './Container';
 import Columns from './Columns';
+import Column from './Column';
 
 // Basic
 import Heading from './Heading';
@@ -68,6 +69,7 @@ export default [
     Section,
     Container,
     Columns,
+    Column,
 
     // Basic
     Heading,
