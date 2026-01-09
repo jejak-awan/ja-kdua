@@ -49,5 +49,8 @@
     "embed": {
         "empty": "HTML Embed Kosong",
         "configure": "Klik ganda untuk konfigurasi"
+    },
+    "placeholder": {
+        "text": "Mulai menulis..."
     }
 }

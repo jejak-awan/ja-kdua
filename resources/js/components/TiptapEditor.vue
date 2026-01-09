@@ -71,6 +71,7 @@
 import { ref, watch, onBeforeUnmount, reactive, nextTick } from 'vue'
 import Card from '@/components/ui/card.vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useI18n } from 'vue-i18n'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import BubbleMenuExtension from '@tiptap/extension-bubble-menu'
@@ -160,6 +161,7 @@ const contextMenu = reactive({
 })
 
 // Create lowlight instance
+const { t } = useI18n()
 const lowlight = createLowlight()
 lowlight.register('javascript', javascript)
 lowlight.register('typescript', typescript)
@@ -180,7 +182,12 @@ const editor = useEditor({
             paragraph: false,
         }),
         Placeholder.configure({
-            placeholder: props.placeholder,
+            placeholder: ({ node }) => {
+                if (props.placeholder === 'Start writing...') {
+                    return t('features.editor.placeholder.text')
+                }
+                return props.placeholder
+            },
         }),
         CustomImage,
         VideoExtension,

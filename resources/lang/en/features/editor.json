@@ -49,5 +49,8 @@
     "embed": {
         "empty": "Empty HTML Embed",
         "configure": "Double click to configure"
+    },
+    "placeholder": {
+        "text": "Start writing..."
     }
 }
