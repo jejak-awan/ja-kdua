@@ -44,7 +44,7 @@
                                         <div v-if="columns.length > 1" class="absolute top-1 right-1 flex items-center gap-1 z-30">
                                             <button 
                                                 @click.stop.prevent="removeColumn(index)"
-                                                class="h-6 w-6 flex items-center justify-center bg-white/90 hover:bg-destructive hover:text-white border border-border rounded-md transition-colors shadow-sm"
+                                                class="h-6 w-6 flex items-center justify-center bg-background text-foreground hover:bg-destructive hover:text-white border border-border rounded-md transition-colors shadow-sm"
                                                 title="Remove Column"
                                             >
                                                 <Trash2 class="w-3 h-3" />
