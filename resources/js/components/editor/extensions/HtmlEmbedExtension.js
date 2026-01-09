@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import HtmlEmbedComponent from './HtmlEmbedComponent.vue'
+import HtmlEmbedComponent from '../nodes/HtmlEmbedComponent.vue'
 
 export const HtmlEmbed = Node.create({
     name: 'htmlEmbed',
