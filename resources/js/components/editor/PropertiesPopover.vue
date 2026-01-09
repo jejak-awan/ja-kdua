@@ -43,73 +43,8 @@
                         </AccordionContent>
                     </AccordionItem>
 
-                    <!-- Shape Settings -->
-                    <AccordionItem value="shape-settings" class="border-b px-3" v-if="isShapeNode">
-                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.shape.title') }}</AccordionTrigger>
-                        <AccordionContent class="pt-1 pb-4 space-y-3">
-                            <!-- Shape Type -->
-                            <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.type') }}</label>
-                                <div class="flex gap-1.5">
-                                    <Button 
-                                        v-for="type in ['rectangle', 'circle', 'pill']" 
-                                        :key="type"
-                                        variant="outline"
-                                        size="sm"
-                                        class="flex-1 capitalize h-7 text-[10px] font-normal"
-                                        :class="{ 'bg-primary text-primary-foreground border-primary font-medium': form.shapeType === type }"
-                                        @click="setShapePreset(type)"
-                                    >
-                                        {{ type }}
-                                    </Button>
-                                </div>
-                            </div>
-                            
-                            <!-- Background Color -->
-                            <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.background') }}</label>
-                                <div class="flex gap-2 items-center">
-                                    <ColorPicker v-model="form.backgroundColor">
-                                        <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
-                                                <div class="absolute inset-0" :style="{ backgroundColor: form.backgroundColor }"></div>
-                                        </Button>
-                                    </ColorPicker>
-                                    <Input v-model="form.backgroundColor" class="h-8 text-xs flex-1 uppercase font-mono" />
-                                </div>
-                            </div>
-
-                             <!-- Text Color -->
-                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Text Color</label>
-                                <div class="flex gap-2 items-center">
-                                    <ColorPicker v-model="form.color">
-                                        <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
-                                                <div class="absolute inset-0" :style="{ backgroundColor: form.color }"></div>
-                                        </Button>
-                                    </ColorPicker>
-                                    <Input v-model="form.color" class="h-8 text-xs flex-1 uppercase font-mono" />
-                                </div>
-                            </div>
-                            <!-- Shadow -->
-                            <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.shadow') }}</label>
-                                <Select v-model="form.boxShadow">
-                                    <SelectTrigger class="h-8 text-xs w-full">
-                                        <SelectValue :placeholder="t('features.editor.placeholders.select')" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">None</SelectItem>
-                                        <SelectItem value="0 1px 2px 0 rgb(0 0 0 / 0.05)">Small</SelectItem>
-                                        <SelectItem value="0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)">Medium</SelectItem>
-                                        <SelectItem value="0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)">Large</SelectItem>
-                                        <SelectItem value="0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)">Extra Large</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
                     <!-- General Settings (Not for Embeds or Shapes) -->
-                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode && !isShapeNode">
+                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.general') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <!-- Source URL -->
@@ -296,48 +231,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:open', 'save'])
 
-const form = ref({
-    src: '',
-    width: '',
-    height: '',
-    borderRadius: '0',
-    borderWidth: '0',
-    borderColor: '',
-    align: 'center',
-    alt: '',
-    displayMode: 'block',
-    margin: '16',
-    // Shape specific
-    backgroundColor: '#e2e8f0',
-    color: '#000000',
-    shapeType: 'rectangle', 
-    boxShadow: 'none',
-    // Video specific
-    autoplay: false,
-    controls: true,
-    loop: false,
-    // Embed specific
-    html: ''
-})
+
 
 const constrainProportions = ref(true)
-const isVideoNode = computed(() => props.node?.type === 'video')
-const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
-const isShapeNode = computed(() => props.node?.type === 'shape')
 
-function getShapeType(radius) {
-    if (!radius || radius === '0' || radius === '0px') return 'rectangle'
-    if (radius === '50%' || radius === '9999px') return 'circle'
-    if (radius === '999px' || radius === '2rem') return 'pill'
-    return 'custom'
-}
-
-function setShapePreset(type) {
-    form.value.shapeType = type
-    if (type === 'rectangle') form.value.borderRadius = '0'
-    else if (type === 'circle') form.value.borderRadius = '50%'
-    else if (type === 'pill') form.value.borderRadius = '999px'
-}
 
 // Dragging Logic (unchanged)
 const dragOffset = reactive({ x: 0, y: 0 })
@@ -359,6 +256,11 @@ const onDrag = (e) => {
     dragOffset.x = e.clientX - startX
     dragOffset.y = e.clientY - startY
 }
+
+const isVideoNode = computed(() => props.node?.type === 'video')
+const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
+
+
 
 const stopDrag = () => {
     isDragging = false
@@ -390,11 +292,6 @@ watch(() => props.open, (isOpen) => {
                 alt: attrs.alt || '',
                 displayMode: attrs.displayMode || 'block',
                 margin: attrs.margin ? parseInt(attrs.margin) : 16,
-                // Shape attrs
-                backgroundColor: attrs.backgroundColor || '#e2e8f0',
-                color: attrs.color || '#000000',
-                shapeType: getShapeType(attrs.borderRadius),
-                boxShadow: attrs.boxShadow || 'none',
                 // Video attrs (with fallbacks)
                 autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
                 controls: attrs.controls !== undefined ? attrs.controls : true,
@@ -435,11 +332,10 @@ const save = () => {
         ...form.value,
         borderRadius: form.value.borderRadius ? `${form.value.borderRadius.toString().replace('px','')}px` : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',
+        borderColor: form.value.borderColor || null,
+        borderStyle: form.value.borderStyle || 'none',
         margin: form.value.margin ? `${form.value.margin}px` : '0px',
-        // Shape props
-        backgroundColor: form.value.backgroundColor,
-        color: form.value.color,
-        boxShadow: form.value.boxShadow
+        padding: form.value.padding ? `${form.value.padding}px` : '0px'
     }
     
     if (isVideoNode.value) {

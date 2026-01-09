@@ -276,10 +276,6 @@
                                     <Minus class="w-5 h-5 opacity-50" />
                                     <span class="text-[10px] font-medium">Line</span>
                                 </Button>
-                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('insertShape')">
-                                    <Box class="w-5 h-5 opacity-70" />
-                                    <span class="text-[10px] font-medium">Shape</span>
-                                </Button>
                                 <!-- Icon Picker handled internally -->
                                 <div class="flex flex-col items-center justify-center">
                                     <IconPicker
@@ -467,7 +463,6 @@ import {
     FileCode2,
     Type as DropcapIcon,
     LayoutGrid,
-    Box,
     Smile,
 } from 'lucide-vue-next'
 
@@ -476,7 +471,7 @@ const props = defineProps({
     showHtmlView: Boolean
 })
 
-const emit = defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape', 'insertIcon'])
+const emit = defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertIcon'])
 
 const activeTab = ref('home')
 

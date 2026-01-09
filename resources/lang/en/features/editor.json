@@ -50,12 +50,6 @@
         "empty": "Empty HTML Embed",
         "configure": "Double click to configure"
     },
-    "shape": {
-        "title": "Shape Style",
-        "type": "Type",
-        "background": "Background",
-        "shadow": "Shadow"
-    },
     "placeholder": {
         "text": "Start writing..."
     }

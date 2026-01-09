@@ -9,7 +9,6 @@
             @open-media="showMediaPicker = true"
             @insert-html="insertHtmlEmbed"
             @toggle-html="toggleHtmlView"
-            @insert-shape="insertShape"
             @insert-icon="insertIcon"
         />
 
@@ -106,7 +105,6 @@ import { Column } from './editor/extensions/Column'
 import { TextColumns } from './editor/extensions/TextColumns'
 import { CodeBlockWithCopyExtension } from './editor/extensions/CodeBlockExtension'
 import { HtmlEmbed } from './editor/extensions/HtmlEmbedExtension'
-import { Shape } from './editor/extensions/Shape'
 import { Icon } from './editor/extensions/IconExtension'
 
 import { createLowlight } from 'lowlight'
@@ -220,7 +218,6 @@ const editor = useEditor({
             lowlight,
         }),
         HtmlEmbed,
-        Shape,
         Icon,
     ],
     editorProps: {
@@ -230,7 +227,7 @@ const editor = useEditor({
         handleDOMEvents: {
             dblclick: (view, event) => {
                 // Check if we clicked on a media node
-                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape') || editor.value.isActive('icon'))) {
+                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('icon'))) {
                     openProperties()
                     return true
                 }
@@ -317,28 +314,6 @@ function insertHtmlEmbed() {
     editor.value.chain().focus().insertHtmlEmbed('').run()
 }
 
-function insertShape() {
-    editor.value.chain().focus().insertContent({
-        type: 'shape',
-        attrs: {
-            width: '200px',
-            height: '200px',
-            backgroundColor: '#f1f5f9'
-        },
-        content: [
-            {
-                type: 'paragraph',
-                content: [
-                    {
-                        type: 'text',
-                        text: 'Shape Text'
-                    }
-                ]
-            }
-        ]
-    }).run()
-}
-
 function insertIcon(iconName) {
     if (iconName) {
         editor.value.chain().focus().insertContent({
@@ -362,7 +337,7 @@ const handleContextMenu = (e) => {
     const items = []
 
     // Contextual actions based on selection
-    if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape')) {
+    if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed')) {
         items.push({ label: 'Properties', icon: SettingsIcon, action: 'properties' })
         items.push({ label: 'Delete', icon: Trash2, action: 'delete' })
     } else if (editor.value.isActive('table')) {
