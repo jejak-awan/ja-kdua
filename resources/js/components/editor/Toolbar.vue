@@ -476,7 +476,7 @@ const props = defineProps({
     showHtmlView: Boolean
 })
 
-defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape', 'insertIcon'])
+const emit = defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape', 'insertIcon'])
 
 const activeTab = ref('home')
 
