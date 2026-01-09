@@ -40,6 +40,16 @@
                                 
                                 <template #footer>
                                      <div v-if="!column.blocks || column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
+                                        <!-- Column Actions Bar (for empty columns) -->
+                                        <div v-if="columns.length > 1" class="absolute top-1 right-1 flex items-center gap-1 z-30">
+                                            <button 
+                                                @click.stop.prevent="removeColumn(index)"
+                                                class="h-6 w-6 flex items-center justify-center bg-white/90 hover:bg-destructive hover:text-white border border-border rounded-md transition-colors shadow-sm"
+                                                title="Remove Column"
+                                            >
+                                                <Trash2 class="w-3 h-3" />
+                                            </button>
+                                        </div>
                                         <div 
                                             @click.stop.prevent="openBlockPicker(index)"
                                             class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn cursor-pointer"
@@ -95,7 +105,7 @@ defineOptions({
 
 import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
-import { Plus } from 'lucide-vue-next';
+import { Plus, Trash2 } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from './BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
@@ -139,6 +149,37 @@ const handleAddBlock = (newBlock) => {
     }
     showBlockPicker.value = false;
     activeColumnIndex.value = null;
+};
+
+/**
+ * Remove a column from the layout
+ * Only allowed when column is empty and there are more than 1 columns
+ */
+const removeColumn = (columnIndex) => {
+    if (props.columns.length <= 1) return;
+    
+    const column = props.columns[columnIndex];
+    if (column.blocks && column.blocks.length > 0) {
+        // Don't allow removing columns with content
+        return;
+    }
+    
+    // Find the block in builder state and update it
+    const block = builder.findBlockById(props.id);
+    if (!block) return;
+    
+    // Remove the column
+    block.settings.columns.splice(columnIndex, 1);
+    
+    // Recalculate widths - distribute evenly
+    const numColumns = block.settings.columns.length;
+    const evenWidth = 100 / numColumns;
+    block.settings.customWidths = Array(numColumns).fill(evenWidth);
+    
+    // Update layout to custom since we manually changed columns
+    block.settings.layout = 'custom';
+    
+    builder.takeSnapshot();
 };
 
 const getColumnCount = (layout) => {
