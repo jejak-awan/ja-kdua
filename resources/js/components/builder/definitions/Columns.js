@@ -85,6 +85,21 @@ export default {
             tab: 'style'
         },
         {
+            key: 'gap',
+            type: 'select',
+            label: 'Gap',
+            options: [
+                { label: 'None', value: '0' },
+                { label: 'Small (8px)', value: '2' },
+                { label: 'Medium (16px)', value: '4' },
+                { label: 'Large (32px)', value: '8' },
+                { label: 'Generic (24px)', value: '6' },
+                { label: 'XL (48px)', value: '12' },
+            ],
+            default: '8', // 2rem = 32px
+            tab: 'style'
+        },
+        {
             key: 'padding',
             type: 'toggle_group',
             label: 'Padding',
@@ -109,6 +124,7 @@ export default {
         columns: [], // Legacy
         customWidths: [50, 50],
         stackOn: 'never',
+        gap: '8',
         direction: 'row',
         mobileDirection: 'column',
         padding: 'py-16',

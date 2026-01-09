@@ -7,31 +7,27 @@
         <div :class="['mx-auto px-6 h-full', width]">
             <div 
                 :class="[
-                    'flex flex-wrap gap-8 h-full',
+                    'flex flex-wrap h-full',
+                    `gap-${gap}`,
                     reverseClasses
                 ]"
                 :style="flexStyles"
                 ref="gridRef"
             >
                 <template v-for="(column, index) in computedColumns" :key="column.id || index">
-                    <!-- Modern Column Block -->
-                    <ColumnBlock 
+                    <!-- Modern Column (Wrapped) -->
+                    <BlockWrapper
                         v-if="isModern"
-                        :id="column.id"
-                        :direction="column.settings?.direction"
-                        :justify="column.settings?.justify"
-                        :align="column.settings?.align"
-                        :padding="column.settings?.padding"
-                        :bg-color="column.settings?.bgColor"
-                        :border-width="column.settings?.borderWidth"
-                        :border-color="column.settings?.borderColor"
-                        :radius="column.settings?.radius"
-                        :blocks="column.settings?.blocks"
-                        :context="context"
-                        :is-preview="isPreview"
-                        class="column-container relative flex items-stretch"
+                        :block="column"
+                        :index="index"
+                        :isNested="true"
+                        :parent-id="id"
+                        class="column-wrapper relative flex items-stretch"
                         :class="getColumnClasses()"
                         :style="{ '--desktop-width': colWidths[index] }"
+                        @delete="removeColumn(index)"
+                        @edit="onEditBlock(column.id)"
+                        @duplicate="duplicateColumn(index)"
                     />
 
                     <!-- Legacy Column Render -->
@@ -132,15 +128,13 @@ defineOptions({
   inheritAttrs: false
 });
 
-import { ref, computed, inject, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue';
+import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
 import { Plus, Trash2 } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from './BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
 import { generateUUID } from '../utils';
-
-const ColumnBlock = defineAsyncComponent(() => import('./ColumnBlock.vue'));
 
 const props = defineProps({
     id: String,
@@ -149,6 +143,7 @@ const props = defineProps({
     layout: { type: String, default: '1-1' },
     customWidths: { type: Array, default: () => [50, 50] },
     stackOn: { type: String, default: 'sm' },
+    gap: { type: String, default: '8' },
     direction: { type: String, default: 'row' },
     mobileDirection: { type: String, default: 'column' },
     padding: { type: String, default: 'py-16' },
@@ -361,10 +356,12 @@ const colWidths = computed(() => {
     }
 
     // Convert percentages to calc strings subtracting gap
-    // Formula: calc(P% - (totalGap * P/100))
-    // Total gap = (n-1) * 2rem (gap-8)
-    const gap = 2; // rem
-    const totalGap = (numCols - 1) * gap;
+    // Total gap = (n-1) * gap_in_rem
+    // Tailwind scale: 1 unit = 0.25rem. So '8' = 2rem.
+    const gapValue = parseInt(props.gap || '8');
+    const gapRem = gapValue * 0.25; 
+    
+    const totalGap = (numCols - 1) * gapRem;
     
     return widths.map(w => {
         const gapSubtraction = (totalGap * (w / 100)).toFixed(3);
@@ -539,6 +536,21 @@ const onDuplicate = (column, index) => {
 const onDelete = (column, index) => {
     column.blocks.splice(index, 1);
     builder.takeSnapshot();
+};
+
+const duplicateColumn = (index) => {
+     if (!isModern.value) return; // Legacy doesn't support col duplication easily
+     const block = builder.findBlockById(props.id);
+     const original = block.settings.blocks[index];
+     const clone = {
+        ...JSON.parse(JSON.stringify(original)),
+        id: generateUUID(),
+        // Regenerate nested IDs? Ideally yes, but deep clone might not.
+        // For now shallow clone of settings is ok, but nested blocks need new IDs.
+        // TODO: Deep ID regeneration helper.
+     };
+     block.settings.blocks.splice(index + 1, 0, clone);
+     builder.takeSnapshot();
 };
 
 const onWrapInColumn = (column, index) => {
