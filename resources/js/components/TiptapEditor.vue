@@ -10,6 +10,7 @@
             @insert-html="insertHtmlEmbed"
             @toggle-html="toggleHtmlView"
             @insert-shape="insertShape"
+            @insert-icon="insertIcon"
         />
 
         <!-- Editor Content (WYSIWYG View) -->
@@ -106,6 +107,7 @@ import { TextColumns } from './editor/extensions/TextColumns'
 import { CodeBlockWithCopyExtension } from './editor/extensions/CodeBlockExtension'
 import { HtmlEmbed } from './editor/extensions/HtmlEmbedExtension'
 import { Shape } from './editor/extensions/Shape'
+import { Icon } from './editor/extensions/IconExtension'
 
 import { createLowlight } from 'lowlight'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -219,6 +221,7 @@ const editor = useEditor({
         }),
         HtmlEmbed,
         Shape,
+        Icon,
     ],
     editorProps: {
         attributes: {
@@ -227,7 +230,7 @@ const editor = useEditor({
         handleDOMEvents: {
             dblclick: (view, event) => {
                 // Check if we clicked on a media node
-                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape'))) {
+                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape') || editor.value.isActive('icon'))) {
                     openProperties()
                     return true
                 }
@@ -334,6 +337,17 @@ function insertShape() {
             }
         ]
     }).run()
+}
+
+function insertIcon(iconName) {
+    if (iconName) {
+        editor.value.chain().focus().insertContent({
+            type: 'icon',
+            attrs: {
+                name: iconName
+            }
+        }).insertContent(' ').run() // Add space after icon for better UX
+    }
 }
 
 // Context Menu Logic

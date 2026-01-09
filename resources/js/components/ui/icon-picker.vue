@@ -1,23 +1,25 @@
 <template>
   <Popover v-model:open="open">
     <PopoverTrigger asChild>
-      <Button
-        variant="outline"
-        role="combobox"
-        :aria-expanded="open"
-        class="w-full justify-between h-9"
-      >
-        <div class="flex items-center gap-2">
-          <component
-            v-if="selectedIcon"
-            :is="getIconComponent(selectedIcon)"
-            class="w-4 h-4"
-          />
-          <span v-else class="text-muted-foreground">{{ placeholder }}</span>
-          <span v-if="selectedIcon" class="text-sm">{{ selectedIcon }}</span>
-        </div>
-        <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
+      <slot name="trigger">
+        <Button
+          variant="outline"
+          role="combobox"
+          :aria-expanded="open"
+          class="w-full justify-between h-9"
+        >
+          <div class="flex items-center gap-2">
+            <component
+              v-if="selectedIcon"
+              :is="getIconComponent(selectedIcon)"
+              class="w-4 h-4"
+            />
+            <span v-else class="text-muted-foreground">{{ placeholder }}</span>
+            <span v-if="selectedIcon" class="text-sm">{{ selectedIcon }}</span>
+          </div>
+          <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </slot>
     </PopoverTrigger>
     <PopoverContent class="w-[340px] p-0" align="start">
       <div class="p-2 border-b">

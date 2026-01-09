@@ -280,6 +280,24 @@
                                     <Box class="w-5 h-5 opacity-70" />
                                     <span class="text-[10px] font-medium">Shape</span>
                                 </Button>
+                                <!-- Icon Picker handled internally -->
+                                <div class="flex flex-col items-center justify-center">
+                                    <IconPicker
+                                        modelValue=""
+                                        @update:modelValue="handleIconSelect"
+                                    >
+                                        <template #trigger>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" 
+                                            >
+                                                <Smile class="w-5 h-5 opacity-70" />
+                                                <span class="text-[10px] font-medium">Icon</span>
+                                            </Button>
+                                        </template>
+                                    </IconPicker>
+                                </div>
                             </div>
                             <div class="ribbon-group-label">Embeds</div>
                         </div>
@@ -409,6 +427,7 @@ import TabsList from '@/components/ui/tabs-list.vue'
 import TabsTrigger from '@/components/ui/tabs-trigger.vue'
 import TabsContent from '@/components/ui/tabs-content.vue'
 import ColorPicker from '@/components/ui/color-picker.vue'
+import IconPicker from '../ui/icon-picker.vue'
 import { 
     TooltipProvider, 
     TooltipRoot, 
@@ -449,6 +468,7 @@ import {
     Type as DropcapIcon,
     LayoutGrid,
     Box,
+    Smile,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -456,9 +476,13 @@ const props = defineProps({
     showHtmlView: Boolean
 })
 
-defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape'])
+defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape', 'insertIcon'])
 
 const activeTab = ref('home')
+
+const handleIconSelect = (iconName) => {
+    emit('insertIcon', iconName)
+}
 
 // Sync selected color with editor state
 const selectedColor = computed({
