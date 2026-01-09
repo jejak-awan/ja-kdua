@@ -25,6 +25,24 @@ export const Icon = Node.create({
             },
             color: {
                 default: 'currentColor',
+            },
+            strokeWidth: {
+                default: 2,
+            },
+            rotate: {
+                default: 0,
+            },
+            backgroundColor: {
+                default: null,
+            },
+            borderRadius: {
+                default: '0px',
+            },
+            padding: {
+                default: '0px',
+            },
+            opacity: {
+                default: 1,
             }
         };
     },
