@@ -43,8 +43,34 @@
                         </AccordionContent>
                     </AccordionItem>
 
+                    <!-- Icon Settings -->
+                    <AccordionItem value="icon-settings" class="border-b px-3" v-if="isIconNode">
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Icon Style</AccordionTrigger>
+                        <AccordionContent class="pt-1 pb-4 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Size -->
+                                <div class="space-y-1.5">
+                                    <label class="text-[11px] font-medium text-muted-foreground">Size</label>
+                                    <Input v-model="form.size" placeholder="1em" class="h-8 text-xs" />
+                                </div>
+                                <!-- Color -->
+                                <div class="space-y-1.5">
+                                    <label class="text-[11px] font-medium text-muted-foreground">Color</label>
+                                    <div class="flex gap-2 items-center">
+                                        <ColorPicker v-model="form.color">
+                                            <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
+                                                <div class="absolute inset-0" :style="{ backgroundColor: form.color === 'currentColor' ? '#000' : form.color }"></div>
+                                            </Button>
+                                        </ColorPicker>
+                                        <Input v-model="form.color" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                    </div>
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
                     <!-- General Settings (Not for Embeds or Shapes) -->
-                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode">
+                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode && !isIconNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.general') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <!-- Source URL -->
@@ -105,7 +131,7 @@
                     </AccordionItem>
 
                     <!-- Dimensions -->
-                    <AccordionItem value="dimensions" class="border-b px-3">
+                    <AccordionItem value="dimensions" class="border-b px-3" v-if="!isIconNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.dimensions') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4">
                             <div class="flex items-end gap-2">
@@ -156,7 +182,7 @@
                     </AccordionItem>
 
                     <!-- Appearance -->
-                    <AccordionItem value="appearance" class="px-3 border-b-0">
+                    <AccordionItem value="appearance" class="px-3 border-b-0" v-if="!isIconNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.appearance') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <div class="grid grid-cols-2 gap-3">
@@ -259,15 +285,35 @@ const onDrag = (e) => {
 
 const isVideoNode = computed(() => props.node?.type === 'video')
 const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
+const isIconNode = computed(() => props.node?.type === 'icon')
 
-
-
-const stopDrag = () => {
-    isDragging = false
-    document.removeEventListener('pointermove', onDrag)
-    document.removeEventListener('pointerup', stopDrag)
-    document.body.style.userSelect = ''
-}
+// Initialize form
+const form = ref({
+    // Image/Video props
+    width: '',
+    height: '',
+    alt: '',
+    title: '',
+    className: '',
+    // Icon specific
+    size: '1em',
+    color: 'currentColor',
+    // Video specific
+    autoplay: false,
+    controls: true,
+    loop: false,
+    muted: false,
+    // HTML Embed specific
+    htmlContent: '',
+    isInteractMode: false,
+    // Common
+    borderRadius: '4px',
+    borderWidth: '0',
+    borderColor: null,
+    borderStyle: 'none',
+    margin: '0',
+    padding: '0'
+})
 
 // Helper to detect YouTube
 const isYoutubeEmbed = computed(() => {
@@ -285,6 +331,13 @@ watch(() => props.open, (isOpen) => {
                 src: attrs.src || '',
                 width: attrs.width || '',
                 height: attrs.height || '',
+                title: attrs.title || '',
+                className: attrs.class || '',
+
+                // Icon attrs
+                size: attrs.size || '1em',
+                color: attrs.color || 'currentColor',
+                
                 borderRadius: parseInt(attrs.borderRadius) || 0,
                 borderWidth: parseInt(attrs.borderWidth) || 0,
                 borderColor: attrs.borderColor || '',
@@ -414,6 +467,9 @@ const save = () => {
                 baseAttrs.height = `${heightMatch[1]}px`
             }
         }
+    } else if (isIconNode.value) {
+        baseAttrs.size = form.value.size
+        baseAttrs.color = form.value.color
     } else {
         // Clean up video attrs if not video
         delete baseAttrs.autoplay
