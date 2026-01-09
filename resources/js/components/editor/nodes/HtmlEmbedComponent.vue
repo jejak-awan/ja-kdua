@@ -86,6 +86,7 @@
 import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { Code, MousePointerClick, X, Maximize2 } from 'lucide-vue-next'
+import DOMPurify from 'dompurify'
 
 const props = defineProps({
 // ... (props unchanged)
@@ -154,8 +155,20 @@ const contentRef = ref(null)
 
 const sanitizedHtml = computed(() => {
     let html = props.node.attrs.html || ''
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    return html
+    
+    // Configure DOMPurify to allow iframe/embeds
+    const config = {
+        ADD_TAGS: ['iframe', 'embed'],
+        ADD_ATTR: [
+            'allow', 'allowfullscreen', 'frameborder', 'scrolling', 
+            'target', 'width', 'height', 'src', 'type', 'style', 'class'
+        ],
+        // Safety: forbid scripting
+        FORBID_TAGS: ['script', 'style'], // style tag debatable, but safer to forbid global style injection. Note: 'style' attr is allowed above.
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'] // Event handlers
+    }
+
+    return DOMPurify.sanitize(html, config)
 })
 
 const justifyContent = computed(() => {
