@@ -6,9 +6,14 @@
     >
         <component 
             :is="iconComponent" 
-            :size="20"
+            :size="node.attrs.size"
             :stroke-width="2"
-            class="text-current" 
+            class="transition-all"
+            :style="{ 
+                color: node.attrs.color,
+                width: node.attrs.size,
+                height: node.attrs.size
+            }"
         />
     </node-view-wrapper>
 </template>
