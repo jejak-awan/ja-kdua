@@ -6,7 +6,7 @@
             isSelected && !builder.isPreview.value ? 'border-primary ring-4 ring-primary/20 z-10' : ''
         ]"
         @click.stop="!builder.isPreview.value && onEdit()"
-        @contextmenu.prevent="!builder.isPreview.value && onContextMenu()"
+        @contextmenu.prevent="!builder.isPreview.value && onContextMenu($event)"
     >
         <!-- Block Toolbar (Elementor/Divi Style) - Show on hover OR when selected -->
         <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left group-hover/block:opacity-100 group-hover/block:scale-100"
