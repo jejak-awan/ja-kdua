@@ -452,18 +452,28 @@ function onDimensionChange(changedField) {
     }
 }
 
-const save = () => {
+// Live update watcher
+watch(form, () => {
+   emitChanges()
+}, { deep: true })
+
+const emitChanges = () => {
     // Only include video attrs if it is a video node
     const baseAttrs = {
         ...form.value,
-        borderRadius: form.value.borderRadius ? `${form.value.borderRadius.toString().replace('px','')}px` : null,
+        borderRadius: form.value.borderRadius ? ensureUnit(form.value.borderRadius) : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',
         borderColor: form.value.borderColor || null,
         borderStyle: form.value.borderStyle || 'none',
         margin: form.value.margin ? `${form.value.margin}px` : '0px',
-        padding: form.value.padding ? `${form.value.padding}px` : '0px'
+        padding: form.value.padding ? ensureUnit(form.value.padding) : '0px'
     }
     
+    // Ensure units for CSS properties helper
+    function ensureUnit(val) {
+        return (val && !isNaN(val) && String(val).trim() !== '') ? `${val}px` : val
+    }
+
     if (isVideoNode.value) {
         baseAttrs.autoplay = form.value.autoplay
         baseAttrs.controls = form.value.controls
@@ -546,9 +556,6 @@ const save = () => {
         baseAttrs.strokeWidth = form.value.strokeWidth
         baseAttrs.rotate = form.value.rotate
         baseAttrs.backgroundColor = form.value.backgroundColor
-        
-        // Ensure units for CSS properties
-        const ensureUnit = (val) => (val && !isNaN(val)) ? `${val}px` : val
         baseAttrs.borderRadius = ensureUnit(form.value.borderRadius)
         baseAttrs.padding = ensureUnit(form.value.padding)
         baseAttrs.opacity = form.value.opacity
@@ -560,6 +567,9 @@ const save = () => {
     }
 
     emit('save', baseAttrs)
+}
+
+const save = () => {
     emit('update:open', false)
 }
 </script>
