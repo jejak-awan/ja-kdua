@@ -9,8 +9,12 @@
         @contextmenu.prevent="!builder.isPreview.value && onContextMenu($event)"
     >
         <!-- Block Toolbar (Elementor/Divi Style) - Show on hover OR when selected -->
-        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left group-hover/block:opacity-100 group-hover/block:scale-100"
-             :class="{ 'opacity-100 scale-100': isSelected }">
+        <div v-if="!builder.isPreview.value" 
+             class="absolute top-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 group-hover/block:opacity-100 group-hover/block:scale-100"
+             :class="[
+                { 'opacity-100 scale-100': isSelected },
+                toolbarPositionClass
+             ]">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
             <div class="w-px h-3 bg-zinc-200 mx-1"></div>
             <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="onEdit" title="Settings">
@@ -130,6 +134,15 @@ const onContextMenu = (e) => {
 };
 
 const isStructuralBlock = computed(() => ['section', 'hero', 'container'].includes(props.block.type));
+
+const toolbarPositionClass = computed(() => {
+    // Structural/Layout blocks get Left toolbar
+    if (['section', 'columns'].includes(props.block.type)) {
+        return 'left-1 origin-top-left';
+    }
+    // Content/Leaf blocks get Right toolbar
+    return 'right-1 origin-top-right';
+});
 
 const updateBlockSize = (dimension, value) => {
     if (!props.block.settings) props.block.settings = {};
