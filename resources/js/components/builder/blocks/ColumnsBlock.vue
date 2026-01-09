@@ -164,20 +164,34 @@ const removeColumn = (columnIndex) => {
         return;
     }
     
-    // Find the block in builder state and update it
+    // Find the block in builder state - search recursively
     const block = builder.findBlockById(props.id);
-    if (!block) return;
+    if (!block || !block.settings) {
+        console.warn('Could not find Columns block in builder state:', props.id);
+        return;
+    }
     
-    // Remove the column
+    // Ensure columns array exists
+    if (!Array.isArray(block.settings.columns)) {
+        console.warn('Block settings.columns is not an array');
+        return;
+    }
+    
+    // Remove the column from the settings
     block.settings.columns.splice(columnIndex, 1);
     
     // Recalculate widths - distribute evenly
     const numColumns = block.settings.columns.length;
-    const evenWidth = 100 / numColumns;
-    block.settings.customWidths = Array(numColumns).fill(evenWidth);
+    if (numColumns > 0) {
+        const evenWidth = 100 / numColumns;
+        block.settings.customWidths = Array(numColumns).fill(evenWidth);
+    }
     
     // Update layout to custom since we manually changed columns
     block.settings.layout = 'custom';
+    
+    // Force Vue reactivity by triggering blocks update
+    builder.blocks.value = [...builder.blocks.value];
     
     builder.takeSnapshot();
 };
