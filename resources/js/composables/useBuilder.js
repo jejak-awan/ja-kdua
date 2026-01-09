@@ -288,6 +288,15 @@ export function useBuilder() {
         return null;
     };
 
+    /**
+     * Get the currently selected block using ID-based selection
+     * This is the single source of truth for block selection
+     */
+    const selectedBlock = computed(() => {
+        if (!activeBlockId.value) return null;
+        return findBlockById(activeBlockId.value);
+    });
+
     const getBlockPath = (id) => {
         if (!id) return [];
         const path = [];
@@ -374,6 +383,7 @@ export function useBuilder() {
         activeRightSidebarTab,
         activeMediaField,
         activeBlockId,
+        selectedBlock,
         clipboard,
         handleMediaSelect,
 

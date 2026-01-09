@@ -8,9 +8,9 @@
         @click.stop="!builder.isPreview.value && onEdit()"
         @contextmenu.prevent="!builder.isPreview.value && onContextMenu()"
     >
-        <!-- Block Toolbar (Elementor/Divi Style) -->
-        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left"
-             :class="{ 'opacity-100': isSelected }">
+        <!-- Block Toolbar (Elementor/Divi Style) - Show on hover OR when selected -->
+        <div v-if="!builder.isPreview.value" class="absolute top-1 left-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 origin-top-left group-hover/block:opacity-100 group-hover/block:scale-100"
+             :class="{ 'opacity-100 scale-100': isSelected }">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
             <div class="w-px h-3 bg-zinc-200 mx-1"></div>
             <button class="h-6 w-6 flex items-center justify-center hover:bg-zinc-100 rounded-full transition-colors" @click.stop="onEdit" title="Settings">
@@ -71,34 +71,22 @@ const emit = defineEmits(['edit', 'delete', 'duplicate', 'wrap', 'split']);
 const builder = inject('builder');
 const { t } = useI18n();
 
-// Determine if this block is currently selected
+// Determine if this block is currently selected - always use ID-based selection
 const isSelected = computed(() => {
     if (!builder) return false;
-    
-    // If nested, we might need a unique ID check instead of index
-    if (props.isNested) {
-         return builder.activeBlockId.value === props.block.id;
-    }
-    return builder.editingIndex.value === props.index;
+    return builder.activeBlockId.value === props.block.id;
 });
 
 const onEdit = () => {
-    if (props.isNested) {
-        // If nested, use ID based selection? 
-        // We need to update builder to support ID-based selection or path-based.
-        // For now, let's just set the ID and open properties
-        builder.activeBlockId.value = props.block.id;
-        builder.activeTab.value = 'content';
-        // We might lose 'index' context for "Layers" tab properties in nested mode.
-        // But Properties Panel largely works on 'selectedBlock' computed.
-        
-        // Hack: If we rely on editingIndex, it breaks for nested. 
-        // We need to update PropertiesPanel to find block by ID if editingIndex is null?
-        // Or we pass a special "path" index?
-    } else {
+    // Always use ID-based selection for consistency
+    builder.activeBlockId.value = props.block.id;
+    builder.activeTab.value = 'content';
+    builder.activeRightSidebarTab.value = 'properties';
+    builder.isRightSidebarOpen.value = true;
+    
+    // Also set editingIndex for root-level blocks (backwards compatibility)
+    if (!props.isNested) {
         builder.editingIndex.value = props.index;
-        builder.activeTab.value = 'content';
-        builder.activeBlockId.value = props.block.id;
     }
     
     emit('edit');

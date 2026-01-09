@@ -229,13 +229,59 @@ const doResize = (event) => {
         
         // Percentage from left
         const percentage = (mouseX / gridWidth) * 100;
-
-        // We only support 2 columns for now for simplicity in resizing logic
-        if (props.columns.length === 2 && activeResizer.value === 0) {
-            const leftWidth = Math.max(15, Math.min(85, percentage));
-            const rightWidth = 100 - leftWidth;
-            updateCustomWidths([leftWidth, rightWidth]);
+        const numColumns = props.columns.length;
+        const resizerIndex = activeResizer.value;
+        
+        // Get current widths or initialize evenly
+        const currentWidths = [...(props.customWidths || Array(numColumns).fill(100 / numColumns))];
+        
+        // Calculate cumulative width up to the resizer
+        let cumulativeWidth = 0;
+        for (let i = 0; i <= resizerIndex; i++) {
+            cumulativeWidth += currentWidths[i];
         }
+        
+        // Calculate the delta (how much the resizer moved)
+        const delta = percentage - cumulativeWidth;
+        
+        // Calculate new widths with constraints (min 10%, max 90% for each column)
+        const minWidth = 10;
+        const maxWidth = 90;
+        
+        // Adjust the column before the resizer and the one after
+        const leftColIndex = resizerIndex;
+        const rightColIndex = resizerIndex + 1;
+        
+        let newLeftWidth = currentWidths[leftColIndex] + delta;
+        let newRightWidth = currentWidths[rightColIndex] - delta;
+        
+        // Apply constraints
+        if (newLeftWidth < minWidth) {
+            newRightWidth += newLeftWidth - minWidth;
+            newLeftWidth = minWidth;
+        } else if (newLeftWidth > maxWidth) {
+            newRightWidth -= newLeftWidth - maxWidth;
+            newLeftWidth = maxWidth;
+        }
+        
+        if (newRightWidth < minWidth) {
+            newLeftWidth += newRightWidth - minWidth;
+            newRightWidth = minWidth;
+        } else if (newRightWidth > maxWidth) {
+            newLeftWidth -= newRightWidth - maxWidth;
+            newRightWidth = maxWidth;
+        }
+        
+        // Final constraints
+        newLeftWidth = Math.max(minWidth, Math.min(maxWidth, newLeftWidth));
+        newRightWidth = Math.max(minWidth, Math.min(maxWidth, newRightWidth));
+        
+        // Update the widths array
+        const newWidths = [...currentWidths];
+        newWidths[leftColIndex] = newLeftWidth;
+        newWidths[rightColIndex] = newRightWidth;
+        
+        updateCustomWidths(newWidths);
     });
 };
 

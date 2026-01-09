@@ -423,31 +423,12 @@ const scrollContainer = ref(null);
 const { showBackToTop, handleScroll, scrollToTop } = useScrollToTop(scrollContainer);
 
 const selectedBlock = computed(() => {
-    if (builder.activeBlockId.value) {
-        // Recursive find helper - searches in Columns and Section nested blocks
-        const findBlock = (blocks, id) => {
-            for (const block of blocks) {
-                if (block.id === id) return block;
-                // Search in Columns (column.blocks)
-                if (block.settings && Array.isArray(block.settings.columns)) {
-                    for (const column of block.settings.columns) {
-                         const found = findBlock(column.blocks || [], id);
-                         if (found) return found;
-                    }
-                }
-                // Search in Section nested blocks (settings.blocks)
-                if (block.settings && Array.isArray(block.settings.blocks)) {
-                    const found = findBlock(block.settings.blocks, id);
-                    if (found) return found;
-                }
-            }
-            return null;
-        };
-        const found = findBlock(builder.blocks.value, builder.activeBlockId.value);
-        if (found) return found;
+    // Use centralized selectedBlock from builder (ID-based selection)
+    if (builder.selectedBlock?.value) {
+        return builder.selectedBlock.value;
     }
     
-    // Legacy fallback to index if ID search fails (or if using main editingIndex)
+    // Legacy fallback to editingIndex for backwards compatibility
     if (builder.editingIndex.value !== null) {
         return builder.blocks.value[builder.editingIndex.value];
     }

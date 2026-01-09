@@ -390,3 +390,21 @@
 .animate-rotate-in {
     animation: rotateIn 0.6s both;
 }
+
+/* --- Page Builder Drag-Drop Styling --- */
+.block-ghost {
+    opacity: 0.4;
+    background: hsl(var(--primary) / 0.1) !important;
+    border: 2px dashed hsl(var(--primary)) !important;
+    border-radius: 8px;
+}
+
+.sortable-chosen {
+    cursor: grabbing;
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    transform: scale(1.02);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}

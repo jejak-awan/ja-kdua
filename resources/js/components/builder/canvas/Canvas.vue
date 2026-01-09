@@ -240,4 +240,12 @@ const themeStyles = computed(() => {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.3);
 }
+
+/* Ghost element styling for drag-drop */
+.block-ghost {
+    opacity: 0.4;
+    background: hsl(var(--primary) / 0.1) !important;
+    border: 2px dashed hsl(var(--primary)) !important;
+    border-radius: 8px;
+}
 </style>
