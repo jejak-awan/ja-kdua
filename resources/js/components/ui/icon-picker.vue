@@ -112,9 +112,18 @@ const activeTab = ref('all');
 const selectedIcon = computed(() => props.modelValue);
 
 // Get ALL icon names from Lucide, excluding createLucideIcon internal
-const allIconNames = Object.keys(LucideIcons).filter(key => 
-    key !== 'default' && key !== 'createLucideIcon' && /^[A-Z]/.test(key)
-);
+const allIconNames = Object.keys(LucideIcons).filter(key => {
+    // Basic exclusions
+    if (key === 'default' || key === 'createLucideIcon' || key === 'Icon' || !/^[A-Z]/.test(key)) {
+        return false;
+    }
+    
+    // Check if it looks like a component (defensive)
+    const exp = LucideIcons[key];
+    if (typeof exp !== 'object' && typeof exp !== 'function') return false;
+    
+    return true;
+});
 
 // Map categories for display (limiting to first 3 + All in tabs usually, but Grid layout handles more)
 // We will show top 7 categories + All
