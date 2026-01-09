@@ -50,6 +50,11 @@
         "empty": "HTML Embed Kosong",
         "configure": "Klik ganda untuk konfigurasi"
     },
+    "shape": {
+        "title": "Gaya Bentuk",
+        "type": "Tipe",
+        "background": "Latar Belakang"
+    },
     "placeholder": {
         "text": "Mulai menulis..."
     }

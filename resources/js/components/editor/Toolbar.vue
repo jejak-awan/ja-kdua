@@ -276,6 +276,10 @@
                                     <Minus class="w-5 h-5 opacity-50" />
                                     <span class="text-[10px] font-medium">Line</span>
                                 </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('insertShape')">
+                                    <Box class="w-5 h-5 opacity-70" />
+                                    <span class="text-[10px] font-medium">Shape</span>
+                                </Button>
                             </div>
                             <div class="ribbon-group-label">Embeds</div>
                         </div>
@@ -444,6 +448,7 @@ import {
     FileCode2,
     Type as DropcapIcon,
     LayoutGrid,
+    Box,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -451,7 +456,7 @@ const props = defineProps({
     showHtmlView: Boolean
 })
 
-defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml'])
+defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertShape'])
 
 const activeTab = ref('home')
 

@@ -19,15 +19,31 @@
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
-    <PopoverContent class="w-[300px] p-0" align="start">
+    <PopoverContent class="w-[340px] p-0" align="start">
       <div class="p-2 border-b">
         <Input
           v-model="searchQuery"
           placeholder="Search icons..."
-          class="h-8"
+          class="h-8 mb-2"
         />
+        
+        <Tabs v-model="activeTab" class="w-full">
+            <TabsList class="grid grid-cols-4 h-auto p-1 gap-1">
+                <TabsTrigger value="all" class="text-[10px] h-6 px-1">All</TabsTrigger>
+                <TabsTrigger 
+                    v-for="(icons, category) in displayCategories" 
+                    :key="category" 
+                    :value="category"
+                    class="text-[10px] h-6 px-1 truncate"
+                    :title="category"
+                >
+                    {{ category }}
+                </TabsTrigger>
+            </TabsList>
+        </Tabs>
       </div>
-      <div class="max-h-[300px] overflow-y-auto p-2">
+
+      <div class="max-h-[300px] overflow-y-auto p-2 scrollbar-thin">
         <div v-if="filteredIcons.length === 0" class="text-center py-6 text-sm text-muted-foreground">
           No icons found
         </div>
@@ -37,7 +53,7 @@
             :key="icon"
             type="button"
             @click="selectIcon(icon)"
-            class="p-2 rounded-md hover:bg-muted transition-colors flex items-center justify-center"
+            class="p-2 rounded-md hover:bg-muted transition-colors flex items-center justify-center relative group"
             :class="{ 'bg-primary/10 ring-1 ring-primary': selectedIcon === icon }"
             :title="icon"
           >
@@ -61,14 +77,18 @@
 </template>
 
 <script setup>
-import { ref, computed, shallowRef } from 'vue';
+import { ref, computed, shallowRef, onMounted } from 'vue';
 import Button from './button.vue';
 import Input from './input.vue';
 import Popover from './popover.vue';
 import PopoverTrigger from './popover-trigger.vue';
 import PopoverContent from './popover-content.vue';
+import Tabs from './tabs.vue';
+import TabsList from './tabs-list.vue';
+import TabsTrigger from './tabs-trigger.vue';
 import { ChevronsUpDown, X } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
+import { iconCategories } from '../../config/icon-categories';
 
 const props = defineProps({
   modelValue: {
@@ -85,39 +105,48 @@ const emit = defineEmits(['update:modelValue']);
 
 const open = ref(false);
 const searchQuery = ref('');
+const activeTab = ref('all');
 
 const selectedIcon = computed(() => props.modelValue);
 
-// Common menu icons - curated subset
-const commonIcons = [
-  'Home', 'Menu', 'Search', 'Settings', 'User', 'Users',
-  'Mail', 'Phone', 'MapPin', 'Calendar', 'Clock', 'Bell',
-  'Heart', 'Star', 'Bookmark', 'Tag', 'Flag', 'Gift',
-  'ShoppingCart', 'ShoppingBag', 'CreditCard', 'Wallet', 'DollarSign', 'Percent',
-  'FileText', 'File', 'Folder', 'Image', 'Video', 'Music',
-  'Camera', 'Mic', 'Headphones', 'Monitor', 'Smartphone', 'Tablet',
-  'Globe', 'Compass', 'Map', 'Navigation', 'Send', 'Share',
-  'Link', 'ExternalLink', 'Download', 'Upload', 'Cloud', 'Database',
-  'Lock', 'Unlock', 'Shield', 'Key', 'Eye', 'EyeOff',
-  'CheckCircle', 'XCircle', 'AlertCircle', 'Info', 'HelpCircle', 'AlertTriangle',
-  'Zap', 'Sparkles', 'Flame', 'Lightbulb', 'Award', 'Trophy',
-  'Rocket', 'Target', 'TrendingUp', 'BarChart', 'PieChart', 'Activity',
-  'Code', 'Terminal', 'Cpu', 'Server', 'Wifi', 'Bluetooth',
-  'MessageSquare', 'MessageCircle', 'AtSign', 'Hash', 'Rss', 'Radio',
-  'Building', 'Building2', 'Store', 'Briefcase', 'Newspaper', 'BookOpen',
-  'GraduationCap', 'Pen', 'Pencil', 'Edit', 'Trash', 'Plus',
-  'Minus', 'X', 'Check', 'ChevronRight', 'ChevronDown', 'ArrowRight',
-  'Play', 'Pause', 'SkipForward', 'SkipBack', 'Volume2', 'VolumeX',
-  'Sun', 'Moon', 'Cloud', 'CloudRain', 'Umbrella', 'Thermometer',
-  'Coffee', 'Utensils', 'Pizza', 'Wine', 'Beer', 'Cake',
-];
+// Get ALL icon names from Lucide, excluding createLucideIcon internal
+const allIconNames = Object.keys(LucideIcons).filter(key => 
+    key !== 'default' && key !== 'createLucideIcon' && /^[A-Z]/.test(key)
+);
+
+// Map categories for display (limiting to first 3 + All in tabs usually, but Grid layout handles more)
+// We will show top 7 categories + All
+const displayCategories = computed(() => {
+    // Only return categories that actually have icons
+    return iconCategories; 
+});
 
 const filteredIcons = computed(() => {
-  if (!searchQuery.value) return commonIcons;
-  const query = searchQuery.value.toLowerCase();
-  return commonIcons.filter(icon => 
-    icon.toLowerCase().includes(query)
-  );
+  let icons = []; // Default to all
+
+  if (activeTab.value === 'all') {
+      icons = allIconNames;
+  } else {
+      // Get icons for specific category
+      icons = iconCategories[activeTab.value] || [];
+  }
+
+  // Filter by search query
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    // If searching, we might want to search ALL icons even if in a category?
+    // User preference usually. Let's strict filter the CURRENT view first.
+    // Actually, widespread search is better UX.
+    // If strict search in category returns 0, maybe search all?
+    // Let's stick to simple: Filter the CURRENT active list.
+    // EXCEPT if 'all' is active.
+    
+    // Improvement: If search is active, maybe auto-switch to "all"?
+    // For now: strict filter.
+    return icons.filter(icon => icon.toLowerCase().includes(query));
+  }
+
+  return icons;
 });
 
 const getIconComponent = (iconName) => {

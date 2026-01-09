@@ -43,8 +43,58 @@
                         </AccordionContent>
                     </AccordionItem>
 
-                    <!-- General Settings (Not for Embeds) -->
-                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode">
+                    <!-- Shape Settings -->
+                    <AccordionItem value="shape-settings" class="border-b px-3" v-if="isShapeNode">
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.shape.title') }}</AccordionTrigger>
+                        <AccordionContent class="pt-1 pb-4 space-y-3">
+                            <!-- Shape Type -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.type') }}</label>
+                                <div class="flex gap-1.5">
+                                    <Button 
+                                        v-for="type in ['rectangle', 'circle', 'pill']" 
+                                        :key="type"
+                                        variant="outline"
+                                        size="sm"
+                                        class="flex-1 capitalize h-7 text-[10px] font-normal"
+                                        :class="{ 'bg-primary text-primary-foreground border-primary font-medium': form.shapeType === type }"
+                                        @click="setShapePreset(type)"
+                                    >
+                                        {{ type }}
+                                    </Button>
+                                </div>
+                            </div>
+                            
+                            <!-- Background Color -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.background') }}</label>
+                                <div class="flex gap-2 items-center">
+                                    <ColorPicker v-model="form.backgroundColor">
+                                        <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
+                                                <div class="absolute inset-0" :style="{ backgroundColor: form.backgroundColor }"></div>
+                                        </Button>
+                                    </ColorPicker>
+                                    <Input v-model="form.backgroundColor" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                </div>
+                            </div>
+
+                             <!-- Text Color -->
+                             <div class="space-y-1.5">
+                                <label class="text-[11px] font-medium text-muted-foreground">Text Color</label>
+                                <div class="flex gap-2 items-center">
+                                    <ColorPicker v-model="form.color">
+                                        <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
+                                                <div class="absolute inset-0" :style="{ backgroundColor: form.color }"></div>
+                                        </Button>
+                                    </ColorPicker>
+                                    <Input v-model="form.color" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <!-- General Settings (Not for Embeds or Shapes) -->
+                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode && !isShapeNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.general') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <!-- Source URL -->
@@ -237,6 +287,10 @@ const form = ref({
     alt: '',
     displayMode: 'block',
     margin: '16',
+    // Shape specific
+    backgroundColor: '#e2e8f0',
+    color: '#000000',
+    shapeType: 'rectangle', 
     // Video specific
     autoplay: false,
     controls: true,
@@ -248,6 +302,21 @@ const form = ref({
 const constrainProportions = ref(true)
 const isVideoNode = computed(() => props.node?.type === 'video')
 const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
+const isShapeNode = computed(() => props.node?.type === 'shape')
+
+function getShapeType(radius) {
+    if (!radius || radius === '0' || radius === '0px') return 'rectangle'
+    if (radius === '50%' || radius === '9999px') return 'circle'
+    if (radius === '999px' || radius === '2rem') return 'pill'
+    return 'custom'
+}
+
+function setShapePreset(type) {
+    form.value.shapeType = type
+    if (type === 'rectangle') form.value.borderRadius = '0'
+    else if (type === 'circle') form.value.borderRadius = '50%'
+    else if (type === 'pill') form.value.borderRadius = '999px'
+}
 
 // Dragging Logic (unchanged)
 const dragOffset = reactive({ x: 0, y: 0 })
@@ -300,6 +369,10 @@ watch(() => props.open, (isOpen) => {
                 alt: attrs.alt || '',
                 displayMode: attrs.displayMode || 'block',
                 margin: attrs.margin ? parseInt(attrs.margin) : 16,
+                // Shape attrs
+                backgroundColor: attrs.backgroundColor || '#e2e8f0',
+                color: attrs.color || '#000000',
+                shapeType: getShapeType(attrs.borderRadius),
                 // Video attrs (with fallbacks)
                 autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
                 controls: attrs.controls !== undefined ? attrs.controls : true,
@@ -338,9 +411,12 @@ const save = () => {
     // Only include video attrs if it is a video node
     const baseAttrs = {
         ...form.value,
-        borderRadius: form.value.borderRadius ? `${form.value.borderRadius}px` : null,
+        borderRadius: form.value.borderRadius ? `${form.value.borderRadius.toString().replace('px','')}px` : null,
         borderWidth: form.value.borderWidth ? `${form.value.borderWidth}px` : '0px',
-        margin: form.value.margin ? `${form.value.margin}px` : '0px'
+        margin: form.value.margin ? `${form.value.margin}px` : '0px',
+        // Shape props
+        backgroundColor: form.value.backgroundColor,
+        color: form.value.color
     }
     
     if (isVideoNode.value) {

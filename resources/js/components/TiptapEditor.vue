@@ -9,6 +9,7 @@
             @open-media="showMediaPicker = true"
             @insert-html="insertHtmlEmbed"
             @toggle-html="toggleHtmlView"
+            @insert-shape="insertShape"
         />
 
         <!-- Editor Content (WYSIWYG View) -->
@@ -104,6 +105,7 @@ import { Column } from './editor/extensions/Column'
 import { TextColumns } from './editor/extensions/TextColumns'
 import { CodeBlockWithCopyExtension } from './editor/extensions/CodeBlockExtension'
 import { HtmlEmbed } from './editor/extensions/HtmlEmbedExtension'
+import { Shape } from './editor/extensions/Shape'
 
 import { createLowlight } from 'lowlight'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -216,6 +218,7 @@ const editor = useEditor({
             lowlight,
         }),
         HtmlEmbed,
+        Shape,
     ],
     editorProps: {
         attributes: {
@@ -224,7 +227,7 @@ const editor = useEditor({
         handleDOMEvents: {
             dblclick: (view, event) => {
                 // Check if we clicked on a media node
-                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed'))) {
+                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape'))) {
                     openProperties()
                     return true
                 }
@@ -261,6 +264,7 @@ function openProperties() {
     let type = 'image'
     if (editor.value.isActive('video')) type = 'video'
     else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
+    else if (editor.value.isActive('shape')) type = 'shape'
 
     selectedNodeForProperties.value = {
         type,
@@ -310,6 +314,28 @@ function insertHtmlEmbed() {
     editor.value.chain().focus().insertHtmlEmbed('').run()
 }
 
+function insertShape() {
+    editor.value.chain().focus().insertContent({
+        type: 'shape',
+        attrs: {
+            width: '200px',
+            height: '200px',
+            backgroundColor: '#f1f5f9'
+        },
+        content: [
+            {
+                type: 'paragraph',
+                content: [
+                    {
+                        type: 'text',
+                        text: 'Shape Text'
+                    }
+                ]
+            }
+        ]
+    }).run()
+}
+
 // Context Menu Logic
 const handleContextMenu = (e) => {
     if (!editor.value) return 
@@ -322,9 +348,9 @@ const handleContextMenu = (e) => {
     const items = []
 
     // Contextual actions based on selection
-    if (editor.value.isActive('image') || editor.value.isActive('video')) {
+    if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('shape')) {
         items.push({ label: 'Properties', icon: SettingsIcon, action: 'properties' })
-        items.push({ label: 'Delete Media', icon: Trash2, action: 'delete' })
+        items.push({ label: 'Delete', icon: Trash2, action: 'delete' })
     } else if (editor.value.isActive('table')) {
         items.push({ label: 'Delete Table', icon: Trash2, action: 'deleteTable' })
     } else {
@@ -355,7 +381,10 @@ const handleContextMenuAction = (action) => {
             // Robust delete: find which one is active or just delete selection if it's a node
             const isImage = editor.value.isActive('image')
             const isVideo = editor.value.isActive('video')
-            const nodeType = isImage ? 'image' : (isVideo ? 'video' : null)
+            const isHtmlEmbed = editor.value.isActive('htmlEmbed')
+            const isShape = editor.value.isActive('shape')
+            
+            const nodeType = isImage ? 'image' : (isVideo ? 'video' : (isHtmlEmbed ? 'htmlEmbed' : (isShape ? 'shape' : null)))
             
             if (nodeType) {
                 editor.value.chain().focus().deleteNode(nodeType).run()
