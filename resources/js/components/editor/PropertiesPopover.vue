@@ -92,33 +92,35 @@
                             </div>
 
                              <!-- Background & Padding -->
-                             <AccordionItem value="icon-appearance" class="border-t pt-2 -mx-0">
-                                <AccordionTrigger class="text-[11px] font-medium py-1.5 hover:no-underline text-muted-foreground">Background & Spacing</AccordionTrigger>
-                                <AccordionContent class="pt-2 pb-0 space-y-3">
-                                    <div class="space-y-1.5">
-                                        <label class="text-[11px] font-medium text-muted-foreground">Background Color</label>
-                                        <div class="flex gap-2 items-center">
-                                            <ColorPicker v-model="form.backgroundColor">
-                                                <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
-                                                     <Palette class="w-3.5 h-3.5 text-muted-foreground" v-if="!form.backgroundColor" />
-                                                    <div v-else class="absolute inset-0" :style="{ backgroundColor: form.backgroundColor }"></div>
-                                                </Button>
-                                            </ColorPicker>
-                                            <Input v-model="form.backgroundColor" placeholder="None" class="h-8 text-xs flex-1 uppercase font-mono" />
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3">
+                             <Accordion type="single" collapsible>
+                                 <AccordionItem value="icon-appearance" class="border-t pt-2 -mx-0 border-b-0">
+                                    <AccordionTrigger class="text-[11px] font-medium py-1.5 hover:no-underline text-muted-foreground">Background & Spacing</AccordionTrigger>
+                                    <AccordionContent class="pt-2 pb-0 space-y-3">
                                         <div class="space-y-1.5">
-                                            <label class="text-[11px] font-medium text-muted-foreground">Padding</label>
-                                            <Input v-model="form.padding" placeholder="0px" class="h-8 text-xs" />
+                                            <label class="text-[11px] font-medium text-muted-foreground">Background Color</label>
+                                            <div class="flex gap-2 items-center">
+                                                <ColorPicker v-model="form.backgroundColor">
+                                                    <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
+                                                        <Palette class="w-3.5 h-3.5 text-muted-foreground" v-if="!form.backgroundColor" />
+                                                        <div v-else class="absolute inset-0" :style="{ backgroundColor: form.backgroundColor }"></div>
+                                                    </Button>
+                                                </ColorPicker>
+                                                <Input v-model="form.backgroundColor" placeholder="None" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                            </div>
                                         </div>
-                                        <div class="space-y-1.5">
-                                            <label class="text-[11px] font-medium text-muted-foreground">Radius</label>
-                                            <Input v-model="form.borderRadius" placeholder="0px" class="h-8 text-xs" />
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="space-y-1.5">
+                                                <label class="text-[11px] font-medium text-muted-foreground">Padding</label>
+                                                <Input v-model="form.padding" placeholder="0px" class="h-8 text-xs" />
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label class="text-[11px] font-medium text-muted-foreground">Radius</label>
+                                                <Input v-model="form.borderRadius" placeholder="0px" class="h-8 text-xs" />
+                                            </div>
                                         </div>
-                                    </div>
-                                </AccordionContent>
-                             </AccordionItem>
+                                    </AccordionContent>
+                                 </AccordionItem>
+                             </Accordion>
                         </AccordionContent>
                     </AccordionItem>
 
