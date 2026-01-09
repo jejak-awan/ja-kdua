@@ -279,6 +279,11 @@ const colWidths = computed(() => {
         }
     }
 
+    // Safety: If widths count doesn't match columns count (e.g. added a column), fallback to even distribution
+    if (widths.length !== numCols) {
+        widths = Array(numCols).fill(100 / numCols);
+    }
+
     // Convert percentages to calc strings subtracting gap
     // Formula: calc(P% - (totalGap * P/100))
     // Total gap = (n-1) * 2rem (gap-8)
@@ -370,7 +375,12 @@ const doResize = (event) => {
         const resizerIndex = activeResizer.value;
         
         // Get current widths or initialize evenly
-        const currentWidths = [...(props.customWidths || Array(numColumns).fill(100 / numColumns))];
+        let currentWidths;
+        if (props.customWidths && props.customWidths.length === numColumns) {
+            currentWidths = [...props.customWidths];
+        } else {
+            currentWidths = Array(numColumns).fill(100 / numColumns);
+        }
         
         // Calculate cumulative width up to the resizer
         let cumulativeWidth = 0;
