@@ -35,10 +35,29 @@ export default {
             tab: 'style'
         },
         {
-            key: 'reverseOnStack',
-            type: 'boolean',
-            label: 'Reverse Order When Stacked',
-            default: false,
+            key: 'direction',
+            type: 'toggle_group',
+            label: 'Direction (Desktop)',
+            options: [
+                { label: '→', value: 'row' },
+                { label: '←', value: 'row-reverse' },
+                { label: '↓', value: 'column' },
+                { label: '↑', value: 'column-reverse' }
+            ],
+            default: 'row',
+            tab: 'style'
+        },
+        {
+            key: 'mobileDirection',
+            type: 'toggle_group',
+            label: 'Direction (Mobile)',
+            options: [
+                { label: '→', value: 'row' },
+                { label: '←', value: 'row-reverse' },
+                { label: '↓', value: 'column' },
+                { label: '↑', value: 'column-reverse' }
+            ],
+            default: 'column',
             tab: 'style'
         },
         {
@@ -77,7 +96,8 @@ export default {
         columns: [{ blocks: [] }, { blocks: [] }],
         customWidths: [50, 50],
         stackOn: 'sm',
-        reverseOnStack: false,
+        direction: 'row',
+        mobileDirection: 'column',
         padding: 'py-16',
         width: 'max-w-7xl',
         bgColor: 'transparent',
