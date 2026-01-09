@@ -36,6 +36,9 @@ export const Shape = Node.create({
             },
             color: {
                 default: 'inherit',
+            },
+            boxShadow: {
+                default: 'none',
             }
         };
     },

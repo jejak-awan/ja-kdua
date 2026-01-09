@@ -53,7 +53,8 @@
     "shape": {
         "title": "Shape Style",
         "type": "Type",
-        "background": "Background"
+        "background": "Background",
+        "shadow": "Shadow"
     },
     "placeholder": {
         "text": "Start writing..."

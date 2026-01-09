@@ -64,6 +64,7 @@ const styleObject = computed(() => {
         borderWidth: attrs.borderWidth + (attrs.borderWidth.endsWith('px') ? '' : 'px'),
         borderStyle: attrs.borderWidth && attrs.borderWidth !== '0' ? 'solid' : 'none',
         borderRadius: attrs.borderRadius + (attrs.borderRadius.endsWith('px') ? '' : 'px'),
+        boxShadow: attrs.boxShadow,
         color: attrs.color,
         textAlign: attrs.textAlign,
         display: 'flex',

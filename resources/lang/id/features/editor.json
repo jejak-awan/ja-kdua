@@ -53,7 +53,8 @@
     "shape": {
         "title": "Gaya Bentuk",
         "type": "Tipe",
-        "background": "Latar Belakang"
+        "background": "Latar Belakang",
+        "shadow": "Bayangan"
     },
     "placeholder": {
         "text": "Mulai menulis..."

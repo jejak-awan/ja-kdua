@@ -90,9 +90,24 @@
                                     <Input v-model="form.color" class="h-8 text-xs flex-1 uppercase font-mono" />
                                 </div>
                             </div>
+                            <!-- Shadow -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.shape.shadow') }}</label>
+                                <Select v-model="form.boxShadow">
+                                    <SelectTrigger class="h-8 text-xs w-full">
+                                        <SelectValue :placeholder="t('features.editor.placeholders.select')" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        <SelectItem value="0 1px 2px 0 rgb(0 0 0 / 0.05)">Small</SelectItem>
+                                        <SelectItem value="0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)">Medium</SelectItem>
+                                        <SelectItem value="0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)">Large</SelectItem>
+                                        <SelectItem value="0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)">Extra Large</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
-
                     <!-- General Settings (Not for Embeds or Shapes) -->
                     <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode && !isShapeNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.general') }}</AccordionTrigger>
@@ -264,6 +279,11 @@ import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
 import AccordionContent from '@/components/ui/accordion-content.vue'
 import ColorPicker from '@/components/ui/color-picker.vue'
 import Switch from '@/components/ui/switch.vue'
+import Select from '@/components/ui/select.vue'
+import SelectContent from '@/components/ui/select-content.vue'
+import SelectItem from '@/components/ui/select-item.vue'
+import SelectTrigger from '@/components/ui/select-trigger.vue'
+import SelectValue from '@/components/ui/select-value.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -291,6 +311,7 @@ const form = ref({
     backgroundColor: '#e2e8f0',
     color: '#000000',
     shapeType: 'rectangle', 
+    boxShadow: 'none',
     // Video specific
     autoplay: false,
     controls: true,
@@ -373,6 +394,7 @@ watch(() => props.open, (isOpen) => {
                 backgroundColor: attrs.backgroundColor || '#e2e8f0',
                 color: attrs.color || '#000000',
                 shapeType: getShapeType(attrs.borderRadius),
+                boxShadow: attrs.boxShadow || 'none',
                 // Video attrs (with fallbacks)
                 autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
                 controls: attrs.controls !== undefined ? attrs.controls : true,
@@ -416,7 +438,8 @@ const save = () => {
         margin: form.value.margin ? `${form.value.margin}px` : '0px',
         // Shape props
         backgroundColor: form.value.backgroundColor,
-        color: form.value.color
+        color: form.value.color,
+        boxShadow: form.value.boxShadow
     }
     
     if (isVideoNode.value) {
