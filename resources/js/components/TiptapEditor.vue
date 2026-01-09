@@ -367,20 +367,7 @@ const handleContextMenuAction = (action) => {
             openProperties()
             break
         case 'delete':
-            // Robust delete: find which one is active or just delete selection if it's a node
-            const isImage = editor.value.isActive('image')
-            const isVideo = editor.value.isActive('video')
-            const isHtmlEmbed = editor.value.isActive('htmlEmbed')
-            const isIcon = editor.value.isActive('icon')
-            
-            const nodeType = isImage ? 'image' : (isVideo ? 'video' : (isHtmlEmbed ? 'htmlEmbed' : (isIcon ? 'icon' : null)))
-            
-            if (nodeType) {
-                editor.value.chain().focus().deleteNode(nodeType).run()
-            } else {
-                // Fallback: delete selection
-                editor.value.chain().focus().deleteSelection().run()
-            }
+            editor.value.chain().focus().deleteSelection().run()
             break
         case 'deleteTable':
             editor.value.chain().focus().deleteTable().run()
