@@ -281,7 +281,7 @@ function openProperties() {
 
 function saveMediaProperties(properties) {
     const type = selectedNodeForProperties.value.type
-    editor.value.chain().focus().updateAttributes(type, properties).run()
+    editor.value.chain().updateAttributes(type, properties).run()
 }
 
 // Table Handlers
