@@ -1,261 +1,418 @@
 <template>
-    <div v-if="editor" class="editor-toolbar flex flex-wrap items-center gap-1 p-2 border-b border-border bg-muted/40">
-        <!-- Text Style -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <Select :model-value="getHeaderLevel()" @update:model-value="setHeaderLevel">
-                <SelectTrigger class="w-[130px] h-8 border-none bg-transparent hover:bg-muted shadow-none">
-                    <SelectValue placeholder="Paragraph" />
-                </SelectTrigger>
-                <SelectContent class="max-h-[250px] overflow-y-auto">
-                    <SelectItem value="p">Paragraph</SelectItem>
-                    <SelectItem value="1">Heading 1</SelectItem>
-                    <SelectItem value="2">Heading 2</SelectItem>
-                    <SelectItem value="3">Heading 3</SelectItem>
-                    <SelectItem value="4">Heading 4</SelectItem>
-                    <SelectItem value="5">Heading 5</SelectItem>
-                    <SelectItem value="6">Heading 6</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+    <TooltipProvider :delay-duration="400">
+        <div v-if="editor" class="editor-toolbar border border-border rounded-t-lg bg-card/30 overflow-hidden shadow-sm flex flex-col">
+            <Tabs v-model="activeTab" class="w-full h-full flex flex-col">
+                <!-- Tabs Header -->
+                <div class="flex items-center justify-between px-2 py-1 bg-muted/20 border-b border-border/50 h-9 shrink-0">
+                    <TabsList class="bg-muted/40 h-7 p-1 gap-1 rounded-md">
+                        <TabsTrigger value="home" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Home</TabsTrigger>
+                        <TabsTrigger value="insert" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Insert</TabsTrigger>
+                        <TabsTrigger value="layout" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Layout</TabsTrigger>
+                        <TabsTrigger 
+                            v-if="editor.isActive('table')" 
+                            value="table" 
+                            class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                        >
+                            Table tools
+                        </TabsTrigger>
+                    </TabsList>
 
-        <!-- Font Family -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-                <Select :model-value="getFontFamily()" @update:model-value="setFontFamily">
-                <SelectTrigger class="w-[110px] h-8 border-none bg-transparent hover:bg-muted shadow-none">
-                    <SelectValue placeholder="Font" />
-                </SelectTrigger>
-                <SelectContent class="max-h-[250px]">
-                    <SelectItem value="Inter">Inter</SelectItem>
-                    <SelectItem value="Comic Sans MS, Comic Sans">Comic Sans</SelectItem>
-                    <SelectItem value="serif">Serif</SelectItem>
-                    <SelectItem value="monospace">Monospace</SelectItem>
-                    <SelectItem value="cursive">Cursive</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+                    <!-- Global Actions -->
+                    <div class="flex items-center gap-0.5 px-2">
+                        <TooltipRoot>
+                            <TooltipTrigger as-child>
+                                <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()">
+                                    <Undo class="w-3.5 h-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                                <TooltipContent class="tooltip-radix" side="top">Undo (Ctrl+Z)</TooltipContent>
+                            </TooltipPortal>
+                        </TooltipRoot>
 
-        <!-- Formatting Group -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleBold().run()" :class="{ 'bg-muted': editor.isActive('bold') }" title="Bold">
-                <Bold class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleItalic().run()" :class="{ 'bg-muted': editor.isActive('italic') }" title="Italic">
-                <Italic class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleUnderline().run()" :class="{ 'bg-muted': editor.isActive('underline') }" title="Underline">
-                <UnderlineIcon class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleStrike().run()" :class="{ 'bg-muted': editor.isActive('strike') }" title="Strikethrough">
-                <Strikethrough class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleCode().run()" :class="{ 'bg-muted': editor.isActive('code') }" title="Inline Code">
-                <Code class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'bg-muted': editor.isActive('codeBlock') }" title="Code Block">
-                <Code2 class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().unsetAllMarks().run()" title="Clear Formatting">
-                <RemoveFormatting class="w-4 h-4" />
-            </Button>
-        </div>
+                        <TooltipRoot>
+                            <TooltipTrigger as-child>
+                                <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()">
+                                    <Redo class="w-3.5 h-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                                <TooltipContent class="tooltip-radix" side="top">Redo (Ctrl+Y)</TooltipContent>
+                            </TooltipPortal>
+                        </TooltipRoot>
 
-        <!-- Colors -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <!-- Text Color -->
-            <div class="relative">
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="showTextColorPicker = !showTextColorPicker" title="Text Color">
-                    <Palette class="w-4 h-4" />
-                </Button>
-                <div v-if="showTextColorPicker" class="absolute top-full left-0 mt-1 p-2 bg-popover border border-border rounded-md shadow-lg z-50 grid grid-cols-5 gap-1">
-                    <button v-for="color in colorOptions" :key="'text-'+color" 
-                        class="w-6 h-6 rounded border border-border/50 cursor-pointer hover:scale-110 transition-transform"
-                        :style="{ backgroundColor: color }"
-                        @click="setTextColor(color)"
-                        :title="color"
-                    />
-                    <button class="w-6 h-6 rounded border border-border flex items-center justify-center cursor-pointer hover:bg-muted" @click="setTextColor(null)" title="Remove color">
-                        <X class="w-3 h-3" />
-                    </button>
-                </div>
-            </div>
-            <!-- Highlight Color -->
-            <div class="relative">
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="showHighlightPicker = !showHighlightPicker" title="Highlight">
-                    <Highlighter class="w-4 h-4" />
-                </Button>
-                <div v-if="showHighlightPicker" class="absolute top-full left-0 mt-1 p-2 bg-popover border border-border rounded-md shadow-lg z-50 grid grid-cols-5 gap-1">
-                    <button v-for="color in highlightOptions" :key="'hl-'+color" 
-                        class="w-6 h-6 rounded border border-border/50 cursor-pointer hover:scale-110 transition-transform"
-                        :style="{ backgroundColor: color }"
-                        @click="setHighlight(color)"
-                        :title="color"
-                    />
-                    <button class="w-6 h-6 rounded border border-border flex items-center justify-center cursor-pointer hover:bg-muted" @click="setHighlight(null)" title="Remove highlight">
-                        <X class="w-3 h-3" />
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alignment -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'bg-muted': editor.isActive({ textAlign: 'left' }) }" title="Align Left">
-                <AlignLeft class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().setTextAlign('center').run()" :class="{ 'bg-muted': editor.isActive({ textAlign: 'center' }) }" title="Align Center">
-                <AlignCenter class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().setTextAlign('right').run()" :class="{ 'bg-muted': editor.isActive({ textAlign: 'right' }) }" title="Align Right">
-                <AlignRight class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().setTextAlign('justify').run()" :class="{ 'bg-muted': editor.isActive({ textAlign: 'justify' }) }" title="Justify">
-                <AlignJustify class="w-4 h-4" />
-            </Button>
-        </div>
-
-        <!-- Lists & Quote -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <Button
-                size="icon"
-                variant="ghost"
-                class="w-8 h-8"
-                :class="{ 'bg-muted': editor.isActive('paragraph', { dropcap: true }) }"
-                title="Dropcap"
-                @click="editor.chain().focus().toggleDropcap().run()"
-            >
-                <DropcapIcon class="w-4 h-4" />
-            </Button>
-
-            <div class="w-px h-8 mx-1 bg-border" />
-
-            <!-- Lists -->
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleBulletList().run()" :class="{ 'bg-muted': editor.isActive('bulletList') }" title="Bullet List">
-                <List class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'bg-muted': editor.isActive('orderedList') }" title="Numbered List">
-                <ListOrdered class="w-4 h-4" />
-            </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleBlockquote().run()" :class="{ 'bg-muted': editor.isActive('blockquote') }" title="Quote">
-                <Quote class="w-4 h-4" />
-            </Button>
-        </div>
-
-        <!-- Columns -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <!-- Grid Style (Old/Container based) -->
-            <div class="flex items-center gap-0.5 bg-background/20 rounded p-0.5 mr-1">
-                <Button variant="ghost" size="icon" class="h-7 w-7" @click="editor.chain().focus().insertColumns({ count: 2 }).run()" title="Insert 2 Grid Columns (Containers)">
-                    <LayoutGrid class="w-3.5 h-3.5 opacity-70" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-7 w-7" @click="editor.chain().focus().insertColumns({ count: 3 }).run()" title="Insert 3 Grid Columns (Containers)">
-                    <div class="grid grid-cols-3 gap-0.5">
-                         <div class="w-1 h-3 bg-foreground/40 rounded-full" />
-                         <div class="w-1 h-3 bg-foreground/40 rounded-full" />
-                         <div class="w-1 h-3 bg-foreground/40 rounded-full" />
+                        <div class="w-px h-4 bg-border/60 mx-1" />
+                        
+                        <TooltipRoot>
+                            <TooltipTrigger as-child>
+                                <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm" :class="{ 'text-primary': showHtmlView }" @click="$emit('toggleHtml')">
+                                    <FileCode class="w-3.5 h-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                                <TooltipContent class="tooltip-radix" side="top">View HTML source</TooltipContent>
+                            </TooltipPortal>
+                        </TooltipRoot>
                     </div>
-                </Button>
-            </div>
-            
-            <div class="w-px h-4 bg-border/40 mx-1" />
-
-            <!-- Newspaper Style (New/Flow based) -->
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                class="h-8 w-8" 
-                :class="{ 'bg-muted': editor.isActive('textColumns', { count: 2 }) }"
-                @click="editor.chain().focus().toggleTextColumns(2).run()" 
-                title="Newspaper Layout (2 Columns Flow)"
-            >
-                <Columns class="w-4 h-4" />
-            </Button>
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                class="h-8 w-8" 
-                :class="{ 'bg-muted': editor.isActive('textColumns', { count: 3 }) }"
-                @click="editor.chain().focus().toggleTextColumns(3).run()" 
-                title="Newspaper Layout (3 Columns Flow)"
-            >
-                <div class="flex gap-0.5" :class="{ 'opacity-100': editor.isActive('textColumns', { count: 3 }), 'opacity-60': !editor.isActive('textColumns', { count: 3 }) }">
-                    <div class="w-1 h-3 bg-primary rounded-full" />
-                    <div class="w-1 h-3 bg-primary rounded-full" />
-                    <div class="w-1 h-3 bg-primary rounded-full" />
                 </div>
-            </Button>
-        </div>
 
-        <!-- Table -->
-        <div class="flex items-center gap-0.5 border-r pr-2 mr-2 border-border/50">
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="$emit('insertTable')" title="Insert Table">
-                <TableIcon class="w-4 h-4" />
-            </Button>
-            <template v-if="editor.isActive('table')">
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().addColumnAfter().run()" title="Add Column Right">
-                    <Columns class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().addRowAfter().run()" title="Add Row Below">
-                    <RowsIcon class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().mergeCells().run()" title="Merge Cells">
-                    <Merge class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().splitCell().run()" title="Split Cell">
-                    <Split class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive" @click="editor.chain().focus().deleteColumn().run()" title="Delete Column">
-                    <Columns class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive" @click="editor.chain().focus().deleteRow().run()" title="Delete Row">
-                    <RowsIcon class="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive" @click="editor.chain().focus().deleteTable().run()" title="Delete Table">
-                    <Trash2 class="w-4 h-4" />
-                </Button>
-            </template>
-        </div>
+                <!-- Tab Content (Ribbon Content) -->
+                <div class="bg-background flex-1 border-t border-border/10 overflow-x-auto custom-scrollbar">
+                    <!-- HOME TAB -->
+                    <TabsContent value="home" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
+                        <!-- Group: Font -->
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content">
+                                <Select :model-value="getHeaderLevel()" @update:model-value="setHeaderLevel">
+                                    <SelectTrigger class="w-[100px] h-7 text-[11px] bg-transparent border-none shadow-none hover:bg-muted/40">
+                                        <SelectValue placeholder="Paragraph" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="p">Paragraph</SelectItem>
+                                        <SelectItem value="1">Heading 1</SelectItem>
+                                        <SelectItem value="2">Heading 2</SelectItem>
+                                        <SelectItem value="3">Heading 3</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                
+                                <Select :model-value="getFontFamily()" @update:model-value="setFontFamily">
+                                    <SelectTrigger class="w-[80px] h-7 text-[11px] bg-transparent border-none shadow-none hover:bg-muted/40">
+                                        <SelectValue placeholder="Font" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Inter">Inter</SelectItem>
+                                        <SelectItem value="serif">Serif</SelectItem>
+                                        <SelectItem value="monospace">Mono</SelectItem>
+                                    </SelectContent>
+                                </Select>
 
-        <!-- Extras -->
-            <div class="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="$emit('openMedia')" title="Insert Image">
-                <ImageIcon class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="$emit('insertHtml')" title="Embed HTML (Maps, Videos, Widgets)">
-                <FileCode2 class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().setHorizontalRule().run()" title="Horizontal Line">
-                <Minus class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()" title="Undo">
-                <Undo class="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()" title="Redo">
-                <Redo class="w-4 h-4" />
-            </Button>
-            <div class="border-l border-border/50 ml-1 pl-1">
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    class="h-8 w-8" 
-                    :class="{ 'bg-muted': showHtmlView }"
-                    @click="$emit('toggleHtml')" 
-                    title="View/Edit HTML"
-                >
-                    <FileCode class="w-4 h-4" />
-                </Button>
-            </div>
+                                <!-- Text Color Picker (Pop-over) -->
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <div class="flex items-center -ml-1">
+                                            <ColorPicker v-model="selectedColor" title="Text Color">
+                                                <Button variant="ghost" size="icon" class="h-7 w-7 relative" :class="{ 'text-primary': selectedColor }">
+                                                    <Palette class="w-4 h-4" />
+                                                    <div 
+                                                        class="absolute bottom-1.5 w-3 h-0.5 rounded-full" 
+                                                        :style="{ backgroundColor: selectedColor || 'currentColor', opacity: selectedColor ? 1 : 0.3 }" 
+                                                    />
+                                                </Button>
+                                            </ColorPicker>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipPortal>
+                                        <TooltipContent class="tooltip-radix" side="top">Text color</TooltipContent>
+                                    </TooltipPortal>
+                                </TooltipRoot>
+                            </div>
+                            <div class="ribbon-group-label">Font</div>
+                        </div>
+
+                        <!-- Group: Style (Compact 2 rows) -->
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content grid grid-cols-3 gap-x-0.5 gap-y-0.5 items-center">
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-primary': editor.isActive('bold') }">
+                                            <Bold class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Bold</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-primary': editor.isActive('italic') }">
+                                            <Italic class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Italic</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleUnderline().run()" :class="{ 'text-primary': editor.isActive('underline') }">
+                                            <UnderlineIcon class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Underline</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleStrike().run()" :class="{ 'text-primary': editor.isActive('strike') }">
+                                            <Strikethrough class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Strikethrough</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleCode().run()" :class="{ 'text-primary': editor.isActive('code') }">
+                                            <Code class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Code</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().unsetAllMarks().run()">
+                                            <RemoveFormatting class="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Clear style</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                            </div>
+                            <div class="ribbon-group-label">Style</div>
+                        </div>
+
+                        <!-- Group: Paragraph (Compact 2 rows) -->
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content grid grid-cols-4 gap-x-0.5 gap-y-0.5 items-center">
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'text-primary': editor.isActive({ textAlign: 'left' }) }">
+                                            <AlignLeft class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Left</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().setTextAlign('center').run()" :class="{ 'text-primary': editor.isActive({ textAlign: 'center' }) }">
+                                            <AlignCenter class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Center</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().setTextAlign('right').run()" :class="{ 'text-primary': editor.isActive({ textAlign: 'right' }) }">
+                                            <AlignRight class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Right</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().setTextAlign('justify').run()" :class="{ 'text-primary': editor.isActive({ textAlign: 'justify' }) }">
+                                            <AlignJustify class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Justify</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().toggleBulletList().run()" :class="{ 'text-primary': editor.isActive('bulletList') }">
+                                            <List class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Bullets</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'text-primary': editor.isActive('orderedList') }">
+                                            <ListOrdered class="w-3 h-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Numbers</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                            </div>
+                            <div class="ribbon-group-label">Paragraph</div>
+                        </div>
+
+                        <!-- Group: Special -->
+                        <div class="ribbon-group">
+                            <div class="ribbon-group-content flex gap-1">
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleBlockquote().run()" :class="{ 'text-primary': editor.isActive('blockquote') }">
+                                            <Quote class="w-4 h-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Blockquote</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                                <TooltipRoot>
+                                    <TooltipTrigger as-child>
+                                        <Button variant="ghost" size="icon" class="h-8 w-8" @click="editor.chain().focus().toggleDropcap().run()" :class="{ 'text-primary': editor.isActive('paragraph', { dropcap: true }) }">
+                                            <DropcapIcon class="w-4 h-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipPortal><TooltipContent class="tooltip-radix">Dropcap</TooltipContent></TooltipPortal>
+                                </TooltipRoot>
+                            </div>
+                            <div class="ribbon-group-label">Special</div>
+                        </div>
+                    </TabsContent>
+
+                    <!-- INSERT TAB -->
+                    <TabsContent value="insert" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
+                        <!-- Group: Media -->
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content gap-2">
+                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('openMedia')">
+                                    <ImageIcon class="w-5 h-5 opacity-70" />
+                                    <span class="text-[10px] font-medium">Image</span>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('insertTable')">
+                                    <TableIcon class="w-5 h-5 opacity-70" />
+                                    <span class="text-[10px] font-medium">Table</span>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Common</div>
+                        </div>
+
+                        <div class="ribbon-group">
+                            <div class="ribbon-group-content gap-2">
+                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('insertHtml')">
+                                    <FileCode2 class="w-5 h-5 opacity-70" />
+                                    <span class="text-[10px] font-medium">Embed</span>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="editor.chain().focus().setHorizontalRule().run()">
+                                    <Minus class="w-5 h-5 opacity-50" />
+                                    <span class="text-[10px] font-medium">Line</span>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Embeds</div>
+                        </div>
+                    </TabsContent>
+
+                    <!-- LAYOUT TAB -->
+                    <TabsContent value="layout" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
+                        <!-- Group: Newspaper -->
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content gap-2">
+                                <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" :class="{ 'text-primary': editor.isActive('textColumns', { count: 2 }) }" @click="editor.chain().focus().toggleTextColumns(2).run()">
+                                    <Columns class="w-4 h-4 opacity-70" />
+                                    <div class="flex flex-col items-start leading-none text-left">
+                                        <span class="text-[10px] font-medium">2 columns</span>
+                                        <span class="text-[9px] opacity-60">Flow layout</span>
+                                    </div>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" :class="{ 'text-primary': editor.isActive('textColumns', { count: 3 }) }" @click="editor.chain().focus().toggleTextColumns(3).run()">
+                                    <div class="flex gap-0.5 opacity-50">
+                                        <div class="w-0.5 h-3 bg-current rounded-full" />
+                                        <div class="w-0.5 h-3 bg-current rounded-full" />
+                                        <div class="w-0.5 h-3 bg-current rounded-full" />
+                                    </div>
+                                    <div class="flex flex-col items-start leading-none text-left">
+                                        <span class="text-[10px] font-medium">3 columns</span>
+                                        <span class="text-[9px] opacity-60">Flow layout</span>
+                                    </div>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Newspaper style</div>
+                        </div>
+
+                        <!-- Group: Grid -->
+                        <div class="ribbon-group">
+                            <div class="ribbon-group-content gap-2">
+                                <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" @click="editor.chain().focus().insertColumns({ count: 2 }).run()">
+                                    <LayoutGrid class="w-4 h-4 opacity-50" />
+                                    <div class="flex flex-col items-start leading-none text-left">
+                                        <span class="text-[10px] font-medium">2 grid</span>
+                                        <span class="text-[9px] opacity-60">Containers</span>
+                                    </div>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" @click="editor.chain().focus().insertColumns({ count: 3 }).run()">
+                                    <div class="grid grid-cols-3 gap-0.5 opacity-50">
+                                        <div class="w-1 h-3 bg-current rounded-sm" />
+                                        <div class="w-1 h-3 bg-current rounded-sm" />
+                                        <div class="w-1 h-3 bg-current rounded-sm" />
+                                    </div>
+                                    <div class="flex flex-col items-start leading-none text-left">
+                                        <span class="text-[10px] font-medium">3 grid</span>
+                                        <span class="text-[9px] opacity-60">Containers</span>
+                                    </div>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Grid system</div>
+                        </div>
+                    </TabsContent>
+
+                    <!-- CONTEXTUAL TABLE TAB -->
+                    <TabsContent v-if="editor.isActive('table')" value="table" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4 animate-in fade-in slide-in-from-top-1">
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content gap-1">
+                                <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center" @click="editor.chain().focus().addColumnAfter().run()">
+                                    <div class="relative">
+                                        <Table2 class="w-5 h-5 opacity-50" />
+                                        <Plus class="w-2 absolute -right-0.5 -bottom-0.5 bg-background rounded-full border border-primary text-primary" />
+                                    </div>
+                                    <span class="text-[10px] font-medium">Add col</span>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center" @click="editor.chain().focus().addRowAfter().run()">
+                                    <div class="relative">
+                                        <Table2 class="w-5 h-5 opacity-50 rotate-90" />
+                                        <Plus class="w-2 absolute -right-0.5 -bottom-0.5 bg-background rounded-full border border-primary text-primary" />
+                                    </div>
+                                    <span class="text-[10px] font-medium">Add row</span>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Structure</div>
+                        </div>
+
+                        <div class="ribbon-group border-r border-border/40">
+                            <div class="ribbon-group-content">
+                                <Button variant="ghost" size="icon" class="h-7 w-7" @click="editor.chain().focus().mergeCells().run()">
+                                    <Merge class="w-3.5 h-3.5 opacity-70" />
+                                </Button>
+                                <Button variant="ghost" size="icon" class="h-7 w-7" @click="editor.chain().focus().splitCell().run()">
+                                    <Split class="w-3.5 h-3.5 opacity-70" />
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Merge</div>
+                        </div>
+
+                        <div class="ribbon-group">
+                            <div class="ribbon-group-content gap-1">
+                                <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center text-destructive" @click="editor.chain().focus().deleteColumn().run()">
+                                    <Minus class="w-4 h-4" />
+                                    <span class="text-[10px] font-medium">Del col</span>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center text-destructive" @click="editor.chain().focus().deleteRow().run()">
+                                    <Minus class="w-4 h-4" />
+                                    <span class="text-[10px] font-medium">Del row</span>
+                                </Button>
+                                <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center text-destructive border-l ml-1 pl-3" @click="editor.chain().focus().deleteTable().run()">
+                                    <Trash2 class="w-4 h-4" />
+                                    <span class="text-[10px] font-medium">Delete</span>
+                                </Button>
+                            </div>
+                            <div class="ribbon-group-label">Danger</div>
+                        </div>
+                    </TabsContent>
+                </div>
+            </Tabs>
         </div>
-    </div>
+    </TooltipProvider>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/button.vue'
 import Select from '@/components/ui/select.vue'
 import SelectTrigger from '@/components/ui/select-trigger.vue'
 import SelectValue from '@/components/ui/select-value.vue'
 import SelectContent from '@/components/ui/select-content.vue'
 import SelectItem from '@/components/ui/select-item.vue'
+import Tabs from '@/components/ui/tabs.vue'
+import TabsList from '@/components/ui/tabs-list.vue'
+import TabsTrigger from '@/components/ui/tabs-trigger.vue'
+import TabsContent from '@/components/ui/tabs-content.vue'
+import ColorPicker from '@/components/ui/color-picker.vue'
+import { 
+    TooltipProvider, 
+    TooltipRoot, 
+    TooltipTrigger, 
+    TooltipContent, 
+    TooltipPortal 
+} from 'radix-vue'
+
 import { 
     Bold, 
     Italic, 
@@ -276,15 +433,13 @@ import {
     AlignRight,
     AlignJustify,
     Table as TableIcon,
-    Rows as RowsIcon,
+    Table2,
     Columns,
     Trash2,
-    Check,
     Palette,
-    Highlighter,
-    X,
     Merge,
     Split,
+    Plus,
     FileCode,
     FileCode2,
     Type as DropcapIcon,
@@ -298,31 +453,33 @@ const props = defineProps({
 
 defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml'])
 
-const showTextColorPicker = ref(false)
-const showHighlightPicker = ref(false)
+const activeTab = ref('home')
 
-// Color palettes
-const colorOptions = [
-    '#000000', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB',
-    '#EF4444', '#F97316', '#EAB308', '#22C55E', '#14B8A6',
-    '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E',
-]
+// Sync selected color with editor state
+const selectedColor = computed({
+    get: () => props.editor?.getAttributes('textStyle').color || '',
+    set: (color) => {
+        if (color) {
+            props.editor.chain().focus().setColor(color).run()
+        } else {
+            props.editor.chain().focus().unsetColor().run()
+        }
+    }
+})
 
-const highlightOptions = [
-    '#FEF9C3', '#FEF08A', '#FDE047', '#FACC15', '#EAB308',
-    '#D9F99D', '#BEF264', '#A3E635', '#84CC16', '#65A30D',
-    '#CCFBF1', '#99F6E4', '#5EEAD4', '#2DD4BF', '#14B8A6',
-    '#E0E7FF', '#C7D2FE', '#A5B4FC', '#818CF8', '#6366F1',
-    '#FCE7F3', '#FBCFE8', '#F9A8D4', '#F472B6', '#EC4899',
-]
+// Watch for table activity and auto-switch tab
+watch(() => props.editor?.isActive('table'), (isInTable) => {
+    if (isInTable) {
+        activeTab.value = 'table'
+    } else if (activeTab.value === 'table') {
+        activeTab.value = 'home'
+    }
+}, { immediate: true })
 
 function getHeaderLevel() {
     if (props.editor?.isActive('heading', { level: 1 })) return '1'
     if (props.editor?.isActive('heading', { level: 2 })) return '2'
     if (props.editor?.isActive('heading', { level: 3 })) return '3'
-    if (props.editor?.isActive('heading', { level: 4 })) return '4'
-    if (props.editor?.isActive('heading', { level: 5 })) return '5'
-    if (props.editor?.isActive('heading', { level: 6 })) return '6'
     return 'p'
 }
 
@@ -341,22 +498,81 @@ function getFontFamily() {
 function setFontFamily(val) {
     props.editor.chain().focus().setFontFamily(val).run()
 }
-
-function setTextColor(color) {
-    if (color) {
-        props.editor.chain().focus().setColor(color).run()
-    } else {
-        props.editor.chain().focus().unsetColor().run()
-    }
-    showTextColorPicker.value = false
-}
-
-function setHighlight(color) {
-    if (color) {
-        props.editor.chain().focus().setHighlight({ color }).run()
-    } else {
-        props.editor.chain().focus().unsetHighlight().run()
-    }
-    showHighlightPicker.value = false
-}
 </script>
+
+<style scoped>
+.editor-toolbar {
+    transition: all 0.3s ease;
+}
+
+/* Ribbon Group Styling */
+.ribbon-group {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: max-content;
+    padding: 0.25rem 0.5rem 0.125rem;
+}
+
+.ribbon-group-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.ribbon-group-label {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground) / 70%);
+    margin-top: 0.125rem;
+}
+
+/* Radix Tooltip Styling */
+.tooltip-radix {
+    z-index: 1000;
+    padding: 0.25rem 0.5rem;
+    background-color: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+    font-size: 10px;
+    font-weight: 400;
+    border-radius: 0.25rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid hsl(var(--border));
+    animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar Styling for Ribbon Overflow */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border) / 50%);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--border));
+}
+
+/* Refined Tab Styling */
+[role="tab"] {
+    position: relative;
+    overflow: hidden;
+}
+
+/* keyboard support */
+button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+}
+</style>

@@ -1,6 +1,9 @@
 <template>
     <Popover>
-        <PopoverTrigger as-child>
+        <PopoverTrigger as-child v-if="$slots.default">
+            <slot />
+        </PopoverTrigger>
+        <PopoverTrigger as-child v-else>
             <button 
                 class="w-8 h-8 rounded border border-border shadow-sm shrink-0 cursor-pointer transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden"
                 :style="{ backgroundColor: modelValue || '#000000' }"
