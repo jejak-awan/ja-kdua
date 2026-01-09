@@ -22,7 +22,7 @@
                 >
                     <div class="flex items-center gap-2">
                         <GripHorizontal class="w-3.5 h-3.5 text-muted-foreground" />
-                        <h3 class="text-sm font-semibold text-foreground">Media Properties</h3>
+                        <h3 class="text-sm font-semibold text-foreground">{{ t('features.editor.properties.title') }}</h3>
                     </div>
                     <Button variant="ghost" size="icon" class="h-6 w-6 rounded-full hover:bg-destructive/10 hover:text-destructive" @pointerdown.stop @click="$emit('update:open', false)">
                         <X class="w-3.5 h-3.5" />
@@ -33,23 +33,23 @@
                 <Accordion type="single" collapsible default-value="general">
                     <!-- HTML Content (Embed Specific) -->
                     <AccordionItem value="html-content" class="border-b px-3" v-if="isHtmlEmbedNode">
-                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">HTML Content</AccordionTrigger>
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.html') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4">
                             <textarea 
                                 v-model="form.html" 
                                 class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono"
-                                placeholder="Paste your HTML code here..."
+                                :placeholder="t('features.editor.placeholders.html')"
                             ></textarea>
                         </AccordionContent>
                     </AccordionItem>
 
                     <!-- General Settings (Not for Embeds) -->
                     <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode">
-                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">General Settings</AccordionTrigger>
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.general') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <!-- Source URL -->
                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Source URL</label>
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.source') }}</label>
                                 <div class="flex gap-1.5">
                                     <Input v-model="form.src" placeholder="https://..." class="h-8 text-xs" />
                                 </div>
@@ -57,14 +57,14 @@
                             
                             <!-- Display Mode -->
                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Display mode</label>
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.displayMode') }}</label>
                                 <div class="grid grid-cols-2 gap-1.5">
                                     <Button 
                                         v-for="mode in [
-                                            { val: 'block', lab: 'Block' },
-                                            { val: 'inline', lab: 'Inline' },
-                                            { val: 'float-left', lab: 'Wrap Left' },
-                                            { val: 'float-right', lab: 'Wrap Right' }
+                                            { val: 'block', lab: t('features.editor.values.block') },
+                                            { val: 'inline', lab: t('features.editor.values.inline') },
+                                            { val: 'float-left', lab: t('features.editor.values.floatLeft') },
+                                            { val: 'float-right', lab: t('features.editor.values.floatRight') }
                                         ]" 
                                         :key="mode.val"
                                         variant="outline"
@@ -80,7 +80,7 @@
 
                             <!-- Alignment -->
                             <div class="space-y-1.5" v-if="form.displayMode === 'block'">
-                                <label class="text-[11px] font-medium text-muted-foreground">Alignment</label>
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.alignment') }}</label>
                                 <div class="flex gap-1.5">
                                     <Button 
                                         v-for="align in ['left', 'center', 'right']" 
@@ -98,19 +98,19 @@
 
                             <!-- Alt Text -->
                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Alt text</label>
-                                <Input v-model="form.alt" placeholder="Description..." class="h-8 text-xs" />
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.altText') }}</label>
+                                <Input v-model="form.alt" :placeholder="t('features.editor.placeholders.alt')" class="h-8 text-xs" />
                             </div>
                         </AccordionContent>
                     </AccordionItem>
 
                     <!-- Dimensions -->
                     <AccordionItem value="dimensions" class="border-b px-3">
-                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Dimensions</AccordionTrigger>
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.dimensions') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4">
                             <div class="flex items-end gap-2">
                                 <div class="space-y-1.5 flex-1">
-                                    <label class="text-[11px] font-medium text-muted-foreground">Width</label>
+                                    <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.width') }}</label>
                                     <Input v-model="form.width" placeholder="auto" class="h-8 text-xs" @input="onDimensionChange('width')" />
                                 </div>
                                 
@@ -121,7 +121,7 @@
                                         class="h-6 w-6 text-muted-foreground"
                                         :class="{ 'bg-muted text-primary': constrainProportions }"
                                         @click="constrainProportions = !constrainProportions"
-                                        title="Constrain proportions"
+                                        :title="t('features.editor.actions.constrainProportions')"
                                     >
                                         <LinkIcon v-if="constrainProportions" class="w-3.5 h-3.5" />
                                         <UnlinkIcon v-else class="w-3.5 h-3.5" />
@@ -129,7 +129,7 @@
                                 </div>
 
                                 <div class="space-y-1.5 flex-1">
-                                    <label class="text-[11px] font-medium text-muted-foreground">Height</label>
+                                    <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.height') }}</label>
                                     <Input v-model="form.height" placeholder="auto" class="h-8 text-xs" @input="onDimensionChange('height')" />
                                 </div>
                             </div>
@@ -138,18 +138,18 @@
                     
                     <!-- Video Settings -->
                     <AccordionItem value="video" class="border-b px-3" v-if="isVideoNode || isYoutubeEmbed">
-                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Video Playback</AccordionTrigger>
+                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.video') }}</AccordionTrigger>
                          <AccordionContent class="pt-1 pb-4 space-y-3">
                             <div class="flex items-center justify-between group">
-                                <label for="video-autoplay" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Autoplay</label>
+                                <label for="video-autoplay" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">{{ t('features.editor.fields.autoplay') }}</label>
                                 <Switch id="video-autoplay" v-model:checked="form.autoplay" class="scale-75 origin-right" />
                             </div>
                             <div class="flex items-center justify-between group">
-                                <label for="video-controls" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Controls</label>
+                                <label for="video-controls" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">{{ t('features.editor.fields.controls') }}</label>
                                 <Switch id="video-controls" v-model:checked="form.controls" class="scale-75 origin-right" />
                             </div>
                             <div class="flex items-center justify-between group">
-                                <label for="video-loop" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Loop</label>
+                                <label for="video-loop" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">{{ t('features.editor.fields.loop') }}</label>
                                 <Switch id="video-loop" v-model:checked="form.loop" class="scale-75 origin-right" />
                             </div>
                          </AccordionContent>
@@ -157,32 +157,32 @@
 
                     <!-- Appearance -->
                     <AccordionItem value="appearance" class="px-3 border-b-0">
-                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Appearance</AccordionTrigger>
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">{{ t('features.editor.properties.appearance') }}</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="space-y-1.5">
-                                    <label class="text-[11px] font-medium text-muted-foreground">Radius (px)</label>
+                                    <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.borderRadius') }}</label>
                                     <Input v-model="form.borderRadius" type="number" placeholder="0" class="h-8 text-xs" />
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label class="text-[11px] font-medium text-muted-foreground">Border (px)</label>
+                                    <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.borderWidth') }}</label>
                                     <Input v-model="form.borderWidth" type="number" placeholder="0" class="h-8 text-xs" />
                                 </div>
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Border color</label>
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.borderColor') }}</label>
                                 <div class="flex gap-2 items-center">
-                                    <ColorPicker v-model="form.borderColor" title="Border Color">
+                                    <ColorPicker v-model="form.borderColor" :title="t('features.editor.fields.borderColor')">
                                         <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
                                              <Palette class="w-4 h-4 text-muted-foreground" v-if="!form.borderColor" />
                                              <div v-else class="absolute inset-0" :style="{ backgroundColor: form.borderColor }"></div>
                                         </Button>
                                     </ColorPicker>
-                                    <Input v-model="form.borderColor" placeholder="None" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                    <Input v-model="form.borderColor" :placeholder="t('features.editor.placeholders.none')" class="h-8 text-xs flex-1 uppercase font-mono" />
                                 </div>
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-[11px] font-medium text-muted-foreground">Wrap spacing (px)</label>
+                                <label class="text-[11px] font-medium text-muted-foreground">{{ t('features.editor.fields.margin') }}</label>
                                 <Input v-model="form.margin" type="number" placeholder="16" class="h-8 text-xs" />
                             </div>
                         </AccordionContent>
@@ -191,8 +191,8 @@
             </div>
 
             <div class="flex justify-end gap-2 p-3 border-t bg-muted/10">
-                <Button variant="outline" size="sm" class="h-7 text-xs px-3" @click="$emit('update:open', false)">Cancel</Button>
-                <Button size="sm" class="h-7 text-xs px-3" @click="save">Save changes</Button>
+                <Button variant="outline" size="sm" class="h-7 text-xs px-3" @click="$emit('update:open', false)">{{ t('features.editor.actions.cancel') }}</Button>
+                <Button size="sm" class="h-7 text-xs px-3" @click="save">{{ t('features.editor.actions.save') }}</Button>
             </div>
             </div>
         </PopoverContent>
@@ -214,6 +214,9 @@ import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
 import AccordionContent from '@/components/ui/accordion-content.vue'
 import ColorPicker from '@/components/ui/color-picker.vue'
 import Switch from '@/components/ui/switch.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
     open: Boolean,

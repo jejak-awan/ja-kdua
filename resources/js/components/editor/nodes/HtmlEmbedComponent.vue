@@ -41,29 +41,31 @@
             <!-- Interact Toggle Button (Visible when selected) -->
             <div v-if="selected || isInteractive" class="absolute top-2 right-2 z-50 flex gap-1 bg-background/80 backdrop-blur-sm p-1 rounded-md shadow-sm border border-border/50">
                  <button 
-                    @click.stop="fitToContent"
-                    class="p-1.5 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                    title="Fit to Content (Reset Size)"
-                 >
-                    <Maximize2 class="w-3.5 h-3.5" />
-                 </button>
-                 <div class="w-px bg-border/50 mx-0.5"></div>
-                 <button 
+                    @click="fitToContent"
+                    class="p-1.5 bg-background text-foreground rounded-md shadow-sm border border-border/50 hover:bg-muted transition-colors"
+                    :title="t('features.editor.actions.fit')"
+                >
+                    <Maximize2 class="w-4 h-4" />
+                </button>
+                <div class="h-4 w-px bg-border/50 mx-1"></div>
+                <button 
                     v-if="!isInteractive"
-                    @click.stop="startInteraction"
-                    class="p-1.5 rounded-sm hover:bg-primary hover:text-primary-foreground text-muted-foreground transition-colors"
-                    title="Interact with content"
-                 >
+                    @click="startInteraction" 
+                    class="flex items-center gap-1.5 px-2 py-1.5 bg-background text-foreground rounded-md shadow-sm border border-border/50 hover:bg-muted transition-colors text-xs font-medium"
+                    :title="t('features.editor.actions.interact')"
+                >
                     <MousePointerClick class="w-3.5 h-3.5" />
-                 </button>
-                 <button 
+                    <span>Interact</span>
+                </button>
+                <button 
                     v-else
-                    @click.stop="stopInteraction"
-                    class="p-1.5 rounded-sm hover:bg-destructive hover:text-destructive-foreground text-foreground transition-colors"
-                    title="Stop interaction"
-                 >
+                    @click="stopInteraction" 
+                    class="flex items-center gap-1.5 px-2 py-1.5 bg-primary text-primary-foreground rounded-md shadow-sm hover:bg-primary/90 transition-colors text-xs font-medium"
+                    :title="t('features.editor.actions.stopInteraction')"
+                >
                     <X class="w-3.5 h-3.5" />
-                 </button>
+                    <span>Close</span>
+                </button>
             </div>
 
             <div 
@@ -73,11 +75,11 @@
                 :class="{ 'is-interactive': isInteractive }"
                 v-html="sanitizedHtml"
             ></div>
-            <div v-else class="html-embed-empty">
-                <Code class="w-8 h-8 text-muted-foreground mb-2" />
-                <p class="text-sm text-muted-foreground">Empty HTML Embed</p>
-                <p class="text-xs text-muted-foreground/70">Double click to configure</p>
-            </div>
+            <div class="flex flex-col items-center gap-2 text-muted-foreground select-none">
+            <Code class="w-8 h-8 opacity-50" />
+            <div class="text-sm font-medium">{{ t('features.editor.embed.empty') }}</div>
+            <div class="text-xs opacity-75">{{ t('features.editor.embed.configure') }}</div>
+        </div>
         </div>
     </node-view-wrapper>
 </template>
@@ -87,6 +89,9 @@ import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { Code, MousePointerClick, X, Maximize2 } from 'lucide-vue-next'
 import DOMPurify from 'dompurify'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
 // ... (props unchanged)

@@ -1,0 +1,53 @@
+{
+    "properties": {
+        "title": "Properti Media",
+        "html": "Konten HTML",
+        "general": "Pengaturan Umum",
+        "dimensions": "Dimensi",
+        "video": "Pemutaran Video",
+        "appearance": "Tampilan"
+    },
+    "fields": {
+        "source": "URL Sumber",
+        "displayMode": "Mode Tampilan",
+        "alignment": "Perataan",
+        "altText": "Teks Alt",
+        "width": "Lebar",
+        "height": "Tinggi",
+        "borderRadius": "Radius (px)",
+        "borderWidth": "Border (px)",
+        "borderColor": "Warna Border",
+        "margin": "Jarak Wrap (px)",
+        "autoplay": "Putar Otomatis",
+        "controls": "Kontrol",
+        "loop": "Putar Berulang"
+    },
+    "values": {
+        "block": "Blok",
+        "inline": "Inline",
+        "floatLeft": "Rata Kiri (Wrap)",
+        "floatRight": "Rata Kanan (Wrap)",
+        "left": "Kiri",
+        "center": "Tengah",
+        "right": "Kanan"
+    },
+    "placeholders": {
+        "html": "Tempel kode HTML di sini...",
+        "src": "https://...",
+        "alt": "Deskripsi...",
+        "auto": "otomatis",
+        "none": "Tidak ada"
+    },
+    "actions": {
+        "save": "Simpan Perubahan",
+        "cancel": "Batal",
+        "fit": "Sesuaikan Konten (Reset)",
+        "interact": "Interaksi dengan konten",
+        "stopInteraction": "Hentikan interaksi",
+        "constrainProportions": "Kunci proporsi"
+    },
+    "embed": {
+        "empty": "HTML Embed Kosong",
+        "configure": "Klik ganda untuk konfigurasi"
+    }
+}

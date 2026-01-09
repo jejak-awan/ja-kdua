@@ -1,0 +1,53 @@
+{
+    "properties": {
+        "title": "Media Properties",
+        "html": "HTML Content",
+        "general": "General Settings",
+        "dimensions": "Dimensions",
+        "video": "Video Playback",
+        "appearance": "Appearance"
+    },
+    "fields": {
+        "source": "Source URL",
+        "displayMode": "Display mode",
+        "alignment": "Alignment",
+        "altText": "Alt text",
+        "width": "Width",
+        "height": "Height",
+        "borderRadius": "Radius (px)",
+        "borderWidth": "Border (px)",
+        "borderColor": "Border color",
+        "margin": "Wrap spacing (px)",
+        "autoplay": "Autoplay",
+        "controls": "Controls",
+        "loop": "Loop"
+    },
+    "values": {
+        "block": "Block",
+        "inline": "Inline",
+        "floatLeft": "Wrap Left",
+        "floatRight": "Wrap Right",
+        "left": "Left",
+        "center": "Center",
+        "right": "Right"
+    },
+    "placeholders": {
+        "html": "Paste your HTML code here...",
+        "src": "https://...",
+        "alt": "Description...",
+        "auto": "auto",
+        "none": "None"
+    },
+    "actions": {
+        "save": "Save changes",
+        "cancel": "Cancel",
+        "fit": "Fit to Content (Reset Size)",
+        "interact": "Interact with content",
+        "stopInteraction": "Stop interaction",
+        "constrainProportions": "Constrain proportions"
+    },
+    "embed": {
+        "empty": "Empty HTML Embed",
+        "configure": "Double click to configure"
+    }
+}
