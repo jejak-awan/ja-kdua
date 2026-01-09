@@ -41,7 +41,9 @@ const fetchSettings = async () => {
         } else if (props.action === 'register') {
             enabled.value = data.enabled_register
         } else if (props.action === 'comment') {
-            enabled.value = data.enabled_comment
+            enabled.value = data.enabled_comment || data.enabled_guest_comment
+        } else if (props.action === 'contact') {
+            enabled.value = data.enabled_contact
         } else {
             enabled.value = false
         }

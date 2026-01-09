@@ -29,6 +29,7 @@
     "messages": {
         "loading": "Memuat...",
         "empty": "Tidak ada menu ditemukan",
+        "emptyHint": "Tarik item dari sidebar kiri untuk mulai membangun menu Anda.",
         "emptyItems": "Tidak ada item menu. Klik \"Tambah Item\" untuk memulai.",
         "deleteConfirm": "Anda yakin ingin menghapus menu \"{name}\"?",
         "deleteItemConfirm": "Anda yakin ingin menghapus \"{title}\"?",

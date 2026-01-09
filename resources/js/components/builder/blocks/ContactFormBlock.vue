@@ -56,6 +56,10 @@
                                 </template>
                             </div>
                         </template>
+                        
+                        <div class="w-full">
+                            <CaptchaWrapper action="contact" @verified="onCaptchaVerified" />
+                        </div>
 
                         <div class="w-full mt-4">
                             <button 
@@ -87,8 +91,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { Loader2, Check } from 'lucide-vue-next';
+import CaptchaWrapper from '../../captcha/CaptchaWrapper.vue';
+import api from '../../../services/api';
 
 defineOptions({
   inheritAttrs: false
@@ -113,18 +119,42 @@ const props = defineProps({
     bgColor: String,
     radius: { type: String, default: 'rounded-none' },
     animation: { type: String, default: '' },
-    alignment: { type: String, default: 'text-left' }
+    alignment: { type: String, default: 'text-left' },
+    formSlug: { type: String, default: 'contact' }
 });
 
 const submitted = ref(false);
 const submitting = ref(false);
+const error = ref('');
+const captchaPayload = reactive({
+    token: '',
+    answer: ''
+});
 
-const handleSubmit = () => {
+const onCaptchaVerified = (payload) => {
+    captchaPayload.token = payload.token;
+    captchaPayload.answer = payload.answer;
+};
+
+const handleSubmit = async (e) => {
     submitting.value = true;
-    // Simulate API call
-    setTimeout(() => {
-        submitting.value = false;
+    error.value = '';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Add captcha data
+        data.captcha_token = captchaPayload.token;
+        data.captcha_answer = captchaPayload.answer;
+
+        await api.post(`/cms/forms/${props.formSlug}/submit`, data);
         submitted.value = true;
-    }, 1500);
+    } catch (err) {
+        console.error('Form submission failed:', err);
+        error.value = err.response?.data?.message || 'Failed to send message. Please try again.';
+    } finally {
+        submitting.value = false;
+    }
 };
 </script>

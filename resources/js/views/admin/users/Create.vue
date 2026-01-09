@@ -101,6 +101,22 @@
                         </p>
                     </div>
 
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground">
+                            {{ $t('features.users.form.passwordConfirmation') || 'Confirm Password' }} <span class="text-destructive">*</span>
+                        </label>
+                        <Input
+                            v-model="form.password_confirmation"
+                            type="password"
+                            required
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password_confirmation }"
+                            :placeholder="$t('features.users.form.placeholders.passwordConfirmation') || 'Repeat password'"
+                        />
+                        <p v-if="errors.password_confirmation" class="text-sm text-destructive">
+                            {{ Array.isArray(errors.password_confirmation) ? errors.password_confirmation[0] : errors.password_confirmation }}
+                        </p>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.phone') }}
@@ -248,12 +264,14 @@ const form = ref({
     location: '',
     avatar: null,
     roles: [],
+    password_confirmation: '',
 });
 
 const isValid = computed(() => {
     return !!form.value.name?.trim() && 
            !!form.value.email?.trim() && 
            !!form.value.password?.trim() &&
+           !!form.value.password_confirmation?.trim() &&
            form.value.roles.length > 0;
 });
 

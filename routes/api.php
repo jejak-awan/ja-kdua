@@ -97,6 +97,8 @@ Route::prefix('v1')->group(function () {
             return response()->json($form);
         })->middleware('throttle:10,1'); // 10 form views per minute
 
+        Route::post('/forms/{form:slug}/submit', [App\Http\Controllers\Api\V1\FormController::class, 'submit'])->middleware('throttle:10,1');
+
         // Search (public - with rate limiting: 30 requests per minute)
         Route::get('/search', [App\Http\Controllers\Api\V1\SearchController::class, 'search'])->middleware('throttle:30,1');
         Route::get('/search/suggestions', [App\Http\Controllers\Api\V1\SearchController::class, 'suggestions'])->middleware('throttle:30,1');

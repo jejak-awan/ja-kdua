@@ -69,28 +69,39 @@
 
                     <!-- Contact Form Card -->
                     <div class="bg-card p-8 rounded-2xl border border-border/50 shadow-xl">
-                        <form class="space-y-6" @submit.prevent>
-                            <div class="grid grid-cols-2 gap-4">
+                        <form class="space-y-6" @submit.prevent="handleSubmit">
+                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <label class="text-sm font-medium">First Name</label>
-                                    <input type="text" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="John">
+                                    <input v-model="form.first_name" type="text" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="John" required>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-medium">Last Name</label>
-                                    <input type="text" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="Doe">
+                                    <input v-model="form.last_name" type="text" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="Doe" required>
                                 </div>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-sm font-medium">Email</label>
-                                <input type="email" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="john@example.com">
+                                <input v-model="form.email" type="email" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="john@example.com" required>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-sm font-medium">Message</label>
-                                <textarea rows="4" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="How can we help?"></textarea>
+                                <textarea v-model="form.message" rows="4" class="w-full px-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="How can we help?" required></textarea>
                             </div>
-                            <button type="submit" class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-lg">
-                                Send Message
+
+                            <CaptchaWrapper action="contact" @verified="onCaptchaVerified" />
+
+                            <div v-if="submitError" class="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                                {{ submitError }}
+                            </div>
+
+                            <button v-if="!submitted" type="submit" class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-lg disabled:opacity-50" :disabled="submitting">
+                                {{ submitting ? 'Sending...' : 'Send Message' }}
                             </button>
+                            
+                            <div v-else class="bg-green-500/10 text-green-500 p-4 rounded-lg text-center font-bold">
+                                {{ $t('features.frontend.contact.success') || 'Message sent successfully!' }}
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -101,14 +112,59 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue'
+import CaptchaWrapper from '@/components/captcha/CaptchaWrapper.vue'
 
 const { t } = useI18n()
 const pageData = ref(null)
 const loading = ref(true)
+const submitting = ref(false)
+const submitted = ref(false)
+const submitError = ref('')
+
+const form = reactive({
+  first_name: '',
+  last_name: '',
+  email: '',
+  message: ''
+})
+
+const captchaPayload = reactive({
+  token: '',
+  answer: ''
+})
+
+const onCaptchaVerified = (payload) => {
+  captchaPayload.token = payload.token
+  captchaPayload.answer = payload.answer
+}
+
+const handleSubmit = async () => {
+  submitting.value = true
+  submitError.value = ''
+  
+  try {
+    await api.post('/cms/forms/contact/submit', {
+      ...form,
+      captcha_token: captchaPayload.token,
+      captcha_answer: captchaPayload.answer
+    })
+    submitted.value = true
+    // Reset form
+    form.first_name = ''
+    form.last_name = ''
+    form.email = ''
+    form.message = ''
+  } catch (err) {
+    console.error('Failed to submit form:', err)
+    submitError.value = err.response?.data?.message || 'Failed to send message. Please try again.'
+  } finally {
+    submitting.value = false
+  }
+}
 
 onMounted(async () => {
   try {

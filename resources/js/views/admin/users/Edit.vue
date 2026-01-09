@@ -106,6 +106,21 @@
                         </p>
                     </div>
 
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground">
+                            {{ $t('features.users.form.passwordConfirmation') || 'Confirm Password' }}
+                        </label>
+                        <Input
+                            v-model="form.password_confirmation"
+                            type="password"
+                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password_confirmation }"
+                            :placeholder="$t('features.users.form.placeholders.passwordConfirmation') || 'Repeat password'"
+                        />
+                        <p v-if="errors.password_confirmation" class="text-sm text-destructive">
+                            {{ Array.isArray(errors.password_confirmation) ? errors.password_confirmation[0] : errors.password_confirmation }}
+                        </p>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-foreground mb-1">
                             {{ $t('features.users.form.phone') }}
@@ -269,6 +284,7 @@ const form = ref({
     avatar: null,
     roles: [],
     is_verified: false,
+    password_confirmation: '',
 });
 
 const initialForm = ref(null);

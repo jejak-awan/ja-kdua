@@ -69,6 +69,7 @@ class CaptchaService
             'login' => (bool) Setting::get('captcha_on_login', true),
             'register' => (bool) Setting::get('captcha_on_register', true),
             'comment' => (bool) Setting::get('comments.security.guest_captcha', true),
+            'contact', 'message' => (bool) Setting::get('captcha_on_contact', true),
             default => true,
         };
     }

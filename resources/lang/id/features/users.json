@@ -97,6 +97,7 @@
         "email": "Email",
         "emailPlaceholder": "user{'@'}teladan.com",
         "password": "Kata Sandi",
+        "passwordConfirmation": "Konfirmasi Kata Sandi",
         "phone": "Telepon",
         "bio": "Bio",
         "website": "Situs Web",
@@ -106,6 +107,7 @@
         "placeholders": {
             "passwordCurrent": "Kata sandi",
             "password": "Minimal 8 karakter",
+            "passwordConfirmation": "Ulangi kata sandi",
             "phone": "+6281234567890",
             "bio": "Biografi pengguna",
             "website": "https://contoh.com",

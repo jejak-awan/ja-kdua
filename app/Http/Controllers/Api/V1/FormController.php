@@ -246,6 +246,19 @@ class FormController extends BaseApiController
             $rules[$field->name] = $field->getValidationRules();
         }
 
+        // Check for captcha if enabled for contact forms
+        if (\App\Services\CaptchaService::isEnabled('contact')) {
+            $request->validate([
+                'captcha_token' => 'required|string',
+                'captcha_answer' => 'required|string',
+            ]);
+
+            $captchaService = new \App\Services\CaptchaService();
+            if (!$captchaService->verify($request->captcha_token, $request->captcha_answer)) {
+                return $this->error('Invalid captcha', 422);
+            }
+        }
+
         $validated = $request->validate($rules);
 
         // Create submission

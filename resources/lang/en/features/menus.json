@@ -29,6 +29,7 @@
     "messages": {
         "loading": "Loading...",
         "empty": "No menus found",
+        "emptyHint": "Drag items from the left sidebar to start building your menu.",
         "emptyItems": "No menu items. Click \"Add Item\" to get started.",
         "deleteConfirm": "Are you sure you want to delete menu \"{name}\"?",
         "deleteItemConfirm": "Are you sure you want to delete \"{title}\"?",
