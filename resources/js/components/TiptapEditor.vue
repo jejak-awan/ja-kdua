@@ -264,7 +264,7 @@ function openProperties() {
     let type = 'image'
     if (editor.value.isActive('video')) type = 'video'
     else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
-    else if (editor.value.isActive('shape')) type = 'shape'
+    else if (editor.value.isActive('icon')) type = 'icon'
 
     selectedNodeForProperties.value = {
         type,
@@ -337,7 +337,7 @@ const handleContextMenu = (e) => {
     const items = []
 
     // Contextual actions based on selection
-    if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed')) {
+    if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('icon')) {
         items.push({ label: 'Properties', icon: SettingsIcon, action: 'properties' })
         items.push({ label: 'Delete', icon: Trash2, action: 'delete' })
     } else if (editor.value.isActive('table')) {
@@ -371,9 +371,9 @@ const handleContextMenuAction = (action) => {
             const isImage = editor.value.isActive('image')
             const isVideo = editor.value.isActive('video')
             const isHtmlEmbed = editor.value.isActive('htmlEmbed')
-            const isShape = editor.value.isActive('shape')
+            const isIcon = editor.value.isActive('icon')
             
-            const nodeType = isImage ? 'image' : (isVideo ? 'video' : (isHtmlEmbed ? 'htmlEmbed' : (isShape ? 'shape' : null)))
+            const nodeType = isImage ? 'image' : (isVideo ? 'video' : (isHtmlEmbed ? 'htmlEmbed' : (isIcon ? 'icon' : null)))
             
             if (nodeType) {
                 editor.value.chain().focus().deleteNode(nodeType).run()
