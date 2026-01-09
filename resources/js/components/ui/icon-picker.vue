@@ -107,7 +107,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const open = ref(false);
 const searchQuery = ref('');
-const activeTab = ref('all');
+const activeTab = ref('General');
 
 const selectedIcon = computed(() => props.modelValue);
 
