@@ -46,7 +46,7 @@
                     <!-- Icon Settings -->
                     <AccordionItem value="icon-settings" class="border-b px-3" v-if="isIconNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Icon Style</AccordionTrigger>
-                        <AccordionContent class="pt-1 pb-4 space-y-3">
+                        <AccordionContent class="pt-1 pb-4 space-y-4">
                             <div class="grid grid-cols-2 gap-3">
                                 <!-- Size -->
                                 <div class="space-y-1.5">
@@ -66,6 +66,59 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Stroke & Rotate -->
+                            <div class="grid grid-cols-2 gap-3">
+                                 <div class="space-y-1.5">
+                                    <label class="text-[11px] font-medium text-muted-foreground flex justify-between">
+                                        Stroke Width <span>{{ form.strokeWidth }}px</span>
+                                    </label>
+                                    <input type="range" v-model.number="form.strokeWidth" min="0.5" max="4" step="0.5" class="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[11px] font-medium text-muted-foreground flex justify-between">
+                                        Rotate <span>{{ form.rotate }}°</span>
+                                    </label>
+                                     <input type="range" v-model.number="form.rotate" min="0" max="360" step="15" class="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer" />
+                                </div>
+                            </div>
+                            
+                            <!-- Opacity -->
+                             <div class="space-y-1.5">
+                                <label class="text-[11px] font-medium text-muted-foreground flex justify-between">
+                                    Opacity <span>{{ form.opacity * 100 }}%</span>
+                                </label>
+                                <input type="range" v-model.number="form.opacity" min="0" max="1" step="0.1" class="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer" />
+                            </div>
+
+                             <!-- Background & Padding -->
+                             <AccordionItem value="icon-appearance" class="border-t pt-2 -mx-0">
+                                <AccordionTrigger class="text-[11px] font-medium py-1.5 hover:no-underline text-muted-foreground">Background & Spacing</AccordionTrigger>
+                                <AccordionContent class="pt-2 pb-0 space-y-3">
+                                    <div class="space-y-1.5">
+                                        <label class="text-[11px] font-medium text-muted-foreground">Background Color</label>
+                                        <div class="flex gap-2 items-center">
+                                            <ColorPicker v-model="form.backgroundColor">
+                                                <Button variant="outline" size="icon" class="h-8 w-8 p-0 shrink-0 relative overflow-hidden">
+                                                     <Palette class="w-3.5 h-3.5 text-muted-foreground" v-if="!form.backgroundColor" />
+                                                    <div v-else class="absolute inset-0" :style="{ backgroundColor: form.backgroundColor }"></div>
+                                                </Button>
+                                            </ColorPicker>
+                                            <Input v-model="form.backgroundColor" placeholder="None" class="h-8 text-xs flex-1 uppercase font-mono" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="space-y-1.5">
+                                            <label class="text-[11px] font-medium text-muted-foreground">Padding</label>
+                                            <Input v-model="form.padding" placeholder="0px" class="h-8 text-xs" />
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <label class="text-[11px] font-medium text-muted-foreground">Radius</label>
+                                            <Input v-model="form.borderRadius" placeholder="0px" class="h-8 text-xs" />
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                             </AccordionItem>
                         </AccordionContent>
                     </AccordionItem>
 
@@ -304,7 +357,12 @@ const form = ref({
     className: '',
     // Icon specific
     size: '1em',
+    size: '1em',
     color: 'currentColor',
+    strokeWidth: 2,
+    rotate: 0,
+    backgroundColor: '',
+    opacity: 1,
     // Video specific
     autoplay: false,
     controls: true,
@@ -342,12 +400,18 @@ watch(() => props.open, (isOpen) => {
                 className: attrs.class || '',
 
                 // Icon attrs
+                // Icon attrs
                 size: attrs.size || '1em',
                 color: attrs.color || 'currentColor',
+                strokeWidth: attrs.strokeWidth || 2,
+                rotate: attrs.rotate || 0,
+                backgroundColor: attrs.backgroundColor || '',
+                opacity: attrs.opacity !== undefined ? attrs.opacity : 1, // Default 1
                 
-                borderRadius: parseInt(attrs.borderRadius) || 0,
+                borderRadius: attrs.borderRadius || '0', // Can be string for icons '50%'
                 borderWidth: parseInt(attrs.borderWidth) || 0,
                 borderColor: attrs.borderColor || '',
+                padding: attrs.padding || '0',
                 align: attrs.align || 'center',
                 alt: attrs.alt || '',
                 displayMode: attrs.displayMode || 'block',
@@ -477,6 +541,12 @@ const save = () => {
     } else if (isIconNode.value) {
         baseAttrs.size = form.value.size
         baseAttrs.color = form.value.color
+        baseAttrs.strokeWidth = form.value.strokeWidth
+        baseAttrs.rotate = form.value.rotate
+        baseAttrs.backgroundColor = form.value.backgroundColor
+        baseAttrs.borderRadius = form.value.borderRadius
+        baseAttrs.padding = form.value.padding
+        baseAttrs.opacity = form.value.opacity
     } else {
         // Clean up video attrs if not video
         delete baseAttrs.autoplay
