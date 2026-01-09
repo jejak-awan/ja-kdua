@@ -42,18 +42,35 @@
             @update:height="updateBlockSize('height', $event)"
             @resize-end="onResizeEnd"
         >
-            <div class="relative h-full">
+            <div 
+                ref="contentRef"
+                class="relative"
+                :class="[
+                    !builder.isPreview.value && !isStructuralBlock ? 'builder-block-content' : 'h-full',
+                    hasOverflow && !builder.isPreview.value ? 'has-overflow' : ''
+                ]"
+            >
                 <BlockRenderer :blocks="[block]" :context="context" class="builder-render h-full" />
                 <!-- Overlay to capture clicks (prevents clicking links inside blocks) -->
                 <!-- Uses pointer-events-none so drag-drop passes through to nested components -->
                 <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
+                
+                <!-- Overflow Indicator -->
+                <div 
+                    v-if="hasOverflow && !builder.isPreview.value" 
+                    class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-zinc-900 to-transparent pointer-events-none z-[6] flex items-end justify-center pb-1"
+                >
+                    <span class="text-[9px] font-bold text-muted-foreground bg-white/80 dark:bg-zinc-900/80 px-2 py-0.5 rounded-full border border-border shadow-sm">
+                        ↓ Scroll for more
+                    </span>
+                </div>
             </div>
         </ResizableWrapper>
     </div>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { GripVertical, Copy, Trash2, Settings2, Box, Columns } from 'lucide-vue-next';
 import BlockRenderer from '../blocks/BlockRenderer.vue';
@@ -131,4 +148,54 @@ const onResizeEnd = () => {
     if (builder) builder.takeSnapshot();
 };
 
+// Overflow detection
+const contentRef = ref(null);
+const hasOverflow = ref(false);
+
+const checkOverflow = () => {
+    if (!contentRef.value) return;
+    hasOverflow.value = contentRef.value.scrollHeight > contentRef.value.clientHeight;
+};
+
+onMounted(() => {
+    nextTick(checkOverflow);
+    // Recheck on window resize
+    window.addEventListener('resize', checkOverflow);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', checkOverflow);
+});
+
+// Watch for content changes
+watch(() => props.block.settings, () => {
+    nextTick(checkOverflow);
+}, { deep: true });
+
 </script>
+
+<style scoped>
+.builder-block-content {
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+.builder-block-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.builder-block-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.builder-block-content::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+}
+
+.builder-block-content::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+}
+</style>
