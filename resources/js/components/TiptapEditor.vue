@@ -266,22 +266,29 @@ function openProperties() {
     else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
     else if (editor.value.isActive('icon')) type = 'icon'
 
+    // Get current selection position
+    const { from } = editor.value.state.selection
+
     selectedNodeForProperties.value = {
         type,
+        pos: from,
         attrs: editor.value.getAttributes(type)
     }
     
     // Get DOM element for anchoring
-    const { selection } = editor.value.state
-    const dom = editor.value.view.nodeDOM(selection.from)
+    const dom = editor.value.view.nodeDOM(from)
     propertiesAnchor.value = dom instanceof HTMLElement ? dom : null
     
     showPropertiesModal.value = true
 }
 
 function saveMediaProperties(properties) {
-    const type = selectedNodeForProperties.value.type
-    editor.value.chain().updateAttributes(type, properties).run()
+    const { type, pos } = selectedNodeForProperties.value
+    // Use setNodeMarkup to update specific node by position, keeping focus in popover
+    editor.value.chain().command(({ tr }) => {
+        tr.setNodeMarkup(pos, undefined, properties)
+        return true
+    }).run()
 }
 
 // Table Handlers
