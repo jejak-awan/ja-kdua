@@ -7,12 +7,14 @@
         ]"
         @click.stop="!builder.isPreview.value && onEdit()"
         @contextmenu.prevent="!builder.isPreview.value && onContextMenu($event)"
+        @mouseover.stop="onMouseOver"
+        @mouseleave="onMouseLeave"
     >
-        <!-- Block Toolbar (Elementor/Divi Style) - Show on hover OR when selected -->
+        <!-- Block Toolbar - Show on hover (deepest only) OR when selected -->
         <div v-if="!builder.isPreview.value" 
-             class="absolute top-1 opacity-0 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95 group-hover/block:opacity-100 group-hover/block:scale-100"
+             class="absolute top-1 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95"
              :class="[
-                { 'opacity-100 scale-100': isSelected },
+                (isSelected || isHovered) ? 'opacity-100 scale-100' : 'opacity-0 pointer-events-none',
                 toolbarPositionClass
              ]">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />
@@ -92,11 +94,29 @@ const emit = defineEmits(['edit', 'delete', 'duplicate', 'wrap', 'split']);
 const builder = inject('builder');
 const { t } = useI18n();
 
-// Determine if this block is currently selected - always use ID-based selection
+// Determine if this block is currently selected
 const isSelected = computed(() => {
     if (!builder) return false;
     return builder.activeBlockId.value === props.block.id;
 });
+
+// Determine if this block is currently hovered (deepest only)
+const isHovered = computed(() => {
+    if (!builder) return false;
+    return builder.hoveredBlockId?.value === props.block.id;
+});
+
+const onMouseOver = () => {
+    if (builder && !builder.isPreview?.value) {
+        builder.hoveredBlockId.value = props.block.id;
+    }
+};
+
+const onMouseLeave = () => {
+    if (builder && builder.hoveredBlockId?.value === props.block.id) {
+        builder.hoveredBlockId.value = null;
+    }
+};
 
 const onEdit = () => {
     // Always use ID-based selection for consistency

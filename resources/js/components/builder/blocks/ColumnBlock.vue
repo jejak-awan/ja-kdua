@@ -1,74 +1,75 @@
 <template>
     <div 
-        class="relative transition-all duration-300 group/column h-full flex flex-col"
+        class="column-block relative h-full flex transition-all duration-300"
         :class="[
-            displayClass,
-            direction, justify, align,
+            direction,
+            justify,
+            align,
+            `gap-${gap}`,
             radius,
-            // Builder interaction - distinct border for column selection if needed
+            // Builder interaction
             isBuilder && !isPreview && isSelected ? 'ring-2 ring-primary/50' : ''
         ]"
         :style="columnStyle"
         v-bind="$attrs"
-        @click.stop="onSelect"
     >
-        <!-- Builder Overlay / UI for Column -->
-        <div v-if="isSelected && isBuilder && !isPreview" class="absolute -top-5 left-0 bg-primary/80 text-primary-foreground text-[9px] px-2 py-0.5 rounded-t-sm font-bold uppercase tracking-wider z-[20] flex items-center gap-1">
-            <Columns class="w-3 h-3" /> Column
-        </div>
-
-        <!-- content -->
+        <!-- Builder Mode: Draggable content -->
         <draggable 
             v-if="isBuilder && !isPreview"
             v-model="nestedBlocks" 
             item-key="id"
             :group="{ name: 'blocks', pull: true, put: true }"
             handle=".drag-handle"
-            class="flex-1 flex flex-col min-h-[50px]"
-            :class="[direction, justify, align]"
-            ghost-class="block-ghost opacity-50 bg-primary/10"
+            class="flex-1 flex min-h-[50px]"
+            :class="[
+                direction, justify, align, `gap-${gap}`,
+                (!nestedBlocks || nestedBlocks.length === 0) ? 'border-2 border-dashed border-muted-foreground/20 rounded-xl bg-muted/20 items-center justify-center' : ''
+            ]"
+            ghost-class="column-ghost"
         >
             <template #item="{ element: block, index }">
                 <BlockWrapper 
                     :block="block" 
                     :index="index"
-                    :context="context"
                     :isNested="true"
-                    class="relative"
+                    class="w-full"
                     @edit="onEditBlock(block.id)"
-                    @duplicate="onDuplicateNested(index)"
-                    @delete="onDeleteNested(index)"
-                    @wrap="onWrapNested(index)"
+                    @duplicate="onDuplicate(index)"
+                    @delete="onDelete(index)"
+                    @wrap="onWrapInContainer(index)"
                     @split="onSplitNested(index)"
                 />
             </template>
-            
-            <template #footer>
-                 <!-- Empty State -->
-                 <div v-if="nestedBlocks.length === 0" class="flex-1 flex flex-col items-center justify-center p-2 text-center relative z-[10] min-h-[50px] border-2 border-dashed border-muted/30 hover:border-primary/30 rounded m-2 transition-colors">
-                    <Button variant="ghost" size="sm" class="h-6 text-[10px] text-muted-foreground" @click.stop.prevent="showBlockPicker = true">
-                        <Plus class="w-3 h-3 mr-1" /> Add Block
-                    </Button>
+
+            <!-- Empty State -->
+            <template #header v-if="!nestedBlocks || nestedBlocks.length === 0">
+                <div 
+                    class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn cursor-pointer"
+                    @click.stop="showBlockPicker = true"
+                >
+                    <Plus class="w-4 h-4 text-muted-foreground group-hover/btn:text-primary" />
+                    <span class="text-[10px] font-bold text-muted-foreground group-hover/btn:text-primary block">Add Block</span>
                 </div>
             </template>
         </draggable>
 
-        <!-- Live Mode -->
+        <!-- Preview Mode: Render content -->
         <div 
-            v-else 
-            class="flex-1 flex flex-col h-full"
-            :class="[direction, justify, align]"
+            v-else
+            class="flex-1 flex"
+            :class="[direction, justify, align, `gap-${gap}`]"
         >
-             <BlockRenderer 
-                :blocks="nestedBlocks" 
+            <BlockRenderer 
+                v-if="blocks && blocks.length > 0"
+                :blocks="blocks" 
                 :context="context"
-                :is-preview="isPreview"
             />
         </div>
 
-        <!-- Block Picker -->
+        <!-- Block Picker Modal -->
         <BlockPicker 
-            :visible="showBlockPicker" 
+            v-if="showBlockPicker"
+            :visible="true"
             @close="showBlockPicker = false"
             @add="handleAddBlock"
             :target-block-id="id"
@@ -79,12 +80,11 @@
 <script setup>
 import { computed, inject, ref } from 'vue';
 import draggable from 'vuedraggable';
-import { Plus, Columns } from 'lucide-vue-next';
+import { Plus } from 'lucide-vue-next';
 import BlockWrapper from '../canvas/BlockWrapper.vue';
 import BlockRenderer from './BlockRenderer.vue';
 import BlockPicker from '../canvas/BlockPicker.vue';
 import { generateUUID } from '../utils';
-import Button from '@/components/ui/button.vue';
 
 defineOptions({
   inheritAttrs: false
@@ -92,17 +92,19 @@ defineOptions({
 
 const props = defineProps({
     id: String,
-    // Settings passed via v-bind from BlockRenderer
+    // Layout
     direction: { type: String, default: 'flex-col' },
     justify: { type: String, default: 'justify-start' },
     align: { type: String, default: 'items-stretch' },
-    
+    gap: { type: String, default: '4' },
+    // Spacing
     padding: { type: Object, default: () => ({ top: '0', right: '0', bottom: '0', left: '0' }) },
-    bgColor: String,
+    // Style
+    bgColor: { type: String, default: 'transparent' },
     borderWidth: { type: Number, default: 0 },
-    borderColor: String,
+    borderColor: { type: String, default: '#e5e7eb' },
     radius: { type: String, default: 'rounded-none' },
-    
+    // Content
     blocks: { type: Array, default: () => [] },
     context: Object,
     isPreview: { type: Boolean, default: false }
@@ -120,7 +122,19 @@ const blockObject = computed(() => {
 const isSelected = computed(() => builder?.activeBlockId?.value === props.id);
 
 const nestedBlocks = computed({
-    get: () => blockObject.value?.settings?.blocks || props.blocks || [],
+    get: () => {
+        // Return direct reference to blocks array for vuedraggable compatibility
+        if (blockObject.value?.settings?.blocks) {
+            return blockObject.value.settings.blocks;
+        }
+        // Fallback: ensure we create the array if it doesn't exist
+        if (blockObject.value) {
+            if (!blockObject.value.settings) blockObject.value.settings = {};
+            if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
+            return blockObject.value.settings.blocks;
+        }
+        return props.blocks || [];
+    },
     set: (val) => {
         if (blockObject.value) {
             if (!blockObject.value.settings) blockObject.value.settings = {};
@@ -130,93 +144,110 @@ const nestedBlocks = computed({
     }
 });
 
-const displayClass = computed(() => 'flex'); // Always flex
-
 const columnStyle = computed(() => {
-    const p = props.padding || {};
-    
     const style = {
-        paddingTop: p.top,
-        paddingRight: p.right,
-        paddingBottom: p.bottom,
-        paddingLeft: p.left,
-        backgroundColor: props.bgColor,
-        // Column width is handled by parent Row/Columns via flex-basis or width classes
+        backgroundColor: props.bgColor || 'transparent'
     };
-    
+
+    // Padding
+    if (props.padding) {
+        style.paddingTop = props.padding.top || '0';
+        style.paddingRight = props.padding.right || '0';
+        style.paddingBottom = props.padding.bottom || '0';
+        style.paddingLeft = props.padding.left || '0';
+    }
+
+    // Border
     if (props.borderWidth > 0) {
         style.borderWidth = `${props.borderWidth}px`;
-        style.borderColor = props.borderColor;
         style.borderStyle = 'solid';
+        style.borderColor = props.borderColor || '#e5e7eb';
     }
-    
+
     return style;
 });
 
-const onSelect = () => {
-    if (builder && props.id) {
-        builder.activeBlockId.value = props.id;
-        builder.activeTab.value = 'content'; // or style?
+const onEditBlock = (blockId) => {
+    if (builder) {
+        builder.activeBlockId.value = blockId;
+        builder.activeRightSidebarTab.value = 'properties';
+        builder.isRightSidebarOpen.value = true;
     }
 };
 
-const handleAddBlock = (newBlock) => {
-    if (!blockObject.value) return;
-    if (!blockObject.value.settings) blockObject.value.settings = {};
-    if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
-    blockObject.value.settings.blocks.push(newBlock);
-    builder?.takeSnapshot();
-    showBlockPicker.value = false;
-};
-
-const onEditBlock = (id) => {
-    if (builder) builder.activeBlockId.value = id;
-};
-
-const onDuplicateNested = (index) => {
-    if (!blockObject.value?.settings?.blocks) return;
-    const original = blockObject.value.settings.blocks[index];
-    const clone = {
-        ...JSON.parse(JSON.stringify(original)),
-        id: generateUUID()
-    };
-    blockObject.value.settings.blocks.splice(index + 1, 0, clone);
+const onDuplicate = (index) => {
+    const original = nestedBlocks.value[index];
+    const clone = JSON.parse(JSON.stringify(original));
+    clone.id = generateUUID();
+    // Regenerate nested IDs
+    if (builder?.regenerateIds) {
+        builder.regenerateIds(clone);
+    }
+    nestedBlocks.value.splice(index + 1, 0, clone);
     builder?.takeSnapshot();
 };
 
-const onDeleteNested = (index) => {
-    blockObject.value.settings.blocks.splice(index, 1);
+const onDelete = (index) => {
+    nestedBlocks.value.splice(index, 1);
     builder?.takeSnapshot();
 };
 
-const onWrapNested = (index) => {
-    const original = blockObject.value.settings.blocks[index];
+const onWrapInContainer = (index) => {
+    const original = nestedBlocks.value[index];
     const container = {
         id: generateUUID(),
         type: 'container',
         settings: {
+            blocks: [original],
             direction: 'flex-col',
-            padding: { top: '16px', right: '16px', bottom: '16px', left: '16px' },
-            blocks: [original]
+            padding: { top: '16px', right: '16px', bottom: '16px', left: '16px' }
         }
     };
-    blockObject.value.settings.blocks.splice(index, 1, container);
+    nestedBlocks.value.splice(index, 1, container);
     builder?.takeSnapshot();
 };
 
 const onSplitNested = (index) => {
-    const original = blockObject.value.settings.blocks[index];
-    // Legacy support? No, use new Row logic ideally? 
-    // For now use 'columns' which is legacy.
+    const original = nestedBlocks.value[index];
     const columns = {
         id: generateUUID(),
         type: 'columns',
         settings: {
             layout: '1-1',
-            columns: [{ blocks: [original] }, { blocks: [] }]
+            stackOn: 'never',
+            gap: '8',
+            width: 'max-w-full',
+            padding: 'py-0',
+            blocks: [
+                {
+                    id: generateUUID(),
+                    type: 'column',
+                    settings: { blocks: [original] }
+                },
+                {
+                    id: generateUUID(),
+                    type: 'column',
+                    settings: { blocks: [] }
+                }
+            ]
         }
     };
-    blockObject.value.settings.blocks.splice(index, 1, columns);
+    nestedBlocks.value.splice(index, 1, columns);
+    builder?.takeSnapshot();
+};
+
+const handleAddBlock = (blockData) => {
+    nestedBlocks.value.push(blockData);
+    showBlockPicker.value = false;
     builder?.takeSnapshot();
 };
 </script>
+
+<style scoped>
+.column-ghost {
+    opacity: 0.5;
+    background: hsl(var(--primary) / 0.1);
+    border: 2px dashed hsl(var(--primary));
+    border-radius: 0.5rem;
+}
+</style>

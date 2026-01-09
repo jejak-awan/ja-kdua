@@ -107,6 +107,7 @@ export function useBuilder() {
     // Media Picker Context
     const activeMediaField = ref(null);
     const activeBlockId = ref(null);
+    const hoveredBlockId = ref(null); // For tracking deepest hovered block (toolbar stacking fix)
 
     // Data
     const blocks = ref([]); // We will sync this with props in the root component
@@ -383,6 +384,7 @@ export function useBuilder() {
         activeRightSidebarTab,
         activeMediaField,
         activeBlockId,
+        hoveredBlockId,
         selectedBlock,
         clipboard,
         handleMediaSelect,

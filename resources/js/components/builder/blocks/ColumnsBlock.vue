@@ -7,22 +7,20 @@
         <div :class="['mx-auto px-6 h-full', width]">
             <div 
                 :class="[
-                    'flex flex-wrap h-full',
-                    `gap-${gap}`,
+                    'flex flex-wrap gap-8 h-full',
                     reverseClasses
                 ]"
                 :style="flexStyles"
                 ref="gridRef"
             >
                 <template v-for="(column, index) in computedColumns" :key="column.id || index">
-                    <!-- Modern Column (Wrapped) -->
+                    <!-- Modern Column (via BlockWrapper) -->
                     <BlockWrapper
                         v-if="isModern"
                         :block="column"
                         :index="index"
                         :isNested="true"
-                        :parent-id="id"
-                        class="column-wrapper relative flex items-stretch"
+                        class="column-wrapper relative flex items-stretch flex-shrink-0 flex-grow-0"
                         :class="getColumnClasses()"
                         :style="{ '--desktop-width': colWidths[index] }"
                         @delete="removeColumn(index)"
@@ -30,10 +28,10 @@
                         @duplicate="duplicateColumn(index)"
                     />
 
-                    <!-- Legacy Column Render -->
+                    <!-- Legacy Column (inline render) -->
                     <div 
                         v-else
-                        class="column-container relative flex items-stretch"
+                        class="column-container relative flex items-stretch flex-shrink-0 flex-grow-0"
                         :class="getColumnClasses()"
                         :style="{ '--desktop-width': colWidths[index] }"
                     >
@@ -45,7 +43,7 @@
                                 item-key="id"
                                 :group="{ name: 'blocks', pull: true, put: true }"
                                 handle=".drag-handle"
-                                class="min-h-[100px] h-full border-2 border-dashed border-transparent hover:border-sidebar-border/50 rounded-xl transition-colors p-2"
+                                class="min-h-[100px] h-full flex flex-col border-2 border-dashed border-transparent hover:border-sidebar-border/50 rounded-xl transition-colors p-2"
                                 ghost-class="block-ghost"
                                 :class="(!column.blocks || column.blocks.length === 0) ? 'bg-muted/30 border-muted-foreground/10' : ''"
                             >
@@ -66,7 +64,7 @@
                                 <template #footer>
                                      <div v-if="!column.blocks || column.blocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center relative z-[20]">
                                         <!-- Column Actions Bar (for empty columns) -->
-                                        <div v-if="columns.length > 1" class="absolute top-1 right-1 flex items-center gap-1 z-30">
+                                        <div v-if="computedColumns.length > 1" class="absolute top-1 right-1 flex items-center gap-1 z-30">
                                             <button 
                                                 @click.stop.prevent="removeColumn(index)"
                                                 class="h-6 w-6 flex items-center justify-center bg-background text-foreground hover:bg-destructive hover:text-white border border-border rounded-md transition-colors shadow-sm"
@@ -102,7 +100,7 @@
 
                         <!-- Resizer Gutter -->
                         <div 
-                            v-if="isBuilder && !isPreview && index < columns.length - 1"
+                            v-if="isBuilder && !isPreview && index < computedColumns.length - 1"
                             class="absolute -right-4 top-0 bottom-0 w-8 z-10 cursor-col-resize group flex items-center justify-center"
                             @mousedown.stop.prevent="startResize(index, $event)"
                         >
@@ -111,6 +109,7 @@
 
                     </div>
                 </template>
+
             </div>
         </div>
     </section>
@@ -139,11 +138,10 @@ import { generateUUID } from '../utils';
 const props = defineProps({
     id: String,
     columns: { type: Array, default: () => [] }, // Legacy
-    blocks: { type: Array, default: () => [] }, // Modern
+    blocks: { type: Array, default: () => [] },   // Modern: Column block objects
     layout: { type: String, default: '1-1' },
     customWidths: { type: Array, default: () => [50, 50] },
-    stackOn: { type: String, default: 'sm' },
-    gap: { type: String, default: '8' },
+    stackOn: { type: String, default: 'never' },
     direction: { type: String, default: 'row' },
     mobileDirection: { type: String, default: 'column' },
     padding: { type: String, default: 'py-16' },
@@ -162,49 +160,17 @@ const isResizing = ref(false);
 const activeResizer = ref(null);
 const showBlockPicker = ref(false);
 const activeColumnIndex = ref(null);
-const rafId = ref(null);
+const rafId = ref(null); // For throttling resize updates
 
+// Determine if using modern blocks array or legacy columns
 const isModern = computed(() => props.blocks && props.blocks.length > 0);
 
+// Computed columns - use modern blocks if available, else legacy columns
 const computedColumns = computed(() => {
     if (isModern.value) return props.blocks;
     return props.columns;
 });
 
-// Migration Logic
-onMounted(() => {
-    const block = builder ? builder.findBlockById(props.id) : null;
-    if (block && block.settings) {
-        // regenerate IDs if default
-        if (block.settings.blocks) {
-             block.settings.blocks.forEach(col => {
-                 if (col.id && col.id.startsWith('default-col')) {
-                     col.id = generateUUID();
-                 }
-             });
-        }
-
-        // Migrate Legacy to Modern
-        if (block.settings.columns && block.settings.columns.length > 0 && (!block.settings.blocks || block.settings.blocks.length === 0)) {
-            console.log('Migrating Columns to Child Blocks...');
-            const newChildren = block.settings.columns.map(col => ({
-                id: generateUUID(),
-                type: 'column',
-                settings: {
-                    blocks: col.blocks || [],
-                    // Legacy defaults
-                    padding: { top: '0', right: '0', bottom: '0', left: '0' },
-                    bgColor: 'transparent'
-                }
-            }));
-            
-            block.settings.blocks = newChildren;
-            // keep columns? verify deletion safety
-            delete block.settings.columns; 
-            builder.takeSnapshot();
-        }
-    }
-});
 
 const openBlockPicker = (colIndex) => {
     activeColumnIndex.value = colIndex;
@@ -212,13 +178,31 @@ const openBlockPicker = (colIndex) => {
 };
 
 const handleAddBlock = (newBlock) => {
-    if (activeColumnIndex.value !== null && props.columns[activeColumnIndex.value]) {
-        if (!props.columns[activeColumnIndex.value].blocks) {
-            props.columns[activeColumnIndex.value].blocks = [];
-        }
-        props.columns[activeColumnIndex.value].blocks.push(newBlock);
-        builder.takeSnapshot();
+    if (activeColumnIndex.value === null) {
+        showBlockPicker.value = false;
+        return;
     }
+    
+    const block = builder.findBlockById(props.id);
+    if (!block || !block.settings) return;
+    
+    if (isModern.value) {
+        // Modern: Add to column.settings.blocks
+        const column = block.settings.blocks[activeColumnIndex.value];
+        if (column && column.settings) {
+            if (!column.settings.blocks) column.settings.blocks = [];
+            column.settings.blocks.push(newBlock);
+        }
+    } else {
+        // Legacy: Add to column.blocks
+        const column = block.settings.columns[activeColumnIndex.value];
+        if (column) {
+            if (!column.blocks) column.blocks = [];
+            column.blocks.push(newBlock);
+        }
+    }
+    
+    builder.takeSnapshot();
     showBlockPicker.value = false;
     activeColumnIndex.value = null;
 };
@@ -230,37 +214,58 @@ const handleAddBlock = (newBlock) => {
 const removeColumn = (columnIndex) => {
     if (computedColumns.value.length <= 1) return;
     
-    // Check if empty
     const column = computedColumns.value[columnIndex];
-    // Modern: column.settings.blocks, Legacy: column.blocks
+    // Check if empty - modern uses column.settings.blocks, legacy uses column.blocks
     const blocks = isModern.value ? column.settings?.blocks : column.blocks;
+    if (blocks && blocks.length > 0) return; // Don't remove columns with content
     
-    if (blocks && blocks.length > 0) return;
-    
-    // Find block
     const block = builder.findBlockById(props.id);
     if (!block || !block.settings) return;
-
+    
     if (isModern.value) {
-        if (!block.settings.blocks) block.settings.blocks = [];
         block.settings.blocks.splice(columnIndex, 1);
-        
-        // Recalculate
         const numColumns = block.settings.blocks.length;
         if (numColumns > 0) {
             block.settings.customWidths = Array(numColumns).fill(100 / numColumns);
         }
     } else {
-        // Legacy
-         if (!block.settings.columns) return;
-         block.settings.columns.splice(columnIndex, 1);
-         const numColumns = block.settings.columns.length;
-         if (numColumns > 0) {
+        block.settings.columns.splice(columnIndex, 1);
+        const numColumns = block.settings.columns.length;
+        if (numColumns > 0) {
             block.settings.customWidths = Array(numColumns).fill(100 / numColumns);
         }
     }
     
     block.settings.layout = 'custom';
+    builder.blocks.value = [...builder.blocks.value];
+    builder.takeSnapshot();
+};
+
+/**
+ * Duplicate a column (modern only)
+ */
+const duplicateColumn = (index) => {
+    if (!isModern.value) return;
+    
+    const block = builder.findBlockById(props.id);
+    if (!block || !block.settings || !block.settings.blocks) return;
+    
+    const original = block.settings.blocks[index];
+    const clone = JSON.parse(JSON.stringify(original));
+    clone.id = generateUUID();
+    
+    // Regenerate nested IDs
+    if (builder.regenerateIds) {
+        builder.regenerateIds(clone);
+    }
+    
+    block.settings.blocks.splice(index + 1, 0, clone);
+    
+    // Update widths
+    const numColumns = block.settings.blocks.length;
+    block.settings.customWidths = Array(numColumns).fill(100 / numColumns);
+    block.settings.layout = 'custom';
+    
     builder.takeSnapshot();
 };
 
@@ -275,32 +280,19 @@ const getColumnCount = (layout) => {
 
 watch(() => props.layout, (newLayout) => {
     const target = getColumnCount(newLayout);
-    const currentLength = computedColumns.value.length;
-    
-    if (currentLength < target) {
-        const diff = target - currentLength;
-        // Find block to update settings
-        const block = builder.findBlockById(props.id);
-        
+    if (props.columns.length < target) {
+        const diff = target - props.columns.length;
         for (let i = 0; i < diff; i++) {
-            if (isModern.value) {
-                // Add new Column Block
-                if (!block.settings.blocks) block.settings.blocks = [];
-                block.settings.blocks.push({
-                    id: generateUUID(),
-                    type: 'column',
-                    settings: { blocks: [] }
-                });
-            } else {
-                // Legacy
-                 if (!block.settings.columns) block.settings.columns = [];
-                 block.settings.columns.push({ blocks: [] });
-            }
+            props.columns.push({ blocks: [] });
         }
     }
     
-    // Update widths...
-    // Note: Update customWidths immediately
+    // Ensure all columns have blocks array
+    props.columns.forEach(col => {
+        if (!col.blocks) col.blocks = [];
+    });
+    
+    // Update customWidths if layout matches presets
     if (newLayout === '1-1') updateCustomWidths([50, 50]);
     if (newLayout === '1-2') updateCustomWidths([33.33, 66.66]);
     if (newLayout === '2-1') updateCustomWidths([66.66, 33.33]);
@@ -356,12 +348,10 @@ const colWidths = computed(() => {
     }
 
     // Convert percentages to calc strings subtracting gap
-    // Total gap = (n-1) * gap_in_rem
-    // Tailwind scale: 1 unit = 0.25rem. So '8' = 2rem.
-    const gapValue = parseInt(props.gap || '8');
-    const gapRem = gapValue * 0.25; 
-    
-    const totalGap = (numCols - 1) * gapRem;
+    // Formula: calc(P% - (totalGap * P/100))
+    // Total gap = (n-1) * 2rem (gap-8)
+    const gap = 2; // rem
+    const totalGap = (numCols - 1) * gap;
     
     return widths.map(w => {
         const gapSubtraction = (totalGap * (w / 100)).toFixed(3);
@@ -444,7 +434,7 @@ const doResize = (event) => {
         
         // Percentage from left
         const percentage = (mouseX / gridWidth) * 100;
-        const numColumns = computedColumns.value.length;
+        const numColumns = props.columns.length;
         const resizerIndex = activeResizer.value;
         
         // Get current widths or initialize evenly
@@ -536,21 +526,6 @@ const onDuplicate = (column, index) => {
 const onDelete = (column, index) => {
     column.blocks.splice(index, 1);
     builder.takeSnapshot();
-};
-
-const duplicateColumn = (index) => {
-     if (!isModern.value) return; // Legacy doesn't support col duplication easily
-     const block = builder.findBlockById(props.id);
-     const original = block.settings.blocks[index];
-     const clone = {
-        ...JSON.parse(JSON.stringify(original)),
-        id: generateUUID(),
-        // Regenerate nested IDs? Ideally yes, but deep clone might not.
-        // For now shallow clone of settings is ok, but nested blocks need new IDs.
-        // TODO: Deep ID regeneration helper.
-     };
-     block.settings.blocks.splice(index + 1, 0, clone);
-     builder.takeSnapshot();
 };
 
 const onWrapInColumn = (column, index) => {

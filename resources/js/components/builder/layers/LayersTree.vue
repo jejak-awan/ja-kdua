@@ -59,29 +59,31 @@
                         v-show="isExpanded(block.id)"
                         class="relative"
                     >
-                        <!-- Generic Block Recursion (Section, Container, Column, Modern Columns) -->
-                        <template v-if="Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0">
+                        <!-- Section Children Logic -->
+                        <template v-if="block.type === 'section' && Array.isArray(block.settings.blocks)">
                             <LayersTree 
                                 :blocks="block.settings.blocks" 
                                 :depth="depth + 1"
                             />
                         </template>
 
-                        <!-- Legacy Columns Logic (Only if NO blocks array found, or specific legacy check) -->
-                        <template v-else-if="block.type === 'columns' && Array.isArray(block.settings?.columns) && block.settings.columns.length > 0">
+                        <!-- Container Children Logic -->
+                        <template v-if="block.type === 'columns' && Array.isArray(block.settings.columns)">
                             <div v-for="(col, colIndex) in block.settings.columns" :key="colIndex">
                                 <!-- Virtual Column Node -->
                                 <div class="relative pl-4 mt-0.5">
-                                    <div class="absolute -left-2.5 top-0 bottom-0 w-px bg-border/50"></div>
-                                    <div class="absolute -left-2.5 top-3 w-2.5 h-px bg-border/50"></div>
+                                    <div class="absolute -left-2.5 top-0 bottom-0 w-px bg-border/50"></div> <!-- Vertical Guide -->
+                                    <div class="absolute -left-2.5 top-3 w-2.5 h-px bg-border/50"></div> <!-- Conn -->
                                     
+                                    <!-- Column Header -->
                                     <div class="flex items-center gap-1.5 p-1 text-[10px] uppercase font-bold text-muted-foreground/70 select-none">
                                         <Columns3 class="w-3 h-3" />
                                         <span>Col {{ colIndex + 1 }}</span>
                                     </div>
                                     
+                                    <!-- Children of Column -->
                                     <LayersTree 
-                                        :blocks="col.blocks || []" 
+                                        :blocks="col.blocks" 
                                         :depth="depth + 1"
                                     />
                                 </div>
@@ -134,11 +136,8 @@ const toggleExpand = (id) => {
 };
 
 const hasChildren = (block) => {
-    // Generic blocks recursion
-    if (Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0) return true;
-    // Legacy Columns Support
-    if (block.type === 'columns' && Array.isArray(block.settings?.columns) && block.settings.columns.length > 0) return true;
-    
+    if (block.type === 'section') return Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0;
+    if (block.type === 'columns') return Array.isArray(block.settings?.columns) && block.settings.columns.length > 0;
     return false;
 };
 
@@ -149,8 +148,6 @@ const selectBlock = (block) => {
 const getBlockIcon = (type) => {
     const map = {
         'columns': Layout,
-        'column': Columns3,
-        'container': Box,
         'image': ImageIcon,
         'heading': Type,
         'text': Type,
@@ -162,7 +159,7 @@ const getBlockIcon = (type) => {
 
 const getBlockColorClass = (type) => {
     // Green for containers/layout? Blue for content?
-    if (['section', 'columns', 'column', 'container'].includes(type)) return 'text-green-500';
+    if (type === 'columns' || type === 'section') return 'text-green-500';
     if (type === 'image') return 'text-purple-500';
     if (type === 'heading' || type === 'text') return 'text-blue-500';
     return 'text-muted-foreground';

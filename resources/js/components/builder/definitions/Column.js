@@ -1,24 +1,79 @@
-import { Columns as ColumnsIcon } from 'lucide-vue-next';
+/**
+ * Column Block Definition
+ * Individual column with flex layout and box styling controls
+ * Used as child of ColumnsBlock
+ */
+
+import { Columns3, AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
+
+// Import Presets
+import { borderRadiusPresets } from './presets/border';
 
 export default {
     name: 'column',
     label: 'Column',
-    icon: ColumnsIcon,
-    description: 'A single column within a row.',
+    icon: Columns3,
+    description: 'Individual column with layout and styling controls.',
     category: 'structure',
-    hidden: true, // Only created by Row
+    hidden: true, // Not directly addable from sidebar, only via ColumnsBlock
     component: defineAsyncComponent(() => import('@/components/builder/blocks/ColumnBlock.vue')),
 
     settings: [
-        { type: 'header', label: 'Appearance', tab: 'style' },
+        // ============ LAYOUT ============
+        { type: 'header', label: 'Layout', tab: 'style' },
         {
-            key: 'bgColor',
-            type: 'color',
-            label: 'Background',
-            default: 'transparent',
+            key: 'direction',
+            type: 'toggle_group',
+            label: 'Direction',
+            options: [
+                { label: 'Column', value: 'flex-col' },
+                { label: 'Row', value: 'flex-row' }
+            ],
+            default: 'flex-col',
             tab: 'style'
         },
+        {
+            key: 'justify',
+            type: 'toggle_group',
+            label: 'Justify',
+            options: [
+                { label: 'Start', value: 'justify-start', icon: AlignHorizontalJustifyStart },
+                { label: 'Center', value: 'justify-center', icon: AlignHorizontalJustifyCenter },
+                { label: 'End', value: 'justify-end', icon: AlignHorizontalJustifyEnd }
+            ],
+            default: 'justify-start',
+            tab: 'style'
+        },
+        {
+            key: 'align',
+            type: 'toggle_group',
+            label: 'Align',
+            options: [
+                { label: 'Start', value: 'items-start', icon: AlignVerticalJustifyStart },
+                { label: 'Center', value: 'items-center', icon: AlignVerticalJustifyCenter },
+                { label: 'End', value: 'items-end', icon: AlignVerticalJustifyEnd },
+                { label: 'Stretch', value: 'items-stretch' }
+            ],
+            default: 'items-stretch',
+            tab: 'style'
+        },
+        {
+            key: 'gap',
+            type: 'select',
+            label: 'Gap',
+            options: [
+                { label: 'None', value: '0' },
+                { label: 'Small (8px)', value: '2' },
+                { label: 'Medium (16px)', value: '4' },
+                { label: 'Large (32px)', value: '8' }
+            ],
+            default: '4',
+            tab: 'style'
+        },
+
+        // ============ SPACING ============
+        { type: 'header', label: 'Spacing', tab: 'style' },
         {
             key: 'padding',
             type: 'box_model',
@@ -27,11 +82,24 @@ export default {
             default: { top: '0', right: '0', bottom: '0', left: '0' },
             tab: 'style'
         },
+
+        // ============ STYLE ============
+        { type: 'header', label: 'Style', tab: 'style' },
+        {
+            key: 'bgColor',
+            type: 'color',
+            label: 'Background',
+            default: 'transparent',
+            tab: 'style'
+        },
         {
             key: 'borderWidth',
             type: 'slider',
             label: 'Border Width',
-            min: 0, max: 10, step: 1,
+            min: 0,
+            max: 8,
+            step: 1,
+            unit: 'px',
             default: 0,
             tab: 'style'
         },
@@ -44,61 +112,14 @@ export default {
         },
         {
             key: 'radius',
-            type: 'select',
+            type: 'toggle_group',
             label: 'Radius',
-            options: [
-                { label: 'None', value: 'rounded-none' },
-                { label: 'Small', value: 'rounded-sm' },
-                { label: 'Default', value: 'rounded' },
-                { label: 'Medium', value: 'rounded-md' },
-                { label: 'Large', value: 'rounded-lg' },
-                { label: 'Full', value: 'rounded-full' },
-            ],
+            options: borderRadiusPresets,
             default: 'rounded-none',
             tab: 'style'
         },
-        // Internal Flex settings for the Column content? 
-        // Usually Columns stack vertically.
-        { type: 'header', label: 'Layout', tab: 'style' },
-        {
-            key: 'direction',
-            type: 'toggle_group',
-            label: 'Direction',
-            options: [
-                { label: 'Col', value: 'flex-col' },
-                { label: 'Row', value: 'flex-row' }
-            ],
-            default: 'flex-col',
-            tab: 'style'
-        },
-        {
-            key: 'justify',
-            type: 'toggle_group',
-            label: 'Justify',
-            options: [
-                { label: 'Start', value: 'justify-start' },
-                { label: 'Center', value: 'justify-center' },
-                { label: 'End', value: 'justify-end' },
-                { label: 'Between', value: 'justify-between' }
-            ],
-            default: 'justify-start',
-            tab: 'style'
-        },
-        {
-            key: 'align',
-            type: 'toggle_group',
-            label: 'Align',
-            options: [
-                { label: 'Start', value: 'items-start' },
-                { label: 'Center', value: 'items-center' },
-                { label: 'End', value: 'items-end' },
-                { label: 'Stretch', value: 'items-stretch' }
-            ],
-            default: 'items-stretch',
-            tab: 'style'
-        },
 
-        // Children blocks storage
+        // ============ HIDDEN ============
         {
             key: 'blocks',
             type: 'hidden',
@@ -107,14 +128,15 @@ export default {
     ],
 
     defaultSettings: {
-        bgColor: 'transparent',
-        padding: { top: '0', right: '0', bottom: '0', left: '0' },
-        borderWidth: 0,
-        borderColor: '#e5e7eb',
-        radius: 'rounded-none',
         direction: 'flex-col',
         justify: 'justify-start',
         align: 'items-stretch',
+        gap: '4',
+        padding: { top: '0', right: '0', bottom: '0', left: '0' },
+        bgColor: 'transparent',
+        borderWidth: 0,
+        borderColor: '#e5e7eb',
+        radius: 'rounded-none',
         blocks: [],
         visibility: { mobile: true, tablet: true, desktop: true }
     }
