@@ -22,6 +22,26 @@ export default {
             tab: 'style'
         },
         {
+            key: 'stackOn',
+            type: 'select',
+            label: 'Stack Columns On',
+            options: [
+                { label: 'Mobile Only', value: 'sm' },
+                { label: 'Mobile & Tablet', value: 'md' },
+                { label: 'All Screens', value: 'lg' },
+                { label: 'Never', value: 'never' }
+            ],
+            default: 'sm',
+            tab: 'style'
+        },
+        {
+            key: 'reverseOnStack',
+            type: 'boolean',
+            label: 'Reverse Order When Stacked',
+            default: false,
+            tab: 'style'
+        },
+        {
             key: 'width',
             type: 'select',
             label: 'Container Width',
@@ -56,6 +76,8 @@ export default {
         layout: '1-1',
         columns: [{ blocks: [] }, { blocks: [] }],
         customWidths: [50, 50],
+        stackOn: 'sm',
+        reverseOnStack: false,
         padding: 'py-16',
         width: 'max-w-7xl',
         bgColor: 'transparent',

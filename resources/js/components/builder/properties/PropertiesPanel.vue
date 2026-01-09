@@ -291,6 +291,58 @@
                     <h3 class="text-[10px] font-bold text-muted-foreground mb-4">{{ t('features.builder.properties.visibility.title') }}</h3>
                     
                     <div v-if="selectedBlock" class="space-y-4">
+                        <!-- Device Visibility Toggles -->
+                        <div class="p-3 bg-sidebar-accent/30 rounded-lg border border-sidebar-border space-y-3">
+                            <label class="text-[10px] font-bold text-foreground/80">Show on Devices</label>
+                            <div class="flex items-center gap-2">
+                                <!-- Mobile Toggle -->
+                                <button 
+                                    @click="toggleDeviceVisibility('mobile')"
+                                    :class="[
+                                        'flex-1 flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all',
+                                        getDeviceVisibility('mobile') 
+                                            ? 'border-primary bg-primary/10 text-primary' 
+                                            : 'border-border bg-muted/30 text-muted-foreground hover:border-primary/50'
+                                    ]"
+                                    title="Mobile"
+                                >
+                                    <Smartphone class="w-4 h-4" />
+                                    <span class="text-[9px] font-bold">Mobile</span>
+                                </button>
+                                
+                                <!-- Tablet Toggle -->
+                                <button 
+                                    @click="toggleDeviceVisibility('tablet')"
+                                    :class="[
+                                        'flex-1 flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all',
+                                        getDeviceVisibility('tablet') 
+                                            ? 'border-primary bg-primary/10 text-primary' 
+                                            : 'border-border bg-muted/30 text-muted-foreground hover:border-primary/50'
+                                    ]"
+                                    title="Tablet"
+                                >
+                                    <Tablet class="w-4 h-4" />
+                                    <span class="text-[9px] font-bold">Tablet</span>
+                                </button>
+                                
+                                <!-- Desktop Toggle -->
+                                <button 
+                                    @click="toggleDeviceVisibility('desktop')"
+                                    :class="[
+                                        'flex-1 flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all',
+                                        getDeviceVisibility('desktop') 
+                                            ? 'border-primary bg-primary/10 text-primary' 
+                                            : 'border-border bg-muted/30 text-muted-foreground hover:border-primary/50'
+                                    ]"
+                                    title="Desktop"
+                                >
+                                    <Monitor class="w-4 h-4" />
+                                    <span class="text-[9px] font-bold">Desktop</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Condition Rules Section -->
                         <div class="space-y-4">
                              <div class="flex items-center justify-between">
                                 <label class="text-[10px] font-bold text-muted-foreground">{{ t('features.builder.properties.visibility.logicMode') }}</label>
@@ -658,6 +710,28 @@ const applyPreset = (preset) => {
 const deletePreset = (id) => {
     if (!selectedBlock.value) return;
     blockPresets.deletePreset(selectedBlock.value.type, id);
+};
+
+// Device Visibility Functions
+const getDeviceVisibility = (device) => {
+    if (!selectedBlock.value?.settings?.visibility) return true;
+    const visibility = selectedBlock.value.settings.visibility;
+    return visibility[device] !== false;
+};
+
+const toggleDeviceVisibility = (device) => {
+    if (!selectedBlock.value) return;
+    
+    // Initialize visibility object if not exists
+    if (!selectedBlock.value.settings.visibility) {
+        selectedBlock.value.settings.visibility = { mobile: true, tablet: true, desktop: true };
+    }
+    
+    // Toggle the device visibility
+    selectedBlock.value.settings.visibility[device] = !getDeviceVisibility(device);
+    
+    // Take snapshot for undo
+    builder.takeSnapshot();
 };
 
 

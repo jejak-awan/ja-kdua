@@ -6,7 +6,11 @@
     >
         <div :class="['mx-auto px-6 h-full', width]">
             <div 
-                :class="['grid gap-8 h-full', layout !== 'custom' ? gridLayout : '']"
+                :class="[
+                    'grid gap-8 h-full',
+                    layout !== 'custom' ? gridLayout : '',
+                    reverseClasses
+                ]"
                 :style="layout === 'custom' ? { gridTemplateColumns: customGridTemplate } : {}"
                 ref="gridRef"
             >
@@ -116,6 +120,8 @@ const props = defineProps({
     columns: { type: Array, default: () => [{ blocks: [] }, { blocks: [] }] },
     layout: { type: String, default: '1-1' },
     customWidths: { type: Array, default: () => [50, 50] },
+    stackOn: { type: String, default: 'sm' },
+    reverseOnStack: { type: Boolean, default: false },
     padding: { type: String, default: 'py-16' },
     width: { type: String, default: 'max-w-7xl' },
     bgColor: String,
@@ -247,14 +253,43 @@ const customGridTemplate = computed(() => {
 });
 
 const gridLayout = computed(() => {
+    const stackBreakpoint = props.stackOn || 'sm';
+    
+    // If 'never', always use columns
+    if (stackBreakpoint === 'never') {
+        switch (props.layout) {
+            case '1-1': return 'grid-cols-2';
+            case '1-2': return 'grid-cols-[1fr_2fr]';
+            case '2-1': return 'grid-cols-[2fr_1fr]';
+            case '1-1-1': return 'grid-cols-3';
+            case '1-1-1-1': return 'grid-cols-4';
+            default: return 'grid-cols-1';
+        }
+    }
+    
+    // Responsive breakpoint prefix
+    const bp = stackBreakpoint === 'sm' ? 'md' : stackBreakpoint === 'md' ? 'lg' : 'xl';
+    
     switch (props.layout) {
-        case '1-1': return 'md:grid-cols-2';
-        case '1-2': return 'md:grid-cols-[1fr_2fr]'; 
-        case '2-1': return 'md:grid-cols-[2fr_1fr]';
-        case '1-1-1': return 'md:grid-cols-3';
-        case '1-1-1-1': return 'md:grid-cols-2 lg:grid-cols-4';
+        case '1-1': return `${bp}:grid-cols-2`;
+        case '1-2': return `${bp}:grid-cols-[1fr_2fr]`;
+        case '2-1': return `${bp}:grid-cols-[2fr_1fr]`;
+        case '1-1-1': return `${bp}:grid-cols-3`;
+        case '1-1-1-1': return `${bp}:grid-cols-2 lg:grid-cols-4`;
         default: return 'grid-cols-1';
     }
+});
+
+// Reverse order class when stacked
+const reverseClasses = computed(() => {
+    if (!props.reverseOnStack) return '';
+    
+    const stackBreakpoint = props.stackOn || 'sm';
+    if (stackBreakpoint === 'never') return '';
+    
+    // Apply flex-col-reverse on mobile, then reset on larger screens
+    const bp = stackBreakpoint === 'sm' ? 'md' : stackBreakpoint === 'md' ? 'lg' : 'xl';
+    return `flex-col-reverse ${bp}:flex-row`;
 });
 
 const startResize = (index, event) => {
