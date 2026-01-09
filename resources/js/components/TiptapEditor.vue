@@ -214,6 +214,16 @@ const editor = useEditor({
         attributes: {
             class: 'focus:outline-none min-h-[400px]',
         },
+        handleDOMEvents: {
+            dblclick: (view, event) => {
+                // Check if we clicked on a media node
+                if (editor.value && (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed'))) {
+                    openProperties()
+                    return true
+                }
+                return false
+            }
+        }
     },
     onUpdate: () => {
         emit('update:modelValue', editor.value.getHTML())
@@ -241,7 +251,10 @@ function handleMediaSelect(media) {
 }
 
 function openProperties() {
-    const type = editor.value.isActive('image') ? 'image' : 'video'
+    let type = 'image'
+    if (editor.value.isActive('video')) type = 'video'
+    else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
+
     selectedNodeForProperties.value = {
         type,
         attrs: editor.value.getAttributes(type)

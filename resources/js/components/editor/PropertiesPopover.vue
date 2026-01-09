@@ -31,8 +31,20 @@
 
             <div class="p-0">
                 <Accordion type="single" collapsible default-value="general">
-                    <!-- General Settings -->
-                    <AccordionItem value="general" class="border-b px-3">
+                    <!-- HTML Content (Embed Specific) -->
+                    <AccordionItem value="html-content" class="border-b px-3" v-if="isHtmlEmbedNode">
+                        <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">HTML Content</AccordionTrigger>
+                        <AccordionContent class="pt-1 pb-4">
+                            <textarea 
+                                v-model="form.html" 
+                                class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+                                placeholder="Paste your HTML code here..."
+                            ></textarea>
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <!-- General Settings (Not for Embeds) -->
+                    <AccordionItem value="general" class="border-b px-3" v-if="!isHtmlEmbedNode">
                         <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">General Settings</AccordionTrigger>
                         <AccordionContent class="pt-1 pb-4 space-y-3">
                             <!-- Source URL -->
@@ -42,7 +54,7 @@
                                     <Input v-model="form.src" placeholder="https://..." class="h-8 text-xs" />
                                 </div>
                             </div>
-
+                            
                             <!-- Display Mode -->
                             <div class="space-y-1.5">
                                 <label class="text-[11px] font-medium text-muted-foreground">Display mode</label>
@@ -125,20 +137,20 @@
                     </AccordionItem>
                     
                     <!-- Video Settings -->
-                    <AccordionItem value="video" class="border-b px-3" v-if="isVideoNode">
+                    <AccordionItem value="video" class="border-b px-3" v-if="isVideoNode || isYoutubeEmbed">
                          <AccordionTrigger class="text-xs font-semibold py-2.5 hover:no-underline">Video Playback</AccordionTrigger>
                          <AccordionContent class="pt-1 pb-4 space-y-3">
-                            <div class="flex items-center justify-between group cursor-pointer" @click="form.autoplay = !form.autoplay">
-                                <label class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer">Autoplay</label>
-                                <input type="checkbox" v-model="form.autoplay" class="accent-primary h-4 w-4 rounded border-border cursor-pointer" />
+                            <div class="flex items-center justify-between group">
+                                <label for="video-autoplay" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Autoplay</label>
+                                <Switch id="video-autoplay" v-model:checked="form.autoplay" class="scale-75 origin-right" />
                             </div>
-                            <div class="flex items-center justify-between group cursor-pointer" @click="form.controls = !form.controls">
-                                <label class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer">Controls</label>
-                                <input type="checkbox" v-model="form.controls" class="accent-primary h-4 w-4 rounded border-border cursor-pointer" />
+                            <div class="flex items-center justify-between group">
+                                <label for="video-controls" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Controls</label>
+                                <Switch id="video-controls" v-model:checked="form.controls" class="scale-75 origin-right" />
                             </div>
-                            <div class="flex items-center justify-between group cursor-pointer" @click="form.loop = !form.loop">
-                                <label class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer">Loop</label>
-                                <input type="checkbox" v-model="form.loop" class="accent-primary h-4 w-4 rounded border-border cursor-pointer" />
+                            <div class="flex items-center justify-between group">
+                                <label for="video-loop" class="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer select-none">Loop</label>
+                                <Switch id="video-loop" v-model:checked="form.loop" class="scale-75 origin-right" />
                             </div>
                          </AccordionContent>
                     </AccordionItem>
@@ -201,6 +213,7 @@ import AccordionItem from '@/components/ui/accordion-item.vue'
 import AccordionTrigger from '@/components/ui/accordion-trigger.vue'
 import AccordionContent from '@/components/ui/accordion-content.vue'
 import ColorPicker from '@/components/ui/color-picker.vue'
+import Switch from '@/components/ui/switch.vue'
 
 const props = defineProps({
     open: Boolean,
@@ -224,11 +237,14 @@ const form = ref({
     // Video specific
     autoplay: false,
     controls: true,
-    loop: false
+    loop: false,
+    // Embed specific
+    html: ''
 })
 
 const constrainProportions = ref(true)
-const isVideoNode = computed(() => props.node?.type.name === 'video')
+const isVideoNode = computed(() => props.node?.type === 'video')
+const isHtmlEmbedNode = computed(() => props.node?.type === 'htmlEmbed')
 
 // Dragging Logic (unchanged)
 const dragOffset = reactive({ x: 0, y: 0 })
@@ -258,6 +274,11 @@ const stopDrag = () => {
     document.body.style.userSelect = ''
 }
 
+// Helper to detect YouTube
+const isYoutubeEmbed = computed(() => {
+    return isHtmlEmbedNode.value && form.value.html && (form.value.html.includes('youtube.com/embed') || form.value.html.includes('youtu.be'))
+})
+
 watch(() => props.open, (isOpen) => {
     if (isOpen) {
         dragOffset.x = 0
@@ -279,7 +300,20 @@ watch(() => props.open, (isOpen) => {
                 // Video attrs (with fallbacks)
                 autoplay: attrs.autoplay !== undefined ? attrs.autoplay : false,
                 controls: attrs.controls !== undefined ? attrs.controls : true,
-                loop: attrs.loop !== undefined ? attrs.loop : false
+                loop: attrs.loop !== undefined ? attrs.loop : false,
+                // Embed specific
+                html: attrs.html || ''
+            }
+
+            // Sync controls state from YouTube URL if applicable
+            if (isYoutubeEmbed.value) {
+                const srcMatch = form.value.html.match(/src=["']([^"']+)["']/)
+                if (srcMatch && srcMatch[1]) {
+                    const url = srcMatch[1]
+                    form.value.autoplay = url.includes('autoplay=1')
+                    form.value.controls = !url.includes('controls=0') // YouTube default is 1 (show)
+                    form.value.loop = url.includes('loop=1')
+                }
             }
         }
     }
@@ -310,6 +344,78 @@ const save = () => {
         baseAttrs.autoplay = form.value.autoplay
         baseAttrs.controls = form.value.controls
         baseAttrs.loop = form.value.loop
+    } else if (isHtmlEmbedNode.value) {
+        let html = form.value.html
+
+        // Intelligent YouTube Param Injection
+        if (isYoutubeEmbed.value) {
+           const srcMatch = html.match(/src=["']([^"']+)["']/)
+           if (srcMatch && srcMatch[1]) {
+                let url = srcMatch[1]
+                let params = []
+
+                // Autoplay (Note: often requires mute=1 for browser policies)
+                if (form.value.autoplay) {
+                    if (!url.includes('autoplay=1')) params.push('autoplay=1')
+                    if (!url.includes('mute=1')) params.push('mute=1') 
+                } else {
+                     url = url.replace(/autoplay=1/g, '').replace(/mute=1/g, '')
+                }
+
+                // Controls
+                if (!form.value.controls) {
+                    if (!url.includes('controls=0')) params.push('controls=0')
+                } else {
+                    url = url.replace(/controls=0/g, '')
+                }
+
+                // Loop (Requires playlist=VIDEO_ID for single video loop)
+                if (form.value.loop) {
+                    if (!url.includes('loop=1')) params.push('loop=1')
+                    
+                    // Extract Video ID for playlist param
+                    // Supports: embed/ID, v=ID, youtu.be/ID
+                    const idMatch = url.match(/(?:embed\/|v=|youtu\.be\/)([^?&"']{11})/)
+                    if (idMatch && idMatch[1]) {
+                        const videoId = idMatch[1]
+                        if (!url.includes(`playlist=${videoId}`)) {
+                            params.push(`playlist=${videoId}`)
+                        }
+                    }
+                } else {
+                    url = url.replace(/loop=1/g, '').replace(/playlist=[^&]*/g, '')
+                }
+                
+                // Clean up any double && or ?? from naive replace
+                url = url.replace(/&+/g, '&').replace(/\?&/g, '?')
+                if (url.endsWith('&') || url.endsWith('?')) url = url.slice(0, -1)
+
+                // Append new params
+                if (params.length > 0) {
+                    const separator = url.includes('?') ? '&' : '?'
+                    url = `${url}${separator}${params.join('&')}`
+                }
+                
+                // Replace in HTML
+               html = html.replace(srcMatch[1], url)
+           }
+        }
+
+        baseAttrs.html = html
+        
+        // Auto-extract dimensions from HTML if it contains iframe/embed
+        // Only if width/height are currently empty or auto
+        if (baseAttrs.html && (!baseAttrs.width || baseAttrs.width === 'auto' || !baseAttrs.height || baseAttrs.height === 'auto')) {
+            const widthMatch = baseAttrs.html.match(/(?:width|WIDTH)=["']?(\d+)(?:px)?["']?/)
+            const heightMatch = baseAttrs.html.match(/(?:height|HEIGHT)=["']?(\d+)(?:px)?["']?/)
+            
+            if (widthMatch && widthMatch[1]) {
+                baseAttrs.width = `${widthMatch[1]}px`
+            }
+            if (heightMatch && heightMatch[1]) {
+                baseAttrs.height = `${heightMatch[1]}px`
+            }
+        }
     } else {
         // Clean up video attrs if not video
         delete baseAttrs.autoplay

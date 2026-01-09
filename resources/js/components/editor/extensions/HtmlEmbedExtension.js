@@ -14,6 +14,30 @@ export const HtmlEmbed = Node.create({
             html: {
                 default: '',
             },
+            width: {
+                default: '100%',
+            },
+            height: {
+                default: 'auto',
+            },
+            displayMode: {
+                default: 'block',
+            },
+            align: {
+                default: 'center',
+            },
+            borderRadius: {
+                default: '0',
+            },
+            borderWidth: {
+                default: '0',
+            },
+            borderColor: {
+                default: null,
+            },
+            margin: {
+                default: '16',
+            },
         }
     },
 
