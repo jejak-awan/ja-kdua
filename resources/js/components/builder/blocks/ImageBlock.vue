@@ -135,8 +135,8 @@ const alignmentClass = computed(() => ({
 
 const wrapperStyle = computed(() => {
     const style = {
-        // Use max-width to ensure image doesn't overflow container
-        maxWidth: props.width ? `min(${props.width}px, 100%)` : '100%',
+        // width=0 means fit to container (100%), otherwise use specified width with max constraint
+        maxWidth: props.width > 0 ? `min(${props.width}px, 100%)` : '100%',
         width: '100%' // Always fill available space up to max-width
     };
 

@@ -66,11 +66,11 @@ export default {
             key: 'width',
             type: 'slider',
             label: 'Width',
-            min: 100,
+            min: 0,
             max: 1200,
             step: 50,
             unit: 'px',
-            default: 800,
+            default: 0,
             responsive: true,
             tab: 'style'
         },
@@ -335,7 +335,7 @@ export default {
         linkNewTab: false,
 
         // Style
-        width: 800,
+        width: 0,
         maxWidth: 'max-w-full',
         height: 'auto',
         aspectRatio: 'auto',
