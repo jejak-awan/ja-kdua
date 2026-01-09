@@ -546,8 +546,11 @@ const save = () => {
         baseAttrs.strokeWidth = form.value.strokeWidth
         baseAttrs.rotate = form.value.rotate
         baseAttrs.backgroundColor = form.value.backgroundColor
-        baseAttrs.borderRadius = form.value.borderRadius
-        baseAttrs.padding = form.value.padding
+        
+        // Ensure units for CSS properties
+        const ensureUnit = (val) => (val && !isNaN(val)) ? `${val}px` : val
+        baseAttrs.borderRadius = ensureUnit(form.value.borderRadius)
+        baseAttrs.padding = ensureUnit(form.value.padding)
         baseAttrs.opacity = form.value.opacity
     } else {
         // Clean up video attrs if not video
