@@ -43,6 +43,16 @@
 
                         <div class="w-px h-4 bg-border/60 mx-1" />
                         
+                        <AiAssistPopover :context="getEditorContext" @result="handleAiResult" :disabled="!isAiEnabled">
+                            <template #trigger>
+                                <Button :disabled="!isAiEnabled" variant="ghost" size="icon" class="h-7 w-7 rounded-sm text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50">
+                                    <Sparkles class="w-3.5 h-3.5" />
+                                </Button>
+                            </template>
+                        </AiAssistPopover>
+
+                        <div class="w-px h-4 bg-border/60 mx-1" />
+                        
                         <TooltipRoot>
                             <TooltipTrigger as-child>
                                 <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm" :class="{ 'text-primary': showHtmlView }" @click="$emit('toggleHtml')">
@@ -57,11 +67,13 @@
                 </div>
 
                 <!-- Tab Content (Ribbon Content) -->
+                <!-- ... existing content ... -->
                 <div class="bg-background flex-1 border-t border-border/10 overflow-x-auto custom-scrollbar">
-                    <!-- HOME TAB -->
-                    <TabsContent value="home" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
-                        <!-- Group: Font -->
+                   <!-- ... tabs content ... -->
+                   <TabsContent value="home" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
+                        <!-- ... -->
                         <div class="ribbon-group border-r border-border/40">
+                            <!-- ... Font group ... -->
                             <div class="ribbon-group-content">
                                 <Select :model-value="getHeaderLevel()" @update:model-value="setHeaderLevel">
                                     <SelectTrigger class="w-[100px] h-7 text-[11px] bg-transparent border-none shadow-none hover:bg-muted/40">
@@ -108,10 +120,10 @@
                             </div>
                             <div class="ribbon-group-label">Font</div>
                         </div>
-
-                        <!-- Group: Style (Compact 2 rows) -->
+                        
+                        <!-- ... Style group ... -->
                         <div class="ribbon-group border-r border-border/40">
-                            <div class="ribbon-group-content grid grid-cols-3 gap-x-0.5 gap-y-0.5 items-center">
+                             <div class="ribbon-group-content grid grid-cols-3 gap-x-0.5 gap-y-0.5 items-center">
                                 <TooltipRoot>
                                     <TooltipTrigger as-child>
                                         <Button variant="ghost" size="icon" class="h-6 w-7" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-primary': editor.isActive('bold') }">
@@ -169,9 +181,9 @@
                             <div class="ribbon-group-label">Style</div>
                         </div>
 
-                        <!-- Group: Paragraph (Compact 2 rows) -->
+                        <!-- ... Paragraph group ... -->
                         <div class="ribbon-group border-r border-border/40">
-                            <div class="ribbon-group-content grid grid-cols-4 gap-x-0.5 gap-y-0.5 items-center">
+                             <div class="ribbon-group-content grid grid-cols-4 gap-x-0.5 gap-y-0.5 items-center">
                                 <TooltipRoot>
                                     <TooltipTrigger as-child>
                                         <Button variant="ghost" size="icon" class="h-6 w-6" @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'text-primary': editor.isActive({ textAlign: 'left' }) }">
@@ -225,7 +237,7 @@
                             <div class="ribbon-group-label">Paragraph</div>
                         </div>
 
-                        <!-- Group: Special -->
+                        <!-- ... Special group ... -->
                         <div class="ribbon-group">
                             <div class="ribbon-group-content flex gap-1">
                                 <TooltipRoot>
@@ -247,11 +259,8 @@
                             </div>
                             <div class="ribbon-group-label">Special</div>
                         </div>
-                    </TabsContent>
-
-                    <!-- INSERT TAB -->
-                    <TabsContent value="insert" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
-                        <!-- Group: Media -->
+                   </TabsContent>
+                   <TabsContent value="insert" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
                         <div class="ribbon-group border-r border-border/40">
                             <div class="ribbon-group-content gap-2">
                                 <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" @click="$emit('openMedia')">
@@ -276,18 +285,10 @@
                                     <Minus class="w-5 h-5 opacity-50" />
                                     <span class="text-[10px] font-medium">Line</span>
                                 </Button>
-                                <!-- Icon Picker handled internally -->
                                 <div class="flex flex-col items-center justify-center">
-                                    <IconPicker
-                                        modelValue=""
-                                        @update:modelValue="handleIconSelect"
-                                    >
+                                    <IconPicker modelValue="" @update:modelValue="handleIconSelect">
                                         <template #trigger>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors" 
-                                            >
+                                            <Button variant="ghost" size="sm" class="h-11 px-4 flex flex-col gap-1 items-center justify-center hover:bg-muted/40 transition-colors">
                                                 <Smile class="w-5 h-5 opacity-70" />
                                                 <span class="text-[10px] font-medium">Icon</span>
                                             </Button>
@@ -297,12 +298,9 @@
                             </div>
                             <div class="ribbon-group-label">Embeds</div>
                         </div>
-                    </TabsContent>
-
-                    <!-- LAYOUT TAB -->
-                    <TabsContent value="layout" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
-                        <!-- Group: Newspaper -->
-                        <div class="ribbon-group border-r border-border/40">
+                   </TabsContent>
+                   <TabsContent value="layout" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4">
+                       <div class="ribbon-group border-r border-border/40">
                             <div class="ribbon-group-content gap-2">
                                 <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" :class="{ 'text-primary': editor.isActive('textColumns', { count: 2 }) }" @click="editor.chain().focus().toggleTextColumns(2).run()">
                                     <Columns class="w-4 h-4 opacity-70" />
@@ -325,8 +323,6 @@
                             </div>
                             <div class="ribbon-group-label">Newspaper style</div>
                         </div>
-
-                        <!-- Group: Grid -->
                         <div class="ribbon-group">
                             <div class="ribbon-group-content gap-2">
                                 <Button variant="ghost" size="sm" class="h-11 px-3 gap-2 font-normal" @click="editor.chain().focus().insertColumns({ count: 2 }).run()">
@@ -350,10 +346,8 @@
                             </div>
                             <div class="ribbon-group-label">Grid system</div>
                         </div>
-                    </TabsContent>
-
-                    <!-- CONTEXTUAL TABLE TAB -->
-                    <TabsContent v-if="editor.isActive('table')" value="table" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4 animate-in fade-in slide-in-from-top-1">
+                   </TabsContent>
+                   <TabsContent v-if="editor.isActive('table')" value="table" class="m-0 p-1 flex items-stretch gap-1 h-full min-w-max pr-4 animate-in fade-in slide-in-from-top-1">
                         <div class="ribbon-group border-r border-border/40">
                             <div class="ribbon-group-content gap-1">
                                 <Button variant="ghost" size="sm" class="h-11 px-3 flex flex-col gap-1 items-center justify-center" @click="editor.chain().focus().addColumnAfter().run()">
@@ -411,7 +405,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import Button from '@/components/ui/button.vue'
 import Select from '@/components/ui/select.vue'
 import SelectTrigger from '@/components/ui/select-trigger.vue'
@@ -463,8 +457,15 @@ import {
     FileCode2,
     Type as DropcapIcon,
     LayoutGrid,
+    CheckCircle2,
+    RefreshCw,
+    Maximize2,
+    Sparkles,
     Smile,
 } from 'lucide-vue-next'
+
+import { useCmsStore } from '@/stores/cms'
+import AiAssistPopover from './AiAssistPopover.vue'
 
 const props = defineProps({
     editor: Object,
@@ -473,11 +474,39 @@ const props = defineProps({
 
 const emit = defineEmits(['insertTable', 'openMedia', 'insertHtml', 'toggleHtml', 'insertIcon'])
 
+const cmsStore = useCmsStore()
 const activeTab = ref('home')
 
 const handleIconSelect = (iconName) => {
     emit('insertIcon', iconName)
 }
+
+const handleAiResult = (text) => {
+    if (!props.editor) return
+    
+    const { from, to } = props.editor.state.selection
+    
+    // If text was selected, replace it. Otherwise insert at cursor.
+    if (from !== to) {
+        props.editor.chain().focus().deleteSelection().insertContent(text).run()
+    } else {
+        props.editor.chain().focus().insertContent(text).run()
+    }
+}
+
+const getEditorContext = computed(() => {
+    if (!props.editor) return ''
+    
+    const { from, to } = props.editor.state.selection
+    
+    // If text is selected, use that as context
+    if (from !== to) {
+        return props.editor.state.doc.textBetween(from, to, ' ')
+    }
+    
+    // Otherwise use up to 1000 chars around the cursor or the whole doc if small
+    return props.editor.getText().slice(0, 5000) // Simple fallback
+})
 
 // Sync selected color with editor state
 const selectedColor = computed({
@@ -499,6 +528,23 @@ watch(() => props.editor?.isActive('table'), (isInTable) => {
         activeTab.value = 'home'
     }
 }, { immediate: true })
+
+const isAiEnabled = computed(() => {
+    const enabled = cmsStore.settings['ai_enabled'];
+    const isEnabled = enabled && enabled !== '0' && enabled !== 'false';
+    if (!isEnabled) return false;
+    
+    // Check if default provider has key
+    const provider = cmsStore.settings['ai_default_provider'] || 'gemini';
+    return !!cmsStore.settings[`${provider}_api_key`];
+})
+
+onMounted(() => {
+    // Check if store has ai settings, if not fetch them
+    if (!cmsStore.settings['gemini_api_key']) {
+        cmsStore.fetchSettingsGroup('ai')
+    }
+})
 
 function getHeaderLevel() {
     if (props.editor?.isActive('heading', { level: 1 })) return '1'
@@ -523,6 +569,8 @@ function setFontFamily(val) {
     props.editor.chain().focus().setFontFamily(val).run()
 }
 </script>
+
+
 
 <style scoped>
 .editor-toolbar {

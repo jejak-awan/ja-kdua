@@ -10,9 +10,14 @@
         "security": "Keamanan",
         "comments": "Diskusi",
         "performance": "Performa",
-        "media": "Media"
+        "media": "Media",
+        "ai": "Bantuan AI"
     },
     "groups": {
+        "ai": {
+            "title": "Bantuan AI",
+            "description": "Konfigurasi fitur AI untuk pembuatan konten."
+        },
         "siteInfo": {
             "title": "Informasi Situs",
             "description": "Informasi dasar tentang situs web Anda"
@@ -420,5 +425,23 @@
                 "banned_words": "Daftar kata yang akan menyebabkan komentar ditandai sebagai spam (array JSON)"
             }
         }
+    },
+    "ai": {
+        "title": "Bantuan AI",
+        "description": "Konfigurasi fitur AI untuk pembuatan konten.",
+        "enable_ai": "Aktifkan Fitur AI",
+        "enable_ai_desc": "Aktifkan atau nonaktifkan bantuan AI di editor.",
+        "default_provider": "Penyedia Default",
+        "default_provider_desc": "Pilih penyedia AI mana yang akan digunakan secara default.",
+        "providers": "Penyedia AI",
+        "test_connection": "Uji Koneksi",
+        "fetch_models": "Ambil Model",
+        "model_select": "Model Default",
+        "model_select_desc": "Pilih model default untuk penyedia ini.",
+        "api_key": "Kunci API",
+        "api_key_placeholder": "Masukkan Kunci API",
+        "connection_success": "Koneksi berhasil!",
+        "connection_failed": "Koneksi gagal",
+        "models_fetched": "Model berhasil diambil"
     }
 }

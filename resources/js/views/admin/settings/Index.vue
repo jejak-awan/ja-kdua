@@ -93,6 +93,14 @@
                         :errors="errors"
                     />
 
+                    <!-- AI Tab -->
+                    <AiTab
+                        v-else-if="activeTab === 'ai'"
+                        :settings="settings"
+                        :form-data="formData"
+                        :errors="errors"
+                    />
+
 
 
                     <!-- Email Test Section (only for email tab) -->
@@ -146,6 +154,7 @@ import TabsTrigger from '../../../components/ui/tabs-trigger.vue';
 import Button from '../../../components/ui/button.vue';
 import { useToast } from '../../../composables/useToast';
 import { useConfirm } from '../../../composables/useConfirm';
+import { useCmsStore } from '@/stores/cms';
 
 // Import tab components
 import GeneralTab from './tabs/GeneralTab.vue';
@@ -155,12 +164,14 @@ import MediaTab from './tabs/MediaTab.vue';
 import SecurityTab from './tabs/SecurityTab.vue';
 import PerformanceTab from './tabs/PerformanceTab.vue';
 import DiscussionTab from './tabs/DiscussionTab.vue';
+import AiTab from './tabs/AiTab.vue';
 import EmailTestSection from './EmailTestSection.vue';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const toast = useToast();
 const route = useRoute();
+const cmsStore = useCmsStore();
 
 const loading = ref(false);
 const saving = ref(false);
@@ -215,6 +226,7 @@ const tabs = [
     { id: 'security', label: 'Security' },
     { id: 'performance', label: 'Performance' },
     { id: 'media', label: 'Media' },
+    { id: 'ai', label: 'AI Assistance' },
 ];
 
 const currentSettings = computed(() => {
@@ -274,6 +286,10 @@ const fetchSettings = async () => {
 
         // Inject Dropbox Settings
         ensureSetting('dropbox_authorization_token', '', 'password', 'media');
+
+        // Inject AI Settings
+        ensureSetting('ai_enabled', true, 'boolean', 'ai');
+        ensureSetting('gemini_api_key', '', 'password', 'ai');
 
         initializeFormData();
     } catch (error) {
@@ -357,6 +373,7 @@ const handleSubmit = async () => {
         
         toast.success.save();
         await fetchSettings();
+        await cmsStore.fetchSettingsGroup(activeTab.value); // Force refresh store for reactivity
 
         // Refresh cache status if on performance tab
         if (activeTab.value === 'performance') {

@@ -189,6 +189,21 @@ api.interceptors.response.use(
         // Handle 403 Forbidden - DON'T auto-redirect, let components handle it
         // This allows for graceful error handling with toast notifications
         if (error.response?.status === 403) {
+            // SPECIAL CASE: If /user endpoint returns 403, it means the user exists but is likely suspended/banned
+            // or the session state is corrupted. in this case we MUST force logout.
+            if (error.config?.url?.endsWith('/user') || error.config?.url?.includes('/user?')) {
+                triggerVaporLock();
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+
+                showError({
+                    code: 403, // We use 403 here so the error page knows to say "Access Denied / Suspended"
+                    reason: 'concurrent',
+                    redirect: '/login'
+                });
+                return Promise.reject(new axios.Cancel('Vapor Lock: 403 Session Terminated'));
+            }
+
             // Just log and let the error propagate to the caller
             console.debug('403 Forbidden:', error.config?.url);
             // Components should handle 403 with toast.error() and appropriate fallback

@@ -10,9 +10,14 @@
         "security": "Security",
         "comments": "Discussion",
         "performance": "Performance",
-        "media": "Media"
+        "media": "Media",
+        "ai": "AI Assistance"
     },
     "groups": {
+        "ai": {
+            "title": "AI Assistance",
+            "description": "Configure AI features for content generation."
+        },
         "siteInfo": {
             "title": "Site Information",
             "description": "Basic information about your website"
@@ -465,5 +470,23 @@
                 "banned_words": "List of words that will cause a comment to be marked as spam (JSON array)"
             }
         }
+    },
+    "ai": {
+        "title": "AI Assistance",
+        "description": "Configure AI features for content generation.",
+        "enable_ai": "Enable AI Features",
+        "enable_ai_desc": "Enable or disable AI assistance in the editor.",
+        "default_provider": "Default Provider",
+        "default_provider_desc": "Select which AI provider to use by default.",
+        "providers": "AI Providers",
+        "test_connection": "Test Connection",
+        "fetch_models": "Fetch Models",
+        "model_select": "Default Model",
+        "model_select_desc": "Select the default model for this provider.",
+        "api_key": "API Key",
+        "api_key_placeholder": "Enter API Key",
+        "connection_success": "Connection successful!",
+        "connection_failed": "Connection failed",
+        "models_fetched": "Models fetched successfully"
     }
 }

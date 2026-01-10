@@ -141,6 +141,12 @@ Route::prefix('v1')->group(function () {
         Route::patch('contents/{content}/toggle-featured', [App\Http\Controllers\Api\V1\ContentController::class, 'toggleFeatured'])->middleware('permission:edit content');
         Route::delete('contents/{id}/force-delete', [App\Http\Controllers\Api\V1\ContentController::class, 'forceDelete'])->middleware('permission:delete content');
 
+        // AI Assistance
+        Route::get('ai/providers', [App\Http\Controllers\Api\V1\AiController::class, 'getProviders'])->middleware('permission:create content');
+        Route::get('ai/models/{provider}', [App\Http\Controllers\Api\V1\AiController::class, 'getModels'])->middleware('permission:create content');
+        Route::post('ai/test', [App\Http\Controllers\Api\V1\AiController::class, 'testConnection'])->middleware('permission:create content');
+        Route::post('ai/generate', [App\Http\Controllers\Api\V1\AiController::class, 'generate'])->middleware('permission:create content');
+
         // Newsletter
         Route::post('newsletter/subscribers/bulk-action', [App\Http\Controllers\Api\V1\NewsletterController::class, 'bulkAction'])->middleware('permission:manage users');
         Route::get('newsletter/subscribers', [App\Http\Controllers\Api\V1\NewsletterController::class, 'index'])->middleware('permission:manage users');
