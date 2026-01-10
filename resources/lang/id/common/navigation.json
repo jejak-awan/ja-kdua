@@ -58,5 +58,6 @@
         "expand": "Perluas sidebar",
         "minimize": "Minimalkan sidebar",
         "toggle": "Beralih sidebar"
-    }
+    },
+    "visit_site": "Kunjungi {url}"
 }

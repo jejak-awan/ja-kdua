@@ -19,7 +19,18 @@
         <div class="flex flex-col h-full">
             <!-- Logo -->
             <div class="flex items-center justify-between h-16 px-4 border-b border-border">
-                <AdminLogo :minimized="sidebarMinimized" />
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger as-child>
+                            <a href="/" target="_blank" class="block transition-opacity hover:opacity-80 focus:outline-none">
+                                <AdminLogo :minimized="sidebarMinimized" />
+                            </a>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" :side-offset="10">
+                            {{ getVisitTooltip }}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
                 <div class="flex items-center gap-2">
                     <!-- Mobile Close Button -->
                     <button
@@ -183,8 +194,13 @@ import {
     BarChart3,
     ScrollText,
     Settings,
-    Code
+    Code,
+    Globe
 } from 'lucide-vue-next';
+import TooltipProvider from '../ui/tooltip-provider.vue';
+import Tooltip from '../ui/tooltip.vue';
+import TooltipTrigger from '../ui/tooltip-trigger.vue';
+import TooltipContent from '../ui/tooltip-content.vue';
 
 const props = defineProps({
     sidebarMinimized: {
@@ -360,4 +376,20 @@ const getNavigationLabel = (item) => {
     const key = `common.navigation.menu.${camelName}`;
     return te(key) ? t(key) : item.label;
 };
+
+const getVisitTooltip = computed(() => {
+    const siteUrl = cmsStore.siteSettings?.site_url || 'domain.com';
+    // Strip protocol for cleaner display if desired, or keep as is.
+    // Let's keep it simple: "Visit [domain]"
+    // We can extract the domain from the URL for a cleaner tooltip
+    let domain = siteUrl;
+    try {
+        const url = new URL(siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`);
+        domain = url.hostname;
+    } catch (e) {
+        // fallback
+    }
+    
+    return t('common.navigation.visit_site', { url: domain });
+});
 </script>

@@ -44,6 +44,7 @@ class ScheduledTask extends Model
         'logs:cleanup',
         'analytics:cleanup',
         'media:thumbnails',
+        'media:cleanup-temp',
 
         // Health & diagnostics
         'cms:health-check',
