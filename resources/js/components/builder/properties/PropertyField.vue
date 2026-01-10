@@ -16,12 +16,16 @@
                 <div class="flex items-center gap-2">
                     <button 
                         v-if="supportsResponsive"
-                        class="opacity-50 hover:opacity-100 transition-opacity"
-                        :class="{ 'text-primary opacity-100': isResponsive }"
+                        class="transition-all flex items-center gap-1.5"
+                        :class="[
+                            isResponsive ? 'text-primary' : 'text-muted-foreground opacity-40 hover:opacity-100',
+                            isOverridden ? 'font-black' : ''
+                        ]"
                         @click="toggleResponsive"
                         :title="isResponsive ? 'Responsive Mode Active' : 'Enable Responsive Mode'"
                     >
-                        <component :is="currentDeviceIcon" class="w-3 h-3" />
+                        <component :is="currentDeviceIcon" class="w-3.5 h-3.5" />
+                        <span v-if="isOverridden" class="w-1 h-1 rounded-full bg-primary"></span>
                     </button>
                     <!-- Global Dynamic Data Trigger -->
                     <DynamicTrigger v-if="supportsDynamic" :field="field" :block="block" />
@@ -326,10 +330,31 @@ const isResponsive = computed(() => {
 });
 
 const supportsResponsive = computed(() => {
-    // Only allow responsive for specific types that are likely class-based or logic-handled
-    // Text/Image content should genericly not be responsive (unless supported by component)
-    // Color is complex (needs wrapper class knowledge).
-    return ['select', 'slider', 'range', 'boolean'].includes(props.field.type);
+    // Almost all fields can be responsive now
+    const exclude = ['header', 'repeater', 'data_select'];
+    return !exclude.includes(props.field.type) && props.field.responsive !== false;
+});
+
+const isOverridden = computed(() => {
+    if (!isResponsive.value) return false;
+    const mode = builder.deviceMode.value;
+    if (mode === 'desktop') return false; // Desktop is base, no dot
+    
+    // Check if it's explicitly set for this mode vs inherited
+    const val = props.modelValue[mode];
+    if (val === undefined || val === null || val === '') return false;
+    
+    if (mode === 'mobile') {
+        const tabletVal = props.modelValue.tablet;
+        const desktopVal = props.modelValue.desktop;
+        // Mobile is overridden if it differs from BOTH tablet and desktop 
+        // OR if it's explicitly set and tablet is also overridden
+        return val !== tabletVal && val !== desktopVal;
+    }
+    if (mode === 'tablet') {
+        return val !== props.modelValue.desktop;
+    }
+    return false;
 });
 
 const supportsDynamic = computed(() => {
@@ -355,14 +380,38 @@ const toggleResponsive = () => {
 const proxyValue = computed({
     get() {
         if (isResponsive.value) {
-            return props.modelValue[builder.deviceMode.value];
+            const mode = builder.deviceMode.value;
+            const val = props.modelValue[mode];
+            
+            // Inheritance Logic: Mobile -> Tablet -> Desktop
+            if (val !== undefined && val !== null && val !== '') return val;
+            
+            if (mode === 'mobile') {
+                const tabletVal = props.modelValue.tablet;
+                if (tabletVal !== undefined && tabletVal !== null && tabletVal !== '') return tabletVal;
+            }
+            
+            return props.modelValue.desktop;
         }
         return props.modelValue;
     },
     set(val) {
+        const mode = builder.deviceMode.value;
+        
+        // Auto-Responsive Logic: If in Mobile/Tablet and not already responsive, convert to responsive object
+        if (mode !== 'desktop' && !isResponsive.value) {
+            const newVal = {
+                desktop: props.modelValue,
+                tablet: mode === 'tablet' ? val : props.modelValue,
+                mobile: mode === 'mobile' ? val : props.modelValue
+            };
+            emit('update:modelValue', newVal);
+            return;
+        }
+
         if (isResponsive.value) {
             const newVal = { ...props.modelValue };
-            newVal[builder.deviceMode.value] = val;
+            newVal[mode] = val;
             emit('update:modelValue', newVal);
         } else {
             emit('update:modelValue', val);

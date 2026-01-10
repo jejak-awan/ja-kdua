@@ -1,10 +1,10 @@
 <template>
     <div 
         class="group/block relative border-2 border-transparent transition-all"
-        :class="[
-            !builder?.isPreview?.value ? 'hover:border-primary cursor-pointer' : '',
-            isSelected && !builder?.isPreview?.value ? 'border-primary ring-4 ring-primary/20 z-10' : ''
-        ]"
+        :class="{
+            'hover:border-primary cursor-pointer': !builder?.isPreview?.value,
+            'border-primary ring-4 ring-primary/20 z-10': isSelected && !builder?.isPreview?.value
+        }"
         @click.stop="!builder?.isPreview?.value && onEdit()"
         @contextmenu.prevent="!builder?.isPreview?.value && onContextMenu($event)"
         @mouseover.stop="onMouseOver"
@@ -14,7 +14,7 @@
         <div v-if="builder && !builder.isPreview?.value" 
              class="absolute top-1 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95"
              :class="[
-                (isSelected || isHovered) ? 'opacity-100 scale-100' : 'opacity-0 pointer-events-none',
+                (isSelected || isHovered) ? ['opacity-100', 'scale-100'] : ['opacity-0', 'pointer-events-none'],
                 toolbarPositionClass
              ]">
             <GripVertical class="w-3 h-3 cursor-move drag-handle mx-0.5" />

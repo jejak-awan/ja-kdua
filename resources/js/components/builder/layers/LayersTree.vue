@@ -2,7 +2,7 @@
     <div class="relative">
         <draggable
             :list="blocks"
-            group="layers"
+            :group="{ name: 'blocks', pull: true, put: true }"
             item-key="id"
             handle=".drag-handle"
             class="space-y-0.5 min-h-[1px]"
@@ -68,6 +68,14 @@
                         </template>
 
                         <!-- Container Children Logic -->
+                        <template v-if="block.type === 'container' && Array.isArray(block.settings.blocks)">
+                            <LayersTree 
+                                :blocks="block.settings.blocks" 
+                                :depth="depth + 1"
+                            />
+                        </template>
+
+                        <!-- Container Children Logic -->
                         <template v-if="block.type === 'columns' && Array.isArray(block.settings.columns)">
                             <div v-for="(col, colIndex) in block.settings.columns" :key="colIndex">
                                 <!-- Virtual Column Node -->
@@ -75,17 +83,30 @@
                                     <div class="absolute -left-2.5 top-0 bottom-0 w-px bg-border/50"></div> <!-- Vertical Guide -->
                                     <div class="absolute -left-2.5 top-3 w-2.5 h-px bg-border/50"></div> <!-- Conn -->
                                     
-                                    <!-- Column Header -->
-                                    <div class="flex items-center gap-1.5 p-1 text-[10px] uppercase font-bold text-muted-foreground/70 select-none">
+                                    <!-- Column Header (Collapsible) -->
+                                    <div 
+                                        class="group flex items-center gap-1.5 p-1 rounded-md border border-transparent text-[10px] uppercase font-bold text-muted-foreground/70 select-none cursor-pointer hover:bg-sidebar-accent transition-colors"
+                                        @click.stop="toggleExpand(`${block.id}_col_${colIndex}`)"
+                                    >
+                                        <!-- Expand/Collapse Toggle -->
+                                        <button 
+                                            class="w-3 h-3 flex items-center justify-center rounded hover:bg-black/5 text-muted-foreground transition-transform duration-200"
+                                            :class="{ 'rotate-90': isExpanded(`${block.id}_col_${colIndex}`) }"
+                                        >
+                                            <ChevronRight class="w-2.5 h-2.5" />
+                                        </button>
+
                                         <Columns3 class="w-3 h-3" />
                                         <span>Col {{ colIndex + 1 }}</span>
                                     </div>
                                     
                                     <!-- Children of Column -->
-                                    <LayersTree 
-                                        :blocks="col.blocks" 
-                                        :depth="depth + 1"
-                                    />
+                                    <div v-show="isExpanded(`${block.id}_col_${colIndex}`)">
+                                        <LayersTree 
+                                            :blocks="col.blocks" 
+                                            :depth="depth + 1"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -137,6 +158,7 @@ const toggleExpand = (id) => {
 
 const hasChildren = (block) => {
     if (block.type === 'section') return Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0;
+    if (block.type === 'container') return Array.isArray(block.settings?.blocks) && block.settings.blocks.length > 0;
     if (block.type === 'columns') return Array.isArray(block.settings?.columns) && block.settings.columns.length > 0;
     return false;
 };

@@ -69,66 +69,81 @@ const props = defineProps({
 });
 
 const applyPrefix = (str, prefix) => {
-    if (!str && str !== 0) return '';
-    return String(str).split(' ').filter(c => c.trim()).map(c => `${prefix}:${c.trim()}`).join(' ');
+    if (!str && str !== 0) return [];
+    return String(str).split(' ').filter(c => c.trim()).map(c => `${prefix}:${c.trim()}`);
 };
 
-const resolveResponsiveValue = (val) => {
-    if (!val) return '';
-    if (typeof val !== 'object' || Array.isArray(val)) return String(val);
+const resolveResponsiveValue = (val, asClasses = true) => {
+    if (!val) return asClasses ? [] : '';
+    if (typeof val !== 'object' || Array.isArray(val)) {
+        return asClasses ? String(val).split(' ').filter(Boolean) : String(val);
+    }
     
     // Check if it's a responsive object
     if ('desktop' in val || 'mobile' in val || 'tablet' in val) {
-         const mobile = val.mobile !== undefined ? val.mobile : '';
-         const tablet = val.tablet;
+         // Inheritance Logic: Mobile -> Tablet -> Desktop
          const desktop = val.desktop;
+         const tablet = (val.tablet !== undefined && val.tablet !== null && val.tablet !== '') ? val.tablet : desktop;
+         const mobile = (val.mobile !== undefined && val.mobile !== null && val.mobile !== '') ? val.mobile : tablet;
          
-         let classes = [];
-         if (mobile !== '') classes.push(mobile);
-         if (tablet !== undefined && tablet !== mobile) {
-             classes.push(applyPrefix(tablet, 'md'));
+         if (asClasses) {
+             let classes = [];
+             if (mobile !== '') {
+                 // Split mobile value in case it contains multiple classes
+                 classes.push(...String(mobile).split(' ').filter(Boolean));
+             }
+             if (tablet !== undefined && tablet !== mobile) {
+                 classes.push(...applyPrefix(tablet, 'md'));
+             }
+             if (desktop !== undefined && desktop !== tablet) {
+                 classes.push(...applyPrefix(desktop, 'lg'));
+             }
+             return classes;
+         } else {
+             // For props (non-class), we default to desktop as the "base" value for JS props
+             // This is a limitation for JS-only props, but most styling should be CSS classes.
+             return desktop;
          }
-         if (desktop !== undefined && desktop !== tablet) {
-             classes.push(applyPrefix(desktop, 'lg'));
-         }
-         
-         return classes.join(' ');
     }
     
-    return ''; // Generic object that we don't know how to handle
+    return asClasses ? [] : ''; 
 };
 
 const resolveBlockSettings = (block) => {
-    // Clone settings to avoid mutating original
     const settings = { ...block.settings };
     const propsToPass = {};
 
-    // 1. Resolve Responsive Objects and filterProps
     for (const key in settings) {
-        // Strict key validation: only allow alphanumeric, underscore, hyphen
-        // MUST start with a letter to avoid DOMException with setAttribute ('1foo', etc)
         if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(key)) continue;
-
-        // Skip internal settings (prefixed with _)
         if (key.startsWith('_')) continue;
-        
-        // Skip system-wide settings handled by BlockRenderer
         if (['visibility', 'animation_effect', 'animation_duration', 'animation_delay', 'animation_repeat'].includes(key)) continue;
 
         let val = settings[key];
         
         // Resolve responsive objects
         if (val && typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val)) {
-             val = resolveResponsiveValue(val);
+             // Unlike before, we ALWAYS try to resolve to a single value for JS props (Desktop)
+             // or keep it if the component can handle objects (rare).
+             // For standard props, we take the desktop value to ensure stability.
+             
+             // Check if it's likely class-based (string with spaces or dashes)
+             const isProbablyClasses = typeof val.desktop === 'string' && (val.desktop.includes('-') || val.desktop.includes(' '));
+             
+             if (isProbablyClasses) {
+                 // If it looks like classes, we want the full array
+                 propsToPass[key] = resolveResponsiveValue(val, true).join(' ');
+             } else {
+                // Otherwise, it's a raw value (e.g. number for a counter).
+                // We default to desktop to avoid breaking the component logic.
+                propsToPass[key] = val.desktop; 
+             }
+        } else {
+            propsToPass[key] = val;
         }
-        
-        propsToPass[key] = val;
     }
     
-    // 2. Add settings object itself for backward compatibility with blocks not yet refactored to flat props
     propsToPass.settings = settings;
 
-    // 3. Check for dynamic overrides
     if (block.dynamicSettings) {
         Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {
             if (sourceId && propsToPass.hasOwnProperty(key)) {
@@ -144,7 +159,7 @@ const resolveBlockSettings = (block) => {
 };
 
 const resolveAdvancedStyles = (settings, prefix = '') => {
-    if (!settings) return '';
+    if (!settings) return [];
     let classes = [];
     const p = prefix ? `${prefix}:` : '';
     
@@ -185,9 +200,14 @@ const resolveAdvancedStyles = (settings, prefix = '') => {
         if (['scale', 'rotate', 'skew_x', 'skew_y', 'translate_x', 'translate_y'].includes(key)) hasTransform = true;
 
         if (typeof val === 'object' && !Array.isArray(val)) {
-            if (val.mobile !== undefined && val.mobile !== '') classes.push(`${p}${tailwindPrefix}-${val.mobile}`);
-            if (val.tablet !== undefined && val.tablet !== '' && val.tablet !== val.mobile) classes.push(`${p}md:${tailwindPrefix}-${val.tablet}`);
-            if (val.desktop !== undefined && val.desktop !== '' && val.desktop !== val.tablet) classes.push(`${p}lg:${tailwindPrefix}-${val.desktop}`);
+            const desktop = val.desktop;
+            const tablet = (val.tablet !== undefined && val.tablet !== null && val.tablet !== '') ? val.tablet : desktop;
+            const mobile = (val.mobile !== undefined && val.mobile !== null && val.mobile !== '') ? val.mobile : tablet;
+
+            // Always render full responsive classes
+            if (mobile !== undefined && mobile !== '') classes.push(`${p}${tailwindPrefix}-${mobile}`);
+            if (tablet !== undefined && tablet !== '' && tablet !== mobile) classes.push(`${p}md:${tailwindPrefix}-${tablet}`);
+            if (desktop !== undefined && desktop !== '' && desktop !== tablet) classes.push(`${p}lg:${tailwindPrefix}-${desktop}`);
         } else {
             classes.push(`${p}${tailwindPrefix}-${val}`);
         }
@@ -197,9 +217,13 @@ const resolveAdvancedStyles = (settings, prefix = '') => {
     if (settings.shadow && settings.shadow !== 'none') {
         const shadow = settings.shadow;
         if (typeof shadow === 'object' && !Array.isArray(shadow)) {
-            if (shadow.mobile) classes.push(`${p}${shadow.mobile}`);
-            if (shadow.tablet && shadow.tablet !== shadow.mobile) classes.push(`${p}md:${shadow.tablet}`);
-            if (shadow.desktop && shadow.desktop !== shadow.tablet) classes.push(`${p}lg:${shadow.desktop}`);
+            const desktop = shadow.desktop;
+            const tablet = (shadow.tablet !== undefined && shadow.tablet !== null && shadow.tablet !== '') ? shadow.tablet : desktop;
+            const mobile = (shadow.mobile !== undefined && shadow.mobile !== null && shadow.mobile !== '') ? shadow.mobile : tablet;
+
+            if (mobile) classes.push(`${p}${mobile}`);
+            if (tablet && tablet !== mobile) classes.push(`${p}md:${tablet}`);
+            if (desktop && desktop !== tablet) classes.push(`${p}lg:${desktop}`);
         } else {
             classes.push(`${p}${shadow}`);
         }
@@ -208,25 +232,33 @@ const resolveAdvancedStyles = (settings, prefix = '') => {
     if (hasFilter) classes.push(`${p}filter`);
     if (hasTransform) classes.push(`${p}transform`);
 
-    return classes.join(' ');
+    return classes;
 };
 
 const getVisibilityClasses = (visibility) => {
-    if (!visibility) return '';
+    if (!visibility) return [];
     const v = visibility;
+    const desktop = v.desktop !== false;
+    const tablet = v.tablet !== undefined ? v.tablet !== false : desktop;
+    const mobile = v.mobile !== undefined ? v.mobile !== false : tablet;
+
+    // We can't use "opacity-30" trick for hidden elements in builder anymore 
+    // because we are using real media queries.
+    // Instead, we just let them be hidden (or block) based on the current iframe width.
+    // To allow editing "hidden" elements, the user must switch to the device mode where it is visible.
+    
     let classes = [];
+    if (!mobile) classes.push('hidden');
     
-    if (v.mobile === false) classes.push('hidden');
-    
-    if (v.tablet !== v.mobile) {
-        classes.push(v.tablet ? 'md:block' : 'md:hidden');
+    if (tablet !== mobile) {
+        classes.push(tablet ? 'md:block' : 'md:hidden');
     }
     
-    if (v.desktop !== v.tablet) {
-        classes.push(v.desktop ? 'lg:block' : 'lg:hidden');
+    if (desktop !== tablet) {
+        classes.push(desktop ? 'lg:block' : 'lg:hidden');
     }
     
-    return classes.join(' ');
+    return classes;
 };
 
 const getAnimationStyles = (settings) => {

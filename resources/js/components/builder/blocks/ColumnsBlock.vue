@@ -286,6 +286,7 @@ const duplicateColumn = (index) => {
 
 const getColumnCount = (layout) => {
     switch (layout) {
+        case '1': return 1;
         case '1-1': case '1-2': case '2-1': case 'custom': return 2;
         case '1-1-1': return 3;
         case '1-1-1-1': return 4;
@@ -308,6 +309,7 @@ watch(() => props.layout, (newLayout) => {
     });
     
     // Update customWidths if layout matches presets
+    if (newLayout === '1') updateCustomWidths([100]);
     if (newLayout === '1-1') updateCustomWidths([50, 50]);
     if (newLayout === '1-2') updateCustomWidths([33.33, 66.66]);
     if (newLayout === '2-1') updateCustomWidths([66.66, 33.33]);
@@ -348,6 +350,7 @@ const colWidths = computed(() => {
     } else {
         // Standard layouts
         switch (props.layout) {
+            case '1': widths = [100]; break;
             case '1-1': widths = [50, 50]; break;
             case '1-2': widths = [33.333, 66.667]; break;
             case '2-1': widths = [66.667, 33.333]; break;

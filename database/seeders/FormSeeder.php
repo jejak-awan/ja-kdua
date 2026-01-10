@@ -16,112 +16,114 @@ class FormSeeder extends Seeder
         $user = User::first();
 
         // Contact Form
-        $contactForm = Form::create([
-            'name' => 'Contact Form',
-            'slug' => 'contact-form',
-            'description' => 'General contact form for website visitors',
-            'success_message' => 'Thank you for contacting us! We will get back to you soon.',
-            'redirect_url' => null,
-            'is_active' => true,
-            'submission_count' => 0,
-        ]);
+        $contactForm = Form::updateOrCreate(
+            ['slug' => 'contact'],
+            [
+                'name' => 'Contact Form',
+                'description' => 'General contact form for website visitors',
+                'success_message' => 'Thank you for contacting us! We will get back to you soon.',
+                'redirect_url' => null,
+                'is_active' => true,
+                'submission_count' => 0,
+            ]
+        );
 
         $this->createContactFields($contactForm);
         $this->createSubmissions($contactForm, $user, 15);
 
         // Newsletter Signup Form
-        $newsletterForm = Form::create([
-            'name' => 'Newsletter Signup',
-            'slug' => 'newsletter-signup',
-            'description' => 'Subscribe to our newsletter',
-            'success_message' => 'You have been subscribed to our newsletter!',
-            'redirect_url' => null,
-            'is_active' => true,
-            'submission_count' => 0,
-        ]);
+        $newsletterForm = Form::updateOrCreate(
+            ['slug' => 'newsletter-signup'],
+            [
+                'name' => 'Newsletter Signup',
+                'description' => 'Subscribe to our newsletter',
+                'success_message' => 'You have been subscribed to our newsletter!',
+                'redirect_url' => null,
+                'is_active' => true,
+                'submission_count' => 0,
+            ]
+        );
 
         $this->createNewsletterFields($newsletterForm);
         $this->createSubmissions($newsletterForm, $user, 25);
 
         // Feedback Form
-        $feedbackForm = Form::create([
-            'name' => 'Feedback Form',
-            'slug' => 'feedback-form',
-            'description' => 'Collect feedback from users',
-            'success_message' => 'Thank you for your feedback!',
-            'redirect_url' => null,
-            'is_active' => true,
-            'submission_count' => 0,
-        ]);
+        $feedbackForm = Form::updateOrCreate(
+            ['slug' => 'feedback-form'],
+            [
+                'name' => 'Feedback Form',
+                'description' => 'Collect feedback from users',
+                'success_message' => 'Thank you for your feedback!',
+                'redirect_url' => null,
+                'is_active' => true,
+                'submission_count' => 0,
+            ]
+        );
 
         $this->createFeedbackFields($feedbackForm);
         $this->createSubmissions($feedbackForm, $user, 10);
 
         // Job Application Form (inactive)
-        $jobForm = Form::create([
-            'name' => 'Job Application',
-            'slug' => 'job-application',
-            'description' => 'Apply for open positions',
-            'success_message' => 'Your application has been received. We will contact you if your profile matches our requirements.',
-            'redirect_url' => null,
-            'is_active' => false,
-            'submission_count' => 0,
-        ]);
+        $jobForm = Form::updateOrCreate(
+            ['slug' => 'job-application'],
+            [
+                'name' => 'Job Application',
+                'description' => 'Apply for open positions',
+                'success_message' => 'Your application has been received. We will contact you if your profile matches our requirements.',
+                'redirect_url' => null,
+                'is_active' => false,
+                'submission_count' => 0,
+            ]
+        );
 
         $this->createJobFields($jobForm);
     }
 
     private function createContactFields(Form $form): void
     {
-        FormField::create([
-            'form_id' => $form->id,
-            'name' => 'name',
-            'label' => 'Full Name',
-            'type' => 'text',
-            'placeholder' => 'Enter your full name',
-            'is_required' => true,
-            'sort_order' => 1,
-        ]);
+        FormField::updateOrCreate(
+            ['form_id' => $form->id, 'name' => 'first_name'],
+            [
+                'label' => 'First Name',
+                'type' => 'text',
+                'placeholder' => 'Enter your first name',
+                'is_required' => true,
+                'sort_order' => 1,
+            ]
+        );
 
-        FormField::create([
-            'form_id' => $form->id,
-            'name' => 'email',
-            'label' => 'Email Address',
-            'type' => 'email',
-            'placeholder' => 'Enter your email',
-            'is_required' => true,
-            'sort_order' => 2,
-        ]);
+        FormField::updateOrCreate(
+            ['form_id' => $form->id, 'name' => 'last_name'],
+            [
+                'label' => 'Last Name',
+                'type' => 'text',
+                'placeholder' => 'Enter your last name',
+                'is_required' => true,
+                'sort_order' => 2,
+            ]
+        );
 
-        FormField::create([
-            'form_id' => $form->id,
-            'name' => 'phone',
-            'label' => 'Phone Number',
-            'type' => 'tel',
-            'placeholder' => 'Enter your phone number',
-            'is_required' => false,
-            'sort_order' => 3,
-        ]);
+        FormField::updateOrCreate(
+            ['form_id' => $form->id, 'name' => 'email'],
+            [
+                'label' => 'Email Address',
+                'type' => 'email',
+                'placeholder' => 'Enter your email',
+                'is_required' => true,
+                'sort_order' => 3,
+            ]
+        );
 
-        FormField::create([
-            'form_id' => $form->id,
-            'name' => 'subject',
-            'label' => 'Subject',
-            'type' => 'select',
-            'options' => ['General Inquiry', 'Support', 'Sales', 'Partnership', 'Other'],
-            'is_required' => true,
-            'sort_order' => 4,
-        ]);
-
-        FormField::create([
-            'form_id' => $form->id,
-            'name' => 'message',
-            'label' => 'Message',
-            'type' => 'textarea',
-            'placeholder' => 'Enter your message',
-            'is_required' => true,
-            'sort_order' => 5,
-        ]);
+        FormField::updateOrCreate(
+            ['form_id' => $form->id, 'name' => 'message'],
+            [
+                'label' => 'Message',
+                'type' => 'textarea',
+                'placeholder' => 'Enter your message',
+                'is_required' => true,
+                'sort_order' => 4,
+            ]
+        );
     }
 
     private function createNewsletterFields(Form $form): void

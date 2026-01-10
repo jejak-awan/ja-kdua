@@ -156,7 +156,7 @@ onMounted(async () => {
         console.warn('Public settings fetch failed:', err);
     });
     
-    if (authStore.isAuthenticated) {
+    if (authStore.isAuthenticated && !window.__isSessionTerminated) {
         authStore.fetchUser();
     }
 });

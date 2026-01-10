@@ -268,6 +268,7 @@ const handleKeydown = (e) => {
 
 onMounted(() => {
     window.addEventListener('keydown', handleKeydown);
+    window.__builder_instance = builder;
     // User requested to rely on app.css, so we remove manual theme injection
     // builder.loadActiveTheme('admin'); 
 });

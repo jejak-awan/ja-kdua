@@ -4,7 +4,7 @@
         :style="{ backgroundColor: bgColor || 'transparent' }"
     >
         <div :class="['mx-auto px-6', width]">
-            <div :class="['transition-all duration-500', style]">
+            <div :class="['transition-all duration-500', customStyle]">
                 <div v-if="!submitted">
                     <div class="mb-10" :class="alignment === 'text-center' ? 'text-center' : alignment === 'text-right' ? 'text-right' : 'text-left'">
                         <h2 v-if="title" class="text-3xl font-bold tracking-tight mb-2">{{ title }}</h2>
@@ -108,12 +108,12 @@ const props = defineProps({
     fields: { 
         type: Array, 
         default: () => [
-            { label: 'Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },
-            { label: 'Email', type: 'email', required: true, width: 'w-full md:w-[calc(50%-1rem)]' },
+            { label: 'Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%_-_1rem)]' },
+            { label: 'Email', type: 'email', required: true, width: 'w-full md:w-[calc(50%_-_1rem)]' },
             { label: 'Message', type: 'textarea', required: true, width: 'w-full' }
         ] 
     },
-    style: { type: String, default: 'bg-card border shadow-sm p-8 rounded-2xl' },
+    customStyle: { type: String, default: 'bg-card border shadow-sm p-8 rounded-2xl' },
     padding: { type: String, default: 'py-20' },
     width: { type: String, default: 'max-w-3xl' },
     bgColor: String,

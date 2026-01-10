@@ -16,7 +16,8 @@ export default {
                 { label: '50/50', value: '1-1' },
                 { label: '1/3 - 2/3', value: '1-2' },
                 { label: '2/3 - 1/3', value: '2-1' },
-                { label: '3 Cols', value: '1-1-1' }
+                { label: '3 Cols', value: '1-1-1' },
+                { label: 'Full', value: '1' }
             ],
             default: '1-1',
             tab: 'style'

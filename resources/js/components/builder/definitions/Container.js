@@ -21,7 +21,21 @@ export default {
 
     settings: [
         // ============ LAYOUT TAB ============
-        { type: 'header', label: 'Flex Layout', tab: 'style' },
+        { type: 'header', label: 'Smart Layout', tab: 'style' },
+        {
+            key: 'layout',
+            type: 'toggle_group',
+            label: 'Layout Mode',
+            options: [
+                { label: 'Stack', value: 'stack', icon: AlignVerticalJustifyStart },
+                { label: 'Row', value: 'row', icon: AlignHorizontalJustifyStart },
+                // { label: 'Grid', value: 'grid', icon: LayoutGrid } // Future
+            ],
+            default: 'stack',
+            responsive: true,
+            tab: 'style'
+        },
+        { type: 'header', label: 'Flex Controls', tab: 'style' },
         {
             key: 'direction',
             type: 'toggle_group',
@@ -33,6 +47,7 @@ export default {
                 { label: 'Row Reverse', value: 'flex-row-reverse' }
             ],
             default: 'flex-col',
+            condition: (settings) => !settings.layout || settings.layout === 'stack' || settings.layout === 'custom',
             tab: 'style'
         },
         {
@@ -70,7 +85,7 @@ export default {
                 { label: 'Wrap', value: 'flex-wrap' },
                 { label: 'Wrap Reverse', value: 'flex-wrap-reverse' }
             ],
-            default: 'flex-nowrap',
+            default: 'flex-wrap', // Smart Default
             tab: 'style'
         },
         {
@@ -204,10 +219,11 @@ export default {
     ],
 
     defaultSettings: {
+        layout: 'stack', // Smart Default
         direction: 'flex-col',
         justify: 'justify-start',
         align: 'items-start',
-        wrap: 'flex-nowrap',
+        wrap: 'flex-wrap', // Smart Default
         gap: '16px',
         width: '100%',
         maxWidth: 'none',

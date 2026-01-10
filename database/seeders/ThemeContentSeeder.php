@@ -81,6 +81,11 @@ class ThemeContentSeeder extends Seeder
         ];
         foreach ($items as $item) MenuItem::create(array_merge($item, ['menu_id' => $header->id, 'type' => 'custom']));
 
+        // Header Home (Clone of header for compatibility)
+        $headerHome = Menu::firstOrCreate(['location' => 'header_home'], ['name' => 'Home Navigation', 'slug' => 'home-nav', 'location' => 'header_home']);
+        MenuItem::where('menu_id', $headerHome->id)->delete();
+        foreach ($items as $item) MenuItem::create(array_merge($item, ['menu_id' => $headerHome->id, 'type' => 'custom']));
+
         // Footer 1
         $f1 = Menu::firstOrCreate(['location' => 'footer_col_1'], ['name' => 'Quick Links', 'slug' => 'footer-1', 'location' => 'footer_col_1']);
         MenuItem::where('menu_id', $f1->id)->delete();
@@ -535,57 +540,104 @@ class ThemeContentSeeder extends Seeder
     
     private function createContactPage($user): void {
          $blocks = [
+            // Dark Hero Section with Mesh Gradient
             [
                 'id' => Str::uuid(),
-                'type' => 'section',
+                'type' => 'hero',
                 'settings' => [
-                    'padding' => ['top' => '96px', 'bottom' => '96px'],
-                ],
+                    'title' => "Let's Connect",
+                    'subtitle' => "Have a question or a project in mind? We'd love to hear from you. Reach out and let's build something amazing together.",
+                    'bgType' => 'gradient',
+                    'gradientStart' => '#0f172a',
+                    'gradientEnd' => '#1e293b',
+                    'gradientDirection' => 'to bottom right',
+                    'overlayEnabled' => true,
+                    'overlayColor' => 'rgba(2, 6, 23, 0.7)',
+                    'minHeight' => 450,
+                    'titleSize' => 64,
+                    'titleColor' => '#ffffff',
+                    'subtitleColor' => 'rgba(255, 255, 255, 0.7)',
+                    'titleAlign' => 'left',
+                    'padding' => ['top' => '120px', 'bottom' => '80px', 'left' => '24px', 'right' => '24px'],
+                ]
+            ],
+            // Content Section
+            [
+                'id' => Str::uuid(),
+                'type' => 'container',
                 'settings' => [
+                    'maxWidth' => 1200,
+                    'padding' => ['top' => '0px', 'bottom' => '80px'],
                     'blocks' => [
-                         [
+                        [
                             'id' => Str::uuid(),
-                            'type' => 'container',
-                            'settings' => ['maxWidth' => 1000],
+                            'type' => 'columns',
                             'settings' => [
+                                'customWidths' => [40, 60],
+                                'layout' => 'custom',
+                                'stackOn' => 'sm',
+                                'gap' => 48,
                                 'blocks' => [
+                                    // Info Column
                                     [
                                         'id' => Str::uuid(),
-                                        'type' => 'columns',
-                                        'settings' => ['columns' => [50, 50], 'gap' => 48],
+                                        'type' => 'column',
                                         'settings' => [
                                             'blocks' => [
-                                                // Contact Form
                                                 [
                                                     'id' => Str::uuid(),
-                                                    'type' => 'column',
+                                                    'type' => 'text',
                                                     'settings' => [
-                                                        'blocks' => [
-                                                            [
-                                                                'id' => Str::uuid(),
-                                                                'type' => 'contact-form',
-                                                                'settings' => [
-                                                                    'title' => 'Send Example Message',
-                                                                    'submitText' => 'Send Message'
-                                                                ]
-                                                            ]
-                                                        ]
+                                                        'content' => '<div class="md:-mt-20 relative z-10 space-y-6">
+                                                            <div class="p-8 rounded-[32px] bg-card border shadow-2xl space-y-8 animate-fade-right">
+                                                                <div class="flex items-start gap-4">
+                                                                    <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Email Us</p>
+                                                                        <p class="font-bold text-lg">hello@janari.com</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex items-start gap-4">
+                                                                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Call Us</p>
+                                                                        <p class="font-bold text-lg">+62 21 555 1234</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex items-start gap-4">
+                                                                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Our Office</p>
+                                                                        <p class="font-bold text-lg">Central Park, Jakarta</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>'
                                                     ]
-                                                ],
-                                                // Info
+                                                ]
+                                            ]
+                                        ]
+                                    ],
+                                    // Form Column
+                                    [
+                                        'id' => Str::uuid(),
+                                        'type' => 'column',
+                                        'settings' => [
+                                            'blocks' => [
                                                 [
                                                     'id' => Str::uuid(),
-                                                    'type' => 'column',
+                                                    'type' => 'contact_form',
                                                     'settings' => [
-                                                        'blocks' => [
-                                                            [
-                                                                'id' => Str::uuid(),
-                                                                'type' => 'text',
-                                                                'settings' => [
-                                                                    'content' => '<h3>Contact Information</h3><p><strong>Email:</strong> hello@ja-cms.com</p><p><strong>Phone:</strong> +1 (555) 123-4567</p><p><strong>Address:</strong><br>123 Innovation Street<br>Tech City, TC 12345</p><h4>Office Hours</h4><p>Monday - Friday: 9am - 6pm<br>Saturday - Sunday: Closed</p>'
-                                                                ]
-                                                            ]
-                                                        ]
+                                                        'title' => 'Send Example Message',
+                                                        'description' => 'Tell us about your project or just say hi!',
+                                                        'customStyle' => 'bg-card/80 backdrop-blur-xl border border-white/10 p-10 rounded-[40px] shadow-2xl md:-mt-20 relative z-10 animate-fade-left',
+                                                        'buttonText' => 'Send Message'
                                                     ]
                                                 ]
                                             ]
@@ -593,17 +645,30 @@ class ThemeContentSeeder extends Seeder
                                     ]
                                 ]
                             ]
-                         ]
+                        ]
                     ]
                 ]
             ],
-            // Map
+            // Map Section
             [
                 'id' => Str::uuid(),
-                'type' => 'map',
+                'type' => 'container',
                 'settings' => [
-                     'address' => 'Jakarta, Indonesia',
-                     'height' => 400
+                    'maxWidth' => 1200,
+                    'padding' => ['bottom' => '80px'],
+                    'blocks' => [
+                        [
+                            'id' => Str::uuid(),
+                            'type' => 'map',
+                            'settings' => [
+                                'address' => 'Jakarta, Indonesia',
+                                'height' => 450,
+                                'zoom' => 15,
+                                'radius' => 'rounded-[40px]',
+                                'border' => true
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ];

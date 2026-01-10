@@ -28,10 +28,10 @@
             item-key="id"
             :group="{ name: 'blocks', pull: true, put: true }"
             handle=".drag-handle"
-            class="flex flex-1"
-            :class="[direction, justify, align, wrap]"
+            class="flex flex-1 w-full h-full min-h-full"
+            :class="[containerLayoutClasses, justify, align]"
             :style="{ gap: gap }"
-            ghost-class="block-ghost opacity-50 bg-primary/10"
+            ghost-class="block-ghost"
         >
             <template #item="{ element: block, index }">
                 <BlockWrapper 
@@ -39,7 +39,7 @@
                     :index="index"
                     :context="context"
                     :isNested="true"
-                    :class="['relative', direction === 'flex-row' && block.settings.width === 'auto' ? 'flex-1' : '']"
+                    :class="getBlockWrapperClasses(block)"
                     @edit="onEditBlock(block.id)"
                     @duplicate="onDuplicateNested(index)"
                     @delete="onDeleteNested(index)"
@@ -67,7 +67,7 @@
         <div 
             v-else 
             class="flex w-full h-full"
-            :class="[direction, justify, align, wrap]"
+            :class="[containerLayoutClasses, justify, align]"
             :style="{ gap: gap }"
         >
              <BlockRenderer 
@@ -102,11 +102,12 @@ defineOptions({
 const props = defineProps({
     id: String,
     // Settings
-    direction: { type: String, default: 'flex-col' },
+    layout: { type: [String, Object], default: 'stack' }, // stack | row | grid OR { mobile: 'stack', desktop: 'row' }
+    direction: { type: String, default: 'flex-col' }, // Legacy/Override
     justify: { type: String, default: 'justify-start' },
     align: { type: String, default: 'items-start' },
-    wrap: { type: String, default: 'flex-nowrap' },
-    gap: { type: String, default: '16px' },
+    wrap: { type: String, default: 'flex-wrap' }, // Changed default to flex-wrap for Smart Layout capability
+    gap: { type: String, default: 'gap-4' }, // proper gap class default
     
     width: { type: String, default: '100%' },
     maxWidth: { type: String, default: 'none' },
@@ -149,7 +150,54 @@ const nestedBlocks = computed({
     }
 });
 
-const displayClass = computed(() => 'flex'); // Always flex for now
+// Helper to map layout type to classes
+const getLayoutClasses = (type) => {
+    if (type === 'row') return ['flex-row', 'flex-wrap'];
+    if (type === 'stack') return ['flex-col'];
+    if (type === 'grid') return ['grid']; // rudimentary grid support
+    return [];
+};
+
+// Smart Layout Logic
+const containerLayoutClasses = computed(() => {
+    const classes = [];
+    
+    if (typeof props.layout === 'string') {
+        classes.push(...getLayoutClasses(props.layout));
+        if (!props.layout || props.layout === 'stack' || props.layout === 'row') {
+             // Append legacy manual overrides only if using simple string layout
+             classes.push(props.direction, props.wrap); 
+        }
+    } else if (typeof props.layout === 'object') {
+        // Handle Responsive Object: { mobile: 'stack', tablet: 'row', desktop: 'row' }
+        // Mobile (default)
+        if (props.layout.mobile) {
+             classes.push(...getLayoutClasses(props.layout.mobile));
+        }
+        
+        // Tablet (md:)
+        if (props.layout.tablet) {
+            const tabletClasses = getLayoutClasses(props.layout.tablet);
+            classes.push(...tabletClasses.map(c => `md:${c}`));
+        }
+        
+        // Desktop (lg:)
+        if (props.layout.desktop) {
+            const desktopClasses = getLayoutClasses(props.layout.desktop);
+            classes.push(...desktopClasses.map(c => `lg:${c}`));
+        }
+    }
+
+    return classes;
+});
+
+const displayClass = computed(() => {
+    const base = ['flex'];
+    // Root should also reflect layout to hold structure
+    base.push(...containerLayoutClasses.value);
+    return base;
+});
+
 
 const containerStyle = computed(() => {
     const p = props.padding || {};
@@ -184,6 +232,7 @@ const onSelect = () => {
     if (builder && props.id) {
         builder.activeBlockId.value = props.id;
     }
+    // Logic for "deep selection" vs "container selection" is handled by stopPropagation on child
 };
 
 const handleAddBlock = (newBlock) => {
@@ -222,13 +271,41 @@ const onWrapNested = (index) => {
         id: generateUUID(),
         type: 'container',
         settings: {
-            direction: 'flex-col',
+            layout: 'stack', // Default to stack for new wrappers
             padding: { top: '16px', right: '16px', bottom: '16px', left: '16px' },
             blocks: [original]
         }
     };
     blockObject.value.settings.blocks.splice(index, 1, container);
     builder?.takeSnapshot();
+};
+
+const getBlockWrapperClasses = (block) => {
+    // Only apply auto-sizing if width is set to 'auto'
+    if (block?.settings?.width !== 'auto') return ['relative'];
+
+    const classes = ['relative'];
+    
+    if (typeof props.layout === 'string') {
+        if (props.layout === 'row' || props.direction === 'flex-row') {
+            classes.push('flex-1');
+        }
+    } else if (typeof props.layout === 'object') {
+        // Mobile
+        if (props.layout.mobile === 'row') classes.push('flex-1');
+        
+        // Tablet
+        // We need to be careful: if mobile is row (flex-1) and tablet is stack, 
+        // flex-1 might still apply. But normally we go Mobile -> Desktop.
+        // If we want to strictly support mixed modes, Tailwind doesn't have "reset flex" easily without w-full.
+        // For now, additive logic is usually sufficient for standard responsive flows.
+        if (props.layout.tablet === 'row') classes.push('md:flex-1');
+        
+        // Desktop
+        if (props.layout.desktop === 'row') classes.push('lg:flex-1');
+    }
+    
+    return classes;
 };
 
 const onSplitNested = (index) => {
@@ -244,4 +321,5 @@ const onSplitNested = (index) => {
     blockObject.value.settings.blocks.splice(index, 1, columns);
     builder?.takeSnapshot();
 };
+
 </script>
