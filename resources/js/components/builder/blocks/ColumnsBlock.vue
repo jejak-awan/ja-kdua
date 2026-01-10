@@ -14,9 +14,9 @@
                 ref="gridRef"
             >
                 <template v-for="(column, index) in computedColumns" :key="column.id || index">
-                    <!-- Modern Column (via BlockWrapper) -->
+                    <!-- Modern Column (via BlockWrapper) - Only in Builder -->
                     <BlockWrapper
-                        v-if="isModern"
+                        v-if="isModern && isBuilder && !isPreview"
                         :block="column"
                         :index="index"
                         :isNested="true"
@@ -27,6 +27,21 @@
                         @edit="onEditBlock(column.id)"
                         @duplicate="duplicateColumn(index)"
                     />
+
+                    <!-- Modern Column (Frontend/Preview) -->
+                    <div 
+                        v-else-if="isModern"
+                        class="column-wrapper relative flex items-stretch flex-shrink-0 flex-grow-0"
+                        :class="getColumnClasses()"
+                        :style="{ '--desktop-width': colWidths[index] }"
+                    >
+                         <BlockRenderer 
+                            :blocks="[column]" 
+                            :context="context" 
+                            :is-preview="isPreview"
+                            class="h-full w-full"
+                        />
+                    </div>
 
                     <!-- Legacy Column (inline render) -->
                     <div 

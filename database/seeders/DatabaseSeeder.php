@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        $admin->assignRole('admin');
+        $admin->assignRole('super-admin');
 
         // 4. Create test user (optional, for development)
         if (app()->environment('local', 'development', 'testing')) {
@@ -43,7 +43,8 @@ class DatabaseSeeder extends Seeder
             ]);
 
             // Optionally seed sample data in development
-            $this->call(SampleDataSeeder::class);
+            // $this->call(SampleDataSeeder::class);
+            $this->call(ThemeContentSeeder::class);
             $this->call(ContentTemplateSeeder::class);
             $this->call(JanariUpgradeSeeder::class);
         }

@@ -28,6 +28,7 @@ export default {
         },
         { key: 'show_line_numbers', type: 'boolean', label: 'Show Line Numbers', default: true },
         { key: 'show_copy_button', type: 'boolean', label: 'Show Copy Button', default: true },
+        { key: 'window_chrome', type: 'boolean', label: 'Window Chrome (Mac Style)', default: false },
         {
             key: 'theme',
             type: 'select',

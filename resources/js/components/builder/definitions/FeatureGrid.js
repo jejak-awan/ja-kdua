@@ -23,6 +23,12 @@ export default {
             itemLabel: 'Feature',
             fields: [
                 { key: 'title', type: 'text', label: 'Title', default: 'New Feature' },
+                {
+                    key: 'icon',
+                    type: 'icon',
+                    label: 'Icon',
+                    default: 'zap'
+                },
                 { key: 'description', type: 'textarea', label: 'Description', default: 'Feature description goes here.' }
             ],
             default: [

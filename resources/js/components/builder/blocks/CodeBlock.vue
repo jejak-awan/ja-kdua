@@ -12,6 +12,7 @@ const props = defineProps({
     language: { type: String, default: 'javascript' },
     show_line_numbers: { type: Boolean, default: true },
     show_copy_button: { type: Boolean, default: true },
+    window_chrome: { type: Boolean, default: false },
     theme: { type: String, default: 'dark' },
     max_height: { type: String, default: '' },
     padding: { type: String, default: 'py-6' }
@@ -54,12 +55,24 @@ const copyCode = async () => {
             :style="{ maxHeight: max_height || 'auto' }"
         >
             <!-- Header -->
-            <div class="flex items-center justify-between px-4 py-2 border-b border-white/10">
-                <span class="text-xs opacity-60">{{ language }}</span>
+            <div 
+                class="flex items-center justify-between px-4 py-3 border-b border-white/10"
+                :class="window_chrome ? 'bg-black/20' : ''"
+            >
+                <div v-if="window_chrome" class="flex items-center gap-2 mr-4">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                
+                <span class="text-xs opacity-60 font-medium">{{ language }}</span>
+                
+                <div class="flex-1"></div>
+
                 <button 
                     v-if="show_copy_button"
                     @click="copyCode"
-                    class="flex items-center gap-1.5 text-xs opacity-60 hover:opacity-100 transition-opacity"
+                    class="flex items-center gap-1.5 text-xs opacity-60 hover:opacity-100 transition-opacity ml-4"
                 >
                     <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-400" />
                     <Copy v-else class="w-3.5 h-3.5" />

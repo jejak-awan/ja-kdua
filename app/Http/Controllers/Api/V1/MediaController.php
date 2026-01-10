@@ -345,6 +345,17 @@ class MediaController extends BaseApiController
         return $this->success($response, 'Media moved to trash');
     }
 
+    public function scan(Request $request)
+    {
+        if (! $request->user()->can('manage media')) {
+            return $this->forbidden('You do not have permission to scan media');
+        }
+
+        $stats = $this->mediaService->scan();
+
+        return $this->success($stats, 'Media scan completed successfully. Added ' . $stats['added'] . ' new files.');
+    }
+
     public function restore(Request $request, $id)
     {
         $user = $request->user();

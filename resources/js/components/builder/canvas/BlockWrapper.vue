@@ -2,16 +2,16 @@
     <div 
         class="group/block relative border-2 border-transparent transition-all"
         :class="[
-            !builder.isPreview.value ? 'hover:border-primary cursor-pointer' : '',
-            isSelected && !builder.isPreview.value ? 'border-primary ring-4 ring-primary/20 z-10' : ''
+            !builder?.isPreview?.value ? 'hover:border-primary cursor-pointer' : '',
+            isSelected && !builder?.isPreview?.value ? 'border-primary ring-4 ring-primary/20 z-10' : ''
         ]"
-        @click.stop="!builder.isPreview.value && onEdit()"
-        @contextmenu.prevent="!builder.isPreview.value && onContextMenu($event)"
+        @click.stop="!builder?.isPreview?.value && onEdit()"
+        @contextmenu.prevent="!builder?.isPreview?.value && onContextMenu($event)"
         @mouseover.stop="onMouseOver"
         @mouseleave="onMouseLeave"
     >
         <!-- Block Toolbar - Show on hover (deepest only) OR when selected -->
-        <div v-if="!builder.isPreview.value" 
+        <div v-if="builder && !builder.isPreview?.value" 
              class="absolute top-1 transition-all z-[30] flex items-center gap-0.5 bg-white text-zinc-950 border border-zinc-200 rounded-md px-1 py-1 shadow-lg scale-95"
              :class="[
                 (isSelected || isHovered) ? 'opacity-100 scale-100' : 'opacity-0 pointer-events-none',
@@ -41,7 +41,7 @@
         <!-- Live Rendering of Block -->
         <ResizableWrapper
             :is-active="isSelected"
-            :is-preview="builder.isPreview.value"
+            :is-preview="builder?.isPreview?.value || false"
             :width="block.settings?.width"
             :height="isStructuralBlock ? 'auto' : block.settings?.height"
             @update:width="updateBlockSize('width', $event)"
@@ -52,18 +52,18 @@
                 ref="contentRef"
                 class="relative"
                 :class="[
-                    !builder.isPreview.value && !isStructuralBlock ? 'builder-block-content' : 'h-full',
-                    hasOverflow && !builder.isPreview.value ? 'has-overflow' : ''
+                    !builder?.isPreview?.value && !isStructuralBlock ? 'builder-block-content' : 'h-full',
+                    hasOverflow && !builder?.isPreview?.value ? 'has-overflow' : ''
                 ]"
             >
                 <BlockRenderer :blocks="[block]" :context="context" class="builder-render h-full" />
                 <!-- Overlay to capture clicks (prevents clicking links inside blocks) -->
                 <!-- Uses pointer-events-none so drag-drop passes through to nested components -->
-                <div v-if="!builder.isPreview.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
+                <div v-if="builder && !builder.isPreview?.value" class="absolute inset-0 z-[5] pointer-events-none"></div>
                 
                 <!-- Overflow Indicator -->
                 <div 
-                    v-if="hasOverflow && !builder.isPreview.value" 
+                    v-if="hasOverflow && builder && !builder.isPreview?.value" 
                     class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-zinc-900 to-transparent pointer-events-none z-[6] flex items-end justify-center pb-1"
                 >
                     <span class="text-[9px] font-bold text-muted-foreground bg-white/80 dark:bg-zinc-900/80 px-2 py-0.5 rounded-full border border-border shadow-sm">

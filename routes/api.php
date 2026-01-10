@@ -193,6 +193,7 @@ Route::prefix('v1')->group(function () {
         Route::post('media/bulk-action', [App\Http\Controllers\Api\V1\MediaController::class, 'bulkAction'])->middleware('permission:edit media');
         Route::delete('media/empty-trash', [App\Http\Controllers\Api\V1\MediaController::class, 'emptyTrash'])->middleware('permission:delete media');
         Route::post('media/download-zip', [App\Http\Controllers\Api\V1\MediaController::class, 'downloadZip'])->middleware('permission:view media');
+        Route::post('media/scan', [App\Http\Controllers\Api\V1\MediaController::class, 'scan'])->middleware('permission:manage media');
         Route::get('media', [App\Http\Controllers\Api\V1\MediaController::class, 'index'])->middleware('permission:view media');
         Route::get('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'show'])->middleware('permission:view media');
         Route::put('media/{media}', [App\Http\Controllers\Api\V1\MediaController::class, 'update']);

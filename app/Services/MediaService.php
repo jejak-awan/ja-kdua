@@ -470,4 +470,91 @@ class MediaService
     {
         return $this->getImageDriver() !== null;
     }
+
+    /**
+     * Scan storage for files not in database
+     *
+     * @param  string  $disk
+     * @param  string  $path
+     * @return array
+     */
+    public function scan(string $disk = 'public', string $path = 'media'): array
+    {
+        $stats = [
+            'scanned' => 0,
+            'added' => 0,
+            'errors' => 0,
+        ];
+
+        try {
+            // Get all files recursively
+            $files = Storage::disk($disk)->allFiles($path);
+
+            foreach ($files as $filePath) {
+                // Skip hidden files or temporary files
+                if (str_starts_with(basename($filePath), '.')) {
+                    continue;
+                }
+
+                // Skip thumbnails and variants directory
+                if (str_contains($filePath, '/thumbnails/') || str_contains($filePath, '/variants/')) {
+                    continue;
+                }
+                
+                // Skip if already exists in DB
+                // Use relative path matching (exact match)
+                $exists = Media::where('path', $filePath)
+                    ->orWhere('path', '/'.$filePath) // legacy paths might have leading slash
+                    ->exists();
+
+                if ($exists) {
+                    $stats['scanned']++;
+                    continue;
+                }
+
+                // File is missing in DB, add it
+                try {
+                    $stats['scanned']++;
+                    $fileSize = Storage::disk($disk)->size($filePath);
+                    $mimeType = Storage::disk($disk)->mimeType($filePath);
+                    $fileName = basename($filePath);
+
+                    // Determine folder ID from path structure?
+                    // For now, scan puts everything in root or we could map folders.
+                    // Let's keep it simple: just register the file.
+                    // Future: map subdirectories to MediaFolder models.
+
+                    $media = Media::create([
+                        'name' => pathinfo($fileName, PATHINFO_FILENAME),
+                        'file_name' => $fileName,
+                        'mime_type' => $mimeType,
+                        'disk' => $disk,
+                        'path' => $filePath, // Store relative path without leading slash
+                        'size' => $fileSize,
+                        'folder_id' => null, // Or try to find folder by name?
+                        'author_id' => null, // System imported
+                        'is_shared' => true, // Imported files usually visible to all
+                    ]);
+
+                    $stats['added']++;
+
+                    // Generate thumbnail if image
+                    if (str_starts_with($mimeType, 'image/')) {
+                        try {
+                            $this->generateThumbnail($media);
+                        } catch (\Exception $e) {
+                            // Ignore thumbnail error
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $stats['errors']++;
+                    Log::error("Failed to import file during scan: {$filePath} - " . $e->getMessage());
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Media scan failed: " . $e->getMessage());
+        }
+
+        return $stats;
+    }
 }

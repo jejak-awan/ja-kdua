@@ -11,6 +11,7 @@ import Button from './Button';
 import Icon from './Icon';
 import Divider from './Divider';
 import Spacer from './Spacer';
+import Html from './Html';
 
 // Media
 import Image from './Image';
@@ -78,6 +79,7 @@ export default [
     Icon,
     Divider,
     Spacer,
+    Html,
 
     // Media
     Image,

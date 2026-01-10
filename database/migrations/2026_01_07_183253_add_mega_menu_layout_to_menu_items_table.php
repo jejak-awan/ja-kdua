@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menu_items', function (Blueprint $table) {
-            $table->string('mega_menu_layout')->nullable()->default('default')->after('image'); // default, grid-2, grid-3, full
+            $table->string('mega_menu_layout')->nullable()->default('default')->after('type'); // default, grid-2, grid-3, full
         });
     }
 
