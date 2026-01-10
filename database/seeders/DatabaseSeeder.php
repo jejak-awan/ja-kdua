@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create default settings (required)
         $this->call(SettingsSeeder::class);
+        $this->call(LanguageSeeder::class);
         $this->call(ScheduledTaskSeeder::class);
         $this->call(CommentSecuritySettingsSeeder::class);
 
