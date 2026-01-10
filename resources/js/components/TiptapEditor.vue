@@ -1,32 +1,37 @@
 <template>
-    <Card class="overflow-hidden relative" @contextmenu="handleContextMenu">
-        <!-- Toolbar Component -->
-        <Toolbar 
-            v-if="editor" 
-            :editor="editor" 
-            :show-html-view="showHtmlView"
-            @insert-table="showTableDialog = true"
-            @open-media="showMediaPicker = true"
-            @insert-html="insertHtmlEmbed"
-            @toggle-html="toggleHtmlView"
-            @insert-icon="insertIcon"
-        />
+    <Card class="overflow-hidden relative flex flex-col max-h-[calc(100vh-12rem)]" @contextmenu="handleContextMenu">
+        <!-- Toolbar Component (Sticky) -->
+        <div class="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+            <Toolbar 
+                v-if="editor" 
+                :editor="editor" 
+                :show-html-view="showHtmlView"
+                @insert-table="showTableDialog = true"
+                @open-media="showMediaPicker = true"
+                @insert-html="insertHtmlEmbed"
+                @toggle-html="toggleHtmlView"
+                @insert-icon="insertIcon"
+            />
+        </div>
 
-        <!-- Editor Content (WYSIWYG View) -->
-        <editor-content 
-            v-show="!showHtmlView"
-            :editor="editor" 
-            class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-card-foreground bg-card" 
-        />
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Editor Content (WYSIWYG View) -->
+            <editor-content 
+                v-show="!showHtmlView"
+                :editor="editor" 
+                class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-card-foreground bg-card" 
+            />
 
-        <!-- HTML Source View -->
-        <div v-show="showHtmlView" class="html-view">
-            <textarea
-                v-model="htmlContent"
-                class="w-full min-h-[400px] p-4 font-mono text-sm bg-card text-card-foreground border-none resize-y focus:outline-none focus:ring-0"
-                placeholder="<p>Your HTML code here...</p>"
-                @blur="applyHtmlChanges"
-            ></textarea>
+            <!-- HTML Source View -->
+            <div v-show="showHtmlView" class="html-view">
+                <textarea
+                    v-model="htmlContent"
+                    class="w-full min-h-[400px] p-4 font-mono text-sm bg-card text-card-foreground border-none resize-y focus:outline-none focus:ring-0"
+                    placeholder="<p>Your HTML code here...</p>"
+                    @blur="applyHtmlChanges"
+                ></textarea>
+            </div>
         </div>
         
         <!-- Standard Bubble Menu -->
@@ -402,143 +407,3 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style>
-/* Custom prose overrides for Tiptap */
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: hsl(var(--muted-foreground));
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-.ProseMirror {
-    color: hsl(var(--card-foreground));
-    background-color: hsl(var(--card));
-}
-
-/* Heading Styles */
-.ProseMirror h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-.ProseMirror h2 { font-size: 1.875rem; font-weight: 700; line-height: 1.25; margin-top: 1.25rem; margin-bottom: 0.5rem; }
-.ProseMirror h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.3; margin-top: 1rem; margin-bottom: 0.5rem; }
-
-/* Inline Code */
-.ProseMirror code {
-    background-color: hsl(var(--muted));
-    border-radius: 0.25rem;
-    padding: 0.125rem 0.375rem;
-    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-    font-size: 0.875em;
-    color: hsl(var(--primary));
-    border: 1px solid hsl(var(--border));
-}
-
-/* Code Block */
-.ProseMirror pre {
-    background-color: hsl(220 15% 12%);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin: 1rem 0;
-    overflow-x: auto;
-    border: 1px solid hsl(var(--border));
-}
-
-.ProseMirror pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    color: hsl(210 14% 83%);
-    font-size: 0.875rem;
-}
-
-/* Blockquote */
-.ProseMirror blockquote {
-    border-left: 3px solid hsl(var(--primary));
-    margin-left: 0;
-    padding-left: 1rem;
-    color: hsl(var(--muted-foreground));
-    font-style: italic;
-}
-
-/* Table Styles */
-.ProseMirror table {
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    margin: 1rem 0;
-    border: 2px solid hsl(var(--border));
-}
-
-.ProseMirror th, .ProseMirror td {
-    border: 1px solid hsl(var(--border));
-    padding: 0.75rem 1rem;
-    min-width: 100px;
-}
-
-.ProseMirror th {
-    background-color: hsl(var(--muted));
-    font-weight: 600;
-}
-
-/* Gapcursor */
-.ProseMirror .ProseMirror-gapcursor {
-    height: 1px;
-    background: hsl(var(--primary));
-}
-
-/* Node Selection */
-.ProseMirror-selectednode {
-    outline: 2px solid hsl(var(--primary));
-}
-
-/* Dropcap Styles */
-.ProseMirror p.has-dropcap::first-letter {
-    float: left;
-    font-size: 4rem;
-    line-height: 1;
-    margin-right: 0.15em;
-    margin-bottom: -0.1em;
-    font-weight: 800;
-    color: hsl(var(--primary));
-    font-family: serif; /* Classic look */
-    text-transform: uppercase;
-}
-
-/* Newspaper Style Columns */
-.ProseMirror div[data-type="text-columns"] {
-    width: 100%;
-    margin: 2rem 0;
-    column-fill: balance;
-    text-align: justify;
-    text-justify: inter-word;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-}
-
-.ProseMirror div[data-type="text-columns"] > * {
-    margin-top: 0;
-}
-
-.ProseMirror div[data-type="text-columns"]:focus-within {
-    outline: 1px dashed hsl(var(--primary) / 30%);
-    outline-offset: 10px;
-}
-
-/* Old Grid Columns Styles (Legacy) */
-.ProseMirror div[data-type="columns"] {
-    display: flex;
-    gap: 2rem;
-    margin: 2rem 0;
-    width: 100%;
-}
-
-.ProseMirror div[data-type="column"] {
-    flex: 1;
-    min-width: 0;
-    border: 1px dashed hsl(var(--border) / 50%);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    position: relative;
-}
-</style>
-制作

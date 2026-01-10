@@ -53,12 +53,12 @@
             <!-- Content -->
             <div class="container mx-auto px-4 max-w-3xl">
                 <!-- If using Page Builder -->
-                <div v-if="post.blocks && post.blocks.length > 0" class="space-y-0">
+                <div v-if="post.blocks?.length > 0" class="space-y-0">
                     <BlockRenderer :blocks="post.blocks" :is-preview="true" />
                 </div>
                 
                 <!-- If using Classic Editor -->
-                <div v-else class="prose prose-lg prose-indigo mx-auto" v-html="post.body"></div>
+                <div v-else ref="contentRef" class="prose prose-lg prose-indigo mx-auto" v-html="post.body"></div>
                 
                 <!-- Tags -->
                 <div v-if="post.tags && post.tags.length > 0" class="mt-12 pt-8 border-t border-border">
@@ -80,28 +80,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
 import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue';
+import { useIconHydration } from '@/composables/useIconHydration';
 
 const route = useRoute();
 const { t } = useI18n();
+const { hydrateIcons } = useIconHydration();
+
 const post = ref(null);
 const loading = ref(true);
+const contentRef = ref(null);
+
+watch(() => post.value, () => {
+    nextTick(() => {
+        if (contentRef.value) {
+            hydrateIcons(contentRef.value);
+        }
+    });
+}, { deep: true });
 
 onMounted(async () => {
     try {
         const slug = route.params.slug;
-        // In real app, might fetch by slug or ID depending on router setup.
-        // Assuming route /blog/:slug
-        const response = await api.get(`/cms/contents/${slug}`); // Or specialized endpoint
+        const response = await api.get(`/cms/contents/${slug}`);
         post.value = response.data.data || response.data;
     } catch (error) {
         console.error('Failed to load post:', error);
     } finally {
         loading.value = false;
+        nextTick(() => {
+            if (contentRef.value) {
+                hydrateIcons(contentRef.value);
+            }
+        });
     }
 });
 </script>

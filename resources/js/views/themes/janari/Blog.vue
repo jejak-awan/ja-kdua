@@ -146,7 +146,6 @@ const fetchPosts = async () => {
             }
         });
         
-        console.log('Blog fetch response:', response);
         
         let posts = [];
         
@@ -161,12 +160,10 @@ const fetchPosts = async () => {
              // Laravel paginate wrapper sometimes { data: { data: [...] } }
              posts = response.data.data.data;
         } else {
-            console.warn('Unexpected API response structure:', response.data);
             posts = [];
         }
         
         if (!Array.isArray(posts)) {
-            console.error('Posts is not an array:', posts);
             posts = [];
         }
         
