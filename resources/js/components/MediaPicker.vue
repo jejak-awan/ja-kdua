@@ -16,7 +16,7 @@
         <Teleport to="body">
             <div
                 v-if="showModal"
-                class="fixed inset-0 z-[9999] pointer-events-none"
+                class="fixed inset-0 z-[30000] pointer-events-none"
             >
                 <!-- Removed centering wrapper to allow free movement -->
                 <div 
@@ -234,7 +234,7 @@
         <!-- Upload Modal -->
         <div
             v-if="showUpload"
-            class="fixed inset-0 z-50 overflow-y-auto bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+            class="fixed inset-0 z-[30001] overflow-y-auto bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
             @click.self="showUpload = false"
         >
             <div class="bg-card rounded-lg max-w-md w-full p-6 shadow-lg border border-border">
@@ -260,7 +260,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import api from '../services/api';
-import MediaUpload from './MediaUpload.vue';
+import { useToast } from '../composables/useToast';
 import { 
     Folder, 
     Image as ImageIcon, 
@@ -271,7 +271,8 @@ import {
     Home, 
     ChevronRight, 
     Search,
-    ArrowUp
+    ArrowUp,
+    AlertCircle
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
@@ -298,6 +299,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['selected', 'update:open']);
+const toast = useToast();
 
 const showModal = ref(false);
 
@@ -395,7 +397,18 @@ const fetchMedia = async () => {
         }
 
         folders.value = Array.isArray(rawFolders) ? rawFolders.filter(f => f && f.id) : [];
-        mediaList.value = Array.isArray(rawMedia) ? rawMedia.filter(m => m && m.id) : [];
+        
+        // Filter media by allowed extensions
+        const allowed = props.constraints?.allowedExtensions || [];
+        if (allowed.length > 0) {
+            mediaList.value = Array.isArray(rawMedia) ? rawMedia.filter(m => {
+                if (!m || !m.id) return false;
+                const ext = m.extension || m.url?.split('.').pop()?.toLowerCase();
+                return allowed.includes(ext);
+            }) : [];
+        } else {
+            mediaList.value = Array.isArray(rawMedia) ? rawMedia.filter(m => m && m.id) : [];
+        }
         
     } catch (error) {
         console.error('Failed to fetch media:', error);
@@ -442,6 +455,13 @@ const navigateToBreadcrumb = (index) => {
 };
 
 const selectMedia = (media) => {
+    const allowed = props.constraints?.allowedExtensions || [];
+    const ext = media.extension || media.url?.split('.').pop()?.toLowerCase();
+    
+    if (allowed.length > 0 && !allowed.includes(ext)) {
+        toast.error.validation(`File type .${ext} is not allowed for this field.`);
+        return;
+    }
     selectedMedia.value = media;
 };
 

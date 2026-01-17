@@ -171,7 +171,7 @@ class ContentService
         $tags = $data['tags'] ?? [];
         $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
-
+        // Keep editor_type
         unset($data['create_revision'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         $content = Content::create($data);
@@ -236,7 +236,7 @@ class ContentService
         $tags = $data['tags'] ?? [];
         $newTags = $data['new_tags'] ?? [];
         $customFields = $data['custom_fields'] ?? null;
-
+        // Keep editor_type
         unset($data['create_revision'], $data['revision_note'], $data['tags'], $data['new_tags'], $data['custom_fields']);
 
         // Handle published_at

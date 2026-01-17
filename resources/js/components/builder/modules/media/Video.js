@@ -1,0 +1,184 @@
+import {
+    backgroundSettings,
+    spacingSettings,
+    borderSettings,
+    boxShadowSettings,
+    sizingSettings,
+    filterSettings,
+    transformSettings,
+    animationSettings,
+    visibilitySettings,
+    positionSettings,
+    transitionSettings,
+    cssSettings
+} from '../commonSettings';
+
+/**
+ * Video Module Definition
+ */
+export default {
+    name: 'video',
+    title: 'Video',
+    icon: 'Play',
+    category: 'media',
+
+    // No children
+    children: null,
+
+    // Default settings
+    defaults: {
+        videoType: 'youtube',
+        youtubeUrl: '',
+        vimeoUrl: '',
+        selfHostedUrl: '',
+        // Poster Image
+        posterImage: '',
+        // Aspect Ratio
+        aspectRatio: '16:9',
+        // Controls
+        autoplay: false,
+        loop: false,
+        muted: false,
+        controls: true,
+        // Alignment
+        alignment: 'center',
+        // Background
+        background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
+        // Spacing
+        padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
+        margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
+        // Border
+        border: {
+            radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
+            styles: {
+                all: { width: 0, color: '#333333', style: 'solid' },
+                top: { width: 0, color: '#333333', style: 'solid' },
+                right: { width: 0, color: '#333333', style: 'solid' },
+                bottom: { width: 0, color: '#333333', style: 'solid' },
+                left: { width: 0, color: '#333333', style: 'solid' }
+            }
+        },
+        boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        // Animation
+        animation_effect: '',
+        animation_duration: 1000,
+        animation_delay: 0,
+        animation_repeat: '1'
+    },
+
+    // Settings panel configuration
+    settings: {
+        content: [
+            {
+                id: 'video',
+                label: 'Video',
+                fields: [
+                    {
+                        name: 'videoType',
+                        type: 'select',
+                        label: 'Video Type',
+                        options: [
+                            { value: 'youtube', label: 'YouTube' },
+                            { value: 'vimeo', label: 'Vimeo' },
+                            { value: 'selfHosted', label: 'Self Hosted' }
+                        ]
+                    },
+                    {
+                        name: 'youtubeUrl',
+                        type: 'text',
+                        label: 'YouTube URL'
+                    },
+                    {
+                        name: 'vimeoUrl',
+                        type: 'text',
+                        label: 'Vimeo URL'
+                    },
+                    {
+                        name: 'selfHostedUrl',
+                        type: 'upload',
+                        label: 'Video File',
+                        allowedExtensions: ['mp4', 'mov', 'm4v', 'webm']
+                    },
+                    {
+                        name: 'posterImage',
+                        type: 'upload',
+                        label: 'Poster Image',
+                        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+                    }
+                ]
+            },
+            {
+                id: 'playback',
+                label: 'Playback',
+                fields: [
+                    {
+                        name: 'autoplay',
+                        type: 'toggle',
+                        label: 'Autoplay'
+                    },
+                    {
+                        name: 'loop',
+                        type: 'toggle',
+                        label: 'Loop'
+                    },
+                    {
+                        name: 'muted',
+                        type: 'toggle',
+                        label: 'Muted'
+                    },
+                    {
+                        name: 'controls',
+                        type: 'toggle',
+                        label: 'Show Controls'
+                    }
+                ]
+            },
+            backgroundSettings
+        ],
+        design: [
+            {
+                id: 'layout',
+                label: 'Layout',
+                fields: [
+                    {
+                        name: 'aspectRatio',
+                        type: 'select',
+                        label: 'Aspect Ratio',
+                        responsive: true,
+                        options: [
+                            { value: '16:9', label: '16:9 (Widescreen)' },
+                            { value: '4:3', label: '4:3 (Standard)' },
+                            { value: '1:1', label: '1:1 (Square)' },
+                            { value: '9:16', label: '9:16 (Portrait)' },
+                            { value: '21:9', label: '21:9 (Ultrawide)' }
+                        ]
+                    },
+                    {
+                        name: 'alignment',
+                        type: 'buttonGroup',
+                        label: 'Alignment',
+                        responsive: true,
+                        options: [
+                            { value: 'left', label: 'Left', icon: 'AlignLeft' },
+                            { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                            { value: 'right', label: 'Right', icon: 'AlignRight' }
+                        ]
+                    }
+                ]
+            },
+            spacingSettings,
+            borderSettings,
+            boxShadowSettings,
+            sizingSettings,
+            filterSettings,
+            transformSettings,
+            animationSettings
+        ],
+        advanced: [
+            visibilitySettings,
+            positionSettings,
+            transitionSettings,
+            cssSettings
+        ]
+    }
+}

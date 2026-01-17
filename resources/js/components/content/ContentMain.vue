@@ -12,8 +12,8 @@
             />
         </div>
 
-        <!-- Editor Mode Toggle -->
-        <div class="flex items-center gap-1 p-1 bg-muted rounded-lg w-fit">
+        <!-- Editor Mode Toggle (Only show after selection) -->
+        <div v-if="editorMode" class="flex items-center gap-1 p-1 bg-muted rounded-lg w-fit">
             <Button 
                 v-for="mode in ['classic', 'builder']" 
                 :key="mode"
@@ -28,8 +28,38 @@
             </Button>
         </div>
 
+        <!-- Editor Selection Screen -->
+        <div v-if="!editorMode" class="py-20 border-2 border-dashed border-muted rounded-xl bg-muted/5 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-8 ring-primary/5">
+                <Layout class="w-10 h-10 text-primary" />
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight mb-2">{{ t('features.content.form.welcomeToBuilder') || 'Build your layout' }}</h2>
+            <p class="text-muted-foreground mb-8 max-w-sm mx-auto">
+                {{ t('features.content.form.chooseEditorDesc') || 'Choose between the standard text editor or our visual drag-and-drop builder.' }}
+            </p>
+            <div class="flex items-center gap-4">
+                <Button 
+                    size="lg" 
+                    class="bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all"
+                    @click="confirmInitialMode('builder')"
+                >
+                    <Layout class="w-4 h-4 mr-2" />
+                    {{ t('features.content.form.useBuilder') || 'Use JA-Builder' }}
+                </Button>
+                <Button 
+                    variant="outline" 
+                    size="lg"
+                    @click="confirmInitialMode('classic')"
+                    class="bg-background"
+                >
+                    <Type class="w-4 h-4 mr-2" />
+                    {{ t('features.content.form.useDefault') || 'Use Classic Editor' }}
+                </Button>
+            </div>
+        </div>
+
         <!-- Classic Editor -->
-        <div v-if="editorMode === 'classic'" class="animate-in fade-in slide-in-from-top-2 duration-300">
+        <div v-else-if="editorMode === 'classic'" class="animate-in fade-in slide-in-from-top-2 duration-300">
             <TiptapEditor
                 :model-value="modelValue.body"
                 @update:model-value="updateField('body', $event)"
@@ -38,10 +68,11 @@
         </div>
 
         <!-- Page Builder -->
-        <div v-else class="animate-in fade-in slide-in-from-top-2 duration-300">
+        <div v-else-if="editorMode === 'builder'" class="animate-in fade-in slide-in-from-top-2 duration-300">
             <Builder
                 :model-value="modelValue.blocks || []"
                 @update:model-value="updateField('blocks', $event)"
+                @save="$emit('save')"
             />
         </div>
 
@@ -78,7 +109,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TiptapEditor from '../TiptapEditor.vue';
-import Builder from '../builder/Builder.vue';
+import Builder from '../builder/Builder.vue'; // Updated back to Builder.vue
 import Button from '@/components/ui/button.vue';
 import Dialog from '@/components/ui/dialog.vue';
 import DialogContent from '@/components/ui/dialog-content.vue';
@@ -97,10 +128,20 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'save', 'mode-selected']);
+
+// ... (methods)
 
 // Determine initial mode: if blocks exist and not empty, use builder
-const editorMode = ref(props.modelValue.blocks && props.modelValue.blocks.length > 0 ? 'builder' : 'classic');
+// For "Create" page, start with null (Selection Screen) unless already confirmed by data
+const editorMode = ref(props.modelValue.editor_type || (props.modelValue.blocks && props.modelValue.blocks.length > 0 ? 'builder' : null));
+
+// Emit initial mode to parent if it's already set (e.g. for edit)
+if (editorMode.value) {
+    setTimeout(() => {
+        emit('mode-selected', editorMode.value);
+    }, 0);
+}
 
 // Dialog state
 const showSwitchDialog = ref(false);
@@ -131,12 +172,22 @@ const handleModeSwitch = (newMode) => {
     } else {
         // No content to lose, switch immediately
         editorMode.value = newMode;
+        emit('mode-selected', newMode);
+        updateField('editor_type', newMode);
     }
+};
+
+const confirmInitialMode = (mode) => {
+    editorMode.value = mode;
+    emit('mode-selected', mode);
+    updateField('editor_type', mode);
 };
 
 const confirmModeSwitch = () => {
     if (pendingMode.value) {
         editorMode.value = pendingMode.value;
+        emit('mode-selected', pendingMode.value);
+        updateField('editor_type', pendingMode.value);
     }
     showSwitchDialog.value = false;
     pendingMode.value = null;

@@ -33,6 +33,7 @@
         window.siteConfig = {
             lazyLoading: {{ config('view.lazy_loading', true) ? 'true' : 'false' }}
         };
+        window.jaCmsData = @json($jaCmsData ?? []);
     </script>
 
     {{-- Critical CSS - Must match app.css exactly --}}

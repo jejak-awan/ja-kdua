@@ -1,98 +1,219 @@
 <template>
-    <div 
-        v-if="builder.contextMenu.value.visible" 
-        class="fixed z-[9999] min-w-[200px] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-80 zoom-in-95 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 slide-in-from-top-2"
-        :style="{
-            top: `${builder.contextMenu.value.y}px`,
-            left: `${builder.contextMenu.value.x}px`
-        }"
-        @contextmenu.prevent
-    >
-        <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-b border-border/50 mb-1">
-            {{ builder.getBlockLabel(builder.contextMenu.value.type) }}
-        </div>
-
-        <button @click="handleAction('edit')" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-            <Edit class="mr-2 h-3.5 w-3.5" />
-            <span>Edit Settings</span>
-            <span class="ml-auto text-[10px] tracking-widest opacity-60">Click</span>
-        </button>
-
-        <button @click="handleAction('duplicate')" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-            <Copy class="mr-2 h-3.5 w-3.5" />
-            <span>Duplicate</span>
-            <span class="ml-auto text-[10px] tracking-widest opacity-60">Ctrl+D</span>
-        </button>
-
-        <div class="my-1 h-px bg-muted" />
-
-        <button @click="handleAction('copy')" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-            <ClipboardCopy class="mr-2 h-3.5 w-3.5" />
-            <span>Copy</span>
-            <span class="ml-auto text-[10px] tracking-widest opacity-60">Ctrl+C</span>
-        </button>
-
-        <button @click="handleAction('paste')" :disabled="!builder.canPaste.value" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 disabled:opacity-30">
-            <ClipboardPaste class="mr-2 h-3.5 w-3.5" />
-            <span>Paste After</span>
-            <span class="ml-auto text-[10px] tracking-widest opacity-60">Ctrl+V</span>
-        </button>
-
-        <div class="my-1 h-px bg-muted" />
-
-        <button @click="handleAction('delete')" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground text-destructive data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-            <Trash2 class="mr-2 h-3.5 w-3.5" />
-            <span>Delete</span>
-            <span class="ml-auto text-[10px] tracking-widest opacity-60">Del</span>
-        </button>
+  <div 
+    v-if="visible" 
+    class="context-menu"
+    :style="{ top: `${y}px`, left: `${x}px` }"
+    @click.stop
+  >
+    <div class="menu-header" v-if="title">
+        <span>{{ title }}</span>
+        <span class="menu-type">{{ type }}</span>
     </div>
+    <div class="menu-divider" v-if="title"></div>
+    
+    <!-- Module Mode Items -->
+    <template v-if="mode === 'module'">
+      <div class="menu-item" @click="handleAction('rename')">
+         <Type :size="14" />
+         <span>Rename Label</span>
+      </div>
+      
+      <div class="menu-divider"></div>
 
-    <!-- Backdrop to close -->
-    <div 
-        v-if="builder.contextMenu.value.visible" 
-        class="fixed inset-0 z-[9998] bg-transparent"
-        @click="closeMenu"
-        @contextmenu.prevent="closeMenu"
-    ></div>
+      <div class="menu-item" @click="handleAction('copy')">
+         <Copy :size="14" />
+         <span>Copy Module</span>
+         <span class="shortcut">⌘C</span>
+      </div>
+
+      <div class="menu-item" @click="handleAction('paste')">
+         <ClipboardPaste :size="14" />
+         <span>Paste Module</span>
+         <span class="shortcut">⌘V</span>
+      </div>
+
+      <div class="menu-divider"></div>
+
+      <div class="menu-item" @click="handleAction('duplicate')">
+         <CopyPlus :size="14" />
+         <span>Duplicate</span>
+         <span class="shortcut">⌘D</span>
+      </div>
+
+      <div class="menu-item" @click="handleAction('delete')">
+         <Trash2 :size="14" />
+         <span>Delete</span>
+         <span class="shortcut">Del</span>
+      </div>
+
+      <div class="menu-divider"></div>
+      
+      <div class="menu-item" @click="handleAction('copy-style')">
+         <ClipboardCopy :size="14" />
+         <span>Copy Styles</span>
+      </div>
+      
+      <div class="menu-item" @click="handleAction('paste-style')">
+         <Brush :size="14" />
+         <span>Paste Styles</span>
+      </div>
+
+      <div class="menu-divider"></div>
+      
+      <div class="menu-item" @click="handleAction('parent')">
+         <ArrowUpLeft :size="14" />
+         <span>Go to Parent</span>
+      </div>
+    </template>
+
+    <!-- Canvas Mode Items -->
+    <template v-else-if="mode === 'canvas'">
+      <div class="menu-item" @click="handleAction('canvas-settings')">
+        <Settings :size="14" />
+        <span>Canvas Settings</span>
+      </div>
+      <div class="menu-item" @click="handleAction('export-canvas')">
+        <Download :size="14" />
+        <span>Export Canvas</span>
+      </div>
+      
+      <div class="menu-divider"></div>
+      
+      <div class="menu-item" @click="handleAction('edit-canvas')">
+        <Edit :size="14" />
+        <span>Edit Canvas</span>
+      </div>
+      <div v-if="!isMainCanvas" class="menu-item" @click="handleAction('make-main-canvas')">
+        <CheckCircle :size="14" />
+        <span>Make Main Canvas</span>
+      </div>
+      <div class="menu-item" @click="handleAction('duplicate-canvas')">
+        <Copy :size="14" />
+        <span>Duplicate Canvas</span>
+      </div>
+      <div v-if="!isMainCanvas" class="menu-item menu-item--danger" @click="handleAction('delete-canvas')">
+        <Trash2 :size="14" />
+        <span>Delete Canvas</span>
+      </div>
+    </template>
+  </div>
 </template>
 
 <script setup>
-import { inject } from 'vue';
+import { onMounted, onUnmounted, computed } from 'vue'
 import { 
-    Copy, Trash2, Edit, ClipboardCopy, ClipboardPaste 
-} from 'lucide-vue-next';
+  Copy, CopyPlus, Trash2, Type, ClipboardCopy, ClipboardPaste, 
+  ArrowUpLeft, Brush, Settings, Download, Edit, CheckCircle 
+} from 'lucide-vue-next'
 
-const builder = inject('builder');
+const props = defineProps({
+    visible: Boolean,
+    x: Number,
+    y: Number,
+    moduleId: String, // Or canvasId depending on mode
+    title: String,
+    type: String,
+    mode: {
+      type: String,
+      default: 'module' // module | canvas
+    }
+})
 
-const closeMenu = () => {
-    builder.contextMenu.value.visible = false;
-};
+const emit = defineEmits(['close', 'action'])
+
+const isMainCanvas = computed(() => props.type === 'Main')
+
+// Close on click outside
+const handleClickOutside = (e) => {
+    if (props.visible) {
+        emit('close')
+    }
+}
 
 const handleAction = (action) => {
-    const { index, blockId } = builder.contextMenu.value;
-    
-    if (index !== null) {
-        switch (action) {
-            case 'edit':
-                builder.editingIndex.value = index;
-                builder.activeBlockId.value = blockId;
-                builder.activeTab.value = 'content';
-                break;
-            case 'duplicate':
-                builder.duplicateBlock(index);
-                break;
-            case 'copy':
-                builder.copyBlock(index);
-                break;
-            case 'paste':
-                builder.pasteBlock(index);
-                break;
-            case 'delete':
-                builder.removeBlock(index);
-                break;
-        }
-    }
-    
-    closeMenu();
-};
+    emit('action', action, props.moduleId, props.mode)
+    emit('close')
+}
+
+onMounted(() => {
+    window.addEventListener('click', handleClickOutside, { capture: true })
+    window.addEventListener('contextmenu', handleClickOutside) 
+})
+
+onUnmounted(() => {
+    window.removeEventListener('click', handleClickOutside, { capture: true })
+    window.removeEventListener('contextmenu', handleClickOutside)
+})
 </script>
+
+<style scoped>
+.context-menu {
+    position: fixed;
+    z-index: 9999;
+    background: var(--builder-bg-primary);
+    border: 1px solid var(--builder-border);
+    box-shadow: var(--shadow-xl);
+    border-radius: var(--border-radius-md);
+    padding: 4px;
+    min-width: 180px;
+    animation: fadeIn 0.1s ease-out;
+}
+
+.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--builder-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--builder-bg-secondary);
+    border-radius: 4px;
+    margin-bottom: 2px;
+}
+
+.menu-type {
+    font-size: 9px;
+    opacity: 0.7;
+    background: var(--builder-border);
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--builder-text-primary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.1s;
+}
+
+.menu-item:hover {
+    background: var(--builder-bg-tertiary);
+    color: var(--builder-accent);
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--builder-border);
+    margin: 4px 0;
+}
+
+.shortcut {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--builder-text-muted);
+    opacity: 0.7;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+</style>

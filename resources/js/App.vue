@@ -93,20 +93,10 @@ watch(() => cmsStore.siteSettings?.site_name, (newName) => {
     document.title = newName || 'JA CMS';
 }, { immediate: true });
 
-// Initialize dark mode from localStorage or system preference
-const initDarkMode = () => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-};
+// Theme initialization is handled by cmsStore.initTheme()
 
 onMounted(async () => {
-    initDarkMode();
+    cmsStore.initTheme();
     authStore.initAuth();
     
     // Global listener for chunk loading errors (occurs after build/asset change)

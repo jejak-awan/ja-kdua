@@ -228,7 +228,7 @@ Content::published()
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
-import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue'
+import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 import { useTheme } from '@/composables/useTheme'
 import { Zap, Palette, Layers, Shield, Code2, Globe } from 'lucide-vue-next'
 

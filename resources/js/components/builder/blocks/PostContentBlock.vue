@@ -1,66 +1,62 @@
 <template>
-  <div :class="containerClasses">
-    <div :class="contentClasses">
-      <!-- If post has builder blocks, render them -->
-      <template v-if="postBlocks && postBlocks.length">
-        <BlockRenderer :blocks="postBlocks" :context="context" />
-      </template>
-
-      <!-- Fallback to classic content (v-html) -->
-      <div v-else v-html="displayContent"></div>
-    </div>
-  </div>
+  <article class="post-content-block" :style="contentStyles">
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt.</p>
+    <h2>Section Heading</h2>
+    <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <blockquote>
+      "This is an example blockquote that might appear in the post content. It demonstrates how quotes are styled."
+    </blockquote>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
+  </article>
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from 'vue';
+import { computed, inject } from 'vue'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles,
+  getTypographyStyles,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-// Lazy load BlockRenderer to avoid circular dependency loops
-const BlockRenderer = defineAsyncComponent(() => import('./BlockRenderer.vue'));
+const props = defineProps({ module: { type: Object, required: true } })
 
-defineOptions({
-    inheritAttrs: false
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const props = defineProps({
-    max_width: { type: String, default: 'max-w-4xl' },
-    font_size: { type: String, default: 'text-base' },
-    line_height: { type: String, default: 'leading-relaxed' },
-    padding: { type: String, default: 'py-8' },
-    alignment: { type: String, default: 'text-left' },
-    context: { type: Object, default: () => ({}) }
-});
-
-const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.padding].filter(Boolean);
-});
-
-const contentClasses = computed(() => {
-    return [
-        'prose prose-lg dark:prose-invert mx-auto',
-        props.max_width,
-        props.font_size,
-        props.line_height,
-        props.alignment
-    ].filter(Boolean);
-});
-
-const postBlocks = computed(() => {
-    return props.context?.post?.blocks || null;
-});
-
-const displayContent = computed(() => {
-    // 1. Get from context post
-    if (props.context?.post?.body) return props.context.post.body;
-    
-    // 2. Demo content for builder
-    if (props.context?.builderMode) {
-        return `
-            <p>This is a dynamic <strong>Post Content</strong> block. In live view, it displays the post body.</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-        `;
-    }
-    
-    return '';
-});
+const contentStyles = computed(() => {
+  const styles = getTypographyStyles(settings.value, '', device.value)
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  const linkColors = getTypographyStyles(settings.value, 'link_', device.value)
+  styles['--link-color'] = linkColors.color || '#2059ea'
+  styles['--link-font-weight'] = linkColors.fontWeight
+  styles['--link-text-decoration'] = linkColors.textDecoration
+  
+  return styles
+})
 </script>
+
+<style scoped>
+.post-content-block { width: 100%; }
+.post-content-block p { margin: 0 0 1.5em; }
+.post-content-block h2, .post-content-block h3 { margin: 2em 0 1em; font-weight: 600; }
+.post-content-block a { 
+  color: var(--link-color); 
+  font-weight: var(--link-font-weight); 
+  text-decoration: var(--link-text-decoration); 
+}
+.post-content-block blockquote { margin: 1.5em 0; padding: 1em 1.5em; border-left: 4px solid #e0e0e0; font-style: italic; color: #666; }
+</style>

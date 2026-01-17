@@ -6,7 +6,7 @@
         ]"
     >
         <!-- Header Top -->
-        <div v-if="headerTopItems.length > 0" class="bg-primary/5 border-b border-border/50 py-2 hidden md:block">
+        <div v-if="isDesktop && headerTopItems.length > 0" class="bg-primary/5 border-b border-border/50 py-2">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center text-xs">
                     <div class="flex items-center gap-6">
@@ -65,7 +65,7 @@
                 </router-link>
 
                 <!-- Desktop Nav with Mega Menu Support -->
-                <nav class="hidden md:flex items-center gap-1">
+                <nav :class="[isDesktop ? 'flex' : 'hidden', 'items-center gap-1']">
                     <template v-for="item in navItems" :key="item.id">
                         <!-- Item with children = Dropdown/Mega Menu -->
                         <div 
@@ -344,7 +344,7 @@
                 </nav>
 
                 <!-- Actions -->
-                <div class="hidden md:flex items-center gap-3">
+                <div :class="[isDesktop ? 'flex' : 'hidden', 'items-center gap-3']">
                     <!-- Language Switcher -->
                     <LanguageSwitcher />
                     
@@ -367,8 +367,9 @@
 
                 <!-- Mobile Menu Button -->
                 <button 
+                    v-if="isMobile"
                     @click="isOpen = !isOpen"
-                    class="md:hidden p-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
+                    class="p-2 text-muted-foreground hover:bg-accent rounded-lg transition-colors"
                 >
                     <svg v-if="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -389,7 +390,7 @@
             leave-from-class="transform translate-y-0 opacity-100"
             leave-to-class="transform -translate-y-4 opacity-0"
         >
-            <div v-if="isOpen" class="md:hidden bg-background border-b border-border absolute w-full left-0 top-16 shadow-xl">
+            <div v-if="isMobile && isOpen" class="bg-background border-b border-border absolute w-full left-0 top-16 shadow-xl">
                 <div class="container mx-auto px-4 py-4 space-y-2">
                     <router-link 
                         v-for="item in navItems" 
@@ -428,6 +429,7 @@ import { useI18n } from 'vue-i18n';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
 import { useCmsStore } from '../../../../stores/cms';
+import { useResponsiveDevice } from '../../../../components/builder/core/useResponsiveDevice';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
 import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
 import { ChevronDown, ArrowRight, Quote } from 'lucide-vue-next';
@@ -436,8 +438,12 @@ import * as LucideIcons from 'lucide-vue-next';
 const { t } = useI18n();
 const { getSetting } = useTheme();
 const { menus, fetchMenuByLocation } = useMenu();
+const device = useResponsiveDevice();
 
 const isOpen = ref(false);
+
+const isDesktop = computed(() => device.value === 'desktop');
+const isMobile = computed(() => device.value !== 'desktop');
 
 const headerSticky = computed(() => getSetting('header_sticky', true));
 const headerStyle = computed(() => getSetting('header_style', 'glass'));
@@ -849,7 +855,7 @@ const headerTopItems = computed(() => menus.value['header_top']?.items || []);
 
 /* Smooth transitions for all nav items */
 nav a, nav button {
-    will-change: transform, box-shadow, background-color;
+    will-change: transform;
 }
 
 /* Dark mode adjustments */

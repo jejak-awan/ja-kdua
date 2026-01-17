@@ -1,0 +1,677 @@
+{
+    "common": {
+        "admin_label": "This will change the label of the module in the builder for easier identification.",
+        "cssClass": "Input custom CSS classes here, separated by spaces. These classes can be used in your custom CSS to style the element.",
+        "cssId": "Input a custom CSS ID here. This ID can be used for anchor links or custom CSS targeting.",
+        "padding": "Padding is the space inside your element between the content and the border. You can set individual values for top, bottom, left, and right.",
+        "margin": "Margin is the space outside your element. You can use this to create space between different modules on your page.",
+        "border": "Border settings allow you to define the width, style, and color of the boundary around your element, as well as corner rounding (radius).",
+        "boxShadow": "Box Shadow adds depth to your element by creating a shadow effect behind it. You can control the offset, blur, and spread of the shadow.",
+        "background": "Background settings allow you to set colors, gradients, images, or even videos as the background for this element.",
+        "backgroundImage": "Upload or select an image to use as the background for this element.",
+        "backgroundColor": "Choose a color to use as the background for this element.",
+        "backgroundGradient": "Create a linear or radial gradient background for this element.",
+        "backgroundGradientShowAboveImage": "If enabled, the gradient will be placed above the background image.",
+        "backgroundImageSize": "Determine how the background image should be scaled: 'Cover' to fill the area, 'Fit' to show the whole image, or 'Auto' for actual size.",
+        "backgroundImageWidth": "Set a custom width for the background image (e.g. 50%, 300px).",
+        "backgroundImageHeight": "Set a custom height for the background image (e.g. 50%, 300px).",
+        "backgroundImagePosition": "Select the starting position of the background image within the element.",
+        "backgroundImageRepeat": "Determine if the background image should repeat horizontally, vertically, both, or not at all.",
+        "backgroundImageAttachment": "Choose whether the background image stays fixed in place or scrolls with the content.",
+        "backgroundImageBlendMode": "Choose how the background image blends with the background color or other elements below it.",
+        "backgroundVideo": "Upload or select a video file (MP4/WebM) to use as a background loop.",
+        "backgroundVideoMp4": "Upload or select an MP4 video file for best compatibility.",
+        "backgroundVideoWebm": "Upload or select a WebM video file for smaller file sizes and transparency support.",
+        "backgroundVideoWidth": "Set the width of the background video (default is 100%).",
+        "backgroundVideoHeight": "Set the height of the background video (default is auto).",
+        "pauseVideoOnPlay": "When enabled, this video will pause if another video on the page starts playing.",
+        "pauseVideoNotInView": "When enabled, this video will pause when it scrolls out of the browser's viewport to save system resources.",
+        "backgroundVideoLoop": "If enabled, the background video will play continuously in a loop.",
+        "backgroundVideoMute": "If enabled, the background video will be muted (no sound). Muted videos are often required for autoplay.",
+        "backgroundVideoOverlayColor": "Apply a color overlay on top of the background video to improve text readability.",
+        "backgroundPattern": "Select a pattern style to overlay on your background.",
+        "backgroundPatternColor": "Set the primary color for the pattern elements.",
+        "backgroundPatternTransform": "Flip, rotate, or invert the pattern to adjust its orientation.",
+        "backgroundPatternSize": "Control the size scaling of the pattern (Actual, Cover, Fit, Stretch, or Custom).",
+        "backgroundPatternWidth": "Set a custom width for the background pattern (e.g. 100px, 50%). Works when Pattern Size is set to Custom Size.",
+        "backgroundPatternHeight": "Set a custom height for the background pattern (e.g. 100px, 50%). Works when Pattern Size is set to Custom Size.",
+        "backgroundPatternProportional": "Link width and height to maintain the pattern's aspect ratio.",
+        "backgroundPatternRepeatOrigin": "Determine the starting position (origin) of the pattern grid (e.g., Top Left, Center).",
+        "backgroundPatternHorizontalOffset": "Shift the pattern horizontally from its origin point.",
+        "backgroundPatternVerticalOffset": "Shift the pattern vertically from its origin point.",
+        "backgroundPatternRepeat": "Determine how the pattern repeats across the background area.",
+        "backgroundPatternBlendMode": "Choose how the pattern blends with the background color/image below it.",
+        "backgroundMask": "Select a shape mask to apply to the background, creating unique frames or dividers.",
+        "backgroundMaskColor": "Set the color of the mask shape.",
+        "backgroundMaskTransform": "Flip, rotate, or invert the mask shape.",
+        "backgroundMaskSize": "Control how the mask scales within the element (Stretch, Cover, Fit, etc.).",
+        "backgroundMaskWidth": "Set a custom width for the background mask.",
+        "backgroundMaskHeight": "Set a custom height for the background mask.",
+        "backgroundMaskPosition": "Adjust the positioning of the mask shape.",
+        "backgroundMaskAspectRatio": "Define the aspect ratio of the mask shape.",
+        "backgroundMaskBlendMode": "Choose how the mask blends with the background colors or images to create unique compositions.",
+        "parallax": "Enable a parallax effect for the background image, where the image moves slower than the rest of the content during scroll.",
+        "parallaxMethod": "Choose the parallax method: 'True Parallax' uses absolute coordinates for a smoother effect, while 'CSS' uses background-attachment: fixed.",
+        "width": "Define the width of the element. You can use percentages or fixed pixel values.",
+        "max_width": "Setting a maximum width prevents the element from growing larger than a certain size, which is useful for maintaining readability on large screens.",
+        "maxWidth": "Setting a maximum width prevents the element from growing larger than a certain size, which is useful for maintaining readability on large screens.",
+        "height": "Set a specific height for the element. Leave empty for auto-height based on content.",
+        "min_height": "A minimum height ensures that the element always occupies at least a certain amount of vertical space, even if it has no content.",
+        "opacity": "Adjust the transparency of the element. 100% is fully opaque, and 0% is completely invisible.",
+        "blur": "Apply a Gaussian blur effect to the element. Higher values make the element appear more out of focus.",
+        "brightness": "Increase or decrease the brightness of the element. 100% is the original brightness.",
+        "contrast": "Adjust the contrast of the element. 100% is the original contrast.",
+        "grayscale": "Converts the colors of the element to shades of gray. 100% is fully grayscale.",
+        "sepia": "Applies a sepia tone to the element, giving it an old, brownish photographic look.",
+        "saturate": "Increase or decrease the color intensity of the element. 100% is original saturation.",
+        "hue_rotate": "Apply a hue rotation to the element's colors, shifting all colors around the color wheel.",
+        "invert": "Inverts the colors of the element, making it look like a photographic negative.",
+        "blend_mode": "Determines how this element's colors blend with the colors of the elements behind it.",
+        "transform_scale": "Scale the entire element up or down in size without affecting the layout of surrounding elements.",
+        "transform_translate_x": "Move the element horizontally from its original position.",
+        "transform_translate_y": "Move the element vertically from its original position.",
+        "transform_rotate": "Rotate the element around the X-axis (creating a 3D flip effect).",
+        "transform_rotate_y": "Rotate the element around the Y-axis (creating a 3D flip effect).",
+        "transform_rotate_z": "Rotate the element in 2D space clockwise or counter-clockwise.",
+        "transform_skew_x": "Skew the element horizontally, distorting its horizontal axis.",
+        "transform_skew_y": "Skew the element vertically, distorting its vertical axis.",
+        "visibility_desktop": "Toggle whether this element is visible on desktop devices.",
+        "visibility_tablet": "Toggle whether this element is visible on tablet devices.",
+        "visibility_mobile": "Toggle whether this element is visible on mobile devices.",
+        "overflow": "Specifies what happens if the content of an element is larger than its container. 'Hidden' will clip the content, 'Scroll' will always show scrollbars.",
+        "position": "Determines how the element is positioned on the page. 'Relative' stays in the flow, 'Absolute' is positioned relative to its parent, and 'Fixed' stays relative to the viewport.",
+        "z_index": "Controls the stack order of elements. Elements with a higher Z-index appear 'closer' to the viewer and overlap lower ones.",
+        "transition_duration": "The length of time a transition animation takes to complete in milliseconds.",
+        "transition_delay": "The amount of time to wait before starting a transition animation.",
+        "transition_curve": "Defines the speed profile of the transition, such as 'Ease' for smooth start/end or 'Linear' for constant speed.",
+        "link_url": "The destination URL that this element should link to.",
+        "linkUrl": "The destination URL that this element should link to.",
+        "link_target": "Determines if the link should open in the same tab (_self) or a new tab (_blank).",
+        "linkTarget": "Determines if the link should open in the same tab (_self) or a new tab (_blank).",
+        "loop": "Enable this to repeat the content of this element multiple times based on dynamic data or specified counts.",
+        "order": "Numerical order for displaying this element relative to its siblings. Lower numbers appear first.",
+        "animation_effect": "Choose an animation effect that will play when the element comes into view.",
+        "animation_duration": "The total time the animation takes to complete, measured in milliseconds.",
+        "animation_delay": "How long to wait before starting the animation after the element comes into view.",
+        "animation_repeat": "Determines how many times the animation should repeat. Choose 'Infinite' for continuous animation.",
+        "alignment": "Align the content horizontally within the element: left, center, or right.",
+        "textColor": "Set the color of the text within this element.",
+        "fontSize": "Adjust the size of the text in this element.",
+        "fontWeight": "Set the thickness of the text. Higher values result in bolder text.",
+        "lineHeight": "Controls the vertical spacing between lines of text.",
+        "objectFit": "Determines how an image or video should be resized to fit its container.",
+        "title": "The main title or heading for this element.",
+        "subtitle": "A secondary title or description below the main title.",
+        "content": "The main text content for this element.",
+        "buttonText": "The text displayed on the button.",
+        "buttonBackgroundColor": "The background color of the button.",
+        "buttonTextColor": "The text/label color of the button.",
+        "iconSize": "Size of the icon in pixels.",
+        "iconColor": "Color of the icon.",
+        "iconPosition": "Position of the icon relative to the content: top, left, right, or bottom.",
+        "iconBackgroundColor": "Background color behind the icon.",
+        "iconBackgroundShape": "Shape of the icon background: none, circle, square, or rounded.",
+        "titleFontSize": "Font size for the title text.",
+        "titleColor": "Color of the title text.",
+        "contentFontSize": "Font size for the content text.",
+        "contentColor": "Color of the content text.",
+        "mediaType": "Choose the type of media to display: icon, image, or none.",
+        "aspectRatio": "The width-to-height ratio of the element (e.g., 16:9, 4:3, 1:1).",
+        "gap": "Spacing between items in a grid or list.",
+        "itemGap": "Spacing between individual items.",
+        "columns": "Number of columns to display in the grid layout.",
+        "items": "Collection of items to display in this element."
+    },
+    "loop": {
+        "loop_enable": "Enable loop to iterate over a list of items based on your query settings.",
+        "query_type": "Choose the type of content to query for your loop: Post Types, Terms, or Users.",
+        "post_type": "Select one or more post types to display. Common types include Posts, Pages, and Products.",
+        "taxonomy": "Select the taxonomies you want to retrieve terms from, such as Categories or Tags.",
+        "user_role": "Filter users by their assigned roles.",
+        "exclude_users": "Select specific users to exclude from the results.",
+        "meta_query": "Add custom filters based on post metadata (custom fields). Matches Key/Value pairs.",
+        "order_by": "Choose the criteria for sorting the results.",
+        "order": "Choose whether to sort results in ascending or descending order.",
+        "posts_per_page": "The maximum number of items to display in this loop.",
+        "offset": "The number of items to skip at the beginning of the list.",
+        "include_terms": "Select categories or tags to include.",
+        "exclude_terms": "Select categories or tags to exclude.",
+        "include_posts": "Select specific posts to include.",
+        "exclude_posts": "Select specific posts to exclude.",
+        "include_specific_terms": "Select specific terms to include.",
+        "exclude_specific_terms": "Select specific terms to exclude.",
+        "hide_empty": "Hide terms that don't have any posts assigned to them.",
+        "exclude_current": "Exclude the current post from the loop results.",
+        "ignore_sticky": "Ignore sticky post settings and treat them as regular posts."
+    },
+    "section": {
+        "fullWidth": "When enabled, the section will stretch to the full width of the browser window. If disabled, it will be contained within the global site width."
+    },
+    "row": {
+        "gutterWidth": "Adjust the spacing between columns in this row. A value of 0 will make columns touch each other.",
+        "equalizeColumns": "When enabled, all columns in this row will have the same height, even if their content lengths differ.",
+        "maxWidth": "Set the maximum width for this row. Useful for limiting the row width on large screens."
+    },
+    "column": {
+        "verticalAlignment": "Align the content of this column to the top, center, or bottom of the column's height."
+    },
+    "text": {
+        "content": "The main text content of the module. You can use simple HTML or just plain text."
+    },
+    "heading": {
+        "content": "The text for your title or heading.",
+        "level": "The HTML heading level (H1-H6). H1 is usually reserved for the main page title."
+    },
+    "image": {
+        "src": "The source URL of the image you want to display.",
+        "alt": "Alternative text for accessibility and SEO. Describes the image for screen readers and search engines.",
+        "title": "Text that appears as a tooltip when the user hovers over the image.",
+        "caption": "Optional caption text displayed below the image.",
+        "lightbox": "When enabled, clicking the image will open it in an overlay with a zoomed view.",
+        "linkUrl": "URL to navigate to when the image is clicked.",
+        "linkTarget": "Determines if the link opens in the same or a new browser tab.",
+        "overlayEnabled": "Show a color overlay when hovering over the image.",
+        "overlayColor": "The color of the overlay that appears on hover.",
+        "objectFit": "How the image should be resized to fit its container: cover, contain, fill, or none."
+    },
+    "button": {
+        "text": "The text label that appears on the button.",
+        "url": "The URL the button will link to when clicked.",
+        "target": "Determines if the button link opens in the same or a new browser tab.",
+        "icon": "Name of the icon to display alongside the button text (using Lucide icons).",
+        "iconPosition": "Choose whether the icon appears to the left or right of the button text.",
+        "size": "Controls the overall size of the button: small, medium, or large.",
+        "fullWidth": "When enabled, the button will stretch to fill the full width of its container.",
+        "hoverBackgroundColor": "The background color of the button when the user hovers over it.",
+        "hoverTextColor": "The text color of the button when the user hovers over it."
+    },
+    "icon": {
+        "icon": "Choose the icon to display from the Lucide icon library.",
+        "iconColor": "Set the color of the icon.",
+        "iconSize": "Adjust the size of the icon in pixels.",
+        "iconBackgroundColor": "Set a background color behind the icon.",
+        "iconPadding": "Add padding around the icon within its background.",
+        "iconBorderRadius": "Round the corners of the icon background."
+    },
+    "divider": {
+        "style": "Choose the visual style of the divider line: solid, dashed, dotted, or double.",
+        "weight": "Set the thickness of the divider line.",
+        "color": "Choose the color of the divider line.",
+        "width": "Set the width of the divider as a percentage or fixed value."
+    },
+    "spacer": {
+        "height": "Set the vertical space created by this spacer element."
+    },
+    "video": {
+        "videoType": "Choose the video source type: YouTube, Vimeo, or self-hosted.",
+        "youtubeUrl": "Enter the full YouTube video URL.",
+        "vimeoUrl": "Enter the full Vimeo video URL.",
+        "selfHostedUrl": "Upload or provide a URL to a self-hosted video file.",
+        "posterImage": "Image displayed before the video plays. Acts as a video thumbnail/cover.",
+        "aspectRatio": "The width-to-height ratio of the video player (e.g., 16:9, 4:3).",
+        "autoplay": "When enabled, the video will start playing automatically when the page loads.",
+        "loop": "When enabled, the video will restart automatically when it ends.",
+        "muted": "When enabled, the video will play without sound. Required for autoplay in most browsers.",
+        "controls": "When enabled, video playback controls will be visible to the user."
+    },
+    "gallery": {
+        "images": "Add images to your gallery collection.",
+        "columns": "Number of columns to display in the gallery grid.",
+        "gap": "Spacing between gallery images.",
+        "lightbox": "Enable lightbox to view images in an overlay when clicked.",
+        "aspectRatio": "The aspect ratio for gallery images.",
+        "hoverEffect": "Animation effect when hovering over gallery images."
+    },
+    "audio": {
+        "src": "URL or file path to the audio file.",
+        "autoplay": "When enabled, the audio will start playing automatically.",
+        "loop": "When enabled, the audio will repeat continuously.",
+        "controls": "Show audio playback controls to the user.",
+        "muted": "Start the audio muted by default."
+    },
+    "embed": {
+        "code": "Paste the embed code (iframe, script, etc.) from the third-party service.",
+        "aspectRatio": "Set the aspect ratio for the embedded content."
+    },
+    "lottie": {
+        "src": "URL to the Lottie animation JSON file.",
+        "loop": "When enabled, the animation will repeat continuously.",
+        "autoplay": "When enabled, the animation starts automatically.",
+        "speed": "Playback speed of the animation (1 = normal speed).",
+        "direction": "Animation playback direction: forward or reverse."
+    },
+    "beforeAfter": {
+        "beforeImage": "The 'before' image shown on the left/top side of the comparison.",
+        "afterImage": "The 'after' image shown on the right/bottom side of the comparison.",
+        "orientation": "Slider orientation: horizontal or vertical.",
+        "startPosition": "Initial position of the comparison slider (0-100%)."
+    },
+    "videoPopup": {
+        "thumbnailImage": "Image displayed as the video thumbnail before opening the popup.",
+        "videoUrl": "URL of the video to play in the popup.",
+        "playIcon": "Style of the play icon displayed over the thumbnail."
+    },
+    "videoSlider": {
+        "videos": "Collection of videos to display in the slider.",
+        "autoplay": "When enabled, automatically advance to the next video.",
+        "showControls": "Display navigation controls on the slider."
+    },
+    "accordion": {
+        "items": "Collection of accordion items with title and content.",
+        "allowMultiple": "When enabled, multiple accordion items can be open simultaneously.",
+        "toggleIcon": "Style of the expand/collapse icon: chevron, plus, arrow, or none.",
+        "iconPosition": "Position of the toggle icon: left or right side of the header.",
+        "headerBackgroundColor": "Background color of the accordion header.",
+        "headerTextColor": "Text color of the accordion header.",
+        "headerFontSize": "Font size for the accordion header text.",
+        "headerPadding": "Padding inside the accordion header.",
+        "contentBackgroundColor": "Background color of the accordion content area.",
+        "contentTextColor": "Text color of the accordion content.",
+        "contentPadding": "Padding inside the accordion content area.",
+        "itemGap": "Spacing between accordion items."
+    },
+    "tabs": {
+        "items": "Collection of tab items with title and content.",
+        "defaultTab": "Index of the tab that should be active by default (starts at 0).",
+        "tabAlignment": "Horizontal alignment of the tab buttons.",
+        "tabPosition": "Position of the tab buttons: top, bottom, left, or right.",
+        "tabBackgroundColor": "Background color of inactive tab buttons.",
+        "activeTabBackgroundColor": "Background color of the active tab button.",
+        "tabTextColor": "Text color of tab buttons.",
+        "activeTabTextColor": "Text color of the active tab button."
+    },
+    "toggle": {
+        "title": "The title/header of the toggle element.",
+        "content": "Content revealed when the toggle is expanded.",
+        "openByDefault": "When enabled, the toggle starts in the expanded state."
+    },
+    "slider": {
+        "slides": "Collection of slides to display.",
+        "autoplay": "When enabled, the slider will automatically advance.",
+        "autoplaySpeed": "Time in milliseconds between slide transitions.",
+        "showArrows": "Display navigation arrows on the slider.",
+        "showDots": "Display pagination dots below the slider.",
+        "infinite": "When enabled, slides loop continuously.",
+        "fade": "Use fade transition instead of slide.",
+        "speed": "Duration of the slide transition animation in milliseconds."
+    },
+    "counter": {
+        "startValue": "The initial number to start counting from.",
+        "endValue": "The final number to count up to.",
+        "duration": "How long the counting animation should take in milliseconds.",
+        "prefix": "Text or symbol displayed before the number (e.g., '$', '€').",
+        "suffix": "Text or symbol displayed after the number (e.g., '+', '%', 'K').",
+        "separator": "Thousands separator character (e.g., ',' or '.').",
+        "decimals": "Number of decimal places to display."
+    },
+    "circleCounter": {
+        "percentage": "The percentage value to display (0-100).",
+        "duration": "Animation duration in milliseconds.",
+        "strokeWidth": "Thickness of the circle progress bar.",
+        "circleColor": "Color of the unfilled portion of the circle.",
+        "progressColor": "Color of the filled progress portion.",
+        "showPercentage": "Display the percentage value in the center."
+    },
+    "numberCounter": {
+        "number": "The number to display and animate to.",
+        "title": "Title or label for the counter.",
+        "prefix": "Text displayed before the number.",
+        "suffix": "Text displayed after the number.",
+        "duration": "Animation duration in milliseconds."
+    },
+    "countdown": {
+        "targetDate": "The date and time to count down to.",
+        "showDays": "Display the days remaining.",
+        "showHours": "Display the hours remaining.",
+        "showMinutes": "Display the minutes remaining.",
+        "showSeconds": "Display the seconds remaining.",
+        "expiredMessage": "Message to display when the countdown reaches zero.",
+        "labels": "Custom labels for days, hours, minutes, seconds."
+    },
+    "progressBar": {
+        "percentage": "The progress value to display (0-100).",
+        "showPercentage": "Display the percentage value as text.",
+        "barColor": "Color of the filled progress portion.",
+        "backgroundColor": "Color of the unfilled background.",
+        "height": "Height/thickness of the progress bar.",
+        "animated": "Enable animation when the progress bar comes into view.",
+        "striped": "Add striped pattern to the progress bar."
+    },
+    "testimonial": {
+        "quote": "The testimonial text or customer quote.",
+        "authorName": "Name of the person giving the testimonial.",
+        "authorTitle": "Job title or company of the testimonial author.",
+        "authorImage": "Photo of the testimonial author.",
+        "rating": "Star rating to display (1-5).",
+        "layout": "Layout style: default, card, or minimalist."
+    },
+    "pricingTable": {
+        "title": "Title or name of the pricing plan.",
+        "subtitle": "Optional subtitle or plan description.",
+        "price": "The price amount to display.",
+        "currency": "Currency symbol (e.g., '$', '€', 'Rp').",
+        "period": "Billing period text (e.g., '/month', '/year').",
+        "features": "List of features included in this plan.",
+        "buttonText": "Text for the call-to-action button.",
+        "buttonUrl": "URL the button should link to.",
+        "featured": "Highlight this plan as featured or recommended.",
+        "badge": "Optional badge text (e.g., 'Popular', 'Best Value')."
+    },
+    "alert": {
+        "type": "Alert style type: info, success, warning, or error.",
+        "title": "Optional title for the alert message.",
+        "content": "The alert message content.",
+        "dismissible": "Allow users to close/dismiss the alert.",
+        "showIcon": "Display an icon based on the alert type."
+    },
+    "code": {
+        "code": "The code snippet to display.",
+        "language": "Programming language for syntax highlighting.",
+        "showLineNumbers": "Display line numbers alongside the code.",
+        "theme": "Color theme for the code display: dark or light.",
+        "copyButton": "Show a button to copy the code to clipboard."
+    },
+    "quote": {
+        "quote": "The quote text to display.",
+        "author": "Name of the person being quoted.",
+        "source": "Source or publication of the quote.",
+        "style": "Visual style of the quote block."
+    },
+    "blurb": {
+        "title": "The heading or title for the blurb.",
+        "content": "The descriptive text content.",
+        "mediaType": "Type of media to display: icon, image, or none.",
+        "icon": "Icon to display (when media type is icon).",
+        "image": "Image to display (when media type is image).",
+        "iconPosition": "Position of the icon/image: top, left, or right.",
+        "iconSize": "Size of the icon in pixels.",
+        "iconColor": "Color of the icon.",
+        "iconBackgroundColor": "Background color behind the icon.",
+        "iconBackgroundShape": "Shape of the icon background: none, circle, square, or rounded."
+    },
+    "cta": {
+        "title": "The main headline for the call-to-action.",
+        "description": "Supporting text that encourages action.",
+        "buttonText": "Text displayed on the CTA button.",
+        "buttonUrl": "URL the CTA button links to.",
+        "secondaryButtonText": "Text for an optional secondary button.",
+        "secondaryButtonUrl": "URL for the secondary button.",
+        "layout": "Layout style: horizontal or stacked."
+    },
+    "feature": {
+        "title": "Title of the feature.",
+        "description": "Description of the feature.",
+        "icon": "Icon representing the feature.",
+        "image": "Image representing the feature."
+    },
+    "iconList": {
+        "items": "List of items with icon and text.",
+        "iconColor": "Default color for all icons.",
+        "iconSize": "Size of the icons.",
+        "spacing": "Spacing between list items."
+    },
+    "teamMember": {
+        "name": "Name of the team member.",
+        "position": "Job title or role.",
+        "image": "Photo of the team member.",
+        "description": "Short bio or description.",
+        "socialLinks": "Social media profile links."
+    },
+    "person": {
+        "name": "Person's name.",
+        "title": "Job title or role.",
+        "image": "Photo of the person.",
+        "bio": "Short biography or description.",
+        "socialLinks": "Social media links."
+    },
+    "author": {
+        "showAvatar": "Display the author's avatar/photo.",
+        "showName": "Display the author's name.",
+        "showBio": "Display the author's biography.",
+        "showLink": "Show a link to the author's page."
+    },
+    "breadcrumbs": {
+        "separator": "Character or icon used to separate breadcrumb items.",
+        "showHome": "Include a home link at the beginning.",
+        "homeText": "Text for the home link."
+    },
+    "starRating": {
+        "rating": "The rating value to display (e.g., 4.5 out of 5).",
+        "maxRating": "Maximum possible rating (usually 5).",
+        "starColor": "Color of filled stars.",
+        "emptyColor": "Color of empty/unfilled stars.",
+        "size": "Size of the star icons."
+    },
+    "faq": {
+        "items": "Collection of FAQ items with question and answer.",
+        "allowMultiple": "Allow multiple FAQ items to be open simultaneously."
+    },
+    "logoGrid": {
+        "logos": "Collection of logo images.",
+        "columns": "Number of columns in the logo grid.",
+        "gap": "Spacing between logos.",
+        "grayscale": "Display logos in grayscale by default.",
+        "hoverEffect": "Effect when hovering over logos."
+    },
+    "shareButtons": {
+        "networks": "Social networks to display share buttons for.",
+        "showLabels": "Display text labels on share buttons.",
+        "style": "Button style: default, rounded, or minimal."
+    },
+    "tableOfContents": {
+        "title": "Title for the table of contents.",
+        "headingLevels": "Which heading levels to include (H2, H3, etc.).",
+        "sticky": "Make the table of contents sticky when scrolling."
+    },
+    "menu": {
+        "menuId": "ID of the menu to display.",
+        "orientation": "Menu orientation: horizontal or vertical.",
+        "dropdownStyle": "Style of dropdown menus.",
+        "mobileBreakpoint": "Screen width at which to switch to mobile menu."
+    },
+    "sidebar": {
+        "sidebarId": "ID of the sidebar/widget area to display.",
+        "sticky": "Make the sidebar sticky when scrolling."
+    },
+    "numberBox": {
+        "number": "The number to display.",
+        "title": "Title accompanying the number.",
+        "description": "Description or additional text."
+    },
+    "group": {
+        "layout": "Layout type for child elements: flex or grid.",
+        "direction": "Flex direction: row or column.",
+        "justifyContent": "How to align items along the main axis.",
+        "alignItems": "How to align items along the cross axis.",
+        "gap": "Spacing between child elements.",
+        "wrap": "Allow items to wrap to the next line."
+    },
+    "groupCarousel": {
+        "slidesPerView": "Number of slides visible at once.",
+        "gap": "Spacing between slides.",
+        "autoplay": "Automatically advance slides.",
+        "loop": "Enable infinite loop.",
+        "navigation": "Show navigation arrows.",
+        "pagination": "Show pagination dots."
+    },
+    "contactForm": {
+        "title": "Form title or heading.",
+        "subtitle": "Subtitle or description above the form.",
+        "fields": "Form fields configuration.",
+        "buttonText": "Submit button text.",
+        "successMessage": "Message displayed after successful submission.",
+        "recipientEmail": "Email address to receive form submissions.",
+        "buttonBackgroundColor": "Background color of the submit button.",
+        "buttonTextColor": "Text color of the submit button."
+    },
+    "login": {
+        "title": "Login form title.",
+        "usernameLabel": "Label for the username/email field.",
+        "passwordLabel": "Label for the password field.",
+        "buttonText": "Login button text.",
+        "forgotPasswordLink": "Show 'Forgot Password' link.",
+        "registerLink": "Show registration link.",
+        "redirectUrl": "URL to redirect to after successful login."
+    },
+    "signup": {
+        "title": "Signup form title.",
+        "fields": "Form fields to include.",
+        "buttonText": "Signup button text.",
+        "termsText": "Terms and conditions text.",
+        "successMessage": "Message after successful registration."
+    },
+    "newsletter": {
+        "title": "Newsletter section title.",
+        "description": "Description or call-to-action text.",
+        "placeholder": "Placeholder text for the email input.",
+        "buttonText": "Subscribe button text.",
+        "successMessage": "Message after successful subscription."
+    },
+    "search": {
+        "placeholder": "Placeholder text for the search input.",
+        "buttonText": "Search button text.",
+        "showIcon": "Display a search icon.",
+        "resultsPage": "URL of the search results page."
+    },
+    "map": {
+        "address": "The address or location to display.",
+        "latitude": "Latitude coordinate of the location.",
+        "longitude": "Longitude coordinate of the location.",
+        "zoom": "Map zoom level (1-20).",
+        "mapType": "Map style: roadmap, satellite, hybrid, or terrain.",
+        "markers": "Custom markers to display on the map.",
+        "height": "Height of the map container."
+    },
+    "socialLinks": {
+        "links": "Social media profile links.",
+        "iconSize": "Size of social icons.",
+        "iconColor": "Color of social icons.",
+        "iconSpacing": "Spacing between icons.",
+        "style": "Icon style: default, rounded, or square.",
+        "showLabels": "Display platform names as labels."
+    },
+    "blog": {
+        "postsPerPage": "Number of posts to display per page.",
+        "columns": "Number of columns in the grid layout.",
+        "showExcerpt": "Display post excerpts.",
+        "excerptLength": "Maximum characters for excerpt.",
+        "showDate": "Display publication dates.",
+        "showAuthor": "Display author names.",
+        "showThumbnail": "Display featured images.",
+        "showCategories": "Display post categories.",
+        "showReadMore": "Display 'Read More' links.",
+        "orderBy": "Sort posts by: date, title, or popularity.",
+        "order": "Sort order: ascending or descending.",
+        "categories": "Filter by specific categories."
+    },
+    "portfolio": {
+        "itemsPerPage": "Number of portfolio items per page.",
+        "columns": "Number of columns in the grid.",
+        "showCategories": "Display category filter.",
+        "showTitle": "Display item titles.",
+        "hoverEffect": "Effect when hovering over items.",
+        "lightbox": "Open items in a lightbox."
+    },
+    "filterablePortfolio": {
+        "categories": "Categories available for filtering.",
+        "defaultCategory": "Category shown by default (or 'All').",
+        "columns": "Number of columns in the grid.",
+        "animation": "Filter animation style."
+    },
+    "postSlider": {
+        "postsCount": "Number of posts to display in the slider.",
+        "categories": "Filter posts by categories.",
+        "autoplay": "Automatically advance slides.",
+        "showTitle": "Display post titles.",
+        "showExcerpt": "Display post excerpts.",
+        "showDate": "Display publication dates."
+    },
+    "postTitle": {
+        "tag": "HTML tag for the title (H1-H6).",
+        "linkToPost": "Make the title a link to the post."
+    },
+    "postMeta": {
+        "showDate": "Display the publication date.",
+        "showAuthor": "Display the author name.",
+        "showCategories": "Display post categories.",
+        "showComments": "Display comment count.",
+        "separator": "Separator between meta items."
+    },
+    "postContent": {
+        "showFullContent": "Display full post content or excerpt."
+    },
+    "featuredImage": {
+        "linkToPost": "Make the image a link to the post.",
+        "showCaption": "Display the image caption."
+    },
+    "postNavigation": {
+        "showThumbnails": "Display post thumbnails.",
+        "showTitles": "Display post titles.",
+        "prevLabel": "Label for previous post link.",
+        "nextLabel": "Label for next post link."
+    },
+    "relatedPosts": {
+        "postsCount": "Number of related posts to display.",
+        "showThumbnails": "Display post thumbnails.",
+        "showDate": "Display publication dates.",
+        "basedOn": "How to determine related posts: category, tags, or author."
+    },
+    "comments": {
+        "title": "Comments section title.",
+        "showAvatar": "Display commenter avatars.",
+        "showDate": "Display comment dates.",
+        "allowReplies": "Allow nested replies."
+    },
+    "fullwidthHeader": {
+        "title": "Main header title.",
+        "subtitle": "Subtitle or tagline.",
+        "backgroundType": "Background type: color, image, or video.",
+        "buttonText": "Primary button text.",
+        "buttonUrl": "Primary button URL.",
+        "minHeight": "Minimum height of the header section."
+    },
+    "fullwidthSlider": {
+        "slides": "Collection of slides with content.",
+        "autoplay": "Automatically advance slides.",
+        "navigation": "Show navigation arrows.",
+        "pagination": "Show pagination dots."
+    },
+    "fullwidthMenu": {
+        "menuId": "ID of the menu to display.",
+        "logo": "Logo image URL.",
+        "sticky": "Make the menu sticky when scrolling.",
+        "transparentOnTop": "Transparent background at the top of the page."
+    },
+    "fullwidthMap": {
+        "address": "Location to display on the map.",
+        "zoom": "Map zoom level.",
+        "height": "Height of the map."
+    },
+    "fullwidthImage": {
+        "src": "Image URL.",
+        "alt": "Alternative text for accessibility.",
+        "parallax": "Enable parallax scrolling effect."
+    },
+    "fullwidthCode": {
+        "code": "Custom HTML/CSS/JavaScript code."
+    },
+    "fullwidthPortfolio": {
+        "columns": "Number of columns.",
+        "showFilter": "Display category filter."
+    },
+    "fullwidthPostSlider": {
+        "postsCount": "Number of posts to display.",
+        "categories": "Filter by categories.",
+        "autoplay": "Auto-advance slides.",
+        "showContent": "Display post content in slides."
+    },
+    "fullwidthPostTitle": {
+        "showBreadcrumbs": "Display breadcrumb navigation.",
+        "showMeta": "Display post meta information.",
+        "backgroundImage": "Background image for the header."
+    },
+    "fullwidthPostContent": {
+        "maxWidth": "Maximum content width.",
+        "showSidebar": "Display a sidebar."
+    }
+}

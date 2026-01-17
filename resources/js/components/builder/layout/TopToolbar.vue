@@ -1,0 +1,355 @@
+<template>
+  <header class="top-toolbar">
+    <!-- Left Section: Menu & Branding -->
+    <div class="top-toolbar__left">
+      <!-- Menu Button (Mobile Only) -->
+      <IconButton 
+        :icon="sidebarVisible ? X : Menu" 
+        :class="['toolbar-btn-lg', 'mobile-only', 'menu-toggle', { 'menu-toggle--active': sidebarVisible }]" 
+        @click="$emit('toggle-sidebar')" 
+        :title="sidebarVisible ? $t('builder.common.close') : $t('builder.toolbar.menu')" 
+      />
+      
+      <!-- Divider (Mobile Only) -->
+      <BaseDivider orientation="vertical" :margin="6" class="mobile-only" />
+
+      <!-- Branding (Logo with Override) -->
+      <AdminLogo 
+        :minimized="false" 
+        class="admin-logo-override" 
+        title="JA-Builder" 
+        subtitle="Visual Editor"
+      />
+    </div>
+    
+    <!-- Center Section: Tools (Zoom, Wireframe, Devices) -->
+    <div class="top-toolbar__center">
+       <!-- Zoom -->
+       <BaseDropdown align="center" width="auto">
+            <template #trigger="{ open }">
+              <IconButton 
+                :icon="Search" 
+                :active="open" 
+                :title="$t('builder.toolbar.zoom')" 
+              />
+            </template>
+            
+            <template #default="{ close }">
+              <button 
+                v-for="opt in zoomOptions" 
+                :key="opt"
+                class="dropdown-item"
+                :class="{ 'active': opt === zoom }"
+                @click="selectZoom(opt); close()"
+              >
+                {{ opt }}%
+              </button>
+            </template>
+       </BaseDropdown>
+
+
+
+      <!-- Device Modes -->
+      <div class="device-modes">
+        <IconButton 
+          v-for="mode in deviceModes"
+          :key="mode.id"
+          :icon="icons[mode.icon] || mode.icon"
+          :active="device === mode.id"
+          :title="$t('builder.toolbar.devices.' + mode.id)"
+          @click="emit('change-device', mode.id)"
+        />
+      </div>
+
+      <BaseDivider orientation="vertical" :margin="6" />
+
+      <!-- Fullview Toggle -->
+      <IconButton 
+        :icon="builder.isFullscreen ? Minimize : Maximize" 
+        :active="builder.isFullscreen"
+        :title="builder.isFullscreen ? $t('builder.toolbar.exitFullscreen') || 'Exit Full View' : $t('builder.toolbar.fullscreen') || 'Enter Full View'" 
+        @click="builder.isFullscreen = !builder.isFullscreen"
+      />
+    </div>
+    
+    <!-- Right Section: Save & Status -->
+    <div class="top-toolbar__right">
+
+      <!-- Save Actions -->
+      <div class="save-actions">
+        <button 
+          class="save-draft-btn" 
+          @click="$emit('save', 'draft')"
+          :title="$t('builder.toolbar.saveDraft') || 'Save as Draft'"
+        >
+          {{ $t('builder.toolbar.draft') || 'Draft' }}
+        </button>
+        <button 
+          class="publish-btn" 
+          @click="$emit('save', 'published')"
+          :title="builder.content.status === 'published' ? $t('builder.toolbar.update') : $t('builder.toolbar.publish')"
+        >
+          <Save class="w-3.5 h-3.5 mr-1.5" />
+          {{ builder.content.status === 'published' ? ($t('builder.toolbar.update') || 'Update') : ($t('builder.toolbar.publish') || 'Publish') }}
+        </button>
+      </div>
+
+    </div>
+  </header>
+</template>
+
+<script setup>
+import { inject, computed } from 'vue'
+import { 
+  Menu, Monitor, Tablet, Smartphone, 
+   Search, Save, X, Maximize, Minimize
+} from 'lucide-vue-next'
+import { DEVICE_MODES } from '../core/constants'
+import { IconButton, BaseDropdown, BaseDivider } from '../ui'
+import AdminLogo from '../../layouts/AdminLogo.vue'
+
+// Icons mapping for dynamic components
+const icons = { Monitor, Tablet, Smartphone }
+
+// Inject builder state
+const builder = inject('builder')
+
+// Props & Emits
+const props = defineProps({
+  sidebarVisible: {
+    type: Boolean,
+    default: false
+  }
+})
+const emit = defineEmits(['toggle-sidebar', 'change-device', 'open-pages', 'close-builder', 'save'])
+
+// State
+const device = computed(() => builder?.device || 'desktop')
+const zoom = computed(() => builder?.zoom || 100)
+const wireframeMode = computed(() => builder?.wireframeMode || false)
+
+const deviceModes = Object.values(DEVICE_MODES)
+
+// Zoom Options
+const zoomOptions = [50, 75, 100, 125, 150]
+
+const selectZoom = (val) => {
+  builder.zoom = val
+}
+
+const toggleWireframe = () => {
+  if (builder) {
+    builder.wireframeMode = !builder.wireframeMode
+  }
+}
+</script>
+
+<style scoped>
+.top-toolbar {  
+  /* Force dark theme text for Top Toolbar since background is always dark */
+  --builder-text-primary: #ffffff;
+  --builder-text-secondary: rgba(255, 255, 255, 0.7);
+  --builder-border: rgba(255, 255, 255, 0.1);
+  --builder-border-layout: rgba(255, 255, 255, 0.1); /* Force dark border in Light Mode */
+  --builder-bg-tertiary: rgba(255, 255, 255, 0.1);
+  --builder-accent: #2059ea;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--toolbar-height);
+  padding: 0 20px 0 6px;
+  background: var(--builder-bg-topbar);
+  border-bottom: 1px solid var(--builder-border-layout);
+  color: var(--builder-text-primary);
+  position: relative; /* For absolute center */
+}
+
+.top-toolbar__left,
+.top-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2; /* Above center */
+}
+
+/* True center using absolute positioning */
+.top-toolbar__center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1;
+}
+
+/* Branding */
+/* Override AdminLogo styles for toolbar context */
+:deep(.admin-logo-override) {
+    color: white;
+}
+:deep(.admin-logo-override .text-foreground) {
+    color: white !important;
+}
+:deep(.admin-logo-override .text-muted-foreground) {
+    color: rgba(255,255,255,0.7) !important;
+}
+/* Make the logo box border crisp without shadow */
+:deep(.admin-logo-override .border-primary) {
+    border-color: #10b981 !important; /* Emerald green */
+    border-width: 2px !important;
+    box-shadow: none !important; /* Remove blur/shadow */
+}
+:deep(.admin-logo-override .shadow-sm) {
+    box-shadow: none !important; /* Remove the shadow-sm class effect */
+}
+:deep(.admin-logo-override [class*="text-primary"]) {
+    color: #10b981 !important;
+}
+
+/* All toolbar buttons - crisp borders without shadow */
+.top-toolbar :deep(.icon-button),
+.top-toolbar :deep(button) {
+    box-shadow: none !important;
+}
+
+.dropdown-item {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  color: var(--builder-text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-text-primary);
+}
+
+.dropdown-item.active {
+  background: var(--builder-accent);
+  color: white;
+}
+
+.device-modes {
+  display: flex;
+  gap: 4px;
+}
+
+@media (max-width: 768px) {
+  .top-toolbar {
+    padding: 0 8px;
+  }
+  
+  .builder-title-badge {
+      display: none; /* Hide title on small screens */
+  }
+  
+  /* Hide logo on mobile to prevent overlap */
+  :deep(.admin-logo-override) {
+      display: none;
+  }
+}
+
+/* Save Actions */
+.save-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.save-draft-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--builder-text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--builder-border);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-draft-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--builder-text-primary);
+    border-color: var(--builder-text-secondary);
+}
+
+.publish-btn {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 6px;
+    background: #10b981; /* Emerald green */
+    border: 1px solid #10b981;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.publish-btn:hover {
+    background: #059669; /* Darker emerald */
+    border-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.publish-btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile Only Elements */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: flex;
+    }
+}
+
+/* Menu Toggle Button - Active State Styling */
+.menu-toggle--active {
+    background: var(--builder-accent, #2059ea) !important;
+    border-color: var(--builder-accent, #2059ea) !important;
+    color: white !important;
+}
+.menu-toggle--active:hover {
+    background: rgba(32, 89, 234, 0.8) !important;
+}
+
+/* Force specific button styling for Toolbar to prevent "White Block" on light mode */
+/* Force specific button styling for Toolbar to prevent "White Block" on light mode */
+/* Target both secondary (default) and ghost variants */
+:deep(.icon-button--secondary),
+:deep(.icon-button--ghost) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+:deep(.icon-button--secondary:hover),
+:deep(.icon-button--ghost:hover) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+:deep(.icon-button--secondary.is-active),
+:deep(.icon-button--ghost.is-active) {
+    background-color: rgba(32, 89, 234, 0.2) !important;
+    border-color: #2059ea !important;
+    color: #2059ea !important;
+}
+</style>

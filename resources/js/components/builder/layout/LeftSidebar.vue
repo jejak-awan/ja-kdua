@@ -1,0 +1,119 @@
+<template>
+  <aside class="left-sidebar">
+    <nav class="sidebar-nav">
+      <button
+        v-for="panel in panels"
+        :key="panel.id"
+        class="sidebar-btn"
+        :class="{ 'sidebar-btn--active': activePanel === panel.id }"
+        @click="$emit('change-panel', panel.id)"
+        :title="$t('builder.sidebars.' + panel.id)"
+      >
+        <component :is="getIcon(panel.icon)" :size="20" />
+      </button>
+    </nav>
+    
+    <div class="sidebar-bottom">
+      <button 
+        class="sidebar-btn" 
+        :class="{ 'sidebar-btn--active': activePanel === 'preferences' }"
+        @click="$emit('change-panel', 'preferences')"
+        :title="$t('builder.toolbar.preferences')"
+      >
+        <component :is="icons.Settings2" :size="20" />
+      </button>
+    </div>
+  </aside>
+</template>
+
+<script setup>
+import { 
+  Layers, FileText, Clock, Layout, Settings, Palette, 
+  Sparkles, Share2, HelpCircle, Settings2, Database
+} from 'lucide-vue-next'
+import { SIDEBAR_PANELS } from '../core/constants'
+
+// Props
+defineProps({
+  activePanel: {
+    type: String,
+    default: 'layers'
+  }
+})
+
+// Emits
+defineEmits(['change-panel'])
+
+// Icons map
+const icons = {
+  Layers, FileText, Clock, Layout, Settings, Palette,
+  Sparkles, Share2, HelpCircle, Settings2, Database
+}
+
+const panels = SIDEBAR_PANELS
+
+const getIcon = (iconName) => {
+  return icons[iconName] || icons.Layers
+}
+</script>
+
+<style scoped>
+.left-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: var(--sidebar-width);
+  background: var(--builder-bg-sidebar);
+  border-right: 1px solid var(--builder-border);
+  padding: var(--spacing-sm) 0;
+  flex-shrink: 0;
+  z-index: 10;
+  /* Prevent flash on theme switch */
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding-bottom: var(--spacing-sm);
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  color: var(--builder-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-btn:hover {
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-text-secondary);
+}
+
+.sidebar-btn--active {
+  background: var(--builder-accent);
+  color: white;
+}
+
+.sidebar-btn--active:hover {
+  background: var(--builder-accent);
+  color: white;
+}
+</style>

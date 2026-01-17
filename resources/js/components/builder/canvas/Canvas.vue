@@ -1,251 +1,303 @@
 <template>
-    <div class="flex-1 min-h-0 relative flex flex-col bg-zinc-100 dark:bg-zinc-950">
-        <div 
-            ref="scrollContainer"
-            @scroll="handleScroll"
-            :class="[
-                'flex-1 overflow-y-auto flex flex-col items-center custom-scrollbar',
-                !builder.isPreview.value ? 'bg-zinc-100 dark:!bg-zinc-950 bg-dot-pattern p-6 pb-20' : 'bg-background'
-            ]"
-        >
+  <div 
+    class="canvas flex flex-col min-h-screen"
+    :class="[
+      { 'canvas--wireframe': wireframeMode },
+      { 'canvas--grid': gridViewMode },
+      `theme-${activeTheme}`
+    ]"
+    @click.self="clearSelection"
+  >
+    <CanvasGridView v-if="gridViewMode" />
 
-            <!-- Draggable Canvas -->
-            <div 
-                :class="[
-                    canvasWidthClass, 
-                    'transition-all duration-300 ease-in-out relative w-full shrink-0 flex flex-col',
-                    !builder.isPreview.value ? 'bg-card shadow-2xl rounded-xl border border-border mt-2' : 'bg-background'
-                ]"
-                :style="{ minHeight: '600px' }"
-            >
-                <!-- Theme Provider Wrapper: Remaps global variables to theme-specific ones -->
-                <div class="theme-provider flex flex-col min-h-full" :style="themeStyles">
-                    <!-- Theme Header (Only in Preview) -->
-                    <ThemePageResolver v-if="builder.isPreview.value" page="components/Header" class="shrink-0" />
+    <template v-else>
+      <!-- Header Preview -->
+      <ThemePageResolver page="components/Header" class="relative z-10" />
 
-                    <draggable 
-                        v-model="builder.blocks.value" 
-                        item-key="id"
-                        :group="{ name: 'blocks', pull: true, put: true }"
-                        handle=".drag-handle"
-                        :class="[
-                            builder.globalSettings.value.block_spacing,
-                            'w-full flex-1',
-                            !builder.isPreview.value ? 'min-h-[600px] pb-20' : ''
-                        ]"
-                        ghost-class="block-ghost"
-                    >
-                        <template #item="{ element: block, index }">
-                            <BlockWrapper 
-                                :block="block" 
-                                :index="index"
-                                :context="context"
-                                :isNested="false"
-                                @edit="editBlock(index)"
-                                @duplicate="builder.duplicateBlock(index)"
-                                @delete="builder.removeBlock(index)"
-                                @wrap="onWrapBlock(index)"
-                                @split="onSplitBlock(index)"
-                            />
-                        </template>
-                    </draggable>
-
-                    <!-- Theme Footer (Only in Preview) -->
-                    <ThemePageResolver v-if="builder.isPreview.value" page="components/Footer" class="shrink-0" />
-                </div>
-                
-                <!-- Empty Placeholder -->
-                <!-- Empty Placeholder / Add Section -->
-                <div v-if="builder.blocks.value.length === 0 && !builder.isPreview.value" class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-6 md:p-12 text-center z-50">
-                    <div class="w-20 h-20 rounded-3xl bg-muted/50 border border-border flex items-center justify-center animate-pulse">
-                        <LayoutPanelTop class="w-10 h-10 opacity-20" />
-                    </div>
-                    <div class="space-y-1 w-full max-w-sm">
-                        <h3 class="text-lg font-bold text-foreground">Start Building</h3>
-                        <p class="text-sm text-muted-foreground mb-4">Add a container section to start your layout.</p>
-                        <Button @click="addSection" size="lg" class="gap-2 shadow-lg">
-                            <Plus class="w-4 h-4" />
-                            Add Section
-                        </Button>
-                    </div>
-                </div>
-                
-                <!-- Add Section at Bottom -->
-                <div v-else-if="!builder.isPreview.value" class="py-8 flex justify-center">
-                     <Button variant="outline" size="lg" class="gap-2 border-dashed border-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/5 transition-all" @click="addSection">
-                        <Plus class="w-5 h-5" />
-                        Add Section
-                    </Button>
-                </div>
-            </div>
-
-            
-            <!-- Global Undo/Redo/History (Coming Soon) -->
-
-            <div class="h-20 w-full shrink-0 bg-transparent"></div>
+      <!-- Main Content Area -->
+      <main class="main-content flex-1 w-full flex flex-col">
+        <!-- Empty State -->
+        <div v-if="blocks.length === 0" class="canvas-empty flex-1">
+          <div class="canvas-empty__content">
+            <p class="canvas-empty__text">{{ $t('builder.canvas.empty', 'Start your page by adding a section.') }}</p>
+            <button class="canvas-empty__btn" @click="addSection">
+              <component :is="icons.Plus" :size="16" />
+              {{ $t('builder.actions.addSection', 'Add New Section') }}
+            </button>
+          </div>
         </div>
 
-        <BackToTop 
-            :show="showBackToTop" 
-            positionClass="bottom-6 right-6"
-            @click="scrollToTop" 
-        />
-    </div>
+        <!-- Modules -->
+        <draggable
+          v-else
+          v-model="blocks"
+          item-key="id"
+          group="section"
+          class="canvas-blocks flex-1"
+          ghost-class="ghost-section"
+        >
+          <template #item="{ element: block, index }">
+            <ModuleWrapper
+              :module="block"
+              :index="index"
+            />
+          </template>
+        </draggable>
+      </main>
+
+      <!-- Footer Preview -->
+      <div class="mt-auto relative z-10">
+        <ThemePageResolver page="components/Footer" />
+      </div>
+    </template>
+  </div>
 </template>
 
 <script setup>
-import { inject, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import draggable from 'vuedraggable';
-import { 
-    Smartphone, Tablet, Monitor, GripVertical, Copy, Trash2, Plus, MousePointer2, PanelLeftOpen, LayoutPanelTop 
-} from 'lucide-vue-next';
-import Button from '@/components/ui/button.vue';
-import BlockRenderer from '../blocks/BlockRenderer.vue';
-import BlockWrapper from './BlockWrapper.vue';
-import BackToTop from '@/components/ui/back-to-top.vue';
-import { useScrollToTop } from '@/composables/useScrollToTop';
-import { ref } from 'vue';
-import { blockRegistry } from '../BlockRegistry';
-import { generateUUID } from '../utils';
-import ThemePageResolver from '@/components/ThemePageResolver.vue';
+import { computed, inject, watch, onMounted } from 'vue'
+import { Plus } from 'lucide-vue-next'
+import draggable from 'vuedraggable'
+import ModuleWrapper from './ModuleWrapper.vue'
+import CanvasGridView from './CanvasGridView.vue'
+import AddModuleButton from './AddModuleButton.vue'
+import ThemePageResolver from '@/components/ThemePageResolver.vue'
 
-const props = defineProps({
-    context: {
-        type: Object,
-        default: () => ({})
+const icons = { Plus }
+
+// Inject builder
+const builder = inject('builder')
+
+// Computed
+const blocks = computed({
+  get: () => builder?.blocks || [],
+  set: (val) => { if (builder) builder.blocks = val }
+})
+const wireframeMode = computed(() => builder?.wireframeMode || false)
+const gridViewMode = computed(() => builder?.gridViewMode || false)
+const activeTheme = computed(() => builder?.activeTheme || 'janari')
+
+// Theme Style Injection
+const hexToHsl = (hex) => {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return null
+  let r = 0, g = 0, b = 0
+  if (hex.length === 4) {
+    r = parseInt('0x' + hex[1] + hex[1])
+    g = parseInt('0x' + hex[2] + hex[2])
+    b = parseInt('0x' + hex[3] + hex[3])
+  } else if (hex.length === 7) {
+    r = parseInt('0x' + hex[1] + hex[2])
+    g = parseInt('0x' + hex[3] + hex[4])
+    b = parseInt('0x' + hex[5] + hex[6])
+  }
+  r /= 255; g /= 255; b /= 255
+  const cmin = Math.min(r, g, b), cmax = Math.max(r, g, b), delta = cmax - cmin
+  let h = 0, s = 0, l = 0
+  if (delta === 0) h = 0
+  else if (cmax === r) h = ((g - b) / delta) % 6
+  else if (cmax === g) h = (b - r) / delta + 2
+  else h = (r - g) / delta + 4
+  h = Math.round(h * 60)
+  if (h < 0) h += 360
+  l = (cmax + cmin) / 2
+  s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
+  s = +(s * 100).toFixed(1); l = +(l * 100).toFixed(1)
+  return `${h} ${s}% ${l}%`
+}
+
+const injectThemeStyles = () => {
+    if (!builder?.themeData) return
+
+    const variables = []
+    const builderOverrides = []
+    const settings = builder.themeSettings || {}
+    const manifest = builder.themeData.manifest || {}
+    const themeSlug = builder.activeTheme || 'janari'
+
+    if (manifest.settings_schema) {
+        Object.keys(manifest.settings_schema).forEach(key => {
+            const schema = manifest.settings_schema[key]
+            const value = settings[key] !== undefined ? settings[key] : schema.default
+            
+            if (value === undefined || value === null) return
+
+            const cssKey = '--theme-' + key.replace(/_/g, '-')
+            
+            if (schema.type === 'color') {
+                variables.push(`${cssKey}: ${value};`)
+                const hslValue = hexToHsl(value)
+                if (hslValue) {
+                    variables.push(`${cssKey}-hsl: ${hslValue};`)
+                    
+                    // Map to Shadcn/Tailwind standard variable names if they match
+                    if (key === 'color_primary' || key === 'primary_color') {
+                        variables.push(`--primary: ${hslValue};`)
+                        builderOverrides.push(`--builder-section: ${value};`)
+                    }
+                    if (key === 'color_background' || key === 'background_color') {
+                        variables.push(`--background: ${hslValue};`)
+                    }
+                }
+            } else if (schema.type === 'font' || schema.type === 'typography' || schema.type === 'select') {
+                const fontValue = String(value).includes(' ') ? `"${value}"` : value
+                variables.push(`${cssKey}: ${fontValue};`)
+            } else {
+                variables.push(`${cssKey}: ${value};`)
+            }
+        })
     }
-});
 
-const builder = inject('builder');
-const { t } = useI18n();
-
-const scrollContainer = ref(null);
-const { showBackToTop, handleScroll, scrollToTop } = useScrollToTop(scrollContainer);
-
-const canvasWidthClass = computed(() => {
-    switch (builder.deviceMode.value) {
-        case 'mobile': return 'max-w-[375px]';
-        case 'tablet': return 'max-w-[768px]';
-        default: return builder.globalSettings.value.container_max_width || 'max-w-full';
+    // Default fallbacks for common Tailwind variables if not set
+    if (!variables.some(v => v.startsWith('--primary:'))) {
+        variables.push('--primary: 221.2 83.2% 53.3%;') // Default blue
     }
-});
 
-const editBlock = (index) => {
-    builder.editingIndex.value = index;
-    builder.activeTab.value = 'content';
-};
+    // Inject CSS variables scoped to .canvas.theme-[slug]
+    const styleId = `builder-theme-styles`
+    let styleTag = document.getElementById(styleId)
+    if (!styleTag) {
+        styleTag = document.createElement('style')
+        styleTag.id = styleId
+        document.head.appendChild(styleTag)
+    }
+
+    const cssContent = `
+        .canvas.theme-${themeSlug} {
+            ${variables.join('\n            ')}
+            ${builderOverrides.join('\n            ')}
+        }
+        /* Debug indicator if theme is active */
+        .canvas.theme-${themeSlug}::after {
+            content: "Theme: ${themeSlug}";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: rgba(0,0,0,0.2);
+            pointer-events: none;
+            z-index: 1000;
+        }
+    `
+    styleTag.textContent = cssContent
+
+    // Inject Theme Assets (CSS Files)
+    if (builder.themeData.assets && builder.themeData.assets.css) {
+        builder.themeData.assets.css.forEach((cssFile, index) => {
+            const linkId = `builder-theme-asset-${index}`
+            if (!document.getElementById(linkId)) {
+                const link = document.createElement('link')
+                link.id = linkId
+                link.rel = 'stylesheet'
+                link.href = cssFile.startsWith('http') || cssFile.startsWith('/') ? cssFile : `/${cssFile}`
+                document.head.appendChild(link)
+            }
+        })
+    }
+}
+
+// Watchers
+watch(() => builder?.themeData, (data) => {
+    if (data) {
+        console.log('[Builder] Theme data loaded:', data.slug)
+        injectThemeStyles()
+    }
+}, { immediate: true })
+
+watch(() => builder?.themeSettings, injectThemeStyles, { deep: true })
+watch(() => builder?.activeTheme, injectThemeStyles)
+
+// Methods
+const clearSelection = () => {
+  builder?.clearSelection()
+}
 
 const addSection = () => {
-    const sectionDef = blockRegistry.get('section');
-    if (!sectionDef) return;
+  builder?.insertModule('section')
+}
 
-    const newBlock = {
-        id: generateUUID(),
-        type: 'section',
-        settings: JSON.parse(JSON.stringify(sectionDef.defaultSettings))
-    };
-    
-    builder.blocks.value.push(newBlock);
-    builder.takeSnapshot();
-    
-    // Auto-select the new block
-    builder.activeBlockId.value = newBlock.id;
-    builder.editingIndex.value = builder.blocks.value.length - 1;
-    builder.activeTab.value = 'content';
-};
-
-const onWrapBlock = (index) => {
-    const original = builder.blocks.value[index];
-    const container = {
-        id: generateUUID(),
-        type: 'container',
-        settings: {
-            direction: 'flex-col',
-            justify: 'justify-start',
-            align: 'items-start',
-            gap: 'gap-4',
-            padding: 'p-4',
-            blocks: [original]
-        }
-    };
-    builder.blocks.value.splice(index, 1, container);
-    builder.takeSnapshot();
-};
-
-const onSplitBlock = (index) => {
-    const original = builder.blocks.value[index];
-    // Create a Columns block with proper grid distribution
-    const columns = {
-        id: generateUUID(),
-        type: 'columns',
-        settings: {
-            layout: '1-1',
-            columns: [
-                { blocks: [original] },
-                { blocks: [] }
-            ],
-            customWidths: [50, 50],
-            padding: 'py-0',
-            width: 'max-w-full',
-            bgColor: 'transparent',
-            radius: 'rounded-none'
-        }
-    };
-    builder.blocks.value.splice(index, 1, columns);
-    builder.takeSnapshot();
-};
-
-// Compute theme overrides for the canvas
-const themeStyles = computed(() => {
-    if (!builder.activeTheme?.value?.manifest?.settings_schema) return {};
-    
-    const styles = {};
-    const settings = builder.activeTheme.value.manifest.settings_schema;
-    
-    Object.keys(settings).forEach(key => {
-        const setting = settings[key];
-        const cssKey = key.replace(/_/g, '-');
-        
-        // Colors mapping to Shadcn variables
-        if (setting.type === 'color') {
-            styles[`--${cssKey}`] = `var(--theme-${cssKey}-hsl)`;
-        }
-        
-        // Typography mapping
-        if (setting.type === 'font') {
-            styles[`--font-${cssKey}`] = `var(--theme-font-${cssKey})`;
-        }
-    });
-    
-    return styles;
-});
+// Initialize default section if empty
+onMounted(() => {
+    if (builder && builder.blocks.length === 0) {
+        addSection()
+    }
+    if (builder?.themeData) {
+        injectThemeStyles()
+    }
+})
 </script>
 
 <style scoped>
-.bg-dot-pattern {
-    background-image: radial-gradient(hsl(var(--foreground) / 0.05) 1px, transparent 1px);
-    background-size: 30px 30px;
-}
-.custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.15);
-    border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.3);
+.canvas {
+  min-height: 100%;
+  padding: var(--spacing-lg);
+
+  /* Force Light Mode Context for Content */
+  --builder-text-primary: #0f172a;
+  --builder-text-secondary: #475569;
+  --builder-text-muted: #64748b;
+  --builder-border: #e2e8f0;
+
+  /* Apply defaults or theme overrides */
+  background-color: var(--theme-color-background, #ffffff);
+  color: var(--theme-color-text, var(--builder-text-primary));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Ghost element styling for drag-drop */
-.block-ghost {
-    opacity: 0.4;
-    background: hsl(var(--primary) / 0.1) !important;
-    border: 2px dashed hsl(var(--primary)) !important;
-    border-radius: 8px;
+.canvas--wireframe {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.05) 10px,
+    rgba(0,0,0,0.05) 20px
+  );
+}
+
+.canvas--grid {
+  /* Grid View Styles - mostly handled in ModuleWrapper but adding container styles here */
+  background-color: #f8fafc;
+}
+
+/* Empty State */
+.canvas-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  border: 2px dashed var(--builder-border);
+  border-radius: var(--border-radius-md);
+  background: rgba(0,0,0,0.02);
+}
+
+.canvas-empty__content {
+  text-align: center;
+}
+
+.canvas-empty__icon {
+  color: var(--builder-text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+.canvas-empty__text {
+  color: var(--builder-text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+.canvas-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--builder-accent);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.canvas-empty__btn:hover {
+  background: var(--builder-accent-hover);
 }
 </style>

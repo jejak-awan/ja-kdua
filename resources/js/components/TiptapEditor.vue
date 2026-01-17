@@ -1,7 +1,7 @@
 <template>
-    <Card class="overflow-hidden relative flex flex-col max-h-[calc(100vh-12rem)]" @contextmenu="handleContextMenu">
+    <div class="relative flex flex-col bg-card border border-border rounded-xl shadow-sm overflow-hidden" @contextmenu="handleContextMenu">
         <!-- Toolbar Component (Sticky) -->
-        <div class="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+        <div class="sticky top-0 z-50 bg-card/80 backdrop-blur-sm border-b border-border/50">
             <Toolbar 
                 v-if="editor" 
                 :editor="editor" 
@@ -15,19 +15,19 @@
         </div>
 
         <!-- Scrollable Content Area -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto max-h-[calc(100vh-16rem)] min-h-[500px]">
             <!-- Editor Content (WYSIWYG View) -->
             <editor-content 
                 v-show="!showHtmlView"
                 :editor="editor" 
-                class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-card-foreground bg-card" 
+                class="prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none p-8 text-card-foreground" 
             />
 
             <!-- HTML Source View -->
             <div v-show="showHtmlView" class="html-view">
                 <textarea
                     v-model="htmlContent"
-                    class="w-full min-h-[400px] p-4 font-mono text-sm bg-card text-card-foreground border-none resize-y focus:outline-none focus:ring-0"
+                    class="w-full min-h-[500px] p-8 font-mono text-sm bg-card text-card-foreground border-none resize-y focus:outline-none focus:ring-0"
                     placeholder="<p>Your HTML code here...</p>"
                     @blur="applyHtmlChanges"
                 ></textarea>
@@ -70,7 +70,7 @@
             v-model:open="showTableDialog"
             @insert="insertTable"
         />
-    </Card>
+    </div>
 </template>
 
 <script setup>

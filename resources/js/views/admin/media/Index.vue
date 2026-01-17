@@ -471,6 +471,12 @@
                                         image-class="w-full h-full object-cover transition-transform group-hover:scale-105"
                                         @error="handleImageError($event)"
                                     />
+                                    <div v-else-if="media.mime_type?.startsWith('video/')" class="relative w-full h-full flex items-center justify-center bg-muted/50">
+                                        <VideoIcon class="w-12 h-12 text-muted-foreground" />
+                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                            {{ media.mime_type.split('/')[1]?.toUpperCase() }}
+                                        </div>
+                                    </div>
                                     <div v-else class="text-muted-foreground">
                                         <FileIcon class="w-12 h-12" />
                                     </div>
@@ -636,6 +642,7 @@
                                                     image-class="w-full h-full object-cover rounded shadow-sm"
                                                     @error="handleImageError($event)"
                                                 />
+                                                <VideoIcon v-else-if="media.mime_type?.startsWith('video/')" class="w-8 h-8 text-muted-foreground/50" />
                                                 <FileIcon v-else class="w-8 h-8 text-muted-foreground/50" />
                                             </div>
                                         </td>

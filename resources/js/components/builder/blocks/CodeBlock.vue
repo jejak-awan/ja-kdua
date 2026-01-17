@@ -1,104 +1,77 @@
+<template>
+  <div class="code-block" :style="wrapperStyles">
+    <div class="code-header" :class="themeClass">
+      <span class="code-language">{{ language.toUpperCase() }}</span>
+      <button class="code-copy" @click="copyCode">
+        <Copy class="copy-icon" />
+      </button>
+    </div>
+    <pre class="code-content" :class="themeClass" :style="codeStyles"><code><template v-for="(line, index) in codeLines" :key="index"><span v-if="showLineNumbers" class="line-number">{{ index + 1 }}</span>{{ line }}
+</template></code></pre>
+  </div>
+</template>
+
 <script setup>
-import { computed } from 'vue';
-import { Copy, Check } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, inject } from 'vue'
+import { Copy } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-defineOptions({
-    inheritAttrs: false
-});
+const props = defineProps({ module: { type: Object, required: true } })
 
-const props = defineProps({
-    code: { type: String, default: '' },
-    language: { type: String, default: 'javascript' },
-    show_line_numbers: { type: Boolean, default: true },
-    show_copy_button: { type: Boolean, default: true },
-    window_chrome: { type: Boolean, default: false },
-    theme: { type: String, default: 'dark' },
-    max_height: { type: String, default: '' },
-    padding: { type: String, default: 'py-6' }
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const copied = ref(false);
+const language = computed(() => settings.value.language || 'html')
+const showLineNumbers = computed(() => getResponsiveValue(settings.value, 'showLineNumbers', device.value) !== false)
+const themeClass = computed(() => `code--${getResponsiveValue(settings.value, 'theme', device.value) || 'dark'}`)
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.padding].filter(Boolean);
-});
+const codeLines = computed(() => {
+  const code = settings.value.code || ''
+  return code.split('\n')
+})
 
-const themeClasses = computed(() => {
-    const themes = {
-        dark: 'bg-zinc-900 text-zinc-100',
-        light: 'bg-zinc-100 text-zinc-900',
-        github: 'bg-card text-card-foreground border'
-    };
-    return themes[props.theme] || themes.dark;
-});
+const copyCode = () => {
+  navigator.clipboard?.writeText(settings.value.code || '')
+}
 
-const lines = computed(() => {
-    return (props.code || '// Your code here').split('\n');
-});
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%', overflow: 'hidden' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
 
-const copyCode = async () => {
-    try {
-        await navigator.clipboard.writeText(props.code || '');
-        copied.value = true;
-        setTimeout(() => { copied.value = false; }, 2000);
-    } catch (e) {
-        console.warn('Failed to copy code');
-    }
-};
+const codeStyles = computed(() => getTypographyStyles(settings.value, 'code_', device.value))
 </script>
 
-<template>
-    <div :class="containerClasses">
-        <div 
-            :class="['relative rounded-xl overflow-hidden font-mono text-sm', themeClasses]"
-            :style="{ maxHeight: max_height || 'auto' }"
-        >
-            <!-- Header -->
-            <div 
-                class="flex items-center justify-between px-4 py-3 border-b border-white/10"
-                :class="window_chrome ? 'bg-black/20' : ''"
-            >
-                <div v-if="window_chrome" class="flex items-center gap-2 mr-4">
-                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                
-                <span class="text-xs opacity-60 font-medium">{{ language }}</span>
-                
-                <div class="flex-1"></div>
-
-                <button 
-                    v-if="show_copy_button"
-                    @click="copyCode"
-                    class="flex items-center gap-1.5 text-xs opacity-60 hover:opacity-100 transition-opacity ml-4"
-                >
-                    <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-400" />
-                    <Copy v-else class="w-3.5 h-3.5" />
-                    <span>{{ copied ? 'Copied!' : 'Copy' }}</span>
-                </button>
-            </div>
-            
-            <!-- Code -->
-            <div 
-                class="overflow-auto p-4"
-                :style="{ maxHeight: max_height ? `calc(${max_height} - 40px)` : 'auto' }"
-            >
-                <table class="w-full">
-                    <tbody>
-                        <tr v-for="(line, index) in lines" :key="index" class="leading-relaxed">
-                            <td 
-                                v-if="show_line_numbers" 
-                                class="pr-4 text-right select-none opacity-40 w-8"
-                            >
-                                {{ index + 1 }}
-                            </td>
-                            <td class="whitespace-pre">{{ line }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</template>
+<style scoped>
+.code-block { width: 100%; }
+.code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; }
+.code-header.code--dark { background: #1e1e1e; color: #888; }
+.code-header.code--light { background: #f5f5f5; color: #666; }
+.code-language { font-size: 12px; font-weight: 600; }
+.code-copy { background: none; border: none; cursor: pointer; padding: 4px; opacity: 0.6; color: inherit; }
+.code-copy:hover { opacity: 1; }
+.copy-icon { width: 16px; height: 16px; }
+.code-content { margin: 0; padding: 16px; overflow-x: auto; }
+.code-content.code--dark { background: #1e1e1e; color: #d4d4d4; }
+.code-content.code--light { background: #f8f8f8; color: #333; }
+.line-number { display: inline-block; width: 32px; color: #666; text-align: right; padding-right: 16px; user-select: none; }
+</style>

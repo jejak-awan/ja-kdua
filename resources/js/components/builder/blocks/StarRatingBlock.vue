@@ -1,82 +1,79 @@
+<template>
+  <div class="star-rating-block" :style="wrapperStyles">
+    <div class="stars-container">
+      <Star v-for="i in maxRatingValue" :key="i" class="star" :class="getStarClass(i)" :style="starStyles(i)" />
+    </div>
+    <span v-if="showNumberValue" class="rating-number" :style="textStyles">{{ ratingValue.toFixed(1) }}</span>
+    <span v-if="showReviewCountValue" class="review-count" :style="reviewStyles">({{ reviewCountValue }} {{ reviewTextValue }})</span>
+  </div>
+</template>
+
 <script setup>
-import { computed } from 'vue';
-import { Star } from 'lucide-vue-next';
+import { computed, inject } from 'vue'
+import { Star } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-defineOptions({
-    inheritAttrs: false
-});
+const props = defineProps({ module: { type: Object, required: true } })
 
-const props = defineProps({
-    rating: { type: Number, default: 4 },
-    max: { type: Number, default: 5 },
-    size: { type: String, default: 'medium' },
-    color: { type: String, default: '' },
-    show_value: { type: Boolean, default: true },
-    label: { type: String, default: '' },
-    alignment: { type: String, default: 'center' },
-    padding: { type: String, default: 'py-4' }
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const sizeClass = computed(() => {
-    const sizes = {
-        small: 'w-4 h-4',
-        medium: 'w-6 h-6',
-        large: 'w-8 h-8'
-    };
-    return sizes[props.size] || sizes.medium;
-});
+const ratingValue = computed(() => parseFloat(getResponsiveValue(settings.value, 'rating', device.value)) || 4.5)
+const maxRatingValue = computed(() => parseInt(getResponsiveValue(settings.value, 'maxRating', device.value)) || 5)
+const showNumberValue = computed(() => getResponsiveValue(settings.value, 'showNumber', device.value) !== false)
+const showReviewCountValue = computed(() => getResponsiveValue(settings.value, 'showReviewCount', device.value) !== false)
+const reviewCountValue = computed(() => getResponsiveValue(settings.value, 'reviewCount', device.value) || 0)
+const reviewTextValue = computed(() => getResponsiveValue(settings.value, 'reviewText', device.value) || 'reviews')
 
-const starColor = computed(() => props.color || 'hsl(var(--primary))');
+const getStarClass = (i) => {
+  if (i <= Math.floor(ratingValue.value)) return 'star--full'
+  if (i === Math.ceil(ratingValue.value) && ratingValue.value % 1 !== 0) return 'star--half'
+  return 'star--empty'
+}
 
-const stars = computed(() => {
-    return Array.from({ length: props.max || 5 }, (_, i) => ({
-        index: i,
-        filled: i < Math.floor(props.rating || 0)
-    }));
-});
+const wrapperStyles = computed(() => {
+  const styles = { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
 
-const alignmentClass = computed(() => {
-    if (props.alignment === 'left') return 'text-left';
-    if (props.alignment === 'right') return 'text-right';
-    return 'text-center';
-});
+const starStyles = (i) => {
+  const size = getResponsiveValue(settings.value, 'starSize', device.value) || 24
+  const color = getResponsiveValue(settings.value, 'starColor', device.value) || '#f59e0b'
+  const emptyColor = getResponsiveValue(settings.value, 'emptyStarColor', device.value) || '#e0e0e0'
+  
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    fill: i <= ratingValue.value ? color : 'transparent',
+    color: i <= ratingValue.value ? color : emptyColor
+  }
+}
 
-const itemsAlignClass = computed(() => {
-    if (props.alignment === 'left') return 'items-start';
-    if (props.alignment === 'right') return 'items-end';
-    return 'items-center';
-});
-
-const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.padding || '', alignmentClass.value].filter(Boolean);
-});
+const textStyles = computed(() => getTypographyStyles(settings.value, 'text_', device.value))
+const reviewStyles = computed(() => getTypographyStyles(settings.value, 'review_', device.value))
 </script>
 
-<template>
-    <div :class="containerClasses">
-        <div :class="['inline-flex flex-col gap-2', itemsAlignClass]">
-            <!-- Stars -->
-            <div class="flex items-center gap-1">
-                <Star 
-                    v-for="star in stars" 
-                    :key="star.index"
-                    :class="sizeClass"
-                    :style="{ color: star.filled ? starColor : 'hsl(var(--muted))' }"
-                    :fill="star.filled ? starColor : 'none'"
-                />
-                
-                <!-- Value -->
-                <span 
-                    v-if="show_value" 
-                    class="ml-2 font-bold tabular-nums"
-                    :style="{ color: starColor }"
-                >
-                    {{ (rating || 0).toFixed(1) }}
-                </span>
-            </div>
-            
-            <!-- Label -->
-            <p v-if="label" class="text-sm text-muted-foreground">{{ label }}</p>
-        </div>
-    </div>
-</template>
+<style scoped>
+.star-rating-block { width: 100%; }
+.stars-container { display: flex; gap: 2px; }
+.star--half { clip-path: inset(0 50% 0 0); }
+</style>

@@ -1,430 +1,433 @@
 <template>
-    <div class="space-y-3">
-        <!-- Actions (Mobile/Tablet only - usually sticky on desktop) -->
-        <div class="lg:hidden flex items-center gap-2 mb-4">
+    <div class="space-y-4">
+        <!-- Actions (Mobile/Tablet only) -->
+        <div class="lg:hidden flex items-center gap-2 mb-4 px-1">
             <slot name="actions"></slot>
         </div>
 
-        <!-- Publish Status -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.publishing = !sections.publishing"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500">
-                        <FileCheck class="w-3.5 h-3.5" />
+        <!-- Main Sidebar Container - Unified Clean Look -->
+        <div class="bg-card border border-border shadow-sm rounded-xl overflow-hidden flex flex-col">
+            <!-- Publish Status Group -->
+            <div class="sidebar-section">
+                <button 
+                    type="button"
+                    @click="sections.publishing = !sections.publishing"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500">
+                            <FileCheck class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</span>
                     </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.publishing') }}</span>
-                </div>
-                <ChevronDown 
-                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                    :class="{ 'rotate-180': sections.publishing }"
-                />
-            </button>
-            <div v-show="sections.publishing" class="border-t border-border p-4 space-y-4">
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.status') }}</Label>
-                    <Select
-                        :model-value="modelValue.status"
-                        @update:model-value="(val) => updateField('status', val)"
-                    >
-                        <SelectTrigger class="w-full">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
-                            <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
-                            <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div v-if="modelValue.status === 'published'" class="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.publishDate') }}</Label>
-                    <Input
-                        :model-value="modelValue.published_at"
-                        @update:model-value="(val) => updateField('published_at', val)"
-                        type="datetime-local"
-                        class="text-xs"
-                    />
-                </div>
-
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.slug') }}</Label>
-                    <div class="flex items-center gap-1">
-                         <span class="text-[10px] text-muted-foreground font-mono select-none">/</span>
-                         <Input
-                            :model-value="modelValue.slug"
-                            @update:model-value="(val) => updateField('slug', val)"
-                            class="text-xs font-mono"
-                            :placeholder="$t('features.content.form.slugPlaceholder')"
-                        />
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.type') }}</Label>
-                     <Select
-                        :model-value="modelValue.type"
-                        @update:model-value="(val) => updateField('type', val)"
-                    >
-                        <SelectTrigger class="w-full capitalize">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="post">Post</SelectItem>
-                            <SelectItem value="page">Page</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div class="flex items-center justify-between border rounded-md p-3">
-                    <div class="space-y-0.5">
-                        <Label class="text-xs font-medium">{{ $t('features.content.form.featured') }}</Label>
-                        <p class="text-[10px] text-muted-foreground">{{ $t('features.content.form.featuredDesc') }}</p>
-                    </div>
-                    <Switch
-                        :checked="!!modelValue.is_featured"
-                        @update:checked="(val) => updateField('is_featured', val)"
-                    />
-                </div>
-            </div>
-        </div>
-        
-        <!-- Menu Settings -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.menu = !sections.menu"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
-                        <MenuSquare class="w-3.5 h-3.5" />
-                    </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.menus.title') }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                     <Badge v-if="modelValue.menu_item?.add_to_menu" variant="secondary" class="h-5 text-[10px] px-1.5 bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
-                        Active
-                    </Badge>
                     <ChevronDown 
                         class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                        :class="{ 'rotate-180': sections.menu }"
+                        :class="{ 'rotate-180': sections.publishing }"
                     />
-                </div>
-            </button>
-            <div v-show="sections.menu" class="border-t border-border p-4 space-y-4">
-                <div class="flex items-center justify-between border rounded-md p-3">
-                    <div class="space-y-0.5">
-                        <Label class="text-xs font-medium">{{ $t('features.menus.actions.addToMenu') }}</Label>
-                        <p class="text-[10px] text-muted-foreground">Add this content to a menu</p>
-                    </div>
-                    <Switch
-                        :checked="!!modelValue.menu_item?.add_to_menu"
-                        @update:checked="(val) => updateMenuField('add_to_menu', val)"
-                    />
-                </div>
-
-                <div v-if="modelValue.menu_item?.add_to_menu" class="space-y-4 animate-in fade-in slide-in-from-top-1">
+                </button>
+                <div v-show="sections.publishing" class="border-t border-border/5 p-5 space-y-5">
                     <div class="space-y-1.5">
-                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.selectMenu') }}</Label>
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.status') }}</Label>
                         <Select
-                            :model-value="modelValue.menu_item.menu_id ? modelValue.menu_item.menu_id.toString() : ''"
-                            @update:model-value="handleMenuChange"
+                            :model-value="modelValue.status"
+                            @update:model-value="(val) => updateField('status', val)"
                         >
-                            <SelectTrigger class="w-full">
-                                <SelectValue :placeholder="$t('features.menus.form.selectMenu')" />
+                            <SelectTrigger class="w-full h-9">
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="menu in menus" :key="menu.id" :value="menu.id.toString()">
-                                    {{ menu.name }}
-                                </SelectItem>
+                                <SelectItem value="draft">{{ $t('features.content.status.draft') }}</SelectItem>
+                                <SelectItem value="published">{{ $t('features.content.status.published') }}</SelectItem>
+                                <SelectItem value="archived">{{ $t('features.content.status.archived') }}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div class="space-y-1.5">
-                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.parentItem') }}</Label>
-                        <Select
-                            :model-value="modelValue.menu_item.parent_id ? modelValue.menu_item.parent_id.toString() : 'root'"
-                            @update:model-value="(val) => updateMenuField('parent_id', val === 'root' ? null : parseInt(val))"
-                            :disabled="loadingParentItems"
-                        >
-                            <SelectTrigger class="w-full">
-                                <SelectValue :placeholder="loadingParentItems ? 'Loading...' : $t('features.menus.form.rootItem')" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="root">{{ $t('features.menus.form.rootItem') }}</SelectItem>
-                                <SelectItem v-for="item in menuParentItems" :key="item.id" :value="item.id.toString()">
-                                    {{ '&nbsp;'.repeat(item.depth * 2) + (item.title || item.label) }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.label') }}</Label>
+                    <div v-if="modelValue.status === 'published'" class="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.publishDate') }}</Label>
                         <Input
-                            :model-value="modelValue.menu_item.title"
-                            @update:model-value="(val) => updateMenuField('title', val)"
-                            class="text-xs"
-                            :placeholder="$t('features.menus.form.labelPlaceholder')"
+                            :model-value="modelValue.published_at"
+                            @update:model-value="(val) => updateField('published_at', val)"
+                            type="datetime-local"
+                            class="text-xs h-9"
                         />
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Taxonomy -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.taxonomy = !sections.taxonomy"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-blue-500/10 text-blue-500">
-                        <Tags class="w-3.5 h-3.5" />
-                    </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.taxonomy') }}</span>
-                </div>
-                <ChevronDown 
-                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                    :class="{ 'rotate-180': sections.taxonomy }"
-                />
-            </button>
-            <div v-show="sections.taxonomy" class="border-t border-border p-4 space-y-4">
-                <!-- Category -->
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.category') }}</Label>
-                    <Select
-                        :model-value="modelValue.category_id ? modelValue.category_id.toString() : null"
-                        @update:model-value="(val) => updateField('category_id', val ? parseInt(val) : null)"
-                    >
-                        <SelectTrigger class="w-full">
-                            <SelectValue :placeholder="$t('features.content.form.selectCategory')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem v-for="category in categories" :key="category.id" :value="category.id.toString()">
-                                {{ category.name }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <!-- Tags -->
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.tags') }}</Label>
-                    <div class="flex flex-wrap gap-2 mb-2">
-                        <Badge
-                            v-for="tag in selectedTags"
-                            :key="tag.id || tag.name"
-                            variant="secondary"
-                            class="pl-2 pr-1 py-0.5 gap-1 text-xs"
-                        >
-                            {{ tag.name }}
-                            <Button variant="ghost" size="icon" class="h-3 w-3 p-0 hover:text-destructive" @click="removeTag(tag.id || tag.name)">
-                                <X class="w-2 h-2" />
-                            </Button>
-                        </Badge>
-                    </div>
-                    <!-- Combobox-style tag input -->
-                    <div class="relative">
-                        <Input 
-                            v-model="tagInput"
-                            @keydown.enter.prevent="handleTagEnter"
-                            @focus="showTagSuggestions = true"
-                            @blur="handleTagBlur"
-                            class="w-full text-xs"
-                            :placeholder="$t('features.content.form.tagInputPlaceholder')"
-                        />
-                        <!-- Suggestions dropdown -->
-                        <div 
-                            v-if="showTagSuggestions && filteredTags.length > 0"
-                            class="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-[200px] overflow-y-auto"
-                        >
-                            <div
-                                v-for="tag in filteredTags"
-                                :key="tag.id"
-                                @mousedown.prevent="selectTag(tag)"
-                                class="px-3 py-2 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-                            >
-                                {{ tag.name }}
-                            </div>
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.slug') }}</Label>
+                        <div class="flex items-center gap-1 group">
+                             <span class="text-[10px] text-muted-foreground font-mono select-none px-1">/</span>
+                             <Input
+                                :model-value="modelValue.slug"
+                                @update:model-value="(val) => updateField('slug', val)"
+                                class="text-xs font-mono h-9"
+                                :placeholder="$t('features.content.form.slugPlaceholder')"
+                            />
                         </div>
                     </div>
-                    <p class="text-[10px] text-muted-foreground/60 italic">{{ $t('features.content.form.tagInputHint') }}</p>
+
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.type') }}</Label>
+                         <Select
+                            :model-value="modelValue.type"
+                            @update:model-value="(val) => updateField('type', val)"
+                        >
+                            <SelectTrigger class="w-full h-9 capitalize">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="post">Post</SelectItem>
+                                <SelectItem value="page">Page</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div class="flex items-center justify-between border border-border/40 rounded-lg p-3 bg-muted/20">
+                        <div class="space-y-0.5">
+                            <Label class="text-xs font-medium leading-none">{{ $t('features.content.form.featured') }}</Label>
+                            <p class="text-[10px] text-muted-foreground leading-tight">{{ $t('features.content.form.featuredDesc') }}</p>
+                        </div>
+                        <Switch
+                            :checked="!!modelValue.is_featured"
+                            @update:checked="(val) => updateField('is_featured', val)"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Featured Image -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.image = !sections.image"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-purple-500/10 text-purple-500">
-                        <ImageIcon class="w-3.5 h-3.5" />
+            <!-- Menu Settings Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.menu = !sections.menu"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
+                            <MenuSquare class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.menus.title') }}</span>
                     </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.featuredImage') }}</span>
+                    <div class="flex items-center gap-2">
+                         <Badge v-if="modelValue.menu_item?.add_to_menu" variant="secondary" class="h-5 text-[10px] px-1.5 bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
+                            Active
+                        </Badge>
+                        <ChevronDown 
+                            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                            :class="{ 'rotate-180': sections.menu }"
+                        />
+                    </div>
+                </button>
+                <div v-show="sections.menu" class="border-t border-border/5 p-5 space-y-5">
+                    <div class="flex items-center justify-between border border-border/40 rounded-lg p-3 bg-muted/20">
+                        <div class="space-y-0.5">
+                            <Label class="text-xs font-medium leading-none">{{ $t('features.menus.actions.addToMenu') }}</Label>
+                            <p class="text-[10px] text-muted-foreground leading-tight">Add this content to a menu</p>
+                        </div>
+                        <Switch
+                            :checked="!!modelValue.menu_item?.add_to_menu"
+                            @update:checked="(val) => updateMenuField('add_to_menu', val)"
+                        />
+                    </div>
+
+                    <div v-if="modelValue.menu_item?.add_to_menu" class="space-y-4 animate-in fade-in slide-in-from-top-1">
+                        <div class="space-y-1.5">
+                            <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.selectMenu') }}</Label>
+                            <Select
+                                :model-value="modelValue.menu_item.menu_id ? modelValue.menu_item.menu_id.toString() : ''"
+                                @update:model-value="handleMenuChange"
+                            >
+                                <SelectTrigger class="w-full h-9">
+                                    <SelectValue :placeholder="$t('features.menus.form.selectMenu')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="menu in menus" :key="menu.id" :value="menu.id.toString()">
+                                        {{ menu.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.parentItem') }}</Label>
+                            <Select
+                                :model-value="modelValue.menu_item.parent_id ? modelValue.menu_item.parent_id.toString() : 'root'"
+                                @update:model-value="(val) => updateMenuField('parent_id', val === 'root' ? null : parseInt(val))"
+                                :disabled="loadingParentItems"
+                            >
+                                <SelectTrigger class="w-full h-9">
+                                    <SelectValue :placeholder="loadingParentItems ? 'Loading...' : $t('features.menus.form.rootItem')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="root">{{ $t('features.menus.form.rootItem') }}</SelectItem>
+                                    <SelectItem v-for="item in menuParentItems" :key="item.id" :value="item.id.toString()">
+                                        {{ '&nbsp;'.repeat(item.depth * 2) + (item.title || item.label) }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.menus.form.label') }}</Label>
+                            <Input
+                                :model-value="modelValue.menu_item.title"
+                                @update:model-value="(val) => updateMenuField('title', val)"
+                                class="text-xs h-9"
+                                :placeholder="$t('features.menus.form.labelPlaceholder')"
+                            />
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div v-if="modelValue.featured_image" class="w-6 h-6 rounded overflow-hidden border border-border">
-                        <img :src="modelValue.featured_image" class="w-full h-full object-cover" />
+            </div>
+
+            <!-- Taxonomy Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.taxonomy = !sections.taxonomy"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-blue-500/10 text-blue-500">
+                            <Tags class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.taxonomy') }}</span>
                     </div>
                     <ChevronDown 
                         class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                        :class="{ 'rotate-180': sections.image }"
+                        :class="{ 'rotate-180': sections.taxonomy }"
                     />
-                </div>
-            </button>
-            <div v-show="sections.image" class="border-t border-border p-4">
-                 <FeaturedImage v-model="modelValue.featured_image" @update:modelValue="(val) => updateField('featured_image', val)" />
-            </div>
-        </div>
+                </button>
+                <div v-show="sections.taxonomy" class="border-t border-border/5 p-5 space-y-5">
+                    <!-- Category -->
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.category') }}</Label>
+                        <Select
+                            :model-value="modelValue.category_id ? modelValue.category_id.toString() : null"
+                            @update:model-value="(val) => updateField('category_id', val ? parseInt(val) : null)"
+                        >
+                            <SelectTrigger class="w-full h-9">
+                                <SelectValue :placeholder="$t('features.content.form.selectCategory')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="category in categories" :key="category.id" :value="category.id.toString()">
+                                    {{ category.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-        <!-- Excerpt -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.excerpt = !sections.excerpt"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
-                        <FileText class="w-3.5 h-3.5" />
-                    </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.excerpt') }}</span>
-                </div>
-                <ChevronDown 
-                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                    :class="{ 'rotate-180': sections.excerpt }"
-                />
-            </button>
-            <div v-show="sections.excerpt" class="border-t border-border p-4">
-                <Textarea
-                    :model-value="modelValue.excerpt"
-                    @update:model-value="(val) => updateField('excerpt', val)"
-                    rows="4"
-                    class="resize-none text-sm"
-                    :placeholder="$t('features.content.form.excerptPlaceholder')"
-                />
-            </div>
-        </div>
-
-        <!-- Discussion Settings -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.discussion = !sections.discussion"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-orange-500/10 text-orange-500">
-                        <MessageSquare class="w-3.5 h-3.5" />
-                    </div>
-                    <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.discussion') }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                     <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-orange-500/10 text-orange-500 border-orange-500/20">
-                        Disabled
-                    </Badge>
-                    <ChevronDown 
-                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                        :class="{ 'rotate-180': sections.discussion }"
-                    />
-                </div>
-            </button>
-            <div v-show="sections.discussion" class="border-t border-border p-4">
-                <div class="flex items-center justify-between border rounded-md p-3">
-                    <div class="space-y-0.5">
-                        <Label class="text-xs font-medium">{{ $t('features.content.form.allowComments') }}</Label>
-                        <p class="text-[10px] text-muted-foreground">{{ $t('features.content.form.allowCommentsDesc') }}</p>
-                    </div>
-                    <Switch
-                        :checked="!!modelValue.comment_status"
-                        @update:checked="(val) => updateField('comment_status', val)"
-                    />
-                </div>
-            </div>
-        </div>
-
-        <!-- SEO Settings -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden">
-            <button 
-                type="button"
-                @click="sections.seo = !sections.seo"
-                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
-            >
-                <div class="flex items-center gap-2">
-                    <div class="p-1.5 rounded-md bg-red-500/10 text-red-500">
-                        <Search class="w-3.5 h-3.5" />
-                    </div>
-                    <span class="text-sm font-semibold text-foreground">SEO</span>
-                </div>
-                <ChevronDown 
-                    class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-                    :class="{ 'rotate-180': sections.seo }"
-                />
-            </button>
-            <div v-show="sections.seo" class="border-t border-border p-4 space-y-4">
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaTitle') }}</Label>
-                    <Input
-                        :model-value="modelValue.meta_title"
-                        @update:model-value="(val) => updateField('meta_title', val)"
-                         class="text-xs"
-                    />
-                </div>
-                 <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaDescription') }}</Label>
-                    <Textarea
-                        :model-value="modelValue.meta_description"
-                        @update:model-value="(val) => updateField('meta_description', val)"
-                        rows="3"
-                         class="resize-none text-xs"
-                    />
-                </div>
-                 <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.metaKeywords') }}</Label>
-                    <Textarea
-                        :model-value="modelValue.meta_keywords"
-                        @update:model-value="(val) => updateField('meta_keywords', val)"
-                        rows="2"
-                         class="resize-none text-xs"
-                         :placeholder="$t('features.content.form.keywordsPlaceholder')"
-                    />
-                </div>
-                <div class="space-y-1.5">
-                    <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.ogImage') }}</Label>
-                    <MediaPicker
-                        @selected="(media) => updateField('og_image', media?.url || media)"
-                        :label="$t('features.content.form.selectOgImage')"
-                        :constraints="{
-                            allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
-                            minWidth: 1200,
-                            minHeight: 630
-                        }"
-                    >
-                         <template #trigger="{ open }">
-                            <div v-if="modelValue.og_image" class="relative group aspect-video w-full rounded-md overflow-hidden border border-border cursor-pointer" @click="open">
-                                <img :src="modelValue.og_image" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span class="text-xs text-white font-medium">{{ $t('common.actions.change') }}</span>
+                    <!-- Tags -->
+                    <div class="space-y-2">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.tags') }}</Label>
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <Badge
+                                v-for="tag in selectedTags"
+                                :key="tag.id || tag.name"
+                                variant="secondary"
+                                class="pl-2 pr-1 py-0.5 gap-1 text-[10px] font-medium bg-muted/50 border-border/20"
+                            >
+                                {{ tag.name }}
+                                <Button variant="ghost" size="icon" class="h-3 w-3 p-0 hover:text-destructive" @click="removeTag(tag.id || tag.name)">
+                                    <X class="w-2.5 h-2.5" />
+                                </Button>
+                            </Badge>
+                        </div>
+                        <!-- Combobox-style tag input -->
+                        <div class="relative">
+                            <Input 
+                                v-model="tagInput"
+                                @keydown.enter.prevent="handleTagEnter"
+                                @focus="showTagSuggestions = true"
+                                @blur="handleTagBlur"
+                                class="w-full text-xs h-9"
+                                :placeholder="$t('features.content.form.tagInputPlaceholder')"
+                            />
+                            <!-- Suggestions dropdown -->
+                            <div 
+                                v-if="showTagSuggestions && filteredTags.length > 0"
+                                class="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-[200px] overflow-y-auto"
+                            >
+                                <div
+                                    v-for="tag in filteredTags"
+                                    :key="tag.id"
+                                    @mousedown.prevent="selectTag(tag)"
+                                    class="px-3 py-2 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                                >
+                                    {{ tag.name }}
                                 </div>
                             </div>
-                            <Button v-else variant="outline" size="sm" class="w-full text-xs" @click="open">
-                                <ImageIcon class="w-3 h-3 mr-2" /> {{ $t('features.content.form.selectOgImage') }}
-                            </Button>
-                         </template>
-                    </MediaPicker>
+                        </div>
+                        <p class="text-[10px] text-muted-foreground/60 italic">{{ $t('features.content.form.tagInputHint') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Image Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.image = !sections.image"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-purple-500/10 text-purple-500">
+                            <ImageIcon class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.featuredImage') }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div v-if="modelValue.featured_image" class="w-6 h-6 rounded overflow-hidden border border-border/40">
+                            <img :src="modelValue.featured_image" class="w-full h-full object-cover" />
+                        </div>
+                        <ChevronDown 
+                            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                            :class="{ 'rotate-180': sections.image }"
+                        />
+                    </div>
+                </button>
+                <div v-show="sections.image" class="border-t border-border/5 p-5">
+                     <FeaturedImage v-model="modelValue.featured_image" @update:modelValue="(val) => updateField('featured_image', val)" />
+                </div>
+            </div>
+
+            <!-- Excerpt Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.excerpt = !sections.excerpt"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
+                            <FileText class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.excerpt') }}</span>
+                    </div>
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.excerpt }"
+                    />
+                </button>
+                <div v-show="sections.excerpt" class="border-t border-border/5 p-5">
+                    <Textarea
+                        :model-value="modelValue.excerpt"
+                        @update:model-value="(val) => updateField('excerpt', val)"
+                        rows="4"
+                        class="resize-none text-sm bg-muted/10"
+                        :placeholder="$t('features.content.form.excerptPlaceholder')"
+                    />
+                </div>
+            </div>
+
+            <!-- Discussion Settings Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.discussion = !sections.discussion"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-orange-500/10 text-orange-500">
+                            <MessageSquare class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">{{ $t('features.content.form.discussion') }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <Badge v-if="!modelValue.comment_status" variant="secondary" class="h-5 text-[10px] px-1.5 bg-orange-500/10 text-orange-500 border-orange-500/20">
+                            Disabled
+                        </Badge>
+                        <ChevronDown 
+                            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                            :class="{ 'rotate-180': sections.discussion }"
+                        />
+                    </div>
+                </button>
+                <div v-show="sections.discussion" class="border-t border-border/5 p-5">
+                    <div class="flex items-center justify-between border border-border/40 rounded-lg p-3 bg-muted/20">
+                        <div class="space-y-0.5">
+                            <Label class="text-xs font-medium leading-none">{{ $t('features.content.form.allowComments') }}</Label>
+                            <p class="text-[10px] text-muted-foreground leading-tight">{{ $t('features.content.form.allowCommentsDesc') }}</p>
+                        </div>
+                        <Switch
+                            :checked="!!modelValue.comment_status"
+                            @update:checked="(val) => updateField('comment_status', val)"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Settings Group -->
+            <div class="sidebar-section border-t border-border/10">
+                <button 
+                    type="button"
+                    @click="sections.seo = !sections.seo"
+                    class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                >
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-md bg-red-500/10 text-red-500">
+                            <Search class="w-3.5 h-3.5" />
+                        </div>
+                        <span class="text-sm font-semibold text-foreground">SEO</span>
+                    </div>
+                    <ChevronDown 
+                        class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+                        :class="{ 'rotate-180': sections.seo }"
+                    />
+                </button>
+                <div v-show="sections.seo" class="border-t border-border/5 p-5 space-y-5">
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaTitle') }}</Label>
+                        <Input
+                            :model-value="modelValue.meta_title"
+                            @update:model-value="(val) => updateField('meta_title', val)"
+                             class="text-xs h-9"
+                        />
+                    </div>
+                     <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.seo.metaDescription') }}</Label>
+                        <Textarea
+                            :model-value="modelValue.meta_description"
+                            @update:model-value="(val) => updateField('meta_description', val)"
+                            rows="3"
+                             class="resize-none text-xs bg-muted/10"
+                        />
+                    </div>
+                     <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.metaKeywords') }}</Label>
+                        <Textarea
+                            :model-value="modelValue.meta_keywords"
+                            @update:model-value="(val) => updateField('meta_keywords', val)"
+                            rows="2"
+                             class="resize-none text-xs bg-muted/10"
+                             :placeholder="$t('features.content.form.keywordsPlaceholder')"
+                        />
+                    </div>
+                    <div class="space-y-1.5">
+                        <Label class="text-xs font-medium text-muted-foreground">{{ $t('features.content.form.ogImage') }}</Label>
+                        <MediaPicker
+                            @selected="(media) => updateField('og_image', media?.url || media)"
+                            :label="$t('features.content.form.selectOgImage')"
+                            :constraints="{
+                                allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                                minWidth: 1200,
+                                minHeight: 630
+                            }"
+                        >
+                             <template #trigger="{ open }">
+                                <div v-if="modelValue.og_image" class="relative group aspect-video w-full rounded-md overflow-hidden border border-border/40 cursor-pointer" @click="open">
+                                    <img :src="modelValue.og_image" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span class="text-xs text-white font-medium">{{ $t('common.actions.change') }}</span>
+                                    </div>
+                                </div>
+                                <Button v-else variant="outline" size="sm" class="w-full text-xs h-9" @click="open">
+                                    <ImageIcon class="w-3 h-3 mr-2" /> {{ $t('features.content.form.selectOgImage') }}
+                                </Button>
+                             </template>
+                        </MediaPicker>
+                    </div>
                 </div>
             </div>
         </div>

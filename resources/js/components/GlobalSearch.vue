@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
-    <DialogContent class="p-0 gap-0 max-w-2xl overflow-hidden bg-popover text-popover-foreground">
+    <DialogContent class="p-0 gap-0 max-w-2xl overflow-hidden bg-background text-foreground">
       <!-- Search Input Header -->
       <div class="flex items-center border-b border-border px-4 py-3" cmdk-input-wrapper>
         <Search class="mr-2 h-5 w-5 shrink-0 opacity-50" />

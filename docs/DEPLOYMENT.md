@@ -81,7 +81,7 @@ chown -R www-data:www-data storage bootstrap/cache
 Create `/etc/supervisor/conf.d/laravel-worker.conf`:
 
 ```ini
-[program:laravel-worker]
+[program : laravel-worker]
 process_name=%(program_name)s_%(process_num)02d
 command=php /var/www/ja-cms/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true

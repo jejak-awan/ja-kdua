@@ -90,6 +90,25 @@
                                     {{ $t('features.media.modals.view.dragToPan') }}
                                 </p>
                             </div>
+                            
+                            <!-- Video Preview -->
+                            <div v-else-if="media.mime_type?.startsWith('video/')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-medium text-muted-foreground">{{ $t('features.media.modals.view.preview') }}</span>
+                                </div>
+                                <div class="relative rounded-lg bg-secondary border border-border h-72 overflow-hidden">
+                                    <video 
+                                        :src="media.url" 
+                                        controls 
+                                        class="w-full h-full object-contain"
+                                        preload="metadata"
+                                    >
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                            
+                            <!-- Other File Types -->
                             <div v-else class="bg-secondary rounded-lg flex items-center justify-center h-72">
                                 <FileText class="w-16 h-16 text-muted-foreground opacity-50" />
                             </div>

@@ -47,7 +47,7 @@
                 <!-- Dashboard (standalone) -->
                 <router-link
                     :to="'/admin'"
-                    class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors group"
+                    class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 group"
                     :class="[
                         $route.name === 'dashboard'
                             ? 'bg-accent text-foreground'
@@ -89,7 +89,7 @@
                                     v-for="item in filteredNavigation[section.key]"
                                     :key="item.name"
                                     :to="item.to"
-                                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group pl-9"
+                                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 group pl-9"
                                     :class="[
                                         $route.name === item.name
                                             ? 'bg-accent text-foreground'
@@ -111,7 +111,7 @@
                         >
                             <button
                                 @click="togglePopup(section.key, $event)"
-                                class="w-full flex items-center justify-center p-2.5 rounded-lg transition-colors cursor-pointer"
+                                class="w-full flex items-center justify-center p-2.5 rounded-lg transition-colors duration-200 cursor-pointer"
                                 :class="[
                                     isSectionActive(section.key) || activePopup === section.key
                                         ? 'bg-accent text-foreground'
@@ -150,7 +150,7 @@
                                             :key="item.name"
                                             :to="item.to"
                                             @click="activePopup = null"
-                                            class="flex items-center px-3 py-2 text-sm font-medium transition-colors hover:bg-accent mx-1 rounded-md"
+                                            class="flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-accent mx-1 rounded-md"
                                             :class="[
                                                 $route.name === item.name
                                                     ? 'text-foreground bg-accent'

@@ -123,24 +123,24 @@ export function useSessionTimeout() {
                     return;
                 }
 
-                // If it's a session error (401 or 419)
-                if (error.response?.status === 401 || error.response?.status === 419) {
+                // If it's a session error (401, 403, or 419)
+                const status = error.response?.status;
+                if (status === 401 || status === 403 || status === 419) {
                     // Stop everything instantly via Vapor Lock
                     triggerVaporLock();
 
                     // Stop heartbeat and cleanup locally
                     stopAllTimers();
-                    // authStore.logout() will handle local storage and isAuthenticated state
-                    // localStorage.removeItem('auth_token');
-                    // localStorage.removeItem('user');
-                    // authStore.isAuthenticated = false;
+
+                    // Force update auth store state to prevent loops
+                    authStore.clearAuth();
 
                     // Logic: Concurrent because it's a heartbeat failure
                     const reason = 'concurrent';
 
                     // Use modal instead of hard redirect
                     showError({
-                        code: 419,
+                        code: status || 419,
                         reason: reason,
                         redirect: router.currentRoute.value.fullPath
                     });

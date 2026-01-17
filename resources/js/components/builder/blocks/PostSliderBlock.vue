@@ -1,194 +1,122 @@
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import api from '@/services/api';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-vue-next';
-
-defineOptions({
-    inheritAttrs: false
-});
-
-const props = defineProps({
-    title: { type: String, default: '' },
-    post_type: { type: String, default: 'post' },
-    category: { type: String, default: '' },
-    limit: { type: Number, default: 5 },
-    autoplay: { type: Boolean, default: true },
-    autoplay_speed: { type: Number, default: 5000 },
-    show_arrows: { type: Boolean, default: true },
-    show_dots: { type: Boolean, default: true },
-    show_excerpt: { type: Boolean, default: true },
-    height: { type: String, default: 'h-[500px]' },
-    overlay_color: { type: String, default: 'rgba(0,0,0,0.5)' },
-    padding: { type: String, default: '' }
-});
-
-const posts = ref([]);
-const loading = ref(true);
-const currentIndex = ref(0);
-let autoplayInterval = null;
-
-const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.padding].filter(Boolean);
-});
-
-const fetchPosts = async () => {
-    loading.value = true;
-    try {
-        const params = {
-            type: props.post_type,
-            limit: props.limit,
-            status: 'published'
-        };
-        if (props.category) params.category = props.category;
-        
-        const response = await api.get('/cms/contents', { params });
-        posts.value = response.data?.data || response.data || [];
-    } catch (err) {
-        console.warn('PostSlider: Failed to fetch posts', err);
-        // Fallback demo data
-        posts.value = Array.from({ length: props.limit }, (_, i) => ({
-            id: i + 1,
-            title: `Sample Post ${i + 1}`,
-            excerpt: 'This is a preview of how your posts will appear in the slider.',
-            featured_image: null,
-            slug: '#'
-        }));
-    } finally {
-        loading.value = false;
-    }
-};
-
-const nextSlide = () => {
-    if (posts.value.length > 0) {
-        currentIndex.value = (currentIndex.value + 1) % posts.value.length;
-    }
-};
-
-const prevSlide = () => {
-    if (posts.value.length > 0) {
-        currentIndex.value = (currentIndex.value - 1 + posts.value.length) % posts.value.length;
-    }
-};
-
-const goToSlide = (index) => {
-    currentIndex.value = index;
-};
-
-const startAutoplay = () => {
-    if (props.autoplay && posts.value.length > 1) {
-        autoplayInterval = setInterval(nextSlide, props.autoplay_speed);
-    }
-};
-
-const stopAutoplay = () => {
-    if (autoplayInterval) {
-        clearInterval(autoplayInterval);
-        autoplayInterval = null;
-    }
-};
-
-onMounted(() => {
-    fetchPosts();
-});
-
-watch(() => [props.post_type, props.category, props.limit], fetchPosts);
-watch(() => props.autoplay, (newVal) => {
-    stopAutoplay();
-    if (newVal) startAutoplay();
-});
-watch(() => posts.value.length, () => {
-    stopAutoplay();
-    startAutoplay();
-});
-</script>
-
 <template>
-    <div :class="containerClasses">
-        <h2 v-if="title" class="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-center">{{ title }}</h2>
-        
-        <!-- Loading -->
-        <div v-if="loading" class="flex items-center justify-center py-20">
-            <Loader2 class="w-8 h-8 animate-spin text-primary" />
+  <div class="post-slider-block" :style="wrapperStyles">
+    <div class="slider-container" :style="containerStyles">
+      <div v-for="(post, index) in mockPosts" :key="index" class="slider-slide" :class="{ 'slider-slide--active': currentSlide === index }">
+        <div v-if="overlayEnabled" class="slide-overlay" :style="overlayStyles" />
+        <div class="slide-content" :style="contentStyles">
+          <span v-if="settings.showMeta !== false" class="slide-meta" :style="metaStyles">Jan 10, 2026 • 5 min read</span>
+          <h2 class="slide-title" :style="titleStyles">{{ post.title }}</h2>
+          <p v-if="settings.showExcerpt !== false" class="slide-excerpt" :style="excerptStyles">{{ post.excerpt }}</p>
+          <a href="#" class="slide-button" :style="buttonStyles">Read More</a>
         </div>
-        
-        <!-- Slider -->
-        <div 
-            v-else
-            :class="['relative overflow-hidden group', height]"
-            @mouseenter="stopAutoplay"
-            @mouseleave="startAutoplay"
-        >
-            <transition-group name="fade" tag="div" class="relative w-full h-full">
-                <div
-                    v-for="(post, index) in posts"
-                    v-show="index === currentIndex"
-                    :key="post.id"
-                    class="absolute inset-0 w-full h-full"
-                >
-                    <!-- Background -->
-                    <div 
-                        class="absolute inset-0 bg-cover bg-center"
-                        :style="{ 
-                            backgroundImage: post.featured_image ? `url(${post.featured_image})` : 'none',
-                            backgroundColor: post.featured_image ? 'transparent' : 'hsl(var(--muted))'
-                        }"
-                    >
-                        <div class="absolute inset-0" :style="{ backgroundColor: overlay_color }"></div>
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
-                        <h3 class="text-3xl md:text-5xl font-extrabold mb-4 drop-shadow-lg max-w-4xl">{{ post.title }}</h3>
-                        <p v-if="show_excerpt && post.excerpt" class="text-lg md:text-xl opacity-90 max-w-2xl mb-8 drop-shadow-md line-clamp-2">
-                            {{ post.excerpt }}
-                        </p>
-                        <a 
-                            :href="`/post/${post.slug || post.id}`"
-                            class="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-full hover:opacity-90 transition-all shadow-xl"
-                        >
-                            Read More
-                        </a>
-                    </div>
-                </div>
-            </transition-group>
-            
-            <!-- Navigation Arrows -->
-            <template v-if="show_arrows && posts.length > 1">
-                <button 
-                    @click="prevSlide"
-                    class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronLeft class="w-6 h-6" />
-                </button>
-                <button 
-                    @click="nextSlide"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronRight class="w-6 h-6" />
-                </button>
-            </template>
-            
-            <!-- Dots -->
-            <div v-if="show_dots && posts.length > 1" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                <button 
-                    v-for="(post, index) in posts" 
-                    :key="index"
-                    @click="goToSlide(index)"
-                    class="w-3 h-3 rounded-full transition-all"
-                    :class="index === currentIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'"
-                ></button>
-            </div>
-        </div>
+      </div>
+      
+      <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--prev" @click="prevSlide"><ChevronLeft /></button>
+      <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--next" @click="nextSlide"><ChevronRight /></button>
+      
+      <div v-if="settings.showDots !== false" class="slider-dots">
+        <button v-for="(_, index) in mockPosts" :key="index" class="slider-dot" :class="{ 'slider-dot--active': currentSlide === index }" @click="currentSlide = index" />
+      </div>
     </div>
+  </div>
 </template>
 
+<script setup>
+import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
+
+const props = defineProps({ module: { type: Object, required: true } })
+
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
+
+const currentSlide = ref(0)
+const overlayEnabled = computed(() => settings.value.overlayEnabled !== false)
+let interval = null
+
+const mockPosts = computed(() => Array.from({ length: settings.value.totalPosts || 5 }, (_, i) => ({
+  title: `Featured Post Title ${i + 1}`,
+  excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.'
+})))
+
+const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % mockPosts.value.length }
+const prevSlide = () => { currentSlide.value = currentSlide.value === 0 ? mockPosts.value.length - 1 : currentSlide.value - 1 }
+
+onMounted(() => { if (settings.value.autoplay !== false) interval = setInterval(nextSlide, settings.value.autoplaySpeed || 5000) })
+onUnmounted(() => { if (interval) clearInterval(interval) })
+
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
+
+const containerStyles = computed(() => {
+    const height = getResponsiveValue(settings.value, 'height', device.value) || 500
+    // Check if height has unit, if not add px
+    const hValue = (typeof height === 'number' || !isNaN(Number(height))) ? `${height}px` : height
+    
+    return {
+        position: 'relative',
+        height: hValue,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        overflow: 'hidden'
+    }
+})
+
+const overlayStyles = computed(() => ({ backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.4)' }))
+const contentStyles = computed(() => ({ color: settings.value.textColor || '#ffffff' }))
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', device.value))
+const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', device.value))
+
+const buttonStyles = computed(() => {
+    const styles = getTypographyStyles(settings.value, 'button_', device.value)
+    return {
+        ...styles,
+        backgroundColor: settings.value.buttonBackgroundColor || '#fff',
+        display: 'inline-block',
+        padding: '12px 28px',
+        borderRadius: '6px',
+        textDecoration: 'none'
+    }
+})
+</script>
+
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
+.post-slider-block { width: 100%; }
+.slider-slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s; }
+.slider-slide--active { opacity: 1; }
+.slide-overlay { position: absolute; inset: 0; }
+.slide-content { position: relative;z-index: 1; text-align: center; padding: 40px; max-width: 800px; }
+.slide-meta { font-size: 14px; opacity: 0.8; }
+.slide-title { margin: 16px 0; font-weight: 700; line-height: 1.2; }
+.slide-excerpt { margin: 0 0 24px; opacity: 0.9; line-height: 1.6; }
+.slide-button { display: inline-block; padding: 12px 28px; background: #fff; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; }
+.slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; color: white; cursor: pointer; }
+.slider-arrow--prev { left: 20px; }
+.slider-arrow--next { right: 20px; }
+.slider-dots { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; gap: 8px; }
+.slider-dot { width: 12px; height: 12px; border-radius: 50%; border: none; background: rgba(255,255,255,0.4); cursor: pointer; }
+.slider-dot--active { background: white; }
 </style>

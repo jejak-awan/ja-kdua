@@ -22,11 +22,13 @@ export const useCmsStore = defineStore('cms', {
         loading: false,
         loadingGroups: {}, // To track loading state for specific settings groups
         settingsPromises: {}, // To store promises for ongoing settings group fetches
+        themeMode: 'system', // 'light', 'dark', 'system'
+        isDarkMode: false,
     }),
 
     actions: {
         async fetchSettingsGroup(group) {
-            // If a request for this group is already in progress, return the existing promise
+            // If already loading, return existing promise
             if (this.loadingGroups[group]) {
                 return this.settingsPromises[group];
             }
@@ -38,11 +40,7 @@ export const useCmsStore = defineStore('cms', {
             const promise = (async () => {
                 try {
                     const response = await api.get(`/admin/ja/settings/group/${group}`);
-                    // Settings endpoint returns: { success: true, data: { key: value, ... } }
-                    // Extract the data object directly (not using parseResponse which is for arrays)
                     const settingsData = response.data?.data || response.data || {};
-
-                    // Merge into settings state
                     this.settings = { ...this.settings, ...settingsData };
                     return settingsData;
                 }
@@ -50,13 +48,12 @@ export const useCmsStore = defineStore('cms', {
                     console.error(`Error fetching ${group} settings:`, error);
                     return {};
                 } finally {
-                    // Mark this group as no longer loading and clear the promise
                     this.loadingGroups = { ...this.loadingGroups, [group]: false };
                     delete this.settingsPromises[group];
                 }
             })();
 
-            this.settingsPromises = { ...this.settingsPromises, [group]: promise };
+            this.settingsPromises = { ...this.settingsPromises, [promise]: promise };
             return promise;
         },
 
@@ -125,6 +122,89 @@ export const useCmsStore = defineStore('cms', {
                 console.error('Error fetching tags:', error);
                 this.tags = [];
                 return [];
+            }
+        },
+
+        async initTheme() {
+            const THEME_KEY = 'admin-dark-mode';
+
+            // 1. Detect system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            // 2. Load from localStorage or fallback to system
+            const saved = localStorage.getItem(THEME_KEY) || 'system';
+            this.themeMode = saved;
+
+            // 3. Resolve actual dark mode state
+            this.isDarkMode = saved === 'dark' || (saved === 'system' && prefersDark);
+
+            // 4. Apply to document
+            this.applyThemeToDocument();
+
+            // 5. Watch for system changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (this.themeMode === 'system') {
+                    this.isDarkMode = e.matches;
+                    this.applyThemeToDocument();
+                }
+            });
+
+            // 6. Try to load from backend (if authenticated)
+            await this.loadThemePreferences();
+        },
+
+        async loadThemePreferences() {
+            if (!localStorage.getItem('auth_token')) return;
+            try {
+                const response = await api.get('/profile/preferences');
+                if (response.data?.success && response.data?.data?.dark_mode) {
+                    const backendMode = response.data.data.dark_mode;
+                    if (this.themeMode !== backendMode) {
+                        this.setThemeMode(backendMode, false); // Don't sync back to backend
+                    }
+                }
+            } catch (error) {
+                console.debug('Failed to load theme preferences:', error.message);
+            }
+        },
+
+        async syncThemeWithBackend(mode) {
+            if (!localStorage.getItem('auth_token')) return;
+            try {
+                await api.put('/profile/preferences', { dark_mode: mode });
+            } catch (error) {
+                console.debug('Theme sync failed:', error.message);
+            }
+        },
+
+        setThemeMode(mode, syncToBackend = true) {
+            const THEME_KEY = 'admin-dark-mode';
+            this.themeMode = mode;
+            localStorage.setItem(THEME_KEY, mode);
+
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.isDarkMode = mode === 'dark' || (mode === 'system' && prefersDark);
+
+            this.applyThemeToDocument();
+
+            if (syncToBackend) {
+                this.syncThemeWithBackend(mode);
+            }
+        },
+
+        toggleDarkMode(value) {
+            // If value is provided (e.g. from a switch), use it. 
+            // Otherwise, toggle current state.
+            const isDark = value !== undefined ? value : !this.isDarkMode;
+            const next = isDark ? 'dark' : 'light';
+            this.setThemeMode(next);
+        },
+
+        applyThemeToDocument() {
+            if (this.isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
             }
         },
     },

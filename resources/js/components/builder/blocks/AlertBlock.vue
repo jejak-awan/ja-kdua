@@ -1,65 +1,86 @@
 <template>
-    <section 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width || 'max-w-4xl']">
-            <div :class="['flex gap-4 p-4 rounded-xl', variantClass]">
-                <div class="flex-shrink-0">
-                    <component :is="variantIcon" class="w-5 h-5 mt-0.5" />
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h4 v-if="title" class="font-bold mb-1">{{ title }}</h4>
-                    <p class="text-sm leading-relaxed opacity-90">{{ message || 'Alert message goes here...' }}</p>
-                </div>
-                <button 
-                    v-if="dismissible" 
-                    class="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
-                    @click="dismissed = true"
-                >
-                    <X class="w-4 h-4" />
-                </button>
-            </div>
-        </div>
-    </section>
+  <div v-if="!dismissed" class="alert-block" :class="alertClass" :style="wrapperStyles">
+    <component :is="alertIcon" v-if="showIcon" class="alert-icon" />
+    <div class="alert-content">
+      <div v-if="settings.title" class="alert-title" :style="titleStyles">{{ settings.title }}</div>
+      <div class="alert-message" :style="messageStyles">{{ settings.content }}</div>
+    </div>
+    <button v-if="settings.dismissible" class="alert-dismiss" @click="dismissed = true">
+      <X class="dismiss-icon" />
+    </button>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Info, AlertTriangle, CheckCircle, XCircle, Bell, X } from 'lucide-vue-next';
-
-defineOptions({
-    inheritAttrs: false
-});
+import { computed, ref, inject } from 'vue'
+import { Info, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getFilterStyles,
+  getTransformStyles 
+} from '../core/styleUtils'
 
 const props = defineProps({
-    title: { type: String, default: '' },
-    message: { type: String, default: 'This is an important message for your visitors.' },
-    variant: { type: String, default: 'info' },
-    dismissible: { type: Boolean, default: false },
-    width: { type: String, default: 'max-w-4xl' },
-    padding: { type: String, default: 'py-6' },
-    bgColor: String,
-    animation: { type: String, default: '' }
-});
+  module: { type: Object, required: true }
+})
 
-const dismissed = ref(false);
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding, props.animation].filter(Boolean);
-});
+const dismissed = ref(false)
+const showIcon = computed(() => settings.value.showIcon !== false)
+const alertType = computed(() => settings.value.type || 'info')
+const alertClass = computed(() => `alert--${alertType.value}`)
 
-const variantIcons = {
-    info: Info, warning: AlertTriangle, success: CheckCircle, error: XCircle, notice: Bell
-};
+const alertIcon = computed(() => {
+  const icons = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle }
+  return icons[alertType.value] || Info
+})
 
-const variantIcon = computed(() => variantIcons[props.variant] || Info);
+const themeColors = computed(() => {
+  const colors = {
+    info: { bg: '#eff6ff', border: '#3b82f6', text: '#1e40af' },
+    success: { bg: '#f0fdf4', border: '#22c55e', text: '#166534' },
+    warning: { bg: '#fffbeb', border: '#f59e0b', text: '#92400e' },
+    error: { bg: '#fef2f2', border: '#ef4444', text: '#991b1b' }
+  }
+  return colors[alertType.value] || colors.info
+})
 
-const variantClass = computed(() => ({
-    'info': 'bg-blue-50 text-blue-900 dark:bg-blue-950/50 dark:text-blue-100 border border-blue-200 dark:border-blue-800',
-    'warning': 'bg-amber-50 text-amber-900 dark:bg-amber-950/50 dark:text-amber-100 border border-amber-200 dark:border-amber-800',
-    'success': 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-800',
-    'error': 'bg-red-50 text-red-900 dark:bg-red-950/50 dark:text-red-100 border border-red-200 dark:border-red-800',
-    'notice': 'bg-purple-50 text-purple-900 dark:bg-purple-950/50 dark:text-purple-100 border border-purple-200 dark:border-purple-800'
-}[props.variant] || 'bg-blue-50 text-blue-900'));
+const wrapperStyles = computed(() => {
+  const styles = { 
+    width: '100%',
+    backgroundColor: themeColors.value.bg,
+    color: themeColors.value.text,
+    borderLeftColor: themeColors.value.border
+  }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const messageStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
 </script>
+
+<style scoped>
+.alert-block { display: flex; align-items: flex-start; gap: 12px; width: 100%; }
+.alert-icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+.alert-content { flex: 1; }
+.alert-title { margin-bottom: 4px; }
+.alert-dismiss { background: none; border: none; cursor: pointer; padding: 4px; opacity: 0.6; transition: opacity 0.2s; color: inherit; }
+.alert-dismiss:hover { opacity: 1; }
+.dismiss-icon { width: 16px; height: 16px; }
+</style>

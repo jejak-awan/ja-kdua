@@ -1,283 +1,595 @@
 <template>
-    <div class="builder-root h-full">
-        <!-- Fullscreen overlay backdrop -->
-        <div 
-            v-if="isFullscreen" 
-            class="bg-background" 
-            :style="{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9998 }"
-            @click="toggleFullscreen"
-        ></div>
+  <Teleport to="body" :disabled="!builder.isFullscreen">
+    <div 
+      class="ja-builder" 
+      :class="[
+        cmsStore.isDarkMode ? 'ja-builder--dark' : 'ja-builder--light',
+        { 'ja-builder--fullscreen': builder.isFullscreen }
+      ]"
+    >
+      <!-- Top Toolbar -->
+      <TopToolbar 
+        :sidebar-visible="sidebarVisible"
+        @toggle-sidebar="toggleSidebar"
+        @change-device="changeDevice"
+        @open-pages="activePanel = 'pages'"
+        @open-preferences="activePanel = 'preferences'"
+        @open-shortcuts="activePanel = 'help'"
+        @close-builder="handleCloseBuilder"
+        @save="handleSave"
+      />
+      
+      <!-- Main Content Area -->
+      <div class="ja-builder__main">
+        <!-- Left Sidebar (Always Visible) -->
+        <LeftSidebar 
+          :active-panel="activePanel"
+          @change-panel="togglePanel"
+        />
         
-        <div 
-            :class="[
-                'flex flex-col bg-background text-foreground group/builder h-full',
-                isFullscreen ? '' : (props.context?.builderMode ? 'relative min-h-[500px] overflow-hidden' : 'relative h-[calc(100vh-10rem)] min-h-[500px] border border-border rounded-xl overflow-hidden shadow-inner')
-            ]"
-            :style="isFullscreen ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}"
-        >
-                <!-- Toolbar -->
-                <div class="h-14 bg-background border-b border-border flex items-center justify-between px-4 z-50 shrink-0 shadow-sm">
-                    <!-- Left Section: History & Actions -->
-                    <div class="flex items-center gap-2 flex-1">
-                        <div class="flex items-center bg-muted/30 rounded-lg p-1 gap-1">
-                            <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canUndo.value" @click="builder.undo" :title="t('features.builder.canvas.toolbar.undo')">
-                                <Undo2 class="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-foreground" :disabled="!builder.canRedo.value" @click="builder.redo" :title="t('features.builder.canvas.toolbar.redo')">
-                                <Redo2 class="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
+        <!-- Left Panel Drawer -->
+        <LeftPanel
+          v-if="sidebarVisible"
+          :active-panel="activePanel"
+          :visible="!!activePanel"
+          @close="activePanel = null"
+        />
+        
+        <!-- Canvas Area -->
+        <div class="ja-builder__canvas-area">
+          <CanvasControls 
+            @save="handleSave"
+          />
+          <CanvasFrame 
+            :device="builder.device" 
+            :zoom="builder.zoom" 
+            :width="builder.customViewportWidth"
+          >
+            <Canvas />
+          </CanvasFrame>
+        </div>
+        
+        <!-- Right Panel (Settings) -->
+        <RightPanel 
+          v-if="selectedModule"
+          :module="selectedModule"
+          @close="closeSettings"
+        />
+      </div>
 
-                    <!-- Center Section: Device Selector -->
-                    <div class="flex items-center justify-center flex-1">
-                        <div class="flex items-center bg-muted/30 rounded-lg p-1 gap-1">
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                class="h-8 w-8 transition-all" 
-                                :class="{ 'bg-background shadow-sm text-primary': builder.deviceMode.value === 'desktop' }" 
-                                @click="builder.deviceMode.value = 'desktop'" 
-                                :title="t('features.builder.canvas.toolbar.desktop')"
-                            >
-                                <Monitor class="w-4 h-4" />
-                            </Button>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                class="h-8 w-8 transition-all" 
-                                :class="{ 'bg-background shadow-sm text-primary': builder.deviceMode.value === 'tablet' }" 
-                                @click="builder.deviceMode.value = 'tablet'" 
-                                :title="t('features.builder.canvas.toolbar.tablet')"
-                            >
-                                <Tablet class="w-4 h-4" />
-                            </Button>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                class="h-8 w-8 transition-all" 
-                                :class="{ 'bg-background shadow-sm text-primary': builder.deviceMode.value === 'mobile' }" 
-                                @click="builder.deviceMode.value = 'mobile'" 
-                                :title="t('features.builder.canvas.toolbar.mobile')"
-                            >
-                                <Smartphone class="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Section: Preview & System -->
-                    <div class="flex items-center justify-end gap-2 flex-1">
-                        <!-- Preview Toggle -->
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            class="h-9 gap-2 text-xs font-semibold px-4 transition-all" 
-                            :class="builder.isPreview.value ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-accent'" 
-                            @click="builder.isPreview.value = !builder.isPreview.value"
-                        >
-                            <Eye v-if="!builder.isPreview.value" class="w-4 h-4" />
-                            <EyeOff v-else class="w-4 h-4" />
-                            <span>{{ builder.isPreview.value ? 'Editor' : 'Preview' }}</span>
-                        </Button>
-                        
-                        <div class="w-px h-6 bg-border mx-1"></div>
+      <!-- Modals -->
+      <InsertModuleModal 
+        v-if="showInsertModal"
+        @close="showInsertModal = false"
+        @insert="handleModuleInsert"
+      />
+      <InsertRowModal
+        v-if="showInsertRowModal"
+        @close="showInsertRowModal = false"
+        @insert="insertRow"
+      />
+      <InsertSectionModal
+        v-if="showInsertSectionModal"
+        :target-index="insertSectionIndex"
+        @close="showInsertSectionModal = false"
+        @inserted="showInsertSectionModal = false"
+      />
+      <StructureTemplateModal
+        v-if="showStructureTemplateModal"
+        :target-type="structureTemplateTargetType"
+        @close="showStructureTemplateModal = false"
+        @insert="handleStructureTemplateInsert"
+      />
+      <ResponsiveFieldModal
+        v-if="builder.responsiveModal && builder.responsiveModal.baseKey"
+        v-bind="builder.responsiveModal"
+        @close="builder.closeResponsiveModal"
+        @update="handleResponsiveUpdate"
+      />
 
-                        <!-- Fullscreen Toggle / Exit -->
-                        <Button 
-                            v-if="!isFullscreen"
-                            variant="ghost" 
-                            size="icon" 
-                            class="h-9 w-9 text-muted-foreground hover:text-foreground" 
-                            @click="toggleFullscreen" 
-                            title="Fullscreen"
-                        >
-                            <Maximize2 class="w-4 h-4" />
-                        </Button>
-
-                        <Button 
-                            v-else
-                            variant="destructive" 
-                            size="sm" 
-                            class="h-9 gap-2 text-xs font-bold px-4 shadow-lg shadow-destructive/20" 
-                            @click="toggleFullscreen"
-                        >
-                            <X class="w-4 h-4" />
-                            Exit Builder
-                        </Button>
-                    </div>
-                </div>
-
-                <div class="flex flex-1 min-h-0 overflow-hidden">
-                <div class="theme-provider contents">
-                    <Sidebar v-if="!builder.isPreview.value" />
-                    <Canvas :context="context" />
-                    <PropertiesPanel v-if="!builder.isPreview.value" />
-                </div>
-                </div>
-                
-                <!-- Shared Media Picker -->
-                <MediaPicker v-model:open="builder.showMediaPicker.value" @selected="handleMediaSelect">
-                    <template #trigger><span class="hidden"></span></template>
-                </MediaPicker>
-
-                <!-- Global Context Menu -->
-                <ContextMenu />
-            </div>
+      <!-- Canvas Modals -->
+      <AddCanvasModal
+        v-if="showAddCanvasModal"
+        @close="showAddCanvasModal = false"
+        @add="handleAddCanvas"
+      />
+      <ImportExportModal
+        v-if="showImportExportModal"
+        @close="showImportExportModal = false"
+        @export="handleExportCanvas"
+        @import="handleImportCanvas"
+      />
+      <CanvasSettingsModal
+        v-if="showCanvasSettingsModal"
+        :canvas="activeCanvasData"
+        @close="showCanvasSettingsModal = false"
+        @save="handleSaveCanvasSettings"
+      />
+      
+      <ContextMenu 
+          :visible="contextMenu.visible"
+          :x="contextMenu.x"
+          :y="contextMenu.y"
+          :module-id="contextMenu.moduleId"
+          :title="contextMenu.title"
+          :type="contextMenu.type"
+          :mode="contextMenu.mode"
+          @close="closeContextMenu"
+          @action="handleContextMenuAction"
+      />
     </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, provide, watch, onMounted, onUnmounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useBuilder } from '@/composables/useBuilder';
-import Sidebar from './sidebar/Sidebar.vue';
-import Canvas from './canvas/Canvas.vue';
-import PropertiesPanel from './properties/PropertiesPanel.vue';
-import BreadcrumbsBar from './canvas/BreadcrumbsBar.vue';
-import MediaPicker from '@/components/MediaPicker.vue';
-import ContextMenu from './ui/ContextMenu.vue';
-import Button from '@/components/ui/button.vue';
-import { 
-    Undo2, 
-    Redo2,
-    Monitor,
-    Tablet,
-    Smartphone,
-    Eye,
-    EyeOff,
-    Maximize2,
-    Minimize2,
-    X
-} from 'lucide-vue-next';
+import { ref, reactive, computed, provide, watch, onMounted, onUnmounted } from 'vue'
 
+// Layout Components
+import TopToolbar from './layout/TopToolbar.vue'
+import LeftSidebar from './layout/LeftSidebar.vue'
+import LeftPanel from './layout/LeftPanel.vue'
+import RightPanel from './layout/RightPanel.vue'
+import CanvasFrame from './layout/CanvasFrame.vue'
+
+// Canvas Components
+import Canvas from './canvas/Canvas.vue'
+import CanvasControls from './canvas/CanvasControls.vue'
+
+// Modal Components
+import InsertModuleModal from './modals/InsertModuleModal.vue'
+import InsertRowModal from './modals/InsertRowModal.vue'
+import InsertSectionModal from './modals/InsertSectionModal.vue'
+import StructureTemplateModal from './modals/StructureTemplateModal.vue'
+import ResponsiveFieldModal from './modals/ResponsiveFieldModal.vue'
+import AddCanvasModal from './modals/AddCanvasModal.vue'
+import ImportExportModal from './modals/ImportExportModal.vue'
+import CanvasSettingsModal from './modals/CanvasSettingsModal.vue'
+import ContextMenu from './ui/ContextMenu.vue'
+
+// Core
+import { useBuilder, ModuleRegistry } from './core'
+import { useGlobalVariables } from './core/useGlobalVariables'
+import { useCmsStore } from '@/stores/cms'
+
+// Register Module Definitions (side-effect import)
+import './modules'
+
+// Global Builder Styles
+import './styles/builder.css'
+
+// Register all Block Components
+import { registerBlockComponents } from './core/registerBlocks'
+registerBlockComponents()
+
+// Props
 const props = defineProps({
-    modelValue: {
-        type: Array,
-        default: () => []
-    },
-    context: {
-        type: Object,
-        default: () => ({})
+  initialData: {
+    type: Object,
+    default: () => ({ blocks: [] })
+  },
+  modelValue: { // Added for v-model support
+    type: Array,
+    default: undefined
+  },
+  contentId: { // New prop for CMS integration
+    type: [String, Number],
+    default: null
+  }
+})
+
+// Emits
+const emit = defineEmits(['update', 'save', 'update:modelValue', 'close'])
+
+// Initialize builder state
+// Prefer modelValue (array of blocks) if provided, otherwise fallback to initialData object
+const builderInitialData = computed(() => {
+  if (props.modelValue) {
+    return { blocks: props.modelValue }
+  }
+  return props.initialData
+})
+
+const builderBase = useBuilder(builderInitialData.value)
+const globalVariables = useGlobalVariables()
+const globalAction = ref(null)
+const cmsStore = useCmsStore()
+
+// UI State
+// Theme initialization is handled by cmsStore
+watch(() => cmsStore.isDarkMode, (isDark) => {
+  if (isDark) {
+    document.body.classList.add('ja-builder--dark')
+    document.body.classList.remove('ja-builder--light')
+  } else {
+    document.body.classList.add('ja-builder--light')
+    document.body.classList.remove('ja-builder--dark')
+  }
+}, { immediate: true })
+
+onUnmounted(() => {
+  document.body.classList.remove('ja-builder--dark', 'ja-builder--light')
+})
+
+const sidebarVisible = ref(true)
+const activePanel = ref('layers')
+// device is managed by builder
+const showInsertModal = ref(false)
+const insertTargetId = ref(null)
+
+const showInsertRowModal = ref(false)
+const insertRowTargetId = ref(null)
+
+const showInsertSectionModal = ref(false)
+const insertSectionIndex = ref(-1)
+
+const showStructureTemplateModal = ref(false)
+const structureTemplateTargetId = ref(null)
+const structureTemplateTargetType = ref(null)
+
+const builder = reactive({
+  ...builderBase,
+  darkMode: computed(() => cmsStore.isDarkMode),
+  sidebarVisible,
+  activePanel,
+  globalAction,
+  globalVariables
+})
+
+// Watch for changes in builder blocks and emit updates
+watch(builder.blocks, (newBlocks) => {
+  emit('update', { blocks: newBlocks })
+  emit('update:modelValue', newBlocks)
+}, { deep: true })
+
+// Watch for external modelValue changes
+watch(() => props.modelValue, (newBlocks) => {
+  if (newBlocks && JSON.stringify(newBlocks) !== JSON.stringify(builder.blocks)) {
+    builder.blocks = newBlocks
+  }
+}, { deep: true })
+
+
+
+// Selected Module
+const selectedModule = computed(() => builder.selectedModule)
+
+watch(selectedModule, (newVal) => {
+  if (newVal && window.innerWidth <= 768) {
+    activePanel.value = null
+  }
+})
+
+// Methods
+const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value
+}
+
+const changeDevice = (newDevice) => {
+  builder.setDeviceMode(newDevice)
+}
+
+const togglePanel = (panel) => {
+  if (activePanel.value === panel) {
+    activePanel.value = null
+  } else {
+    activePanel.value = panel
+  }
+}
+
+const closeSettings = () => {
+  builder.clearSelection()
+}
+
+const openInsertModal = (targetId) => {
+  insertTargetId.value = targetId
+  showInsertModal.value = true
+}
+
+const openInsertRowModal = (targetId) => {
+  insertRowTargetId.value = targetId
+  showInsertRowModal.value = true
+}
+
+const openInsertSectionModal = (index = -1) => {
+  if (window.innerWidth <= 768) {
+      sidebarVisible.value = false
+  }
+  insertSectionIndex.value = index
+  showInsertSectionModal.value = true
+}
+
+const openStructureTemplateModal = (targetId, targetType) => {
+  structureTemplateTargetId.value = targetId
+  structureTemplateTargetType.value = targetType
+  showStructureTemplateModal.value = true
+}
+
+const insertModule = (type) => { // Keep for backward compat if needed, but primary logic is below
+  builder.insertModule(type, insertTargetId.value)
+  showInsertModal.value = false
+}
+
+const handleModuleInsert = (type, payload) => {
+  // Handle Row insertion from InsertModuleModal which passes layout object
+  if (type === 'row') {
+    insertRowTargetId.value = insertTargetId.value
+    insertRow(payload)
+    return
+  }
+
+  // Handle normal module insertion
+  insertModule(type)
+}
+
+const handleStructureTemplateInsert = (payload) => {
+    insertRowTargetId.value = structureTemplateTargetId.value
+    insertRow(payload)
+    showStructureTemplateModal.value = false
+}
+
+const insertRow = (layout) => {
+  // layout can be:
+  // 1. object {widths}
+  // 2. object {rows: [ {widths:[]}, ... ]} (Multi-row preset)
+  // 3. object {cols: [ {width, rows:[]}, ... ]} (Specialty preset)
+  
+  const createSingleRow = (config, parentId = insertRowTargetId.value) => {
+    // 1. Create Row
+    const row = builder.insertModule('row', parentId)
+    
+    if (row) {
+      if (config.cols) {
+        // Specialty/Nested structure
+        config.cols.forEach(colConfig => {
+          const col = builder.insertModule('column', row.id)
+          if (col) {
+            builder.updateModuleSettings(col.id, { flexGrow: colConfig.width })
+            if (colConfig.rows) {
+              colConfig.rows.forEach(nestedRowConfig => {
+                createSingleRow(nestedRowConfig, col.id)
+              })
+            }
+          }
+        })
+      } else {
+        // Standard structure
+        const structure = config.structure || config
+        const widths = config.widths || (typeof structure === 'string' ? structure.split('-').map(() => 1) : [1])
+        
+        widths.forEach(width => {
+          const col = builder.insertModule('column', row.id)
+          if (col) {
+            builder.updateModuleSettings(col.id, { flexGrow: width })
+          }
+        })
+      }
     }
-});
+  }
 
-const emit = defineEmits(['update:modelValue']);
-const { t } = useI18n();
+  if (layout.rows) {
+      // Multi-Row Preset
+      layout.rows.forEach(rowConfig => createSingleRow(rowConfig))
+  } else {
+      // Single Row or Specialty
+      createSingleRow(layout)
+  }
+  
+  showInsertRowModal.value = false
+}
 
-// Fullscreen state
-const isFullscreen = ref(false);
-const toggleFullscreen = () => {
-    isFullscreen.value = !isFullscreen.value;
-    // Prevent body scroll when fullscreen
-    document.body.style.overflow = isFullscreen.value ? 'hidden' : '';
-};
+const handleResponsiveUpdate = (updates) => {
+  if (builder.responsiveModal) {
+    const moduleId = builder.responsiveModal.module.id
+    builder.updateModuleSettings(moduleId, updates)
+  }
+}
 
-// Provide builder state
-const builder = useBuilder();
-provide('builder', builder);
-
-// Sync initial ModelValue -> Instance State
-watch(() => props.modelValue, (newVal) => {
-    if (newVal && builder.blocks.value !== newVal) {
-         builder.blocks.value = JSON.parse(JSON.stringify(newVal));
-         // Initialize history snapshot after load
-         setTimeout(() => builder.takeSnapshot(), 100);
-    }
-}, { immediate: true, deep: true });
-
-// Sync Instance State -> ModelValue (Emit up)
-watch(builder.blocks, (newVal) => {
-    emit('update:modelValue', newVal);
-}, { deep: true });
+// Close Builder
+const handleCloseBuilder = () => {
+    // Emit close event for parent app to handle (e.g. redirect)
+    emit('close')
+    // Alternatively, could window.history.back() if standalone
+}
 
 // Keyboard Shortcuts
 const handleKeydown = (e) => {
-    // Don't trigger if user is in an input field
-    if (e.target.closest('input, textarea, [contenteditable]')) return;
+  // Check if input/textarea is focused to avoid conflict
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+    return
+  }
 
-    const selectedIndex = builder.editingIndex.value;
-    
-    // Check for Ctrl/Cmd key combinations
-    if (e.ctrlKey || e.metaKey) {
-        switch (e.key.toLowerCase()) {
-            case 'z':
-                e.preventDefault();
-                if (e.shiftKey) {
-                    builder.redo();
-                } else {
-                    builder.undo();
-                }
-                break;
-            case 'y':
-                e.preventDefault();
-                builder.redo();
-                break;
-            case 'c':
-                if (selectedIndex !== null) {
-                    e.preventDefault();
-                    builder.copyBlock(selectedIndex);
-                }
-                break;
-            case 'x':
-                if (selectedIndex !== null) {
-                    e.preventDefault();
-                    builder.cutBlock(selectedIndex);
-                }
-                break;
-            case 'v':
-                if (builder.canPaste.value) {
-                    e.preventDefault();
-                    builder.pasteBlock(selectedIndex);
-                }
-                break;
-            case 'd':
-                if (selectedIndex !== null) {
-                    e.preventDefault();
-                    builder.duplicateBlock(selectedIndex);
-                }
-                break;
-        }
+  // Undo/Redo
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault()
+    if (e.shiftKey) {
+      builder.redo()
+    } else {
+      builder.undo()
     }
-    
-    // Non-Ctrl shortcuts
-    if (selectedIndex !== null) {
-        switch (e.key) {
-            case 'Delete':
-            case 'Backspace':
-                e.preventDefault();
-                builder.removeBlock(selectedIndex);
-                break;
-            case 'ArrowUp':
-                if (e.altKey) {
-                    e.preventDefault();
-                    builder.moveBlockUp(selectedIndex);
-                }
-                break;
-            case 'ArrowDown':
-                if (e.altKey) {
-                    e.preventDefault();
-                    builder.moveBlockDown(selectedIndex);
-                }
-                break;
-            case 'Escape':
-                builder.editingIndex.value = null;
-                break;
-        }
-    }
-};
+  }
+  
+  // Save
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault()
+    emit('save')
+  }
+}
 
-onMounted(() => {
-    window.addEventListener('keydown', handleKeydown);
-    window.__builder_instance = builder;
-    // User requested to rely on app.css, so we remove manual theme injection
-    // builder.loadActiveTheme('admin'); 
-});
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
+
+const handleSave = async (status = null) => {
+  if (props.contentId) {
+    try {
+      if (status) {
+        builder.content.status = status
+      }
+      toast.info('Saving changes...')
+      await builder.saveContent()
+      toast.success('Changes saved successfully')
+      emit('save')
+    } catch (err) {
+      toast.error('Failed to save changes')
+    }
+  } else {
+    emit('save')
+  }
+}
+
+onMounted(async () => {
+    window.addEventListener('keydown', handleKeydown)
+    builder.loadTheme()
+    builder.fetchMetadata()
+    
+    if (props.contentId) {
+      try {
+        await builder.loadContent(props.contentId)
+      } catch (err) {
+        toast.error('Failed to load content')
+      }
+    }
+})
 
 onUnmounted(() => {
-    window.removeEventListener('keydown', handleKeydown);
-});
+    window.removeEventListener('keydown', handleKeydown)
+})
 
-const handleMediaSelect = (media) => {
-    builder.handleMediaSelect(media);
-};
+// Context Menu Logic
+const contextMenu = reactive({
+    visible: false,
+    x: 0,
+    y: 0,
+    moduleId: null,
+    title: '',
+    type: '',
+    mode: 'module'
+})
+
+const openContextMenu = (moduleId, event, title = '', type = '', mode = 'module') => {
+    event.preventDefault()
+    contextMenu.visible = true
+    contextMenu.x = event.clientX
+    contextMenu.y = event.clientY
+    contextMenu.moduleId = moduleId
+    contextMenu.title = title
+    contextMenu.type = type
+    contextMenu.mode = mode
+}
+
+const closeContextMenu = () => {
+    contextMenu.visible = false
+}
+
+// Canvas Modal State
+const showAddCanvasModal = ref(false)
+const showImportExportModal = ref(false)
+const showCanvasSettingsModal = ref(false)
+const activeCanvasForModal = ref(null)
+
+const getCanvasById = (id) => {
+    if (!id || !builder || !builder.canvases) return null
+    const list = Array.isArray(builder.canvases) ? builder.canvases : (builder.canvases.value || [])
+    return list.find(c => c.id === id)
+}
+
+const activeCanvasData = computed(() => {
+    return getCanvasById(activeCanvasForModal.value)
+})
+
+const handleContextMenuAction = (action, id, mode = 'module') => {
+    if (mode === 'canvas') {
+        handleCanvasAction(action, id)
+        return
+    }
+
+    if (action === 'duplicate') {
+        builder.duplicateModule(id)
+    } else if (action === 'delete') {
+        if (confirm('Delete this module?')) {
+            builder.removeModule(id)
+        }
+    } else if (action === 'copy') {
+        builder.copyModule(id)
+    } else if (action === 'paste') {
+        builder.pasteModule(id)
+    } else if (action === 'copy-style') {
+        builder.copyStyles(id)
+    } else if (action === 'paste-style') {
+        builder.pasteStyles(id)
+    } else if (action === 'parent') {
+        const parent = builder.findParentById(builder.blocks, id)
+        if (parent) {
+            builder.selectModule(parent.id)
+        }
+    }
+}
+
+const handleCanvasAction = (action, id) => {
+    if (action === 'edit-canvas') {
+        builder.switchCanvas(id)
+    } else if (action === 'duplicate-canvas') {
+        builder.duplicateCanvas(id)
+    } else if (action === 'delete-canvas') {
+        builder.removeCanvas(id)
+    } else if (action === 'canvas-settings') {
+        activeCanvasForModal.value = id
+        showCanvasSettingsModal.value = true
+    } else if (action === 'export-canvas') {
+        activeCanvasForModal.value = id
+        showImportExportModal.value = true
+    } else if (action === 'make-main-canvas') {
+        builder.setMainCanvas(id)
+    }
+}
+
+const handleAddCanvas = (data) => {
+    builder.addCanvas(data.title)
+    showAddCanvasModal.value = false
+}
+
+const handleExportCanvas = (data) => {
+    builder.exportCanvas(activeCanvasForModal.value)
+    showImportExportModal.value = false
+}
+
+const handleImportCanvas = (data) => {
+    // Importing to canvas...
+    showImportExportModal.value = false
+}
+
+const handleSaveCanvasSettings = (data) => {
+    builder.renameCanvas(activeCanvasForModal.value, data.title)
+    // Update global status if needed (mock for now)
+    const canvas = getCanvasById(activeCanvasForModal.value)
+    if (canvas) {
+        canvas.isGlobal = data.isGlobal
+        canvas.append = data.append
+    }
+    showCanvasSettingsModal.value = false
+}
+
+// Global openers
+builder.openAddCanvasModal = () => { showAddCanvasModal.value = true }
+builder.openImportExportModal = (id) => { 
+    activeCanvasForModal.value = id
+    showImportExportModal.value = true 
+}
+
+// Assign modal openers to builder (to avoid TDZ)
+builder.openInsertModal = openInsertModal
+builder.openInsertRowModal = openInsertRowModal
+builder.openInsertSectionModal = openInsertSectionModal
+builder.openStructureTemplateModal = openStructureTemplateModal
+builder.openContextMenu = openContextMenu
+
+// Provide builder to all children
+provide('builder', builder)
+provide('darkMode', computed({
+  get: () => cmsStore.isDarkMode,
+  set: (val) => cmsStore.toggleDarkMode(val)
+}))
 </script>
+
+
+

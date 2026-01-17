@@ -88,7 +88,7 @@ const routes = [
             {
                 path: 'contents/:id/edit',
                 name: 'contents.edit',
-                component: () => import('../views/admin/contents/Edit.vue'),
+                component: () => import('../views/admin/contents/Editor.vue'),
             },
             {
                 path: 'contents/:id/revisions',
@@ -376,6 +376,7 @@ const routes = [
 
         ],
     },
+
 
 
 

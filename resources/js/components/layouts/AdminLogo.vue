@@ -13,8 +13,7 @@
       <!-- Option A: User uploaded Logo Image -->
       <img 
         v-if="siteLogo" 
-        :src="siteLogo" 
-        :alt="siteName"
+        :alt="displayTitle"
         class="w-full h-full object-contain rounded-lg"
       />
 
@@ -30,8 +29,8 @@
 
     <!-- Site Branding (Hidden when minimized) -->
     <div v-if="!minimized" class="flex flex-col ml-1">
-      <span class="text-sm font-black tracking-tight text-foreground leading-none">{{ siteName }}</span>
-      <span class="text-[10px] font-medium text-muted-foreground leading-none mt-0.5">{{ siteVersion }}</span>
+      <span class="text-sm font-black tracking-tight text-foreground leading-none">{{ displayTitle }}</span>
+      <span class="text-[10px] font-medium text-muted-foreground leading-none mt-0.5">{{ displaySubtitle }}</span>
     </div>
   </div>
 </template>
@@ -44,12 +43,20 @@ const props = defineProps({
   minimized: {
     type: Boolean,
     default: false
+  },
+  title: {
+    type: String,
+    default: null
+  },
+  subtitle: {
+    type: String,
+    default: null
   }
 });
 
 const cmsStore = useCmsStore();
-const siteName = computed(() => cmsStore.siteSettings?.site_name || 'JA CMS');
-const siteVersion = computed(() => cmsStore.siteSettings?.site_version || 'v1.0 Janari');
+const displayTitle = computed(() => props.title || cmsStore.siteSettings?.site_name || 'JA CMS');
+const displaySubtitle = computed(() => props.subtitle || cmsStore.siteSettings?.site_version || 'v1.0 Janari');
 const siteLogo = computed(() => cmsStore.siteSettings?.site_logo || '');
 </script>
 

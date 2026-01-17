@@ -1,169 +1,99 @@
+<template>
+  <nav class="menu-block" :style="wrapperStyles">
+    <div v-if="showLogo && settings.logoImage" class="menu-logo" :class="`menu-logo--${logoPosition}`">
+      <img :src="settings.logoImage" alt="Logo" class="logo-image" />
+    </div>
+    <ul class="menu-items" :class="`menu-items--${menuStyle}`" :style="menuStyles">
+      <li v-for="item in menuItems" :key="item" class="menu-item">
+        <a href="#" class="menu-link" :style="linkStyles">{{ item }}</a>
+      </li>
+    </ul>
+    <button class="menu-toggle" @click="mobileOpen = !mobileOpen">
+      <MenuIcon class="toggle-icon" />
+    </button>
+  </nav>
+</template>
+
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { Menu as MenuIcon, ChevronDown, Loader2 } from 'lucide-vue-next';
-import api from '@/services/api';
-import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { computed, ref, inject } from 'vue'
+import { Menu as MenuIcon } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-defineOptions({
-    inheritAttrs: false
-});
+const props = defineProps({ module: { type: Object, required: true } })
 
-const props = defineProps({
-    items: {
-        type: Array,
-        default: () => []
-    },
-    menu_id: { type: [String, Number], default: null },
-    style: { type: String, default: 'horizontal' },
-    alignment: { type: String, default: 'center' },
-    show_mobile_toggle: { type: Boolean, default: true },
-    mobile_breakpoint: { type: String, default: 'md' },
-    padding: { type: String, default: 'py-4' },
-    bgColor: { type: String, default: '' }
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
+const mobileOpen = ref(false)
+const menuItems = ['Home', 'About', 'Services', 'Portfolio', 'Contact']
+const showLogo = computed(() => getResponsiveValue(settings.value, 'showLogo', device.value))
+const logoPosition = computed(() => getResponsiveValue(settings.value, 'logoPosition', device.value) || 'left')
+const menuStyle = computed(() => getResponsiveValue(settings.value, 'style', device.value) || 'horizontal')
 
-const systemItems = ref(null);
-const loading = ref(false);
-const mobileOpen = ref(false);
-const openDropdown = ref(null);
+const wrapperStyles = computed(() => {
+  const styles = { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '24px',
+    width: '100%'
+  }
+  
+  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
+  if (alignment === 'center') styles.justifyContent = 'center'
+  else if (alignment === 'right') styles.justifyContent = 'flex-end'
+  else styles.justifyContent = 'flex-start'
 
-const displayItems = computed(() => {
-    if (props.menu_id && systemItems.value) {
-        return systemItems.value;
-    }
-    return props.items && props.items.length > 0 ? props.items : [
-        { label: 'Home', url: '/', children: [] },
-        { label: 'Blog', url: '/blog', children: [] },
-        { label: 'Contact', url: '/contact', children: [] }
-    ];
-});
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
 
-const fetchSystemMenu = async () => {
-    if (!props.menu_id) {
-        systemItems.value = null;
-        return;
-    }
+const menuStyles = computed(() => {
+  const bgColor = getResponsiveValue(settings.value, 'menuBackgroundColor', device.value) || ''
+  return { 
+    backgroundColor: bgColor 
+  }
+})
 
-    loading.value = true;
-    try {
-        const response = await api.get(`/cms/menus/${props.menu_id}`);
-        const data = parseSingleResponse(response);
-        // Menu item format might need transformation
-        systemItems.value = ensureArray(data?.items);
-    } catch (error) {
-        console.error('Failed to fetch system menu:', error);
-    } finally {
-        loading.value = false;
-    }
-};
-
-onMounted(fetchSystemMenu);
-watch(() => props.menu_id, fetchSystemMenu);
-
-const containerClasses = computed(() => {
-    return ['transition-all duration-300', props.padding].filter(Boolean);
-});
-
-const navClasses = computed(() => {
-    const alignments = {
-        left: 'justify-start',
-        center: 'justify-center',
-        right: 'justify-end'
-    };
-    return ['hidden md:flex items-center gap-1', alignments[props.alignment] || 'justify-center'];
-});
-
-const toggleDropdown = (index) => {
-    openDropdown.value = openDropdown.value === index ? null : index;
-};
+const linkStyles = computed(() => {
+  const styles = getTypographyStyles(settings.value, 'menu_', device.value)
+  const hoverColor = getResponsiveValue(settings.value, 'menu_colorHover', device.value) || '#2059ea'
+  return {
+    ...styles,
+    textDecoration: 'none',
+    '--hover-color': hoverColor
+  }
+})
 </script>
 
-<template>
-    <nav 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-        class="relative"
-    >
-        <div v-if="loading" class="absolute inset-0 bg-background/50 flex items-center justify-center z-10 rounded-lg">
-            <Loader2 class="w-5 h-5 animate-spin text-primary" />
-        </div>
-
-        <div class="container mx-auto px-6">
-            <!-- Desktop Menu -->
-            <ul :class="navClasses">
-                <li 
-                    v-for="(item, index) in displayItems" 
-                    :key="index"
-                    class="relative group"
-                >
-                    <a 
-                        :href="item.url || '#'"
-                        class="flex items-center gap-1 px-4 py-2 font-medium text-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted"
-                        @click="item.children?.length ? ($event.preventDefault(), toggleDropdown(index)) : null"
-                    >
-                        {{ item.title || item.label }}
-                        <ChevronDown 
-                            v-if="item.children?.length" 
-                            class="w-4 h-4 transition-transform"
-                            :class="{ 'rotate-180': openDropdown === index }"
-                        />
-                    </a>
-                    
-                    <!-- Dropdown -->
-                    <ul 
-                        v-if="item.children?.length"
-                        class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-                    >
-                        <li class="bg-card border rounded-xl shadow-lg py-2 min-w-[200px]">
-                            <a 
-                                v-for="(child, childIndex) in item.children" 
-                                :key="childIndex"
-                                :href="child.url || '#'"
-                                class="block px-4 py-2 text-sm text-foreground hover:text-primary hover:bg-muted transition-colors"
-                            >
-                                {{ child.title || child.label }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <!-- Mobile Toggle -->
-            <div v-if="show_mobile_toggle" class="flex md:hidden justify-end">
-                <button 
-                    @click="mobileOpen = !mobileOpen"
-                    class="p-2 rounded-lg hover:bg-muted transition-colors"
-                >
-                    <MenuIcon class="w-6 h-6" />
-                </button>
-            </div>
-            
-            <!-- Mobile Menu -->
-            <div 
-                v-if="mobileOpen"
-                class="md:hidden mt-4 bg-card border rounded-xl p-4 space-y-2"
-            >
-                <template v-for="(item, index) in displayItems" :key="index">
-                    <a 
-                        :href="item.url || '#'"
-                        class="block px-4 py-2 font-medium rounded-lg hover:bg-muted transition-colors"
-                        @click="!item.children?.length && (mobileOpen = false)"
-                    >
-                        {{ item.title || item.label }}
-                    </a>
-                    <div v-if="item.children?.length" class="pl-4 space-y-1">
-                        <a 
-                            v-for="(child, childIndex) in item.children" 
-                            :key="childIndex"
-                            :href="child.url || '#'"
-                            class="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
-                            @click="mobileOpen = false"
-                        >
-                            {{ child.title || child.label }}
-                        </a>
-                    </div>
-                </template>
-            </div>
-        </div>
-    </nav>
-</template>
+<style scoped>
+.menu-block { position: relative; }
+.menu-items { display: flex; list-style: none; margin: 0; padding: 0; gap: 24px; }
+.menu-items--vertical { flex-direction: column; gap: 12px; }
+.menu-link { padding: 8px 0; transition: color 0.2s; }
+.menu-link:hover { color: var(--hover-color, #2059ea); }
+.logo-image { height: 40px; width: auto; }
+.menu-toggle { display: none; background: none; border: none; cursor: pointer; }
+.toggle-icon { width: 24px; height: 24px; }
+@media (max-width: 980px) {
+  .menu-items { display: none; }
+  .menu-toggle { display: block; }
+}
+</style>

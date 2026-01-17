@@ -1,7 +1,7 @@
 <template>
     <footer class="bg-card text-card-foreground mt-auto border-t border-border">
         <div class="container mx-auto px-4 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div :class="['grid gap-12', isDesktop ? 'grid-cols-4' : 'grid-cols-1']">
                 <!-- Brand -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <div class="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+            <div :class="['mt-16 pt-8 border-t border-border flex justify-between items-center gap-4', isDesktop ? 'flex-row' : 'flex-col']">
                 <p class="text-muted-foreground text-sm">
                     {{ getSetting('footer_text', `© ${new Date().getFullYear()} Janari. All rights reserved.`) }}
                 </p>
@@ -141,13 +141,17 @@ import { useMenu } from '../../../../composables/useMenu'
 import { useCmsStore } from '../../../../stores/cms'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
+import { useResponsiveDevice } from '../../../../components/builder/core/useResponsiveDevice';
 import { newsletterSchema } from '../../../../schemas'
 
 const { t } = useI18n()
 const { getSetting } = useTheme()
 const { menus, fetchMenuByLocation } = useMenu()
+const device = useResponsiveDevice();
 const toast = useToast()
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(newsletterSchema)
+
+const isDesktop = computed(() => device.value === 'desktop');
 const loading = ref(false)
 const email = ref('')
 

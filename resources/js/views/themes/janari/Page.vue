@@ -52,7 +52,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/services/api';
-import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue';
+import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
 
 const route = useRoute();
 const pageData = ref(null);

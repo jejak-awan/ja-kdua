@@ -1,82 +1,101 @@
 <template>
-    <section 
-        :class="['transition-all duration-500', padding, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width, alignmentClass]">
-            <div 
-                class="text-7xl md:text-8xl font-extrabold tabular-nums tracking-tight"
-                :style="{ color: numberColor || 'inherit' }"
-            >
-                {{ prefix }}{{ displayNumber }}{{ suffix }}
-            </div>
-            <p 
-                v-if="label" 
-                class="mt-4 text-lg font-medium opacity-80"
-            >
-                {{ label }}
-            </p>
-        </div>
-    </section>
+  <div class="counter-block" :style="wrapperStyles">
+    <div class="counter-number" :style="numberStyles">
+      {{ prefixValue }}{{ displayNumber }}{{ suffixValue }}
+    </div>
+    <div v-if="titleValue" class="counter-title" :style="titleStyles">
+      {{ titleValue }}
+    </div>
+  </div>
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, inject } from 'vue'
+import { 
+  getBackgroundStyles,
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles,
+  getSizingStyles,
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    number: { type: [Number, String], default: 100 },
-    prefix: { type: String, default: '' },
-    suffix: { type: String, default: '' },
-    label: { type: String, default: '' },
-    duration: { type: Number, default: 2000 },
-    alignment: { type: String, default: 'center' },
-    numberColor: { type: String, default: '' },
-    width: { type: String, default: 'max-w-xl' },
-    padding: { type: String, default: 'py-12' },
-    bgColor: String,
-    animation: { type: String, default: '' }
-});
+  module: {
+    type: Object,
+    required: true
+  }
+})
 
-const displayNumber = ref(0);
-const targetNumber = computed(() => parseInt(props.number) || 0);
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const alignmentClass = computed(() => ({
-    'left': 'text-left',
-    'center': 'text-center',
-    'right': 'text-right'
-}[props.alignment] || 'text-center'));
+const targetNumber = computed(() => parseInt(getResponsiveValue(settings.value, 'number', device.value)) || 100)
+const prefixValue = computed(() => getResponsiveValue(settings.value, 'prefix', device.value) || '')
+const suffixValue = computed(() => getResponsiveValue(settings.value, 'suffix', device.value) || '')
+const titleValue = computed(() => getResponsiveValue(settings.value, 'title', device.value))
 
-const animateCounter = () => {
-    const start = 0;
-    const end = targetNumber.value;
-    const duration = props.duration;
-    const startTime = performance.now();
-    
-    const animate = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function (ease-out)
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        displayNumber.value = Math.floor(start + (end - start) * easeOut);
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        }
-    };
-    
-    requestAnimationFrame(animate);
-};
+const displayNumber = ref(0)
 
 onMounted(() => {
-    animateCounter();
-});
+  if (getResponsiveValue(settings.value, 'animateOnView', device.value) !== false) {
+    animateNumber()
+  } else {
+    displayNumber.value = targetNumber.value
+  }
+})
 
-watch(() => props.number, () => {
-    animateCounter();
-});
+const animateNumber = () => {
+  const duration = getResponsiveValue(settings.value, 'duration', device.value) || 2000
+  const steps = 60
+  const stepDuration = duration / steps
+  const increment = targetNumber.value / steps
+  let current = 0
+  
+  const timer = setInterval(() => {
+    current += increment
+    if (current >= targetNumber.value) {
+      displayNumber.value = targetNumber.value
+      clearInterval(timer)
+    } else {
+      displayNumber.value = Math.floor(current)
+    }
+  }, stepDuration)
+}
+
+const wrapperStyles = computed(() => {
+  const styles = { 
+    textAlign: getResponsiveValue(settings.value, 'alignment', device.value) || 'center',
+    width: '100%'
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
+
+const numberStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'number_', device.value)
+})
+
+const titleStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'title_', device.value)
+})
 </script>
+
+<style scoped>
+.counter-block { width: 100%; }
+.counter-number { font-variant-numeric: tabular-nums; }
+.counter-title { text-transform: uppercase; letter-spacing: 0.5px; }
+</style>

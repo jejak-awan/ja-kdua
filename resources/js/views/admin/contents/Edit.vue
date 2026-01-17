@@ -100,6 +100,8 @@
             <div :class="[isSidebarOpen ? 'lg:col-span-8' : 'lg:col-span-12', 'space-y-8 transition-all duration-300 ease-in-out']">
                 <ContentMain
                     v-model="form"
+                    @save="handleSubmit"
+                    @mode-selected="handleModeSelected"
                 />
             </div>
 
@@ -204,7 +206,8 @@ const form = ref({
         title: ''
     },
     blocks: [],
-    comment_status: true
+    comment_status: true,
+    editor_type: null
 });
 
 const isDirty = computed(() => {
@@ -293,7 +296,8 @@ const fetchContent = async () => {
                 title: ''
             },
             blocks: content.blocks || [],
-            comment_status: content.comment_status !== undefined ? content.comment_status : true
+            comment_status: content.comment_status !== undefined ? content.comment_status : true,
+            editor_type: content.editor_type || null
         };
 
         // Handle menu items
@@ -436,6 +440,16 @@ const fetchMenus = async () => {
         menus.value = Array.isArray(data) ? data : [];
     } catch (error) {
         console.error('Failed to fetch menus:', error);
+    }
+};
+
+const handleModeSelected = (mode) => {
+    form.value.editor_type = mode;
+    // Only auto-open sidebar if classic is selected
+    if (mode === 'classic') {
+        isSidebarOpen.value = true;
+    } else {
+        isSidebarOpen.value = false;
     }
 };
 

@@ -1,86 +1,76 @@
 <template>
-    <section 
-        :class="['transition-all duration-500', padding, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto', width]">
-            <div 
-                :class="['relative', heightClass]"
-            >
-                <!-- Line Divider -->
-                <div 
-                    v-if="style === 'line'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2"
-                    :class="[lineThickness]"
-                    :style="{ backgroundColor: color }"
-                ></div>
-                
-                <!-- Dashed Divider -->
-                <div 
-                    v-else-if="style === 'dashed'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2 border-t-2 border-dashed"
-                    :style="{ borderColor: color }"
-                ></div>
-                
-                <!-- Dotted Divider -->
-                <div 
-                    v-else-if="style === 'dotted'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2 border-t-2 border-dotted"
-                    :style="{ borderColor: color }"
-                ></div>
-                
-                <!-- Double Line -->
-                <div 
-                    v-else-if="style === 'double'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex flex-col gap-1"
-                >
-                    <div class="h-0.5" :style="{ backgroundColor: color }"></div>
-                    <div class="h-0.5" :style="{ backgroundColor: color }"></div>
-                </div>
-                
-                <!-- Gradient Divider -->
-                <div 
-                    v-else-if="style === 'gradient'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-0.5"
-                    :style="{ background: `linear-gradient(to right, transparent, ${color}, transparent)` }"
-                ></div>
-                
-                <!-- Shadow Divider -->
-                <div 
-                    v-else-if="style === 'shadow'"
-                    class="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-px bg-gradient-to-b from-border to-transparent shadow-lg"
-                ></div>
-            </div>
-        </div>
-    </section>
+  <div class="divider-block" :style="wrapperStyles">
+    <hr v-if="settings.visible !== false" class="divider-line" :style="lineStyles" />
+  </div>
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
-import { computed } from 'vue';
+import { computed, inject } from 'vue'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getFilterStyles,
+  getTransformStyles,
+  getResponsiveValue
+} from '../core/styleUtils'
 
 const props = defineProps({
-    style: { type: String, default: 'line' },
-    color: { type: String, default: 'hsl(var(--border))' },
-    height: { type: String, default: 'medium' },
-    width: { type: String, default: 'max-w-full' },
-    padding: { type: String, default: 'py-6' },
-    bgColor: String,
-    animation: { type: String, default: '' }
-});
+  module: {
+    type: Object,
+    required: true
+  }
+})
 
-const heightClass = computed(() => ({
-    'small': 'h-4',
-    'medium': 'h-8',
-    'large': 'h-16'
-}[props.height] || 'h-8'));
+const builder = inject('builder')
+const device = computed(() => builder?.device || 'desktop')
 
-const lineThickness = computed(() => ({
-    'small': 'h-px',
-    'medium': 'h-0.5',
-    'large': 'h-1'
-}[props.height] || 'h-0.5'));
+const wrapperStyles = computed(() => {
+  const styles = {
+    width: '100%',
+    display: 'flex'
+  }
+  
+  const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+  if (align === 'center') {
+    styles.justifyContent = 'center'
+  } else if (align === 'right') {
+    styles.justifyContent = 'flex-end'
+  } else {
+    styles.justifyContent = 'flex-start'
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
+
+const lineStyles = computed(() => {
+  const weight = getResponsiveValue(settings.value, 'weight', device.value) || 1
+  const width = getResponsiveValue(settings.value, 'width', device.value) || '100%'
+  const style = getResponsiveValue(settings.value, 'style', device.value) || 'solid'
+  const color = getResponsiveValue(settings.value, 'color', device.value) || '#cccccc'
+  
+  return {
+    border: 'none',
+    borderTop: `${weight}px ${style} ${color}`,
+    width: width,
+    margin: 0
+  }
+})
 </script>
+
+<style scoped>
+.divider-block { box-sizing: border-box; }
+.divider-line { flex-shrink: 0; }
+</style>

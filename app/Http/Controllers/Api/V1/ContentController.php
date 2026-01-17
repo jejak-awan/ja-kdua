@@ -205,6 +205,7 @@ class ContentController extends BaseApiController
                 'new_tags.*' => 'string|max:50',
                 'blocks' => 'nullable|array',
                 'comment_status' => 'boolean',
+                'editor_type' => 'nullable|string|in:classic,builder',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -270,6 +271,7 @@ class ContentController extends BaseApiController
                 'new_tags.*' => 'string|max:50',
                 'blocks' => 'nullable|array',
                 'comment_status' => 'boolean',
+                'editor_type' => 'nullable|string|in:classic,builder',
             ];
 
             // If publishing, require body OR blocks
@@ -373,6 +375,7 @@ class ContentController extends BaseApiController
                 'meta_keywords' => 'nullable|string|max:255',
                 'og_image' => 'nullable|string',
                 'custom_fields' => 'nullable|array',
+                'editor_type' => 'nullable|string|in:classic,builder',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());

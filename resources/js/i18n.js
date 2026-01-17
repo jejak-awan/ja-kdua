@@ -2,6 +2,8 @@ import { createI18n } from 'vue-i18n';
 import config from '../lang/config';
 import en from '../lang/en/index.js';
 import id from '../lang/id/index.js';
+import builderTranslations from './components/builder/lang/index.js';
+import _ from 'lodash';
 
 /**
  * Detect the best locale to use
@@ -30,10 +32,16 @@ const detectLocale = () => {
 
 const detectedLocale = detectLocale();
 
+// Merge global messages with builder-specific translations
+const messages = {
+    en: _.merge({}, en, builderTranslations.en),
+    id: _.merge({}, id, builderTranslations.id)
+};
+
 const i18n = createI18n({
     ...config,
     locale: detectedLocale,
-    messages: { en, id },
+    messages: messages,
 });
 
 // Save detected locale to localStorage for next visit

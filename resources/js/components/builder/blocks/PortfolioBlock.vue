@@ -1,164 +1,114 @@
+<template>
+  <div class="portfolio-block" :style="wrapperStyles">
+    <!-- Filter -->
+    <div v-if="settings.showFilter !== false" class="portfolio-filter">
+      <button v-for="cat in categories" :key="cat" class="filter-btn" :class="{ 'filter-btn--active': activeFilter === cat }" :style="filterStyles" @click="activeFilter = cat">{{ cat }}</button>
+    </div>
+    
+    <!-- Grid -->
+    <div class="portfolio-grid" :style="gridStyles">
+      <div v-for="item in mockItems" :key="item.id" class="portfolio-item" :class="`portfolio-item--${hoverEffect}`" :style="itemStyles">
+        <div class="item-image" :style="imageStyles">
+          <Layers class="placeholder-icon" />
+        </div>
+        <div class="item-overlay" :style="overlayStyles">
+          <span v-if="settings.showCategory !== false" class="item-category" :style="categoryStyles">{{ item.category }}</span>
+          <h4 v-if="settings.showTitle !== false" class="item-title" :style="titleStyles">{{ item.title }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import api from '@/services/api';
-import { Loader2, ExternalLink } from 'lucide-vue-next';
+import { computed, ref, inject } from 'vue'
+import { Layers } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-defineOptions({
-    inheritAttrs: false
-});
+const props = defineProps({ module: { type: Object, required: true } })
 
-const props = defineProps({
-    title: { type: String, default: '' },
-    category: { type: String, default: '' },
-    limit: { type: Number, default: 9 },
-    columns: { type: String, default: '3' },
-    show_filter: { type: Boolean, default: true },
-    show_title: { type: Boolean, default: true },
-    show_category: { type: Boolean, default: true },
-    style: { type: String, default: 'cards' },
-    padding: { type: String, default: 'py-16' },
-    bgColor: { type: String, default: '' }
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const projects = ref([]);
-const loading = ref(true);
-const activeFilter = ref('all');
-const categories = ref(['all']);
+const categories = ['All', 'Web', 'Mobile', 'Branding']
+const activeFilter = ref('All')
+const hoverEffect = computed(() => settings.value.hoverEffect || 'overlay')
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding].filter(Boolean);
-});
+const mockItems = computed(() => Array.from({ length: settings.value.itemsPerPage || 9 }, (_, i) => ({
+  id: i + 1, title: `Project ${i + 1}`, category: categories[1 + (i % 3)]
+})))
 
-const gridClass = computed(() => {
-    const cols = {
-        '2': 'grid-cols-1 md:grid-cols-2',
-        '3': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-        '4': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
-    };
-    return cols[props.columns] || cols['3'];
-});
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
 
-const filteredProjects = computed(() => {
-    if (activeFilter.value === 'all') return projects.value;
-    return projects.value.filter(p => 
-        (p.category?.name || p.category) === activeFilter.value
-    );
-});
-
-const fetchProjects = async () => {
-    loading.value = true;
-    try {
-        const params = {
-            type: 'project',
-            limit: props.limit,
-            status: 'published'
-        };
-        if (props.category) params.category = props.category;
-        
-        const response = await api.get('/cms/contents', { params });
-        projects.value = response.data?.data || response.data || [];
-        
-        // Extract unique categories
-        const cats = new Set(['all']);
-        projects.value.forEach(p => {
-            if (p.category?.name) cats.add(p.category.name);
-            else if (typeof p.category === 'string') cats.add(p.category);
-        });
-        categories.value = Array.from(cats);
-    } catch (err) {
-        console.warn('Portfolio: Failed to fetch projects', err);
-        // Fallback demo data
-        projects.value = Array.from({ length: props.limit }, (_, i) => ({
-            id: i + 1,
-            title: `Project ${i + 1}`,
-            featured_image: null,
-            category: { name: ['Design', 'Development', 'Marketing'][i % 3] },
-            slug: '#'
-        }));
-        categories.value = ['all', 'Design', 'Development', 'Marketing'];
-    } finally {
-        loading.value = false;
+const gridStyles = computed(() => {
+    const cols = getResponsiveValue(settings.value, 'columns', device.value) || 3
+    const gap = getResponsiveValue(settings.value, 'gap', device.value) || 20
+    return { 
+        display: 'grid', 
+        gridTemplateColumns: `repeat(${cols}, 1fr)`, 
+        gap: `${gap}px` 
     }
-};
+})
 
-onMounted(fetchProjects);
-watch(() => [props.category, props.limit], fetchProjects);
+const itemStyles = computed(() => {
+  const styles = { position: 'relative', overflow: 'hidden', cursor: 'pointer' }
+  // Item overrides could be added here if needed, or if border applies to block vs items. 
+  // Assuming border mostly applies to block in this case, but let's see. 
+  // Based on Portfolio.js, border is in the main design tab, so it likely applies to the wrapper.
+  return styles
+})
+
+const imageStyles = computed(() => {
+  const ratio = { '1:1': '100%', '4:3': '75%', '16:9': '56.25%' }[settings.value.imageAspectRatio] || '100%'
+  return { paddingTop: ratio, backgroundColor: '#f0f0f0', position: 'relative' }
+})
+
+const overlayStyles = computed(() => ({ 
+    backgroundColor: settings.value.overlayColor || 'rgba(32, 89, 234, 0.9)', 
+    color: settings.value.textColor || '#ffffff' 
+}))
+
+const filterStyles = computed(() => getTypographyStyles(settings.value, 'filter_', device.value))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const categoryStyles = computed(() => getTypographyStyles(settings.value, 'category_', device.value))
+
 </script>
 
-<template>
-    <section 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div class="container mx-auto px-6">
-            <h2 v-if="title" class="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-center">{{ title }}</h2>
-            
-            <!-- Filter -->
-            <div v-if="show_filter && categories.length > 1" class="flex flex-wrap justify-center gap-2 mb-10">
-                <button 
-                    v-for="cat in categories" 
-                    :key="cat"
-                    @click="activeFilter = cat"
-                    :class="[
-                        'px-4 py-2 text-sm font-medium rounded-full transition-all',
-                        activeFilter === cat 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted hover:bg-muted/80 text-foreground'
-                    ]"
-                >
-                    {{ cat === 'all' ? 'All' : cat }}
-                </button>
-            </div>
-            
-            <!-- Loading -->
-            <div v-if="loading" class="flex items-center justify-center py-20">
-                <Loader2 class="w-8 h-8 animate-spin text-primary" />
-            </div>
-            
-            <!-- Grid -->
-            <div v-else :class="['grid gap-6', gridClass]">
-                <article 
-                    v-for="project in filteredProjects" 
-                    :key="project.id"
-                    :class="[
-                        'group relative overflow-hidden transition-all duration-300',
-                        style === 'cards' ? 'bg-card border rounded-2xl shadow-sm hover:shadow-xl' : 'rounded-xl'
-                    ]"
-                >
-                    <!-- Image -->
-                    <div class="aspect-[4/3] overflow-hidden bg-muted">
-                        <img 
-                            v-if="project.featured_image" 
-                            :src="project.featured_image" 
-                            :alt="project.title"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <span class="text-xs">No Image</span>
-                        </div>
-                        
-                        <!-- Overlay -->
-                        <div 
-                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
-                        >
-                            <a 
-                                :href="`/project/${project.slug || project.id}`"
-                                class="w-12 h-12 rounded-full bg-background text-foreground flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform"
-                            >
-                                <ExternalLink class="w-5 h-5" />
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Info -->
-                    <div v-if="style === 'cards' && (show_title || show_category)" class="p-4">
-                        <span v-if="show_category" class="text-[10px] font-bold text-primary">
-                            {{ project.category?.name || project.category || 'Project' }}
-                        </span>
-                        <h3 v-if="show_title" class="font-bold mt-1 line-clamp-1">{{ project.title }}</h3>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-</template>
+<style scoped>
+.portfolio-block { width: 100%; }
+.portfolio-filter { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+.filter-btn { padding: 8px 20px; border: 1px solid #e0e0e0; background: #fff; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+.filter-btn--active, .filter-btn:hover { background: #2059ea; color: #fff; border-color: #2059ea; }
+.portfolio-item { position: relative; }
+.item-image { display: flex; align-items: center; justify-content: center; }
+.placeholder-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; color: #ccc; }
+.item-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+.portfolio-item:hover .item-overlay { opacity: 1; }
+.item-category { text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+.item-title { margin: 8px 0 0; }
+.portfolio-item--zoom:hover .item-image { transform: scale(1.1); transition: transform 0.3s; }
+.portfolio-item--grayscale .item-image { filter: grayscale(100%); }
+.portfolio-item--grayscale:hover .item-image { filter: grayscale(0); }
+</style>

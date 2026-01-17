@@ -1,253 +1,175 @@
 <template>
-    <div 
-        class="column-block relative h-full flex transition-all duration-300"
-        :class="[
-            direction,
-            justify,
-            align,
-            `gap-${gap}`,
-            radius,
-            // Builder interaction
-            isBuilder && !isPreview && isSelected ? 'ring-2 ring-primary/50' : ''
-        ]"
-        :style="columnStyle"
-        v-bind="$attrs"
-    >
-        <!-- Builder Mode: Draggable content -->
-        <draggable 
-            v-if="isBuilder && !isPreview"
-            v-model="nestedBlocks" 
-            item-key="id"
-            :group="{ name: 'blocks', pull: true, put: true }"
-            handle=".drag-handle"
-            class="flex-1 flex min-h-[50px]"
-            :class="[
-                direction, justify, align, `gap-${gap}`,
-                (!nestedBlocks || nestedBlocks.length === 0) ? 'border-2 border-dashed border-muted-foreground/20 rounded-xl bg-muted/20 items-center justify-center' : ''
-            ]"
-            ghost-class="column-ghost"
-        >
-            <template #item="{ element: block, index }">
-                <BlockWrapper 
-                    :block="block" 
-                    :index="index"
-                    :isNested="true"
-                    class="w-full"
-                    @edit="onEditBlock(block.id)"
-                    @duplicate="onDuplicate(index)"
-                    @delete="onDelete(index)"
-                    @wrap="onWrapInContainer(index)"
-                    @split="onSplitNested(index)"
-                />
-            </template>
-
-            <!-- Empty State -->
-            <template #header v-if="!nestedBlocks || nestedBlocks.length === 0">
-                <div 
-                    class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-dashed border-muted-foreground/10 hover:border-primary/50 hover:bg-primary/5 transition-all w-full h-full justify-center group/btn cursor-pointer"
-                    @click.stop="showBlockPicker = true"
-                >
-                    <Plus class="w-4 h-4 text-muted-foreground group-hover/btn:text-primary" />
-                    <span class="text-[10px] font-bold text-muted-foreground group-hover/btn:text-primary block">Add Block</span>
-                </div>
-            </template>
-        </draggable>
-
-        <!-- Preview Mode: Render content -->
-        <div 
-            v-else
-            class="flex-1 flex"
-            :class="[direction, justify, align, `gap-${gap}`]"
-        >
-            <BlockRenderer 
-                v-if="blocks && blocks.length > 0"
-                :blocks="blocks" 
-                :context="context"
-            />
-        </div>
-
-        <!-- Block Picker Modal -->
-        <BlockPicker 
-            v-if="showBlockPicker"
-            :visible="true"
-            @close="showBlockPicker = false"
-            @add="handleAddBlock"
-            :target-block-id="id"
-        />
+  <div 
+    :id="settings.cssId"
+    class="column-block"
+    :style="columnStyles"
+    :class="cssClass"
+  >
+    <BackgroundMedia :settings="settings" />
+    
+    <a 
+      v-if="settings.link_url" 
+      :href="settings.link_url" 
+      :target="settings.link_target" 
+      class="column-link-overlay"
+      @click.prevent
+    ></a>
+    
+    <!-- Column Children (Modules) -->
+    <slot />
+    
+    <!-- Empty State -->
+    <div v-if="!hasChildren" class="column-block__empty">
+      <button class="add-btn" @click.stop="addModule">
+        <Plus :size="16" />
+      </button>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
-import draggable from 'vuedraggable';
-import { Plus } from 'lucide-vue-next';
-import BlockWrapper from '../canvas/BlockWrapper.vue';
-import BlockRenderer from './BlockRenderer.vue';
-import BlockPicker from '../canvas/BlockPicker.vue';
-import { generateUUID } from '../utils';
-
-defineOptions({
-  inheritAttrs: false
-});
+import { computed, inject } from 'vue'
+import { Plus } from 'lucide-vue-next'
+import { 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSpacingStyles, 
+  getBackgroundStyles,
+  getSizingStyles,
+  getFilterStyles,
+  getTransformStyles,
+  getResponsiveValue
+} from '../core/styleUtils'
+import { BackgroundMedia } from '../canvas'
 
 const props = defineProps({
-    id: String,
-    // Layout
-    direction: { type: String, default: 'flex-col' },
-    justify: { type: String, default: 'justify-start' },
-    align: { type: String, default: 'items-stretch' },
-    gap: { type: String, default: '4' },
-    // Spacing
-    padding: { type: Object, default: () => ({ top: '0', right: '0', bottom: '0', left: '0' }) },
-    // Style
-    bgColor: { type: String, default: 'transparent' },
-    borderWidth: { type: Number, default: 0 },
-    borderColor: { type: String, default: '#e5e7eb' },
-    radius: { type: String, default: 'rounded-none' },
-    // Content
-    blocks: { type: Array, default: () => [] },
-    context: Object,
-    isPreview: { type: Boolean, default: false }
-});
+  module: {
+    type: Object,
+    required: true
+  },
+  isPreview: {
+    type: Boolean,
+    default: false
+  }
+})
 
-const builder = inject('builder', null);
-const isBuilder = computed(() => !!builder);
-const showBlockPicker = ref(false);
+// Inject builder
+const builder = inject('builder')
 
-const blockObject = computed(() => {
-    if (!builder || !props.id) return null;
-    return builder.findBlockById(props.id);
-});
+import { useResponsiveDevice } from '../core/useResponsiveDevice'
 
-const isSelected = computed(() => builder?.activeBlockId?.value === props.id);
+// Computed
+const settings = computed(() => props.module?.settings || {})
 
-const nestedBlocks = computed({
-    get: () => {
-        // Return direct reference to blocks array for vuedraggable compatibility
-        if (blockObject.value?.settings?.blocks) {
-            return blockObject.value.settings.blocks;
-        }
-        // Fallback: ensure we create the array if it doesn't exist
-        if (blockObject.value) {
-            if (!blockObject.value.settings) blockObject.value.settings = {};
-            if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
-            return blockObject.value.settings.blocks;
-        }
-        return props.blocks || [];
-    },
-    set: (val) => {
-        if (blockObject.value) {
-            if (!blockObject.value.settings) blockObject.value.settings = {};
-            blockObject.value.settings.blocks = val;
-            builder?.takeSnapshot();
-        }
-    }
-});
+const hasChildren = computed(() => {
+  return props.module?.children && props.module.children.length > 0
+})
 
-const columnStyle = computed(() => {
-    const style = {
-        backgroundColor: props.bgColor || 'transparent'
-    };
+const device = useResponsiveDevice()
 
-    // Padding
-    if (props.padding) {
-        style.paddingTop = props.padding.top || '0';
-        style.paddingRight = props.padding.right || '0';
-        style.paddingBottom = props.padding.bottom || '0';
-        style.paddingLeft = props.padding.left || '0';
-    }
+const columnStyles = computed(() => {
+  const styles = {
+    transition: 'background 0.2s ease, box-shadow 0.2s ease'
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
 
-    // Border
-    if (props.borderWidth > 0) {
-        style.borderWidth = `${props.borderWidth}px`;
-        style.borderStyle = 'solid';
-        style.borderColor = props.borderColor || '#e5e7eb';
-    }
+  const verticalAlign = getResponsiveValue(settings.value, 'verticalAlignment', device.value) || 'top'
+  const alignMap = {
+    top: 'flex-start',
+    center: 'center',
+    bottom: 'flex-end'
+  }
+  styles.justifyContent = alignMap[verticalAlign]
+  
+  return styles
+})
 
-    return style;
-});
+const cssClass = computed(() => settings.value.cssClass || '')
 
-const onEditBlock = (blockId) => {
-    if (builder) {
-        builder.activeBlockId.value = blockId;
-        builder.activeRightSidebarTab.value = 'properties';
-        builder.isRightSidebarOpen.value = true;
-    }
-};
-
-const onDuplicate = (index) => {
-    const original = nestedBlocks.value[index];
-    const clone = JSON.parse(JSON.stringify(original));
-    clone.id = generateUUID();
-    // Regenerate nested IDs
-    if (builder?.regenerateIds) {
-        builder.regenerateIds(clone);
-    }
-    nestedBlocks.value.splice(index + 1, 0, clone);
-    builder?.takeSnapshot();
-};
-
-const onDelete = (index) => {
-    nestedBlocks.value.splice(index, 1);
-    builder?.takeSnapshot();
-};
-
-const onWrapInContainer = (index) => {
-    const original = nestedBlocks.value[index];
-    const container = {
-        id: generateUUID(),
-        type: 'container',
-        settings: {
-            blocks: [original],
-            direction: 'flex-col',
-            padding: { top: '16px', right: '16px', bottom: '16px', left: '16px' }
-        }
-    };
-    nestedBlocks.value.splice(index, 1, container);
-    builder?.takeSnapshot();
-};
-
-const onSplitNested = (index) => {
-    const original = nestedBlocks.value[index];
-    const columns = {
-        id: generateUUID(),
-        type: 'columns',
-        settings: {
-            layout: '1-1',
-            stackOn: 'never',
-            gap: '8',
-            width: 'max-w-full',
-            padding: 'py-0',
-            blocks: [
-                {
-                    id: generateUUID(),
-                    type: 'column',
-                    settings: { blocks: [original] }
-                },
-                {
-                    id: generateUUID(),
-                    type: 'column',
-                    settings: { blocks: [] }
-                }
-            ]
-        }
-    };
-    nestedBlocks.value.splice(index, 1, columns);
-    builder?.takeSnapshot();
-};
-
-const handleAddBlock = (blockData) => {
-    nestedBlocks.value.push(blockData);
-    showBlockPicker.value = false;
-    builder?.takeSnapshot();
-};
+// Methods
+const addModule = () => {
+  builder?.openInsertModal(props.module.id)
+}
 </script>
 
 <style scoped>
-.column-ghost {
-    opacity: 0.5;
-    background: hsl(var(--primary) / 0.1);
-    border: 2px dashed hsl(var(--primary));
-    border-radius: 0.5rem;
+.column-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover Overlay Layer */
+.column-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--hover-bg-color, transparent);
+    background-image: var(--hover-bg-image, none);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.column-block:hover::before {
+    opacity: 1;
+}
+
+.column-link-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    cursor: pointer;
+}
+
+.column-block__empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  position: relative;
+  z-index: 6; /* Stay above link overlay */
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #1a1e25;
+  border: none;
+  border-radius: 50%;
+  color: #8899a6;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.add-btn:hover {
+  background: #2d323b;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 </style>

@@ -22,9 +22,10 @@ import {
     Copy,
     LayoutTemplate,
     History,
-    Edit2,
     FileX2,
-    Loader2
+    Loader2,
+    Type,
+    Layout
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
 import { useCmsStore } from '@/stores/cms';
@@ -158,12 +159,12 @@ const toggleFeatured = async (content) => {
 
 const getStatusBadgeClass = (status) => {
     switch (status) {
-        case 'published': return 'bg-emerald-500/10 text-emerald-500 border-emerald-200 dark:border-emerald-500/20';
-        case 'draft': return 'bg-slate-500/10 text-slate-500 border-slate-200 dark:border-slate-500/20';
-        case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-200 dark:border-amber-500/20';
-        case 'archived': return 'bg-rose-500/10 text-rose-500 border-rose-200 dark:border-rose-500/20';
-        case 'trashed': return 'bg-destructive/10 text-destructive border-destructive/20';
-        default: return 'bg-gray-500/10 text-gray-500 border-gray-200 dark:border-gray-500/20';
+        case 'published': return 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20';
+        case 'draft': return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        case 'pending': return 'bg-amber-500/10 text-amber-600 border-amber-200 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20';
+        case 'archived': return 'bg-rose-500/10 text-rose-600 border-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20';
+        case 'trashed': return 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/20 dark:text-red-400';
+        default: return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
 };
 
@@ -569,6 +570,7 @@ onMounted(() => {
                             <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Status</TableHead>
                             <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Featured</TableHead>
                             <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Date</TableHead>
+                            <TableHead class="px-6 py-4 text-xs font-bold text-muted-foreground">Editor</TableHead>
                             <TableHead class="px-6 py-4 text-center text-xs font-bold text-muted-foreground">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -614,6 +616,12 @@ onMounted(() => {
                                 <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <Calendar class="w-3.5 h-3.5" />
                                     {{ formatDate(content.created_at) }}
+                                </div>
+                            </TableCell>
+                            <TableCell class="px-6 py-4">
+                                <div class="flex items-center gap-1.5">
+                                    <component :is="content.editor_type === 'builder' ? Layout : Type" class="w-3.5 h-3.5 text-muted-foreground" />
+                                    <span class="text-xs capitalize text-muted-foreground">{{ content.editor_type || 'Classic' }}</span>
                                 </div>
                             </TableCell>
                             <TableCell class="px-6 py-4 text-right">

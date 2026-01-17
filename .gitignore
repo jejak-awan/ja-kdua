@@ -114,3 +114,6 @@ _ide_helper_models.php
 # Task Management
 /docs/task/
 /docs/99-arsip/
+
+# External References (development only)
+/references/

@@ -62,7 +62,18 @@
                 "none": "None",
                 "medium": "Medium",
                 "large": "Large"
-            }
+            },
+            "actions": {
+                "reset": "Reset to Default",
+                "info": "Field Information",
+                "dynamicData": "Dynamic Data",
+                "responsive": "Responsive Editor",
+                "more": "More Options",
+                "copyAttributes": "Copy {label} Attributes",
+                "resetAttributes": "Reset {label} Attributes",
+                "manageGlobal": "Manage Global URLs"
+            },
+            "dynamicContent": "Dynamic Content"
         }
     },
     "properties": {

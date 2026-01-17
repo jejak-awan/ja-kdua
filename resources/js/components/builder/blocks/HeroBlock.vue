@@ -1,323 +1,141 @@
 <template>
-    <section 
-        :class="['relative overflow-hidden transition-all duration-500 h-full', radius, entranceAnimation]"
-        :style="sectionStyle"
-        v-bind="$attrs"
-    >
-        <!-- Background Layer -->
-        <div class="absolute inset-0 z-0" :style="backgroundStyle">
-            <!-- Parallax wrapper -->
-            <div 
-                v-if="bgImage && bgType === 'image'" 
-                class="absolute inset-0 bg-cover transition-transform duration-100"
-                :style="{ 
-                    backgroundImage: `url(${bgImage})`,
-                    backgroundSize: bgSize || 'cover',
-                    backgroundPosition: bgPosition || 'center',
-                    transform: parallaxEnabled ? `translateY(${parallaxOffset}px)` : 'none'
-                }"
-            ></div>
-        </div>
-
-        <!-- Overlay -->
-        <div 
-            v-if="overlayEnabled" 
-            class="absolute inset-0 z-[1]"
-            :style="{ backgroundColor: overlayColor, opacity: overlayOpacity / 100 }"
-        ></div>
-
-        <!-- Content -->
-        <div 
-            class="relative z-10 w-full h-full flex flex-col"
-            :class="[
-                verticalAlign === 'start' ? 'justify-start' : '',
-                verticalAlign === 'center' ? 'justify-center' : '',
-                verticalAlign === 'end' ? 'justify-end' : ''
-            ]"
-            :style="contentContainerStyle"
+  <div class="hero-block" :style="wrapperStyles">
+    <div class="hero-container" :style="containerStyles">
+      <h1 v-if="settings.title" class="hero-title" :style="titleStyles">{{ settings.title }}</h1>
+      <h2 v-if="settings.subtitle" class="hero-subtitle" :style="subtitleStyles">{{ settings.subtitle }}</h2>
+      
+      <div v-if="settings.content" class="hero-content" :style="bodyStyles" v-html="settings.content"></div>
+      
+      <div class="hero-buttons" v-if="settings.showButton1 || settings.showButton2">
+        <a 
+          v-if="settings.showButton1" 
+          :href="settings.buttonUrl" 
+          class="hero-btn hero-btn-primary"
+          :style="button1Styles"
         >
-            <div :style="{ maxWidth: `${contentMaxWidth}px`, margin: '0 auto', width: '100%' }">
-                <!-- Title -->
-                <component 
-                    :is="titleTag || 'h1'"
-                    v-if="title" 
-                    class="font-extrabold mb-6 tracking-tight transition-all duration-300"
-                    :style="titleStyle"
-                >
-                    {{ title }}
-                </component>
-                
-                <!-- Subtitle -->
-                <p 
-                    v-if="subtitle" 
-                    class="leading-relaxed mb-8 transition-all duration-300"
-                    :style="subtitleStyle"
-                >
-                    {{ subtitle }}
-                </p>
-
-                <!-- Nested Blocks Area -->
-                <div class="relative min-h-[50px]">
-                    <!-- Builder Mode -->
-                    <draggable 
-                        v-if="isBuilder && !isPreview"
-                        v-model="nestedBlocks" 
-                        item-key="id"
-                        :group="{ name: 'blocks', pull: true, put: true }"
-                        handle=".drag-handle"
-                        class="space-y-4 min-h-[50px] transition-colors rounded-xl p-2"
-                        :class="nestedBlocks.length === 0 ? 'border-2 border-dashed border-white/20 hover:border-white/50 bg-white/5' : ''"
-                        ghost-class="block-ghost"
-                    >
-                        <template #item="{ element: block, index }">
-                            <BlockWrapper 
-                                :block="block" 
-                                :index="index"
-                                :context="context"
-                                :isNested="true"
-                                @edit="onEditBlock(block.id)"
-                                @duplicate="onDuplicateNested(index)"
-                                @delete="onDeleteNested(index)"
-                            />
-                        </template>
-                         <template #footer>
-                             <div v-if="nestedBlocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center">
-                                <button 
-                                    @click.stop.prevent="showBlockPicker = true"
-                                    type="button"
-                                    class="text-sm font-medium text-white/50 hover:text-white transition-colors flex items-center gap-2"
-                                >
-                                    <Plus class="w-4 h-4" />
-                                    <span>Add Button or Element</span>
-                                </button>
-                            </div>
-                        </template>
-                    </draggable>
-
-                    <!-- Live Mode -->
-                    <div v-else class="space-y-4">
-                         <BlockRenderer 
-                            :blocks="nestedBlocks" 
-                            :context="context"
-                            :is-preview="isPreview"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Block Picker Modal -->
-    <BlockPicker 
-        :visible="showBlockPicker" 
-        @close="showBlockPicker = false"
-        @add="handleAddBlock"
-    />
+          {{ settings.buttonText }}
+        </a>
+        <a 
+          v-if="settings.showButton2" 
+          :href="settings.button2Url" 
+          class="hero-btn hero-btn-secondary"
+          :style="button2Styles"
+        >
+          {{ settings.button2Text }}
+        </a>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
-import draggable from 'vuedraggable';
-import { Plus } from 'lucide-vue-next';
-import BlockWrapper from '../canvas/BlockWrapper.vue';
-import BlockRenderer from './BlockRenderer.vue';
-import BlockPicker from '../canvas/BlockPicker.vue';
-import { generateUUID } from '../utils';
-
-defineOptions({
-  inheritAttrs: false
-});
+import { computed } from 'vue'
+import { inject } from 'vue'
+import { 
+  getSpacingStyles, 
+  getBackgroundStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    id: String,
-    // Content
-    title: String,
-    titleTag: { type: String, default: 'h1' },
-    subtitle: String,
-    
-    // Title Style
-    titleFontFamily: { type: String, default: 'inherit' },
-    titleSize: { type: Number, default: 56 },
-    titleWeight: { type: String, default: '700' },
-    titleAlign: { type: String, default: 'center' },
-    titleColor: { type: String, default: '#ffffff' },
-    titleShadow: { type: Boolean, default: true },
-    
-    // Subtitle Style
-    subtitleFontFamily: { type: String, default: 'inherit' },
-    subtitleSize: { type: Number, default: 20 },
-    subtitleWeight: { type: String, default: '400' },
-    subtitleColor: { type: String, default: 'rgba(255, 255, 255, 0.8)' },
-    subtitleMaxWidth: { type: Number, default: 700 },
-    
-    // Background
-    bgType: { type: String, default: 'color' },
-    bgColor: { type: String, default: '#18181b' },
-    bgImage: String,
-    bgSize: { type: String, default: 'cover' },
-    bgPosition: { type: String, default: 'center' },
-    gradientStart: { type: String, default: '#3b82f6' },
-    gradientEnd: { type: String, default: '#8b5cf6' },
-    gradientDirection: { type: String, default: 'to bottom right' },
-    
-    // Overlay
-    overlayEnabled: { type: Boolean, default: true },
-    overlayColor: { type: String, default: 'rgba(0, 0, 0, 0.5)' },
-    overlayOpacity: { type: Number, default: 50 },
-    
-    // Layout
-    minHeight: { type: Number, default: 500 },
-    contentMaxWidth: { type: Number, default: 1200 },
-    verticalAlign: { type: String, default: 'center' },
-    padding: { type: Object, default: () => ({ top: '80px', right: '24px', bottom: '80px', left: '24px' }) },
-    radius: { type: String, default: 'rounded-none' },
-    
-    // Animation
-    entranceAnimation: { type: String, default: 'animate-fade' },
-    animationDuration: { type: Number, default: 700 },
-    animationDelay: { type: Number, default: 0 },
-    parallaxEnabled: { type: Boolean, default: false },
-    parallaxSpeed: { type: Number, default: 0.5 },
-    
-    // Nested
-    blocks: { type: Array, default: () => [] },
-    context: Object,
-    isPreview: { type: Boolean, default: false }
-});
+  module: { type: Object, required: true }
+})
 
-const builder = inject('builder', null);
-const isBuilder = computed(() => !!builder);
-const showBlockPicker = ref(false);
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-// Parallax effect
-const parallaxOffset = ref(0);
-const handleScroll = () => {
-    if (props.parallaxEnabled) {
-        parallaxOffset.value = window.scrollY * props.parallaxSpeed;
-    }
-};
+const wrapperStyles = computed(() => {
+  const styles = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: '100%'
+  }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  if (!styles.minHeight) styles.minHeight = '400px'
+  
+  return styles
+})
 
-onMounted(() => {
-    if (props.parallaxEnabled) {
-        window.addEventListener('scroll', handleScroll);
-    }
-});
+const containerStyles = computed(() => {
+  const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+  const maxWidth = getResponsiveValue(settings.value, 'contentWidth', device.value) || 800
+  
+  return {
+    position: 'relative',
+    zIndex: 2,
+    width: '100%',
+    maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
+    textAlign: align,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')
+  }
+})
 
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-});
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subtitle_', device.value))
+const bodyStyles = computed(() => getTypographyStyles(settings.value, 'body_', device.value))
 
-// Computed styles
-const sectionStyle = computed(() => ({
-    minHeight: `${props.minHeight}px`,
-    animationDuration: `${props.animationDuration}ms`,
-    animationDelay: `${props.animationDelay}ms`
-}));
+const button1Styles = computed(() => ({
+  // Fallback styles for hero buttons
+  backgroundColor: '#2059ea',
+  color: 'white',
+  padding: '12px 32px',
+  borderRadius: '4px',
+  fontWeight: '600',
+  textDecoration: 'none'
+}))
 
-const backgroundStyle = computed(() => {
-    const style = {};
-    
-    switch (props.bgType) {
-        case 'color':
-            style.backgroundColor = props.bgColor;
-            break;
-        case 'gradient':
-            const direction = props.gradientDirection || 'to bottom right';
-            if (direction === 'radial') {
-                style.backgroundImage = `radial-gradient(circle, ${props.gradientStart}, ${props.gradientEnd})`;
-            } else {
-                style.backgroundImage = `linear-gradient(${direction}, ${props.gradientStart}, ${props.gradientEnd})`;
-            }
-            break;
-        case 'image':
-            // Image is handled separately in the template
-            if (!props.bgImage) {
-                style.backgroundColor = props.bgColor;
-            }
-            break;
-    }
-    
-    return style;
-});
+const button2Styles = computed(() => ({
+  backgroundColor: 'transparent',
+  border: '2px solid white',
+  color: 'white',
+  padding: '10px 30px',
+  borderRadius: '4px',
+  fontWeight: '600',
+  textDecoration: 'none'
+}))
 
-const contentContainerStyle = computed(() => {
-    const p = props.padding || { top: '80px', right: '24px', bottom: '80px', left: '24px' };
-    return {
-        paddingTop: p.top,
-        paddingRight: p.right,
-        paddingBottom: p.bottom,
-        paddingLeft: p.left
-    };
-});
-
-const titleStyle = computed(() => ({
-    fontFamily: props.titleFontFamily,
-    fontSize: `${props.titleSize}px`,
-    fontWeight: props.titleWeight,
-    textAlign: props.titleAlign,
-    color: props.titleColor,
-    textShadow: props.titleShadow ? '0 2px 4px rgba(0,0,0,0.3)' : 'none'
-}));
-
-const subtitleStyle = computed(() => ({
-    fontFamily: props.subtitleFontFamily,
-    fontSize: `${props.subtitleSize}px`,
-    fontWeight: props.subtitleWeight,
-    textAlign: props.titleAlign, // Use same alignment as title
-    color: props.subtitleColor,
-    maxWidth: `${props.subtitleMaxWidth}px`,
-    margin: props.titleAlign === 'center' ? '0 auto' : '0'
-}));
-
-const blockObject = computed(() => {
-    if (!builder || !props.id) return null;
-    return builder.findBlockById(props.id);
-});
-
-// Nested blocks logic
-const nestedBlocks = computed({
-    get: () => {
-        if (blockObject.value) {
-            return blockObject.value.settings?.blocks || [];
-        }
-        return props.blocks || [];
-    },
-    set: (val) => {
-        if (blockObject.value) {
-            if (!blockObject.value.settings) blockObject.value.settings = {};
-            blockObject.value.settings.blocks = val;
-            builder?.takeSnapshot();
-        }
-    }
-});
-
-const handleAddBlock = (newBlock) => {
-    if (!blockObject.value) return;
-    if (!blockObject.value.settings) blockObject.value.settings = {};
-    if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
-    blockObject.value.settings.blocks.push(newBlock);
-    builder?.takeSnapshot();
-    showBlockPicker.value = false;
-};
-
-const onEditBlock = (id) => {
-    if (builder) builder.activeBlockId.value = id;
-};
-
-const onDuplicateNested = (index) => {
-    if (!blockObject.value?.settings?.blocks) return;
-    const original = blockObject.value.settings.blocks[index];
-    const clone = {
-        ...JSON.parse(JSON.stringify(original)),
-        id: generateUUID()
-    };
-    blockObject.value.settings.blocks.splice(index + 1, 0, clone);
-    builder?.takeSnapshot();
-};
-
-const onDeleteNested = (index) => {
-    if (!blockObject.value?.settings?.blocks) return;
-    blockObject.value.settings.blocks.splice(index, 1);
-    builder?.takeSnapshot();
-};
 </script>
+
+<style scoped>
+.hero-title { margin: 0 0 16px; }
+.hero-subtitle { margin: 0 0 24px; }
+.hero-content { margin: 0 0 32px; }
+
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.hero-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+</style>

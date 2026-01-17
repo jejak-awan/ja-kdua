@@ -1,77 +1,110 @@
 <template>
-    <div :class="containerClasses">
-        <div class="flex flex-col gap-6" :class="itemsAlignClass">
-            <!-- Quote Icon -->
-            <div class="text-primary opacity-20">
-                <QuoteIcon :size="48" />
-            </div>
-
-            <!-- Quote Text -->
-            <blockquote 
-                :class="['text-xl md:text-2xl font-medium leading-relaxed italic', alignment || 'text-left']"
-                :style="{ color: quote_color || '' }"
-            >
-                "{{ quote || 'Add your testimonial quote here.' }}"
-            </blockquote>
-
-            <!-- Author Info -->
-            <div class="flex items-center gap-4 mt-4" :class="alignment === 'text-right' ? 'flex-row-reverse' : ''">
-                <!-- Avatar -->
-                <div v-if="avatar" class="w-14 h-14 rounded-full overflow-hidden border-2 border-background shadow-md">
-                    <img :src="avatar" :alt="author || 'Author'" class="w-full h-full object-cover" />
-                </div>
-                <div v-else class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl border-2 border-background shadow-md">
-                    {{ authorInitial }}
-                </div>
-
-                <!-- Text -->
-                <div :class="alignment === 'text-right' ? 'text-right' : 'text-left'">
-                    <h4 class="font-bold">{{ author || 'Author Name' }}</h4>
-                    <p class="text-xs font-semibold opacity-80">{{ job_title || 'Position' }}</p>
-                </div>
-            </div>
-        </div>
+  <div class="testimonial-block" :style="wrapperStyles">
+    <!-- Quote Icon -->
+    <Quote 
+      v-if="showQuoteIcon" 
+      class="quote-icon"
+      :style="quoteIconStyles"
+    />
+    
+    <!-- Content -->
+    <div class="testimonial-content" :style="contentStyles">
+      {{ contentValue }}
     </div>
+    
+    <!-- Author -->
+    <div class="testimonial-author">
+      <img 
+        v-if="settings.authorImage"
+        :src="settings.authorImage"
+        :alt="authorNameValue"
+        class="author-image"
+      />
+      <div class="author-info">
+        <div class="author-name" :style="authorNameStyles">{{ authorNameValue || 'Author Name' }}</div>
+        <div v-if="authorTitleValue" class="author-title" :style="authorTitleStyles">{{ authorTitleValue }}</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Quote as QuoteIcon } from 'lucide-vue-next';
-
-defineOptions({
-    inheritAttrs: false
-});
+import { computed, inject } from 'vue'
+import { Quote } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    quote: { type: String, default: '' },
-    author: { type: String, default: '' },
-    job_title: { type: String, default: '' },
-    avatar: { type: String, default: '' },
-    alignment: { type: String, default: 'text-left' },
-    style: { type: String, default: 'bg-card border shadow-sm' },
-    padding: { type: String, default: 'p-8' },
-    radius: { type: String, default: 'rounded-2xl' },
-    quote_color: { type: String, default: '' }
-});
+  module: {
+    type: Object,
+    required: true
+  }
+})
 
-const authorInitial = computed(() => {
-    const name = props.author || 'A';
-    return name.charAt(0);
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const containerClasses = computed(() => {
-    return [
-        'transition-all duration-300',
-        props.style || '',
-        props.padding || '',
-        props.radius || '',
-        props.alignment || ''
-    ].filter(Boolean);
-});
+const contentValue = computed(() => getResponsiveValue(settings.value, 'content', device.value))
+const authorNameValue = computed(() => getResponsiveValue(settings.value, 'authorName', device.value))
+const authorTitleValue = computed(() => getResponsiveValue(settings.value, 'authorTitle', device.value))
+const showQuoteIcon = computed(() => getResponsiveValue(settings.value, 'showQuoteIcon', device.value) !== false)
 
-const itemsAlignClass = computed(() => {
-    if (props.alignment === 'text-center') return 'items-center';
-    if (props.alignment === 'text-right') return 'items-end';
-    return 'items-start';
-});
+const wrapperStyles = computed(() => {
+  const styles = { 
+    textAlign: getResponsiveValue(settings.value, 'alignment', device.value) || 'center',
+    width: '100%'
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
+
+const quoteIconStyles = computed(() => {
+  const size = getResponsiveValue(settings.value, 'quoteIconSize', device.value) || 48
+  const color = getResponsiveValue(settings.value, 'quoteIconColor', device.value) || '#e0e0e0'
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    color: color
+  }
+})
+
+const contentStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'content_', device.value)
+})
+
+const authorNameStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'author_name_', device.value)
+})
+
+const authorTitleStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'author_title_', device.value)
+})
 </script>
+
+<style scoped>
+.testimonial-block { width: 100%; }
+.quote-icon { margin-bottom: 16px; transform: rotate(180deg); }
+.testimonial-content { margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto; }
+.testimonial-author { display: inline-flex; align-items: center; gap: 12px; }
+.author-image { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.author-title { margin-top: 2px; }
+</style>

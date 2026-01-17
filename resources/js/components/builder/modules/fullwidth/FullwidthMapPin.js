@@ -1,0 +1,45 @@
+import {
+    adminLabelSettings,
+    visibilitySettings,
+    cssSettings
+} from '../commonSettings';
+
+/**
+ * Fullwidth Map Pin Module Definition
+ */
+export default {
+    name: 'fullwidthmap_pin',
+    title: 'Map Pin',
+    icon: 'MapPin',
+    category: 'internal',
+
+    children: null,
+
+    defaults: {
+        title: 'New Pin',
+        content: 'Location details...',
+        lat: '40.7128',
+        lng: '-74.0060'
+    },
+
+    settings: {
+        content: [
+            {
+                id: 'main',
+                label: 'Pin Details',
+                fields: [
+                    { name: 'title', type: 'text', label: 'Title' },
+                    { name: 'content', type: 'wysiwyg', label: 'Description' },
+                    { name: 'lat', type: 'text', label: 'Latitude' },
+                    { name: 'lng', type: 'text', label: 'Longitude' }
+                ]
+            },
+            adminLabelSettings('Pin')
+        ],
+        design: [],
+        advanced: [
+            visibilitySettings,
+            cssSettings
+        ]
+    }
+}

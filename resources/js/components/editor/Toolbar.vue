@@ -1,9 +1,9 @@
 <template>
     <TooltipProvider :delay-duration="400">
-        <div v-if="editor" class="editor-toolbar border border-border rounded-t-lg bg-card/30 overflow-hidden shadow-sm flex flex-col">
-            <Tabs v-model="activeTab" class="w-full h-full flex flex-col">
+        <div v-if="editor" class="editor-toolbar bg-card/30 flex flex-col">
+            <Tabs v-model="activeTab" class="w-full flex flex-col">
                 <!-- Tabs Header -->
-                <div class="flex items-center justify-between px-2 py-1 bg-muted/20 border-b border-border/50 h-9 shrink-0">
+                <div class="flex items-center justify-between px-3 py-1.5 bg-muted/10 h-10 shrink-0">
                     <TabsList class="bg-muted/40 h-7 p-1 gap-1 rounded-md">
                         <TabsTrigger value="home" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Home</TabsTrigger>
                         <TabsTrigger value="insert" class="h-5 px-3 text-[11px] font-medium rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Insert</TabsTrigger>

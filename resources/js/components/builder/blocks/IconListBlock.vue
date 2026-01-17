@@ -1,101 +1,130 @@
 <template>
-    <section 
-        :class="['transition-all duration-500', padding, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
+  <div class="icon-list-block" :style="containerStyles">
+    <div 
+        v-for="child in (module.children || [])" 
+        :key="child.id" 
+        class="icon-list-item"
+        :style="itemStyles"
     >
-        <div :class="['mx-auto px-6', width]">
-            <h3 v-if="title" class="text-2xl font-bold mb-6" :class="alignmentClass">{{ title }}</h3>
-            <ul :class="['space-y-4', alignmentClass]">
-                <li 
-                    v-for="(item, index) in items" 
-                    :key="index"
-                    class="flex items-start gap-4"
-                >
-                    <div 
-                        :class="[
-                            'flex-shrink-0 flex items-center justify-center rounded-full',
-                            iconSizeClass
-                        ]"
-                        :style="{ 
-                            backgroundColor: iconBgColor || 'hsl(var(--primary) / 0.1)',
-                            color: iconColor || 'hsl(var(--primary))'
-                        }"
-                    >
-                        <component :is="getIcon(item.icon || defaultIcon)" :class="iconInnerClass" />
-                    </div>
-                    <div class="flex-1 pt-0.5">
-                        <h4 v-if="item.title" class="font-bold text-lg">{{ item.title }}</h4>
-                        <p v-if="item.description" class="opacity-80 mt-1">{{ item.description }}</p>
-                    </div>
-                </li>
-            </ul>
+        <!-- Icon -->
+        <div class="icon-wrapper" :style="iconWrapperStyles">
+            <component 
+                :is="getIcon(child.settings.icon)" 
+                :style="iconStyles" 
+            />
         </div>
-    </section>
+        
+        <!-- Text -->
+        <div class="text-content">
+            <span v-if="child.settings.link_url" class="item-link">
+                <a :href="child.settings.link_url" :target="child.settings.link_target">{{ child.settings.text }}</a>
+            </span>
+            <span v-else>{{ child.settings.text }}</span>
+        </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div v-if="!module.children || module.children.length === 0" class="empty-list-placeholder">
+        <List :size="24" />
+        <span>Add items in settings</span>
+    </div>
+  </div>
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
-import { computed } from 'vue';
+import { computed, inject } from 'vue'
+import * as LucideIcons from 'lucide-vue-next'
+import { List } from 'lucide-vue-next'
 import { 
-    Check, Star, ArrowRight, Zap, Shield, Heart,
-    CheckCircle, Circle, Square, Diamond, Sparkles
-} from 'lucide-vue-next';
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    title: { type: String, default: '' },
-    items: { 
-        type: Array, 
-        default: () => [
-            { title: 'First Item', description: 'Description for the first item.', icon: 'check' },
-            { title: 'Second Item', description: 'Description for the second item.', icon: 'check' },
-            { title: 'Third Item', description: 'Description for the third item.', icon: 'check' }
-        ] 
-    },
-    defaultIcon: { type: String, default: 'check' },
-    iconSize: { type: String, default: 'medium' },
-    iconColor: { type: String, default: '' },
-    iconBgColor: { type: String, default: '' },
-    alignment: { type: String, default: 'left' },
-    width: { type: String, default: 'max-w-2xl' },
-    padding: { type: String, default: 'py-12' },
-    bgColor: String,
-    animation: { type: String, default: '' }
-});
+  module: { type: Object, required: true }
+})
 
-const icons = {
-    check: Check,
-    'check-circle': CheckCircle,
-    star: Star,
-    'arrow-right': ArrowRight,
-    zap: Zap,
-    shield: Shield,
-    heart: Heart,
-    circle: Circle,
-    square: Square,
-    diamond: Diamond,
-    sparkles: Sparkles
-};
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const getIcon = (name) => icons[name] || Check;
+const getIcon = (name) => {
+    if (!name) return LucideIcons.Check
+    return LucideIcons[name] || LucideIcons.Check
+}
 
-const alignmentClass = computed(() => ({
-    'left': 'text-left',
-    'center': 'text-center mx-auto',
-    'right': 'text-right ml-auto'
-}[props.alignment] || 'text-left'));
+const containerStyles = computed(() => {
+  const styles = {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    gap: `${getResponsiveValue(settings.value, 'gap', device.value) || 12}px`
+  }
+  
+  const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
+  if (align === 'center') styles.alignItems = 'center'
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
 
-const iconSizeClass = computed(() => ({
-    'small': 'w-8 h-8',
-    'medium': 'w-10 h-10',
-    'large': 'w-12 h-12'
-}[props.iconSize] || 'w-10 h-10'));
+const itemStyles = computed(() => {
+    const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
+    const styles = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        justifyContent: align === 'center' ? 'center' : 'flex-start',
+        width: align === 'center' ? 'auto' : '100%'
+    }
+    Object.assign(styles, getTypographyStyles(settings.value, 'text_', device.value))
+    return styles
+})
 
-const iconInnerClass = computed(() => ({
-    'small': 'w-4 h-4',
-    'medium': 'w-5 h-5',
-    'large': 'w-6 h-6'
-}[props.iconSize] || 'w-5 h-5'));
+const iconWrapperStyles = computed(() => {
+    const s = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0
+    }
+    
+    if (settings.value.iconBackgroundColor) {
+        s.backgroundColor = settings.value.iconBackgroundColor
+        s.padding = '8px'
+        s.borderRadius = settings.value.iconBackgroundShape === 'circle' ? '50%' : settings.value.iconBackgroundShape === 'square' ? '4px' : '0'
+    }
+    
+    return s
+})
+
+const iconStyles = computed(() => {
+    const size = getResponsiveValue(settings.value, 'iconSize', device.value) || 20
+    return {
+        width: `${size}px`,
+        height: `${size}px`,
+        color: settings.value.iconColor || 'inherit'
+    }
+})
 </script>
+
+<style scoped>
+.icon-list-block {
+  width: 100%;
+}
+</style>

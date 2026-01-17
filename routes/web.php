@@ -57,7 +57,7 @@ Route::get('/login', function () {
 
 // Ignore Cloudflare cdn-cgi routes if they hit the app directly
 Route::any('/cdn-cgi/{any}', function () {
-    return response()->noContent();
+    return response('OK', 200)->header('Content-Type', 'text/plain');
 })->where('any', '.*');
 
 // SPA Route - All routes handled by Vue Router

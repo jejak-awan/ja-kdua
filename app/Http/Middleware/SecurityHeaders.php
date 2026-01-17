@@ -60,11 +60,9 @@ class SecurityHeaders
             "https:",
         ];
 
-        // Allow localhost for Vite dev server in development
-        if ($isDevelopment) {
-            $scriptSrc[] = 'http://localhost:5173';
-            $scriptSrc[] = 'ws://localhost:5173';
-        }
+        // Allow localhost for Vite dev server (including development on production machine)
+        $scriptSrc[] = 'http://localhost:5173';
+        $scriptSrc[] = 'ws://localhost:5173';
 
         // Add external script sources
         $scriptSrc = array_merge($scriptSrc, [
@@ -90,10 +88,8 @@ class SecurityHeaders
         // Style sources
         $styleSrc = ["'self'", "'unsafe-inline'"];
 
-        // Allow localhost for Vite dev server in development
-        if ($isDevelopment) {
-            $styleSrc[] = 'http://localhost:5173';
-        }
+        // Allow localhost for Vite dev server (including development on production machine)
+        $styleSrc[] = 'http://localhost:5173';
 
         $styleSrc = array_merge($styleSrc, [
             'https://cdn.jsdelivr.net',
@@ -112,12 +108,10 @@ class SecurityHeaders
         // Connect sources (for AJAX, WebSocket, etc.)
         $connectSrc = ["'self'"];
 
-        // Allow localhost WebSocket for Vite HMR in development
-        if ($isDevelopment) {
-            $connectSrc[] = 'http://localhost:5173';
-            $connectSrc[] = 'ws://localhost:5173';
-            $connectSrc[] = 'wss://localhost:5173';
-        }
+        // Allow localhost WebSocket for Vite HMR (including development on production machine)
+        $connectSrc[] = 'http://localhost:5173';
+        $connectSrc[] = 'ws://localhost:5173';
+        $connectSrc[] = 'wss://localhost:5173';
 
         $connectSrc = array_merge($connectSrc, [
             'https://static.cloudflareinsights.com',

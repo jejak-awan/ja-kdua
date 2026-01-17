@@ -1,0 +1,674 @@
+{
+    "common": {
+        "admin_label": "Ini akan mengubah label modul di builder untuk mempermudah identifikasi.",
+        "cssClass": "Masukkan kelas CSS kustom di sini, pisahkan dengan spasi. Kelas-kelas ini dapat digunakan dalam CSS kustom Anda untuk mengatur gaya elemen.",
+        "cssId": "Masukkan ID CSS kustom di sini. ID ini dapat digunakan untuk tautan jangkar (anchor) atau target CSS kustom.",
+        "padding": "Padding adalah ruang di dalam elemen Anda antara konten dan batas (border). Anda dapat mengatur nilai individu untuk atas, bawah, kiri, dan kanan.",
+        "margin": "Margin adalah ruang di luar elemen. Anda dapat menggunakan ini untuk membuat jarak antara modul yang berbeda di halaman Anda.",
+        "border": "Pengaturan Batas (Border) memungkinkan Anda menentukan lebar, gaya, dan warna garis di sekitar elemen Anda, serta pembulatan sudut (radius).",
+        "boxShadow": "Box Shadow menambahkan kedalaman pada elemen Anda dengan membuat efek bayangan di belakangnya. Anda dapat mengontrol posisi, keburaman, dan penyebaran bayangan.",
+        "background": "Pengaturan Latar Belakang memungkinkan Anda mengatur warna, gradien, gambar, atau bahkan video sebagai latar belakang untuk elemen ini.",
+        "backgroundImage": "Unggah atau pilih gambar untuk digunakan sebagai latar belakang elemen ini.",
+        "backgroundColor": "Pilih warna untuk digunakan sebagai latar belakang elemen ini.",
+        "backgroundGradient": "Buat latar belakang gradien linier atau radial untuk elemen ini.",
+        "backgroundGradientShowAboveImage": "Jika diaktifkan, gradien akan diletakkan di atas gambar latar belakang.",
+        "backgroundImageSize": "Tentukan bagaimana gambar latar belakang harus diukur: 'Cover' untuk mengisi seluruh area, 'Pas (Fit)' untuk menampilkan seluruh gambar, atau 'Ukuran Asli' untuk menggunakan ukuran asli.",
+        "backgroundImageWidth": "Atur lebar kustom untuk gambar latar belakang (misalnya 50%, 300px).",
+        "backgroundImageHeight": "Atur tinggi kustom untuk gambar latar belakang (misalnya 50%, 300px).",
+        "backgroundImagePosition": "Pilih posisi awal gambar latar belakang di dalam elemen.",
+        "backgroundImageRepeat": "Tentukan apakah gambar latar belakang harus diulang secara horizontal, vertikal, keduanya, atau tidak sama sekali.",
+        "backgroundImageAttachment": "Pilih apakah gambar latar belakang harus tetap pada tempatnya (Fixed) atau ikut bergulir dengan konten (Scroll).",
+        "backgroundImageBlendMode": "Pilih bagaimana gambar latar belakang harus bercampur dengan warna latar belakang atau elemen lain di bawahnya.",
+        "backgroundVideo": "Unggah atau pilih file video (MP4/WebM) untuk digunakan sebagai loop latar belakang.",
+        "backgroundVideoMp4": "Unggah atau pilih file video MP4 untuk kompatibilitas terbaik.",
+        "backgroundVideoWebm": "Unggah atau pilih file video WebM untuk ukuran file lebih kecil dan dukungan transparansi.",
+        "backgroundVideoWidth": "Atur lebar video latar belakang (default adalah 100%).",
+        "backgroundVideoHeight": "Atur tinggi video latar belakang (default adalah auto).",
+        "pauseVideoOnPlay": "Jika diaktifkan, video ini akan dijeda jika video lain di halaman mulai diputar.",
+        "pauseVideoNotInView": "Jika diaktifkan, video ini akan dijeda saat tidak terlihat di layar untuk menghemat sumber daya sistem.",
+        "backgroundVideoLoop": "Jika diaktifkan, video latar belakang akan diputar terus-menerus (looping).",
+        "backgroundVideoMute": "Jika diaktifkan, video latar belakang akan dibisukan (tanpa suara). Video bisu seringkali diperlukan agar bisa diputar otomatis.",
+        "backgroundVideoOverlayColor": "Terapkan lapisan warna di atas video latar belakang untuk meningkatkan keterbacaan teks.",
+        "backgroundPattern": "Pilih gaya pola untuk melapisi latar belakang Anda.",
+        "backgroundPatternColor": "Atur warna utama untuk elemen pola.",
+        "backgroundPatternTransform": "Balik, putar, atau inversi pola untuk menyesuaikan orientasinya.",
+        "backgroundPatternSize": "Kontrol skala ukuran pola (Ukuran Asli, Cover, Fit, Stretch, atau Kustom).",
+        "backgroundPatternWidth": "Atur lebar kustom untuk pola latar belakang (mis. 100px, 50%). Berfungsi saat Ukuran Pola diatur ke Ukuran Kustom.",
+        "backgroundPatternHeight": "Atur tinggi kustom untuk pola latar belakang (mis. 100px, 50%). Berfungsi saat Ukuran Pola diatur ke Ukuran Kustom.",
+        "backgroundPatternProportional": "Hubungkan lebar dan tinggi untuk menjaga rasio aspek pola.",
+        "backgroundPatternRepeatOrigin": "Menentukan posisi awal (asal) grid pola (mis: Kiri Atas, Tengah).",
+        "backgroundPatternHorizontalOffset": "Geser pola secara horizontal dari titik asalnya.",
+        "backgroundPatternVerticalOffset": "Geser pola secara vertikal dari titik asalnya.",
+        "backgroundPatternRepeat": "Tentukan bagaimana pola diulang di seluruh area latar belakang.",
+        "backgroundPatternBlendMode": "Pilih bagaimana pola bercampur dengan warna/gambar latar belakang di bawahnya.",
+        "backgroundMask": "Pilih masker bentuk untuk diterapkan pada latar belakang, menciptakan bingkai atau pemisah unik.",
+        "backgroundMaskColor": "Atur warna bentuk masker.",
+        "backgroundMaskTransform": "Balik, putar, atau inversi bentuk masker.",
+        "backgroundMaskSize": "Kontrol bagaimana masker berskala di dalam elemen (Stretch, Cover, Fit, dll.).",
+        "backgroundMaskPosition": "Sesuaikan posisi bentuk masker.",
+        "backgroundMaskAspectRatio": "Tentukan rasio aspek bentuk masker.",
+        "parallax": "Aktifkan efek paralaks untuk gambar latar belakang, di mana gambar bergerak lebih lambat daripada konten lainnya saat digulir.",
+        "parallaxMethod": "Pilih metode paralaks: 'True Parallax' menggunakan koordinat absolut untuk efek yang lebih halus, sementara 'CSS' menggunakan background-attachment: fixed.",
+        "width": "Tentukan lebar elemen. Anda dapat menggunakan persentase atau nilai piksel tetap.",
+        "max_width": "Mengatur lebar maksimum mencegah elemen tumbuh lebih besar dari ukuran tertentu, yang berguna untuk menjaga keterbacaan pada layar besar.",
+        "maxWidth": "Mengatur lebar maksimum mencegah elemen tumbuh lebih besar dari ukuran tertentu, yang berguna untuk menjaga keterbacaan pada layar besar.",
+        "height": "Atur tinggi spesifik untuk elemen. Biarkan kosong untuk tinggi otomatis berdasarkan konten.",
+        "min_height": "Tinggi minimum memastikan bahwa elemen selalu menempati setidaknya sejumlah ruang vertikal tertentu, bahkan jika tidak memiliki konten.",
+        "opacity": "Sesuaikan transparansi elemen. 100% berarti sepenuhnya terlihat, dan 0% berarti benar-benar tidak terlihat.",
+        "blur": "Terapkan efek blur Gaussian pada elemen. Nilai yang lebih tinggi membuat elemen tampak lebih tidak fokus.",
+        "brightness": "Tingkatkan atau kurangi tingkat kecerahan elemen. 100% adalah kecerahan asli.",
+        "contrast": "Sesuaikan kontras elemen. 100% adalah kontras asli.",
+        "grayscale": "Mengubah warna elemen menjadi nuansa abu-abu. 100% berarti sepenuhnya abu-abu.",
+        "sepia": "Menerapkan nada sepia pada elemen, memberikan tampilan fotografi lama berwarna kecokelatan.",
+        "saturate": "Tingkatkan atau kurangi intensitas warna elemen. 100% adalah saturasi asli.",
+        "hue_rotate": "Terapkan rotasi rona pada warna elemen, menggeser semua warna di sekitar roda warna.",
+        "invert": "Membalikkan warna elemen, membuatnya terlihat seperti negatif film fotografi.",
+        "blend_mode": "Menentukan bagaimana warna elemen ini bercampur dengan warna elemen di belakangnya.",
+        "transform_scale": "Ubah skala seluruh elemen menjadi lebih besar atau lebih kecil tanpa mempengaruhi tata letak elemen di sekitarnya.",
+        "transform_translate_x": "Pindahkan elemen secara horizontal dari posisi aslinya.",
+        "transform_translate_y": "Pindahkan elemen secara vertikal dari posisi aslinya.",
+        "transform_rotate": "Putar elemen di sekitar sumbu X (menciptakan efek lipat 3D).",
+        "transform_rotate_y": "Putar elemen di sekitar sumbu Y (menciptakan efek lipat 3D).",
+        "transform_rotate_z": "Putar elemen dalam ruang 2D searah jarum jam atau berlawanan arah jarum jam.",
+        "transform_skew_x": "Miringkan elemen secara horizontal, mendistorsi sumbu horizontalnya.",
+        "transform_skew_y": "Miringkan elemen secara vertikal, mendistorsi sumbu vertikalnya.",
+        "visibility_desktop": "Aktifkan apakah elemen ini terlihat di perangkat desktop.",
+        "visibility_tablet": "Aktifkan apakah elemen ini terlihat di perangkat tablet.",
+        "visibility_mobile": "Aktifkan apakah elemen ini terlihat di perangkat seluler.",
+        "overflow": "Menentukan apa yang terjadi jika konten elemen lebih besar dari kontainernya. 'Hidden' akan memotong konten, 'Scroll' akan selalu menampilkan scrollbar.",
+        "position": "Menentukan bagaimana elemen diposisikan di halaman. 'Relative' tetap dalam alur, 'Absolute' diposisikan relatif terhadap induknya, dan 'Fixed' tetap relatif terhadap viewport.",
+        "z_index": "Mengontrol urutan tumpukan elemen. Elemen dengan Z-index yang lebih tinggi muncul lebih 'dekat' ke pemirsa dan menutupi yang di bawahnya.",
+        "transition_duration": "Lamanya waktu yang dibutuhkan animasi transisi untuk selesai dalam milidetik.",
+        "transition_delay": "Jumlah waktu tunggu sebelum memulai animasi transisi.",
+        "transition_curve": "Menentukan profil kecepatan transisi, seperti 'Ease' untuk mulai/akhir yang halus atau 'Linear' untuk kecepatan konstan.",
+        "link_url": "URL tujuan yang akan dituju oleh elemen ini saat diklik.",
+        "linkUrl": "URL tujuan yang akan dituju oleh elemen ini saat diklik.",
+        "link_target": "Menentukan apakah tautan harus dibuka di tab yang sama (_self) atau tab baru (_blank).",
+        "linkTarget": "Menentukan apakah tautan harus dibuka di tab yang sama (_self) atau tab baru (_blank).",
+        "loop": "Aktifkan ini untuk mengulang konten elemen ini beberapa kali berdasarkan data dinamis atau jumlah yang ditentukan.",
+        "order": "Urutan numerik untuk menampilkan elemen ini relatif terhadap saudara-saudaranya. Nomor yang lebih rendah muncul lebih dulu.",
+        "animation_effect": "Pilih efek animasi yang akan diputar saat elemen muncul di tampilan.",
+        "animation_duration": "Total waktu yang dibutuhkan animasi untuk selesai, diukur dalam milidetik.",
+        "animation_delay": "Berapa lama menunggu sebelum memulai animasi setelah elemen muncul di tampilan.",
+        "animation_repeat": "Menentukan berapa kali animasi harus diulang. Pilih 'Selamanya' untuk animasi berkelanjutan.",
+        "alignment": "Sejajarkan konten secara horizontal dalam elemen: kiri, tengah, atau kanan.",
+        "textColor": "Atur warna teks dalam elemen ini.",
+        "fontSize": "Sesuaikan ukuran teks dalam elemen ini.",
+        "fontWeight": "Atur ketebalan teks. Nilai yang lebih tinggi menghasilkan teks yang lebih tebal.",
+        "lineHeight": "Mengontrol jarak vertikal antara baris teks.",
+        "objectFit": "Menentukan bagaimana gambar atau video harus diubah ukurannya agar pas dengan kontainernya.",
+        "title": "Judul utama atau heading untuk elemen ini.",
+        "subtitle": "Judul sekunder atau deskripsi di bawah judul utama.",
+        "content": "Konten teks utama untuk elemen ini.",
+        "buttonText": "Teks yang ditampilkan pada tombol.",
+        "buttonBackgroundColor": "Warna latar belakang tombol.",
+        "buttonTextColor": "Warna teks/label pada tombol.",
+        "iconSize": "Ukuran ikon dalam piksel.",
+        "iconColor": "Warna ikon.",
+        "iconPosition": "Posisi ikon relatif terhadap konten: atas, kiri, kanan, atau bawah.",
+        "iconBackgroundColor": "Warna latar belakang di belakang ikon.",
+        "iconBackgroundShape": "Bentuk latar belakang ikon: tidak ada, lingkaran, kotak, atau bulat.",
+        "titleFontSize": "Ukuran font untuk teks judul.",
+        "titleColor": "Warna teks judul.",
+        "contentFontSize": "Ukuran font untuk teks konten.",
+        "contentColor": "Warna teks konten.",
+        "mediaType": "Pilih jenis media yang akan ditampilkan: ikon, gambar, atau tidak ada.",
+        "aspectRatio": "Rasio lebar-terhadap-tinggi elemen (misalnya, 16:9, 4:3, 1:1).",
+        "gap": "Jarak antara item dalam grid atau daftar.",
+        "itemGap": "Jarak antara item individual.",
+        "columns": "Jumlah kolom yang ditampilkan dalam tata letak grid.",
+        "items": "Koleksi item yang akan ditampilkan dalam elemen ini."
+    },
+    "loop": {
+        "loop_enable": "Aktifkan loop untuk mengulangi daftar item berdasarkan pengaturan kueri Anda.",
+        "query_type": "Pilih jenis konten yang akan dicari untuk loop Anda: Tipe Postingan, Taksonomi, atau Pengguna.",
+        "post_type": "Pilih satu atau lebih tipe postingan untuk ditampilkan. Tipe umum meliputi Postingan, Halaman, dan Proyek.",
+        "taxonomy": "Pilih taksonomi yang ingin Anda ambil istilahnya, seperti Kategori atau Tag.",
+        "user_role": "Filter pengguna berdasarkan peran yang diberikan kepada mereka.",
+        "exclude_users": "Pilih pengguna tertentu untuk dikecualikan dari hasil.",
+        "meta_query": "Tambahkan filter kustom berdasarkan metadata postingan (field kustom). Mencocokkan pasangan Key/Value.",
+        "order_by": "Pilih kriteria untuk mengurutkan hasil.",
+        "order": "Pilih apakah hasil diurutkan secara menaik (ascending) atau menurun (descending).",
+        "posts_per_page": "Jumlah maksimum item yang akan ditampilkan dalam loop ini.",
+        "offset": "Jumlah item yang akan dilewati di awal daftar.",
+        "include_terms": "Pilih kategori atau tag untuk disertakan.",
+        "exclude_terms": "Pilih kategori atau tag untuk dikecualikan.",
+        "include_posts": "Pilih postingan tertentu untuk disertakan.",
+        "exclude_posts": "Pilih postingan tertentu untuk dikecualikan.",
+        "include_specific_terms": "Pilih istilah tertentu untuk disertakan.",
+        "exclude_specific_terms": "Pilih istilah tertentu untuk dikecualikan.",
+        "hide_empty": "Sembunyikan istilah yang tidak memiliki postingan terkait.",
+        "exclude_current": "Kecualikan postingan saat ini dari hasil loop.",
+        "ignore_sticky": "Abaikan pengaturan postingan lengket (sticky) dan perlakukan sebagai postingan biasa."
+    },
+    "section": {
+        "fullWidth": "Bila diaktifkan, bagian akan merentang ke lebar penuh jendela browser. Jika dinonaktifkan, bagian akan dibatasi dalam lebar global situs."
+    },
+    "row": {
+        "gutterWidth": "Sesuaikan jarak antar kolom dalam baris ini. Nilai 0 akan membuat kolom saling bersentuhan.",
+        "equalizeColumns": "Bila diaktifkan, semua kolom dalam baris ini akan memiliki tinggi yang sama, meskipun panjang kontennya berbeda.",
+        "maxWidth": "Atur lebar maksimum untuk baris ini. Berguna untuk membatasi lebar baris pada layar besar."
+    },
+    "column": {
+        "verticalAlignment": "Sejajarkan konten kolom ini ke bagian atas, tengah, atau bawah dari tinggi kolom."
+    },
+    "text": {
+        "content": "Konten teks utama modul. Anda dapat menggunakan HTML sederhana atau hanya teks biasa."
+    },
+    "heading": {
+        "content": "Teks untuk judul atau tajuk Anda.",
+        "level": "Level heading HTML (H1-H6). H1 biasanya disediakan untuk judul halaman utama."
+    },
+    "image": {
+        "src": "URL sumber gambar yang ingin Anda tampilkan.",
+        "alt": "Teks alternatif untuk aksesibilitas dan SEO. Menjelaskan gambar untuk pembaca layar dan mesin pencari.",
+        "title": "Teks yang muncul sebagai tooltip saat pengguna mengarahkan kursor ke atas gambar.",
+        "caption": "Teks keterangan opsional yang ditampilkan di bawah gambar.",
+        "lightbox": "Bila diaktifkan, mengklik gambar akan membukanya dalam overlay dengan tampilan zoom.",
+        "linkUrl": "URL untuk dinavigasi saat gambar diklik.",
+        "linkTarget": "Menentukan apakah tautan terbuka di tab browser yang sama atau baru.",
+        "overlayEnabled": "Tampilkan overlay warna saat mengarahkan kursor ke gambar.",
+        "overlayColor": "Warna overlay yang muncul saat hover.",
+        "objectFit": "Bagaimana gambar harus diubah ukurannya agar pas dengan kontainernya: cover, contain, fill, atau none."
+    },
+    "button": {
+        "text": "Label teks yang muncul pada tombol.",
+        "url": "URL yang akan dituju tombol saat diklik.",
+        "target": "Menentukan apakah tautan tombol terbuka di tab browser yang sama atau baru.",
+        "icon": "Nama ikon untuk ditampilkan di samping teks tombol (menggunakan ikon Lucide).",
+        "iconPosition": "Pilih apakah ikon muncul di kiri atau kanan teks tombol.",
+        "size": "Mengontrol ukuran keseluruhan tombol: kecil, sedang, atau besar.",
+        "fullWidth": "Bila diaktifkan, tombol akan merentang untuk mengisi lebar penuh kontainernya.",
+        "hoverBackgroundColor": "Warna latar belakang tombol saat pengguna mengarahkan kursor ke atasnya.",
+        "hoverTextColor": "Warna teks tombol saat pengguna mengarahkan kursor ke atasnya."
+    },
+    "icon": {
+        "icon": "Pilih ikon untuk ditampilkan dari pustaka ikon Lucide.",
+        "iconColor": "Atur warna ikon.",
+        "iconSize": "Sesuaikan ukuran ikon dalam piksel.",
+        "iconBackgroundColor": "Atur warna latar belakang di belakang ikon.",
+        "iconPadding": "Tambahkan padding di sekitar ikon dalam latar belakangnya.",
+        "iconBorderRadius": "Bulatkan sudut latar belakang ikon."
+    },
+    "divider": {
+        "style": "Pilih gaya visual garis pemisah: solid, putus-putus, titik-titik, atau ganda.",
+        "weight": "Atur ketebalan garis pemisah.",
+        "color": "Pilih warna garis pemisah.",
+        "width": "Atur lebar pemisah sebagai persentase atau nilai tetap."
+    },
+    "spacer": {
+        "height": "Atur ruang vertikal yang dibuat oleh elemen spacer ini."
+    },
+    "video": {
+        "videoType": "Pilih jenis sumber video: YouTube, Vimeo, atau self-hosted.",
+        "youtubeUrl": "Masukkan URL lengkap video YouTube.",
+        "vimeoUrl": "Masukkan URL lengkap video Vimeo.",
+        "selfHostedUrl": "Unggah atau berikan URL ke file video self-hosted.",
+        "posterImage": "Gambar yang ditampilkan sebelum video diputar. Berfungsi sebagai thumbnail/cover video.",
+        "aspectRatio": "Rasio lebar-terhadap-tinggi pemutar video (misalnya, 16:9, 4:3).",
+        "autoplay": "Bila diaktifkan, video akan mulai diputar secara otomatis saat halaman dimuat.",
+        "loop": "Bila diaktifkan, video akan dimulai ulang secara otomatis saat berakhir.",
+        "muted": "Bila diaktifkan, video akan diputar tanpa suara. Diperlukan untuk autoplay di sebagian besar browser.",
+        "controls": "Bila diaktifkan, kontrol pemutaran video akan terlihat oleh pengguna."
+    },
+    "gallery": {
+        "images": "Tambahkan gambar ke koleksi galeri Anda.",
+        "columns": "Jumlah kolom untuk ditampilkan dalam grid galeri.",
+        "gap": "Jarak antara gambar galeri.",
+        "lightbox": "Aktifkan lightbox untuk melihat gambar dalam overlay saat diklik.",
+        "aspectRatio": "Rasio aspek untuk gambar galeri.",
+        "hoverEffect": "Efek animasi saat mengarahkan kursor ke gambar galeri."
+    },
+    "audio": {
+        "src": "URL atau path file ke file audio.",
+        "autoplay": "Bila diaktifkan, audio akan mulai diputar secara otomatis.",
+        "loop": "Bila diaktifkan, audio akan berulang terus-menerus.",
+        "controls": "Tampilkan kontrol pemutaran audio kepada pengguna.",
+        "muted": "Mulai audio dalam keadaan mute secara default."
+    },
+    "embed": {
+        "code": "Tempel kode embed (iframe, script, dll.) dari layanan pihak ketiga.",
+        "aspectRatio": "Atur rasio aspek untuk konten yang disematkan."
+    },
+    "lottie": {
+        "src": "URL ke file JSON animasi Lottie.",
+        "loop": "Bila diaktifkan, animasi akan berulang terus-menerus.",
+        "autoplay": "Bila diaktifkan, animasi dimulai secara otomatis.",
+        "speed": "Kecepatan pemutaran animasi (1 = kecepatan normal).",
+        "direction": "Arah pemutaran animasi: maju atau mundur."
+    },
+    "beforeAfter": {
+        "beforeImage": "Gambar 'sebelum' yang ditampilkan di sisi kiri/atas perbandingan.",
+        "afterImage": "Gambar 'sesudah' yang ditampilkan di sisi kanan/bawah perbandingan.",
+        "orientation": "Orientasi slider: horizontal atau vertikal.",
+        "startPosition": "Posisi awal slider perbandingan (0-100%)."
+    },
+    "videoPopup": {
+        "thumbnailImage": "Gambar yang ditampilkan sebagai thumbnail video sebelum membuka popup.",
+        "videoUrl": "URL video yang akan diputar dalam popup.",
+        "playIcon": "Gaya ikon putar yang ditampilkan di atas thumbnail."
+    },
+    "videoSlider": {
+        "videos": "Koleksi video untuk ditampilkan dalam slider.",
+        "autoplay": "Bila diaktifkan, otomatis lanjut ke video berikutnya.",
+        "showControls": "Tampilkan kontrol navigasi pada slider."
+    },
+    "accordion": {
+        "items": "Koleksi item akordeon dengan judul dan konten.",
+        "allowMultiple": "Bila diaktifkan, beberapa item akordeon dapat terbuka secara bersamaan.",
+        "toggleIcon": "Gaya ikon expand/collapse: chevron, plus, panah, atau tidak ada.",
+        "iconPosition": "Posisi ikon toggle: sisi kiri atau kanan header.",
+        "headerBackgroundColor": "Warna latar belakang header akordeon.",
+        "headerTextColor": "Warna teks header akordeon.",
+        "headerFontSize": "Ukuran font untuk teks header akordeon.",
+        "headerPadding": "Padding di dalam header akordeon.",
+        "contentBackgroundColor": "Warna latar belakang area konten akordeon.",
+        "contentTextColor": "Warna teks konten akordeon.",
+        "contentPadding": "Padding di dalam area konten akordeon.",
+        "itemGap": "Jarak antara item akordeon."
+    },
+    "tabs": {
+        "items": "Koleksi item tab dengan judul dan konten.",
+        "defaultTab": "Indeks tab yang harus aktif secara default (dimulai dari 0).",
+        "tabAlignment": "Perataan horizontal tombol tab.",
+        "tabPosition": "Posisi tombol tab: atas, bawah, kiri, atau kanan.",
+        "tabBackgroundColor": "Warna latar belakang tombol tab yang tidak aktif.",
+        "activeTabBackgroundColor": "Warna latar belakang tombol tab yang aktif.",
+        "tabTextColor": "Warna teks tombol tab.",
+        "activeTabTextColor": "Warna teks tombol tab yang aktif."
+    },
+    "toggle": {
+        "title": "Judul/header elemen toggle.",
+        "content": "Konten yang ditampilkan saat toggle dibuka.",
+        "openByDefault": "Bila diaktifkan, toggle dimulai dalam keadaan terbuka."
+    },
+    "slider": {
+        "slides": "Koleksi slide untuk ditampilkan.",
+        "autoplay": "Bila diaktifkan, slider akan otomatis berpindah.",
+        "autoplaySpeed": "Waktu dalam milidetik antara transisi slide.",
+        "showArrows": "Tampilkan panah navigasi pada slider.",
+        "showDots": "Tampilkan titik paginasi di bawah slider.",
+        "infinite": "Bila diaktifkan, slide berputar terus-menerus.",
+        "fade": "Gunakan transisi fade daripada slide.",
+        "speed": "Durasi animasi transisi slide dalam milidetik."
+    },
+    "counter": {
+        "startValue": "Angka awal untuk mulai menghitung.",
+        "endValue": "Angka akhir untuk dihitung.",
+        "duration": "Berapa lama animasi penghitungan harus berlangsung dalam milidetik.",
+        "prefix": "Teks atau simbol yang ditampilkan sebelum angka (misalnya, 'Rp', '€').",
+        "suffix": "Teks atau simbol yang ditampilkan setelah angka (misalnya, '+', '%', 'K').",
+        "separator": "Karakter pemisah ribuan (misalnya, ',' atau '.').",
+        "decimals": "Jumlah tempat desimal yang ditampilkan."
+    },
+    "circleCounter": {
+        "percentage": "Nilai persentase yang ditampilkan (0-100).",
+        "duration": "Durasi animasi dalam milidetik.",
+        "strokeWidth": "Ketebalan bilah progres lingkaran.",
+        "circleColor": "Warna bagian lingkaran yang tidak terisi.",
+        "progressColor": "Warna bagian progres yang terisi.",
+        "showPercentage": "Tampilkan nilai persentase di tengah."
+    },
+    "numberCounter": {
+        "number": "Angka untuk ditampilkan dan dianimasikan.",
+        "title": "Judul atau label untuk penghitung.",
+        "prefix": "Teks yang ditampilkan sebelum angka.",
+        "suffix": "Teks yang ditampilkan setelah angka.",
+        "duration": "Durasi animasi dalam milidetik."
+    },
+    "countdown": {
+        "targetDate": "Tanggal dan waktu untuk dihitung mundur.",
+        "showDays": "Tampilkan hari yang tersisa.",
+        "showHours": "Tampilkan jam yang tersisa.",
+        "showMinutes": "Tampilkan menit yang tersisa.",
+        "showSeconds": "Tampilkan detik yang tersisa.",
+        "expiredMessage": "Pesan yang ditampilkan saat hitung mundur mencapai nol.",
+        "labels": "Label kustom untuk hari, jam, menit, detik."
+    },
+    "progressBar": {
+        "percentage": "Nilai kemajuan yang ditampilkan (0-100).",
+        "showPercentage": "Tampilkan nilai persentase sebagai teks.",
+        "barColor": "Warna bagian kemajuan yang terisi.",
+        "backgroundColor": "Warna latar belakang yang tidak terisi.",
+        "height": "Tinggi/ketebalan bilah kemajuan.",
+        "animated": "Aktifkan animasi saat bilah kemajuan muncul di tampilan.",
+        "striped": "Tambahkan pola bergaris pada bilah kemajuan."
+    },
+    "testimonial": {
+        "quote": "Teks testimonial atau kutipan pelanggan.",
+        "authorName": "Nama orang yang memberikan testimonial.",
+        "authorTitle": "Jabatan atau perusahaan penulis testimonial.",
+        "authorImage": "Foto penulis testimonial.",
+        "rating": "Peringkat bintang yang ditampilkan (1-5).",
+        "layout": "Gaya tata letak: default, kartu, atau minimalis."
+    },
+    "pricingTable": {
+        "title": "Judul atau nama paket harga.",
+        "subtitle": "Subtitle opsional atau deskripsi paket.",
+        "price": "Jumlah harga yang ditampilkan.",
+        "currency": "Simbol mata uang (misalnya, 'Rp', '$', '€').",
+        "period": "Teks periode penagihan (misalnya, '/bulan', '/tahun').",
+        "features": "Daftar fitur yang termasuk dalam paket ini.",
+        "buttonText": "Teks untuk tombol call-to-action.",
+        "buttonUrl": "URL yang ditautkan tombol.",
+        "featured": "Sorot paket ini sebagai unggulan atau direkomendasikan.",
+        "badge": "Teks lencana opsional (misalnya, 'Populer', 'Nilai Terbaik')."
+    },
+    "alert": {
+        "type": "Jenis gaya peringatan: info, sukses, peringatan, atau error.",
+        "title": "Judul opsional untuk pesan peringatan.",
+        "content": "Konten pesan peringatan.",
+        "dismissible": "Izinkan pengguna menutup/mengabaikan peringatan.",
+        "showIcon": "Tampilkan ikon berdasarkan jenis peringatan."
+    },
+    "code": {
+        "code": "Potongan kode yang akan ditampilkan.",
+        "language": "Bahasa pemrograman untuk syntax highlighting.",
+        "showLineNumbers": "Tampilkan nomor baris di samping kode.",
+        "theme": "Tema warna untuk tampilan kode: gelap atau terang.",
+        "copyButton": "Tampilkan tombol untuk menyalin kode ke clipboard."
+    },
+    "quote": {
+        "quote": "Teks kutipan yang ditampilkan.",
+        "author": "Nama orang yang dikutip.",
+        "source": "Sumber atau publikasi kutipan.",
+        "style": "Gaya visual blok kutipan."
+    },
+    "blurb": {
+        "title": "Judul atau heading untuk blurb.",
+        "content": "Konten teks deskriptif.",
+        "mediaType": "Jenis media yang ditampilkan: ikon, gambar, atau tidak ada.",
+        "icon": "Ikon untuk ditampilkan (saat jenis media adalah ikon).",
+        "image": "Gambar untuk ditampilkan (saat jenis media adalah gambar).",
+        "iconPosition": "Posisi ikon/gambar: atas, kiri, atau kanan.",
+        "iconSize": "Ukuran ikon dalam piksel.",
+        "iconColor": "Warna ikon.",
+        "iconBackgroundColor": "Warna latar belakang di belakang ikon.",
+        "iconBackgroundShape": "Bentuk latar belakang ikon: tidak ada, lingkaran, kotak, atau bulat."
+    },
+    "cta": {
+        "title": "Headline utama untuk call-to-action.",
+        "description": "Teks pendukung yang mendorong tindakan.",
+        "buttonText": "Teks yang ditampilkan pada tombol CTA.",
+        "buttonUrl": "URL yang ditautkan tombol CTA.",
+        "secondaryButtonText": "Teks untuk tombol sekunder opsional.",
+        "secondaryButtonUrl": "URL untuk tombol sekunder.",
+        "layout": "Gaya tata letak: horizontal atau bertumpuk."
+    },
+    "feature": {
+        "title": "Judul fitur.",
+        "description": "Deskripsi fitur.",
+        "icon": "Ikon yang mewakili fitur.",
+        "image": "Gambar yang mewakili fitur."
+    },
+    "iconList": {
+        "items": "Daftar item dengan ikon dan teks.",
+        "iconColor": "Warna default untuk semua ikon.",
+        "iconSize": "Ukuran ikon.",
+        "spacing": "Jarak antara item daftar."
+    },
+    "teamMember": {
+        "name": "Nama anggota tim.",
+        "position": "Jabatan atau peran.",
+        "image": "Foto anggota tim.",
+        "description": "Bio singkat atau deskripsi.",
+        "socialLinks": "Tautan profil media sosial."
+    },
+    "person": {
+        "name": "Nama orang.",
+        "title": "Jabatan atau peran.",
+        "image": "Foto orang.",
+        "bio": "Biografi singkat atau deskripsi.",
+        "socialLinks": "Tautan media sosial."
+    },
+    "author": {
+        "showAvatar": "Tampilkan avatar/foto penulis.",
+        "showName": "Tampilkan nama penulis.",
+        "showBio": "Tampilkan biografi penulis.",
+        "showLink": "Tampilkan tautan ke halaman penulis."
+    },
+    "breadcrumbs": {
+        "separator": "Karakter atau ikon yang digunakan untuk memisahkan item breadcrumb.",
+        "showHome": "Sertakan tautan beranda di awal.",
+        "homeText": "Teks untuk tautan beranda."
+    },
+    "starRating": {
+        "rating": "Nilai peringkat yang ditampilkan (misalnya, 4.5 dari 5).",
+        "maxRating": "Peringkat maksimum yang mungkin (biasanya 5).",
+        "starColor": "Warna bintang yang terisi.",
+        "emptyColor": "Warna bintang kosong/tidak terisi.",
+        "size": "Ukuran ikon bintang."
+    },
+    "faq": {
+        "items": "Koleksi item FAQ dengan pertanyaan dan jawaban.",
+        "allowMultiple": "Izinkan beberapa item FAQ terbuka secara bersamaan."
+    },
+    "logoGrid": {
+        "logos": "Koleksi gambar logo.",
+        "columns": "Jumlah kolom dalam grid logo.",
+        "gap": "Jarak antara logo.",
+        "grayscale": "Tampilkan logo dalam skala abu-abu secara default.",
+        "hoverEffect": "Efek saat mengarahkan kursor ke logo."
+    },
+    "shareButtons": {
+        "networks": "Jejaring sosial untuk menampilkan tombol berbagi.",
+        "showLabels": "Tampilkan label teks pada tombol berbagi.",
+        "style": "Gaya tombol: default, bulat, atau minimal."
+    },
+    "tableOfContents": {
+        "title": "Judul untuk daftar isi.",
+        "headingLevels": "Level heading mana yang disertakan (H2, H3, dll.).",
+        "sticky": "Buat daftar isi tetap saat menggulir."
+    },
+    "menu": {
+        "menuId": "ID menu yang akan ditampilkan.",
+        "orientation": "Orientasi menu: horizontal atau vertikal.",
+        "dropdownStyle": "Gaya menu dropdown.",
+        "mobileBreakpoint": "Lebar layar untuk beralih ke menu mobile."
+    },
+    "sidebar": {
+        "sidebarId": "ID sidebar/area widget yang akan ditampilkan.",
+        "sticky": "Buat sidebar tetap saat menggulir."
+    },
+    "numberBox": {
+        "number": "Angka yang ditampilkan.",
+        "title": "Judul yang menyertai angka.",
+        "description": "Deskripsi atau teks tambahan."
+    },
+    "group": {
+        "layout": "Jenis tata letak untuk elemen anak: flex atau grid.",
+        "direction": "Arah flex: baris atau kolom.",
+        "justifyContent": "Cara menyelaraskan item sepanjang sumbu utama.",
+        "alignItems": "Cara menyelaraskan item sepanjang sumbu silang.",
+        "gap": "Jarak antara elemen anak.",
+        "wrap": "Izinkan item membungkus ke baris berikutnya."
+    },
+    "groupCarousel": {
+        "slidesPerView": "Jumlah slide yang terlihat sekaligus.",
+        "gap": "Jarak antara slide.",
+        "autoplay": "Otomatis lanjutkan slide.",
+        "loop": "Aktifkan loop tak terbatas.",
+        "navigation": "Tampilkan panah navigasi.",
+        "pagination": "Tampilkan titik paginasi."
+    },
+    "contactForm": {
+        "title": "Judul atau heading formulir.",
+        "subtitle": "Subtitle atau deskripsi di atas formulir.",
+        "fields": "Konfigurasi field formulir.",
+        "buttonText": "Teks tombol kirim.",
+        "successMessage": "Pesan yang ditampilkan setelah pengiriman berhasil.",
+        "recipientEmail": "Alamat email untuk menerima pengiriman formulir.",
+        "buttonBackgroundColor": "Warna latar belakang tombol kirim.",
+        "buttonTextColor": "Warna teks tombol kirim."
+    },
+    "login": {
+        "title": "Judul formulir login.",
+        "usernameLabel": "Label untuk field username/email.",
+        "passwordLabel": "Label untuk field password.",
+        "buttonText": "Teks tombol login.",
+        "forgotPasswordLink": "Tampilkan tautan 'Lupa Password'.",
+        "registerLink": "Tampilkan tautan registrasi.",
+        "redirectUrl": "URL untuk redirect setelah login berhasil."
+    },
+    "signup": {
+        "title": "Judul formulir pendaftaran.",
+        "fields": "Field formulir yang disertakan.",
+        "buttonText": "Teks tombol daftar.",
+        "termsText": "Teks syarat dan ketentuan.",
+        "successMessage": "Pesan setelah registrasi berhasil."
+    },
+    "newsletter": {
+        "title": "Judul bagian newsletter.",
+        "description": "Deskripsi atau teks ajakan.",
+        "placeholder": "Teks placeholder untuk input email.",
+        "buttonText": "Teks tombol berlangganan.",
+        "successMessage": "Pesan setelah berlangganan berhasil."
+    },
+    "search": {
+        "placeholder": "Teks placeholder untuk input pencarian.",
+        "buttonText": "Teks tombol cari.",
+        "showIcon": "Tampilkan ikon pencarian.",
+        "resultsPage": "URL halaman hasil pencarian."
+    },
+    "map": {
+        "address": "Alamat atau lokasi yang ditampilkan.",
+        "latitude": "Koordinat lintang lokasi.",
+        "longitude": "Koordinat bujur lokasi.",
+        "zoom": "Level zoom peta (1-20).",
+        "mapType": "Gaya peta: roadmap, satelit, hybrid, atau terrain.",
+        "markers": "Penanda kustom untuk ditampilkan di peta.",
+        "height": "Tinggi kontainer peta."
+    },
+    "socialLinks": {
+        "links": "Tautan profil media sosial.",
+        "iconSize": "Ukuran ikon sosial.",
+        "iconColor": "Warna ikon sosial.",
+        "iconSpacing": "Jarak antara ikon.",
+        "style": "Gaya ikon: default, bulat, atau kotak.",
+        "showLabels": "Tampilkan nama platform sebagai label."
+    },
+    "blog": {
+        "postsPerPage": "Jumlah postingan untuk ditampilkan per halaman.",
+        "columns": "Jumlah kolom dalam tata letak grid.",
+        "showExcerpt": "Tampilkan kutipan postingan.",
+        "excerptLength": "Jumlah karakter maksimum untuk kutipan.",
+        "showDate": "Tampilkan tanggal publikasi.",
+        "showAuthor": "Tampilkan nama penulis.",
+        "showThumbnail": "Tampilkan gambar unggulan.",
+        "showCategories": "Tampilkan kategori postingan.",
+        "showReadMore": "Tampilkan tautan 'Baca Selengkapnya'.",
+        "orderBy": "Urutkan postingan berdasarkan: tanggal, judul, atau popularitas.",
+        "order": "Urutan: naik atau turun.",
+        "categories": "Filter berdasarkan kategori tertentu."
+    },
+    "portfolio": {
+        "itemsPerPage": "Jumlah item portofolio per halaman.",
+        "columns": "Jumlah kolom dalam grid.",
+        "showCategories": "Tampilkan filter kategori.",
+        "showTitle": "Tampilkan judul item.",
+        "hoverEffect": "Efek saat mengarahkan kursor ke item.",
+        "lightbox": "Buka item dalam lightbox."
+    },
+    "filterablePortfolio": {
+        "categories": "Kategori yang tersedia untuk filter.",
+        "defaultCategory": "Kategori yang ditampilkan secara default (atau 'Semua').",
+        "columns": "Jumlah kolom dalam grid.",
+        "animation": "Gaya animasi filter."
+    },
+    "postSlider": {
+        "postsCount": "Jumlah postingan yang ditampilkan dalam slider.",
+        "categories": "Filter postingan berdasarkan kategori.",
+        "autoplay": "Otomatis lanjutkan slide.",
+        "showTitle": "Tampilkan judul postingan.",
+        "showExcerpt": "Tampilkan kutipan postingan.",
+        "showDate": "Tampilkan tanggal publikasi."
+    },
+    "postTitle": {
+        "tag": "Tag HTML untuk judul (H1-H6).",
+        "linkToPost": "Buat judul sebagai tautan ke postingan."
+    },
+    "postMeta": {
+        "showDate": "Tampilkan tanggal publikasi.",
+        "showAuthor": "Tampilkan nama penulis.",
+        "showCategories": "Tampilkan kategori postingan.",
+        "showComments": "Tampilkan jumlah komentar.",
+        "separator": "Pemisah antara item meta."
+    },
+    "postContent": {
+        "showFullContent": "Tampilkan konten postingan lengkap atau kutipan."
+    },
+    "featuredImage": {
+        "linkToPost": "Buat gambar sebagai tautan ke postingan.",
+        "showCaption": "Tampilkan keterangan gambar."
+    },
+    "postNavigation": {
+        "showThumbnails": "Tampilkan thumbnail postingan.",
+        "showTitles": "Tampilkan judul postingan.",
+        "prevLabel": "Label untuk tautan postingan sebelumnya.",
+        "nextLabel": "Label untuk tautan postingan berikutnya."
+    },
+    "relatedPosts": {
+        "postsCount": "Jumlah postingan terkait yang ditampilkan.",
+        "showThumbnails": "Tampilkan thumbnail postingan.",
+        "showDate": "Tampilkan tanggal publikasi.",
+        "basedOn": "Cara menentukan postingan terkait: kategori, tag, atau penulis."
+    },
+    "comments": {
+        "title": "Judul bagian komentar.",
+        "showAvatar": "Tampilkan avatar komentator.",
+        "showDate": "Tampilkan tanggal komentar.",
+        "allowReplies": "Izinkan balasan bersarang."
+    },
+    "fullwidthHeader": {
+        "title": "Judul header utama.",
+        "subtitle": "Subtitle atau tagline.",
+        "backgroundType": "Jenis latar belakang: warna, gambar, atau video.",
+        "buttonText": "Teks tombol utama.",
+        "buttonUrl": "URL tombol utama.",
+        "minHeight": "Tinggi minimum bagian header."
+    },
+    "fullwidthSlider": {
+        "slides": "Koleksi slide dengan konten.",
+        "autoplay": "Otomatis lanjutkan slide.",
+        "navigation": "Tampilkan panah navigasi.",
+        "pagination": "Tampilkan titik paginasi."
+    },
+    "fullwidthMenu": {
+        "menuId": "ID menu yang akan ditampilkan.",
+        "logo": "URL gambar logo.",
+        "sticky": "Buat menu tetap saat menggulir.",
+        "transparentOnTop": "Latar belakang transparan di bagian atas halaman."
+    },
+    "fullwidthMap": {
+        "address": "Lokasi yang ditampilkan di peta.",
+        "zoom": "Level zoom peta.",
+        "height": "Tinggi peta."
+    },
+    "fullwidthImage": {
+        "src": "URL gambar.",
+        "alt": "Teks alternatif untuk aksesibilitas.",
+        "parallax": "Aktifkan efek scrolling parallax."
+    },
+    "fullwidthCode": {
+        "code": "Kode HTML/CSS/JavaScript kustom."
+    },
+    "fullwidthPortfolio": {
+        "columns": "Jumlah kolom.",
+        "showFilter": "Tampilkan filter kategori."
+    },
+    "fullwidthPostSlider": {
+        "postsCount": "Jumlah postingan yang ditampilkan.",
+        "categories": "Filter berdasarkan kategori.",
+        "autoplay": "Otomatis lanjutkan slide.",
+        "showContent": "Tampilkan konten postingan dalam slide."
+    },
+    "fullwidthPostTitle": {
+        "showBreadcrumbs": "Tampilkan navigasi breadcrumb.",
+        "showMeta": "Tampilkan informasi meta postingan.",
+        "backgroundImage": "Gambar latar belakang untuk header."
+    },
+    "fullwidthPostContent": {
+        "maxWidth": "Lebar konten maksimum.",
+        "showSidebar": "Tampilkan sidebar."
+    }
+}

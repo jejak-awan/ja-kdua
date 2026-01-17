@@ -112,7 +112,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
-import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue'
+import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
 
 const pageData = ref(null)
 const articles = ref([])

@@ -1,172 +1,270 @@
-<script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
-
-defineOptions({
-    inheritAttrs: false
-});
-
-const props = defineProps({
-    slides: {
-        type: Array,
-        default: () => [
-            { title: 'Slide 1', subtitle: 'First slide content', image: '', button_text: '', button_url: '' },
-            { title: 'Slide 2', subtitle: 'Second slide content', image: '', button_text: '', button_url: '' }
-        ]
-    },
-    autoplay: { type: Boolean, default: true },
-    autoplay_speed: { type: Number, default: 5000 },
-    show_arrows: { type: Boolean, default: true },
-    show_dots: { type: Boolean, default: true },
-    height: { type: String, default: 'h-[500px]' },
-    overlay_color: { type: String, default: 'rgba(0,0,0,0.4)' },
-    animation: { type: String, default: 'fade' }
-});
-
-const currentIndex = ref(0);
-let autoplayInterval = null;
-
-const safeSlides = computed(() => props.slides || []);
-
-const nextSlide = () => {
-    if (safeSlides.value.length > 0) {
-        currentIndex.value = (currentIndex.value + 1) % safeSlides.value.length;
-    }
-};
-
-const prevSlide = () => {
-    if (safeSlides.value.length > 0) {
-        currentIndex.value = (currentIndex.value - 1 + safeSlides.value.length) % safeSlides.value.length;
-    }
-};
-
-const goToSlide = (index) => {
-    currentIndex.value = index;
-};
-
-const startAutoplay = () => {
-    if (props.autoplay && safeSlides.value.length > 1) {
-        autoplayInterval = setInterval(nextSlide, props.autoplay_speed || 5000);
-    }
-};
-
-const stopAutoplay = () => {
-    if (autoplayInterval) {
-        clearInterval(autoplayInterval);
-        autoplayInterval = null;
-    }
-};
-
-const containerClasses = computed(() => {
-    return ['relative overflow-hidden group', props.height || 'h-[500px]'].filter(Boolean);
-});
-
-const transitionName = computed(() => {
-    return props.animation === 'slide' ? 'slide' : 'fade';
-});
-
-onMounted(startAutoplay);
-onUnmounted(stopAutoplay);
-
-watch(() => props.autoplay, (newVal) => {
-    stopAutoplay();
-    if (newVal) startAutoplay();
-});
-</script>
-
 <template>
-    <div 
-        :class="containerClasses"
-        @mouseenter="stopAutoplay"
-        @mouseleave="startAutoplay"
-    >
-        <!-- Slides -->
-        <div class="relative w-full h-full">
-            <transition-group
-                :name="transitionName"
-                tag="div"
-                class="relative w-full h-full"
-            >
-                <div
-                    v-for="(slide, index) in safeSlides"
-                    v-show="index === currentIndex"
-                    :key="index"
-                    class="absolute inset-0 w-full h-full"
-                >
-                    <!-- Background -->
-                    <div 
-                        class="absolute inset-0 bg-cover bg-center"
-                        :style="{ 
-                            backgroundImage: slide.image ? `url(${slide.image})` : 'none',
-                            backgroundColor: slide.image ? 'transparent' : 'hsl(var(--muted))'
-                        }"
-                    >
-                        <div class="absolute inset-0" :style="{ backgroundColor: overlay_color || 'rgba(0,0,0,0.4)' }"></div>
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
-                        <h2 class="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">{{ slide.title || '' }}</h2>
-                        <p class="text-lg md:text-2xl opacity-90 max-w-2xl mb-8 drop-shadow-md">{{ slide.subtitle || '' }}</p>
-                        <a 
-                            v-if="slide.button_text" 
-                            :href="slide.button_url || '#'"
-                            class="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-full hover:opacity-90 transition-all shadow-xl"
-                        >
-                            {{ slide.button_text }}
-                        </a>
-                    </div>
-                </div>
-            </transition-group>
-        </div>
+  <div class="slider-block" :style="wrapperStyles">
+    <div class="slider-container" :style="containerStyles">
+      <!-- Slides -->
+      <div 
+        v-for="(slide, index) in sliderSlides" 
+        :key="slide.id || index"
+        class="slider-slide"
+        :class="{ 'slider-slide--active': currentSlide === index }"
+        :style="slideStyles(slide)"
+      >
+        <!-- Overlay -->
+        <div v-if="overlayEnabled" class="slider-overlay" :style="overlayStyles" />
         
-        <!-- Navigation Arrows -->
-        <template v-if="show_arrows && safeSlides.length > 1">
-            <button 
-                @click="prevSlide"
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-            >
-                <ChevronLeft class="w-6 h-6" />
-            </button>
-            <button 
-                @click="nextSlide"
-                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-            >
-                <ChevronRight class="w-6 h-6" />
-            </button>
-        </template>
-        
-        <!-- Dots -->
-        <div v-if="show_dots && safeSlides.length > 1" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            <button 
-                v-for="(slide, index) in safeSlides" 
-                :key="index"
-                @click="goToSlide(index)"
-                class="w-3 h-3 rounded-full transition-all"
-                :class="index === currentIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'"
-            ></button>
+        <!-- Content -->
+        <div class="slider-content" :style="contentStyles">
+          <h2 v-if="slide.title" class="slider-title" :style="titleStyles">{{ slide.title }}</h2>
+          <p v-if="slide.content" class="slider-text" :style="textStyles">{{ slide.content }}</p>
+          <a v-if="slide.buttonText" :href="slide.buttonUrl" class="slider-button" :style="buttonStyles">{{ slide.buttonText }}</a>
         </div>
+      </div>
+      
+      <!-- Arrows -->
+      <button v-if="showArrows" class="slider-arrow slider-arrow--prev" @click="prevSlide">
+        <ChevronLeft />
+      </button>
+      <button v-if="showArrows" class="slider-arrow slider-arrow--next" @click="nextSlide">
+        <ChevronRight />
+      </button>
+      
+      <!-- Dots -->
+      <div v-if="showDots" class="slider-dots">
+        <button 
+          v-for="(slide, index) in sliderSlides" 
+          :key="index"
+          class="slider-dot"
+          :class="{ 'slider-dot--active': currentSlide === index }"
+          @click="currentSlide = index"
+        />
+      </div>
     </div>
+  </div>
 </template>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
+<script setup>
+import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
+
+const props = defineProps({
+  module: {
+    type: Object,
+    required: true
+  }
+})
+
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
+
+const sliderSlides = computed(() => {
+  return (props.module.children || []).map(child => ({
+    id: child.id,
+    title: child.settings.title,
+    content: child.settings.content,
+    image: child.settings.image,
+    buttonText: child.settings.buttonText,
+    buttonUrl: child.settings.buttonUrl
+  }))
+})
+
+const currentSlide = ref(0)
+const showArrows = computed(() => settings.value.showArrows !== false)
+const showDots = computed(() => settings.value.showDots !== false)
+const overlayEnabled = computed(() => settings.value.overlayEnabled !== false)
+
+let autoplayInterval = null
+
+const nextSlide = () => {
+  currentSlide.value = (currentSlide.value + 1) % sliderSlides.value.length
 }
 
-.slide-enter-active,
-.slide-leave-active {
-    transition: transform 0.5s ease;
+const prevSlide = () => {
+  currentSlide.value = currentSlide.value === 0 
+    ? sliderSlides.value.length - 1 
+    : currentSlide.value - 1
 }
-.slide-enter-from {
-    transform: translateX(100%);
+
+onMounted(() => {
+  if (settings.value.autoplay !== false) {
+    autoplayInterval = setInterval(nextSlide, settings.value.autoplaySpeed || 5000)
+  }
+})
+
+onUnmounted(() => {
+  if (autoplayInterval) clearInterval(autoplayInterval)
+})
+
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
+
+const containerStyles = computed(() => {
+  const height = getResponsiveValue(settings.value, 'height', device.value) || 400
+  const styles = {
+    position: 'relative',
+    height: `${height}px`,
+    overflow: 'hidden'
+  }
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  return styles
+})
+
+const slideStyles = (slide) => ({
+  backgroundImage: slide.image ? `url(${slide.image})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center'
+})
+
+const overlayStyles = computed(() => ({
+  backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.4)',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%'
+}))
+
+const contentStyles = computed(() => {
+  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+  return {
+    textAlign: alignment,
+    maxWidth: '800px',
+    padding: '40px'
+  }
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
+const buttonStyles = computed(() => {
+    const styles = getTypographyStyles(settings.value, 'button_', device.value)
+    return {
+        ...styles,
+        display: 'inline-block',
+        marginTop: '20px',
+        padding: '10px 20px',
+        backgroundColor: settings.value.buttonBackgroundColor || styles.color || '#ffffff',
+        textDecoration: 'none',
+        borderRadius: '4px'
+    }
+})
+</script>
+
+<style scoped>
+.slider-block {
+  width: 100%;
 }
-.slide-leave-to {
-    transform: translateX(-100%);
+
+.slider-container {
+  background: #1a1a1a;
+}
+
+.slider-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.slider-slide--active {
+  opacity: 1;
+}
+
+.slider-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.slider-content {
+  position: relative;
+  z-index: 1;
+  padding: 40px;
+  max-width: 800px;
+}
+
+.slider-title {
+  margin: 0 0 16px;
+  font-weight: 700;
+}
+
+.slider-text {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.slider-arrow:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+.slider-arrow--prev {
+  left: 16px;
+}
+
+.slider-arrow--next {
+  right: 16px;
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.slider-dot--active {
+  background: white;
 }
 </style>

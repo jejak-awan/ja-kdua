@@ -509,6 +509,12 @@
                                         class="w-full h-full object-cover transition-transform group-hover:scale-105"
                                         loading="lazy"
                                     />
+                                    <div v-else-if="isVideo(file)" class="relative w-full h-full flex items-center justify-center bg-muted/50">
+                                        <Video class="w-12 h-12 text-muted-foreground/50" />
+                                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                                            {{ file.extension?.toUpperCase() }}
+                                        </div>
+                                    </div>
                                     <FileText v-else class="w-12 h-12 text-muted-foreground/50" />
                                 </div>
                                 <div class="p-3 border-t border-border bg-card">
@@ -582,6 +588,7 @@
                                         </td>
                                         <td class="px-4 py-3">
                                             <img v-if="isImage(file)" :src="file.url" class="w-8 h-8 rounded object-cover border border-border" />
+                                            <Video v-else-if="isVideo(file)" class="w-5 h-5 text-muted-foreground" />
                                             <FileText v-else class="w-5 h-5 text-muted-foreground" />
                                         </td>
                                         <td class="px-4 py-3 font-medium">{{ file.name }}</td>
@@ -614,16 +621,32 @@
             </div>
         </div>
 
-        <!-- Image Preview Modal -->
+        <!-- Media Preview Modal -->
         <Dialog v-model:open="showImagePreview">
             <DialogContent class="max-w-4xl p-0 overflow-hidden bg-black/95 border-none">
                 <div class="relative flex items-center justify-center p-4 min-h-[50vh]">
+                    <!-- Image Preview -->
                     <img
-                        v-if="previewImage"
+                        v-if="previewImage && isImage(previewImage)"
                         :src="previewImage.url"
                         :alt="previewImage.name"
                         class="max-w-full max-h-[80vh] object-contain rounded-sm"
                     />
+                    <!-- Video Preview -->
+                    <video
+                        v-else-if="previewImage && isVideo(previewImage)"
+                        :src="previewImage.url"
+                        controls
+                        class="max-w-full max-h-[80vh] rounded-sm"
+                        preload="metadata"
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                    <!-- Other File Types -->
+                    <div v-else class="flex flex-col items-center text-white/70">
+                        <FileText class="w-24 h-24 mb-4" />
+                        <p class="text-lg">{{ previewImage?.name }}</p>
+                    </div>
                 </div>
                 <div class="p-4 bg-background/10 text-white backdrop-blur flex justify-between items-center absolute bottom-0 left-0 right-0">
                     <div>
@@ -792,6 +815,7 @@ import {
     File,
     Image as ImageIcon,
     File as FileIcon,
+    Video,
     PanelLeft,
     PanelLeftClose,
     Copy,
@@ -1006,6 +1030,11 @@ const isImage = (file) => {
     return imageExtensions.includes(file.extension?.toLowerCase());
 };
 
+const isVideo = (file) => {
+    const videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'];
+    return videoExtensions.includes(file.extension?.toLowerCase());
+};
+
 const matchesFileType = (file, type) => {
     if (type === 'all') return true;
     
@@ -1204,8 +1233,8 @@ const navigateToPath = (path) => {
 };
 
 const viewFile = (file) => {
-    if (isImage(file)) {
-        // Show image preview modal
+    if (isImage(file) || isVideo(file)) {
+        // Show image/video preview modal
         previewImage.value = file;
         showImagePreview.value = true;
     } else if (file.url) {

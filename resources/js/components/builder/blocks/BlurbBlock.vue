@@ -1,112 +1,151 @@
-<script setup>
-import { computed } from 'vue';
-import * as Icons from 'lucide-vue-next';
-
-defineOptions({
-    inheritAttrs: false
-});
-
-const props = defineProps({
-    use_icon: {
-        type: Boolean,
-        default: true
-    },
-    icon_name: {
-        type: String,
-        default: 'Zap'
-    },
-    icon_color: {
-        type: String,
-        default: ''
-    },
-    image_url: {
-        type: String,
-        default: ''
-    },
-    icon_position: {
-        type: String,
-        default: 'top'
-    },
-    alignment: {
-        type: String,
-        default: 'center'
-    },
-    title: {
-        type: String,
-        default: 'Your Feature Title'
-    },
-    title_tag: {
-        type: String,
-        default: 'h3'
-    },
-    content: {
-        type: String,
-        default: 'Add a short description here.'
-    },
-    titleSize: { type: String, default: 'text-xl' },
-    titleColor: { type: String, default: '' },
-    contentSize: { type: String, default: 'text-base' },
-    contentColor: { type: String, default: '' }
-});
-
-const iconComponent = computed(() => {
-    return props.icon_name && Icons[props.icon_name] ? Icons[props.icon_name] : Icons.Zap;
-});
-
-const containerClass = computed(() => {
-    return {
-        'flex flex-col': props.icon_position === 'top',
-        'flex flex-row items-center gap-6': props.icon_position === 'left',
-        'text-left': props.alignment === 'left',
-        'text-center': props.alignment === 'center',
-        'text-right': props.alignment === 'right',
-        'items-center': props.alignment === 'center' && props.icon_position === 'top',
-        'items-start': props.alignment === 'left' && props.icon_position === 'top',
-        'items-end': props.alignment === 'right' && props.icon_position === 'top'
-    };
-});
-</script>
-
 <template>
-    <div :class="containerClass" class="blurb-item">
-        <!-- Media (Icon or Image) -->
-        <div class="blurb-media mb-4" :class="{ 'mb-0': icon_position === 'left' }">
-            <template v-if="use_icon">
-                <div 
-                    class="p-4 rounded-2xl bg-primary/10 text-primary transition-transform hover:rotate-6"
-                    :style="{ color: icon_color || '' }"
-                >
-                    <component :is="iconComponent" :size="48" stroke-width="1.5" />
-                </div>
-            </template>
-            <template v-else-if="image_url">
-                <img :src="image_url" :alt="title" class="w-24 h-24 object-cover rounded-xl shadow-lg" />
-            </template>
-        </div>
-
-        <!-- Content -->
-        <div class="blurb-content flex-1">
-            <component 
-                :is="title_tag" 
-                class="font-bold mb-2 tracking-tight transition-all duration-300"
-                :class="[titleSize || 'text-xl']"
-                :style="{ color: titleColor || '' }"
-            >
-                {{ title }}
-            </component>
-            <p 
-                class="opacity-80 leading-relaxed transition-all duration-300"
-                :class="[contentSize || 'text-base']"
-                :style="{ color: contentColor || '' }"
-            >
-                {{ content }}
-            </p>
-        </div>
+  <div class="blurb-block" :style="wrapperStyles" :class="layoutClass">
+    <!-- Media (Icon/Image) -->
+    <div v-if="mediaType !== 'none'" class="blurb-media" :style="mediaStyles">
+      <component 
+        v-if="mediaType === 'icon'"
+        :is="iconComponent" 
+        class="blurb-icon"
+        :style="iconStyles"
+      />
+      <img 
+        v-else-if="mediaType === 'image' && settings.image"
+        :src="settings.image" 
+        alt=""
+        class="blurb-image"
+      />
     </div>
+    
+    <!-- Content -->
+    <div class="blurb-content" :style="contentWrapperStyles">
+      <h3 v-if="settings.title" class="blurb-title" :style="titleStyles">
+        {{ settings.title }}
+      </h3>
+      <div v-if="settings.content" class="blurb-text" :style="textStyles">
+        {{ settings.content }}
+      </div>
+    </div>
+  </div>
 </template>
 
+<script setup>
+import { computed, defineAsyncComponent, inject } from 'vue'
+import { Star } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
+
+const props = defineProps({
+  module: {
+    type: Object,
+    required: true
+  }
+})
+
+const settings = computed(() => props.module.settings || {})
+
+const mediaType = computed(() => settings.value.mediaType || 'icon')
+
+const layoutClass = computed(() => {
+  const position = getResponsiveValue(settings.value, 'iconPosition', device.value) || 'top'
+  return `blurb--${position}`
+})
+
+const iconComponent = computed(() => {
+  const iconName = settings.value.icon || 'Star'
+  try {
+    return defineAsyncComponent(() => 
+      import('lucide-vue-next').then(m => m[iconName] || Star)
+    )
+  } catch {
+    return Star
+  }
+})
+
+const builder = inject('builder')
+const device = computed(() => builder?.device || 'desktop')
+
+const wrapperStyles = computed(() => {
+  const position = getResponsiveValue(settings.value, 'iconPosition', device.value) || 'top'
+  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+  
+  const styles = { 
+    width: '100%',
+    display: 'flex',
+    gap: position === 'top' ? '16px' : '20px',
+    flexDirection: position === 'top' ? 'column' : (position === 'right' ? 'row-reverse' : 'row'),
+    alignItems: position === 'top' ? (alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start')) : 'flex-start'
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
+
+const contentWrapperStyles = computed(() => ({
+  flex: 1,
+  textAlign: getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+}))
+
+const mediaStyles = computed(() => {
+  const styles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+  
+  const bgColor = getResponsiveValue(settings.value, 'iconBackgroundColor', device.value)
+  const shape = getResponsiveValue(settings.value, 'iconBackgroundShape', device.value)
+  
+  if (bgColor && shape !== 'none') {
+    styles.backgroundColor = bgColor
+    styles.padding = '16px'
+    
+    if (shape === 'circle') {
+      styles.borderRadius = '50%'
+    } else if (shape === 'rounded') {
+      styles.borderRadius = '12px'
+    }
+  }
+  
+  return styles
+})
+
+const iconStyles = computed(() => {
+  const size = getResponsiveValue(settings.value, 'iconSize', device.value) || 48
+  const color = getResponsiveValue(settings.value, 'iconColor', device.value) || '#2059ea'
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    color: color
+  }
+})
+
+const titleStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'title_', device.value)
+})
+
+const textStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'content_', device.value)
+})
+</script>
+
 <style scoped>
-.blurb-item:hover .blurb-media div {
-    background-color: hsl(var(--primary) / 0.2);
-}
+.blurb-block { width: 100%; }
+.blurb-image { max-width: 80px; height: auto; border-radius: 4px; }
 </style>

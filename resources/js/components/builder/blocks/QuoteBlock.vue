@@ -1,68 +1,80 @@
 <template>
-    <section 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width || 'max-w-3xl']">
-            <blockquote :class="['relative', styleClass]">
-                <Quote 
-                    v-if="showQuoteIcon" 
-                    class="absolute -top-2 -left-2 w-8 h-8 text-primary/20" 
-                />
-                <p :class="['text-lg md:text-xl leading-relaxed italic', quoteTextClass]">
-                    "{{ quote || 'Your inspirational quote goes here...' }}"
-                </p>
-                <footer v-if="author || role" class="mt-4 flex items-center gap-4">
-                    <img 
-                        v-if="authorImage" 
-                        :src="authorImage" 
-                        :alt="author || 'Author'"
-                        class="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div>
-                        <cite v-if="author" class="font-bold not-italic">{{ author }}</cite>
-                        <p v-if="role" class="text-sm opacity-70">{{ role }}</p>
-                    </div>
-                </footer>
-            </blockquote>
-        </div>
-    </section>
+  <blockquote class="quote-block" :class="`quote-block--${quoteStyle}`" :style="wrapperStyles">
+    <QuoteIcon v-if="quoteStyle === 'classic'" class="quote-icon" :style="iconStyles" />
+    <p class="quote-content" :style="contentStyles">{{ quoteContent }}</p>
+    <footer v-if="quoteAuthor" class="quote-footer">
+      <cite class="quote-author" :style="authorStyles">
+        {{ quoteAuthor }}
+        <span v-if="authorTitleValue" class="author-title">, {{ authorTitleValue }}</span>
+      </cite>
+    </footer>
+  </blockquote>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Quote } from 'lucide-vue-next';
+import { computed, inject } from 'vue'
+import { Quote as QuoteIcon } from 'lucide-vue-next'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
-defineOptions({
-    inheritAttrs: false
-});
+const props = defineProps({ module: { type: Object, required: true } })
 
-const props = defineProps({
-    quote: { type: String, default: 'The only way to do great work is to love what you do.' },
-    author: { type: String, default: 'Steve Jobs' },
-    role: { type: String, default: 'Co-founder, Apple Inc.' },
-    authorImage: { type: String, default: '' },
-    style: { type: String, default: 'border' },
-    showQuoteIcon: { type: Boolean, default: true },
-    alignment: { type: String, default: 'left' },
-    width: { type: String, default: 'max-w-3xl' },
-    padding: { type: String, default: 'py-12' },
-    bgColor: String,
-    animation: { type: String, default: '' }
-});
+const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device || 'desktop')
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding, props.animation].filter(Boolean);
-});
+const quoteStyle = computed(() => getResponsiveValue(settings.value, 'quoteStyle', device.value) || 'modern')
+const quoteContent = computed(() => getResponsiveValue(settings.value, 'content', device.value) || 'Your quote here...')
+const quoteAuthor = computed(() => getResponsiveValue(settings.value, 'author', device.value))
+const authorTitleValue = computed(() => getResponsiveValue(settings.value, 'authorTitle', device.value))
 
-const styleClass = computed(() => ({
-    'border': 'border-l-4 border-primary pl-6',
-    'card': 'bg-muted/50 p-6 rounded-xl',
-    'minimal': 'pl-4',
-    'centered': 'text-center'
-}[props.style] || 'border-l-4 border-primary pl-6'));
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%', position: 'relative' }
+  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
+  styles.textAlign = alignment
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  return styles
+})
 
-const quoteTextClass = computed(() => ({
-    'centered': 'text-center'
-}[props.style] || ''));
+const iconStyles = computed(() => {
+  const typography = getTypographyStyles(settings.value, 'quote_', device.value)
+  return { 
+    width: '48px', 
+    height: '48px', 
+    color: typography.color || '#2059ea',
+    opacity: 0.3, 
+    marginBottom: '16px' 
+  }
+})
+
+const contentStyles = computed(() => getTypographyStyles(settings.value, 'quote_', device.value))
+const authorStyles = computed(() => getTypographyStyles(settings.value, 'author_', device.value))
 </script>
+
+<style scoped>
+.quote-block { width: 100%; position: relative; }
+.quote-content { font-weight: 400; }
+.quote-footer { margin-top: 16px; }
+.quote-author { display: block; }
+.author-title { opacity: 0.7; }
+.quote-block--classic { border: none !important; }
+.quote-block--minimal { border-left: none !important; padding-left: 0 !important; }
+.quote-block--minimal::before { content: '"'; font-size: 4em; color: rgba(0,0,0,0.1); position: absolute; left: 0; top: -10px; }
+</style>

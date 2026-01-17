@@ -84,7 +84,7 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '@/services/api';
-import BlockRenderer from '@/components/builder/blocks/BlockRenderer.vue';
+import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue';
 import { useIconHydration } from '@/composables/useIconHydration';
 
 const route = useRoute();

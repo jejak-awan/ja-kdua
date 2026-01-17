@@ -28,7 +28,14 @@
         </div>
 
         <div v-else class="relative">
-            <img :src="preview" alt="Preview" class="w-full h-64 object-cover rounded-lg">
+            <video 
+                v-if="isPreviewVideo" 
+                :src="preview" 
+                class="w-full h-64 object-cover rounded-lg" 
+                controls
+            ></video>
+            <img v-else :src="preview" alt="Preview" class="w-full h-64 object-cover rounded-lg">
+            
             <div class="mt-4 flex space-x-2">
                 <button
                     type="button"
@@ -59,6 +66,7 @@ import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import api from '../services/api';
 import { useCmsStore } from '../stores/cms';
+import { useToast } from '../composables/useToast';
 
 const props = defineProps({
     folderId: {
@@ -80,6 +88,7 @@ const props = defineProps({
 
 const emit = defineEmits(['uploaded']);
 const cmsStore = useCmsStore();
+const toast = useToast();
 const { settings } = storeToRefs(cmsStore);
 
 // Define reactive settings reference using storeToRefs
@@ -121,6 +130,11 @@ onMounted(async () => {
     await cmsStore.fetchSettingsGroup('media');
 });
 
+const isPreviewVideo = computed(() => {
+    if (!selectedFile.value) return false;
+    return selectedFile.value.type.startsWith('video/');
+});
+
 const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -130,14 +144,18 @@ const handleFileSelect = async (event) => {
     
     // Check extension
     if (effectiveConstraints.value.allowedExtensions && !effectiveConstraints.value.allowedExtensions.includes(extension)) {
-        error.value = `File type .${extension} is not allowed. Allowed: ${effectiveConstraints.value.allowedExtensions.join(', ')}`;
+        const msg = `File type .${extension} is not allowed. Allowed: ${effectiveConstraints.value.allowedExtensions.join(', ')}`;
+        error.value = msg;
+        toast.error.validation(msg);
         return;
     }
 
     // Check size
-    const maxSizeInBytes = (effectiveConstraints.value.maxSize || 10240) * 1024;
+    const maxSizeInBytes = (effectiveConstraints.value.maxSize || (settings.value.max_upload_size || 10240)) * 1024;
     if (file.size > maxSizeInBytes) {
-        error.value = `File size exceeds limit of ${formatSize(maxSizeInBytes)}`;
+        const msg = `File size exceeds limit of ${formatSize(maxSizeInBytes)}`;
+        error.value = msg;
+        toast.error.validation(msg);
         return;
     }
 
@@ -170,12 +188,11 @@ const handleFileSelect = async (event) => {
 
     selectedFile.value = file;
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        preview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    // Create preview using URL.createObjectURL instead of FileReader for performance
+    if (preview.value && preview.value.startsWith('blob:')) {
+        URL.revokeObjectURL(preview.value);
+    }
+    preview.value = URL.createObjectURL(file);
 };
 
 const getImageDimensions = (file) => {
@@ -234,6 +251,9 @@ const uploadFile = async () => {
 };
 
 const clearPreview = () => {
+    if (preview.value && preview.value.startsWith('blob:')) {
+        URL.revokeObjectURL(preview.value);
+    }
     preview.value = null;
     selectedFile.value = null;
     uploadedMedia.value = null;

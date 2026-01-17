@@ -1,162 +1,104 @@
 <template>
-    <section 
-        :class="['transition-all duration-500', padding, radius, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent', color: textColor || 'inherit' }"
-    >
-        <div :class="['container mx-auto px-6 text-center space-y-8', width]">
-            <h2 v-if="title" class="text-4xl md:text-6xl font-extrabold tracking-tight">{{ title }}</h2>
-            <p v-if="subtitle" class="text-xl opacity-90 leading-relaxed max-w-2xl mx-auto">{{ subtitle }}</p>
-            <div class="pt-4 mb-4">
-                <a 
-                    :href="buttonUrl || '#'" 
-                    class="inline-flex items-center px-10 py-5 bg-primary text-primary-foreground rounded-full font-bold text-lg hover:shadow-2xl transition-all shadow-xl transform hover:-translate-y-1 active:scale-95"
-                >
-                    {{ buttonText || 'Get Started' }}
-                    <ArrowRight class="ml-2 w-5 h-5" />
-                </a>
-            </div>
-
-            <!-- Nested Blocks Area -->
-            <div class="relative min-h-[50px]">
-                <!-- Builder Mode -->
-                <draggable 
-                    v-if="isBuilder && !isPreview"
-                    v-model="nestedBlocks" 
-                    item-key="id"
-                    :group="{ name: 'blocks', pull: true, put: true }"
-                    handle=".drag-handle"
-                    class="space-y-4 min-h-[50px] transition-colors rounded-xl p-2"
-                    :class="nestedBlocks.length === 0 ? 'border-2 border-dashed border-white/20 hover:border-white/50 bg-white/5' : ''"
-                    ghost-class="block-ghost"
-                >
-                    <template #item="{ element: block, index }">
-                        <BlockWrapper 
-                            :block="block" 
-                            :index="index"
-                            :context="context"
-                            :isNested="true"
-                            @edit="onEditBlock(block.id)"
-                            @duplicate="onDuplicateNested(index)"
-                            @delete="onDeleteNested(index)"
-                        />
-                    </template>
-                     <template #footer>
-                         <div v-if="nestedBlocks.length === 0" class="h-full flex flex-col items-center justify-center p-4 text-center">
-                            <button 
-                                @click.stop.prevent="showBlockPicker = true"
-                                type="button"
-                                class="text-sm font-medium opacity-50 hover:opacity-100 transition-colors flex items-center gap-2"
-                            >
-                                <Plus class="w-4 h-4" />
-                                <span>Add Element</span>
-                            </button>
-                        </div>
-                    </template>
-                </draggable>
-
-                <!-- Live Mode -->
-                <div v-else class="space-y-4">
-                     <BlockRenderer 
-                        :blocks="nestedBlocks" 
-                        :context="context"
-                        :is-preview="isPreview"
-                    />
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Block Picker Modal -->
-    <BlockPicker 
-        :visible="showBlockPicker" 
-        @close="showBlockPicker = false"
-        @add="handleAddBlock"
-    />
+  <div class="cta-block" :style="wrapperStyles">
+    <div class="cta-content" :style="contentStyles">
+      <h2 v-if="settings.title" class="cta-title" :style="titleStyles">
+        {{ settings.title }}
+      </h2>
+      <p v-if="settings.content" class="cta-text" :style="textStyles">
+        {{ settings.content }}
+      </p>
+    </div>
+    
+    <div class="cta-button-wrapper">
+      <a 
+        :href="settings.buttonUrl || '#'" 
+        :target="settings.buttonTarget || '_self'"
+        class="cta-button"
+        :style="buttonStyles"
+        @click.prevent
+      >
+        {{ settings.buttonText || 'Get Started' }}
+      </a>
+    </div>
+  </div>
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
-
-import { computed, inject, ref } from 'vue';
-import draggable from 'vuedraggable';
-import { ArrowRight, Plus } from 'lucide-vue-next';
-import BlockWrapper from '../canvas/BlockWrapper.vue';
-import BlockRenderer from './BlockRenderer.vue';
-import BlockPicker from '../canvas/BlockPicker.vue';
-import { generateUUID } from '../utils';
+import { computed, inject } from 'vue'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    id: String,
-    title: String,
-    subtitle: String,
-    buttonText: String,
-    buttonUrl: String,
-    padding: { type: String, default: 'py-24' },
-    width: { type: String, default: 'max-w-4xl' },
-    bgColor: String,
-    textColor: String,
-    radius: { type: String, default: 'rounded-none' },
-    animation: { type: String, default: '' },
-    blocks: { type: Array, default: () => [] },
-    context: Object,
-    isPreview: { type: Boolean, default: false }
-});
+  module: {
+    type: Object,
+    required: true
+  }
+})
 
-const builder = inject('builder', null);
-const isBuilder = computed(() => !!builder);
-const showBlockPicker = ref(false);
+const settings = computed(() => props.module.settings || {})
 
-const blockObject = computed(() => {
-    if (!builder || !props.id) return null;
-    return builder.findBlockById(props.id);
-});
+const builder = inject('builder')
+const device = computed(() => builder?.device || 'desktop')
 
-// Nested blocks logic
-const nestedBlocks = computed({
-    get: () => {
-        if (blockObject.value) {
-            return blockObject.value.settings?.blocks || [];
-        }
-        return props.blocks || [];
-    },
-    set: (val) => {
-        if (blockObject.value) {
-            if (!blockObject.value.settings) blockObject.value.settings = {};
-            blockObject.value.settings.blocks = val;
-            builder?.takeSnapshot();
-        }
-    }
-});
+const layout = computed(() => getResponsiveValue(settings.value, 'layout', device.value) || 'stacked')
+const alignment = computed(() => getResponsiveValue(settings.value, 'alignment', device.value) || 'center')
 
-const handleAddBlock = (newBlock) => {
-    if (!blockObject.value) return;
-    if (!blockObject.value.settings) blockObject.value.settings = {};
-    if (!blockObject.value.settings.blocks) blockObject.value.settings.blocks = [];
-    blockObject.value.settings.blocks.push(newBlock);
-    builder?.takeSnapshot();
-    showBlockPicker.value = false;
-};
+const wrapperStyles = computed(() => {
+  const styles = { 
+    width: '100%',
+    display: 'flex',
+    gap: layout.value === 'stacked' ? '24px' : '32px',
+    flexDirection: layout.value === 'stacked' ? 'column' : 'row',
+    alignItems: layout.value === 'inline' ? 'center' : (alignment.value === 'center' ? 'center' : (alignment.value === 'right' ? 'flex-end' : 'flex-start')),
+    textAlign: alignment.value
+  }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
 
-const onEditBlock = (id) => {
-    if (builder) builder.activeBlockId.value = id;
-};
+const contentStyles = computed(() => ({
+  flex: layout.value === 'inline' ? 1 : 'none',
+  textAlign: alignment.value
+}))
 
-const onDuplicateNested = (index) => {
-    if (!blockObject.value?.settings?.blocks) return;
-    const original = blockObject.value.settings.blocks[index];
-    const clone = {
-        ...JSON.parse(JSON.stringify(original)),
-        id: generateUUID()
-    };
-    blockObject.value.settings.blocks.splice(index + 1, 0, clone);
-    builder?.takeSnapshot();
-};
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
 
-const onDeleteNested = (index) => {
-    if (!blockObject.value?.settings?.blocks) return;
-    blockObject.value.settings.blocks.splice(index, 1);
-    builder?.takeSnapshot();
-};
+const buttonStyles = computed(() => {
+  const styles = {
+    display: 'inline-block',
+    padding: '12px 28px',
+    backgroundColor: settings.value.buttonBackgroundColor || '#ffffff',
+    color: settings.value.buttonTextColor || '#2059ea',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    cursor: 'pointer'
+  }
+  Object.assign(styles, getTypographyStyles(settings.value, 'button_', device.value))
+  return styles
+})
 </script>
+
+<style scoped>
+.cta-block { width: 100%; }
+.cta-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+</style>

@@ -1,129 +1,140 @@
-<script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+<template>
+  <div class="countdown-block" :style="wrapperStyles">
+    <div class="countdown-items" :style="itemsStyles">
+      <div v-if="settings.showDays !== false" class="countdown-item" :style="itemStyles">
+        <div class="countdown-number" :style="numberStyles">{{ timeLeft.days }}</div>
+        <div class="countdown-label" :style="labelStyles">{{ settings.daysLabel || 'Days' }}</div>
+      </div>
+      <div v-if="settings.showHours !== false" class="countdown-item" :style="itemStyles">
+        <div class="countdown-number" :style="numberStyles">{{ timeLeft.hours }}</div>
+        <div class="countdown-label" :style="labelStyles">{{ settings.hoursLabel || 'Hours' }}</div>
+      </div>
+      <div v-if="settings.showMinutes !== false" class="countdown-item" :style="itemStyles">
+        <div class="countdown-number" :style="numberStyles">{{ timeLeft.minutes }}</div>
+        <div class="countdown-label" :style="labelStyles">{{ settings.minutesLabel || 'Minutes' }}</div>
+      </div>
+      <div v-if="settings.showSeconds !== false" class="countdown-item" :style="itemStyles">
+        <div class="countdown-number" :style="numberStyles">{{ timeLeft.seconds }}</div>
+        <div class="countdown-label" :style="labelStyles">{{ settings.secondsLabel || 'Seconds' }}</div>
+      </div>
+    </div>
+  </div>
+</template>
 
-defineOptions({
-    inheritAttrs: false
-});
+<script setup>
+import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { 
+  getBackgroundStyles, 
+  getSpacingStyles, 
+  getBorderStyles, 
+  getBoxShadowStyles, 
+  getSizingStyles, 
+  getTypographyStyles,
+  getResponsiveValue,
+  getFilterStyles,
+  getTransformStyles
+} from '../core/styleUtils'
 
 const props = defineProps({
-    end_date: { type: String, default: '' },
-    end_time: { type: String, default: '00:00' },
-    title: { type: String, default: '' },
-    expired_message: { type: String, default: 'Time is up!' },
-    show_days: { type: Boolean, default: true },
-    show_hours: { type: Boolean, default: true },
-    show_minutes: { type: Boolean, default: true },
-    show_seconds: { type: Boolean, default: true },
-    digit_style: { type: String, default: 'boxed' },
-    size: { type: String, default: 'large' },
-    alignment: { type: String, default: 'text-center' },
-    padding: { type: String, default: 'py-16' },
-    bgColor: { type: String, default: '' }
-});
+  module: {
+    type: Object,
+    required: true
+  }
+})
 
-const now = ref(Date.now());
-let interval = null;
+const settings = computed(() => props.module.settings || {})
+
+const builder = inject('builder')
+const device = computed(() => builder?.device || 'desktop')
+
+const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+let interval = null
+
+const calculateTimeLeft = () => {
+  const targetDate = settings.value.targetDate || new Date().toISOString().split('T')[0]
+  const targetTime = settings.value.targetTime || '00:00'
+  const target = new Date(`${targetDate}T${targetTime}:00`)
+  const now = new Date()
+  const diff = target - now
+
+  if (diff <= 0) {
+    timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
+    return
+  }
+
+  timeLeft.value = {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+    minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+    seconds: Math.floor((diff % (1000 * 60)) / 1000)
+  }
+}
 
 onMounted(() => {
-    interval = setInterval(() => {
-        now.value = Date.now();
-    }, 1000);
-});
+  calculateTimeLeft()
+  interval = setInterval(calculateTimeLeft, 1000)
+})
 
 onUnmounted(() => {
-    if (interval) clearInterval(interval);
-});
+  if (interval) clearInterval(interval)
+})
 
-const targetTime = computed(() => {
-    if (!props.end_date) return null;
-    const dateStr = `${props.end_date}T${props.end_time || '00:00'}`;
-    return new Date(dateStr).getTime();
-});
+const wrapperStyles = computed(() => {
+  const styles = { width: '100%' }
+  
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
+  Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  Object.assign(styles, getSizingStyles(settings.value, device.value))
+  Object.assign(styles, getFilterStyles(settings.value, device.value))
+  Object.assign(styles, getTransformStyles(settings.value, device.value))
+  
+  return styles
+})
 
-const timeRemaining = computed(() => {
-    if (!targetTime.value) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
-    
-    const diff = targetTime.value - now.value;
-    
-    if (diff <= 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
-    }
-    
-    const seconds = Math.floor((diff / 1000) % 60);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
-    return { days, hours, minutes, seconds, expired: false };
-});
+const itemsStyles = computed(() => {
+  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 24
+  
+  return {
+    display: 'flex',
+    gap: `${gap}px`,
+    justifyContent: alignment === 'center' ? 'center' : 
+                    alignment === 'right' ? 'flex-end' : 'flex-start',
+    flexWrap: 'wrap'
+  }
+})
 
-const digitClass = computed(() => {
-    const base = 'flex flex-col items-center justify-center font-bold tabular-nums';
-    const styles = {
-        boxed: 'bg-card border rounded-2xl shadow-lg',
-        minimal: 'bg-transparent',
-        gradient: 'bg-gradient-to-br from-primary to-primary/60 text-white rounded-2xl shadow-xl'
-    };
-    const sizes = {
-        small: 'w-16 h-16 text-2xl',
-        medium: 'w-20 h-20 text-3xl',
-        large: 'w-24 h-24 text-4xl md:text-5xl'
-    };
-    return `${base} ${styles[props.digit_style] || styles.boxed} ${sizes[props.size] || sizes.large}`;
-});
+const itemStyles = computed(() => {
+  const padding = getResponsiveValue(settings.value, 'itemPadding', device.value) || 20
+  const radius = getResponsiveValue(settings.value, 'itemBorderRadius', device.value) || 8
+  
+  return {
+    backgroundColor: settings.value.itemBackgroundColor || '#f5f5f5',
+    borderRadius: `${radius}px`,
+    padding: `${padding}px`,
+    textAlign: 'center',
+    minWidth: '80px'
+  }
+})
 
-const labelClass = computed(() => {
-    const sizes = {
-        small: 'text-[9px]',
-        medium: 'text-[10px]',
-        large: 'text-xs'
-    };
-    return `font-semibold opacity-70 mt-2 ${sizes[props.size] || sizes.large}`;
-});
+const numberStyles = computed(() => {
+  const styles = getTypographyStyles(settings.value, 'number_', device.value)
+  return {
+    ...styles,
+    fontVariantNumeric: 'tabular-nums'
+  }
+})
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding, props.alignment].filter(Boolean);
-});
-
-const pad = (num) => String(num).padStart(2, '0');
+const labelStyles = computed(() => {
+  return getTypographyStyles(settings.value, 'label_', device.value)
+})
 </script>
 
-<template>
-    <section 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <h2 v-if="title" class="text-3xl md:text-4xl font-extrabold mb-10 tracking-tight">{{ title }}</h2>
-        
-        <div v-if="!timeRemaining.expired" class="flex flex-wrap gap-4 md:gap-6" :class="{ 'justify-center': alignment === 'text-center', 'justify-start': alignment === 'text-left', 'justify-end': alignment === 'text-right' }">
-            <!-- Days -->
-            <div v-if="show_days" :class="digitClass">
-                <span>{{ pad(timeRemaining.days) }}</span>
-                <span :class="labelClass">Days</span>
-            </div>
-            
-            <!-- Hours -->
-            <div v-if="show_hours" :class="digitClass">
-                <span>{{ pad(timeRemaining.hours) }}</span>
-                <span :class="labelClass">Hours</span>
-            </div>
-            
-            <!-- Minutes -->
-            <div v-if="show_minutes" :class="digitClass">
-                <span>{{ pad(timeRemaining.minutes) }}</span>
-                <span :class="labelClass">Minutes</span>
-            </div>
-            
-            <!-- Seconds -->
-            <div v-if="show_seconds" :class="digitClass">
-                <span>{{ pad(timeRemaining.seconds) }}</span>
-                <span :class="labelClass">Seconds</span>
-            </div>
-        </div>
-        
-        <!-- Expired State -->
-        <div v-else class="py-10">
-            <p class="text-2xl md:text-3xl font-bold text-primary animate-pulse">{{ expired_message }}</p>
-        </div>
-    </section>
-</template>
+<style scoped>
+.countdown-block {
+  width: 100%;
+}
+</style>
