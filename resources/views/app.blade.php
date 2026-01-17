@@ -74,7 +74,7 @@
         }
 
         /* Prevent white flash - apply bg immediately */
-        html, border {
+        html, body {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
         }

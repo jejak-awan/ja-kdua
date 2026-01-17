@@ -441,7 +441,7 @@ class ContentService
     {
         SearchIndex::index($content, [
             'title' => $content->title,
-            'content' => strip_tags($content->body),
+            'content' => strip_tags($content->body ?? ''),
             'excerpt' => $content->excerpt,
             'url' => url('/content/'.$content->slug),
             'type' => $content->type,

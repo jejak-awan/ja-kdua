@@ -438,11 +438,13 @@
         "devices": {
             "desktop": "Desktop View",
             "tablet": "Tablet View",
-            "mobile": "Mobile View"
+            "mobile": "Mobile View",
+            "auto": "Auto (Responsive)"
         },
         "toggleTheme": "Toggle Theme",
         "fullscreen": "Full View",
         "exitFullscreen": "Normal View",
+        "cancel": "Cancel",
         "more": "More Options"
     },
     "sidebars": {

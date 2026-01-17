@@ -161,7 +161,7 @@
 }
 
 .ProseMirror div[data-type="text-columns"]:focus-within {
-    outline: 1px dashed hsl(var(--primary) / 30%);
+    outline: 1px dashed hsl(var(--primary));
     outline-offset: 10px;
 }
 

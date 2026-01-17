@@ -222,7 +222,9 @@ export function useMenu(menuId) {
      * Find item by ID recursively
      */
     const findItemById = (id, searchItems = items.value) => {
+        if (!searchItems || !Array.isArray(searchItems)) return null;
         for (const item of searchItems) {
+            if (!item) continue;
             const itemId = item.id || item._temp_id;
             if (itemId === id) return item;
             if (item.children) {
@@ -237,15 +239,17 @@ export function useMenu(menuId) {
      * Find parent of an item
      */
     const findParent = (id, searchItems = items.value, parent = null) => {
+        if (!searchItems || !Array.isArray(searchItems)) return null;
         for (const item of searchItems) {
+            if (!item) continue;
             const itemId = item.id || item._temp_id;
             if (itemId === id) return parent;
             if (item.children) {
                 const found = findParent(id, item.children, item);
-                if (found !== undefined) return found;
+                if (found) return found;
             }
         }
-        return undefined;
+        return null;
     };
 
     /**

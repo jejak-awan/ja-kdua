@@ -169,7 +169,7 @@ import { contentSchema } from '../../../schemas';
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore(); // Initialize Auth Store
-const isSidebarOpen = ref(true);
+const isSidebarOpen = ref(false);
 const contentId = route.params.id;
 const { t } = useI18n();
 const toast = useToast();

@@ -6,7 +6,7 @@
       <div class="panel-breadcrumb">
         <!-- Collapse Button (Before Breadcrumb) -->
         <IconButton 
-          :icon="PanelRightClose" 
+          :icon="ChevronsRight" 
           class="panel-collapse-btn"
           @click="$emit('close')" 
           :title="$t('builder.rightPanel.collapse')" 
@@ -153,7 +153,7 @@
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library, PanelRightClose } from 'lucide-vue-next'
+import { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library, ChevronsRight } from 'lucide-vue-next'
 import { SETTINGS_TABS } from '../core/constants'
 import ModuleRegistry from '../core/ModuleRegistry'
 import SettingsPanel from '../settings/SettingsPanel.vue'

@@ -94,9 +94,11 @@ import { useResponsiveDevice } from '../core/useResponsiveDevice'
 const device = useResponsiveDevice()
 
 const rowStyles = computed(() => {
-  const gutter = getResponsiveValue(settings.value, 'gutterWidth', device.value) || 30
+  const gutterRaw = getResponsiveValue(settings.value, 'gutterWidth', device.value)
+  const gutter = (gutterRaw !== undefined && gutterRaw !== null && gutterRaw !== '') ? gutterRaw : 30
+  
   const styles = {
-    gap: `${gutter}px`,
+    gap: typeof gutter === 'number' ? `${gutter}px` : (String(gutter).match(/^\d+$/) ? `${gutter}px` : gutter),
     transition: 'background 0.2s ease, box-shadow 0.2s ease'
   }
   
@@ -111,7 +113,9 @@ const rowStyles = computed(() => {
   
   // Custom maxWidth handling if not standard
   if (settings.value.maxWidth && !styles.maxWidth) {
-    styles.maxWidth = `${settings.value.maxWidth}px`
+    const val = settings.value.maxWidth
+    styles.maxWidth = typeof val === 'number' ? `${val}px` : (String(val).match(/^\d+$/) ? `${val}px` : val)
+    
     if (!styles.marginLeft) styles.marginLeft = 'auto'
     if (!styles.marginRight) styles.marginRight = 'auto'
   }

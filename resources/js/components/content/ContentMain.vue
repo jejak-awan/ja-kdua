@@ -73,53 +73,24 @@
                 :model-value="modelValue.blocks || []"
                 @update:model-value="updateField('blocks', $event)"
                 @save="$emit('save')"
+                @close="handleBuilderClose"
             />
         </div>
-
-        <!-- Mode Switch Confirmation Dialog -->
-        <Dialog :open="showSwitchDialog" @update:open="showSwitchDialog = $event">
-            <DialogContent class="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{{ t('features.content.form.switchModeTitle') }}</DialogTitle>
-                    <DialogDescription>
-                        {{ t('features.content.form.switchModeDescription') }}
-                    </DialogDescription>
-                </DialogHeader>
-                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-600 dark:text-amber-400 text-sm">
-                    <strong>{{ t('common.labels.warning') }}:</strong> 
-                    {{ pendingMode === 'builder' 
-                        ? t('features.content.form.switchToBuilderWarning') 
-                        : t('features.content.form.switchToClassicWarning') 
-                    }}
-                </div>
-                <DialogFooter class="flex gap-2 sm:gap-0">
-                    <Button variant="outline" @click="cancelModeSwitch">
-                        {{ t('common.actions.cancel') }}
-                    </Button>
-                    <Button @click="confirmModeSwitch">
-                        {{ t('common.actions.continue') }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue'; // Added nextTick
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router'; // Added useRouter
 import TiptapEditor from '../TiptapEditor.vue';
-import Builder from '../builder/Builder.vue'; // Updated back to Builder.vue
+import Builder from '../builder/Builder.vue';
+import { htmlToBuilder, builderToHtml } from '@/utils/builderTransformer';
 import Button from '@/components/ui/button.vue';
-import Dialog from '@/components/ui/dialog.vue';
-import DialogContent from '@/components/ui/dialog-content.vue';
-import DialogHeader from '@/components/ui/dialog-header.vue';
-import DialogTitle from '@/components/ui/dialog-title.vue';
-import DialogDescription from '@/components/ui/dialog-description.vue';
-import DialogFooter from '@/components/ui/dialog-footer.vue';
 import { Type, Layout } from 'lucide-vue-next';
 
 const { t } = useI18n();
+const router = useRouter();
 
 const props = defineProps({
     modelValue: {
@@ -132,9 +103,8 @@ const emit = defineEmits(['update:modelValue', 'save', 'mode-selected']);
 
 // ... (methods)
 
-// Determine initial mode: if blocks exist and not empty, use builder
-// For "Create" page, start with null (Selection Screen) unless already confirmed by data
-const editorMode = ref(props.modelValue.editor_type || (props.modelValue.blocks && props.modelValue.blocks.length > 0 ? 'builder' : null));
+// Determine initial mode: if editor_type exists, use it. Otherwise start with null (Selection Screen)
+const editorMode = ref(props.modelValue.editor_type || null);
 
 // Emit initial mode to parent if it's already set (e.g. for edit)
 if (editorMode.value) {
@@ -142,10 +112,6 @@ if (editorMode.value) {
         emit('mode-selected', editorMode.value);
     }, 0);
 }
-
-// Dialog state
-const showSwitchDialog = ref(false);
-const pendingMode = ref(null);
 
 // Check if content exists in the other mode
 const hasClassicContent = computed(() => {
@@ -158,23 +124,30 @@ const hasBuilderContent = computed(() => {
     return blocks && blocks.length > 0;
 });
 
-const handleModeSwitch = (newMode) => {
+const handleModeSwitch = async (newMode) => {
     if (newMode === editorMode.value) return;
 
-    // Check if switching would lose content
-    const switchingToBuilder = newMode === 'builder';
-    const hasContentInCurrentMode = switchingToBuilder ? hasClassicContent.value : hasBuilderContent.value;
-
-    if (hasContentInCurrentMode) {
-        // Show warning dialog
-        pendingMode.value = newMode;
-        showSwitchDialog.value = true;
-    } else {
-        // No content to lose, switch immediately
-        editorMode.value = newMode;
-        emit('mode-selected', newMode);
-        updateField('editor_type', newMode);
+    // Transform content based on new mode
+    if (newMode === 'builder' && hasClassicContent.value) {
+        // Transform HTML to Builder
+        const newBlocks = htmlToBuilder(props.modelValue.body);
+        updateField('blocks', newBlocks);
+        
+        // Wait for parent to update props before switching UI
+        await nextTick();
+        await nextTick(); // Double tick for safety with Inertia forms
+    } else if (newMode === 'classic' && hasBuilderContent.value) {
+        // Transform Builder to HTML
+        const newHtml = builderToHtml(props.modelValue.blocks);
+        updateField('body', newHtml);
+        
+        await nextTick();
+        await nextTick();
     }
+
+    editorMode.value = newMode;
+    emit('mode-selected', newMode);
+    updateField('editor_type', newMode);
 };
 
 const confirmInitialMode = (mode) => {
@@ -183,19 +156,9 @@ const confirmInitialMode = (mode) => {
     updateField('editor_type', mode);
 };
 
-const confirmModeSwitch = () => {
-    if (pendingMode.value) {
-        editorMode.value = pendingMode.value;
-        emit('mode-selected', pendingMode.value);
-        updateField('editor_type', pendingMode.value);
-    }
-    showSwitchDialog.value = false;
-    pendingMode.value = null;
-};
-
-const cancelModeSwitch = () => {
-    showSwitchDialog.value = false;
-    pendingMode.value = null;
+const handleBuilderClose = () => {
+    // If we have a router, navigate back to contents list
+    router.push({ name: 'contents' });
 };
 
 const updateField = (field, value) => {

@@ -36,7 +36,10 @@
         />
         
         <!-- Canvas Area -->
-        <div class="ja-builder__canvas-area">
+        <div 
+          class="ja-builder__canvas-area"
+          ref="canvasAreaRef"
+        >
           <CanvasControls 
             @save="handleSave"
           />
@@ -241,6 +244,8 @@ watch(builder.blocks, (newBlocks) => {
   emit('update:modelValue', newBlocks)
 }, { deep: true })
 
+
+
 // Watch for external modelValue changes
 watch(() => props.modelValue, (newBlocks) => {
   if (newBlocks && JSON.stringify(newBlocks) !== JSON.stringify(builder.blocks)) {
@@ -437,11 +442,38 @@ const handleSave = async (status = null) => {
   }
 }
 
+const canvasAreaRef = ref(null)
+let resizeObserver = null
+
 onMounted(async () => {
     window.addEventListener('keydown', handleKeydown)
     builder.loadTheme()
     builder.fetchMetadata()
     
+    // Setup ResizeObserver for adaptive device mode
+    if (canvasAreaRef.value) {
+        resizeObserver = new ResizeObserver((entries) => {
+            if (builder.deviceModeType !== 'auto') return
+
+            for (let entry of entries) {
+                const width = entry.contentRect.width
+                
+                // Adaptive thresholds
+                let newDevice = 'desktop'
+                if (width < 768) {
+                    newDevice = 'mobile'
+                } else if (width < 1024) {
+                    newDevice = 'tablet'
+                }
+                
+                if (builder.device !== newDevice) {
+                    builder.device = newDevice
+                }
+            }
+        })
+        resizeObserver.observe(canvasAreaRef.value)
+    }
+
     if (props.contentId) {
       try {
         await builder.loadContent(props.contentId)
@@ -453,6 +485,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown)
+    if (resizeObserver) {
+        resizeObserver.disconnect()
+    }
 })
 
 // Context Menu Logic

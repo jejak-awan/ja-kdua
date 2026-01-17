@@ -421,11 +421,13 @@
         "devices": {
             "desktop": "Tampilan Desktop",
             "tablet": "Tampilan Tablet",
-            "mobile": "Tampilan Mobile"
+            "mobile": "Tampilan Mobile",
+            "auto": "Otomatis (Adaptif)"
         },
         "toggleTheme": "Ganti Tema",
         "fullscreen": "Tampilan Penuh",
         "exitFullscreen": "Tampilan Normal",
+        "cancel": "Batal",
         "more": "Opsi Lainnya"
     },
     "sidebars": {

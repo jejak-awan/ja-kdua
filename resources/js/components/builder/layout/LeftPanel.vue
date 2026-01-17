@@ -340,12 +340,13 @@ const selectModule = (id) => {
 @media (max-width: 768px) {
   .left-panel--visible {
     position: fixed;
-    top: var(--toolbar-height); /* Assuming this variable exists and is global */
+    top: var(--toolbar-height); 
     bottom: 0;
     left: 0;
-    z-index: 900; /* High z-index to sit above canvas */
-    width: 85% !important; /* Take up most of screen but leave a gap */
+    z-index: 900; 
+    width: 85% !important; 
     max-width: 320px;
+    background: var(--builder-bg-primary) !important; /* Fix transparency */
     box-shadow: var(--shadow-xl);
     border-right: 1px solid var(--builder-border);
   }

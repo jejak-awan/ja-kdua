@@ -14,6 +14,7 @@ import {
     XCircle,
     Clock3,
     AlertCircle,
+    Pencil,
     FileEdit,
     Archive,
     RotateCcw,
@@ -636,7 +637,7 @@ onMounted(() => {
                                     </template>
                                     <template v-else>
                                         <Button variant="ghost" size="icon" class="h-8 w-8" @click="handleEdit(content)" v-if="authStore.hasPermission('edit content')" :title="t('common.actions.edit')">
-                                            <Edit2 class="w-4 h-4" />
+                                            <Pencil class="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive" @click="handleDelete(content)" v-if="authStore.hasPermission('delete content')" :title="t('common.actions.delete')">
                                             <Trash2 class="w-4 h-4" />

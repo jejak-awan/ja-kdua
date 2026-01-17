@@ -64,7 +64,14 @@ export function getSizingStyles(settings, device = 'desktop') {
                 else if (val === 'left') { css.marginLeft = '0'; css.marginRight = 'auto' }
                 else if (val === 'right') { css.marginLeft = 'auto'; css.marginRight = '0' }
             } else {
-                css[f.prop] = typeof val === 'number' ? `${val}px` : val
+                // If numeric (number or string containing only digits), append px
+                if (typeof val === 'number') {
+                    css[f.prop] = `${val}px`
+                } else if (typeof val === 'string' && val.match(/^\d+$/)) {
+                    css[f.prop] = `${val}px`
+                } else {
+                    css[f.prop] = val
+                }
             }
         }
     })

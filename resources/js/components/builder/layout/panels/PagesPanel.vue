@@ -11,46 +11,56 @@
       </BaseInput>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="pages-loading">
+      <div class="spinner"></div>
+      <span>{{ t('builder.panels.pages.loading') }}</span>
+    </div>
+
     <!-- List -->
-    <div class="pages-list">
-      <div 
-        v-for="page in filteredPages" 
-        :key="page.id" 
-        class="page-item" 
-        :class="{ 'page-item--active': currentPageId === page.id }"
-        @click="selectPage(page.id)"
-      >
-        <div class="page-info">
-          <span class="page-title">{{ page.title }}</span>
-          <span class="page-slug">/{{ page.slug }}</span>
+    <template v-else>
+      <div class="pages-list">
+        <div 
+          v-for="page in filteredPages" 
+          :key="page.id" 
+          class="page-item" 
+          :class="{ 'page-item--active': currentPageId === page.id }"
+          @click="selectPage(page.id)"
+        >
+          <div class="page-info">
+            <span class="page-title">{{ page.title }}</span>
+            <span class="page-slug">/{{ page.slug }}</span>
+            <span v-if="page.status === 'draft'" class="page-status-badge">{{ page.status }}</span>
+          </div>
+          <div class="page-actions">
+            <!-- Normal edit button (switching page in builder) -->
+            <button class="action-btn" :title="t('builder.panels.pages.actions.edit')" @click.stop="selectPage(page.id)">
+              <Edit2 :size="14" />
+            </button>
+            <button class="action-btn" :title="t('builder.panels.pages.actions.delete')" @click.stop="handleDelete(page)">
+              <Trash2 :size="14" />
+            </button>
+          </div>
         </div>
-        <div class="page-actions">
-          <button class="action-btn" :title="t('builder.panels.pages.actions.edit')">
-            <Edit2 :size="14" />
-          </button>
-          <button class="action-btn" :title="t('builder.panels.pages.actions.delete')">
-            <Trash2 :size="14" />
-          </button>
+        
+        <div v-if="filteredPages.length === 0" class="empty-results">
+          {{ t('builder.panels.pages.empty') }}
         </div>
       </div>
       
-      <div v-if="filteredPages.length === 0" class="empty-results">
-        {{ t('builder.panels.pages.empty') }}
+      <!-- Add Button -->
+      <div class="panel-footer">
+          <button class="add-page-btn" @click="handleCreate">
+            <Plus :size="16" />
+            <span>{{ t('builder.panels.pages.addNew') }}</span>
+          </button>
       </div>
-    </div>
-    
-    <!-- Add Button -->
-    <div class="panel-footer">
-        <button class="add-page-btn" @click="handleCreate">
-          <Plus :size="16" />
-          <span>{{ t('builder.panels.pages.addNew') }}</span>
-        </button>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Edit2, Trash2, Plus, Search } from 'lucide-vue-next'
 import { BaseInput } from '../../ui'
@@ -59,6 +69,7 @@ const { t } = useI18n()
 const builder = inject('builder')
 const pages = computed(() => builder?.pages || [])
 const currentPageId = computed(() => builder?.currentPageId)
+const loading = computed(() => builder?.pagesLoading || false)
 
 const searchQuery = ref('')
 
@@ -81,6 +92,18 @@ const handleCreate = () => {
     builder?.addPage(title)
   }
 }
+
+const handleDelete = (page) => {
+    if (confirm(t('builder.panels.pages.confirmDelete', { title: page.title }))) {
+        // In real app, call builder.deletePage(page.id)
+        // For now, this could be handled by api directly or via builder extension
+        console.log('Deleting page:', page.id)
+    }
+}
+
+onMounted(() => {
+    builder?.fetchPages()
+})
 </script>
 
 <style scoped>
@@ -144,6 +167,17 @@ const handleCreate = () => {
   color: var(--builder-text-muted);
 }
 
+.page-status-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  background: var(--builder-bg-secondary);
+  color: var(--builder-text-muted);
+  padding: 2px 6px;
+  border-radius: 10px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
 .page-actions {
   display: flex;
   gap: 4px;
@@ -201,5 +235,30 @@ const handleCreate = () => {
   border-color: var(--builder-accent);
   color: var(--builder-accent);
   background: var(--builder-bg-primary);
+}
+
+.pages-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--builder-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--builder-border);
+  border-top-color: var(--builder-accent);
+  border-radius: 50%;
+  animation: rotate 0.8s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 </style>

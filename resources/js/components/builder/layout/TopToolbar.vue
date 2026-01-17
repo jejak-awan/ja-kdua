@@ -4,8 +4,8 @@
     <div class="top-toolbar__left">
       <!-- Menu Button (Mobile Only) -->
       <IconButton 
-        :icon="sidebarVisible ? X : Menu" 
-        :class="['toolbar-btn-lg', 'mobile-only', 'menu-toggle', { 'menu-toggle--active': sidebarVisible }]" 
+        :icon="sidebarVisible ? ChevronsLeft : Menu" 
+        :class="['toolbar-btn-lg', 'toolbar-btn-mobile', 'menu-toggle', { 'menu-toggle--active': sidebarVisible }]" 
         @click="$emit('toggle-sidebar')" 
         :title="sidebarVisible ? $t('builder.common.close') : $t('builder.toolbar.menu')" 
       />
@@ -49,26 +49,73 @@
 
 
 
-      <!-- Device Modes -->
-      <div class="device-modes">
+      <!-- Device Modes (Desktop) -->
+      <div class="device-modes desktop-only">
+        <IconButton 
+          :icon="Wand2"
+          :active="builder.deviceModeType === 'auto'"
+          :title="$t('builder.toolbar.devices.auto') || 'Auto (Responsive)'"
+          @click="builder.setDeviceModeAuto()"
+        />
+        <BaseDivider orientation="vertical" :margin="2" />
         <IconButton 
           v-for="mode in deviceModes"
           :key="mode.id"
           :icon="icons[mode.icon] || mode.icon"
-          :active="device === mode.id"
+          :active="device === mode.id && builder.deviceModeType === 'manual'"
           :title="$t('builder.toolbar.devices.' + mode.id)"
-          @click="emit('change-device', mode.id)"
+          @click="builder.setDeviceMode(mode.id)"
         />
+      </div>
+
+      <!-- Device Modes (Mobile Dropdown) -->
+      <div class="mobile-only">
+        <BaseDropdown align="center" width="auto">
+            <template #trigger="{ open }">
+              <IconButton 
+                :icon="builder.deviceModeType === 'auto' ? Wand2 : (icons[currentDeviceIcon] || Monitor)" 
+                :active="open" 
+                :title="builder.deviceModeType === 'auto' ? 'Auto Mode' : $t('builder.toolbar.devices.' + device)" 
+                class="device-dropdown-trigger"
+              />
+            </template>
+            
+            <template #default="{ close }">
+              <button 
+                class="dropdown-item"
+                :class="{ 'active': builder.deviceModeType === 'auto' }"
+                @click="builder.setDeviceModeAuto(); close()"
+              >
+                <div class="flex items-center gap-2">
+                    <Wand2 class="w-4 h-4" />
+                    {{ $t('builder.toolbar.devices.auto') || 'Auto (Responsive)' }}
+                </div>
+              </button>
+              <BaseDivider orientation="horizontal" :margin="4" />
+              <button 
+                v-for="mode in deviceModes" 
+                :key="mode.id"
+                class="dropdown-item"
+                :class="{ 'active': mode.id === device && builder.deviceModeType === 'manual' }"
+                @click="builder.setDeviceMode(mode.id); close()"
+              >
+                <div class="flex items-center gap-2">
+                    <component :is="icons[mode.icon] || mode.icon" class="w-4 h-4" />
+                    {{ $t('builder.toolbar.devices.' + mode.id) }}
+                </div>
+              </button>
+            </template>
+        </BaseDropdown>
       </div>
 
       <BaseDivider orientation="vertical" :margin="6" />
 
       <!-- Fullview Toggle -->
       <IconButton 
-        :icon="builder.isFullscreen ? Minimize : Maximize" 
-        :active="builder.isFullscreen"
-        :title="builder.isFullscreen ? $t('builder.toolbar.exitFullscreen') || 'Exit Full View' : $t('builder.toolbar.fullscreen') || 'Enter Full View'" 
-        @click="builder.isFullscreen = !builder.isFullscreen"
+        :icon="isFullscreen ? Minimize : Maximize" 
+        :active="isFullscreen"
+        :title="isFullscreen ? $t('builder.toolbar.exitFullscreen') || 'Exit Full View' : $t('builder.toolbar.fullscreen') || 'Enter Full View'" 
+        @click="toggleFullscreen"
       />
     </div>
     
@@ -94,6 +141,16 @@
         </button>
       </div>
 
+      <BaseDivider orientation="vertical" :margin="6" />
+
+      <!-- Cancel/Close Button -->
+      <IconButton 
+        :icon="X" 
+        class="toolbar-btn-lg cancel-btn" 
+        @click="$emit('close-builder')" 
+        :title="$t('builder.toolbar.cancel') || 'Cancel'" 
+      />
+
     </div>
   </header>
 </template>
@@ -102,14 +159,15 @@
 import { inject, computed } from 'vue'
 import { 
   Menu, Monitor, Tablet, Smartphone, 
-   Search, Save, X, Maximize, Minimize
+   Search, Save, X, Maximize, Minimize, ChevronsLeft,
+   Wand2
 } from 'lucide-vue-next'
 import { DEVICE_MODES } from '../core/constants'
 import { IconButton, BaseDropdown, BaseDivider } from '../ui'
 import AdminLogo from '../../layouts/AdminLogo.vue'
 
 // Icons mapping for dynamic components
-const icons = { Monitor, Tablet, Smartphone }
+const icons = { Monitor, Tablet, Smartphone, Wand2 }
 
 // Inject builder state
 const builder = inject('builder')
@@ -130,11 +188,26 @@ const wireframeMode = computed(() => builder?.wireframeMode || false)
 
 const deviceModes = Object.values(DEVICE_MODES)
 
+const currentDeviceIcon = computed(() => {
+    const mode = deviceModes.find(m => m.id === device.value)
+    return mode ? mode.icon : 'Monitor'
+})
+
 // Zoom Options
 const zoomOptions = [50, 75, 100, 125, 150]
 
 const selectZoom = (val) => {
-  builder.zoom = val
+    if (builder) {
+        builder.zoom = val
+    }
+}
+
+const isFullscreen = computed(() => !!builder?.isFullscreen)
+
+const toggleFullscreen = () => {
+    if (builder) {
+        builder.isFullscreen = !builder.isFullscreen
+    }
 }
 
 const toggleWireframe = () => {
@@ -183,6 +256,32 @@ const toggleWireframe = () => {
     align-items: center;
     gap: 8px;
     z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .top-toolbar__center {
+        position: static;
+        transform: none;
+        flex: 1;
+        justify-content: center;
+        gap: 4px;
+        order: 2;
+    }
+    
+    .top-toolbar__left {
+        order: 1;
+        flex: 0;
+    }
+    
+    .top-toolbar__right {
+        order: 3;
+        flex: 0;
+        gap: 4px;
+    }
+
+    .device-modes {
+        display: none !important; /* Hide device modes on small mobile */
+    }
 }
 
 /* Branding */
@@ -255,6 +354,23 @@ const toggleWireframe = () => {
   :deep(.admin-logo-override) {
       display: none;
   }
+
+  /* Hide zoom on very small screens */
+  @media (max-width: 480px) {
+     .top-toolbar__center {
+         display: none;
+     }
+  }
+}
+
+/* Cancel Button */
+.cancel-btn {
+    color: var(--builder-text-secondary);
+}
+.cancel-btn:hover {
+    color: var(--builder-error);
+    background: rgba(231, 76, 60, 0.1) !important;
+    border-color: var(--builder-error) !important;
 }
 
 /* Save Actions */
@@ -308,13 +424,29 @@ const toggleWireframe = () => {
     transform: translateY(0);
 }
 
-/* Mobile Only Elements */
+/* Mobile Visibility Helpers */
 .mobile-only {
     display: none;
+}
+.desktop-only {
+    display: flex;
 }
 
 @media (max-width: 768px) {
     .mobile-only {
+        display: flex;
+    }
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* Toolbar Fixes */
+.toolbar-btn-mobile {
+    display: none;
+}
+@media (max-width: 768px) {
+    .toolbar-btn-mobile {
         display: flex;
     }
 }

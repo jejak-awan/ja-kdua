@@ -143,7 +143,8 @@
 .ja-builder {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 800px;
+    min-height: 500px;
     width: 100%;
     background: var(--builder-bg-primary);
     font-family: var(--font-family);
@@ -167,6 +168,7 @@
     inset: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    max-height: 100vh !important;
     z-index: 99999 !important;
     border-radius: 0 !important;
     border: none !important;

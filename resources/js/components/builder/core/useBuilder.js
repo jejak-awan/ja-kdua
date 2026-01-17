@@ -46,6 +46,7 @@ export default function useBuilder(initialData = { blocks: [] }) {
     // UI State
     const activeTab = ref('content') // content | design | advanced
     const device = ref('desktop') // desktop | tablet | mobile
+    const deviceModeType = ref('auto') // auto | manual
     const customViewportWidth = ref(null) // null | number (px)
     const zoom = ref(100)
     const wireframeMode = ref(false)
@@ -87,16 +88,10 @@ export default function useBuilder(initialData = { blocks: [] }) {
     const historyIndex = ref(-1)
     const maxHistory = 50
 
-    // Pages State (Mock)
-    const pages = ref([
-        { id: 1, title: 'Home Page', slug: 'home' },
-        { id: 2, title: 'About Us', slug: 'about' },
-        { id: 3, title: 'Services', slug: 'services' },
-        { id: 4, title: 'Contact', slug: 'contact' },
-        { id: 5, title: 'Blog', slug: 'blog' },
-        { id: 6, title: 'Pricing', slug: 'pricing' }
-    ])
-    const currentPageId = ref(1)
+    // Pages State (Live)
+    const pages = ref([])
+    const currentPageId = ref(null)
+    const pagesLoading = ref(false)
 
     // Metadata for selection
     const categories = ref([])
@@ -125,20 +120,160 @@ export default function useBuilder(initialData = { blocks: [] }) {
     })
 
     // ============================================
-    // METHODS - Selection
+    // METHODS - Page Operations (Live)
     // ============================================
 
-    function setCurrentPage(id) {
-        currentPageId.value = id
-        // In real app, this would fetch page content
-        // resetLayout()
-        // fetchContent(id)
+    async function fetchPages() {
+        pagesLoading.value = true
+        try {
+            const response = await api.get('/admin/ja/contents', {
+                params: { type: 'page', per_page: 100 }
+            })
+            const data = response.data?.data || response.data
+            pages.value = (data.data || data || []).map(p => ({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                status: p.status
+            }))
+        } catch (error) {
+            console.error('Failed to fetch pages:', error)
+        } finally {
+            pagesLoading.value = false
+        }
     }
 
-    function addPage(title, slug) {
-        const id = Math.max(...pages.value.map(p => p.id)) + 1
-        pages.value.push({ id, title, slug: slug || title.toLowerCase().replace(/\s+/g, '-') })
-        setCurrentPage(id)
+    async function setCurrentPage(id) {
+        if (currentPageId.value === id) return
+
+        clearSelection()
+        try {
+            await loadContent(id)
+            currentPageId.value = id
+        } catch (error) {
+            console.error('Failed to switch page:', error)
+        }
+    }
+
+    async function addPage(title) {
+        try {
+            const payload = {
+                title,
+                slug: title.toLowerCase().replace(/\s+/g, '-'),
+                type: 'page',
+                status: 'draft',
+                editor_type: 'builder',
+                blocks: []
+            }
+            const response = await api.post('/admin/ja/contents', payload)
+            const newPage = response.data?.data || response.data
+
+            if (newPage) {
+                await fetchPages()
+                await setCurrentPage(newPage.id)
+            }
+            return newPage
+        } catch (error) {
+            console.error('Failed to create page:', error)
+            throw error
+        }
+    }
+
+    async function loadContent(id) {
+        try {
+            const response = await api.get(`/admin/ja/contents/${id}`)
+            const data = response.data?.data || response.data
+
+            if (data) {
+                content.value = {
+                    id: data.id,
+                    title: data.title || '',
+                    slug: data.slug || '',
+                    excerpt: data.excerpt || '',
+                    status: data.status || 'draft',
+                    type: data.type || 'post',
+                    category_id: data.category_id || null,
+                    featured_image: data.featured_image || null,
+                    published_at: data.published_at || null,
+                    meta_title: data.meta_title || '',
+                    meta_description: data.meta_description || '',
+                    meta_keywords: data.meta_keywords || '',
+                    og_image: data.og_image || null,
+                    comment_status: data.comment_status !== undefined ? data.comment_status : true,
+                    is_featured: !!data.is_featured,
+                    tags: data.tags || [],
+                    menu_item: {
+                        add_to_menu: false,
+                        menu_id: '',
+                        parent_id: null,
+                        title: ''
+                    }
+                }
+
+                if (data.menu_items && data.menu_items.length > 0) {
+                    const menuItem = data.menu_items[0]
+                    content.value.menu_item = {
+                        add_to_menu: true,
+                        menu_id: menuItem.menu_id,
+                        parent_id: menuItem.parent_id,
+                        title: menuItem.title
+                    }
+                }
+
+                if (data.blocks) {
+                    blocks.value = data.blocks
+                    triggerRef(blocks)
+                    takeSnapshot()
+                }
+            }
+            return data
+        } catch (error) {
+            console.error('Failed to load content for builder:', error)
+            throw error
+        }
+    }
+
+    async function saveContent() {
+        if (!content.value.id) return false
+
+        try {
+            const payload = {
+                ...content.value,
+                blocks: blocks.value
+            }
+
+            if (content.value.tags) {
+                payload.tags = content.value.tags.filter(t => t.id).map(t => t.id)
+                payload.new_tags = content.value.tags.filter(t => !t.id).map(t => t.name)
+            }
+
+            const response = await api.put(`/admin/ja/contents/${content.value.id}`, payload)
+            return response.data
+        } catch (error) {
+            console.error('Failed to save content from builder:', error)
+            throw error
+        }
+    }
+
+    async function fetchMetadata() {
+        try {
+            const [catsRes, tagsRes, menusRes] = await Promise.all([
+                api.get('/admin/ja/categories'),
+                api.get('/admin/ja/tags'),
+                api.get('/admin/ja/menus')
+            ])
+
+            const ensureArray = (response) => {
+                const data = response?.data?.data || response?.data || []
+                return Array.isArray(data) ? data : []
+            }
+
+            categories.value = ensureArray(catsRes)
+            availableTags.value = ensureArray(tagsRes)
+            menus.value = ensureArray(menusRes)
+        } catch (error) {
+            console.error('Failed to fetch builder metadata:', error)
+        }
     }
 
     function selectModule(id) {
@@ -365,6 +500,126 @@ export default function useBuilder(initialData = { blocks: [] }) {
         return true
     }
 
+    async function loadTheme(slug = null) {
+        const themeSlug = slug || activeTheme.value
+        try {
+            const response = await api.get(`/cms/themes/active?type=frontend`)
+            const data = response.data?.data || response.data
+
+            if (data) {
+                themeData.value = data
+                themeSettings.value = data.settings || {}
+                activeTheme.value = data.slug
+
+                globalActiveTheme.value = data
+                globalThemeSettings.value = data.settings || {}
+                if (data.assets) {
+                    globalThemeAssets.value = data.assets
+                }
+
+                applyThemeStyles()
+            }
+        } catch (error) {
+            console.error('Failed to load theme for builder:', error)
+        }
+    }
+
+    function addCanvas(title = 'New Canvas') {
+        const id = `canvas-${Date.now()}`
+        canvases.value.push({
+            id,
+            title,
+            blocks: [],
+            isMain: false
+        })
+        activeCanvasId.value = id
+        clearSelection()
+        return id
+    }
+
+    function removeCanvas(id) {
+        const index = canvases.value.findIndex(c => c.id === id)
+        if (index === -1 || canvases.value[index].isMain) return false
+
+        const isDeletingActive = activeCanvasId.value === id
+        canvases.value.splice(index, 1)
+
+        if (isDeletingActive) {
+            activeCanvasId.value = canvases.value[0].id
+            clearSelection()
+        }
+        return true
+    }
+
+    function switchCanvas(id) {
+        const canvas = canvases.value.find(c => c.id === id)
+        if (!canvas) return
+
+        activeCanvasId.value = id
+        gridViewMode.value = false
+        clearSelection()
+    }
+
+    function renameCanvas(id, title) {
+        const canvas = canvases.value.find(c => c.id === id)
+        if (canvas) {
+            canvas.title = title
+        }
+    }
+
+    function duplicateCanvas(id) {
+        const canvas = canvases.value.find(c => c.id === id)
+        if (!canvas) return null
+
+        const newId = `canvas-${Date.now()}`
+        const newCanvas = {
+            ...JSON.parse(JSON.stringify(canvas)),
+            id: newId,
+            title: `${canvas.title} (Copy)`,
+            isMain: false
+        }
+        canvases.value.push(newCanvas)
+        return newId
+    }
+
+    function setMainCanvas(id) {
+        canvases.value.forEach(c => {
+            c.isMain = c.id === id
+        })
+    }
+
+    function exportCanvas(id) {
+        const canvas = canvases.value.find(c => c.id === id)
+        if (!canvas) return
+
+        const data = JSON.stringify(canvas, null, 2)
+        const blob = new Blob([data], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${canvas.title.toLowerCase().replace(/\s+/g, '-')}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+    }
+
+    function setDeviceMode(mode) {
+        device.value = mode
+        deviceModeType.value = 'manual'
+        customViewportWidth.value = null
+    }
+
+    function setDeviceModeAuto() {
+        deviceModeType.value = 'auto'
+    }
+
+    function openResponsiveModal(config) {
+        responsiveModal.value = config
+    }
+
+    function closeResponsiveModal() {
+        responsiveModal.value = null
+    }
+
     // ============================================
     // HELPER FUNCTIONS
     // ============================================
@@ -448,6 +703,9 @@ export default function useBuilder(initialData = { blocks: [] }) {
         wireframeMode,
         gridViewMode,
         isFullscreen,
+        deviceModeType,
+        setDeviceMode,
+        setDeviceModeAuto,
         activeTheme,
         themeData,
         themeSettings,
@@ -457,6 +715,7 @@ export default function useBuilder(initialData = { blocks: [] }) {
         historyIndex,
         pages,
         currentPageId,
+        pagesLoading,
         categories,
         availableTags,
         menus,
@@ -469,6 +728,7 @@ export default function useBuilder(initialData = { blocks: [] }) {
         currentPage,
 
         // Page Operations
+        fetchPages,
         setCurrentPage,
         addPage,
 
@@ -504,218 +764,23 @@ export default function useBuilder(initialData = { blocks: [] }) {
         // Multi-Canvas Management
         canvases,
         activeCanvasId,
-        addCanvas: (title = 'New Canvas') => {
-            const id = `canvas-${Date.now()}`
-            canvases.value.push({
-                id,
-                title,
-                blocks: [],
-                isMain: false
-            })
-            activeCanvasId.value = id
-            clearSelection()
-            return id
-        },
-        removeCanvas: (id) => {
-            const index = canvases.value.findIndex(c => c.id === id)
-            if (index === -1 || canvases.value[index].isMain) return false
-
-            const isDeletingActive = activeCanvasId.value === id
-            canvases.value.splice(index, 1)
-
-            if (isDeletingActive) {
-                activeCanvasId.value = canvases.value[0].id
-                clearSelection()
-            }
-            return true
-        },
-        switchCanvas: (id) => {
-            const canvas = canvases.value.find(c => c.id === id)
-            if (!canvas) return
-
-            activeCanvasId.value = id
-            gridViewMode.value = false // Close Grid View on switch
-            clearSelection()
-        },
-        renameCanvas: (id, title) => {
-            const canvas = canvases.value.find(c => c.id === id)
-            if (canvas) {
-                canvas.title = title
-            }
-        },
-        duplicateCanvas: (id) => {
-            const canvas = canvases.value.find(c => c.id === id)
-            if (!canvas) return null
-
-            const newId = `canvas-${Date.now()}`
-            const newCanvas = {
-                ...JSON.parse(JSON.stringify(canvas)),
-                id: newId,
-                title: `${canvas.title} (Copy)`,
-                isMain: false
-            }
-            canvases.value.push(newCanvas)
-            return newId
-        },
-        setMainCanvas: (id) => {
-            canvases.value.forEach(c => {
-                c.isMain = c.id === id
-            })
-        },
-        loadTheme: async (slug = null) => {
-            const themeSlug = slug || activeTheme.value
-            try {
-                // Fetch public theme data for preview
-                const response = await api.get(`/cms/themes/active?type=frontend`)
-                const data = response.data?.data || response.data
-
-                if (data) {
-                    themeData.value = data
-                    themeSettings.value = data.settings || {}
-                    activeTheme.value = data.slug
-
-                    // Sync with global useTheme state for interactive components (Header/Footer)
-                    globalActiveTheme.value = data
-                    globalThemeSettings.value = data.settings || {}
-                    if (data.assets) {
-                        globalThemeAssets.value = data.assets
-                    }
-
-                    // Re-apply styles globally
-                    applyThemeStyles()
-                }
-            } catch (error) {
-                console.error('Failed to load theme for builder:', error)
-            }
-        },
-        loadContent: async (id) => {
-            try {
-                const response = await api.get(`/admin/ja/contents/${id}`)
-                // In a real app, we'd use parseSingleResponse, but use direct data for now if needed 
-                // matched with legacy Edit.vue parsing logic
-                const data = response.data?.data || response.data
-
-                if (data) {
-                    content.value = {
-                        id: data.id,
-                        title: data.title || '',
-                        slug: data.slug || '',
-                        excerpt: data.excerpt || '',
-                        status: data.status || 'draft',
-                        type: data.type || 'post',
-                        category_id: data.category_id || null,
-                        featured_image: data.featured_image || null,
-                        published_at: data.published_at || null,
-                        meta_title: data.meta_title || '',
-                        meta_description: data.meta_description || '',
-                        meta_keywords: data.meta_keywords || '',
-                        og_image: data.og_image || null,
-                        comment_status: data.comment_status !== undefined ? data.comment_status : true,
-                        is_featured: !!data.is_featured,
-                        tags: data.tags || [],
-                        menu_item: {
-                            add_to_menu: false,
-                            menu_id: '',
-                            parent_id: null,
-                            title: ''
-                        }
-                    }
-
-                    // Handle menu items if present
-                    if (data.menu_items && data.menu_items.length > 0) {
-                        const menuItem = data.menu_items[0]
-                        content.value.menu_item = {
-                            add_to_menu: true,
-                            menu_id: menuItem.menu_id,
-                            parent_id: menuItem.parent_id,
-                            title: menuItem.title
-                        }
-                    }
-
-                    if (data.blocks) {
-                        blocks.value = data.blocks
-                        triggerRef(blocks)
-                        takeSnapshot()
-                    }
-                }
-                return data
-            } catch (error) {
-                console.error('Failed to load content for builder:', error)
-                throw error
-            }
-        },
-        saveContent: async () => {
-            if (!content.value.id) return false
-
-            try {
-                const payload = {
-                    ...content.value,
-                    blocks: blocks.value
-                }
-
-                // Prepared tags logic (mirroring legacy)
-                if (content.value.tags) {
-                    payload.tags = content.value.tags.filter(t => t.id).map(t => t.id)
-                    payload.new_tags = content.value.tags.filter(t => !t.id).map(t => t.name)
-                }
-
-                const response = await api.put(`/admin/ja/contents/${content.value.id}`, payload)
-                return response.data
-            } catch (error) {
-                console.error('Failed to save content from builder:', error)
-                throw error
-            }
-        },
-        exportCanvas: (id) => {
-            const canvas = canvases.value.find(c => c.id === id)
-            if (!canvas) return
-
-            const data = JSON.stringify(canvas, null, 2)
-            // Exporting canvas
-            // In a real app, this would trigger a download
-            const blob = new Blob([data], { type: 'application/json' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${canvas.title.toLowerCase().replace(/\s+/g, '-')}.json`
-            a.click()
-            URL.revokeObjectURL(url)
-        },
-        fetchMetadata: async () => {
-            try {
-                const [catsRes, tagsRes, menusRes] = await Promise.all([
-                    api.get('/admin/ja/categories'),
-                    api.get('/admin/ja/tags'),
-                    api.get('/admin/ja/menus')
-                ])
-
-                // Helper to ensure array
-                const ensureArray = (response) => {
-                    const data = response?.data?.data || response?.data || []
-                    return Array.isArray(data) ? data : []
-                }
-
-                categories.value = ensureArray(catsRes)
-                availableTags.value = ensureArray(tagsRes)
-                menus.value = ensureArray(menusRes)
-            } catch (error) {
-                console.error('Failed to fetch builder metadata:', error)
-            }
-        },
+        addCanvas,
+        removeCanvas,
+        switchCanvas,
+        renameCanvas,
+        duplicateCanvas,
+        setMainCanvas,
+        loadTheme,
+        loadContent,
+        saveContent,
+        exportCanvas,
+        fetchMetadata,
 
         // Responsive Modal
-        openResponsiveModal: (config) => {
-            responsiveModal.value = config
-        },
-        closeResponsiveModal: () => {
-            responsiveModal.value = null
-        },
+        openResponsiveModal,
+        closeResponsiveModal,
 
         // UI Helpers
-        setDeviceMode: (mode) => {
-            device.value = mode
-            // Reset custom width when switching modes to use auto/default
-            customViewportWidth.value = null
-        }
+        setDeviceMode
     }
 }
