@@ -1,0 +1,145 @@
+/**
+ * Janari Full Page Templates
+ * Pre-built page layouts matching the Janari theme
+ */
+
+import {
+    heroGradient,
+    featuresGrid,
+    ctaDark,
+    aboutSplit,
+    teamGrid,
+    blogHeader,
+    contactSection
+} from './SectionTemplates.js'
+
+// Simple text section helper for quick additions
+const textSection = (text) => ({
+    id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+    type: 'section',
+    settings: { padding: { top: '60', bottom: '60' } },
+    children: [{
+        id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'row',
+        settings: { columns: '1' },
+        children: [{
+            id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+            type: 'column',
+            children: [{
+                id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                type: 'text',
+                settings: { content: text }
+            }]
+        }]
+    }]
+})
+
+export const homePage = () => [
+    heroGradient(),
+    featuresGrid(),
+    ctaDark()
+]
+
+export const aboutPage = () => [
+    aboutSplit(),
+    teamGrid(),
+    ctaDark()
+]
+
+export const blogPage = () => [
+    blogHeader(),
+    // Blog page usually has a dynamic blog loop. 
+    // We'll create a simple section with a Blog block.
+    (() => {
+        const id = `tpl_${Math.random().toString(36).substr(2, 9)}`
+        return {
+            id: id,
+            type: 'section',
+            settings: { padding: { top: '80', bottom: '80' } },
+            children: [{
+                id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                type: 'row',
+                settings: { columns: '1', maxWidth: '1280px', margin: { left: 'auto', right: 'auto' } },
+                children: [{
+                    id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                    type: 'column',
+                    children: [{
+                        id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                        type: 'blog',
+                        settings: {
+                            layout: 'grid',
+                            columns: 3,
+                            postsPerPage: 6,
+                            showFeaturedImage: true,
+                            showExcerpt: true
+                        }
+                    }]
+                }]
+            }]
+        }
+    })()
+]
+
+export const contactPage = () => [
+    contactSection(),
+    // Map section
+    (() => {
+        const id = `tpl_${Math.random().toString(36).substr(2, 9)}`
+        return {
+            id: id,
+            type: 'section',
+            settings: { padding: { top: '0', bottom: '0' } },
+            children: [{
+                id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                type: 'row',
+                settings: { columns: '1' },
+                children: [{
+                    id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                    type: 'column',
+                    children: [{
+                        id: `tpl_${Math.random().toString(36).substr(2, 9)}`,
+                        type: 'map',
+                        settings: {
+                            address: 'Jakarta, Indonesia',
+                            zoom: 14,
+                            height: '400px'
+                        }
+                    }]
+                }]
+            }]
+        }
+    })()
+]
+
+export const pageTemplates = [
+    {
+        id: 'janari-home',
+        name: 'Home Page',
+        description: 'Complete home page with Hero, Features, and CTA',
+        thumbnail: 'home-page',
+        factory: homePage
+    },
+    {
+        id: 'janari-about',
+        name: 'About Page',
+        description: 'About us page with mission and team grid',
+        thumbnail: 'about-page',
+        factory: aboutPage
+    },
+    {
+        id: 'janari-blog',
+        name: 'Blog Page',
+        description: 'Blog listing page with header and post grid',
+        thumbnail: 'blog-page',
+        factory: blogPage
+    },
+    {
+        id: 'janari-contact',
+        name: 'Contact Page',
+        description: 'Contact page with form, info, and map',
+        thumbnail: 'contact-page',
+        factory: contactPage
+    }
+]
+
+export default pageTemplates

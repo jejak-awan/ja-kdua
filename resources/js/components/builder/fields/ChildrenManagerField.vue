@@ -144,7 +144,7 @@ const deleteChild = (child) => {
 }
 
 const copyStyles = (child) => {
-    console.log('Copy styles for', child.id)
+    // TODO: Implement copy styles
 }
 
 const addChild = () => {

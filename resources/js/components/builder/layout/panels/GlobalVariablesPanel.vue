@@ -667,7 +667,6 @@ const cancelChanges = () => {
 
 const saveVariables = () => {
     if (!validateInputs()) return
-    console.log('Saving variables...', getSnapshot())
     originalState.value = getSnapshot() // Update snapshot
     alert(t('builder.panels.globalVariables.messages.saveSuccess'))
 }

@@ -65,6 +65,12 @@ class ContentController extends BaseApiController
 
         $content->increment('views');
 
+        // Resolve dynamic tags in blocks for frontend rendering
+        if ($content->blocks && is_array($content->blocks)) {
+            $dynamicTagService = new \App\Services\DynamicTagService();
+            $content->blocks = $dynamicTagService->resolveBlocks($content->blocks, $content);
+        }
+
         return $this->success($content, 'Content retrieved successfully');
     }
 
@@ -184,7 +190,7 @@ class ContentController extends BaseApiController
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'slug' => 'required|string|unique:contents,slug',
+                'slug' => 'nullable|string',
                 'excerpt' => 'nullable|string',
                 'body' => 'nullable|required_without:blocks|string',
                 'featured_image' => 'nullable|string',
@@ -210,6 +216,12 @@ class ContentController extends BaseApiController
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
         }
+
+        // Handle slug generation and uniqueness
+        if (! isset($validated['slug']) || empty($validated['slug'])) {
+            $validated['slug'] = \Illuminate\Support\Str::slug($validated['title']);
+        }
+        $validated['slug'] = $this->contentService->generateUniqueSlug($validated['slug']);
 
         // Approval Workflow: Authors cannot publish directly
         if (! $request->user()->can('publish content')) {
@@ -249,7 +261,7 @@ class ContentController extends BaseApiController
         try {
             $rules = [
                 'title' => 'sometimes|required|string|max:255',
-                'slug' => 'sometimes|required|string|unique:contents,slug,'.$content->id,
+                'slug' => 'sometimes|nullable|string',
                 'excerpt' => 'nullable|string',
                 'body' => 'nullable|string', // Allow null body for drafts
                 'featured_image' => 'nullable|string',

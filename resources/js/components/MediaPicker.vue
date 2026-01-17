@@ -1,10 +1,10 @@
 <template>
     <div class="media-picker">
-        <slot name="trigger" :open="() => showModal = true">
+        <slot name="trigger" :open="openModal">
             <Button
                 type="button"
                 variant="outline"
-                @click="showModal = true"
+                @click="openModal"
                 class="w-full h-12 border-2 border-dashed flex items-center justify-center gap-2"
             >
                 <ImageIcon class="w-4 h-4" />
@@ -16,7 +16,7 @@
         <Teleport to="body">
             <div
                 v-if="showModal"
-                class="fixed inset-0 z-[30000] pointer-events-none"
+                class="fixed inset-0 z-[100000] pointer-events-none"
             >
                 <!-- Removed centering wrapper to allow free movement -->
                 <div 
@@ -276,6 +276,7 @@ import {
 } from 'lucide-vue-next';
 import Button from '@/components/ui/button.vue';
 import Input from '@/components/ui/input.vue';
+import MediaUpload from './MediaUpload.vue';
 
 const props = defineProps({
     label: {
@@ -302,6 +303,11 @@ const emit = defineEmits(['selected', 'update:open']);
 const toast = useToast();
 
 const showModal = ref(false);
+
+// Open modal function
+const openModal = () => {
+    showModal.value = true
+}
 
 // Sync prop 'open' to internal state
 watch(() => props.open, (newVal) => {

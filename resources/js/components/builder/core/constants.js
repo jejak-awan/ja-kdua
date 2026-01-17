@@ -81,14 +81,14 @@ export const SETTINGS_TABS = {
 
 // Left Sidebar Panels
 export const SIDEBAR_PANELS = [
-    { id: 'layers', label: 'Layers', icon: 'Layers' },
     { id: 'pages', label: 'Pages', icon: 'FileText' },
-    { id: 'history', label: 'History', icon: 'Clock' },
-    { id: 'layouts', label: 'Layouts', icon: 'Layout' },
     { id: 'settings', label: 'Settings', icon: 'Settings' },
-    { id: 'global_variables', label: 'Global Variables', icon: 'Database' },
-    { id: 'theme', label: 'Theme', icon: 'Palette' },
+    { id: 'layers', label: 'Layers', icon: 'Layers' },
+    { id: 'layouts', label: 'Layouts', icon: 'Layout' },
     { id: 'presets', label: 'Presets', icon: 'Sparkles' },
+    { id: 'history', label: 'History', icon: 'Clock' },
+    { id: 'theme', label: 'Theme', icon: 'Palette' },
+    { id: 'global_variables', label: 'Global Variables', icon: 'Database' },
     { id: 'portability', label: 'Import/Export', icon: 'Share2' },
     { id: 'help', label: 'Help', icon: 'HelpCircle' }
 ]

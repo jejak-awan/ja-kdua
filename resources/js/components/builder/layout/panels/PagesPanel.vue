@@ -95,9 +95,7 @@ const handleCreate = () => {
 
 const handleDelete = (page) => {
     if (confirm(t('builder.panels.pages.confirmDelete', { title: page.title }))) {
-        // In real app, call builder.deletePage(page.id)
-        // For now, this could be handled by api directly or via builder extension
-        console.log('Deleting page:', page.id)
+        // TODO: Call builder.deletePage(page.id) when implemented
     }
 }
 

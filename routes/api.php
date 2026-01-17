@@ -547,6 +547,12 @@ Route::prefix('v1')->group(function () {
         Route::post('languages/import-pack', [App\Http\Controllers\Api\V1\LanguageController::class, 'importPack'])->middleware('permission:manage settings');
         Route::post('languages/{language}/set-default', [App\Http\Controllers\Api\V1\LanguageController::class, 'setDefault'])->middleware('permission:manage settings');
         Route::apiResource('languages', App\Http\Controllers\Api\V1\LanguageController::class)->middleware('permission:manage settings');
+
+        // Builder API (for visual builder dynamic data)
+        Route::prefix('builder')->group(function () {
+            Route::get('dynamic-sources', [App\Http\Controllers\Api\V1\BuilderController::class, 'dynamicSources']);
+            Route::post('resolve-dynamic', [App\Http\Controllers\Api\V1\BuilderController::class, 'resolveDynamic']);
+        });
     });
 });
 

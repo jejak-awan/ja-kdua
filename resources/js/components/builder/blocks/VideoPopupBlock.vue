@@ -32,7 +32,7 @@ const device = computed(() => builder?.device || 'desktop')
 
 const openPopup = () => {
   // In a real implementation, this would open a video modal
-  console.log('Open video:', settings.value.videoUrl)
+  // TODO: Implement video modal
 }
 
 const iconSizeValue = computed(() => getResponsiveValue(settings.value, 'iconSize', device.value) || 80)

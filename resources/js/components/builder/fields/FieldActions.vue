@@ -133,12 +133,12 @@ const openGlobalVariables = () => {
 }
 
 const copyAttributes = () => {
-    console.log('Copy attributes for:', props.label)
+    // TODO: Implement copy attributes
     closeMenu()
 }
 
 const extendAttributes = () => {
-    console.log('Extend attributes for:', props.label)
+    // TODO: Implement extend attributes
     closeMenu()
 }
 
@@ -148,7 +148,7 @@ const resetField = () => {
 }
 
 const findReplace = () => {
-    console.log('Find & Replace for:', props.label)
+    // TODO: Implement find & replace
     closeMenu()
 }
 </script>

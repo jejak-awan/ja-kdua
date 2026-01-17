@@ -91,18 +91,25 @@
     <!-- Media Section -->
     <section class="settings-section">
       <h4 class="section-title">{{ t('builder.panels.pageSettings.fields.featuredImage') }}</h4>
-      <div class="image-preview" @click="openMediaLibrary">
-        <template v-if="content.featured_image">
-          <img :src="content.featured_image" class="w-full h-full object-cover rounded" />
-          <div class="image-overlay">
-            <Edit2 class="w-6 h-6 text-white" />
+      <MediaPicker 
+        @selected="(media) => content.featured_image = media.url"
+        :constraints="{ allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] }"
+      >
+        <template #trigger="{ open }">
+          <div class="image-preview" @click="open">
+            <template v-if="content.featured_image">
+              <img :src="content.featured_image" class="w-full h-full object-cover rounded" />
+              <div class="image-overlay">
+                <Edit2 class="w-6 h-6 text-white" />
+              </div>
+            </template>
+            <div v-else class="image-placeholder">
+              <Image class="w-10 h-10" />
+              <span>{{ t('builder.panels.pageSettings.placeholders.selectImage') }}</span>
+            </div>
           </div>
         </template>
-        <div v-else class="image-placeholder">
-          <Image class="w-10 h-10" />
-          <span>{{ t('builder.panels.pageSettings.placeholders.selectImage') }}</span>
-        </div>
-      </div>
+      </MediaPicker>
       <button v-if="content.featured_image" @click="content.featured_image = null" class="mt-2 text-xs text-red-500 hover:text-red-600 transition-colors">
         {{ t('features.content.form.removeImage') || 'Remove Image' }}
       </button>
@@ -185,6 +192,7 @@ import {
   Layers,
   Settings2
 } from 'lucide-vue-next'
+import MediaPicker from '../../../MediaPicker.vue'
 
 const { t } = useI18n()
 const builder = inject('builder')
@@ -222,18 +230,7 @@ const removeTag = (tag) => {
   )
 }
 
-const openMediaLibrary = () => {
-    // Media library integration placeholder
-    // In a real app, this would emit an event to open the library
-    // and handle the selection.
-    window.dispatchEvent(new CustomEvent('builder:open-media', {
-        detail: {
-            callback: (url) => {
-                content.value.featured_image = url
-            }
-        }
-    }))
-}
+
 </script>
 
 <style scoped>

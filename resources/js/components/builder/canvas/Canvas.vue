@@ -197,7 +197,6 @@ const injectThemeStyles = () => {
 // Watchers
 watch(() => builder?.themeData, (data) => {
     if (data) {
-        console.log('[Builder] Theme data loaded:', data.slug)
         injectThemeStyles()
     }
 }, { immediate: true })

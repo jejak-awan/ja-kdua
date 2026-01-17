@@ -20,6 +20,15 @@
         title="JA-Builder" 
         subtitle="Visual Editor"
       />
+
+      <!-- Templates Button -->
+      <BaseDivider orientation="vertical" :margin="6" class="desktop-only" />
+      <IconButton 
+        :icon="LayoutTemplate" 
+        class="toolbar-btn-lg desktop-only" 
+        @click="$emit('open-templates')" 
+        :title="$t('builder.toolbar.templates') || 'Page Templates'" 
+      />
     </div>
     
     <!-- Center Section: Tools (Zoom, Wireframe, Devices) -->
@@ -160,7 +169,7 @@ import { inject, computed } from 'vue'
 import { 
   Menu, Monitor, Tablet, Smartphone, 
    Search, Save, X, Maximize, Minimize, ChevronsLeft,
-   Wand2
+   Wand2, LayoutTemplate
 } from 'lucide-vue-next'
 import { DEVICE_MODES } from '../core/constants'
 import { IconButton, BaseDropdown, BaseDivider } from '../ui'
@@ -179,7 +188,7 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits(['toggle-sidebar', 'change-device', 'open-pages', 'close-builder', 'save'])
+const emit = defineEmits(['toggle-sidebar', 'change-device', 'open-pages', 'close-builder', 'save', 'open-templates'])
 
 // State
 const device = computed(() => builder?.device || 'desktop')

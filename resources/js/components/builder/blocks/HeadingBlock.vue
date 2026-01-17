@@ -5,12 +5,12 @@
     :style="headingStyles"
     :class="cssClass"
   >
-    {{ text }}
+    {{ displayText }}
   </component>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { 
   getResponsiveValue, 
   getBackgroundStyles, 
@@ -22,6 +22,7 @@ import {
   getFilterStyles,
   getTransformStyles 
 } from '../core/styleUtils'
+import { isDynamicValue, extractTag, getTagLabel, resolveDynamicValue } from '../core/dynamicResolver'
 
 const props = defineProps({
   module: { type: Object, required: true }
@@ -31,8 +32,47 @@ const builder = inject('builder')
 const settings = computed(() => props.module?.settings || {})
 const device = computed(() => builder?.device || 'desktop')
 
-const text = computed(() => settings.value.text || 'Your Heading Here')
+const rawText = computed(() => settings.value.text || 'Your Heading Here')
 const tag = computed(() => settings.value.tag || 'h2')
+
+// Dynamic resolution state
+const resolvedText = ref(null)
+const isResolving = ref(false)
+
+// Check if text is dynamic
+const isDynamic = computed(() => isDynamicValue(rawText.value))
+
+// Resolve dynamic text when it changes
+watch(rawText, async (newValue) => {
+  if (isDynamicValue(newValue)) {
+    isResolving.value = true
+    resolvedText.value = null
+    try {
+      const resolved = await resolveDynamicValue(newValue, {
+        contentId: builder?.contentId
+      })
+      resolvedText.value = resolved
+    } catch (e) {
+      resolvedText.value = getTagLabel(extractTag(newValue))
+    } finally {
+      isResolving.value = false
+    }
+  }
+}, { immediate: true })
+
+// Display text: resolved value, loading indicator, or raw text
+const displayText = computed(() => {
+  if (!isDynamic.value) {
+    return rawText.value
+  }
+  
+  if (isResolving.value) {
+    return '...'
+  }
+  
+  // Show resolved value or fallback to label
+  return resolvedText.value || getTagLabel(extractTag(rawText.value))
+})
 
 const headingStyles = computed(() => {
   const styles = { width: '100%' }

@@ -174,10 +174,9 @@ const isDynamicPopoverOpen = ref(false)
 const dynamicPopoverRect = ref(null)
 
 const loopContextSource = computed(() => {
-    // Traverse parents to see if we are in a loop
-    const path = builder.modulePath
-    const isInLoop = path.some(m => m.settings?.loop_enable === true)
-    return isInLoop ? 'loop' : 'page'
+    // Always fetch all sources from API - the popover will display all available data
+    // The loop context is detected for highlighting but we want all sources available
+    return 'all'
 })
 
 const FieldComponent = computed(() => {

@@ -15,6 +15,7 @@
         @open-pages="activePanel = 'pages'"
         @open-preferences="activePanel = 'preferences'"
         @open-shortcuts="activePanel = 'help'"
+        @open-templates="showPageTemplateModal = true"
         @close-builder="handleCloseBuilder"
         @save="handleSave"
       />
@@ -76,6 +77,11 @@
         :target-index="insertSectionIndex"
         @close="showInsertSectionModal = false"
         @inserted="showInsertSectionModal = false"
+      />
+      <PageTemplateModal
+        v-if="showPageTemplateModal"
+        @close="showPageTemplateModal = false"
+        @inserted="showPageTemplateModal = false"
       />
       <StructureTemplateModal
         v-if="showStructureTemplateModal"
@@ -142,6 +148,7 @@ import CanvasControls from './canvas/CanvasControls.vue'
 import InsertModuleModal from './modals/InsertModuleModal.vue'
 import InsertRowModal from './modals/InsertRowModal.vue'
 import InsertSectionModal from './modals/InsertSectionModal.vue'
+import PageTemplateModal from './modals/PageTemplateModal.vue'
 import StructureTemplateModal from './modals/StructureTemplateModal.vue'
 import ResponsiveFieldModal from './modals/ResponsiveFieldModal.vue'
 import AddCanvasModal from './modals/AddCanvasModal.vue'
@@ -224,6 +231,8 @@ const insertRowTargetId = ref(null)
 
 const showInsertSectionModal = ref(false)
 const insertSectionIndex = ref(-1)
+
+const showPageTemplateModal = ref(false)
 
 const showStructureTemplateModal = ref(false)
 const structureTemplateTargetId = ref(null)

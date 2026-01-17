@@ -46,7 +46,7 @@ export default function useBuilder(initialData = { blocks: [] }) {
     // UI State
     const activeTab = ref('content') // content | design | advanced
     const device = ref('desktop') // desktop | tablet | mobile
-    const deviceModeType = ref('auto') // auto | manual
+    const deviceModeType = ref('manual') // auto | manual - default to manual (desktop)
     const customViewportWidth = ref(null) // null | number (px)
     const zoom = ref(100)
     const wireframeMode = ref(false)
@@ -159,7 +159,6 @@ export default function useBuilder(initialData = { blocks: [] }) {
         try {
             const payload = {
                 title,
-                slug: title.toLowerCase().replace(/\s+/g, '-'),
                 type: 'page',
                 status: 'draft',
                 editor_type: 'builder',
@@ -174,8 +173,10 @@ export default function useBuilder(initialData = { blocks: [] }) {
             }
             return newPage
         } catch (error) {
+            const message = error.response?.data?.message || error.message || 'Failed to create page'
             console.error('Failed to create page:', error)
-            throw error
+            // If we had a toast system, we'd use it here
+            throw new Error(message)
         }
     }
 
@@ -778,9 +779,6 @@ export default function useBuilder(initialData = { blocks: [] }) {
 
         // Responsive Modal
         openResponsiveModal,
-        closeResponsiveModal,
-
-        // UI Helpers
-        setDeviceMode
+        closeResponsiveModal
     }
 }

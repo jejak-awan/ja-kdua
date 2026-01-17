@@ -421,6 +421,7 @@
         "copyStyles": "Copy Item Styles"
     },
     "toolbar": {
+        "templates": "Page Templates",
         "pages": "Pages",
         "selectPage": "Select Page",
         "wireframeView": "Wireframe View",
@@ -869,5 +870,9 @@
         "tabletWide": "Tablet Wide",
         "widescreen": "Widescreen",
         "ultraWide": "Ultra Wide"
+    },
+    "pageTemplateModal": {
+        "title": "Import Page Template",
+        "warning": "Warning: Importing a template will replace all current content."
     }
 }

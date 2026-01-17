@@ -80,8 +80,36 @@
 
         </div>
         
-        <div v-else class="library-placeholder">
-           <p>{{ $t('builder.insertRowModal.libraryPlaceholder') }}</p>
+        <!-- Library Tab - Section Templates -->
+        <div v-else class="library-wrapper">
+          <div v-for="group in templateGroups" :key="group.id" class="template-group">
+            <h4 class="group-title">
+              <span class="category-badge category-badge--template">
+                {{ group.icon }}
+              </span>
+              {{ group.title }}
+            </h4>
+            
+            <div class="template-grid">
+              <button 
+                v-for="template in group.templates" 
+                :key="template.id"
+                class="template-card"
+                @click="insertTemplate(template)"
+                :title="template.description"
+              >
+                <div class="template-preview" :class="`preview-${template.thumbnail}`">
+                  <div class="preview-placeholder">
+                    <component :is="getPreviewIcon(template.category)" class="preview-icon" />
+                  </div>
+                </div>
+                <div class="template-info">
+                  <h5 class="template-name">{{ template.name }}</h5>
+                  <p class="template-desc">{{ template.description }}</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -102,6 +130,8 @@ import {
     masonryPresets,
     sidebarPresets
 } from '../constants/layouts.js'
+import { sectionTemplates } from '../templates/SectionTemplates.js'
+import { Sparkles, Layout, Users, MessageSquare, FileText, Megaphone } from 'lucide-vue-next'
 
 const props = defineProps({
   targetIndex: {
@@ -129,6 +159,70 @@ const allGroups = computed(() => [
   { id: 'masonry', type: 'grid', title: 'Masonry', items: masonryPresets },
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
 ])
+
+// Template groups for library tab
+const templateGroups = computed(() => {
+  const categories = {
+    hero: { id: 'hero', title: 'Hero Sections', icon: '🚀', templates: [] },
+    features: { id: 'features', title: 'Features', icon: '✨', templates: [] },
+    content: { id: 'content', title: 'Content', icon: '📝', templates: [] },
+    cta: { id: 'cta', title: 'Call to Action', icon: '📢', templates: [] },
+    team: { id: 'team', title: 'Team', icon: '👥', templates: [] },
+    header: { id: 'header', title: 'Headers', icon: '📄', templates: [] }
+  }
+  
+  sectionTemplates.forEach(tpl => {
+    const cat = categories[tpl.category] || categories.content
+    cat.templates.push(tpl)
+  })
+  
+  return Object.values(categories).filter(c => c.templates.length > 0)
+})
+
+// Get preview icon based on category
+const getPreviewIcon = (category) => {
+  const iconMap = {
+    hero: Sparkles,
+    features: Layout,
+    content: FileText,
+    cta: Megaphone,
+    team: Users,
+    header: FileText
+  }
+  return iconMap[category] || Layout
+}
+
+// Insert a template into the builder
+const insertTemplate = (template) => {
+  if (!template.factory) return
+  
+  // Generate the section with all its children
+  const sectionData = template.factory()
+  
+  // Deep clone to ensure unique IDs
+  const clonedSection = JSON.parse(JSON.stringify(sectionData))
+  
+  // Regenerate all IDs to be unique
+  const regenerateIds = (block) => {
+    block.id = ModuleRegistry.generateId()
+    if (block.children) {
+      block.children.forEach(regenerateIds)
+    }
+  }
+  regenerateIds(clonedSection)
+  
+  // Insert into builder
+  if (!builder.blocks) builder.blocks = []
+  
+  const targetIndex = props.targetIndex >= 0 ? props.targetIndex : builder.blocks.length
+  builder.blocks.splice(targetIndex, 0, clonedSection)
+  
+  builder.takeSnapshot()
+  builder.selectModule(clonedSection.id)
+  
+  emit('inserted')
+  emit('close')
+}
 
 const selectLayout = (layout) => {
     // 1. Create Section
@@ -325,9 +419,91 @@ const selectLayout = (layout) => {
   gap: 3px;
 }
 
-.library-placeholder {
-    padding: 40px;
-    text-align: center;
+.library-wrapper {
+    padding: 0;
+}
+
+.template-group {
+    margin-bottom: 24px;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.template-card {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    padding: 0;
+    background: var(--builder-bg-secondary);
+    border: 1px solid var(--builder-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+}
+
+.template-card:hover {
+    border-color: var(--builder-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.template-preview {
+    height: 80px;
+    background: linear-gradient(135deg, var(--builder-accent-light, rgba(32, 89, 234, 0.1)) 0%, var(--builder-bg-tertiary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--builder-border);
+}
+
+.preview-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--builder-bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--builder-accent);
+}
+
+.template-card:hover .preview-icon {
+    color: var(--builder-accent);
+}
+
+.template-info {
+    padding: 12px;
+}
+
+.template-name {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--builder-text-primary);
+}
+
+.template-desc {
+    margin: 0;
+    font-size: 11px;
     color: var(--builder-text-muted);
+    line-height: 1.4;
+}
+
+.category-badge--template {
+    font-size: 14px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-right: 8px;
 }
 </style>

@@ -404,6 +404,7 @@
         "copyStyles": "Salin Gaya Item"
     },
     "toolbar": {
+        "templates": "Templat Halaman",
         "pages": "Halaman",
         "selectPage": "Pilih Halaman",
         "wireframeView": "Tampilan Wireframe",
@@ -849,5 +850,9 @@
         "tabletWide": "Tablet Lebar",
         "widescreen": "Layar Lebar",
         "ultraWide": "Ultra Lebar"
+    },
+    "pageTemplateModal": {
+        "title": "Impor Templat Halaman",
+        "warning": "Peringatan: Mengimpor templat akan mengganti seluruh konten saat ini."
     }
 }
