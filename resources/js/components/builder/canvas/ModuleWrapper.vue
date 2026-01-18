@@ -353,27 +353,26 @@ const handleMoreAction = (action) => {
   padding-bottom: 24px; /* Space for add button */
 }
 
-/* Row: Green */
+/* Row: Emerald Green */
 .module-wrapper--grid.module-wrapper--row,
 .module-wrapper--wireframe.module-wrapper--row {
   border: 2px solid var(--builder-row);
   margin-bottom: var(--spacing-md);
 }
 
-/* Column: Gray - Same as toolbar */
+/* Column: Cyan/Teal */
 .module-wrapper--grid.module-wrapper--column,
 .module-wrapper--wireframe.module-wrapper--column {
-  border: 1px solid #4a5568;
+  border: 2px solid var(--builder-column);
   min-height: 50px;
 }
 
-/* Module: Dashed Gray */
-/* But user wants simple block? Modules are gray blocks */
+/* Module: Blueprint Style in Wireframe */
 .module-wrapper--wireframe.module-wrapper--text,
 .module-wrapper--wireframe.module-wrapper--image,
 .module-wrapper--wireframe.module-wrapper--button {
-    background: var(--builder-bg-tertiary);
-    border: 1px solid var(--builder-border);
+    background: #f1f5f9;
+    border: 2px dashed var(--builder-module);
 }
 
 /* Selection states - Type-specific outline colors */
@@ -388,7 +387,7 @@ const handleMoreAction = (action) => {
   z-index: 5;
 }
 .module-wrapper--selected.module-wrapper--column {
-  outline: 2px solid #4a5568;
+  outline: 2px solid var(--builder-column);
   outline-offset: -2px;
   z-index: 5;
 }
@@ -404,18 +403,18 @@ const handleMoreAction = (action) => {
   z-index: 4;
 }
 .module-wrapper--hovered.module-wrapper--column {
-  outline: 1px solid #4a5568;
+  outline: 1px solid var(--builder-column);
   outline-offset: -1px;
   z-index: 4;
 }
 .module-wrapper--hovered.module-wrapper--content {
-  outline: 1px solid #000000;
+  outline: 1px solid var(--builder-module);
   outline-offset: -1px;
   z-index: 6; /* Higher z-index for inner modules */
 }
 
 .module-wrapper--selected.module-wrapper--content {
-  outline: 2px solid #000000;
+  outline: 2px solid var(--builder-module);
   outline-offset: -2px;
   z-index: 6;
 }
@@ -427,7 +426,7 @@ const handleMoreAction = (action) => {
   gap: 2px;
   padding: 4px;
   background: var(--builder-toolbar-bg-module);
-  z-index: 100;
+  z-index: 110; /* Above labels */
 }
 
 /* Specific toolbar positions per type to avoid overlap (Zig-Zag) */
@@ -496,15 +495,57 @@ const handleMoreAction = (action) => {
   top: 0;
   left: 0;
   padding: 2px 6px;
-  background: var(--builder-accent);
+  background: var(--builder-module); /* Default to module color */
   border-bottom-right-radius: 4px;
   color: white;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  z-index: 10;
+  z-index: 105; /* Between block and toolbar */
   pointer-events: none;
+  transition: all 0.2s ease;
 }
+
+/* SMART STRATEGY: Shift label to RIGHT when toolbar is on LEFT */
+.module-wrapper--selected > .module-label,
+.module-wrapper--hovered > .module-label {
+    left: auto;
+    right: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 4px;
+}
+
+/* For Row and Content (Toolbar is on Right, so move Label to LEFT) */
+/* Wait, labels are already on left. So when selected, Row label should shift? */
+/* Actually, let's just make it consistent: Labels on LEFT by default, shift to RIGHT on active. */
+/* But if toolbar is on right, label can stay left. */
+
+/* Section: Toolbar LEFT -> Shift Label RIGHT */
+.module-wrapper--section.module-wrapper--selected > .module-label,
+.module-wrapper--section.module-wrapper--hovered > .module-label {
+    left: auto;
+    right: 0;
+}
+
+/* Row: Toolbar RIGHT -> Label stays LEFT (No change needed) */
+.module-wrapper--row.module-wrapper--selected > .module-label,
+.module-wrapper--row.module-wrapper--hovered > .module-label {
+    left: 0;
+    right: auto;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 0;
+}
+
+/* Column: Toolbar LEFT -> Shift Label RIGHT */
+.module-wrapper--column.module-wrapper--selected > .module-label,
+.module-wrapper--column.module-wrapper--hovered > .module-label {
+    left: auto;
+    right: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 4px;
+}
+
+/* Module: Toolbar RIGHT -> Label stays LEFT (already left) */
 
 .module-wrapper--grid.module-wrapper--section > .module-label,
 .module-wrapper--wireframe.module-wrapper--section > .module-label {
@@ -519,7 +560,8 @@ const handleMoreAction = (action) => {
 .module-wrapper--grid.module-wrapper--column > .module-label,
 .module-wrapper--wireframe.module-wrapper--column > .module-label {
   background: var(--builder-column);
-  color: var(--builder-text-primary);
+  color: white;
+  z-index: 11;
 }
 
 /* Loop Styles */
@@ -579,7 +621,7 @@ const handleMoreAction = (action) => {
 }
 
 .wireframe-placeholder {
-    color: white;
+    color: var(--builder-text-secondary);
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;

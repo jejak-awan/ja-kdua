@@ -230,30 +230,28 @@ const addColumn = () => {
   min-height: 60px;
 }
 
-.add-column-btn,
-.add-module-btn {
+.add-column-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: transparent;
-  border: 2px dashed var(--builder-column, #b3c3d6);
-  border-radius: 4px;
-  color: var(--builder-column, #b3c3d6);
-  font-size: 13px;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: white;
+  border: 2px dashed var(--builder-row);
+  border-radius: 8px;
+  color: var(--builder-row);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.add-module-btn {
-  padding: 8px;
-  border-radius: 50%;
-}
-
-.add-column-btn:hover,
-.add-module-btn:hover {
-  background: rgba(179, 195, 214, 0.1);
-  border-color: var(--builder-accent, #2059ea);
-  color: var(--builder-accent, #2059ea);
+.add-column-btn:hover {
+  background: var(--builder-row);
+  color: white;
+  border-style: solid;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 </style>

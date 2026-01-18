@@ -192,8 +192,9 @@ const filteredBlocks = computed(() => {
   position: relative;
 }
 
-.layer-row:hover {
-  background: var(--builder-bg-secondary);
+.layer-row:not(.layer-row--selected):hover {
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-accent) !important;
 }
 
 .layer-name {
@@ -204,16 +205,24 @@ const filteredBlocks = computed(() => {
     padding-right: 20px;
 }
 
-/* Color Coding based on reference image */
-.layer-row--section {
-    color: #2980b9; /* Blue */
+/* Color Coding based on Vibrant Hierarchy */
+.layer-row--section { color: var(--builder-section); }
+.layer-row--row { color: var(--builder-row); }
+.layer-row--column { color: var(--builder-column); }
+.layer-row--module,
+.layer-row--text,
+.layer-row--heading,
+.layer-row--image,
+.layer-row--button,
+.layer-row--divider,
+.layer-row--code,
+.layer-row--gallery { 
+    color: var(--builder-module); 
 }
-.layer-row--row {
-    color: #27ae60; /* Green */
-}
-.layer-row--column,
-.layer-row--module {
-    color: #64748b; /* Gray/Slate */
+
+/* Unselected rows base state */
+.layer-row:not(.layer-row--selected) {
+    background: transparent;
 }
 
 /* Icons inherit color */
@@ -225,18 +234,25 @@ const filteredBlocks = computed(() => {
 
 /* Selected State - Solid colored background with white text */
 .layer-row--selected {
-    color: white !important;
+    background: var(--builder-module); /* Default background for all modules */
+    color: #ffffff !important;
 }
 
 .layer-row--selected.layer-row--section {
-    background: #2980b9;
+    background: var(--builder-section);
 }
 .layer-row--selected.layer-row--row {
-    background: #27ae60;
+    background: var(--builder-row);
 }
-.layer-row--selected.layer-row--column,
-.layer-row--selected.layer-row--module {
-    background: #64748b;
+.layer-row--selected.layer-row--column {
+    background: var(--builder-column);
+}
+
+.layer-row--selected .layer-name,
+.layer-row--selected .layer-toggle,
+.layer-row--selected .layer-icon,
+.layer-row--selected .layer-actions-trigger {
+    color: #ffffff !important;
 }
 
 .layer-toggle {

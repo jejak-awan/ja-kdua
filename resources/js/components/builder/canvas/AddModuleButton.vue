@@ -51,10 +51,10 @@ const label = computed(() => {
 /* Floating mode for Section/Row (attached to bottom center) */
 .add-btn-wrapper--floating {
   position: absolute;
-  bottom: -14px;
+  bottom: -15px; /* Fully centered on the border line */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20;
+  z-index: 9999; /* Maximum z-index to guarantee visibility above ALL borders/overlays */
   width: auto;
 }
 

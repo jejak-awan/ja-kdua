@@ -69,21 +69,21 @@
     --builder-field-border-clean: rgba(255, 255, 255, 0.05);
 
     --builder-toggle-track: rgba(255, 255, 255, 0.06);
-    --builder-section: #2059ea;
-    --builder-row: #18b793;
-    --builder-column: #b3c3d6;
-    --builder-module: #b3c3d6;
+    --builder-section: #312e81;
+    --builder-row: #059669;
+    --builder-column: #0891b2;
+    --builder-module: #64748b;
 
     --builder-input-bg: var(--builder-bg-primary);
     --builder-input-border: var(--builder-border);
     --builder-input-text: var(--builder-text-primary);
 
     /* Toolbar Specific Colors */
-    --builder-toolbar-bg-section: #2059ea;
+    --builder-toolbar-bg-section: #312e81;
     --builder-toolbar-text-section: #ffffff;
-    --builder-toolbar-bg-row: #18b793;
+    --builder-toolbar-bg-row: #059669;
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-module: #2d323b;
+    --builder-toolbar-bg-module: #0891b2;
     --builder-toolbar-text-module: #ffffff;
     --builder-toolbar-icon: #ffffff;
 }
@@ -117,21 +117,21 @@
     --builder-field-border-clean: rgba(0, 0, 0, 0.05);
 
     --builder-toggle-track: #e2e8f0;
-    --builder-section: #2059ea;
-    --builder-row: #18b793;
-    --builder-column: #cbd5e1;
-    --builder-module: #cbd5e1;
+    --builder-section: #312e81;
+    --builder-row: #059669;
+    --builder-column: #0891b2;
+    --builder-module: #64748b;
 
     --builder-input-bg: #ffffff;
     --builder-input-border: #e2e8f0;
     --builder-input-text: var(--builder-text-primary);
 
     /* Toolbar Specific Colors (Light) */
-    --builder-toolbar-bg-section: #2059ea;
+    --builder-toolbar-bg-section: #312e81;
     --builder-toolbar-text-section: #ffffff;
-    --builder-toolbar-bg-row: #18b793;
+    --builder-toolbar-bg-row: #059669;
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-module: #475569;
+    --builder-toolbar-bg-module: #0891b2;
     --builder-toolbar-text-module: #ffffff;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -528,10 +528,10 @@
     border: 1px solid #cbd5e1 !important;
 }
 
-/* Content modules (Text, Image, etc.) become simple dark blocks in wireframe */
+/* Content modules (Text, Image, etc.) become simple blueprint blocks in wireframe */
 .ja-builder--wireframe .module-wrapper--content {
-    background: #2d323b !important;
-    border: 1px solid #1a1e25 !important;
+    background: #f1f5f9 !important;
+    border: 1px dashed #cbd5e1 !important;
     min-height: 44px;
     display: flex;
     align-items: center;
@@ -558,4 +558,85 @@
 
 .ja-builder--wireframe.ja-builder--dark .ja-builder__canvas-area {
     background: #0f172a;
+}
+
+/* ==========================================================================
+   WIREFRAME MODE: Compact Vertical Spacing
+   These overrides ONLY apply in wireframe mode for tighter editing.
+   Normal/Live view remains proportional.
+   ========================================================================== */
+
+/* Override SectionBlock container padding - THE KEY SPACING SOURCE */
+.ja-builder--wireframe .section-block__container {
+    padding: 24px 8px 8px 8px !important;
+}
+
+.ja-builder--wireframe .section-block__empty {
+    padding: 8px 0 !important;
+}
+
+/* Override RowBlock - reduce gap and empty state padding */
+.ja-builder--wireframe .row-block {
+    gap: 8px !important;
+    margin-bottom: 4px !important;
+    padding-top: 24px !important;
+    padding-bottom: 4px !important;
+}
+
+.ja-builder--wireframe .row-block__empty {
+    padding: 8px !important;
+}
+
+.ja-builder--wireframe .row-block__column {
+    min-height: 40px !important;
+}
+
+/* Override ColumnBlock empty state */
+.ja-builder--wireframe .column-block__empty {
+    padding: 8px !important;
+}
+
+.ja-builder--wireframe .column-block {
+    min-height: 36px !important;
+    padding: 24px 4px 4px 4px !important;
+}
+
+/* Compact the children-container inside ModuleWrapper */
+.ja-builder--wireframe .children-container {
+    padding: 4px !important;
+    gap: 4px !important;
+}
+
+/* Reduce wireframe module-content padding */
+.ja-builder--wireframe .module-content {
+    padding: 0 !important;
+}
+
+/* Compact wireframe placeholder for content modules */
+.ja-builder--wireframe .wireframe-placeholder {
+    min-height: 28px !important;
+    padding: 6px 8px !important;
+}
+
+/* Reduce minimum height of content modules */
+.ja-builder--wireframe .module-wrapper--content {
+    min-height: 28px !important;
+}
+
+/* Add Column button compact style */
+.ja-builder--wireframe .add-column-btn {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+}
+
+/* Add Module button compact */
+.ja-builder--wireframe .add-module-btn {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+/* Module-level empty placeholders */
+.ja-builder--wireframe .column-empty-placeholder {
+    min-height: 32px !important;
+    padding: 4px !important;
 }
