@@ -4,7 +4,10 @@
       class="ja-builder" 
       :class="[
         cmsStore.isDarkMode ? 'ja-builder--dark' : 'ja-builder--light',
-        { 'ja-builder--fullscreen': builder.isFullscreen }
+        { 
+          'ja-builder--fullscreen': builder.isFullscreen,
+          'ja-builder--wireframe': builder.wireframeMode
+        }
       ]"
     >
       <!-- Top Toolbar -->

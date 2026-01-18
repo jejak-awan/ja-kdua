@@ -487,3 +487,75 @@
     background: var(--builder-accent);
     color: white;
 }
+
+/* --- Enhanced Wireframe Mode --- */
+.ja-builder--wireframe .ja-builder__canvas-area {
+    background: #f8fafc;
+    /* Neutral light background for workspace */
+}
+
+/* Hide all decorative frontend backgrounds */
+.ja-builder--wireframe .section-block,
+.ja-builder--wireframe .row-block,
+.ja-builder--wireframe .column-block,
+.ja-builder--wireframe .module-renderer>* {
+    background-image: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+}
+
+/* Specifically hide BackgroundMedia component contents */
+.ja-builder--wireframe .background-video-container {
+    display: none !important;
+}
+
+/* Reset base colors for wireframe blocks */
+.ja-builder--wireframe .module-wrapper--section {
+    background: #ffffff !important;
+    border: 2px solid var(--builder-section) !important;
+}
+
+.ja-builder--wireframe .module-wrapper--row {
+    background: #ffffff !important;
+    border: 2px solid var(--builder-row) !important;
+}
+
+.ja-builder--wireframe .module-wrapper--column {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+/* Content modules (Text, Image, etc.) become simple dark blocks in wireframe */
+.ja-builder--wireframe .module-wrapper--content {
+    background: #2d323b !important;
+    border: 1px solid #1a1e25 !important;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure children are visible but simplified */
+.ja-builder--wireframe .children-container {
+    background: transparent !important;
+    padding: 12px !important;
+}
+
+/* Labels in wireframe mode */
+.ja-builder--wireframe .module-label {
+    display: block !important;
+    top: -1px;
+    left: -1px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 8px;
+    font-size: 9px;
+    border-radius: 0;
+}
+
+.ja-builder--wireframe.ja-builder--dark .ja-builder__canvas-area {
+    background: #0f172a;
+}

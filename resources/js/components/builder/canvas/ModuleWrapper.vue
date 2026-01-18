@@ -41,7 +41,14 @@
 
     <!-- Module Content with Children -->
     <div class="module-content" :class="{ 'is-looping': isLoopEnabled }">
-      <template v-for="instance in loopInstances" :key="instance.id">
+      <!-- Wireframe Mode: Hide actual renderer content for specific modules -->
+      <template v-if="wireframeMode && !hasChildren">
+        <div class="wireframe-placeholder">
+          {{ moduleTitle }}
+        </div>
+      </template>
+
+      <template v-else v-for="instance in loopInstances" :key="instance.id">
         <ModuleRenderer 
            :module="module"
            :class="{ 'loop-ghost': instance.isGhost }"
@@ -569,5 +576,14 @@ const handleMoreAction = (action) => {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-5px);
+}
+
+.wireframe-placeholder {
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
 }
 </style>
