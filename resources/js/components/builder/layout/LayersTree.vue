@@ -5,7 +5,7 @@
     group="layers"
     tag="ul"
     class="layers-list"
-    ghost-class="layer-ghost"
+    ghost-class="ja-builder-ghost"
     drag-class="layer-drag"
     handle=".layer-row"
     :animation="200"

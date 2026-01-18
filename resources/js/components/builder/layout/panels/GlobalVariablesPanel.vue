@@ -23,7 +23,7 @@
                    v-model="globalNumbers" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: number, index }">
@@ -143,7 +143,7 @@
                    v-model="globalText" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: item, index }">
@@ -193,7 +193,7 @@
                    v-model="globalImages" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: item, index }">
@@ -256,7 +256,7 @@
                    v-model="globalLinks" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: item, index }">
@@ -303,7 +303,7 @@
                    v-model="globalColors" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: color, index }">
@@ -381,7 +381,7 @@
                    v-model="globalFonts" 
                    item-key="id"
                    handle=".drag-handle"
-                   ghost-class="drag-ghost"
+                   ghost-class="ja-builder-ghost"
                    animation="200"
                >
                    <template #item="{ element: font, index }">

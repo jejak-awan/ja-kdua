@@ -7,7 +7,7 @@
     :class="cssClass"
     item-key="id"
     group="column"
-    ghost-class="ghost-column"
+    ghost-class="ja-builder-ghost"
   >
     <BackgroundMedia :settings="settings" />
     

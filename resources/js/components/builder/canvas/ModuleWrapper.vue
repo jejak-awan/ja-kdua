@@ -54,7 +54,7 @@
               item-key="id"
               :group="childType"
               class="children-container"
-              ghost-class="ghost-module"
+              ghost-class="ja-builder-ghost"
               drag-class="drag-module"
             >
               <template #item="{ element: child, index: idx }">

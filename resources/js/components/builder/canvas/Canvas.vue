@@ -34,7 +34,7 @@
           item-key="id"
           group="section"
           class="canvas-blocks flex-1"
-          ghost-class="ghost-section"
+          ghost-class="ja-builder-ghost"
         >
           <template #item="{ element: block, index }">
             <ModuleWrapper

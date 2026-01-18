@@ -1,7 +1,7 @@
 /* JA-CMS Builder Global Styles & Design Tokens */
 
-/* --- Base & Shared Variables (Safe to be global) --- */
-:root {
+/* --- Base & Shared Variables (Scoped to .ja-builder) --- */
+.ja-builder {
     /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -35,12 +35,12 @@
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
 
-    /* Builder-specific UI Tokens (Renamed to avoid clashes) */
+    /* Builder-specific UI Tokens */
     --builder-input-radius: 6px;
 }
 
 /* --- Theme: Dark (Default) --- */
-:root,
+.ja-builder,
 .ja-builder--dark {
     --builder-bg-primary: #1a1e25;
     --builder-bg-secondary: #242830;
@@ -193,16 +193,49 @@
     position: relative;
 }
 
-/* Global Transition Suppression */
-.ja-builder,
-.ja-builder *,
-.ja-builder *::before,
-.ja-builder *::after {
+/* Global Transition Suppression (Only when active/dragging or for specific UI) */
+.ja-builder.is-dragging *,
+.ja-builder.is-dragging *::before,
+.ja-builder.is-dragging *::after {
     transition: none !important;
 }
 
-/* Legacy Utility Classes */
-.builder-input {
+/* Animation Overrides for Builder Mode */
+.ja-builder .animate-fade,
+.ja-builder .animate-fade-up,
+.ja-builder .animate-fade-down,
+.ja-builder .animate-zoom,
+.ja-builder .animate-bounce-in,
+.ja-builder .animate-slide-up,
+.ja-builder .animate-slide-down,
+.ja-builder .animate-slide-left,
+.ja-builder .animate-slide-right,
+.ja-builder .animate-rotate-in {
+    /* Play once or stay static in builder to avoid distraction */
+    animation-iteration-count: 1;
+}
+
+/* --- Page Builder Drag-Drop Styling (Consolidated from app.css) --- */
+.ja-builder .ja-builder-ghost {
+    opacity: 0.4;
+    background: rgba(32, 89, 234, 0.1) !important;
+    border: 2px dashed var(--builder-accent) !important;
+    border-radius: 8px;
+}
+
+.ja-builder .sortable-chosen {
+    cursor: grabbing;
+}
+
+.ja-builder .sortable-drag {
+    opacity: 0.9;
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+}
+
+/* Legacy Utility Classes (Scoped) */
+.ja-builder .builder-input {
     width: 100%;
     padding: 8px 12px;
     background: var(--builder-input-bg);
@@ -214,12 +247,12 @@
     transition: var(--transition-fast);
 }
 
-.builder-input:focus {
+.ja-builder .builder-input:focus {
     border-color: var(--builder-accent);
     box-shadow: 0 0 0 2px rgba(32, 89, 234, 0.1);
 }
 
-.builder-select {
+.ja-builder .builder-select {
     width: 100%;
     padding: 8px 12px;
     background-color: var(--builder-input-bg);
@@ -232,39 +265,39 @@
     cursor: pointer;
 }
 
-.builder-select:focus {
+.ja-builder .builder-select:focus {
     border-color: var(--builder-accent);
     box-shadow: 0 0 0 2px rgba(32, 89, 234, 0.1);
 }
 
-.builder-select option {
+.ja-builder .builder-select option {
     background-color: var(--builder-input-bg);
     color: var(--builder-input-text);
     padding: 8px;
 }
 
-.builder-field-wrapper {
+.ja-builder .builder-field-wrapper {
     background: transparent;
     padding: 10px 0;
     border-radius: var(--border-radius-md);
     border-bottom: 1px solid var(--builder-border-light);
 }
 
-/* Theme-Aware Text Utilities */
-.text-primary {
+/* Theme-Aware Text Utilities (Scoped) */
+.ja-builder .text-primary {
     color: var(--builder-text-primary);
 }
 
-.text-secondary {
+.ja-builder .text-secondary {
     color: var(--builder-text-secondary);
 }
 
-.text-muted {
+.ja-builder .text-muted {
     color: var(--builder-text-muted);
 }
 
 /* Standard Label Style */
-.builder-label {
+.ja-builder .builder-label {
     font-size: 11px;
     font-weight: 600;
     color: var(--builder-text-muted);
@@ -273,27 +306,27 @@
     margin-bottom: 8px;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
+/* Scrollbar Styling (Scoped to .ja-builder) */
+.ja-builder ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.ja-builder ::-webkit-scrollbar-track {
     background: var(--builder-bg-primary);
 }
 
-::-webkit-scrollbar-thumb {
+.ja-builder ::-webkit-scrollbar-thumb {
     background: var(--builder-border);
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.ja-builder ::-webkit-scrollbar-thumb:hover {
     background: var(--builder-text-secondary);
 }
 
 /* Preview Box Styles */
-.bg-preview-box {
+.ja-builder .bg-preview-box {
     width: 100%;
     height: 120px;
     border: 1px solid var(--builder-field-border-clean);
@@ -315,7 +348,7 @@
     z-index: 1;
 }
 
-.bg-preview-box::after {
+.ja-builder .bg-preview-box::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -325,34 +358,34 @@
     z-index: 2;
 }
 
-.bg-preview-box>* {
+.ja-builder .bg-preview-box>* {
     position: relative;
     z-index: 10;
 }
 
-.bg-preview-box.is-empty {
+.ja-builder .bg-preview-box.is-empty {
     border-style: dashed;
     border-color: var(--builder-border);
     background-image: none;
     background-color: var(--builder-field-bg-clean);
 }
 
-.bg-preview-box.is-empty::after {
+.ja-builder .bg-preview-box.is-empty::after {
     display: none;
 }
 
-.bg-preview-box.is-empty:hover {
+.ja-builder .bg-preview-box.is-empty:hover {
     border-color: var(--builder-accent);
     background-color: rgba(32, 89, 234, 0.05);
 }
 
-.bg-preview-box.is-inherited {
+.ja-builder .bg-preview-box.is-inherited {
     border-style: dashed;
     border-color: var(--builder-accent);
     opacity: 0.8;
 }
 
-.empty-preview {
+.ja-builder .empty-preview {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -365,11 +398,11 @@
     transition: var(--transition-fast);
 }
 
-.bg-preview-box.is-empty:hover .empty-preview {
+.ja-builder .bg-preview-box.is-empty:hover .empty-preview {
     color: var(--builder-accent);
 }
 
-.inherited-badge {
+.ja-builder .inherited-badge {
     position: absolute;
     bottom: 8px;
     left: 8px;
@@ -386,7 +419,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.preview-actions-overlay {
+.ja-builder .preview-actions-overlay {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -395,11 +428,11 @@
     transition: var(--transition-fast);
 }
 
-.bg-preview-box:hover .preview-actions-overlay {
+.ja-builder .bg-preview-box:hover .preview-actions-overlay {
     opacity: 1;
 }
 
-.action-btn-group {
+.ja-builder .action-btn-group {
     display: flex;
     background: var(--builder-bg-sidebar);
     border: 1px solid var(--builder-border);
@@ -409,7 +442,7 @@
     box-shadow: var(--shadow-sm);
 }
 
-.action-icon-btn {
+.ja-builder .action-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -421,36 +454,36 @@
     transition: var(--transition-fast);
 }
 
-.action-icon-btn:hover {
+.ja-builder .action-icon-btn:hover {
     background: var(--builder-bg-tertiary);
     color: var(--builder-accent);
 }
 
-.action-icon-btn.remove:hover {
+.ja-builder .action-icon-btn.remove:hover {
     background: var(--builder-error);
     color: white;
 }
 
 /* --- Overlay Toolbar Specific Overrides (Fix for washed out buttons) --- */
-.ja-overlay-toolbar .action-btn-group {
+.ja-builder .ja-overlay-toolbar .action-btn-group {
     background: var(--builder-bg-sidebar);
     border-color: var(--builder-border);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.ja-overlay-toolbar .action-icon-btn {
+.ja-builder .ja-overlay-toolbar .action-icon-btn {
     color: var(--builder-text-secondary);
     opacity: 1;
     /* Force opacity */
 }
 
-.ja-overlay-toolbar .action-icon-btn:hover {
+.ja-builder .ja-overlay-toolbar .action-icon-btn:hover {
     background: var(--builder-bg-tertiary);
     color: var(--builder-text-primary);
 }
 
 /* Active/Selected State for toolbar buttons */
-.ja-overlay-toolbar .action-icon-btn.active {
+.ja-builder .ja-overlay-toolbar .action-icon-btn.active {
     background: var(--builder-accent);
     color: white;
 }
