@@ -32,7 +32,7 @@
             <span class="page-slug">/{{ page.slug }}</span>
             <span v-if="page.status === 'draft'" class="page-status-badge">{{ page.status }}</span>
           </div>
-          <div class="page-actions">
+          <div v-if="builder.mode === 'site'" class="page-actions">
             <!-- Normal edit button (switching page in builder) -->
             <button class="action-btn" :title="t('builder.panels.pages.actions.edit')" @click.stop="selectPage(page.id)">
               <Edit2 :size="14" />
@@ -49,7 +49,7 @@
       </div>
       
       <!-- Add Button -->
-      <div class="panel-footer">
+      <div v-if="builder.mode === 'site'" class="panel-footer">
           <button class="add-page-btn" @click="handleCreate">
             <Plus :size="16" />
             <span>{{ t('builder.panels.pages.addNew') }}</span>
@@ -93,9 +93,13 @@ const handleCreate = () => {
   }
 }
 
-const handleDelete = (page) => {
+const handleDelete = async (page) => {
     if (confirm(t('builder.panels.pages.confirmDelete', { title: page.title }))) {
-        // TODO: Call builder.deletePage(page.id) when implemented
+        try {
+            await builder?.deletePage(page.id)
+        } catch (error) {
+            console.error('Delete failed:', error)
+        }
     }
 }
 

@@ -71,6 +71,7 @@
         <div v-else-if="editorMode === 'builder'" class="animate-in fade-in slide-in-from-top-2 duration-300">
             <Builder
                 :model-value="modelValue.blocks || []"
+                :mode="'page'"
                 @update:model-value="updateField('blocks', $event)"
                 @save="$emit('save')"
                 @close="handleBuilderClose"

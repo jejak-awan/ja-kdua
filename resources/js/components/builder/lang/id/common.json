@@ -32,6 +32,7 @@
             "projectLink": "Tautan Proyek"
         },
         "common": {
+            "all": "Semua",
             "width": "Lebar",
             "widthPlaceholder": "misal 50%",
             "height": "Tinggi",
@@ -428,7 +429,7 @@
         "toggleTheme": "Ganti Tema",
         "fullscreen": "Tampilan Penuh",
         "exitFullscreen": "Tampilan Normal",
-        "cancel": "Batal",
+        "close": "Tutup",
         "more": "Opsi Lainnya"
     },
     "sidebars": {
@@ -549,7 +550,10 @@
                 "pricing": "Tabel Harga",
                 "testimonials": "Testimoni",
                 "footer": "Footer Sederhana"
-            }
+            },
+            "search": "Cari Templat...",
+            "emptyTitle": "Tidak ada templat ditemukan",
+            "emptyDesc": "Coba sesuaikan pencarian atau kategori Anda."
         },
         "presets": {
             "categories": {

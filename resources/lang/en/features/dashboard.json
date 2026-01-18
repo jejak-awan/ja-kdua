@@ -52,6 +52,7 @@
             "manageUsers": "Manage Users",
             "viewComments": "View Comments",
             "settings": "Settings",
+            "siteEditor": "Site Editor",
             "recentActions": "Recent Actions"
         },
         "systemHealth": {

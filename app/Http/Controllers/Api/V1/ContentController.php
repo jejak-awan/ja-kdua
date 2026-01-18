@@ -192,7 +192,7 @@ class ContentController extends BaseApiController
                 'title' => 'required|string|max:255',
                 'slug' => 'nullable|string',
                 'excerpt' => 'nullable|string',
-                'body' => 'nullable|required_without:blocks|string',
+                'body' => 'nullable|string',
                 'featured_image' => 'nullable|string',
                 'status' => 'required|in:draft,pending,published,archived',
                 'type' => 'required|in:post,page,custom',
@@ -387,6 +387,7 @@ class ContentController extends BaseApiController
                 'meta_keywords' => 'nullable|string|max:255',
                 'og_image' => 'nullable|string',
                 'custom_fields' => 'nullable|array',
+                'blocks' => 'nullable|array',
                 'editor_type' => 'nullable|string|in:classic,builder',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {

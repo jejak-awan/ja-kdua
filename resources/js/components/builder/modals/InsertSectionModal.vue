@@ -98,9 +98,9 @@
                 @click="insertTemplate(template)"
                 :title="template.description"
               >
-                <div class="template-preview" :class="`preview-${template.thumbnail}`">
+                <div class="template-preview" :class="[`preview-${template.thumbnail}`, `accent-${template.category}`]">
                   <div class="preview-placeholder">
-                    <component :is="getPreviewIcon(template.category)" class="preview-icon" />
+                    <component :is="getPreviewIcon(template)" class="preview-icon" />
                   </div>
                 </div>
                 <div class="template-info">
@@ -131,7 +131,8 @@ import {
     sidebarPresets
 } from '../constants/layouts.js'
 import { sectionTemplates } from '../templates/SectionTemplates.js'
-import { Sparkles, Layout, Users, MessageSquare, FileText, Megaphone } from 'lucide-vue-next'
+import { pageTemplates } from '../templates/PageTemplates.js'
+import { Sparkles, Layout, Users, MessageSquare, FileText, Megaphone, LayoutTemplate } from 'lucide-vue-next'
 
 const props = defineProps({
   targetIndex: {
@@ -160,68 +161,115 @@ const allGroups = computed(() => [
   { id: 'sidebar', type: 'grid', title: 'Sidebar', items: sidebarPresets }
 ])
 
-// Template groups for library tab
-const templateGroups = computed(() => {
-  const categories = {
-    hero: { id: 'hero', title: 'Hero Sections', icon: '🚀', templates: [] },
-    features: { id: 'features', title: 'Features', icon: '✨', templates: [] },
-    content: { id: 'content', title: 'Content', icon: '📝', templates: [] },
-    cta: { id: 'cta', title: 'Call to Action', icon: '📢', templates: [] },
-    team: { id: 'team', title: 'Team', icon: '👥', templates: [] },
-    header: { id: 'header', title: 'Headers', icon: '📄', templates: [] }
-  }
-  
-  sectionTemplates.forEach(tpl => {
-    const cat = categories[tpl.category] || categories.content
-    cat.templates.push(tpl)
-  })
-  
-  return Object.values(categories).filter(c => c.templates.length > 0)
+// Extract unique categories including Pages
+const categories = computed(() => {
+    const cats = new Set(sectionTemplates.map(t => t.category).filter(Boolean))
+    return ['all', 'pages', ...Array.from(cats).sort()]
 })
 
-// Get preview icon based on category
-const getPreviewIcon = (category) => {
-  const iconMap = {
-    hero: Sparkles,
-    features: Layout,
-    content: FileText,
-    cta: Megaphone,
-    team: Users,
-    header: FileText
-  }
-  return iconMap[category] || Layout
+// Template groups for library tab
+const templateGroups = computed(() => {
+    const categoriesMap = {
+        pages: { id: 'pages', title: 'Full Pages', icon: '📄', templates: [] },
+        hero: { id: 'hero', title: 'Hero Sections', icon: '🚀', templates: [] },
+        features: { id: 'features', title: 'Features', icon: '✨', templates: [] },
+        content: { id: 'content', title: 'Content', icon: '📝', templates: [] },
+        cta: { id: 'cta', title: 'Call to Action', icon: '📢', templates: [] },
+        team: { id: 'team', title: 'Team', icon: '👥', templates: [] },
+        contact: { id: 'contact', title: 'Contact', icon: '📞', templates: [] }
+    }
+    
+    // Add sections
+    sectionTemplates.forEach(tpl => {
+        const cat = categoriesMap[tpl.category] || categoriesMap.content
+        cat.templates.push({ ...tpl, templateType: 'section' })
+    })
+
+    // Add pages
+    pageTemplates.forEach(tpl => {
+        categoriesMap.pages.templates.push({ ...tpl, category: 'pages', templateType: 'page' })
+    })
+    
+    return Object.values(categoriesMap).filter(c => c.templates.length > 0)
+})
+
+// Combined and filtered templates
+const filteredTemplates = computed(() => {
+    let all = []
+    
+    // Add sections
+    sectionTemplates.forEach(s => all.push({ ...s, templateType: 'section' }))
+    
+    // Add pages
+    pageTemplates.forEach(p => all.push({ ...p, category: 'pages', templateType: 'page' }))
+
+    return all.filter(template => {
+        const matchesSearch = template.name.toLowerCase().includes(searchTerm.value.toLowerCase()) || 
+                              (template.description && template.description.toLowerCase().includes(searchTerm.value.toLowerCase()))
+        const matchesCategory = activeCategory.value === 'all' || template.category === activeCategory.value
+        
+        return matchesSearch && matchesCategory
+    })
+})
+
+const getPreviewIcon = (template) => {
+    if (template.templateType === 'page') return LayoutTemplate
+    
+    const iconMap = {
+        hero: Sparkles,
+        features: Layout,
+        content: FileText,
+        cta: Megaphone,
+        team: Users,
+        header: FileText,
+        contact: MessageSquare
+    }
+    return iconMap[template.category] || Layout
 }
 
-// Insert a template into the builder
 const insertTemplate = (template) => {
-  if (!template.factory) return
-  
-  // Generate the section with all its children
-  const sectionData = template.factory()
-  
-  // Deep clone to ensure unique IDs
-  const clonedSection = JSON.parse(JSON.stringify(sectionData))
-  
-  // Regenerate all IDs to be unique
-  const regenerateIds = (block) => {
-    block.id = ModuleRegistry.generateId()
-    if (block.children) {
-      block.children.forEach(regenerateIds)
+    if (!builder || !template.factory) return
+    
+    // Handle Page Templates (Full Content Replacement)
+    if (template.templateType === 'page') {
+        if (confirm(t('builder.pageTemplateModal.warning', 'Warning: Importing a template will replace all current content. Do you want to proceed?'))) {
+            const blocks = template.factory()
+            
+            // Regenerate all IDs for safety
+            const regenerateAll = (nodes) => {
+                nodes.forEach(node => {
+                    node.id = ModuleRegistry.generateId()
+                    if (node.children) regenerateAll(node.children)
+                })
+            }
+            regenerateAll(blocks)
+            
+            builder.blocks = blocks
+            builder.takeSnapshot()
+            emit('inserted')
+            emit('close')
+        }
+        return
     }
-  }
-  regenerateIds(clonedSection)
-  
-  // Insert into builder
-  if (!builder.blocks) builder.blocks = []
-  
-  const targetIndex = props.targetIndex >= 0 ? props.targetIndex : builder.blocks.length
-  builder.blocks.splice(targetIndex, 0, clonedSection)
-  
-  builder.takeSnapshot()
-  builder.selectModule(clonedSection.id)
-  
-  emit('inserted')
-  emit('close')
+
+    // Handle Section Templates
+    const clonedSection = template.factory()
+    const regenerateIds = (node) => {
+        node.id = ModuleRegistry.generateId()
+        if (node.children) {
+            node.children.forEach(regenerateIds)
+        }
+    }
+    regenerateIds(clonedSection)
+    
+    if (!builder.blocks) builder.blocks = []
+    
+    builder.blocks.splice(props.targetIndex, 0, clonedSection)
+    builder.takeSnapshot()
+    builder.selectModule(clonedSection.id)
+    
+    emit('inserted')
+    emit('close')
 }
 
 const selectLayout = (layout) => {

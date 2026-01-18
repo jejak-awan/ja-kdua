@@ -128,6 +128,21 @@
             {{ $t('features.dashboard.widgets.quickActions.settings') }}
           </span>
         </button>
+
+        <!-- Site Editor -->
+        <button
+          v-if="authStore.hasPermission('manage settings')"
+          @click="handleAction('site-editor')"
+          class="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-blue-500/5 transition-colors group"
+          :disabled="loading"
+        >
+          <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+            <Layout class="w-5 h-5" />
+          </div>
+          <span class="mt-2 text-xs font-semibold text-foreground text-center line-clamp-1 leading-tight w-full">
+            {{ $t('features.dashboard.widgets.quickActions.siteEditor') }}
+          </span>
+        </button>
       </div>
       
       <!-- Recent Actions -->
@@ -169,7 +184,8 @@ import {
   UserCog, 
   MessageSquare, 
   Settings,
-  Clock 
+  Clock,
+  Layout 
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -195,6 +211,7 @@ const actionRoutes = {
   'manage-users': { name: 'users' },
   'view-comments': { name: 'comments' },
   'settings': { name: 'settings' },
+  'site-editor': { name: 'builder.site' },
 };
 
 const actionLabels = {
@@ -206,6 +223,7 @@ const actionLabels = {
   'manage-users': 'features.dashboard.widgets.quickActions.manageUsers',
   'view-comments': 'features.dashboard.widgets.quickActions.viewComments',
   'settings': 'features.dashboard.widgets.quickActions.settings',
+  'site-editor': 'features.dashboard.widgets.quickActions.siteEditor',
 };
 
 const getActionLabel = (action) => {

@@ -3,7 +3,9 @@ import ModuleRegistry from './ModuleRegistry'
 import api from '@/services/api'
 import { useTheme } from '@/composables/useTheme'
 
-export default function useBuilder(initialData = { blocks: [] }) {
+export default function useBuilder(initialData = { blocks: [] }, options = {}) {
+    const mode = ref(options.mode || 'site') // site | page
+
     const {
         activeTheme: globalActiveTheme,
         themeSettings: globalThemeSettings,
@@ -57,14 +59,21 @@ export default function useBuilder(initialData = { blocks: [] }) {
     const themeSettings = ref({})
     const responsiveModal = ref(null) // { label, baseKey, type, module, settings }
 
+    // Mode state (site vs page)
+    // - site: Full site management (add pages, switch pages, etc.)
+    // - page: Focused page editing (usually within CMS edit screen)
+
+
     // Content Metadata State (for integration with CMS)
     const content = ref({
         id: null,
         title: '',
         slug: '',
         excerpt: '',
+        body: '',
         status: 'draft',
         type: 'post',
+        editor_type: 'builder',
         category_id: null,
         featured_image: null,
         published_at: null,
@@ -162,6 +171,9 @@ export default function useBuilder(initialData = { blocks: [] }) {
                 type: 'page',
                 status: 'draft',
                 editor_type: 'builder',
+                body: '',
+                excerpt: '',
+                category_id: null,
                 blocks: []
             }
             const response = await api.post('/admin/ja/contents', payload)
@@ -180,6 +192,43 @@ export default function useBuilder(initialData = { blocks: [] }) {
         }
     }
 
+    async function deletePage(id) {
+        try {
+            await api.delete(`/admin/ja/contents/${id}`)
+            await fetchPages()
+
+            // If the deleted page was the active one, clear state or switch
+            if (currentPageId.value === id) {
+                if (pages.value.length > 0) {
+                    await setCurrentPage(pages.value[0].id)
+                } else {
+                    blocks.value = []
+                    currentPageId.value = null
+                    // Reset content ref to defaults
+                    content.value = {
+                        id: null,
+                        title: '',
+                        slug: '',
+                        excerpt: '',
+                        body: '',
+                        status: 'draft',
+                        type: 'post',
+                        editor_type: 'builder',
+                        category_id: null,
+                        featured_image: null,
+                        published_at: null,
+                        tags: [],
+                        menu_item: { add_to_menu: false, menu_id: '', parent_id: null, title: '' }
+                    }
+                }
+            }
+            return true
+        } catch (error) {
+            console.error('Failed to delete page:', error)
+            throw error
+        }
+    }
+
     async function loadContent(id) {
         try {
             const response = await api.get(`/admin/ja/contents/${id}`)
@@ -191,8 +240,10 @@ export default function useBuilder(initialData = { blocks: [] }) {
                     title: data.title || '',
                     slug: data.slug || '',
                     excerpt: data.excerpt || '',
+                    body: data.body || '',
                     status: data.status || 'draft',
                     type: data.type || 'post',
+                    editor_type: data.editor_type || 'builder',
                     category_id: data.category_id || null,
                     featured_image: data.featured_image || null,
                     published_at: data.published_at || null,
@@ -694,7 +745,9 @@ export default function useBuilder(initialData = { blocks: [] }) {
 
     return {
         // State
+        mode,
         blocks,
+
         selectedModuleId,
         hoveredModuleId,
         activeTab,
@@ -732,6 +785,7 @@ export default function useBuilder(initialData = { blocks: [] }) {
         fetchPages,
         setCurrentPage,
         addPage,
+        deletePage,
 
         // Selection
         selectModule,

@@ -2,7 +2,7 @@
   <aside class="left-sidebar">
     <nav class="sidebar-nav">
       <button
-        v-for="panel in panels"
+        v-for="panel in filteredPanels"
         :key="panel.id"
         class="sidebar-btn"
         :class="{ 'sidebar-btn--active': activePanel === panel.id }"
@@ -31,6 +31,7 @@ import {
   Layers, FileText, Clock, Layout, Settings, Palette, 
   Sparkles, Share2, HelpCircle, Settings2, Database
 } from 'lucide-vue-next'
+import { inject, computed } from 'vue'
 import { SIDEBAR_PANELS } from '../core/constants'
 
 // Props
@@ -50,7 +51,17 @@ const icons = {
   Sparkles, Share2, HelpCircle, Settings2, Database
 }
 
+const builder = inject('builder')
 const panels = SIDEBAR_PANELS
+
+const filteredPanels = computed(() => {
+  if (builder?.mode === 'page') {
+    // Hidden panels in page mode (focused editing)
+    const hidden = ['pages', 'portability', 'theme', 'global_variables']
+    return panels.filter(p => !hidden.includes(p.id))
+  }
+  return panels
+})
 
 const getIcon = (iconName) => {
   return icons[iconName] || icons.Layers

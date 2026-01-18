@@ -496,7 +496,7 @@ class ContentService
         $baseSlug = $slug;
         $counter = 1;
 
-        $query = Content::where('slug', $slug);
+        $query = Content::withTrashed()->where('slug', $slug);
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
@@ -504,7 +504,7 @@ class ContentService
         while ($query->exists()) {
             $slug = $baseSlug.'-'.$counter;
             $counter++;
-            $query = Content::where('slug', $slug);
+            $query = Content::withTrashed()->where('slug', $slug);
             if ($excludeId) {
                 $query->where('id', '!=', $excludeId);
             }

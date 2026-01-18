@@ -31,6 +31,7 @@
             "projectLink": "Project Link"
         },
         "common": {
+            "all": "All",
             "width": "Width",
             "widthPlaceholder": "e.g. 50%",
             "height": "Height",
@@ -445,7 +446,7 @@
         "toggleTheme": "Toggle Theme",
         "fullscreen": "Full View",
         "exitFullscreen": "Normal View",
-        "cancel": "Cancel",
+        "close": "Close",
         "more": "More Options"
     },
     "sidebars": {
@@ -566,7 +567,10 @@
                 "pricing": "Pricing Table",
                 "testimonials": "Testimonials",
                 "footer": "Footer Simple"
-            }
+            },
+            "search": "Search Templates...",
+            "emptyTitle": "No templates found",
+            "emptyDesc": "Try adjusting your search or category."
         },
         "presets": {
             "categories": {

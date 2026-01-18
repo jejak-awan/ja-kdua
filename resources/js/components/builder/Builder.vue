@@ -9,14 +9,11 @@
     >
       <!-- Top Toolbar -->
       <TopToolbar 
-        :sidebar-visible="sidebarVisible"
-        @toggle-sidebar="toggleSidebar"
-        @change-device="changeDevice"
-        @open-pages="activePanel = 'pages'"
-        @open-preferences="activePanel = 'preferences'"
-        @open-shortcuts="activePanel = 'help'"
-        @open-templates="showPageTemplateModal = true"
-        @close-builder="handleCloseBuilder"
+        :active-panel="activePanel"
+        @toggle-sidebar="handleToggleSidebar"
+        @change-device="builder.setDevice"
+        @open-pages="showInsertSectionModal = true"
+        @close-builder="handleClose"
         @save="handleSave"
       />
       
@@ -74,14 +71,9 @@
       />
       <InsertSectionModal
         v-if="showInsertSectionModal"
-        :target-index="insertSectionIndex"
+        :target-index="insertTargetIndex"
         @close="showInsertSectionModal = false"
-        @inserted="showInsertSectionModal = false"
-      />
-      <PageTemplateModal
-        v-if="showPageTemplateModal"
-        @close="showPageTemplateModal = false"
-        @inserted="showPageTemplateModal = false"
+        @inserted="handleSectionInserted"
       />
       <StructureTemplateModal
         v-if="showStructureTemplateModal"
@@ -148,7 +140,6 @@ import CanvasControls from './canvas/CanvasControls.vue'
 import InsertModuleModal from './modals/InsertModuleModal.vue'
 import InsertRowModal from './modals/InsertRowModal.vue'
 import InsertSectionModal from './modals/InsertSectionModal.vue'
-import PageTemplateModal from './modals/PageTemplateModal.vue'
 import StructureTemplateModal from './modals/StructureTemplateModal.vue'
 import ResponsiveFieldModal from './modals/ResponsiveFieldModal.vue'
 import AddCanvasModal from './modals/AddCanvasModal.vue'
@@ -184,11 +175,15 @@ const props = defineProps({
   contentId: { // New prop for CMS integration
     type: [String, Number],
     default: null
+  },
+  mode: { // site | page
+    type: String,
+    default: 'site'
   }
 })
 
 // Emits
-const emit = defineEmits(['update', 'save', 'update:modelValue', 'close'])
+const emit = defineEmits(['update', 'save', 'update:modelValue', 'close', 'update:fullscreen'])
 
 // Initialize builder state
 // Prefer modelValue (array of blocks) if provided, otherwise fallback to initialData object
@@ -199,7 +194,9 @@ const builderInitialData = computed(() => {
   return props.initialData
 })
 
-const builderBase = useBuilder(builderInitialData.value)
+const builderBase = useBuilder(builderInitialData.value, {
+  mode: props.mode
+})
 const globalVariables = useGlobalVariables()
 const globalAction = ref(null)
 const cmsStore = useCmsStore()
@@ -232,8 +229,6 @@ const insertRowTargetId = ref(null)
 const showInsertSectionModal = ref(false)
 const insertSectionIndex = ref(-1)
 
-const showPageTemplateModal = ref(false)
-
 const showStructureTemplateModal = ref(false)
 const structureTemplateTargetId = ref(null)
 const structureTemplateTargetType = ref(null)
@@ -245,6 +240,10 @@ const builder = reactive({
   activePanel,
   globalAction,
   globalVariables
+})
+
+watch(() => builder.isFullscreen, (val) => {
+  emit('update:fullscreen', val)
 })
 
 // Watch for changes in builder blocks and emit updates
@@ -399,7 +398,7 @@ const handleResponsiveUpdate = (updates) => {
 }
 
 // Close Builder
-const handleCloseBuilder = () => {
+const handleClose = () => {
     // Emit close event for parent app to handle (e.g. redirect)
     emit('close')
     // Alternatively, could window.history.back() if standalone

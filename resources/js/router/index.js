@@ -96,6 +96,12 @@ const routes = [
                 component: () => import('../views/admin/contents/Revisions.vue'),
             },
             {
+                path: 'site-editor',
+                name: 'builder.site',
+                component: () => import('../views/admin/builder/SiteEditor.vue'),
+                meta: { permission: 'manage settings' },
+            },
+            {
                 path: 'media',
                 name: 'media',
                 component: () => import('../views/admin/media/Index.vue'),

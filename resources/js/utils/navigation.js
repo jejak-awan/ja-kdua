@@ -40,6 +40,7 @@ export const navigationGroups = {
 
     // Appearance (3 items)
     appearance: [
+        { name: 'builder.site', to: '/admin/site-editor', label: 'Site Editor', permission: 'manage settings' },
         { name: 'themes', to: '/admin/themes', label: 'Themes', permission: 'view themes' },
         { name: 'menus', to: '/admin/menus', label: 'Menus', permission: 'view menus' },
         { name: 'widgets', to: '/admin/widgets', label: 'Widgets', permission: 'view widgets' },
