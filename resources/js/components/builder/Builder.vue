@@ -253,6 +253,9 @@ const builder = reactive({
   globalAction,
 })
 
+// Provide builder for child components
+provide('builder', builder)
+
 watch(() => builder.isFullscreen, (val) => {
   emit('update:fullscreen', val)
 })

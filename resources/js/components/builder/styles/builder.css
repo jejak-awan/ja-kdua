@@ -83,7 +83,9 @@
     --builder-toolbar-text-section: #ffffff;
     --builder-toolbar-bg-row: #059669;
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-module: #0891b2;
+    --builder-toolbar-bg-column: #0891b2;
+    --builder-toolbar-text-column: #ffffff;
+    --builder-toolbar-bg-module: #64748b;
     --builder-toolbar-text-module: #ffffff;
     --builder-toolbar-icon: #ffffff;
 }
@@ -131,7 +133,9 @@
     --builder-toolbar-text-section: #ffffff;
     --builder-toolbar-bg-row: #059669;
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-module: #0891b2;
+    --builder-toolbar-bg-column: #0891b2;
+    --builder-toolbar-text-column: #ffffff;
+    --builder-toolbar-bg-module: #64748b;
     --builder-toolbar-text-module: #ffffff;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);

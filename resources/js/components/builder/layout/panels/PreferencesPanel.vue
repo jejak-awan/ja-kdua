@@ -85,9 +85,22 @@ import { useLanguage } from '../../../../composables/useLanguage'
 
 const { t } = useI18n()
 const darkMode = inject('darkMode')
-const showGrid = ref(false)
-const snapToObjects = ref(true)
-const autoSave = ref(true)
+const builder = inject('builder', null)
+
+// Use builder preferences (persisted to localStorage)
+// Note: builder is a reactive object, refs are auto-unwrapped
+const showGrid = computed({
+    get: () => builder?.showGrid ?? false,
+    set: (val) => { if (builder && 'showGrid' in builder) builder.showGrid = val }
+})
+const snapToObjects = computed({
+    get: () => builder?.snapToObjects ?? true,
+    set: (val) => { if (builder && 'snapToObjects' in builder) builder.snapToObjects = val }
+})
+const autoSave = computed({
+    get: () => builder?.autoSave ?? true,
+    set: (val) => { if (builder && 'autoSave' in builder) builder.autoSave = val }
+})
 
 // Language Logic via useLanguage composable for global sync
 const { 

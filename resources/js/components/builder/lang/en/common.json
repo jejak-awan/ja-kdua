@@ -7,6 +7,7 @@
     "fields": {
         "actions": {
             "reset": "Reset",
+            "copy": "Copy",
             "info": "Help",
             "responsive": "Mobile Settings",
             "manageGlobal": "Manage My Global URLs",
@@ -424,6 +425,7 @@
         "edit": "Edit",
         "duplicate": "Duplicate",
         "delete": "Delete",
+        "drag": "Drag to Move",
         "info": "Item Info",
         "more": "More Options",
         "copyStyles": "Copy Item Styles"

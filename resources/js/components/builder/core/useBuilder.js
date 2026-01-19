@@ -76,6 +76,37 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         loading: false
     })
 
+    // Builder Preferences (persisted to localStorage)
+    const PREFS_STORAGE_KEY = 'ja-builder-preferences'
+    const loadPreferencesFromStorage = () => {
+        try {
+            const stored = localStorage.getItem(PREFS_STORAGE_KEY)
+            return stored ? JSON.parse(stored) : {}
+        } catch {
+            return {}
+        }
+    }
+    const storedPrefs = loadPreferencesFromStorage()
+
+    const showGrid = ref(storedPrefs.showGrid ?? false)
+    const snapToObjects = ref(storedPrefs.snapToObjects ?? true)
+    const autoSave = ref(storedPrefs.autoSave ?? true)
+    let autoSaveInterval = null
+
+    // Save preferences to localStorage
+    const savePreferences = () => {
+        localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify({
+            showGrid: showGrid.value,
+            snapToObjects: snapToObjects.value,
+            autoSave: autoSave.value
+        }))
+    }
+
+    // Watch preferences for changes and persist
+    watch([showGrid, snapToObjects, autoSave], () => {
+        savePreferences()
+    })
+
     // Mode state (site vs page)
     // - site: Full site management (add pages, switch pages, etc.)
     // - page: Focused page editing (usually within CMS edit screen)
@@ -1082,6 +1113,30 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
 
         // Responsive Modal
         openResponsiveModal,
-        closeResponsiveModal
+        closeResponsiveModal,
+
+        // Preferences
+        showGrid,
+        snapToObjects,
+        autoSave,
+        startAutoSave: () => {
+            if (autoSaveInterval) clearInterval(autoSaveInterval)
+            autoSaveInterval = setInterval(async () => {
+                if (autoSave.value && content.value.id) {
+                    try {
+                        await saveContent()
+                        console.log('[Auto-save] Content saved')
+                    } catch (e) {
+                        console.error('[Auto-save] Failed:', e)
+                    }
+                }
+            }, 60000) // Auto-save every 60 seconds
+        },
+        stopAutoSave: () => {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval)
+                autoSaveInterval = null
+            }
+        }
     }
 }

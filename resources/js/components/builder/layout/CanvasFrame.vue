@@ -4,13 +4,15 @@
       class="canvas-frame__viewport"
       :style="viewportStyle"
     >
+      <!-- Grid Overlay -->
+      <div v-if="showGridOverlay" class="canvas-grid-overlay"></div>
       <slot />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { DEVICE_MODES } from '../core/constants'
 
 const props = defineProps({
@@ -28,6 +30,9 @@ const props = defineProps({
     default: null
   }
 })
+
+const builder = inject('builder', null)
+const showGridOverlay = computed(() => builder?.showGrid?.value ?? false)
 
 const viewportStyle = computed(() => {
   // Mobile-first approach or explicit mapping to avoid import issues
@@ -90,5 +95,17 @@ const viewportStyle = computed(() => {
 .canvas-frame--mobile .canvas-frame__viewport {
   border-radius: 24px;
   border: 8px solid #333;
+}
+
+/* Grid Overlay */
+.canvas-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background-image: 
+    linear-gradient(to right, rgba(100, 100, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(100, 100, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 </style>

@@ -15,24 +15,14 @@
         :show-layout="isRow"
         :show-duplicate="true"
         :show-delete="true"
-        :show-info="true"
-        :show-more="true"
         :show-drag="true"
-        :info-active="showInfo"
         @layout="openRowLayoutModal"
         @duplicate="duplicateModule"
         @delete="deleteModule"
-        @toggle-info="toggleInfo"
-        @more-action="handleMoreAction"
       />
     </div>
 
-    <!-- Inline Info Panel (for Canvas) -->
-    <transition name="fade-slide">
-      <div v-if="showInfo && !isGhost" class="module-info-panel-canvas">
-          <p>{{ moduleInfoText }}</p>
-      </div>
-    </transition>
+
     
     <!-- Loop Indicator Badge -->
     <div v-if="isLoopEnabled" class="loop-indicator" title="Loop Enabled">
@@ -123,14 +113,13 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { ref, computed, inject, watch } from 'vue'
 import { Plus, Repeat } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
 import ModuleRegistry from '../core/ModuleRegistry'
 import ModuleRenderer from './ModuleRenderer.vue'
 import AddModuleButton from './AddModuleButton.vue'
 import ModuleActions from '../fields/ModuleActions.vue'
-import { ref } from 'vue'
 
 const icons = { Plus, Repeat }
 
@@ -352,28 +341,7 @@ const deleteModule = () => {
   }
 }
 
-// Reusable Actions Logic
-const showInfo = ref(false)
-const toggleInfo = () => {
-    showInfo.value = !showInfo.value
-}
 
-const moduleInfoText = computed(() => {
-    const def = moduleDefinition.value
-    return `Type: ${props.module.type}. ID: ${props.module.id}. Title: ${moduleTitle.value}.`
-})
-
-const handleMoreAction = (action) => {
-    if (action === 'reset') {
-        const def = ModuleRegistry.get(props.module.type)
-        if (def && def.defaults) {
-            builder?.updateModuleSettings(props.module.id, { ...def.defaults })
-        }
-    } else if (action === 'savePreset') {
-        builder?.openSavePresetModal(props.module.id)
-    }
-    // Handle other actions...
-}
 </script>
 
 <style scoped>
@@ -499,7 +467,7 @@ const handleMoreAction = (action) => {
     top: 0;
     left: auto;
     right: 0;
-    background: var(--builder-toolbar-bg-module);
+    background: var(--builder-toolbar-bg-column);
     border-bottom-left-radius: var(--border-radius-sm);
     border-bottom-right-radius: 0;
 }
