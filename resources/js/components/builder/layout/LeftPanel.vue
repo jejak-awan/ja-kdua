@@ -175,6 +175,7 @@ const selectModule = (id) => {
 
 .left-panel {
   width: 0; /* Fallback for inactive state, overruled by inline style when active */
+  height: 100%; /* Ensure it takes full height of ja-builder__main */
   border-right: 1px solid var(--builder-border-layout);
   border-bottom: 1px solid var(--builder-border-layout);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -256,17 +257,34 @@ const selectModule = (id) => {
 
 .panel-content {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0; /* Critical for flex child scrolling */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Let child panels manage their own scrolling */
+.panel-content > * {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
 .layers-controls {
+    flex: none; /* Keep natural height for search bar */
     padding: 8px 12px;
     border-bottom: 1px solid var(--builder-border);
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.layers-tree-container {
+    flex: 1; /* Tree container takes remaining space */
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
 }
 
 .search-layout {
@@ -314,11 +332,7 @@ const selectModule = (id) => {
     opacity: 0.8;
 }
 
-.layers-tree-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-sm);
-}
+
 
 .empty-state {
   text-align: center;

@@ -436,20 +436,16 @@ import { useToast } from '@/composables/useToast'
 const toast = useToast()
 
 const handleSave = async (status = null) => {
-  if (props.contentId) {
+  if (props.contentId || builder.content.id) {
     try {
       if (status) {
         builder.content.status = status
       }
-      toast.info('Saving changes...')
       await builder.saveContent()
-      toast.success('Changes saved successfully')
-      emit('save')
+      toast.success.save()
     } catch (err) {
-      toast.error('Failed to save changes')
+      toast.error.action(err)
     }
-  } else {
-    emit('save')
   }
 }
 
