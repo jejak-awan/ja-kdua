@@ -59,7 +59,10 @@
             "padding": "Padding",
             "border": "Border",
             "shadow": "Bayangan",
-            "background": "Latar Belakang"
+            "background": "Latar Belakang",
+            "filters": "Filter",
+            "transform": "Transformasi",
+            "animation": "Animasi"
         },
         "layoutTypes": {
             "flex": "Flex",
@@ -219,7 +222,7 @@
                 },
                 "flipH": "Balik Horizontal",
                 "flipV": "Balik Vertikal",
-                "rotate": "Putar 90°",
+                "rotate": "Putar 90\u00b0",
                 "invert": "Balikkan Warna (Invert)",
                 "size": {
                     "label": "Ukuran Pola",
@@ -264,7 +267,7 @@
                 "transform": "Transformasi Masker",
                 "flipH": "Balik Horizontal",
                 "flipV": "Balik Vertikal",
-                "rotate": "Putar 90°",
+                "rotate": "Putar 90\u00b0",
                 "invert": "Balikkan Warna (Invert)",
                 "size": {
                     "label": "Ukuran Masker",
@@ -306,6 +309,9 @@
                 "blend_mode": {
                     "label": "Mode Campuran Masker"
                 }
+            },
+            "animation": {
+                "empty": "Pilih gaya animasi untuk melihat opsi."
             }
         },
         "border": {
@@ -577,7 +583,7 @@
             "emptyDesc": "Coba sesuaikan pencarian atau kategori Anda."
         },
         "presets": {
-            "title": "Preset Gaya",
+            "title": "Pilih Preset",
             "empty": "Tidak ada preset ditemukan. Simpan modul sebagai preset untuk melihatnya di sini.",
             "yourPresets": "Preset Anda",
             "categories": {
@@ -734,18 +740,35 @@
     "settings": {
         "groups": {
             "sizing": "Ukuran",
-            "filters": "Filter",
-            "transform": "Transformasi",
+            "filters": {
+                "label": "Filter"
+            },
+            "transform": {
+                "label": "Transformasi",
+                "tabs": {
+                    "scale": "Skala",
+                    "translate": "Geser",
+                    "rotate": "Putar",
+                    "skew": "Miring"
+                }
+            },
             "visibility": "Visibilitas",
             "position": "Posisi",
             "transitions": "Transisi",
-            "animation": "Animasi",
+            "animation": {
+                "label": "Animasi",
+                "empty": "Pilih gaya animasi untuk melihat opsi."
+            },
             "typography": "Tipografi",
             "spacing": "Jarak",
             "border": "Border",
             "boxShadow": "Bayangan Kotak",
             "elements": "Elemen",
-            "css": "CSS Kustom"
+            "css": "CSS",
+            "conditions": "Kondisi",
+            "attributes": "Atribut",
+            "interactions": "Interaksi",
+            "scroll_effects": "Efek Gulir"
         },
         "meta_query": {
             "add": "Tambah Meta Query",
@@ -755,6 +778,77 @@
             "value_placeholder": "Masukkan nilai meta",
             "compare": "Bandingkan",
             "type": "Tipe"
+        },
+        "layout": {
+            "layout_type": {
+                "label": "Gaya Layout"
+            },
+            "gap_x": {
+                "label": "Jarak Horizontal"
+            },
+            "gap_y": {
+                "label": "Jarak Vertikal"
+            },
+            "direction": {
+                "label": "Arah Layout"
+            },
+            "justify_content": {
+                "label": "Justifikasi Konten"
+            },
+            "align_items": {
+                "label": "Perataan Item"
+            },
+            "flex_wrap": {
+                "label": "Bungkus Layout"
+            },
+            "align_content": {
+                "label": "Perataan Konten"
+            },
+            "grid_direction": {
+                "label": "Arah Grid"
+            },
+            "grid_density": {
+                "label": "Kepadatan Grid"
+            },
+            "justify_items": {
+                "label": "Justifikasi Item"
+            },
+            "place_items": {
+                "label": "Penempatan Item"
+            },
+            "column_widths": {
+                "label": "Lebar Kolom",
+                "options": {
+                    "equal": "Kolom Lebar Tetap (Sama)",
+                    "equal_min": "Kolom Lebar Minimal (Sama)",
+                    "auto": "Kolom Lebar Otomatis",
+                    "manual": "Kolom Lebar Manual"
+                }
+            },
+            "column_count": {
+                "label": "Jumlah Kolom"
+            },
+            "column_min_width": {
+                "label": "Lebar Minimal Kolom"
+            },
+            "grid_template_columns": {
+                "label": "Template Grid Kolom"
+            },
+            "collapse_empty": {
+                "label": "Sembunyikan Kolom Kosong"
+            },
+            "auto_columns": {
+                "label": "Kolom Otomatis"
+            },
+            "row_heights": {
+                "label": "Tinggi Baris"
+            },
+            "row_count": {
+                "label": "Jumlah Baris"
+            },
+            "auto_rows": {
+                "label": "Baris Otomatis"
+            }
         },
         "fields": {
             "width": "Lebar",
@@ -790,17 +884,65 @@
             "overflow": "Overflow",
             "position": "Posisi",
             "z_index": "Indeks Z",
-            "transition_duration": "Durasi Transisi (ms)",
-            "transition_delay": "Jeda Transisi (ms)",
-            "transition_curve": "Kurva Kecepatan Transisi",
             "cssClass": "Kelas CSS",
             "cssId": "ID CSS",
             "link_url": "URL Tautan",
             "link_target": "Target Tautan",
             "admin_label": "Label Admin",
-            "fullWidth": "Lebar Penuh",
-            "loop": "Ulangi Elemen",
-            "order": "Urutan Tampilan"
+            "order": "Urutan Tampilan",
+            "scale": "Skala",
+            "translateX": "Geser X",
+            "translateY": "Geser Y",
+            "rotateX": "Rotasi X",
+            "rotateY": "Rotasi Y",
+            "rotateZ": "Rotasi Z",
+            "skewX": "Miring X",
+            "skewY": "Miring Y",
+            "origin": "Asal Transformasi",
+            "animation_curve": "Kurva Kecepatan Animasi",
+            "size_type": "Tipe Ukuran",
+            "column_class": "Kelas Kolom",
+            "font": "Font",
+            "fontStyle": "Gaya Font",
+            "textTransform": "Transformasi Teks",
+            "textDecoration": "Dekorasi Teks",
+            "letterSpacing": "Jarak Huruf",
+            "wordSpacing": "Jarak Kata",
+            "textAlign": "Perataan Teks",
+            "transition": "Transisi",
+            "transition_duration": "Durasi Transisi",
+            "transition_delay": "Tunda Transisi",
+            "transition_curve": "Kurva Kecepatan Transisi",
+            "backgroundPatternColor": "Warna Pola",
+            "backgroundPatternRotate": "Putar Pola",
+            "backgroundPatternInvert": "Balikkan Warna Pola",
+            "backgroundPatternFlipH": "Balik Horizontal Pola",
+            "backgroundPatternFlipV": "Balik Vertikal Pola",
+            "backgroundPatternSize": "Ukuran Pola",
+            "backgroundPatternWidth": "Lebar Pola",
+            "backgroundPatternHeight": "Tinggi Pola",
+            "backgroundPatternRepeat": "Ulangi Pola",
+            "backgroundPatternRepeatOrigin": "Asal Pengulangan",
+            "backgroundPatternBlendMode": "Mode Campuran Pola",
+            "backgroundMaskColor": "Warna Masker",
+            "backgroundMaskRotate": "Putar Masker",
+            "backgroundMaskInvert": "Balikkan Warna Masker",
+            "backgroundMaskFlipH": "Balik Horizontal Masker",
+            "backgroundMaskFlipV": "Balik Vertikal Masker",
+            "backgroundMaskAspectRatio": "Rasio Aspek Masker",
+            "backgroundMaskSize": "Ukuran Masker",
+            "backgroundMaskWidth": "Lebar Masker",
+            "backgroundMaskHeight": "Tinggi Masker",
+            "backgroundMaskRepeat": "Ulangi Masker",
+            "backgroundMaskRepeatOrigin": "Asal Pengulangan Masker",
+            "backgroundMaskBlendMode": "Mode Campuran Masker",
+            "disable_on": "Nonaktifkan Di",
+            "overflow_x": "Overflow Horizontal",
+            "overflow_y": "Overflow Vertikal",
+            "sticky_position": "Posisi Lengket",
+            "motion_effects_child": "Terapkan Efek Gerak Ke Elemen Anak",
+            "scroll_effects": "Efek Transformasi Gulir",
+            "motion_trigger": "Pemicu Efek Gerak"
         },
         "options": {
             "link_target": {
@@ -824,10 +966,11 @@
             },
             "transition_curve": {
                 "ease": "Ease",
-                "ease-in": "Ease In",
-                "ease-out": "Ease Out",
-                "ease-in-out": "Ease In Out",
-                "linear": "Linear"
+                "ease-in": "Ease-In",
+                "ease-out": "Ease-Out",
+                "ease-in-out": "Ease-In-Out",
+                "linear": "Linear",
+                "auto": "Otomatis"
             },
             "blend_mode": {
                 "normal": "Normal",
@@ -844,8 +987,29 @@
                 "exclusion": "Exclusion",
                 "hue": "Hue",
                 "saturation": "Saturation",
-                "color": "Color",
+                "color": "Warna",
                 "luminosity": "Luminosity"
+            },
+            "size_type": {
+                "auto": "Otomatis",
+                "custom": "Kustom"
+            },
+            "overflow": {
+                "visible": "Terlihat",
+                "scroll": "Gulir",
+                "hidden": "Tersembunyi",
+                "auto": "Otomatis"
+            },
+            "sticky_position": {
+                "none": "Jangan Menempel",
+                "top": "Tempel ke Atas",
+                "bottom": "Tempel ke Bawah",
+                "top-bottom": "Tempel ke Atas dan Bawah"
+            },
+            "motion_trigger": {
+                "middle": "Tengah Elemen",
+                "top": "Atas Elemen",
+                "bottom": "Bawah Elemen"
             }
         },
         "section": {
@@ -891,5 +1055,28 @@
     "pageTemplateModal": {
         "title": "Impor Templat Halaman",
         "warning": "Peringatan: Mengimpor templat akan mengganti seluruh konten saat ini."
+    },
+    "advanced": {
+        "conditions": {
+            "add": "Tambah Kondisi",
+            "pickerTitle": "Pilih Kondisi",
+            "search": "Cari kondisi..."
+        },
+        "attributes": {
+            "add": "Tambah Atribut",
+            "custom": "Masukkan Atribut Kustom"
+        },
+        "css": {
+            "info": "Tulis CSS bebas menggunakan kata kunci {selector} untuk menargetkan modul ini. Contoh: {example}",
+            "elementsInfo": "Targetkan selektor yang telah ditentukan dalam elemen ini tanpa perlu menuliskan nama selektor. Contoh: {example}"
+        },
+        "interactions": {
+            "add": "Tambah Interaksi"
+        },
+        "scroll": {
+            "configure": "Konfigurasikan pengaturan {type} Anda di bawah ini.",
+            "tabDisabled": "Aktifkan {type} untuk melihat opsi.",
+            "level": "Intensitas"
+        }
     }
 }

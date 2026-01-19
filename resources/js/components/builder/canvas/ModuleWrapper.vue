@@ -31,7 +31,7 @@
     </div>
 
     <!-- Module Content with Children -->
-    <div class="module-content" :class="{ 'is-looping': isLoopEnabled }">
+    <div class="module-content" :class="[{ 'is-looping': isLoopEnabled }, ...animationClasses]" :style="animationStyles">
       <!-- Wireframe Mode: Hide actual renderer content for specific modules -->
       <template v-if="wireframeMode && !hasChildren">
         <div class="wireframe-placeholder">
@@ -141,6 +141,23 @@ const props = defineProps({
 
 // Inject
 const builder = inject('builder')
+
+import { getAnimationStyles, getResponsiveValue } from '../core/styleUtils'
+
+const currentDevice = computed(() => builder?.device || 'desktop')
+
+const animationClasses = computed(() => {
+    // 1. Try nested object
+    const anim = getResponsiveValue(props.module.settings, 'animation', currentDevice.value)
+    // 2. Fallback to flat key
+    const effect = (anim && anim.effect) ? anim.effect : getResponsiveValue(props.module.settings, 'animation_effect', currentDevice.value)
+    
+    return effect ? [effect] : []
+})
+
+const animationStyles = computed(() => {
+    return getAnimationStyles(props.module.settings, currentDevice.value)
+})
 
 // Computed
 const isSelected = computed(() => 

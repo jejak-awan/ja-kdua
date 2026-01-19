@@ -4,6 +4,36 @@
  */
 
 // Background
+const generateFractions = () => {
+    const common = [
+        { l: '100%', v: '100%' },
+        { l: '3/4', v: '75%' },
+        { l: '2/3', v: '66.67%' },
+        { l: '1/2', v: '50%' },
+        { l: '1/3', v: '33.33%' },
+        { l: '1/4', v: '25%' },
+        { l: '1/5', v: '20%' },
+        { l: '1/6', v: '16.67%' }
+    ]
+    const others = [
+        { l: '11/12', v: '91.67%' },
+        { l: '5/6', v: '83.33%' },
+        { l: '4/5', v: '80%' },
+        { l: '3/5', v: '60%' },
+        { l: '2/5', v: '40%' },
+        { l: '5/12', v: '41.67%' },
+        { l: '7/12', v: '58.33%' },
+        { l: '1/12', v: '8.33%' }
+    ]
+
+    return [
+        ...common.map(i => ({ label: i.l, value: i.v, group: 'Common' })),
+        ...others.map(i => ({ label: i.l, value: i.v, group: 'Other' }))
+    ]
+}
+
+const widthOptions = generateFractions()
+
 export const backgroundSettings = {
     id: 'background',
     label: 'Background',
@@ -157,58 +187,17 @@ export const typographySettings = {
 }
 
 // Animation (Moved from settings.js for consistency)
+// Animation
 export const animationSettings = {
     id: 'animation',
     label: 'Animation',
     presets: true,
     fields: [
         {
-            name: 'animation_effect',
-            type: 'select',
-            label: 'Animation Effect',
-            options: [
-                { label: 'None', value: '' },
-                { label: 'Fade In', value: 'animate-fade' },
-                { label: 'Fade In Up', value: 'animate-fade-up' },
-                { label: 'Fade In Down', value: 'animate-fade-down' },
-                { label: 'Fade In Left', value: 'animate-fade-left' },
-                { label: 'Fade In Right', value: 'animate-fade-right' },
-                { label: 'Zoom In', value: 'animate-zoom' },
-                { label: 'Bounce In', value: 'animate-bounce-in' },
-                { label: 'Flip X', value: 'animate-flip-x' }
-            ],
-            default: ''
-        },
-        {
-            name: 'animation_duration',
-            type: 'range',
-            label: 'Duration (ms)',
-            min: 0,
-            max: 3000,
-            step: 100,
-            default: 1000,
-            show_if: { field: 'animation_effect', operator: '!=', value: '' }
-        },
-        {
-            name: 'animation_delay',
-            type: 'range',
-            label: 'Delay (ms)',
-            min: 0,
-            max: 2000,
-            step: 50,
-            default: 0,
-            show_if: { field: 'animation_effect', operator: '!=', value: '' }
-        },
-        {
-            name: 'animation_repeat',
-            type: 'select',
-            label: 'Repeat',
-            options: [
-                { label: 'Once', value: '1' },
-                { label: 'Infinite', value: 'infinite' }
-            ],
-            default: '1',
-            show_if: { field: 'animation_effect', operator: '!=', value: '' }
+            name: 'animation',
+            type: 'animation',
+            label: 'Animation',
+            responsive: true
         }
     ]
 }
@@ -216,7 +205,7 @@ export const animationSettings = {
 // CSS ID & Class Settings
 export const cssSettings = {
     id: 'css',
-    label: 'Custom CSS',
+    label: 'CSS',
     fields: [
         {
             name: 'cssId',
@@ -227,6 +216,11 @@ export const cssSettings = {
             name: 'cssClass',
             type: 'text',
             label: 'CSS Class'
+        },
+        {
+            name: 'custom_css',
+            type: 'custom_css',
+            label: 'Custom CSS'
         }
     ]
 }
@@ -238,48 +232,87 @@ export const sizingSettings = {
     presets: true,
     fields: [
         {
+            name: 'size_type',
+            type: 'buttonGroup',
+            label: 'Size',
+            options: [
+                { label: 'Auto', value: 'auto', icon: 'Minimize' },
+                { label: 'Custom', value: 'custom', icon: 'Maximize' }
+            ],
+            default: 'auto',
+            responsive: true
+        },
+        {
             name: 'width',
-            type: 'range',
+            type: 'dimension',
             label: 'Width',
-            min: 0,
-            max: 100,
-            unit: '%',
+            options: ['px', '%', 'em', 'rem', 'vw', 'vh', 'auto', 'inherit'],
             responsive: true,
-            default: ''
+            default: 'auto',
+            show_if: { field: 'size_type', value: 'custom' }
         },
         {
             name: 'max_width',
-            type: 'range',
+            type: 'dimension',
             label: 'Max Width',
-            min: 0,
-            max: 100,
-            unit: '%',
+            options: ['px', '%', 'em', 'rem', 'vw', 'vh', 'none', 'inherit'],
             responsive: true,
-            default: ''
+            default: 'none',
+            show_if: { field: 'size_type', value: 'custom' }
         },
         {
-            name: 'height',
-            type: 'range',
-            label: 'Height',
-            min: 0,
-            max: 1000,
-            unit: 'px',
+            name: 'align',
+            type: 'buttonGroup',
+            label: 'Alignment',
+            options: [
+                { value: 'left', icon: 'AlignLeft' },
+                { value: 'center', icon: 'AlignCenter' },
+                { value: 'right', icon: 'AlignRight' }
+            ],
             responsive: true,
-            default: ''
+            default: 'left',
+            show_if: { field: 'size_type', value: 'custom' }
         },
         {
             name: 'min_height',
-            type: 'range',
+            type: 'dimension',
             label: 'Min Height',
-            min: 0,
-            max: 1000,
-            unit: 'px',
+            options: ['px', '%', 'em', 'rem', 'vh', 'auto', 'inherit'],
             responsive: true,
-            default: ''
+            default: 'auto',
+            show_if: { field: 'size_type', value: 'custom' }
+        },
+        {
+            name: 'height',
+            type: 'dimension',
+            label: 'Height',
+            options: ['px', '%', 'em', 'rem', 'vh', 'auto', 'inherit'],
+            responsive: true,
+            default: 'auto',
+            show_if: { field: 'size_type', value: 'custom' }
+        },
+        {
+            name: 'max_height',
+            type: 'dimension',
+            label: 'Max Height',
+            options: ['px', '%', 'em', 'rem', 'vh', 'none', 'inherit'],
+            responsive: true,
+            default: 'none',
+            show_if: { field: 'size_type', value: 'custom' }
+        },
+        {
+            name: 'column_class',
+            type: 'select',
+            label: 'Column Class',
+            options: widthOptions,
+            default: '100%',
+            responsive: true,
+            show_if: { field: 'size_type', value: 'custom' }
         }
     ]
 }
 
+// Filters
 // Filters
 export const filterSettings = {
     id: 'filters',
@@ -287,118 +320,10 @@ export const filterSettings = {
     presets: true,
     fields: [
         {
-            name: 'opacity',
-            type: 'range',
-            label: 'Opacity',
-            min: 0,
-            max: 100,
-            unit: '%',
-            default: 100,
+            name: 'filter',
+            type: 'filters',
+            label: 'Filters',
             responsive: true
-        },
-        {
-            name: 'blur',
-            type: 'range',
-            label: 'Blur',
-            min: 0,
-            max: 50,
-            unit: 'px',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'brightness',
-            type: 'range',
-            label: 'Brightness',
-            min: 0,
-            max: 200,
-            unit: '%',
-            default: 100,
-            responsive: true
-        },
-        {
-            name: 'contrast',
-            type: 'range',
-            label: 'Contrast',
-            min: 0,
-            max: 200,
-            unit: '%',
-            default: 100,
-            responsive: true
-        },
-        {
-            name: 'grayscale',
-            type: 'range',
-            label: 'Grayscale',
-            min: 0,
-            max: 100,
-            unit: '%',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'sepia',
-            type: 'range',
-            label: 'Sepia',
-            min: 0,
-            max: 100,
-            unit: '%',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'saturate',
-            type: 'range',
-            label: 'Saturate',
-            min: 0,
-            max: 200,
-            unit: '%',
-            default: 100,
-            responsive: true
-        },
-        {
-            name: 'hue_rotate',
-            type: 'range',
-            label: 'Hue Rotate',
-            min: 0,
-            max: 360,
-            unit: 'deg',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'invert',
-            type: 'range',
-            label: 'Invert',
-            min: 0,
-            max: 100,
-            unit: '%',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'blend_mode',
-            type: 'select',
-            label: 'Blend Mode',
-            options: [
-                { label: 'Normal', value: 'normal' },
-                { label: 'Multiply', value: 'multiply' },
-                { label: 'Screen', value: 'screen' },
-                { label: 'Overlay', value: 'overlay' },
-                { label: 'Darken', value: 'darken' },
-                { label: 'Lighten', value: 'lighten' },
-                { label: 'Color Dodge', value: 'color-dodge' },
-                { label: 'Color Burn', value: 'color-burn' },
-                { label: 'Hard Light', value: 'hard-light' },
-                { label: 'Soft Light', value: 'soft-light' },
-                { label: 'Difference', value: 'difference' },
-                { label: 'Exclusion', value: 'exclusion' },
-                { label: 'Hue', value: 'hue' },
-                { label: 'Saturation', value: 'saturation' },
-                { label: 'Color', value: 'color' },
-                { label: 'Luminosity', value: 'luminosity' }
-            ],
-            default: 'normal'
         }
     ]
 }
@@ -410,83 +335,9 @@ export const transformSettings = {
     presets: true,
     fields: [
         {
-            name: 'transform_scale',
-            type: 'range',
-            label: 'Scale (%)',
-            min: 0,
-            max: 200,
-            unit: '%',
-            default: 100,
-            responsive: true
-        },
-        {
-            name: 'transform_translate_x',
-            type: 'range',
-            label: 'Translate X',
-            min: -500,
-            max: 500,
-            unit: 'px',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_translate_y',
-            type: 'range',
-            label: 'Translate Y',
-            min: -500,
-            max: 500,
-            unit: 'px',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_rotate',
-            type: 'range',
-            label: 'Rotate X (deg)',
-            min: 0,
-            max: 360,
-            unit: 'deg',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_rotate_y',
-            type: 'range',
-            label: 'Rotate Y (deg)',
-            min: 0,
-            max: 360,
-            unit: 'deg',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_rotate_z',
-            type: 'range',
-            label: 'Rotate Z (deg)',
-            min: 0,
-            max: 360,
-            unit: 'deg',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_skew_x',
-            type: 'range',
-            label: 'Skew X (deg)',
-            min: -180,
-            max: 180,
-            unit: 'deg',
-            default: 0,
-            responsive: true
-        },
-        {
-            name: 'transform_skew_y',
-            type: 'range',
-            label: 'Skew Y (deg)',
-            min: -180,
-            max: 180,
-            unit: 'deg',
-            default: 0,
+            name: 'transform',
+            type: 'transform',
+            label: 'Transform',
             responsive: true
         }
     ]
@@ -498,31 +349,40 @@ export const visibilitySettings = {
     label: 'Visibility',
     fields: [
         {
-            name: 'visibility_desktop',
-            type: 'toggle',
-            label: 'Show on Desktop',
-            default: true
+            name: 'disable_on',
+            type: 'buttonGroup',
+            label: 'Disable On',
+            multiple: true,
+            options: [
+                { label: 'Phone', value: 'phone', icon: 'Smartphone' },
+                { label: 'Tablet', value: 'italy', icon: 'Tablet' },
+                { label: 'Desktop', value: 'desktop', icon: 'Monitor' }
+            ],
+            responsive: false
         },
         {
-            name: 'visibility_tablet',
-            type: 'toggle',
-            label: 'Show on Tablet',
-            default: true
-        },
-        {
-            name: 'visibility_mobile',
-            type: 'toggle',
-            label: 'Show on Mobile',
-            default: true
-        },
-        {
-            name: 'overflow',
+            name: 'overflow_x',
             type: 'select',
-            label: 'Overflow',
+            label: 'Horizontal Overflow',
             options: [
                 { label: 'Default', value: 'visible' },
-                { label: 'Hidden', value: 'hidden' },
+                { label: 'Visible', value: 'visible' },
                 { label: 'Scroll', value: 'scroll' },
+                { label: 'Hidden', value: 'hidden' },
+                { label: 'Auto', value: 'auto' }
+            ],
+            default: 'visible',
+            responsive: true
+        },
+        {
+            name: 'overflow_y',
+            type: 'select',
+            label: 'Vertical Overflow',
+            options: [
+                { label: 'Default', value: 'visible' },
+                { label: 'Visible', value: 'visible' },
+                { label: 'Scroll', value: 'scroll' },
+                { label: 'Hidden', value: 'hidden' },
                 { label: 'Auto', value: 'auto' }
             ],
             default: 'visible',
@@ -541,7 +401,8 @@ export const positionSettings = {
             type: 'select',
             label: 'Position',
             options: [
-                { label: 'Default (Relative)', value: 'relative' },
+                { label: 'Default', value: 'relative' },
+                { label: 'Relative', value: 'relative' },
                 { label: 'Absolute', value: 'absolute' },
                 { label: 'Fixed', value: 'fixed' }
             ],
@@ -550,7 +411,7 @@ export const positionSettings = {
         },
         {
             name: 'z_index',
-            type: 'number',
+            type: 'advanced_number',
             label: 'Z Index',
             default: '',
             responsive: true
@@ -588,13 +449,13 @@ export const transitionSettings = {
             type: 'select',
             label: 'Transition Speed Curve',
             options: [
+                { label: 'Ease-In-Out', value: 'ease-in-out' },
                 { label: 'Ease', value: 'ease' },
-                { label: 'Ease In', value: 'ease-in' },
-                { label: 'Ease Out', value: 'ease-out' },
-                { label: 'Ease In Out', value: 'ease-in-out' },
-                { label: 'Linear', value: 'linear' }
+                { label: 'Ease-In', value: 'ease-in' },
+                { label: 'Ease-Out', value: 'ease-out' },
+                { label: 'Auto', value: 'auto' }
             ],
-            default: 'ease'
+            default: 'ease-in-out'
         }
     ]
 }
@@ -793,24 +654,6 @@ export const loopSettings = {
     ]
 }
 
-// Order Settings
-export const orderSettings = {
-    id: 'order',
-    label: 'Order',
-    fields: [
-        {
-            name: 'order',
-            type: 'select',
-            label: 'Order',
-            options: [
-                { label: 'Descending', value: 'DESC' },
-                { label: 'Ascending', value: 'ASC' }
-            ],
-            default: 'DESC',
-            responsive: true
-        }
-    ]
-}
 
 // Admin Label Settings
 export const adminLabelSettings = (defaultLabel = 'Module') => ({
@@ -826,6 +669,25 @@ export const adminLabelSettings = (defaultLabel = 'Module') => ({
         }
     ]
 })
+
+// Order Settings
+export const orderSettings = {
+    id: 'order',
+    label: 'Order',
+    presets: true,
+    fields: [
+        {
+            name: 'display_order',
+            type: 'advanced_number',
+            label: 'Display Order',
+            default: 0,
+            responsive: true,
+            min: -99,
+            max: 99,
+            step: 1
+        }
+    ]
+}
 
 // Link Settings
 export const linkSettings = {
@@ -854,17 +716,238 @@ export const linkSettings = {
 export const layoutSettings = {
     id: 'layout',
     label: 'Layout',
+    presets: true,
     fields: [
         {
             name: 'layout_type',
             type: 'select',
-            label: 'Layout Type',
+            label: 'Layout Style',
             options: [
-                { label: 'Standard', value: 'standard' },
-                { label: 'Stacked', value: 'stacked' }
+                { label: 'Flex', value: 'flex' },
+                { label: 'Grid', value: 'grid' },
+                { label: 'Block', value: 'block' }
             ],
-            default: 'standard',
+            default: 'flex',
             responsive: true
+        },
+        // Shared Gaps
+        {
+            name: 'gap_x',
+            type: 'dimension',
+            label: 'Horizontal Gap',
+            default: '30px',
+            responsive: true,
+            options: ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'calc', 'min', 'max', 'clamp', 'inherit', 'unset', 'normal', 'css var'],
+            show_if: { field: 'layout_type', value: ['flex', 'grid'] }
+        },
+        {
+            name: 'gap_y',
+            type: 'dimension',
+            label: 'Vertical Gap',
+            default: '30px',
+            responsive: true,
+            options: ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'calc', 'min', 'max', 'clamp', 'inherit', 'unset', 'normal', 'css var'],
+            show_if: { field: 'layout_type', value: ['flex', 'grid'] }
+        },
+
+        // Grid Specific Controls
+        {
+            name: 'column_widths',
+            type: 'select',
+            label: 'Column Widths',
+            options: [
+                { label: 'Equal Fixed Width Columns', value: 'equal' },
+                { label: 'Equal Minimum Width Columns', value: 'equal_min' },
+                { label: 'Auto Width Columns', value: 'auto' },
+                { label: 'Manual Width Columns', value: 'manual' }
+            ],
+            default: 'equal',
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'column_min_width',
+            type: 'dimension',
+            label: 'Column Minimum Width',
+            default: '250px',
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid', AND: { field: 'column_widths', value: 'equal_min' } }
+        },
+        {
+            name: 'grid_template_columns',
+            type: 'text', // Using text for manual input like "1fr 2fr 100px"
+            label: 'Grid Column Template',
+            placeholder: 'e.g. 1fr 2fr 100px',
+            default: '',
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid', AND: { field: 'column_widths', value: 'manual' } }
+        },
+        {
+            name: 'column_count',
+            type: 'advanced_number',
+            label: 'Number Of Columns',
+            default: 3,
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid', AND: { field: 'column_widths', value: ['equal', 'equal_min'] } }
+        },
+        {
+            name: 'collapse_empty',
+            type: 'toggle',
+            label: 'Collapse Empty Columns',
+            default: false,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'auto_columns',
+            type: 'dimension',
+            label: 'Grid Auto Columns',
+            default: 'auto',
+            options: ['px', 'fr', '%', 'min-content', 'max-content', 'auto', 'minmax'],
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'row_heights',
+            type: 'select',
+            label: 'Row Heights',
+            options: [
+                { label: 'Auto Height Rows', value: 'auto' },
+                { label: 'Custom Heights', value: 'custom' }
+            ],
+            default: 'auto',
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'row_count',
+            type: 'advanced_number',
+            label: 'Number Of Rows',
+            default: 'auto',
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'auto_rows',
+            type: 'dimension',
+            label: 'Grid Auto Rows',
+            default: 'auto',
+            options: ['px', 'fr', '%', 'min-content', 'max-content', 'auto', 'minmax'],
+            responsive: true,
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'grid_direction',
+            type: 'buttonGroup',
+            label: 'Grid Direction',
+            default: 'row',
+            responsive: true,
+            options: [
+                { value: 'row', label: 'Row', icon: 'MoveRight' },
+                { value: 'column', label: 'Column', icon: 'MoveDown' },
+            ],
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+        {
+            name: 'grid_density',
+            type: 'buttonGroup',
+            label: 'Grid Density',
+            default: 'dense',
+            responsive: true,
+            options: [
+                { value: 'dense', label: 'Dense', icon: 'Grid2x2' },
+                { value: 'sparse', label: 'Sparse', icon: 'LayoutGrid' },
+            ],
+            show_if: { field: 'layout_type', value: 'grid' }
+        },
+
+
+        {
+            name: 'direction',
+            type: 'buttonGroup',
+            label: 'Layout Direction',
+            default: 'column',
+            responsive: true,
+            options: [
+                { value: 'row', label: 'Row', icon: 'ArrowRight' },
+                { value: 'row-reverse', label: 'Row Reverse', icon: 'ArrowLeft' },
+                { value: 'column', label: 'Column', icon: 'ArrowDown' },
+                { value: 'column-reverse', label: 'Column Reverse', icon: 'ArrowUp' }
+            ],
+            show_if: { field: 'layout_type', value: 'flex' }
+        },
+        {
+            name: 'justify_content',
+            type: 'buttonGroup',
+            label: 'Justify Content',
+            default: 'flex-start',
+            responsive: true,
+            options: [
+                { value: 'flex-start', label: 'Start', icon: 'AlignLeft' },
+                { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                { value: 'flex-end', label: 'End', icon: 'AlignRight' },
+                { value: 'space-between', label: 'Space Between', icon: 'Minimize2' },
+                { value: 'space-around', label: 'Space Around', icon: 'Maximize2' },
+                { value: 'space-evenly', label: 'Space Evenly', icon: 'MoreHorizontal' }
+            ],
+            show_if: { field: 'layout_type', value: ['flex', 'grid'] }
+        },
+        {
+            name: 'align_items',
+            type: 'buttonGroup',
+            label: 'Align Items',
+            default: 'stretch',
+            responsive: true,
+            options: [
+                { value: 'flex-start', label: 'Start', icon: 'ArrowUp' },
+                { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                { value: 'flex-end', label: 'End', icon: 'ArrowDown' },
+                { value: 'stretch', label: 'Stretch', icon: 'Maximize' },
+                { value: 'baseline', label: 'Baseline', icon: 'Type' }
+            ],
+            show_if: { field: 'layout_type', value: ['flex', 'grid'] }
+        },
+        {
+            name: 'flex_wrap',
+            type: 'buttonGroup',
+            label: 'Layout Wrapping',
+            default: 'nowrap',
+            responsive: true,
+            options: [
+                { value: 'nowrap', label: 'No Wrap', icon: 'Ban' },
+                { value: 'wrap', label: 'Wrap', icon: 'WrapText' },
+                { value: 'wrap-reverse', label: 'Wrap Reverse', icon: 'Undo2' }
+            ],
+            show_if: { field: 'layout_type', value: 'flex' }
+        },
+        {
+            name: 'align_content',
+            type: 'buttonGroup',
+            label: 'Align Content',
+            default: 'flex-start',
+            responsive: true,
+            options: [
+                { value: 'flex-start', label: 'Start', icon: 'ArrowUp' },
+                { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                { value: 'flex-end', label: 'End', icon: 'ArrowDown' },
+                { value: 'space-between', label: 'Space Between', icon: 'Minimize2' },
+                { value: 'space-around', label: 'Space Around', icon: 'Maximize2' },
+                { value: 'stretch', label: 'Stretch', icon: 'Maximize' }
+            ],
+            show_if: { field: 'layout_type', value: ['flex', 'grid'] }
+        },
+        {
+            name: 'justify_items',
+            type: 'buttonGroup',
+            label: 'Justify Items',
+            default: 'stretch',
+            responsive: true,
+            options: [
+                { value: 'start', label: 'Start', icon: 'AlignLeft' },
+                { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                { value: 'end', label: 'End', icon: 'AlignRight' },
+                { value: 'stretch', label: 'Stretch', icon: 'Maximize' }
+            ],
+            show_if: { field: 'layout_type', value: 'grid' }
         }
     ]
 }
@@ -875,10 +958,9 @@ export const conditionsSettings = {
     label: 'Conditions',
     fields: [
         {
-            name: 'condition_enable',
-            type: 'toggle',
-            label: 'Enable Conditions',
-            default: false
+            name: 'conditions',
+            type: 'conditions',
+            label: 'Conditions'
         }
     ]
 }
@@ -889,15 +971,9 @@ export const interactionsSettings = {
     label: 'Interactions',
     fields: [
         {
-            name: 'interaction_on_click',
-            type: 'select',
-            label: 'On Click',
-            options: [
-                { label: 'None', value: '' },
-                { label: 'Link', value: 'link' },
-                { label: 'Popup', value: 'popup' }
-            ],
-            default: ''
+            name: 'interactions',
+            type: 'interactions',
+            label: 'Interactions'
         }
     ]
 }
@@ -908,10 +984,39 @@ export const scrollEffectsSettings = {
     label: 'Scroll Effects',
     fields: [
         {
-            name: 'scroll_enable',
+            name: 'sticky_position',
+            type: 'select',
+            label: 'Sticky Position',
+            options: [
+                { label: 'Do Not Stick', value: 'none' },
+                { label: 'Stick to Top', value: 'top' },
+                { label: 'Stick to Bottom', value: 'bottom' },
+                { label: 'Stick to Top and Bottom', value: 'top-bottom' }
+            ],
+            default: 'none',
+            responsive: true
+        },
+        {
+            name: 'motion_effects_child',
             type: 'toggle',
-            label: 'Enable Scroll Effects',
+            label: 'Apply Motion Effects To Child Elements',
             default: false
+        },
+        {
+            name: 'scroll_effects',
+            type: 'scroll_effects',
+            label: 'Scroll Transform Effects'
+        },
+        {
+            name: 'motion_trigger',
+            type: 'select',
+            label: 'Motion Effect Trigger',
+            options: [
+                { label: 'Middle of Element', value: 'middle' },
+                { label: 'Top of Element', value: 'top' },
+                { label: 'Bottom of Element', value: 'bottom' }
+            ],
+            default: 'middle'
         }
     ]
 }
@@ -922,9 +1027,9 @@ export const attributesSettings = {
     label: 'Attributes',
     fields: [
         {
-            name: 'custom_attributes',
-            type: 'key_value',
-            label: 'Custom Attributes'
+            name: 'attributes',
+            type: 'attributes',
+            label: 'Attributes'
         }
     ]
 }

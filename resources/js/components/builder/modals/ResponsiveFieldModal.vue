@@ -120,7 +120,7 @@
             <template v-for="(group, gIndex) in subFields" :key="gIndex">
                 <div v-if="!group.match || getModeValue(mode.id) === group.match" class="sub-fields-container">
                     <div v-for="(field, fIndex) in group.fields" :key="fIndex" class="sub-field-item">
-                         <div class="sub-field-label">{{ field.label }}</div>
+                         <div class="sub-field-label">{{ translateFieldLabel(field) }}</div>
                          
                          <!-- Transform Controls Special UI -->
                          <div v-if="field.type === 'transform'" class="transform-controls-row">
@@ -198,7 +198,25 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'update'])
 const builder = inject('builder')
-const { t } = useI18n()
+const { t, te } = useI18n()
+
+// Helper to translate field labels
+const translateFieldLabel = (field) => {
+    const moduleType = props.module?.type || 'common'
+    const name = field.name
+
+    // 1. Try module-specific: builder.settings.{moduleType}.{name}.label
+    if (te(`builder.settings.${moduleType}.${name}.label`)) {
+        return t(`builder.settings.${moduleType}.${name}.label`)
+    }
+
+    // 2. Try common field: builder.settings.fields.${name}
+    if (te(`builder.settings.fields.${name}`)) {
+        return t(`builder.settings.fields.${name}`)
+    }
+
+    return field.label
+}
 
 // Current builder device for highlighting
 const currentDevice = computed(() => builder?.device || 'desktop')

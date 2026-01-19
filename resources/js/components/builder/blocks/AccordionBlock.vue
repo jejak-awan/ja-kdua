@@ -9,6 +9,7 @@
       item-key="id"
       group="accordion_item"
       class="accordion-items-container"
+      :style="containerStyles"
       ghost-class="ja-builder-ghost"
     >
       <template #item="{ element: child, index }">
@@ -85,12 +86,33 @@ provide('accordionState', {
 const builder = inject('builder')
 const device = computed(() => builder?.device || 'desktop')
 
+import { getLayoutStyles } from '../core/styleUtils'
+
+const containerStyles = computed(() => {
+    const layout = getLayoutStyles(settings.value, device.value)
+    
+    // Fallback for legacy 'standard' layout or if layout_type is missing
+    if (!layout.display && !layout.gridTemplateColumns) {
+        const gap = getResponsiveValue(settings.value, 'itemGap', device.value) || 24
+        return {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${gap}px`,
+            width: '100%'
+        }
+    }
+    
+    // Ensure width 100% if flex column to stretch items?
+    // Or let alignment settings handle it. 
+    // Usually container should accept full width.
+    layout.width = '100%'
+    
+    return layout
+})
+
 const wrapperStyles = computed(() => {
-  const gap = getResponsiveValue(settings.value, 'itemGap', device.value) || 24
   const styles = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: `${gap}px`,
+    position: 'relative', // Ensure containment
     width: '100%',
     transition: 'var(--transition-premium)'
   }
@@ -126,7 +148,7 @@ const handleWrapperClick = () => {
 .accordion-items-container {
   display: flex;
   flex-direction: column;
-  gap: inherit;
+  /* gap handled by inline style */
   width: 100%;
 }
 </style>

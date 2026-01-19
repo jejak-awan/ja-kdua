@@ -46,7 +46,7 @@
     </div>
 
     <!-- Slider (Only if not auto) -->
-    <div v-if="unit !== 'auto'" class="px-1">
+    <div v-if="showSlider" class="px-1">
         <BaseSlider 
             :min="0" 
             :max="sliderMax" 
@@ -80,16 +80,19 @@ const emit = defineEmits(['update:value'])
 const numericValue = ref(0)
 const unit = ref('px')
 
+const keywords = ['auto', 'inherit', 'initial', 'unset', 'normal', 'none', 'cover', 'contain']
+
 // Extract numeric value and unit from string
 const parseValue = (val) => {
-    if (!val || val === 'auto') {
+    if (!val || keywords.includes(val)) {
         numericValue.value = 0
-        unit.value = 'auto'
+        unit.value = val || 'auto'
         return
     }
 
+    // Default processing
     const num = parseFloat(val)
-    const u = val.replace(/[0-9.]/g, '') || 'px'
+    const u = val.replace(/[0-9.-]/g, '') || 'px'
     
     numericValue.value = isNaN(num) ? 0 : num
     unit.value = u
@@ -97,12 +100,13 @@ const parseValue = (val) => {
 
 const displayValue = computed({
     get: () => {
-        if (unit.value === 'auto') return 'auto'
+        if (keywords.includes(unit.value)) return unit.value
         return numericValue.value
     },
     set: (val) => {
-        if (val.toLowerCase() === 'auto') {
-            unit.value = 'auto'
+        const lowerVal = val.toLowerCase()
+        if (keywords.includes(lowerVal)) {
+            unit.value = lowerVal
             numericValue.value = 0
             emitUpdate()
             return
@@ -111,7 +115,7 @@ const displayValue = computed({
         const num = parseFloat(val)
         if (!isNaN(num)) {
             numericValue.value = num
-            if (unit.value === 'auto') unit.value = 'px'
+            if (keywords.includes(unit.value)) unit.value = 'px'
         }
         emitUpdate()
     }
@@ -125,7 +129,7 @@ const sliderMax = computed(() => {
 
 const setUnit = (u) => {
     unit.value = u
-    if (u === 'auto') numericValue.value = 0
+    if (keywords.includes(u)) numericValue.value = 0
     emitUpdate()
 }
 
@@ -134,13 +138,17 @@ const updateNumericValue = (delta) => {
     emitUpdate()
 }
 
+const showSlider = computed(() => {
+    return !keywords.includes(unit.value) && unit.value !== ''
+})
+
 const updateValueFromSlider = (val) => {
     numericValue.value = val
     emitUpdate()
 }
 
 const emitUpdate = () => {
-    const finalVal = unit.value === 'auto' ? 'auto' : `${numericValue.value}${unit.value}`
+    const finalVal = keywords.includes(unit.value) ? unit.value : `${numericValue.value}${unit.value}`
     emit('update:value', finalVal)
 }
 

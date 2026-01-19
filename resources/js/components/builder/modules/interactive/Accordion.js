@@ -39,6 +39,15 @@ export default {
     defaults: {
         // Behavior
         allowMultiple: false,
+        // Layout
+        layout_type: 'flex',
+        direction: 'column',
+        justify_content: 'flex-start',
+        align_items: 'stretch',
+        flex_wrap: 'nowrap',
+        align_content: 'flex-start',
+        gap_x: '0px',
+        gap_y: '0px',
         // Toggle Icon
         toggleIcon: 'plus',
         iconPosition: 'right',
@@ -46,6 +55,8 @@ export default {
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         headerBackgroundColor: '#f7f7f7',
+        openHeaderBackgroundColor: '#f7f7f7',
+        openHeaderTextColor: '#333333',
         contentBackgroundColor: '#ffffff',
         // Spacing
         itemGap: 24,
@@ -138,14 +149,14 @@ export default {
                 label: 'Toggle',
                 fields: [
                     {
-                        name: 'headerBackgroundColor',
-                        type: 'color',
-                        label: 'Header Background'
-                    },
-                    {
                         name: 'openHeaderBackgroundColor',
                         type: 'color',
-                        label: 'Open Header Background'
+                        label: 'Open Toggle Background Color'
+                    },
+                    {
+                        name: 'headerBackgroundColor',
+                        type: 'color',
+                        label: 'Closed Toggle Background Color'
                     }
                 ]
             },
@@ -161,11 +172,18 @@ export default {
             {
                 id: 'title_text_design',
                 label: 'Title Text',
-                fields: typographySettings.fields.map(f => ({
-                    ...f,
-                    name: `header_${f.name}`,
-                    label: `Title ${f.label}`
-                }))
+                fields: [
+                    {
+                        name: 'openHeaderTextColor',
+                        type: 'color',
+                        label: 'Open Title Text Color'
+                    },
+                    ...typographySettings.fields.map(f => ({
+                        ...f,
+                        name: `header_${f.name}`,
+                        label: `Title ${f.label}`
+                    }))
+                ]
             },
             {
                 id: 'closed_title_text_design',

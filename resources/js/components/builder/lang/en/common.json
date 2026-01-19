@@ -58,7 +58,10 @@
             "padding": "Padding",
             "border": "Border",
             "shadow": "Shadow",
-            "background": "Background"
+            "background": "Background",
+            "filters": "Filters",
+            "transform": "Transform",
+            "animation": "Animation"
         },
         "layoutTypes": {
             "flex": "Flex",
@@ -219,7 +222,7 @@
                 },
                 "flipH": "Flip Horizontal",
                 "flipV": "Flip Vertical",
-                "rotate": "90° Rotate",
+                "rotate": "90\u00b0 Rotate",
                 "invert": "Invert Colors",
                 "size": {
                     "label": "Pattern Size",
@@ -265,6 +268,14 @@
                     "label": "Pattern Blend Mode"
                 }
             },
+            "transform": {
+                "tabs": {
+                    "scale": "Scale",
+                    "translate": "Move",
+                    "rotate": "Rotate",
+                    "skew": "Skew"
+                }
+            },
             "mask": {
                 "label": "Background Mask",
                 "add": "Add Background Mask",
@@ -272,7 +283,7 @@
                 "transform": "Mask Transform",
                 "flipH": "Flip Horizontal",
                 "flipV": "Flip Vertical",
-                "rotate": "90° Rotate",
+                "rotate": "90\u00b0 Rotate",
                 "invert": "Invert Colors",
                 "size": {
                     "label": "Mask Size",
@@ -323,6 +334,9 @@
                 "blend_mode": {
                     "label": "Mask Blend Mode"
                 }
+            },
+            "animation": {
+                "empty": "Select an animation style to see options."
             }
         },
         "border": {
@@ -594,7 +608,7 @@
             "emptyDesc": "Try adjusting your search or category."
         },
         "presets": {
-            "title": "Style Presets",
+            "title": "Select Preset",
             "empty": "No presets found. Save a module as a preset to see it here.",
             "yourPresets": "Your Presets",
             "categories": {
@@ -754,18 +768,35 @@
     "settings": {
         "groups": {
             "sizing": "Sizing",
-            "filters": "Filters",
-            "transform": "Transform",
+            "filters": {
+                "label": "Filters"
+            },
+            "transform": {
+                "label": "Transform",
+                "tabs": {
+                    "scale": "Scale",
+                    "translate": "Move",
+                    "rotate": "Rotate",
+                    "skew": "Skew"
+                }
+            },
             "visibility": "Visibility",
             "position": "Position",
             "transitions": "Transitions",
-            "animation": "Animation",
+            "animation": {
+                "label": "Animation",
+                "empty": "Select an animation style to see options."
+            },
             "typography": "Typography",
             "spacing": "Spacing",
             "border": "Border",
             "boxShadow": "Box Shadow",
             "elements": "Elements",
-            "css": "Custom CSS"
+            "css": "CSS",
+            "conditions": "Conditions",
+            "attributes": "Attributes",
+            "interactions": "Interactions",
+            "scroll_effects": "Scroll Effects"
         },
         "meta_query": {
             "add": "Add Meta Query",
@@ -775,6 +806,77 @@
             "value_placeholder": "Enter meta value",
             "compare": "Compare",
             "type": "Type"
+        },
+        "layout": {
+            "layout_type": {
+                "label": "Layout Style"
+            },
+            "gap_x": {
+                "label": "Horizontal Gap"
+            },
+            "gap_y": {
+                "label": "Vertical Gap"
+            },
+            "direction": {
+                "label": "Layout Direction"
+            },
+            "justify_content": {
+                "label": "Justify Content"
+            },
+            "align_items": {
+                "label": "Align Items"
+            },
+            "flex_wrap": {
+                "label": "Layout Wrapping"
+            },
+            "align_content": {
+                "label": "Align Content"
+            },
+            "grid_direction": {
+                "label": "Grid Direction"
+            },
+            "grid_density": {
+                "label": "Grid Density"
+            },
+            "justify_items": {
+                "label": "Justify Items"
+            },
+            "place_items": {
+                "label": "Place Items"
+            },
+            "column_widths": {
+                "label": "Column Widths",
+                "options": {
+                    "equal": "Equal Fixed Width Columns",
+                    "equal_min": "Equal Minimum Width Columns",
+                    "auto": "Auto Width Columns",
+                    "manual": "Manual Width Columns"
+                }
+            },
+            "column_count": {
+                "label": "Number Of Columns"
+            },
+            "column_min_width": {
+                "label": "Column Minimum Width"
+            },
+            "grid_template_columns": {
+                "label": "Grid Column Template"
+            },
+            "collapse_empty": {
+                "label": "Collapse Empty Columns"
+            },
+            "auto_columns": {
+                "label": "Grid Auto Columns"
+            },
+            "row_heights": {
+                "label": "Row Heights"
+            },
+            "row_count": {
+                "label": "Number Of Rows"
+            },
+            "auto_rows": {
+                "label": "Grid Auto Rows"
+            }
         },
         "fields": {
             "width": "Width",
@@ -810,9 +912,6 @@
             "overflow": "Overflow",
             "position": "Position",
             "z_index": "Z Index",
-            "transition_duration": "Transition Duration (ms)",
-            "transition_delay": "Transition Delay (ms)",
-            "transition_curve": "Transition Speed Curve",
             "cssClass": "CSS Class",
             "cssId": "CSS ID",
             "link_url": "Link URL",
@@ -820,7 +919,60 @@
             "admin_label": "Admin Label",
             "fullWidth": "Full Width",
             "loop": "Loop Element",
-            "order": "Display Order"
+            "order": "Display Order",
+            "scale": "Scale",
+            "translateX": "Translate X",
+            "translateY": "Translate Y",
+            "rotateX": "Rotate X",
+            "rotateY": "Rotate Y",
+            "rotateZ": "Rotate Z",
+            "skewX": "Skew X",
+            "skewY": "Skew Y",
+            "origin": "Transform Origin",
+            "animation_curve": "Animation Speed Curve",
+            "size_type": "Size Mode",
+            "column_class": "Column Class",
+            "font": "Font",
+            "fontStyle": "Font Style",
+            "textTransform": "Text Transform",
+            "textDecoration": "Text Decoration",
+            "letterSpacing": "Letter Spacing",
+            "wordSpacing": "Word Spacing",
+            "textAlign": "Text Alignment",
+            "transition": "Transition",
+            "transition_duration": "Transition Duration",
+            "transition_delay": "Transition Delay",
+            "transition_curve": "Transition Speed Curve",
+            "backgroundPatternColor": "Pattern Color",
+            "backgroundPatternRotate": "Rotate Pattern",
+            "backgroundPatternInvert": "Invert Pattern",
+            "backgroundPatternFlipH": "Flip Horizontal Pattern",
+            "backgroundPatternFlipV": "Flip Vertical Pattern",
+            "backgroundPatternSize": "Pattern Size",
+            "backgroundPatternWidth": "Pattern Width",
+            "backgroundPatternHeight": "Pattern Height",
+            "backgroundPatternRepeat": "Repeat Pattern",
+            "backgroundPatternRepeatOrigin": "Repeat Origin",
+            "backgroundPatternBlendMode": "Pattern Blend Mode",
+            "backgroundMaskColor": "Mask Color",
+            "backgroundMaskRotate": "Rotate Mask",
+            "backgroundMaskInvert": "Invert Mask",
+            "backgroundMaskFlipH": "Flip Horizontal Mask",
+            "backgroundMaskFlipV": "Flip Vertical Mask",
+            "backgroundMaskAspectRatio": "Mask Aspect Ratio",
+            "backgroundMaskSize": "Mask Size",
+            "backgroundMaskWidth": "Mask Width",
+            "backgroundMaskHeight": "Mask Height",
+            "backgroundMaskRepeat": "Repeat Mask",
+            "backgroundMaskRepeatOrigin": "Mask Repeat Origin",
+            "backgroundMaskBlendMode": "Mask Blend Mode",
+            "disable_on": "Disable On",
+            "overflow_x": "Horizontal Overflow",
+            "overflow_y": "Vertical Overflow",
+            "sticky_position": "Sticky Position",
+            "motion_effects_child": "Apply Motion Effects To Child Elements",
+            "scroll_effects": "Scroll Transform Effects",
+            "motion_trigger": "Motion Effect Trigger"
         },
         "options": {
             "link_target": {
@@ -844,10 +996,11 @@
             },
             "transition_curve": {
                 "ease": "Ease",
-                "ease-in": "Ease In",
-                "ease-out": "Ease Out",
-                "ease-in-out": "Ease In Out",
-                "linear": "Linear"
+                "ease-in": "Ease-In",
+                "ease-out": "Ease-Out",
+                "ease-in-out": "Ease-In-Out",
+                "linear": "Linear",
+                "auto": "Auto"
             },
             "blend_mode": {
                 "normal": "Normal",
@@ -866,6 +1019,27 @@
                 "saturation": "Saturation",
                 "color": "Color",
                 "luminosity": "Luminosity"
+            },
+            "size_type": {
+                "auto": "Auto",
+                "custom": "Custom"
+            },
+            "overflow": {
+                "visible": "Visible",
+                "scroll": "Scroll",
+                "hidden": "Hidden",
+                "auto": "Auto"
+            },
+            "sticky_position": {
+                "none": "Do Not Stick",
+                "top": "Stick to Top",
+                "bottom": "Stick to Bottom",
+                "top-bottom": "Stick to Top and Bottom"
+            },
+            "motion_trigger": {
+                "middle": "Middle of Element",
+                "top": "Top of Element",
+                "bottom": "Bottom of Element"
             }
         },
         "section": {
@@ -911,5 +1085,28 @@
     "pageTemplateModal": {
         "title": "Import Page Template",
         "warning": "Warning: Importing a template will replace all current content."
+    },
+    "advanced": {
+        "conditions": {
+            "add": "Add Condition",
+            "pickerTitle": "Select Condition",
+            "search": "Search conditions..."
+        },
+        "attributes": {
+            "add": "Add Attribute",
+            "custom": "Enter Custom Attribute"
+        },
+        "css": {
+            "info": "Write free-form css using the keyword {selector} to target this module. i.e. {example}",
+            "elementsInfo": "Target predefined selectors within this element without the need to write out selectors name. i.e. {example}"
+        },
+        "interactions": {
+            "add": "Add Interaction"
+        },
+        "scroll": {
+            "configure": "Configure your {type} settings below.",
+            "tabDisabled": "Enable {type} to see options.",
+            "level": "Intensity"
+        }
     }
 }

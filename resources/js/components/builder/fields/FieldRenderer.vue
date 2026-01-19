@@ -68,7 +68,16 @@ const fieldComponents = {
   background: defineAsyncComponent(() => import('./BackgroundField.vue')),
   meta_query: defineAsyncComponent(() => import('./MetaQueryField.vue')),
   advanced_number: defineAsyncComponent(() => import('./AdvancedNumberField.vue')),
-  icon: defineAsyncComponent(() => import('./IconField.vue'))
+  icon: defineAsyncComponent(() => import('./IconField.vue')),
+  dimension: defineAsyncComponent(() => import('./DimensionField.vue')),
+  filters: defineAsyncComponent(() => import('./FilterField.vue')),
+  transform: defineAsyncComponent(() => import('./TransformField.vue')),
+  animation: defineAsyncComponent(() => import('./AnimationField.vue')),
+  conditions: defineAsyncComponent(() => import('./ConditionField.vue')),
+  attributes: defineAsyncComponent(() => import('./AttributeField.vue')),
+  custom_css: defineAsyncComponent(() => import('./CSSField.vue')),
+  interactions: defineAsyncComponent(() => import('./InteractionField.vue')),
+  scroll_effects: defineAsyncComponent(() => import('./ScrollEffectsField.vue'))
 }
 
 const props = defineProps({
@@ -222,6 +231,7 @@ const handleResponsiveClick = () => {
         label: translatedLabel.value,
         baseKey: props.field.name,
         type: props.field.type,
+        options: props.field.options,
         module: props.module,
         settings: props.module.settings || {}
     })

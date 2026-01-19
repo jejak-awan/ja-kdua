@@ -53,7 +53,9 @@ export function getSizingStyles(settings, device = 'desktop') {
         { key: 'maxWidth', prop: 'maxWidth' },
         { key: 'minHeight', prop: 'minHeight' },
         { key: 'height', prop: 'height' },
-        { key: 'align', prop: 'margin' }
+        { key: 'maxHeight', prop: 'maxHeight' },
+        { key: 'align', prop: 'margin' },
+        { key: 'column_class', prop: 'width' }
     ]
 
     fields.forEach(f => {
@@ -617,41 +619,51 @@ export function getFilterStyles(settings, device = 'desktop') {
     const css = {}
     const filters = []
 
+    // Support both old flat keys and new nested object
+    const getVal = (key) => {
+        // 1. Try nested object first
+        const nested = getResponsiveValue(settings, 'filter', device)
+        if (nested && nested[key] !== undefined) return nested[key]
+
+        // 2. Fallback to flat key
+        return getResponsiveValue(settings, key, device)
+    }
+
     // 1. Opacity
-    const opacity = getResponsiveValue(settings, 'opacity', device)
+    const opacity = getVal('opacity')
     if (opacity !== undefined && opacity !== null && opacity !== '' && opacity != 100) {
         css.opacity = opacity / 100
     }
 
     // 2. Blend Mode
-    const blendMode = getResponsiveValue(settings, 'blend_mode', device)
+    const blendMode = getVal('blend_mode')
     if (blendMode && blendMode !== 'normal') {
         css.mixBlendMode = blendMode
     }
 
     // 3. CSS Filter Functions
-    const blur = getResponsiveValue(settings, 'blur', device)
+    const blur = getVal('blur')
     if (blur && blur > 0) filters.push(`blur(${blur}px)`)
 
-    const brightness = getResponsiveValue(settings, 'brightness', device)
+    const brightness = getVal('brightness')
     if (brightness !== undefined && brightness !== null && brightness !== '' && brightness != 100) filters.push(`brightness(${brightness}%)`)
 
-    const contrast = getResponsiveValue(settings, 'contrast', device)
+    const contrast = getVal('contrast')
     if (contrast !== undefined && contrast !== null && contrast !== '' && contrast != 100) filters.push(`contrast(${contrast}%)`)
 
-    const grayscale = getResponsiveValue(settings, 'grayscale', device)
+    const grayscale = getVal('grayscale')
     if (grayscale && grayscale > 0) filters.push(`grayscale(${grayscale}%)`)
 
-    const sepia = getResponsiveValue(settings, 'sepia', device)
+    const sepia = getVal('sepia')
     if (sepia && sepia > 0) filters.push(`sepia(${sepia}%)`)
 
-    const saturate = getResponsiveValue(settings, 'saturate', device)
+    const saturate = getVal('saturate')
     if (saturate !== undefined && saturate !== null && saturate !== '' && saturate != 100) filters.push(`saturate(${saturate}%)`)
 
-    const hueRotate = getResponsiveValue(settings, 'hue_rotate', device)
+    const hueRotate = getVal('hue_rotate')
     if (hueRotate && hueRotate > 0) filters.push(`hue-rotate(${hueRotate}deg)`)
 
-    const invert = getResponsiveValue(settings, 'invert', device)
+    const invert = getVal('invert')
     if (invert && invert > 0) filters.push(`invert(${invert}%)`)
 
     if (filters.length > 0) {
@@ -664,36 +676,276 @@ export function getFilterStyles(settings, device = 'desktop') {
 export function getTransformStyles(settings, device = 'desktop') {
     const transforms = []
 
+    // Support both old flat keys and new nested object
+    const getVal = (key) => {
+        // 1. Try nested object first
+        const nested = getResponsiveValue(settings, 'transform', device)
+        // Handle mapped names if necessary, but we kept them same in TransformField
+        if (nested && nested[key] !== undefined) return nested[key]
+
+        // 2. Fallback to flat key
+        return getResponsiveValue(settings, key, device)
+    }
+
+    // Origin
+    const origin = getVal('origin')
+
     // Scale
-    const scale = getResponsiveValue(settings, 'transform_scale', device)
+    // Note: TransformField uses 'scale' key, old settings used 'transform_scale'
+    // We check both.
+    const scale = getVal('scale') ?? getVal('transform_scale')
     if (scale !== undefined && scale !== null && scale !== '' && scale != 100) {
         transforms.push(`scale(${scale / 100})`)
     }
 
     // Translate
-    const tx = getResponsiveValue(settings, 'transform_translate_x', device)
-    const ty = getResponsiveValue(settings, 'transform_translate_y', device)
+    // New keys: translate_x, translate_y
+    // Old keys: transform_translate_x, transform_translate_y
+    const tx = getVal('translate_x') ?? getVal('transform_translate_x')
+    const ty = getVal('translate_y') ?? getVal('transform_translate_y')
     if ((tx && tx != 0) || (ty && ty != 0)) {
         transforms.push(`translate(${tx || 0}px, ${ty || 0}px)`)
     }
 
     // Rotate
-    const rx = getResponsiveValue(settings, 'transform_rotate', device)
-    const ry = getResponsiveValue(settings, 'transform_rotate_y', device)
-    const rz = getResponsiveValue(settings, 'transform_rotate_z', device)
+    // New keys: rotate_x, rotate_y, rotate_z
+    // Old keys: transform_rotate (X), transform_rotate_y, transform_rotate_z
+    const rx = getVal('rotate_x') ?? getVal('transform_rotate')
+    const ry = getVal('rotate_y') ?? getVal('transform_rotate_y')
+    const rz = getVal('rotate_z') ?? getVal('transform_rotate_z')
 
     if (rx && rx != 0) transforms.push(`rotateX(${rx}deg)`)
     if (ry && ry != 0) transforms.push(`rotateY(${ry}deg)`)
     if (rz && rz != 0) transforms.push(`rotateZ(${rz}deg)`)
 
     // Skew
-    const sx = getResponsiveValue(settings, 'transform_skew_x', device)
-    const sy = getResponsiveValue(settings, 'transform_skew_y', device)
+    // New keys: skew_x, skew_y
+    // Old keys: transform_skew_x, transform_skew_y
+    const sx = getVal('skew_x') ?? getVal('transform_skew_x')
+    const sy = getVal('skew_y') ?? getVal('transform_skew_y')
     if (sx && sx != 0) transforms.push(`skewX(${sx}deg)`)
     if (sy && sy != 0) transforms.push(`skewY(${sy}deg)`)
 
+    const css = {}
+
     if (transforms.length > 0) {
-        return { transform: transforms.join(' ') }
+        css.transform = transforms.join(' ')
     }
-    return {}
+
+    if (origin && origin !== 'center') {
+        css.transformOrigin = origin
+    }
+
+    return css
+}
+
+export function getAnimationStyles(settings, device = 'desktop') {
+    const css = {}
+
+    // Support both old flat keys and new nested object
+    const getVal = (key) => {
+        // 1. Try nested object first
+        const nested = getResponsiveValue(settings, 'animation', device)
+        if (nested && nested[key] !== undefined) return nested[key]
+
+        // 2. Fallback to flat key (prefixed with animation_)
+        return getResponsiveValue(settings, `animation_${key}`, device)
+    }
+
+    const effect = getVal('effect') // New key 'effect', old key 'animation_effect' -> getVal adds prefix if needed? No, getVal adds prefix for fallback. 
+    // Wait, old keys were `animation_effect`, `animation_duration`, etc.
+    // My getVal fallback uses `animation_${key}`. 
+    // So getVal('effect') checks nested.effect, then settings.animation_effect. Correct.
+
+    if (effect) {
+        // Note: The actual animation class (e.g. 'animate-fade') is handled by the component's class binding usually.
+        // But we might need to apply duration/delay/etc as inline styles.
+
+        const duration = getVal('duration')
+        const delay = getVal('delay')
+        const repeat = getVal('repeat') // 'once' or 'infinite' or '1'
+        const curve = getVal('curve') // 'ease', 'linear' etc.
+
+        if (duration !== undefined && duration !== null) css.animationDuration = `${duration}ms`
+        if (delay !== undefined && delay !== null) css.animationDelay = `${delay}ms`
+        if (curve) css.animationTimingFunction = curve
+
+        if (repeat === 'infinite') {
+            css.animationIterationCount = 'infinite'
+        } else if (repeat === 'once' || repeat === '1') {
+            css.animationIterationCount = '1'
+        }
+
+        // We also need to return the class name potentially? 
+        // StyleUtils usually returns inline styles. 
+        // The class name should be extracted separately in the component.
+    }
+
+    return css
+}
+
+export function getLayoutStyles(settings, device = 'desktop') {
+    const css = {}
+    const layoutType = getResponsiveValue(settings, 'layout_type', device)
+
+    if (layoutType === 'block') {
+        css.display = 'block'
+    } else if (layoutType === 'flex') {
+        css.display = 'flex'
+
+        // Direction
+        css.flexDirection = getResponsiveValue(settings, 'direction', device) || 'column'
+
+        // Wrap
+        css.flexWrap = getResponsiveValue(settings, 'flex_wrap', device) || 'nowrap'
+
+        // Justify Content
+        css.justifyContent = getResponsiveValue(settings, 'justify_content', device) || 'flex-start'
+
+        // Align Items
+        css.alignItems = getResponsiveValue(settings, 'align_items', device) || 'stretch'
+
+        // Align Content
+        const alignContent = getResponsiveValue(settings, 'align_content', device)
+        if (alignContent) css.alignContent = alignContent
+
+        // Gaps
+        const gapX = getResponsiveValue(settings, 'gap_x', device)
+        const gapY = getResponsiveValue(settings, 'gap_y', device)
+
+        const formatGap = (v) => {
+            if (v === undefined || v === null || v === '') return undefined
+            // If it's a number, or a numeric string without non-digit chars (except dot), append px
+            if (typeof v === 'number' || (typeof v === 'string' && !isNaN(parseFloat(v)) && isFinite(v))) {
+                return `${v}px`
+            }
+            return v
+        }
+
+        const gX = formatGap(gapX)
+        const gY = formatGap(gapY)
+
+        if (gX) {
+            if (gY) {
+                css.gap = `${gY} ${gX}`
+            } else {
+                css.columnGap = gX
+            }
+        } else if (gY) {
+            css.rowGap = gY
+        }
+
+    } else if (layoutType === 'grid') {
+        css.display = 'grid'
+
+        // --- 1. Columns & Rows ---
+
+        // Columns
+        const colWidths = getResponsiveValue(settings, 'column_widths', device) || 'equal'
+
+        if (colWidths === 'equal') {
+            // Standard: repeat(N, 1fr)
+            const cols = getResponsiveValue(settings, 'column_count', device) || 3
+            // Handle if cols is a number or string like 'auto'? 
+            // If cols is 'auto', we can't really do repeat(auto, 1fr) validly in CSS grid without auto-fit/fill context
+            // But if user sets 'auto' in column_count while in 'equal' mode, we might assume they want auto-fit?
+            // Let's coerce:
+            if (cols === 'auto') {
+                css.gridTemplateColumns = `repeat(auto-fit, minmax(0, 1fr))`
+            } else {
+                css.gridTemplateColumns = `repeat(${cols}, 1fr)`
+            }
+        } else if (colWidths === 'equal_min') {
+            // Responsive Auto-Fit: repeat(auto-fit, minmax(MIN_WIDTH, 1fr))
+            const minW = getResponsiveValue(settings, 'column_min_width', device) || '250px'
+            // Ensure unit? Dimension field usually provides unit.
+            const minWStr = typeof minW === 'number' ? `${minW}px` : minW
+            css.gridTemplateColumns = `repeat(auto-fit, minmax(${minWStr}, 1fr))`
+        } else if (colWidths === 'auto') {
+            // Auto Width: repeat(auto-fit, minmax(min-content, 1fr)) or similar
+            // This distributes columns based on content size, but ensuring they fill space?
+            // Or maybe Just auto? 
+            // "Auto Width Columns" usually means: let content dictate width.
+            // `repeat(auto-fit, minmax(auto, 1fr))`?
+            css.gridTemplateColumns = `repeat(auto-fit, minmax(min-content, 1fr))`
+        } else if (colWidths === 'manual') {
+            // Manual: Direct use of value
+            const manualVal = getResponsiveValue(settings, 'grid_template_columns', device)
+            if (manualVal) css.gridTemplateColumns = manualVal
+        } else {
+            // Fallback
+            css.gridTemplateColumns = 'repeat(3, 1fr)'
+        }
+
+        // Rows
+        const rowHeights = getResponsiveValue(settings, 'row_heights', device) || 'auto'
+        if (rowHeights === 'auto') {
+            css.gridTemplateRows = 'auto' // Default
+        } else {
+            // If user selects custom, maybe they want explicit rows?
+            // Since we don't have a complex repeater yet, let's look for row_count
+            const rows = getResponsiveValue(settings, 'row_count', device)
+            if (rows && rows !== 'auto') {
+                css.gridTemplateRows = `repeat(${rows}, 1fr)`
+            }
+        }
+
+        // Auto Columns/Rows (Implicit Grid)
+        const autoCol = getResponsiveValue(settings, 'auto_columns', device)
+        if (autoCol && autoCol !== 'auto') css.gridAutoColumns = autoCol
+
+        const autoRow = getResponsiveValue(settings, 'auto_rows', device)
+        if (autoRow && autoRow !== 'auto') css.gridAutoRows = autoRow
+
+
+        // --- 2. Alignment & Distibution ---
+
+        // Direction & Density (grid-auto-flow)
+        const gridDir = getResponsiveValue(settings, 'grid_direction', device) || 'row'
+        const gridDense = getResponsiveValue(settings, 'grid_density', device) === 'dense'
+        css.gridAutoFlow = `${gridDir}${gridDense ? ' dense' : ''}`
+
+        // Justify Content (distribution along row axis)
+        const justifyContent = getResponsiveValue(settings, 'justify_content', device)
+        if (justifyContent) css.justifyContent = justifyContent
+
+        // Align Content (distribution along block axis)
+        const alignContent = getResponsiveValue(settings, 'align_content', device)
+        if (alignContent) css.alignContent = alignContent
+
+        // Justify Items (alignment within cell - inline axis)
+        const justifyItems = getResponsiveValue(settings, 'justify_items', device)
+        if (justifyItems) css.justifyItems = justifyItems
+
+        // Align Items (alignment within cell - block axis)
+        const alignItems = getResponsiveValue(settings, 'align_items', device)
+        if (alignItems) css.alignItems = alignItems
+
+        // --- 3. Gaps ---
+        const gapX = getResponsiveValue(settings, 'gap_x', device)
+        const gapY = getResponsiveValue(settings, 'gap_y', device)
+
+        const formatGap = (v) => {
+            if (v === undefined || v === null || v === '') return undefined
+            if (typeof v === 'number' || (typeof v === 'string' && !isNaN(parseFloat(v)) && isFinite(v))) {
+                return `${v}px`
+            }
+            return v
+        }
+
+        const gX = formatGap(gapX)
+        const gY = formatGap(gapY)
+
+        if (gX) {
+            if (gY) {
+                css.gap = `${gY} ${gX}`
+            } else {
+                css.columnGap = gX
+            }
+        } else if (gY) {
+            css.rowGap = gY
+        }
+    }
+
+    return css
 }
