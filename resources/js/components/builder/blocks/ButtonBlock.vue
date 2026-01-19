@@ -76,7 +76,9 @@ const buttonStyles = computed(() => {
     lineHeight: 1,
     textDecoration: 'none',
     cursor: 'pointer',
-    transition: 'all 0.2s ease'
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
+    overflow: 'hidden'
   }
   
   Object.assign(styles, getBackgroundStyles(settings.value))
@@ -118,6 +120,12 @@ const buttonStyles = computed(() => {
 .button-element:hover {
   background-color: var(--hover-bg, inherit) !important;
   color: var(--hover-color, inherit) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.button-element:active {
+  transform: translateY(0);
 }
 
 .button-icon {

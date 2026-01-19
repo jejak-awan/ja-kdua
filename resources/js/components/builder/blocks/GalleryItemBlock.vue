@@ -56,7 +56,12 @@ const captionPosition = computed(() => getResponsiveValue(parentSettings.value, 
 const hoverClass = computed(() => `gallery-item--${hoverEffect.value}`)
 
 const itemStyles = computed(() => {
-  const styles = { overflow: 'hidden', cursor: 'pointer' }
+  const styles = { 
+    overflow: 'hidden', 
+    cursor: 'pointer',
+    borderRadius: 'var(--border-radius-lg)',
+    transition: 'var(--transition-premium)'
+  }
   Object.assign(styles, getBorderStyles(parentSettings.value, 'border', device.value))
   Object.assign(styles, getBoxShadowStyles(parentSettings.value, 'boxShadow', device.value))
   return styles
@@ -101,15 +106,32 @@ const captionStyles = computed(() => getTypographyStyles(parentSettings.value, '
 
 <style scoped>
 .gallery-item-block { width: 100%; height: 100%; position: relative; }
-.gallery-image-wrapper { background: #f0f0f0; width: 100%; }
-.gallery-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, filter 0.3s ease; }
+.gallery-item-block:hover {
+  box-shadow: var(--shadow-premium) !important;
+  transform: translateY(-4px);
+}
+
+.gallery-image-wrapper { background: #f0f0f0; width: 100%; overflow: hidden; }
+.gallery-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: var(--transition-premium); }
 
 .gallery-item--zoom:hover .gallery-image { transform: scale(1.1); }
 .gallery-item--grayscale .gallery-image { filter: grayscale(100%); }
 .gallery-item--grayscale:hover .gallery-image { filter: grayscale(0%); }
 
-.gallery-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; z-index: 2; }
+.gallery-overlay { 
+  position: absolute; 
+  inset: 0; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  opacity: 0; 
+  transition: var(--transition-premium); 
+  z-index: 2;
+  background: var(--glass-bg);
+  backdrop-filter: blur(4px);
+}
 .gallery-item--overlay:hover .gallery-overlay { opacity: 1; }
-.overlay-icon { width: 32px; height: 32px; color: white; }
-.gallery-caption { margin: 8px 0 0; }
+.overlay-icon { width: 40px; height: 40px; color: white; transform: scale(0.8); transition: var(--transition-premium); }
+.gallery-item--overlay:hover .overlay-icon { transform: scale(1); }
+.gallery-caption { margin: 8px 0 0; font-size: 13px; opacity: 0.8; }
 </style>

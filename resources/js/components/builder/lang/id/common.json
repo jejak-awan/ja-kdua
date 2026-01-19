@@ -39,6 +39,8 @@
             "projectLink": "Tautan Proyek"
         },
         "common": {
+            "no_results": "Tidak ada hasil",
+            "search": "Cari...",
             "all": "Semua",
             "width": "Lebar",
             "widthPlaceholder": "misal 50%",
@@ -376,6 +378,14 @@
             "empty": "Tidak ada {type} ditemukan.",
             "add": "Tambah {type}",
             "applyTemplate": "Terapkan Templat Struktur"
+        },
+        "icon": {
+            "search": "Cari ikon...",
+            "searchLarge": "Cari di antara semua ikon...",
+            "filter": "Filter Ikon",
+            "expand": "Perluas Modal",
+            "noResults": "Tidak ada ikon yang ditemukan.",
+            "pickIcon": "Pilih Ikon"
         }
     },
     "modals": {

@@ -51,7 +51,7 @@ export default {
                 label: 'FAQ Content',
                 fields: [
                     { name: 'question', type: 'text', label: 'Question' },
-                    { name: 'answer', type: 'wysiwyg', label: 'Answer' }
+                    { name: 'answer', type: 'richtext', label: 'Answer' }
                 ]
             },
             backgroundSettings,

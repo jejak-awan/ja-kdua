@@ -62,7 +62,9 @@ const cssClass = computed(() => settings.value.cssClass || '')
 }
 
 .text-block :deep(p) {
-  margin: 0 0 1em;
+  margin: 0 0 1.5em;
+  line-height: 1.7;
+  color: inherit;
 }
 
 .text-block :deep(p:last-child) {

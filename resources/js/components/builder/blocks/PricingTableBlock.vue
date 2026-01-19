@@ -102,15 +102,22 @@ const wrapperStyles = computed(() => {
 const cardStyles = computed(() => {
   const styles = {
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible',
     transform: isFeatured.value ? 'scale(1.05)' : 'none',
-    zIndex: isFeatured.value ? '1' : '0',
-    transition: 'transform 0.3s ease'
+    zIndex: isFeatured.value ? '10' : '1',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    borderRadius: '16px'
   }
   Object.assign(styles, getBackgroundStyles(settings.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
-  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  
+  if (!settings.value.boxShadow) {
+    styles.boxShadow = isFeatured.value ? 'var(--shadow-premium)' : 'var(--shadow-lg)'
+  } else {
+    Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
+  }
+  
   return styles
 })
 
@@ -151,33 +158,66 @@ const buttonStyles = computed(() => {
   
   return {
     ...styles,
-    display: 'block',
-    margin: '24px',
-    padding: '14px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '32px 24px 24px',
+    padding: '16px 32px',
     backgroundColor: bgColor,
     textAlign: 'center',
     textDecoration: 'none',
-    borderRadius: '6px',
-    transition: 'transform 0.2s ease, opacity 0.2s ease'
+    borderRadius: '12px',
+    fontWeight: '700',
+    letterSpacing: '0.01em',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
   }
 })
 </script>
 
 <style scoped>
-.pricing-block { width: 100%; }
-.pricing-card { position: relative; }
-.pricing-badge { position: absolute; top: 12px; right: -30px; background: #ff6b6b; color: white; padding: 4px 40px; font-size: 12px; font-weight: 600; transform: rotate(45deg); z-index: 10; }
-.pricing-title { margin: 0; }
-.pricing-subtitle { margin: 8px 0 0; opacity: 0.8; }
-.price-amount { font-size: 56px; font-weight: 700; line-height: 1; }
-.price-currency { font-size: 24px; font-weight: 500; }
-.price-period { font-size: 16px; opacity: 0.7; }
-.pricing-features { list-style: none; padding: 0 24px; margin: 0; }
-.pricing-feature { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-.pricing-feature:last-child { border-bottom: none; }
-.pricing-feature--disabled { opacity: 0.5; text-decoration: line-through; }
-.feature-icon { width: 18px; height: 18px; flex-shrink: 0; }
-.feature-icon--check { color: #22c55e; }
-.feature-icon--x { color: #ef4444; }
-.pricing-button:hover { transform: translateY(-2px); opacity: 0.9; }
+.pricing-block { width: 100%; padding: 40px 20px; }
+.pricing-card { position: relative; background: #ffffff; }
+.pricing-card:hover { transform: translateY(-8px) scale(1.02); }
+.pricing-card--featured:hover { transform: translateY(-8px) scale(1.07); }
+
+.pricing-badge { 
+  position: absolute; 
+  top: 20px; 
+  right: 20px; 
+  background: linear-gradient(135deg, #ff6b6b, #ee5253); 
+  color: white; 
+  padding: 6px 16px; 
+  font-size: 11px; 
+  font-weight: 800; 
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+  z-index: 10; 
+  box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
+}
+
+.pricing-header { border-radius: 16px 16px 0 0; }
+.pricing-title { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; }
+.pricing-subtitle { margin: 8px 0 0; font-size: 13px; opacity: 0.7; }
+
+.pricing-price { padding: 40px 24px; color: #0f172a !important; }
+.price-amount { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.price-currency { font-size: 24px; font-weight: 600; vertical-align: super; margin-right: 2px; }
+.price-period { font-size: 14px; font-weight: 500; opacity: 0.5; margin-left: 4px; }
+
+.pricing-features { list-style: none; padding: 0 32px; margin: 0; }
+.pricing-feature-wrapper { 
+  padding: 16px 0; 
+  border-bottom: 1px solid rgba(0,0,0,0.04); 
+  transition: all 0.2s ease;
+}
+.pricing-feature-wrapper:last-child { border-bottom: none; }
+.pricing-feature-wrapper:hover { background: rgba(0,0,0,0.01); padding-left: 4px; }
+
+.pricing-button:hover { 
+  transform: translateY(-2px); 
+  box-shadow: 0 10px 20px -10px rgba(var(--builder-accent-rgb), 0.5);
+  filter: brightness(1.1);
+}
+.pricing-button:active { transform: translateY(0); }
 </style>

@@ -58,7 +58,7 @@ const slideStyles = computed(() => ({
   alignItems: 'center',
   justifyContent: 'center',
   opacity: isActive.value ? 1 : 0,
-  transition: 'opacity 0.5s ease',
+  transition: 'opacity var(--transition-premium)',
   pointerEvents: isActive.value ? 'auto' : 'none'
 }))
 
@@ -97,6 +97,36 @@ const buttonStyles = computed(() => {
 
 <style scoped>
 .slider-slide-block { width: 100%; height: 100%; position: absolute; }
-.slider-title { margin: 0 0 16px; font-weight: 700; }
-.slider-text { margin: 0; opacity: 0.9; }
+.slider-title { 
+  margin: 0 0 16px; 
+  font-weight: 700; 
+  transition: var(--transition-premium);
+  transform: translateY(20px);
+  opacity: 0;
+}
+.slider-slide-block--active .slider-title {
+  transform: translateY(0);
+  opacity: 1;
+}
+.slider-text { 
+  margin: 0; 
+  opacity: 0; 
+  transition: var(--transition-premium);
+  transition-delay: 0.1s;
+  transform: translateY(20px);
+}
+.slider-slide-block--active .slider-text {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+.slider-button {
+  transition: var(--transition-premium);
+  transition-delay: 0.2s;
+  transform: translateY(20px);
+  opacity: 0;
+}
+.slider-slide-block--active .slider-button {
+  transform: translateY(0);
+  opacity: 1;
+}
 </style>

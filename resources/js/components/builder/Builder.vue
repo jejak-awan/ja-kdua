@@ -92,6 +92,12 @@
         @close="builder.closeResponsiveModal"
         @update="handleResponsiveUpdate"
       />
+      <IconPickerModal
+        v-if="showIconPickerModal"
+        :value="iconPickerValue"
+        :on-select="handleIconSelect"
+        @close="showIconPickerModal = false"
+      />
 
       <!-- Canvas Modals -->
       <AddCanvasModal
@@ -158,6 +164,7 @@ import AddCanvasModal from './modals/AddCanvasModal.vue'
 import ImportExportModal from './modals/ImportExportModal.vue'
 import CanvasSettingsModal from './modals/CanvasSettingsModal.vue'
 import SavePresetModal from './modals/SavePresetModal.vue'
+import IconPickerModal from './modals/IconPickerModal.vue'
 import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
@@ -563,6 +570,9 @@ const closeContextMenu = () => {
 const showAddCanvasModal = ref(false)
 const showImportExportModal = ref(false)
 const showCanvasSettingsModal = ref(false)
+const showIconPickerModal = ref(false)
+const iconPickerValue = ref('')
+const onIconSelectCallback = ref(null)
 const activeCanvasForModal = ref(null)
 
 const getCanvasById = (id) => {
@@ -645,6 +655,18 @@ const handleSaveCanvasSettings = (data) => {
         canvas.append = data.append
     }
     showCanvasSettingsModal.value = false
+}
+
+const handleIconSelect = (iconName) => {
+    if (onIconSelectCallback.value) {
+        onIconSelectCallback.value(iconName)
+    }
+}
+
+builder.openIconPickerModal = (value, onSelect) => {
+    iconPickerValue.value = value
+    onIconSelectCallback.value = onSelect
+    showIconPickerModal.value = true
 }
 
 // Global openers

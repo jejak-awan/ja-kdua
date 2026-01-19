@@ -54,7 +54,7 @@ export default {
                 label: 'Slide Content',
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'content', type: 'wysiwyg', label: 'Content' },
+                    { name: 'content', type: 'richtext', label: 'Content' },
                     { name: 'image', type: 'image', label: 'Background Image' },
                     { name: 'buttonText', type: 'text', label: 'Button Text' },
                     { name: 'buttonUrl', type: 'text', label: 'Button URL' }

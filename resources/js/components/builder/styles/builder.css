@@ -22,18 +22,29 @@
     --font-size-lg: 16px;
 
     /* Borders & Shadows */
-    --border-radius-sm: 3px;
-    --border-radius-md: 6px;
-    --border-radius-lg: 8px;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+    --border-radius-full: 9999px;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    /* Shadows (Modern Soft & Layered) */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-premium: 0 20px 50px -10px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+
+    /* Glassmorphism */
+    --glass-blur: 12px;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 
     /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 250ms ease;
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-premium: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Builder-specific UI Tokens */
     --builder-input-radius: 6px;
@@ -88,6 +99,10 @@
     --builder-toolbar-bg-module: #64748b;
     --builder-toolbar-text-module: #ffffff;
     --builder-toolbar-icon: #ffffff;
+
+    --builder-shadow-color: rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(20, 24, 31, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* --- Theme: Light --- */
@@ -141,6 +156,8 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+    --builder-shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 /* Base Builder Styles */
@@ -158,7 +175,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    line-height: 1.6;
 
     /* Workspace Frame - Prevent blending into parent */
     border: 1px solid var(--builder-border);

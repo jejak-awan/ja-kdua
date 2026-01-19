@@ -108,16 +108,21 @@ const gridStyles = computed(() => {
 const postStyles = computed(() => {
   const styles = {
     backgroundColor: settings.value.cardBackgroundColor || '#ffffff',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    borderRadius: 'var(--border-radius-lg)',
+    transition: 'var(--transition-premium)',
+    display: 'flex',
+    flexDirection: 'column'
   }
   Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
   return styles
 })
 
 const imageStyles = computed(() => {
   const ratio = settings.value.imageAspectRatio || '16:9'
   const ratioMap = { '16:9': '56.25%', '4:3': '75%', '1:1': '100%' }
-  return { paddingTop: ratioMap[ratio], position: 'relative' }
+  return { paddingTop: ratioMap[ratio] || '56.25%', position: 'relative' }
 })
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
@@ -128,13 +133,51 @@ const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', d
 
 <style scoped>
 .blog-block { width: 100%; }
-.blog-post { display: flex; flex-direction: column; }
-.post-image { background: #f0f0f0; }
+.blog-post { 
+  background: white; 
+}
+.blog-post:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-premium) !important;
+}
+.post-image { background: #f8fafc; overflow: hidden; }
 .post-image-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-.placeholder-icon { width: 48px; height: 48px; color: #ccc; }
-.post-content { padding: 20px; }
-.post-category { display: inline-block; margin-bottom: 8px; }
-.post-title { margin: 0 0 12px; }
-.post-excerpt { margin: 0 0 12px; }
-.post-meta { display: flex; gap: 8px; }
+.placeholder-icon { width: 48px; height: 48px; color: #cbd5e1; }
+.post-content { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+.post-category { 
+  display: inline-block; 
+  margin-bottom: 12px; 
+  text-transform: uppercase; 
+  font-size: 10px; 
+  font-weight: 700; 
+  letter-spacing: 0.1em;
+  color: var(--builder-accent);
+}
+.post-title { 
+  margin: 0 0 12px; 
+  font-size: 1.25rem; 
+  font-weight: 700; 
+  line-height: 1.3;
+  color: var(--builder-text-primary);
+}
+.post-excerpt { 
+  margin: 0 0 20px; 
+  font-size: 14px; 
+  line-height: 1.6; 
+  color: var(--builder-text-secondary);
+  display: -webkit-box;
+  overflow: hidden;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.post-meta { 
+  display: flex; 
+  gap: 8px; 
+  font-size: 12px; 
+  color: var(--builder-text-muted); 
+  margin-top: auto;
+  border-top: 1px solid var(--builder-border-light);
+  padding-top: 16px;
+}
 </style>

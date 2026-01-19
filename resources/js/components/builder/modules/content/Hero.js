@@ -68,7 +68,7 @@ export default {
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'subtitle', type: 'text', label: 'Subtitle' },
-                    { name: 'content', type: 'wysiwyg', label: 'Content' }
+                    { name: 'content', type: 'richtext', label: 'Content' }
                 ]
             },
             {

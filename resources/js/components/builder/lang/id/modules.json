@@ -77,5 +77,16 @@
     "fullwidthMenu": "Menu Lebar Penuh",
     "fullwidthPostContent": "Konten Postingan Lebar Penuh",
     "fullwidthPostSlider": "Slider Postingan Lebar Penuh",
-    "fullwidthPostTitle": "Judul Postingan Lebar Penuh"
+    "fullwidthPostTitle": "Judul Postingan Lebar Penuh",
+    "accordion_item": "Item Akordeon",
+    "tab_item": "Item Tab",
+    "slide_item": "Item Slide",
+    "fullwidth_slide_item": "Item Slide Lebar Penuh",
+    "faq_item": "Item Tanya Jawab",
+    "map_pin": "Pin Peta",
+    "fullwidth_map_pin": "Pin Peta Lebar Penuh",
+    "pricing_feature": "Fitur Harga",
+    "gallery_item": "Item Galeri",
+    "video_slide_item": "Item Slide Video",
+    "sociallink_item": "Item Tautan Sosial"
 }

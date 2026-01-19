@@ -67,7 +67,8 @@ const fieldComponents = {
   children_manager: defineAsyncComponent(() => import('./ChildrenManagerField.vue')),
   background: defineAsyncComponent(() => import('./BackgroundField.vue')),
   meta_query: defineAsyncComponent(() => import('./MetaQueryField.vue')),
-  advanced_number: defineAsyncComponent(() => import('./AdvancedNumberField.vue'))
+  advanced_number: defineAsyncComponent(() => import('./AdvancedNumberField.vue')),
+  icon: defineAsyncComponent(() => import('./IconField.vue'))
 }
 
 const props = defineProps({
@@ -185,7 +186,7 @@ const FieldComponent = computed(() => {
 
 const supportsDynamicData = computed(() => {
    // Disable dynamic data for specific field types
-   const excludedTypes = ['background', 'select', 'toggle', 'buttonGroup', 'range', 'children_manager', 'shadow', 'border', 'spacing']
+   const excludedTypes = ['background', 'select', 'toggle', 'buttonGroup', 'range', 'children_manager', 'shadow', 'border', 'spacing', 'icon', 'number']
    return !excludedTypes.includes(props.field.type)
 })
 

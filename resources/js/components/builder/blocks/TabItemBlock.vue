@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, unref } from 'vue'
 import { 
   getTypographyStyles,
   getSpacingStyles,
@@ -35,7 +35,7 @@ const tabsState = inject('tabsState', {
 })
 
 const isActive = computed(() => tabsState.activeTabId.value === props.module.id)
-const parentSettings = computed(() => tabsState.parentSettings || {})
+const parentSettings = computed(() => unref(tabsState.parentSettings) || {})
 
 const paneStyles = computed(() => {
   const styles = {

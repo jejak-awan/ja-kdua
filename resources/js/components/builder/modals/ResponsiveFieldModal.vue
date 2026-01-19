@@ -313,7 +313,8 @@ const fieldComponents = {
   dimension: defineAsyncComponent(() => import('../fields/DimensionField.vue')),
   pattern: defineAsyncComponent(() => import('../fields/PatternField.vue')),
   mask: defineAsyncComponent(() => import('../fields/MaskField.vue')),
-  advanced_number: defineAsyncComponent(() => import('../fields/AdvancedNumberField.vue'))
+  advanced_number: defineAsyncComponent(() => import('../fields/AdvancedNumberField.vue')),
+  icon: defineAsyncComponent(() => import('../fields/IconField.vue'))
 }
 
 const FieldComponent = computed(() => {

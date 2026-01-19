@@ -51,7 +51,7 @@ export default {
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'subtitle', type: 'text', label: 'Subtitle' },
-                    { name: 'content', type: 'wysiwyg', label: 'Body Content' },
+                    { name: 'content', type: 'richtext', label: 'Body Content' },
                     { name: 'buttonText', type: 'text', label: 'Button Text' },
                     { name: 'buttonUrl', type: 'text', label: 'Button URL' }
                 ]

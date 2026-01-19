@@ -1,28 +1,40 @@
 <template>
   <div class="testimonial-block" :style="wrapperStyles">
-    <!-- Quote Icon -->
+    <!-- Quote Icon Overlay -->
     <Quote 
       v-if="showQuoteIcon" 
-      class="quote-icon"
-      :style="quoteIconStyles"
+      class="quote-icon-bg"
+      :style="{ color: quoteIconStyles.color }"
     />
     
-    <!-- Content -->
-    <div class="testimonial-content" :style="contentStyles">
-      {{ contentValue }}
-    </div>
-    
-    <!-- Author -->
-    <div class="testimonial-author">
-      <img 
-        v-if="settings.authorImage"
-        :src="settings.authorImage"
-        :alt="authorNameValue"
-        class="author-image"
+    <!-- Content Wrapper -->
+    <div class="testimonial-inner">
+      <!-- Quote Icon Small -->
+      <Quote 
+        v-if="showQuoteIcon" 
+        class="quote-icon"
+        :style="quoteIconStyles"
       />
-      <div class="author-info">
-        <div class="author-name" :style="authorNameStyles">{{ authorNameValue || 'Author Name' }}</div>
-        <div v-if="authorTitleValue" class="author-title" :style="authorTitleStyles">{{ authorTitleValue }}</div>
+      
+      <!-- Content -->
+      <div class="testimonial-content" :style="contentStyles">
+        {{ contentValue }}
+      </div>
+      
+      <!-- Author -->
+      <div class="testimonial-author">
+        <div class="author-image-wrapper">
+          <img 
+            v-if="settings.authorImage"
+            :src="settings.authorImage"
+            :alt="authorNameValue"
+            class="author-image"
+          />
+        </div>
+        <div class="author-info">
+          <div class="author-name" :style="authorNameStyles">{{ authorNameValue || 'Author Name' }}</div>
+          <div v-if="authorTitleValue" class="author-title" :style="authorTitleStyles">{{ authorTitleValue }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -101,10 +113,97 @@ const authorTitleStyles = computed(() => {
 </script>
 
 <style scoped>
-.testimonial-block { width: 100%; }
-.quote-icon { margin-bottom: 16px; transform: rotate(180deg); }
-.testimonial-content { margin-bottom: 24px; max-width: 700px; margin-left: auto; margin-right: auto; }
-.testimonial-author { display: inline-flex; align-items: center; gap: 12px; }
-.author-image { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
-.author-title { margin-top: 2px; }
+.testimonial-block { 
+  width: 100%; 
+  position: relative; 
+  background: white; 
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.testimonial-block:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-premium);
+}
+
+.testimonial-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.quote-icon-bg {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.05;
+  transform: rotate(180deg);
+  z-index: 1;
+}
+
+.quote-icon { 
+  margin-bottom: 24px; 
+  transform: rotate(180deg); 
+  opacity: 0.8;
+}
+
+.testimonial-content { 
+  margin-bottom: 32px; 
+  max-width: 800px; 
+  line-height: 1.8;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.testimonial-author { 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  margin-top: auto;
+}
+
+.author-image-wrapper {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.author-image-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--builder-accent);
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+.author-image { 
+  width: 100%; 
+  height: 100%; 
+  border-radius: 50%; 
+  object-fit: cover; 
+  box-shadow: var(--shadow-md);
+}
+
+.author-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.author-title { 
+  margin-top: 2px; 
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 </style>

@@ -121,19 +121,23 @@ const getTabStyles = (tabId) => {
   const alignment = getResponsiveValue(settings.value, 'tabAlignment', device.value) || 'left'
   
   const styles = {
-    padding: '10px 20px',
+    padding: '12px 24px',
     border: 'none',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'var(--transition-premium)',
     flex: alignment === 'fill' ? '1' : 'none',
-    borderRadius: '4px 4px 0 0'
+    position: 'relative',
+    fontWeight: isActive ? '700' : '500',
+    borderRadius: '12px 12px 0 0',
+    fontSize: '14px',
+    letterSpacing: '-0.01em'
   }
   
   const typographyPrefix = isActive ? 'tab_active_' : 'tab_'
   Object.assign(styles, getTypographyStyles(settings.value, typographyPrefix, device.value))
   
   const activeBg = getResponsiveValue(settings.value, 'tabActiveBackgroundColor', device.value) || '#ffffff'
-  const normalBg = getResponsiveValue(settings.value, 'tabBackgroundColor', device.value) || '#f0f0f0'
+  const normalBg = getResponsiveValue(settings.value, 'tabBackgroundColor', device.value) || 'transparent'
   
   styles.backgroundColor = isActive ? activeBg : normalBg
     
@@ -154,14 +158,53 @@ const contentStyles = computed(() => {
 </script>
 
 <style scoped>
-.tabs-block { width: 100%; overflow: hidden; }
-.tabs--top { display: flex; flex-direction: column; }
-.tabs--bottom { display: flex; flex-direction: column-reverse; }
-.tabs--left { display: flex; flex-direction: row; }
-.tabs--left .tabs-header { flex-direction: column; }
-.tab-button:hover { opacity: 0.9; }
-.tab-button--active { position: relative; z-index: 1; }
-.tabs-content { border-top: 1px solid #e0e0e0; }
-.tab-pane { display: none; }
-.tab-pane--active { display: block; }
+.tabs-block { 
+  width: 100%; 
+  overflow: visible; 
+  background: white;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-premium);
+  transition: var(--transition-premium);
+}
+
+.tabs-header { 
+  padding: 8px 8px 0;
+  background: var(--builder-bg-secondary);
+  border-bottom: 1px solid var(--builder-border-light);
+}
+
+.tab-button {
+  color: var(--builder-text-secondary);
+}
+
+.tab-button:hover { 
+  color: var(--builder-text-primary);
+  background: rgba(0,0,0,0.03) !important;
+}
+
+.tab-button--active { 
+  color: var(--builder-accent) !important;
+  box-shadow: 0 -3px 0 0 var(--builder-accent) inset;
+}
+
+.tabs-content { 
+  padding: 0;
+  min-height: 100px;
+}
+
+.tabs--left .tabs-header { 
+  padding: 8px;
+  border-bottom: none;
+  border-right: 1px solid var(--builder-border-light);
+}
+
+.tabs--left .tab-button {
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.tabs--left .tab-button--active {
+  background: white !important;
+  box-shadow: var(--shadow-sm);
+}
 </style>

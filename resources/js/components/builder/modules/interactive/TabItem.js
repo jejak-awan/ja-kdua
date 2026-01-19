@@ -51,7 +51,7 @@ export default {
                 label: 'Tab Content',
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'content', type: 'wysiwyg', label: 'Content' }
+                    { name: 'content', type: 'richtext', label: 'Content' }
                 ]
             },
             backgroundSettings,

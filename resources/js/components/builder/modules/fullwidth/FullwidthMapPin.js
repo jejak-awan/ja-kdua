@@ -29,7 +29,7 @@ export default {
                 label: 'Pin Details',
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'content', type: 'wysiwyg', label: 'Description' },
+                    { name: 'content', type: 'richtext', label: 'Description' },
                     { name: 'lat', type: 'text', label: 'Latitude' },
                     { name: 'lng', type: 'text', label: 'Longitude' }
                 ]

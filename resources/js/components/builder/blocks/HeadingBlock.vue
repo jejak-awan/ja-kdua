@@ -102,5 +102,8 @@ const cssClass = computed(() => settings.value.cssClass || '')
 .heading-block {
   margin: 0;
   padding: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 </style>

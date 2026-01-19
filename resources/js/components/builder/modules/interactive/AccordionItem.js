@@ -7,7 +7,20 @@ import {
     sizingSettings,
     filterSettings,
     transformSettings,
-    animationSettings
+    animationSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    layoutSettings,
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    visibilitySettings,
+    transitionSettings,
+    positionSettings,
+    cssSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -22,8 +35,8 @@ export default {
     children: null,
 
     defaults: {
-        title: 'New Accordion Item',
-        content: '<p>Accordion content goes here...</p>',
+        title: 'Your Title Goes Here',
+        content: '<p>Your content goes here. Edit or remove this text inline or in the module Content settings. You can also style every aspect of this content in the module Design settings and even apply custom CSS to this text in the module Advanced settings.</p>',
         open: false,
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
@@ -34,40 +47,121 @@ export default {
         border: {
             radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
             styles: {
-                all: { width: 0, color: '#333333', style: 'solid' },
-                top: { width: 0, color: '#333333', style: 'solid' },
-                right: { width: 0, color: '#333333', style: 'solid' },
-                bottom: { width: 0, color: '#333333', style: 'solid' },
-                left: { width: 0, color: '#333333', style: 'solid' }
+                all: { width: 0, color: '#e5e5e5', style: 'solid' }
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
+        animation_effect: '',
+        animation_duration: 1000,
+        animation_delay: 0,
+        animation_repeat: '1'
     },
 
     settings: {
         content: [
             {
-                id: 'main',
-                label: 'Item Content',
+                id: 'text',
+                label: 'Text',
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'content', type: 'wysiwyg', label: 'Content' },
+                    { name: 'content', type: 'richtext', label: 'Content' }
+                ]
+            },
+            linkSettings,
+            {
+                id: 'elements',
+                label: 'Elements',
+                fields: [
                     { name: 'open', type: 'toggle', label: 'Open by Default' }
                 ]
             },
             backgroundSettings,
-            adminLabelSettings('Item')
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Accordion Item')
         ],
         design: [
+            layoutSettings,
+            {
+                id: 'icon_design',
+                label: 'Icon',
+                fields: [
+                    {
+                        name: 'iconColor',
+                        type: 'color',
+                        label: 'Icon Color'
+                    }
+                ]
+            },
+            {
+                id: 'toggle_design',
+                label: 'Toggle',
+                fields: [
+                    {
+                        name: 'headerBackgroundColor',
+                        type: 'color',
+                        label: 'Header Background'
+                    },
+                    {
+                        name: 'openHeaderBackgroundColor',
+                        type: 'color',
+                        label: 'Open Header Background'
+                    }
+                ]
+            },
+            {
+                id: 'text_design',
+                label: 'Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `text_${f.name}`,
+                    label: `Text ${f.label}`
+                }))
+            },
+            {
+                id: 'title_text_design',
+                label: 'Title Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `header_${f.name}`,
+                    label: `Title ${f.label}`
+                }))
+            },
+            {
+                id: 'closed_title_text_design',
+                label: 'Closed Title Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `closed_header_${f.name}`,
+                    label: `Closed Title ${f.label}`
+                }))
+            },
+            {
+                id: 'body_text_design',
+                label: 'Body Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `content_${f.name}`,
+                    label: `Body ${f.label}`
+                }))
+            },
+            sizingSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,
-            sizingSettings,
             filterSettings,
             transformSettings,
             animationSettings
         ],
-        advanced: []
+        advanced: [
+            attributesSettings,
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            visibilitySettings,
+            transitionSettings,
+            positionSettings,
+            scrollEffectsSettings
+        ]
     }
 }

@@ -223,30 +223,36 @@ const buttonStyles = computed(() => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 2;
-  width: 44px;
-  height: 44px;
+  z-index: 10;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.2);
-  border: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
-  color: white;
+  color: var(--builder-text-primary);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: var(--transition-normal);
+  box-shadow: var(--shadow-md);
 }
 
 .slider-arrow:hover {
-  background: rgba(255,255,255,0.4);
+  background: white;
+  color: var(--builder-accent);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .slider-arrow--prev {
-  left: 16px;
+  left: 24px;
 }
 
 .slider-arrow--next {
-  right: 16px;
+  right: 24px;
 }
 
 .slider-dots {
@@ -260,16 +266,18 @@ const buttonStyles = computed(() => {
 }
 
 .slider-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.3);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: var(--transition-normal);
 }
 
 .slider-dot--active {
   background: white;
+  transform: scale(1.5);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 </style>

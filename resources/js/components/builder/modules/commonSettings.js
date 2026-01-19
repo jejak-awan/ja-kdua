@@ -555,7 +555,6 @@ export const positionSettings = {
             default: '',
             responsive: true
         }
-        // Offsets can be added if Position is Absolute/Fixed, condition logic needed?
     ]
 }
 
@@ -615,7 +614,6 @@ export const loopSettings = {
             name: 'query_type',
             type: 'select',
             label: 'Query Type',
-            description: 'Choose the type of content to query for your loop. Select Post Type to display things like blog posts and products, Terms to display things like categories and tags, or Users to display lists of users.',
             options: [
                 { label: 'Post Type', value: 'post_type' },
                 { label: 'Terms', value: 'terms' },
@@ -624,14 +622,19 @@ export const loopSettings = {
             default: 'post_type',
             show_if: { field: 'loop_enable', value: true }
         },
-        // Post Type Fields
+
+        // --- Post Type Mode ---
         {
             name: 'post_type',
             type: 'select',
             label: 'Post Type',
             multiple: true,
             searchable: true,
-            options: 'dynamic:postTypes',
+            options: [
+                { label: 'Posts', value: 'post' },
+                { label: 'Pages', value: 'page' },
+                { label: 'Portfolio', value: 'portfolio' }
+            ],
             default: ['post'],
             show_if: { field: 'query_type', value: 'post_type' }
         },
@@ -639,7 +642,6 @@ export const loopSettings = {
             name: 'include_terms',
             type: 'select',
             label: 'Only Include Posts With Specific Terms',
-            description: 'Select categories or tags',
             multiple: true,
             searchable: true,
             options: 'dynamic:terms',
@@ -649,7 +651,6 @@ export const loopSettings = {
             name: 'exclude_terms',
             type: 'select',
             label: 'Exclude Posts With Specific Terms',
-            description: 'Select categories or tags',
             multiple: true,
             searchable: true,
             options: 'dynamic:terms',
@@ -659,166 +660,65 @@ export const loopSettings = {
             name: 'include_posts',
             type: 'select',
             label: 'Only Include Specific Posts',
-            description: 'Select specific posts to include',
             multiple: true,
             searchable: true,
             options: 'dynamic:posts',
-            filter_by: { field: 'post_type', match_key: 'type' },
             show_if: { field: 'query_type', value: 'post_type' }
         },
         {
             name: 'exclude_posts',
             type: 'select',
             label: 'Exclude Specific Posts',
-            description: 'Select specific posts to exclude',
             multiple: true,
             searchable: true,
             options: 'dynamic:posts',
-            filter_by: { field: 'post_type', match_key: 'type' },
             show_if: { field: 'query_type', value: 'post_type' }
         },
 
-        // Terms Fields
+        // --- Terms Mode ---
         {
-            name: 'taxonomy',
+            name: 'terms',
             type: 'select',
-            label: 'Taxonomy',
-            multiple: true,
-            searchable: true,
-            options: 'dynamic:taxonomies',
-            default: ['category'],
-            show_if: { field: 'query_type', value: 'terms' }
-        },
-        {
-            name: 'include_specific_terms',
-            type: 'select',
-            label: 'Include Specific Terms',
-            description: 'Select specific terms',
+            label: 'Terms',
             multiple: true,
             searchable: true,
             options: 'dynamic:terms',
-            filter_by: { field: 'taxonomy', match_key: 'taxonomy' },
-            show_if: { field: 'query_type', value: 'terms' }
-        },
-        {
-            name: 'exclude_specific_terms',
-            type: 'select',
-            label: 'Exclude Specific Terms',
-            description: 'Select specific terms',
-            multiple: true,
-            searchable: true,
-            options: 'dynamic:terms',
-            filter_by: { field: 'taxonomy', match_key: 'taxonomy' },
-            show_if: { field: 'query_type', value: 'terms' }
-        },
-        {
-            name: 'hide_empty',
-            type: 'toggle',
-            label: 'Hide Empty Terms',
-            default: true,
             show_if: { field: 'query_type', value: 'terms' }
         },
 
-        // Users Fields
+        // --- Users Mode ---
         {
-            name: 'user_role',
+            name: 'users',
             type: 'select',
-            label: 'User Role',
-            multiple: true,
-            searchable: true,
-            options: 'dynamic:roles',
-            default: [],
-            show_if: { field: 'query_type', value: 'users' }
-        },
-        {
-            name: 'include_users',
-            type: 'select',
-            label: 'Include Specific Users',
-            description: 'Select specific users',
-            multiple: true,
-            searchable: true,
-            options: 'dynamic:users',
-            show_if: { field: 'query_type', value: 'users' }
-        },
-        {
-            name: 'exclude_users',
-            type: 'select',
-            label: 'Exclude Specific Users',
+            label: 'Users',
             multiple: true,
             searchable: true,
             options: 'dynamic:users',
             show_if: { field: 'query_type', value: 'users' }
         },
 
-        // Meta Query
+        // --- Common Query Options ---
         {
             name: 'meta_query',
             type: 'meta_query',
             label: 'Meta Query',
-            default: [],
-            responsive: false,
-            show_if: { field: 'query_type', value: ['post_type', 'terms', 'users'] }
+            show_if: { field: 'loop_enable', value: true }
         },
-
-
-        // Common Fields
-        // Order By - Post Type
         {
             name: 'order_by',
             type: 'select',
             label: 'Order By',
             options: [
                 { label: 'Publish Date', value: 'date' },
-                { label: 'None', value: 'none' },
-                { label: 'ID', value: 'ID' },
                 { label: 'Title', value: 'title' },
-                { label: 'Post Name', value: 'name' },
-                { label: 'Last Modified Date', value: 'modified' },
                 { label: 'Random', value: 'rand' },
-                { label: 'Author', value: 'author' },
+                { label: 'ID', value: 'ID' },
+                { label: 'Modified Date', value: 'modified' },
                 { label: 'Comment Count', value: 'comment_count' }
             ],
             default: 'date',
-            show_if: { field: 'query_type', value: 'post_type' }
+            show_if: { field: 'loop_enable', value: true }
         },
-        // Order By - Terms
-        {
-            name: 'order_by',
-            type: 'select',
-            label: 'Order By',
-            options: [
-                { label: 'Name', value: 'name' },
-                { label: 'Slug', value: 'slug' },
-                { label: 'Term ID', value: 'term_id' },
-                { label: 'Term Group', value: 'term_group' },
-                { label: 'Description', value: 'description' },
-                { label: 'Count', value: 'count' },
-                { label: 'None', value: 'none' }
-            ],
-            default: 'name',
-            show_if: { field: 'query_type', value: 'terms' }
-        },
-        // Order By - Users
-        {
-            name: 'order_by',
-            type: 'select',
-            label: 'Order By',
-            options: [
-                { label: 'Display Name', value: 'display_name' },
-                { label: 'Login', value: 'login' },
-                { label: 'Name', value: 'name' },
-                { label: 'Nicename', value: 'nicename' },
-                { label: 'Email', value: 'email' },
-                { label: 'URL', value: 'url' },
-                { label: 'Registered', value: 'registered' },
-                { label: 'Post Count', value: 'post_count' },
-                { label: 'None', value: 'none' }
-            ],
-            default: 'display_name',
-            show_if: { field: 'query_type', value: 'users' }
-        },
-
-        // Common Order
         {
             name: 'order',
             type: 'select',
@@ -831,58 +731,51 @@ export const loopSettings = {
             show_if: { field: 'loop_enable', value: true }
         },
 
-        // Posts Per Page / Count
+        // --- Pagination / Limits ---
         {
             name: 'posts_per_page',
             type: 'number',
             label: 'Posts Per Page',
             default: 10,
-            responsive: true,
             show_if: { field: 'query_type', value: 'post_type' }
         },
         {
-            name: 'posts_per_page',
+            name: 'terms_per_page',
             type: 'number',
             label: 'Terms Per Page',
             default: 10,
-            responsive: true,
             show_if: { field: 'query_type', value: 'terms' }
         },
         {
-            name: 'posts_per_page',
+            name: 'users_per_page',
             type: 'number',
             label: 'Users Per Page',
             default: 10,
-            responsive: true,
             show_if: { field: 'query_type', value: 'users' }
         },
-
-        // Offset
         {
             name: 'offset',
             type: 'number',
-            label: 'Offset',
+            label: 'Post Offset',
             default: 0,
-            responsive: true,
             show_if: { field: 'query_type', value: 'post_type' }
         },
         {
-            name: 'offset',
+            name: 'term_offset',
             type: 'number',
             label: 'Term Offset',
             default: 0,
-            responsive: true,
             show_if: { field: 'query_type', value: 'terms' }
         },
         {
-            name: 'offset',
+            name: 'user_offset',
             type: 'number',
             label: 'User Offset',
             default: 0,
-            responsive: true,
             show_if: { field: 'query_type', value: 'users' }
         },
-        // Post Type Specific Common
+
+        // --- Additional Post Options ---
         {
             name: 'exclude_current',
             type: 'toggle',
@@ -907,14 +800,14 @@ export const orderSettings = {
     fields: [
         {
             name: 'order',
-            type: 'advanced_number',
-            label: 'Display Order',
-            placeholder: '0',
-            responsive: true,
-            default: 0,
-            min: -10,
-            max: 10,
-            step: 1
+            type: 'select',
+            label: 'Order',
+            options: [
+                { label: 'Descending', value: 'DESC' },
+                { label: 'Ascending', value: 'ASC' }
+            ],
+            default: 'DESC',
+            responsive: true
         }
     ]
 }
@@ -933,3 +826,105 @@ export const adminLabelSettings = (defaultLabel = 'Module') => ({
         }
     ]
 })
+
+// Link Settings
+export const linkSettings = {
+    id: 'link',
+    label: 'Link',
+    fields: [
+        {
+            name: 'link_url',
+            type: 'text',
+            label: 'Link URL'
+        },
+        {
+            name: 'link_target',
+            type: 'select',
+            label: 'Link Target',
+            options: [
+                { label: 'Same Window', value: '_self' },
+                { label: 'New Tab', value: '_blank' }
+            ],
+            default: '_self'
+        }
+    ]
+}
+
+// Layout Settings
+export const layoutSettings = {
+    id: 'layout',
+    label: 'Layout',
+    fields: [
+        {
+            name: 'layout_type',
+            type: 'select',
+            label: 'Layout Type',
+            options: [
+                { label: 'Standard', value: 'standard' },
+                { label: 'Stacked', value: 'stacked' }
+            ],
+            default: 'standard',
+            responsive: true
+        }
+    ]
+}
+
+// Conditions Settings
+export const conditionsSettings = {
+    id: 'conditions',
+    label: 'Conditions',
+    fields: [
+        {
+            name: 'condition_enable',
+            type: 'toggle',
+            label: 'Enable Conditions',
+            default: false
+        }
+    ]
+}
+
+// Interactions Settings
+export const interactionsSettings = {
+    id: 'interactions',
+    label: 'Interactions',
+    fields: [
+        {
+            name: 'interaction_on_click',
+            type: 'select',
+            label: 'On Click',
+            options: [
+                { label: 'None', value: '' },
+                { label: 'Link', value: 'link' },
+                { label: 'Popup', value: 'popup' }
+            ],
+            default: ''
+        }
+    ]
+}
+
+// Scroll Effects Settings
+export const scrollEffectsSettings = {
+    id: 'scroll_effects',
+    label: 'Scroll Effects',
+    fields: [
+        {
+            name: 'scroll_enable',
+            type: 'toggle',
+            label: 'Enable Scroll Effects',
+            default: false
+        }
+    ]
+}
+
+// Attributes Settings
+export const attributesSettings = {
+    id: 'attributes',
+    label: 'Attributes',
+    fields: [
+        {
+            name: 'custom_attributes',
+            type: 'key_value',
+            label: 'Custom Attributes'
+        }
+    ]
+}

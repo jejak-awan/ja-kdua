@@ -38,6 +38,8 @@
             "projectLink": "Project Link"
         },
         "common": {
+            "no_results": "No results found",
+            "search": "Search...",
             "all": "All",
             "width": "Width",
             "widthPlaceholder": "e.g. 50%",
@@ -393,6 +395,14 @@
             "empty": "No {type} found.",
             "add": "Add {type}",
             "applyTemplate": "Apply Structure Template"
+        },
+        "icon": {
+            "search": "Search icons...",
+            "searchLarge": "Search among all icons...",
+            "filter": "Filter Icons",
+            "expand": "Expand Modal",
+            "noResults": "No icons found matching your search.",
+            "pickIcon": "Select Icon"
         }
     },
     "modals": {

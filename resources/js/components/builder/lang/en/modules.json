@@ -77,5 +77,16 @@
     "fullwidthMenu": "Fullwidth Menu",
     "fullwidthPostContent": "Fullwidth Post Content",
     "fullwidthPostSlider": "Fullwidth Post Slider",
-    "fullwidthPostTitle": "Fullwidth Post Title"
+    "fullwidthPostTitle": "Fullwidth Post Title",
+    "accordion_item": "Accordion Item",
+    "tab_item": "Tab Item",
+    "slide_item": "Slide Item",
+    "fullwidth_slide_item": "Fullwidth Slide Item",
+    "faq_item": "FAQ Item",
+    "map_pin": "Map Pin",
+    "fullwidth_map_pin": "Fullwidth Map Pin",
+    "pricing_feature": "Pricing Feature",
+    "gallery_item": "Gallery Item",
+    "video_slide_item": "Video Slide Item",
+    "sociallink_item": "Social Link Item"
 }

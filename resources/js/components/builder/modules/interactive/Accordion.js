@@ -11,7 +11,16 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
+    linkSettings,
+    layoutSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -24,29 +33,31 @@ export default {
     category: 'interactive',
 
     children: ['accordion_item'],
+    defaultChildren: ['accordion_item'],
 
     // Default settings
     defaults: {
         // Behavior
         allowMultiple: false,
         // Toggle Icon
-        toggleIcon: 'chevron',
+        toggleIcon: 'plus',
         iconPosition: 'right',
+        iconColor: '#333333',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
+        headerBackgroundColor: '#f7f7f7',
+        contentBackgroundColor: '#ffffff',
         // Spacing
-        itemGap: 8,
+        itemGap: 24,
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
+        headerPadding: { top: 15, bottom: 15, left: 20, right: 20, unit: 'px' },
+        contentPadding: { top: 20, bottom: 20, left: 20, right: 20, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 4, tr: 4, bl: 4, br: 4, linked: true },
+            radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
             styles: {
-                all: { width: 1, color: '#e0e0e0', style: 'solid' },
-                top: { width: 1, color: '#e0e0e0', style: 'solid' },
-                right: { width: 1, color: '#e0e0e0', style: 'solid' },
-                bottom: { width: 1, color: '#e0e0e0', style: 'solid' },
-                left: { width: 1, color: '#e0e0e0', style: 'solid' }
+                all: { width: 1, color: '#e5e5e5', style: 'solid' }
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
@@ -61,7 +72,7 @@ export default {
         content: [
             {
                 id: 'items',
-                label: 'Items',
+                label: 'Elements',
                 fields: [
                     {
                         name: 'module_manager',
@@ -71,34 +82,30 @@ export default {
                 ]
             },
             {
-                id: 'behavior',
-                label: 'Behavior',
-                fields: [
-                    {
-                        name: 'allowMultiple',
-                        type: 'toggle',
-                        label: 'Allow Multiple Open'
-                    }
-                ]
-            },
-            backgroundSettings
-        ],
-        design: [
-            {
                 id: 'toggleIcon',
                 label: 'Toggle Icon',
                 fields: [
                     {
                         name: 'toggleIcon',
-                        type: 'select',
+                        type: 'icon',
                         label: 'Icon Style',
-                        options: [
-                            { value: 'chevron', label: 'Chevron' },
-                            { value: 'plus', label: 'Plus/Minus' },
-                            { value: 'arrow', label: 'Arrow' },
-                            { value: 'none', label: 'None' }
-                        ]
-                    },
+                        default: 'plus',
+                        responsive: true
+                    }
+                ]
+            },
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Accordion')
+        ],
+        design: [
+            layoutSettings,
+            {
+                id: 'icon_design',
+                label: 'Icon',
+                fields: [
                     {
                         name: 'iconPosition',
                         type: 'buttonGroup',
@@ -113,12 +120,22 @@ export default {
                         name: 'iconColor',
                         type: 'color',
                         label: 'Icon Color'
+                    },
+                    {
+                        name: 'iconSize',
+                        type: 'range',
+                        label: 'Icon Size',
+                        min: 10,
+                        max: 50,
+                        unit: 'px',
+                        default: 14,
+                        responsive: true
                     }
                 ]
             },
             {
-                id: 'headerStyle',
-                label: 'Header Style',
+                id: 'toggle_design',
+                label: 'Toggle',
                 fields: [
                     {
                         name: 'headerBackgroundColor',
@@ -126,77 +143,65 @@ export default {
                         label: 'Header Background'
                     },
                     {
-                        name: 'headerPadding',
-                        type: 'spacing',
-                        label: 'Header Padding',
-                        responsive: true
+                        name: 'openHeaderBackgroundColor',
+                        type: 'color',
+                        label: 'Open Header Background'
                     }
                 ]
             },
             {
-                id: 'headerTypography',
-                label: 'Header Typography',
+                id: 'text_design',
+                label: 'Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `text_${f.name}`,
+                    label: `Text ${f.label}`
+                }))
+            },
+            {
+                id: 'title_text_design',
+                label: 'Title Text',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
                     name: `header_${f.name}`,
-                    label: `Header ${f.label}`
+                    label: `Title ${f.label}`
                 }))
             },
             {
-                id: 'contentStyle',
-                label: 'Content Style',
-                fields: [
-                    {
-                        name: 'contentBackgroundColor',
-                        type: 'color',
-                        label: 'Content Background'
-                    },
-                    {
-                        name: 'contentPadding',
-                        type: 'spacing',
-                        label: 'Content Padding',
-                        responsive: true
-                    }
-                ]
+                id: 'closed_title_text_design',
+                label: 'Closed Title Text',
+                fields: typographySettings.fields.map(f => ({
+                    ...f,
+                    name: `closed_header_${f.name}`,
+                    label: `Closed Title ${f.label}`
+                }))
             },
             {
-                id: 'contentTypography',
-                label: 'Content Typography',
+                id: 'body_text_design',
+                label: 'Body Text',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
                     name: `content_${f.name}`,
-                    label: `Content ${f.label}`
+                    label: `Body ${f.label}`
                 }))
             },
-            {
-                id: 'spacing_custom',
-                label: 'Module Spacing',
-                fields: [
-                    {
-                        name: 'itemGap',
-                        type: 'range',
-                        label: 'Gap Between Items',
-                        min: 0,
-                        max: 48,
-                        step: 4,
-                        unit: 'px',
-                        responsive: true
-                    }
-                ]
-            },
+            sizingSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,
-            sizingSettings,
             filterSettings,
             transformSettings,
             animationSettings
         ],
         advanced: [
+            attributesSettings,
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
             visibilitySettings,
-            positionSettings,
             transitionSettings,
-            cssSettings
+            positionSettings,
+            scrollEffectsSettings
         ]
     }
 }

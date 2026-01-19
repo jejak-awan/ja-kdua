@@ -103,15 +103,26 @@ class ModuleRegistry {
             return null
         }
 
-        return {
+        const instance = {
             id: this.generateId(),
             type: name,
             settings: {
                 ...JSON.parse(JSON.stringify(definition.defaults || {})),
                 ...overrides
-            },
-            children: definition.children ? [] : undefined
+            }
         }
+
+        if (definition.children) {
+            instance.children = []
+            if (definition.defaultChildren && Array.isArray(definition.defaultChildren)) {
+                definition.defaultChildren.forEach(childType => {
+                    const child = this.createInstance(childType)
+                    if (child) instance.children.push(child)
+                })
+            }
+        }
+
+        return instance
     }
 
     /**
