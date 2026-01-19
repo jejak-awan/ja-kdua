@@ -162,7 +162,6 @@ import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
 import { useBuilder, ModuleRegistry } from './core'
-import { useGlobalVariables } from './core/useGlobalVariables'
 import { useCmsStore } from '@/stores/cms'
 
 // Register Module Definitions (side-effect import)
@@ -210,7 +209,6 @@ const builderInitialData = computed(() => {
 const builderBase = useBuilder(builderInitialData.value, {
   mode: props.mode
 })
-const globalVariables = useGlobalVariables()
 const globalAction = ref(null)
 const cmsStore = useCmsStore()
 
@@ -253,7 +251,6 @@ const builder = reactive({
   sidebarVisible,
   activePanel,
   globalAction,
-  globalVariables
 })
 
 watch(() => builder.isFullscreen, (val) => {

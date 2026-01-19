@@ -76,9 +76,6 @@
         <!-- Page Settings Panel -->
         <PageSettingsPanel v-else-if="activePanel === 'settings'" />
 
-        <!-- Global Design Panel (Theme) -->
-        <GlobalDesignPanel v-else-if="activePanel === 'design' || activePanel === 'theme'" />
-
         <!-- Pages Panel -->
         <PagesPanel v-else-if="activePanel === 'pages'" />
 
@@ -118,7 +115,6 @@ import { SIDEBAR_PANELS } from '../core/constants'
 import LayersTree from './LayersTree.vue'
 import HistoryPanel from './panels/HistoryPanel.vue'
 import PageSettingsPanel from './panels/PageSettingsPanel.vue'
-import GlobalDesignPanel from './panels/GlobalDesignPanel.vue'
 import PagesPanel from './panels/PagesPanel.vue'
 import LayoutsPanel from './panels/LayoutsPanel.vue'
 import PresetsPanel from './panels/PresetsPanel.vue'

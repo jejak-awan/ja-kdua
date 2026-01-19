@@ -87,7 +87,6 @@ export const SIDEBAR_PANELS = [
     { id: 'layouts', label: 'Layouts', icon: 'Layout' },
     { id: 'presets', label: 'Presets', icon: 'Sparkles' },
     { id: 'history', label: 'History', icon: 'Clock' },
-    { id: 'theme', label: 'Theme', icon: 'Palette' },
     { id: 'global_variables', label: 'Global Variables', icon: 'Database' },
     { id: 'portability', label: 'Import/Export', icon: 'Share2' },
     { id: 'help', label: 'Help', icon: 'HelpCircle' }

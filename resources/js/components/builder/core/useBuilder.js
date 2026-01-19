@@ -3,6 +3,7 @@ import ModuleRegistry from './ModuleRegistry'
 import api from '@/services/api'
 import { useTheme } from '@/composables/useTheme'
 import { usePresets } from './usePresets'
+import { useGlobalVariables } from './useGlobalVariables'
 
 export default function useBuilder(initialData = { blocks: [] }, options = {}) {
     const mode = ref(options.mode || 'site') // site | page
@@ -21,6 +22,8 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         themeAssets: globalThemeAssets,
         applyThemeStyles
     } = useTheme()
+
+    const globalVariables = useGlobalVariables()
     // ============================================
     // STATE
     // ============================================
@@ -291,6 +294,10 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
                     triggerRef(blocks)
                     takeSnapshot()
                 }
+
+                if (data.global_variables) {
+                    globalVariables.loadVariables(data.global_variables)
+                }
             }
             return data
         } catch (error) {
@@ -305,7 +312,8 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         try {
             const payload = {
                 ...content.value,
-                blocks: blocks.value
+                blocks: blocks.value,
+                global_variables: globalVariables.getVariables()
             }
 
             if (content.value.tags) {
@@ -319,6 +327,44 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
             console.error('Failed to save content from builder:', error)
             throw error
         }
+    }
+
+    async function saveGlobalVariables() {
+        const vars = globalVariables.getVariables()
+
+        // If in content mode (editing a page/post), save to content
+        if (content.value.id) {
+            try {
+                const response = await api.put(`/admin/ja/contents/${content.value.id}`, {
+                    global_variables: vars
+                })
+                return response.data
+            } catch (error) {
+                console.error('Failed to save global variables to content:', error)
+                throw error
+            }
+        }
+
+        // In site mode, save to theme settings
+        if (activeTheme.value) {
+            try {
+                const currentSettings = themeSettings.value || {}
+                const newSettings = {
+                    ...currentSettings,
+                    global_variables: vars
+                }
+                const response = await api.put(`/admin/ja/themes/${activeTheme.value}/settings`, {
+                    settings: newSettings
+                })
+                themeSettings.value = newSettings
+                return response.data
+            } catch (error) {
+                console.error('Failed to save global variables to theme:', error)
+                throw error
+            }
+        }
+
+        throw new Error('No content or theme available to save global variables')
     }
 
     async function fetchMetadata() {
@@ -715,6 +761,11 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
                     globalThemeAssets.value = data.assets
                 }
 
+                // Load global variables from theme settings if available
+                if (data.settings?.global_variables) {
+                    globalVariables.loadVariables(data.settings.global_variables)
+                }
+
                 applyThemeStyles()
             }
         } catch (error) {
@@ -1018,9 +1069,14 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         renameCanvas,
         duplicateCanvas,
         setMainCanvas,
+
+        // Global Variables
+        globalVariables,
+
         loadTheme,
         loadContent,
         saveContent,
+        saveGlobalVariables,
         exportCanvas,
         fetchMetadata,
 

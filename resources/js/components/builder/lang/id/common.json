@@ -519,7 +519,9 @@
             "messages": {
                 "fillName": "Silakan isi nama untuk variabel {type} yang ada terlebih dahulu.",
                 "discardConfirm": "Apakah Anda yakin ingin membatalkan perubahan?",
-                "saveSuccess": "Variabel global berhasil disimpan!"
+                "saveSuccess": "Variabel global berhasil disimpan!",
+                "saveError": "Gagal menyimpan variabel.",
+                "invalidHex": "Kode hex tidak valid: {value} untuk {name}"
             }
         },
         "preferences": {

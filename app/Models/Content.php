@@ -34,6 +34,7 @@ class Content extends Model
         'locked_by',
         'locked_at',
         'blocks',
+        'global_variables',
         'comment_status',
         'editor_type',
     ];
@@ -43,6 +44,7 @@ class Content extends Model
         'locked_at' => 'datetime',
         'meta' => 'array',
         'blocks' => 'array',
+        'global_variables' => 'array',
     ];
 
     public function author(): BelongsTo

@@ -534,9 +534,11 @@
                 "save": "Save Variables"
             },
             "messages": {
-                "fillName": "Please fill in the name for existing {type} variables first.",
-                "discardConfirm": "Are you sure you want to discard changes?",
-                "saveSuccess": "Global variables saved successfully!"
+                "fillName": "Please fill in the name for all {type} variables.",
+                "discardConfirm": "Are you sure you want to discard unsaved changes?",
+                "saveSuccess": "Global variables saved successfully.",
+                "saveError": "Failed to save variables.",
+                "invalidHex": "Invalid color hex: {value} for {name}"
             }
         },
         "preferences": {

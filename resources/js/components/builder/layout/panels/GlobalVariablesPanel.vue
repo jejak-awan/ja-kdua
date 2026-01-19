@@ -475,6 +475,7 @@ const categories = [
 const activeCategoryId = ref('numbers')
 
 const fontOptions = [
+    'Instrument Sans',
     'Open Sans',
     'Inter',
     'Roboto',
@@ -629,12 +630,12 @@ const validateInputs = () => {
     
     // Validate Names
     const allVars = [
-        ...globalNumbers.value.map(i => ({...i, type: 'Number'})),
-        ...globalText.value.map(i => ({...i, type: 'Text'})),
-        ...globalImages.value.map(i => ({...i, type: 'Image'})),
-        ...globalLinks.value.map(i => ({...i, type: 'Link'})),
-        ...globalColors.value.map(i => ({...i, type: 'Color'})),
-        ...globalFonts.value.map(i => ({...i, type: 'Font'}))
+        ...(globalNumbers.value || []).map(i => ({...i, type: 'Number'})),
+        ...(globalText.value || []).map(i => ({...i, type: 'Text'})),
+        ...(globalImages.value || []).map(i => ({...i, type: 'Image'})),
+        ...(globalLinks.value || []).map(i => ({...i, type: 'Link'})),
+        ...(globalColors.value || []).map(i => ({...i, type: 'Color'})),
+        ...(globalFonts.value || []).map(i => ({...i, type: 'Font'}))
     ]
     
     allVars.forEach(v => {
@@ -645,9 +646,9 @@ const validateInputs = () => {
 
     // Validate Colors
     const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
-    globalColors.value.forEach(c => {
+    ;(globalColors.value || []).forEach(c => {
         if (!hexRegex.test(c.value)) {
-            errors.push(`Invalid color hex: ${c.value} for ${c.name}`)
+            errors.push(t('builder.panels.globalVariables.messages.invalidHex', { value: c.value, name: c.name }))
         }
     })
 
@@ -665,10 +666,17 @@ const cancelChanges = () => {
     }
 }
 
-const saveVariables = () => {
+const saveVariables = async () => {
     if (!validateInputs()) return
     originalState.value = getSnapshot() // Update snapshot
-    alert(t('builder.panels.globalVariables.messages.saveSuccess'))
+    
+    try {
+        await builder.saveGlobalVariables()
+        alert(t('builder.panels.globalVariables.messages.saveSuccess'))
+    } catch (error) {
+        console.error('Failed to save variables:', error)
+        alert(t('builder.panels.globalVariables.messages.saveError'))
+    }
 }
 </script>
 

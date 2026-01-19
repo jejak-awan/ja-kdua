@@ -44,6 +44,14 @@ class Theme extends Model
     ];
 
     /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
      * Get active theme by type
      * Auto-activates default theme if no theme is active
      */

@@ -212,6 +212,7 @@ class ContentController extends BaseApiController
                 'blocks' => 'nullable|array',
                 'comment_status' => 'boolean',
                 'editor_type' => 'nullable|string|in:classic,builder',
+                'global_variables' => 'nullable|array',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());
@@ -259,6 +260,13 @@ class ContentController extends BaseApiController
         }
 
         try {
+            // Debug: Log incoming global_variables
+            \Illuminate\Support\Facades\Log::info('Content update request', [
+                'content_id' => $content->id,
+                'has_global_variables' => $request->has('global_variables'),
+                'global_variables' => $request->input('global_variables'),
+            ]);
+
             $rules = [
                 'title' => 'sometimes|required|string|max:255',
                 'slug' => 'sometimes|nullable|string',
@@ -284,6 +292,7 @@ class ContentController extends BaseApiController
                 'blocks' => 'nullable|array',
                 'comment_status' => 'boolean',
                 'editor_type' => 'nullable|string|in:classic,builder',
+                'global_variables' => 'nullable|array',
             ];
 
             // If publishing, require body OR blocks
@@ -389,6 +398,7 @@ class ContentController extends BaseApiController
                 'custom_fields' => 'nullable|array',
                 'blocks' => 'nullable|array',
                 'editor_type' => 'nullable|string|in:classic,builder',
+                'global_variables' => 'nullable|array',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e->errors());

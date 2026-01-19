@@ -7,8 +7,15 @@ const generateId = () => {
 export function useGlobalVariables() {
     // State
     const globalNumbers = ref([
+        { id: generateId(), name: 'Spacing XS', value: '4', unit: 'px' },
         { id: generateId(), name: 'Spacing SM', value: '8', unit: 'px' },
-        { id: generateId(), name: 'Spacing MD', value: '16', unit: 'px' }
+        { id: generateId(), name: 'Spacing MD', value: '12', unit: 'px' },
+        { id: generateId(), name: 'Spacing LG', value: '16', unit: 'px' },
+        { id: generateId(), name: 'Spacing XL', value: '24', unit: 'px' },
+        { id: generateId(), name: 'Spacing 2XL', value: '32', unit: 'px' },
+        { id: generateId(), name: 'Radius SM', value: '4', unit: 'px' },
+        { id: generateId(), name: 'Radius MD', value: '8', unit: 'px' },
+        { id: generateId(), name: 'Radius LG', value: '12', unit: 'px' }
     ])
 
     const globalText = ref([])
@@ -16,15 +23,17 @@ export function useGlobalVariables() {
     const globalLinks = ref([])
 
     const globalColors = ref([
-        { id: generateId(), name: 'Primary Color', value: '#2EA3F2', hex: '2EA3F2', opacity: 100 },
-        { id: generateId(), name: 'Secondary Color', value: '#2EA3F2', hex: '2EA3F2', opacity: 100 },
-        { id: generateId(), name: 'Heading Text Color', value: '#666666', hex: '666666', opacity: 100 },
-        { id: generateId(), name: 'Body Text Color', value: '#666666', hex: '666666', opacity: 100 }
+        { id: generateId(), name: 'Primary', value: '#2059ea', hex: '2059ea', opacity: 100 },
+        { id: generateId(), name: 'Secondary', value: '#18b793', hex: '18b793', opacity: 100 },
+        { id: generateId(), name: 'Dark', value: '#1a1e25', hex: '1a1e25', opacity: 100 },
+        { id: generateId(), name: 'Light', value: '#ffffff', hex: 'ffffff', opacity: 100 },
+        { id: generateId(), name: 'Muted', value: '#9da5b1', hex: '9da5b1', opacity: 100 },
+        { id: generateId(), name: 'Border', value: '#e2e8f0', hex: 'e2e8f0', opacity: 100 }
     ])
 
     const globalFonts = ref([
-        { id: generateId(), name: 'Headings', family: 'Open Sans' },
-        { id: generateId(), name: 'Body', family: 'Open Sans' }
+        { id: generateId(), name: 'Headings', family: 'Instrument Sans' },
+        { id: generateId(), name: 'Body', family: 'Inter' }
     ])
 
     // Actions
@@ -65,6 +74,7 @@ export function useGlobalVariables() {
     }
 
     // reset/load methods could go here
+    // reset/load methods could go here
     const loadVariables = (data) => {
         if (!data) return
         if (data.globalNumbers) globalNumbers.value = data.globalNumbers
@@ -73,6 +83,17 @@ export function useGlobalVariables() {
         if (data.globalLinks) globalLinks.value = data.globalLinks
         if (data.globalColors) globalColors.value = data.globalColors
         if (data.globalFonts) globalFonts.value = data.globalFonts
+    }
+
+    const getVariables = () => {
+        return {
+            globalNumbers: globalNumbers.value,
+            globalText: globalText.value,
+            globalImages: globalImages.value,
+            globalLinks: globalLinks.value,
+            globalColors: globalColors.value,
+            globalFonts: globalFonts.value
+        }
     }
 
     return {
@@ -87,6 +108,7 @@ export function useGlobalVariables() {
         // Actions
         addVariable,
         deleteVariable,
-        loadVariables
+        loadVariables,
+        getVariables
     }
 }
