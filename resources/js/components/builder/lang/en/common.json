@@ -1,4 +1,9 @@
 {
+    "messages": {
+        "loading": "Loading...",
+        "noResults": "No results found.",
+        "confirmDelete": "Are you sure you want to delete this?"
+    },
     "fields": {
         "actions": {
             "reset": "Reset",
@@ -15,6 +20,7 @@
             "select": "Select",
             "cancel": "Cancel",
             "apply": "Apply",
+            "savePreset": "Save as Preset",
             "dynamicData": "Dynamic Data"
         },
         "inherited": "Inherited",
@@ -414,6 +420,7 @@
         }
     },
     "items": {
+        "layout": "Layout",
         "edit": "Edit",
         "duplicate": "Duplicate",
         "delete": "Delete",
@@ -573,6 +580,9 @@
             "emptyDesc": "Try adjusting your search or category."
         },
         "presets": {
+            "title": "Style Presets",
+            "empty": "No presets found. Save a module as a preset to see it here.",
+            "yourPresets": "Your Presets",
             "categories": {
                 "buttons": "Button Styles",
                 "cards": "Card Styles"
@@ -586,7 +596,15 @@
                 "glassmorphism": "Glassmorphism"
             },
             "actions": {
-                "apply": "Apply"
+                "apply": "Apply",
+                "delete": "Delete"
+            },
+            "saveModal": {
+                "title": "Save as Preset",
+                "description": "Save this module configuration to reuse it later across your site.",
+                "nameLabel": "Preset Name",
+                "placeholder": "e.g. Primary Rounded Button",
+                "saveBtn": "Save Preset"
             }
         },
         "portability": {
@@ -664,7 +682,8 @@
             "module": "New Module",
             "row": "New Row",
             "section": "New Section",
-            "library": "Add From Library"
+            "library": "Add From Library",
+            "presets": "Design Presets"
         },
         "layoutGroups": {
             "equal": "Equal Columns",

@@ -1,27 +1,19 @@
 <template>
   <div class="icon-list-block" :style="containerStyles">
-    <div 
-        v-for="child in (module.children || [])" 
-        :key="child.id" 
-        class="icon-list-item"
-        :style="itemStyles"
+    <draggable
+        v-model="module.children"
+        item-key="id"
+        group="icon_list_item"
+        class="icon-list-container"
+        ghost-class="ja-builder-ghost"
     >
-        <!-- Icon -->
-        <div class="icon-wrapper" :style="iconWrapperStyles">
-            <component 
-                :is="getIcon(child.settings.icon)" 
-                :style="iconStyles" 
+        <template #item="{ element: child, index }">
+            <ModuleWrapper
+                :module="child"
+                :index="index"
             />
-        </div>
-        
-        <!-- Text -->
-        <div class="text-content">
-            <span v-if="child.settings.link_url" class="item-link">
-                <a :href="child.settings.link_url" :target="child.settings.link_target">{{ child.settings.text }}</a>
-            </span>
-            <span v-else>{{ child.settings.text }}</span>
-        </div>
-    </div>
+        </template>
+    </draggable>
     
     <!-- Empty State -->
     <div v-if="!module.children || module.children.length === 0" class="empty-list-placeholder">
@@ -32,7 +24,9 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import * as LucideIcons from 'lucide-vue-next'
 import { List } from 'lucide-vue-next'
 import { 
@@ -111,6 +105,11 @@ const iconWrapperStyles = computed(() => {
     }
     
     return s
+})
+
+// Provide state to IconListItemBlock
+provide('iconListState', {
+    parentSettings: settings
 })
 
 const iconStyles = computed(() => {

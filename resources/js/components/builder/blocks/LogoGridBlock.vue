@@ -1,23 +1,31 @@
 <template>
   <div class="logo-grid-block" :style="wrapperStyles">
     <h4 v-if="settings.showTitle !== false && settings.title" class="logo-grid-title" :style="titleStyles">{{ settings.title }}</h4>
-    <div class="logo-grid" :style="gridStyles">
-      <div v-for="(logo, index) in logoList" :key="index" class="logo-item" :class="{ 'logo-item--grayscale': settings.grayscale !== false, 'logo-item--hover-color': settings.hoverColor !== false }">
-        <a v-if="logo.url" :href="logo.url" target="_blank" class="logo-link">
-          <img v-if="logo.image" :src="logo.image" :alt="logo.name" :style="logoStyles" />
-          <div v-else class="logo-placeholder" :style="placeholderStyles"><Building /></div>
-        </a>
-        <template v-else>
-          <img v-if="logo.image" :src="logo.image" :alt="logo.name" :style="logoStyles" />
-          <div v-else class="logo-placeholder" :style="placeholderStyles"><Building /></div>
+    <div class="logo-grid">
+      <draggable
+        v-model="module.children"
+        item-key="id"
+        group="logo_grid_item"
+        class="logo-grid-draggable"
+        :style="gridStyles"
+        ghost-class="ja-builder-ghost"
+      >
+        <template #item="{ element: child, index }">
+          <ModuleWrapper
+            :module="child"
+            :index="index"
+            class="logo-grid-wrapper"
+          />
         </template>
-      </div>
+      </draggable>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Building } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -37,12 +45,9 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device || 'desktop')
 
-const logoList = computed(() => {
-  return (props.module.children || []).map(child => ({
-    image: child.settings.image || '',
-    name: child.settings.name || '',
-    url: child.settings.url || ''
-  }))
+// Provide state to LogoGridItemBlock
+provide('logoGridState', {
+    parentSettings: settings
 })
 
 const wrapperStyles = computed(() => {

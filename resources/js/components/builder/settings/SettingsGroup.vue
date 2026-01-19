@@ -10,36 +10,14 @@
       <span class="group-label">{{ translatedLabel }}</span>
       
       <!-- Design Presets Button (Hover) -->
-      <div class="group-presets-trigger" @click.stop>
-        <BaseDropdown align="right" :width="240">
-          <template #trigger="{ open }">
-            <IconButton 
-              :icon="Library" 
-              size="sm"
-              :active="open" 
-              class="presets-btn"
-              :title="$t('builder.presets.title')" 
-            />
-          </template>
-          
-          <template #default="{ close }">
-            <div class="preset-header">
-              <Check :size="14" class="preset-check" />
-              <div class="preset-info">
-                <div class="preset-name">{{ $t('builder.presets.defaultPreset') }}</div>
-                <div class="preset-sub">{{ $t('builder.presets.basedOn', { name: translatedLabel + ' 1' }) }}</div>
-              </div>
-            </div>
-            <BaseDivider :margin="4" />
-            <button class="dropdown-item primary-action" @click="close">
-              {{ $t('builder.presets.newFromCurrent') }}
-            </button>
-            <button class="dropdown-item accent-action" @click="close">
-              {{ $t('builder.presets.addNew') }}
-            </button>
-          </template>
-        </BaseDropdown>
-      </div>
+      <DesignPresetsSelector 
+        v-if="group.presets"
+        size="sm"
+        class="group-presets-trigger"
+        :type="module.type"
+        :based-on-name="translatedLabel + ' 1'"
+        @action="handlePresetAction"
+      />
     </button>
     
     <!-- Content -->
@@ -67,6 +45,7 @@ import { useI18n } from 'vue-i18n'
 import { ChevronRight, Library, Check } from 'lucide-vue-next'
 import FieldRenderer from '../fields/FieldRenderer.vue'
 import { IconButton, BaseDropdown, BaseDivider } from '../ui'
+import DesignPresetsSelector from './DesignPresetsSelector.vue'
 
 const props = defineProps({
   group: {
@@ -143,6 +122,15 @@ const isFieldVisible = (field) => {
   
   return dependencyValue === expectedValue
 }
+
+const handlePresetAction = (payload) => {
+  const { type, data } = payload
+  if (type === 'addNew' || type === 'newFromCurrent') {
+    builder?.openSavePresetModal(props.module.id)
+  } else if (type === 'apply' && data) {
+    builder?.applyPreset(props.module.id, data)
+  }
+}
 </script>
 
 <style scoped>
@@ -200,60 +188,6 @@ const isFieldVisible = (field) => {
   color: var(--builder-accent);
 }
 
-/* Preset Dropdown Styles (from RightPanel) */
-.preset-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-}
-
-.preset-check {
-  color: var(--builder-accent);
-}
-
-.preset-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.preset-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--builder-text-primary);
-}
-
-.preset-sub {
-  font-size: 11px;
-  color: var(--builder-text-muted);
-}
-
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
-  background: none;
-  border: none;
-  font-size: 13px;
-  font-weight: 530;
-  color: var(--builder-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.dropdown-item:hover {
-  background: var(--builder-bg-secondary);
-  color: var(--builder-text-primary);
-}
-
-.primary-action {
-  color: var(--builder-text-primary);
-}
-
-.accent-action {
-  color: var(--builder-accent);
-}
 
 .group-content {
   padding: var(--spacing-lg) 20px;

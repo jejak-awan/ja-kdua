@@ -14,7 +14,7 @@
           :key="tab.id"
           class="modal-tab"
           :class="{ 'modal-tab--active': activeTab === tab.id }"
-          @click="activeTab = tab.id"
+          @click="handleTabChange(tab.id)"
         >
           {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
         </button>
@@ -22,6 +22,19 @@
     </template>
 
     <div class="modal-body-content">
+      <!-- Search (Presets only for now in this modal) -->
+      <div v-if="activeTab === 'presets'" class="modal-search-wrapper" style="padding-bottom: 16px;">
+        <BaseInput 
+          v-model="searchQuery"
+          :placeholder="$t('builder.insertModal.searchPlaceholder')"
+          autofocus
+        >
+          <template #prefix>
+             <Search :size="16" />
+          </template>
+        </BaseInput>
+      </div>
+
       <div class="modal-content">
         <div v-if="activeTab === 'row'" class="layout-wrapper">
           
@@ -80,7 +93,39 @@
 
         </div>
         
-        <div v-else class="library-placeholder">
+        <div v-if="activeTab === 'presets'" class="library-content">
+          <div v-if="loadingPresets" class="no-results">
+            <div class="loading-spinner"></div>
+            <p>{{ $t('common.messages.loading') }}</p>
+          </div>
+          <div v-else-if="filteredPresets.length === 0" class="no-results">
+            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+          </div>
+          <div v-else class="module-content">
+            <div 
+              v-for="(typePresets, type) in groupedPresets" 
+              :key="type"
+              class="module-group"
+            >
+              <h4 class="group-title"><span>{{ type }}</span></h4>
+              <div class="module-grid">
+                <button
+                  v-for="preset in typePresets"
+                  :key="preset.id"
+                  class="module-card"
+                  @click="selectPreset(preset)"
+                >
+                  <div class="module-icon">
+                    <component :is="icons.Layout" :size="24" />
+                  </div>
+                  <span class="module-name">{{ preset.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="activeTab === 'library'" class="library-placeholder">
            <p>{{ $t('builder.insertRowModal.libraryPlaceholder') }}</p>
         </div>
       </div>
@@ -89,9 +134,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { BaseModal } from '../ui'
+import { BaseModal, BaseInput } from '../ui'
+import { Search, Layout } from 'lucide-vue-next'
+
+const icons = { Search, Layout }
 import { 
     equalLayouts, 
     offsetLayouts, 
@@ -102,14 +150,68 @@ import {
     sidebarPresets
 } from '../constants/layouts.js'
 
-const emit = defineEmits(['close', 'insert'])
-const activeTab = ref('row')
-const { t, te } = useI18n()
+const props = defineProps({
+  mode: {
+    type: String,
+    default: 'insert'
+  }
+})
 
-const tabs = [
-  { id: 'row', label: 'New Row' },
-  { id: 'library', label: 'Add From Library' }
-]
+const emit = defineEmits(['close', 'insert', 'update'])
+const activeTab = ref('row')
+
+const tabs = computed(() => {
+  if (props.mode === 'edit') {
+    return [{ id: 'row', label: 'Row Layout' }]
+  }
+  return [
+    { id: 'row', label: 'New Row' },
+    { id: 'presets', label: 'Design Presets' },
+    { id: 'library', label: 'Add From Library' }
+  ]
+})
+
+const { t, te } = useI18n()
+const builder = inject('builder')
+
+const modalTitle = computed(() => {
+    return props.mode === 'edit' 
+        ? t('builder.insertRowModal.updateTitle', 'Update Row Layout') 
+        : t('builder.insertRowModal.title', 'Insert Row')
+})
+
+// Search/Filter logic
+const searchQuery = ref('')
+const loadingPresets = computed(() => builder?.loadingPresets || false)
+const presets = computed(() => builder?.presets || [])
+
+const filteredPresets = computed(() => {
+  const allPresets = presets.value.filter(p => p.type === 'row')
+  if (!searchQuery.value) return allPresets
+  const query = searchQuery.value.toLowerCase()
+  return allPresets.filter(p => p.name.toLowerCase().includes(query))
+})
+
+const groupedPresets = computed(() => {
+  const groups = {}
+  filteredPresets.value.forEach(preset => {
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
+    if (!groups[type]) groups[type] = []
+    groups[type].push(preset)
+  })
+  return groups
+})
+
+const selectPreset = (preset) => {
+  emit('insert', 'preset', preset)
+}
+
+const handleTabChange = (tabId) => {
+  activeTab.value = tabId
+  if (tabId === 'presets' && presets.value.length === 0) {
+    builder?.fetchPresets()
+  }
+}
 
 const allGroups = computed(() => [
   { id: 'equal', type: 'flex', title: 'Equal Columns', items: equalLayouts },
@@ -122,7 +224,11 @@ const allGroups = computed(() => [
 ])
 
 const selectLayout = (layout) => {
-  emit('insert', layout)
+  if (props.mode === 'edit') {
+      emit('update', layout)
+  } else {
+      emit('insert', layout)
+  }
   emit('close')
 }
 </script>
@@ -270,9 +376,50 @@ const selectLayout = (layout) => {
   gap: 3px;
 }
 
-.library-placeholder {
-    padding: 40px;
-    text-align: center;
-    color: var(--builder-text-muted);
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.module-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px;
+  background: transparent;
+  border: 1px solid var(--builder-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.module-card:hover {
+  border-color: var(--builder-accent);
+  background: var(--builder-bg-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.module-icon {
+  color: var(--builder-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-name {
+  font-size: 11px;
+  color: var(--builder-text-primary);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--builder-text-muted);
+  padding: 40px;
 }
 </style>

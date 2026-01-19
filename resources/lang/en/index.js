@@ -44,7 +44,6 @@ import profile from './features/profile.json';
 import scheduled_tasks from './features/scheduled_tasks.json';
 import command_runner from './features/command_runner.json';
 import email_templates from './features/email_templates.json';
-import builder from './features/builder.json';
 import editor from './features/editor.json';
 
 export default {
@@ -96,7 +95,6 @@ export default {
         scheduled_tasks,
         command_runner,
         email_templates,
-        builder,
         editor
     },
 };

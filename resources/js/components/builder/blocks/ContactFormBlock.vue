@@ -8,31 +8,20 @@
       </div>
       
       <!-- Fields -->
-      <div class="form-fields">
-        <div 
-          v-for="field in formFields" 
-          :key="field.id"
-          class="form-field"
-          :class="{ 'form-field--full': field.type === 'textarea' }"
-        >
-          <label class="field-label" :style="labelStyles">
-            {{ field.label }}
-            <span v-if="field.required" class="field-required">*</span>
-          </label>
-          <textarea 
-            v-if="field.type === 'textarea'"
-            class="field-input field-textarea"
-            :placeholder="field.placeholder"
-            rows="5"
-          />
-          <input 
-            v-else
-            :type="field.type || 'text'"
-            class="field-input"
-            :placeholder="field.placeholder"
-          />
-        </div>
-      </div>
+      <draggable
+          v-model="module.children"
+          item-key="id"
+          group="contact_field"
+          class="form-fields"
+          ghost-class="ja-builder-ghost"
+      >
+          <template #item="{ element: child, index }">
+              <ModuleWrapper
+                  :module="child"
+                  :index="index"
+              />
+          </template>
+      </draggable>
       
       <!-- Button -->
       <button class="form-button" :style="buttonStyles">
@@ -44,7 +33,9 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Send } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -70,16 +61,9 @@ const settings = computed(() => props.module.settings || {})
 const builder = inject('builder')
 const device = computed(() => builder?.device || 'desktop')
 
-const formFields = computed(() => {
-  return (props.module.children || []).map(child => ({
-    id: child.settings.fieldId || `field_${Math.random().toString(36).substr(2, 9)}`,
-    type: child.settings.type || 'text',
-    label: child.settings.label || '',
-    placeholder: child.settings.placeholder || '',
-    required: child.settings.required || false,
-    width: child.settings.width || '100%',
-    options: child.settings.options ? child.settings.options.split('\n') : []
-  }))
+// Provide state to ContactFieldBlock
+provide('contactFormState', {
+    parentSettings: settings
 })
 
 const wrapperStyles = computed(() => {

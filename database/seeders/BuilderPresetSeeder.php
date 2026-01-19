@@ -45,6 +45,29 @@ class BuilderPresetSeeder extends Seeder
                 ],
                 'is_system' => true,
             ],
+            [
+                'type' => 'section',
+                'name' => 'Gradient Hero',
+                'settings' => [
+                    'bgType' => 'gradient',
+                    'bgGradient' => 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                    'textColor' => '#ffffff',
+                    'padding' => ['top' => '120', 'bottom' => '120', 'left' => '0', 'right' => '0']
+                ],
+                'is_system' => true,
+            ],
+            [
+                'type' => 'section',
+                'name' => 'Soft Shadow Card',
+                'settings' => [
+                    'bgColor' => '#ffffff',
+                    'margin' => ['top' => '40', 'bottom' => '40'],
+                    'padding' => ['top' => '40', 'bottom' => '40', 'left' => '40', 'right' => '40'],
+                    'borderRadius' => 16,
+                    'boxShadow' => '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+                ],
+                'is_system' => true,
+            ],
             
             // Row Presets
             [
@@ -75,7 +98,23 @@ class BuilderPresetSeeder extends Seeder
                     'bgColor' => '#2059ea',
                     'textColor' => '#ffffff',
                     'borderStyle' => 'none',
-                    'borderRadius' => 99
+                    'borderRadius' => 99,
+                    'padding' => ['top' => '12', 'bottom' => '12', 'left' => '24', 'right' => '24']
+                ],
+                'is_system' => true,
+            ],
+            [
+                'type' => 'button',
+                'name' => 'Glass Primary',
+                'settings' => [
+                    'bgType' => 'color',
+                    'bgColor' => 'rgba(32, 89, 234, 0.1)',
+                    'textColor' => '#2059ea',
+                    'borderStyle' => 'solid',
+                    'borderWidth' => 1,
+                    'borderColor' => 'rgba(32, 89, 234, 0.2)',
+                    'borderRadius' => 8,
+                    'backdropBlur' => 8
                 ],
                 'is_system' => true,
             ],
@@ -93,14 +132,14 @@ class BuilderPresetSeeder extends Seeder
             ],
             [
                 'type' => 'button',
-                'name' => 'Outline Primary',
+                'name' => 'Gradient Pop',
                 'settings' => [
-                    'bgType' => 'none',
-                    'borderStyle' => 'solid',
-                    'borderWidth' => 2,
-                    'borderColor' => '#2059ea',
-                    'textColor' => '#2059ea',
-                    'borderRadius' => 6
+                    'bgType' => 'gradient',
+                    'bgGradient' => 'linear-gradient(45deg, #f43f5e 0%, #fb923c 100%)',
+                    'textColor' => '#ffffff',
+                    'borderStyle' => 'none',
+                    'borderRadius' => 8,
+                    'boxShadow' => '0 4px 14px 0 rgba(244, 63, 94, 0.39)'
                 ],
                 'is_system' => true,
             ],
@@ -117,23 +156,26 @@ class BuilderPresetSeeder extends Seeder
                 'is_system' => true,
             ],
             [
-                'type' => 'text',
-                'name' => 'Muted Small',
+                'type' => 'heading',
+                'name' => 'Display Large',
                 'settings' => [
-                    'fontSize' => 14,
-                    'lineHeight' => 1.4,
-                    'textColor' => '#9ca3af'
+                    'fontSize' => 48,
+                    'lineHeight' => 1.1,
+                    'fontWeight' => '800',
+                    'letterSpacing' => '-0.02em',
+                    'textColor' => '#111827'
                 ],
                 'is_system' => true,
             ],
             [
                 'type' => 'heading',
-                'name' => 'Lead Text',
+                'name' => 'Section Title',
                 'settings' => [
-                    'fontSize' => 20,
-                    'lineHeight' => 1.5,
-                    'fontWeight' => '500',
-                    'textColor' => '#374151'
+                    'fontSize' => 32,
+                    'lineHeight' => 1.2,
+                    'fontWeight' => '700',
+                    'textColor' => '#1f2937',
+                    'textAlign' => 'center'
                 ],
                 'is_system' => true,
             ],

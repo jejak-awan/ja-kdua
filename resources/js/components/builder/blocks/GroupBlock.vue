@@ -8,19 +8,35 @@
   >
     <div v-if="settings.overlayColor" class="group-overlay" :style="overlayStyles" />
     <div class="group-content" :style="contentStyles">
-      <slot>
-        <div class="group-placeholder">
-          <Square class="placeholder-icon" />
-          <span>Group Container</span>
-          <small>Add modules inside this group</small>
-        </div>
-      </slot>
+      <draggable
+        v-model="module.children"
+        item-key="id"
+        group="module"
+        class="group-items-container"
+        ghost-class="ja-builder-ghost"
+      >
+        <template #item="{ element: child, index }">
+          <ModuleWrapper
+            :module="child"
+            :index="index"
+          />
+        </template>
+        <template #footer>
+          <div v-if="!module.children?.length" class="group-placeholder">
+            <Square class="placeholder-icon" />
+            <span>Group Container</span>
+            <small>Add modules inside this group</small>
+          </div>
+        </template>
+      </draggable>
     </div>
   </component>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Square } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 

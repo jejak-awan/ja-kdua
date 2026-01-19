@@ -1,27 +1,22 @@
 <template>
   <div class="gallery-block" :style="wrapperStyles">
     <div class="gallery-grid" :style="gridStyles">
-      <div 
-        v-for="(image, index) in galleryImages" 
-        :key="index"
-        class="gallery-item"
-        :class="hoverClass"
-        :style="itemStyles"
+      <draggable
+        v-model="module.children"
+        item-key="id"
+        group="gallery_item"
+        class="gallery-grid-draggable"
+        :style="gridStyles"
+        ghost-class="ja-builder-ghost"
       >
-        <div class="gallery-image-wrapper" :style="imageWrapperStyles">
-          <img 
-            :src="image.src" 
-            :alt="image.alt || ''"
-            class="gallery-image"
+        <template #item="{ element: child, index }">
+          <ModuleWrapper
+            :module="child"
+            :index="index"
+            class="gallery-item-wrapper"
           />
-          <div v-if="hoverEffect === 'overlay'" class="gallery-overlay" :style="overlayStyles">
-            <ZoomIn class="overlay-icon" />
-          </div>
-        </div>
-        <p v-if="showCaptions && image.caption && captionPosition === 'below'" class="gallery-caption" :style="captionStyles">
-          {{ image.caption }}
-        </p>
-      </div>
+        </template>
+      </draggable>
       
       <!-- Placeholder when empty -->
       <template v-if="galleryImages.length === 0">
@@ -36,7 +31,9 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Image as ImageIcon, ZoomIn } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -72,7 +69,12 @@ const galleryImages = computed(() => {
 const hoverEffect = computed(() => getResponsiveValue(settings.value, 'hoverEffect', device.value) || 'zoom')
 const showCaptions = computed(() => getResponsiveValue(settings.value, 'showCaptions', device.value))
 const captionPosition = computed(() => getResponsiveValue(settings.value, 'captionPosition', device.value) || 'below')
-const hoverClass = computed(() => `gallery-item--${hoverEffect.value}`)
+// const hoverClass = computed(() => `gallery-item--${hoverEffect.value}`) // Moved to child
+
+// Provide state to GalleryItemBlock
+provide('galleryState', {
+    parentSettings: settings
+})
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }

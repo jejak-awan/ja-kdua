@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(LanguageSeeder::class);
         $this->call(ScheduledTaskSeeder::class);
         $this->call(CommentSecuritySettingsSeeder::class);
+        $this->call(BuilderPresetSeeder::class);
 
         // 3. Create admin user if not exists
         $admin = User::firstOrCreate(

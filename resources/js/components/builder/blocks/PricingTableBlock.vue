@@ -20,19 +20,23 @@
       </div>
       
       <!-- Features -->
-      <ul class="pricing-features">
-        <li 
-          v-for="(feature, index) in featuresList" 
-          :key="index"
-          class="pricing-feature"
-          :class="{ 'pricing-feature--disabled': !feature.included }"
-          :style="featureStyles"
-        >
-          <Check v-if="feature.included" class="feature-icon feature-icon--check" />
-          <X v-else class="feature-icon feature-icon--x" />
-          {{ feature.text }}
-        </li>
-      </ul>
+      <draggable
+          tag="ul"
+          v-model="module.children"
+          item-key="id"
+          group="pricing_feature"
+          class="pricing-features"
+          ghost-class="ja-builder-ghost"
+      >
+          <template #item="{ element: child, index }">
+              <ModuleWrapper
+                  :module="child"
+                  :index="index"
+                  tag="li"   
+                  class="pricing-feature-wrapper"
+              />
+          </template>
+      </draggable>
       
       <!-- Button -->
       <a :href="buttonUrlValue" class="pricing-button" :style="buttonStyles" @click.prevent>
@@ -43,7 +47,9 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Check, X } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -69,12 +75,9 @@ const settings = computed(() => props.module.settings || {})
 const builder = inject('builder')
 const device = computed(() => builder?.device || 'desktop')
 
-const featuresList = computed(() => {
-  return (props.module.children || []).map(child => ({
-    text: getResponsiveValue(child.settings, 'text', device.value) || '',
-    included: getResponsiveValue(child.settings, 'included', device.value) !== false,
-    strikeThrough: getResponsiveValue(child.settings, 'strikeThrough', device.value) || false
-  }))
+// Provide state to PricingFeatureBlock
+provide('pricingState', {
+    parentSettings: settings
 })
 
 const isFeatured = computed(() => getResponsiveValue(settings.value, 'featured', device.value))

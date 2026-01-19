@@ -14,7 +14,7 @@
           :key="tab.id"
           class="modal-tab"
           :class="{ 'modal-tab--active': activeTab === tab.id }"
-          @click="activeTab = tab.id"
+          @click="handleTabChange(tab.id)"
         >
           {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
         </button>
@@ -23,7 +23,7 @@
 
     <div class="modal-body-content">
       <!-- Search (Module Tab Only) -->
-      <div v-if="activeTab === 'module'" class="modal-search-wrapper">
+      <div v-if="activeTab === 'module' || activeTab === 'presets' || activeTab === 'library'" class="modal-search-wrapper">
         <BaseInput 
           v-model="searchQuery"
           :placeholder="$t('builder.insertModal.searchPlaceholder')"
@@ -120,9 +120,38 @@
 
         </div>
         
-        <!-- Library Tab -->
+        <div v-if="activeTab === 'presets'" class="library-content">
+          <div v-if="loadingPresets" class="no-results">
+            <div class="loading-spinner"></div>
+            <p>{{ $t('common.messages.loading') }}</p>
+          </div>
+          <div v-else-if="filteredPresets.length === 0" class="no-results">
+            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+          </div>
+          <div v-else class="module-content">
+            <div v-for="(typePresets, type) in groupedPresets" :key="type" class="module-group">
+              <h4 class="group-title"><span>{{ type }}</span></h4>
+              <div class="module-grid">
+                <button
+                  v-for="preset in typePresets"
+                  :key="preset.id"
+                  class="module-card"
+                  @click="selectPreset(preset)"
+                >
+                  <div class="module-icon">
+                    <component :size="24" :is="getIcon(ModuleRegistry.get(preset.type)?.icon)" />
+                  </div>
+                  <span class="module-name">{{ preset.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div v-if="activeTab === 'library'" class="library-content">
-          <p class="library-empty">{{ $t('builder.insertModal.libraryEmpty') }}</p>
+          <div class="no-results">
+            {{ $t('builder.insertModal.libraryEmpty') }}
+          </div>
         </div>
       </div>
     </div>
@@ -130,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { 
   X, Search, Type, Heading, Image, MousePointer, Video, Layout,
@@ -166,6 +195,9 @@ const icons = {
 // Emits
 const emit = defineEmits(['close', 'insert'])
 
+// Props/Injections
+const builder = inject('builder')
+
 // State
 const activeTab = ref('module')
 const searchQuery = ref('')
@@ -175,6 +207,7 @@ const { t, te } = useI18n()
 const tabs = [
   { id: 'module', label: 'New Module' },
   { id: 'row', label: 'New Row' },
+  { id: 'presets', label: 'Design Presets' },
   { id: 'library', label: 'Add From Library' }
 ]
 
@@ -218,6 +251,26 @@ const groupedModules = computed(() => {
   return groups
 })
 
+// Presets - builder.presets is already a reactive Proxy, not a ref
+const loadingPresets = computed(() => builder?.loadingPresets || false)
+const presets = computed(() => builder?.presets || [])
+
+const filteredPresets = computed(() => {
+  if (!searchQuery.value) return presets.value
+  const query = searchQuery.value.toLowerCase()
+  return presets.value.filter(p => p.name.toLowerCase().includes(query))
+})
+
+const groupedPresets = computed(() => {
+  const groups = {}
+  filteredPresets.value.forEach(preset => {
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
+    if (!groups[type]) groups[type] = []
+    groups[type].push(preset)
+  })
+  return groups
+})
+
 // Methods
 const getIcon = (iconName) => {
   return icons[iconName] || icons.Layout
@@ -230,6 +283,23 @@ const selectModule = (name) => {
 const selectLayout = (layout) => {
   emit('insert', 'row', layout)
 }
+
+const selectPreset = (preset) => {
+  emit('insert', 'preset', preset)
+}
+
+const handleTabChange = (tabId) => {
+  activeTab.value = tabId
+  if (tabId === 'presets' && presets.value.length === 0) {
+    builder?.fetchPresets()
+  }
+}
+
+onMounted(() => {
+  if (activeTab.value === 'presets' || activeTab.value === 'library') {
+    builder?.fetchPresets()
+  }
+})
 </script>
 
 <style scoped>

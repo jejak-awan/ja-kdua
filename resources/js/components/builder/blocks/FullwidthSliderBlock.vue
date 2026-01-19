@@ -1,25 +1,38 @@
 <template>
   <div class="fullwidth-slider-block" :style="containerStyles">
-    <div v-for="(slide, index) in slideList" :key="index" class="slider-slide" :class="{ 'slider-slide--active': currentSlide === index }">
-      <div class="slide-overlay" :style="overlayStyles" />
-      <div class="slide-content" :style="contentStyles">
-        <h2 class="slide-title" :style="titleStyles">{{ slide.title || 'Slide Title' }}</h2>
-        <p v-if="slide.subtitle" class="slide-subtitle" :style="subtitleStyles">{{ slide.subtitle }}</p>
-        <a v-if="slide.buttonText" :href="slide.buttonUrl || '#'" class="slide-button">{{ slide.buttonText }}</a>
-      </div>
-    </div>
+    <draggable
+        v-model="module.children"
+        item-key="id"
+        group="fullwidth_slide_item"
+        class="slider-slides-container"
+        :style="{ height: '100%', width: '100%', position: 'relative' }"
+        ghost-class="ja-builder-ghost"
+    >
+        <template #item="{ element: child, index }">
+            <ModuleWrapper
+                :module="child"
+                :index="index"
+                class="fullwidth-slide-wrapper"
+                :style="{ position: 'absolute', inset: 0, zIndex: currentSlide === index ? 10 : 1, pointerEvents: currentSlide === index ? 'auto' : 'none' }"
+            />
+        </template>
+    </draggable>
     
     <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--prev" @click="prev"><ChevronLeft /></button>
     <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--next" @click="next"><ChevronRight /></button>
     
     <div v-if="settings.showDots !== false" class="slider-dots">
-      <button v-for="(_, i) in slideList" :key="i" class="slider-dot" :class="{ 'slider-dot--active': currentSlide === i }" @click="currentSlide = i" />
+    <div v-if="settings.showDots !== false" class="slider-dots">
+      <button v-for="i in (module.children?.length || 0)" :key="i" class="slider-dot" :class="{ 'slider-dot--active': currentSlide === i - 1 }" @click="currentSlide = i - 1" />
+    </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { computed, ref, onMounted, onUnmounted, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { 
   getSpacingStyles, 
@@ -41,21 +54,29 @@ const device = computed(() => builder?.device || 'desktop')
 const currentSlide = ref(0)
 let interval = null
 
-const slideList = computed(() => {
-  return (props.module.children || []).map(child => ({
-    title: child.settings.title || 'New Slide',
-    subtitle: child.settings.subtitle || '',
-    buttonText: child.settings.buttonText || '',
-    buttonUrl: child.settings.buttonUrl || '#',
-    image: child.settings.image || ''
-  }))
+// const slideList = computed(...) // Removed as we use module.children directly via ModuleWrapper
+
+const next = () => { 
+    const count = props.module.children?.length || 0
+    if (count > 0) currentSlide.value = (currentSlide.value + 1) % count 
+}
+const prev = () => { 
+    const count = props.module.children?.length || 0
+    if (count > 0) currentSlide.value = currentSlide.value === 0 ? count - 1 : currentSlide.value - 1 
+}
+
+onMounted(() => { 
+    if (settings.value.autoplay !== false && (props.module.children?.length || 0) > 0) {
+        interval = setInterval(next, settings.value.autoplaySpeed || 5000) 
+    }
 })
-
-const next = () => { currentSlide.value = (currentSlide.value + 1) % slideList.value.length }
-const prev = () => { currentSlide.value = currentSlide.value === 0 ? slideList.value.length - 1 : currentSlide.value - 1 }
-
-onMounted(() => { if (settings.value.autoplay !== false && slideList.value.length > 0) interval = setInterval(next, settings.value.autoplaySpeed || 5000) })
 onUnmounted(() => { if (interval) clearInterval(interval) })
+
+// Provide state to FullwidthSlideItemBlock
+provide('fullwidthSliderState', {
+    parentSettings: settings,
+    currentSlide
+})
 
 const containerStyles = computed(() => {
   const styles = { 

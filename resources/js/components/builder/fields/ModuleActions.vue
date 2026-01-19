@@ -1,19 +1,9 @@
 <template>
   <div class="module-actions" :class="{ 'is-active': showMenu }">
     
-    <!-- Edit Settings -->
-    <div v-if="showEdit" class="action-icon" :title="$t('builder.items.edit')" @click.stop="$emit('edit')">
-        <Pencil :size="size" />
-    </div>
-
-    <!-- Duplicate -->
-    <div v-if="showDuplicate" class="action-icon" :title="$t('builder.items.duplicate')" @click.stop="$emit('duplicate')">
-        <Copy :size="size" />
-    </div>
-
-    <!-- Info/Help -->
-    <div v-if="showInfo" class="action-icon" :class="{ 'is-active': infoActive }" :title="$t('builder.items.info')" @click.stop="$emit('toggle-info')">
-        <Info :size="size" />
+    <!-- Drag Handle -->
+    <div v-if="showDrag" class="action-icon drag-handle" :title="$t('builder.items.drag')">
+        <GripVertical :size="size" />
     </div>
 
     <!-- Delete -->
@@ -21,9 +11,19 @@
         <Trash :size="size" />
     </div>
 
-    <!-- Drag Handle -->
-    <div v-if="showDrag" class="action-icon drag-handle" :title="$t('builder.items.drag')">
-        <GripVertical :size="size" />
+    <!-- Duplicate -->
+    <div v-if="showDuplicate" class="action-icon" :title="$t('builder.items.duplicate')" @click.stop="$emit('duplicate')">
+        <Copy :size="size" />
+    </div>
+
+    <!-- Layout -->
+    <div v-if="showLayout" class="action-icon" :title="$t('builder.items.layout')" @click.stop="$emit('layout')">
+        <LayoutTemplate :size="size" />
+    </div>
+
+    <!-- Info/Help -->
+    <div v-if="showInfo" class="action-icon" :class="{ 'is-active': infoActive }" :title="$t('builder.items.info')" @click.stop="$emit('toggle-info')">
+        <Info :size="size" />
     </div>
 
     <!-- More Options -->
@@ -38,12 +38,11 @@
          
          <Teleport to="body">
             <div v-if="showMenu" class="field-menu context-menu" v-click-outside="closeMenu" :style="dropdownStyle">
-                <div class="menu-item" @click="handleAction('copy')">{{ $t('builder.fields.actions.copyAttributes', { label: label }) }}</div>
-                <div class="menu-item disabled" @click="handleAction('extend')">{{ $t('builder.fields.actions.extendAttributes', { label: label }) }}</div>
+                <div class="menu-item disabled" @click="handleAction('copy')">{{ $t('builder.fields.actions.copy') }}</div>
                 <div class="menu-divider"></div>
-                <div class="menu-item" @click="handleAction('reset')">{{ $t('builder.fields.actions.resetAttributes', { label: label }) }}</div>
+                <div class="menu-item" @click="handleAction('savePreset')">{{ $t('builder.fields.actions.savePreset') }}</div>
                 <div class="menu-divider"></div>
-                <div class="menu-item disabled" @click="handleAction('findReplace')">{{ $t('builder.fields.actions.findReplace') }}</div>
+                <div class="menu-item" @click="handleAction('reset')">{{ $t('builder.fields.actions.reset') }}</div>
             </div>
          </Teleport>
     </div>
@@ -52,12 +51,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Pencil, Copy, Trash, MoreVertical, Info, GripVertical } from 'lucide-vue-next'
+import { Pencil, Copy, Trash, MoreVertical, Info, GripVertical, LayoutTemplate } from 'lucide-vue-next'
 
 const props = defineProps({
   label: { type: String, default: 'Item' },
   size: { type: Number, default: 14 },
   showEdit: { type: Boolean, default: true },
+  showLayout: { type: Boolean, default: false },
   showDuplicate: { type: Boolean, default: true },
   showDelete: { type: Boolean, default: true },
   showInfo: { type: Boolean, default: false },
@@ -66,7 +66,7 @@ const props = defineProps({
   infoActive: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['edit', 'duplicate', 'delete', 'toggle-info', 'more-action'])
+const emit = defineEmits(['edit', 'layout', 'duplicate', 'delete', 'toggle-info', 'more-action'])
 
 const showMenu = ref(false)
 const moreIconRef = ref(null)

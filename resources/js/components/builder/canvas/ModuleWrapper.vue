@@ -11,14 +11,15 @@
     <div v-if="shouldShowToolbar" class="module-toolbar" :class="`module-toolbar--${moduleType}`" :style="{ zIndex: isSelected ? 150 : 100 }">
       <ModuleActions 
         :label="moduleTitle"
-        :show-edit="true"
+        :show-edit="false"
+        :show-layout="isRow"
         :show-duplicate="true"
         :show-delete="true"
         :show-info="true"
         :show-more="true"
         :show-drag="true"
         :info-active="showInfo"
-        @edit="openSettings"
+        @layout="openRowLayoutModal"
         @duplicate="duplicateModule"
         @delete="deleteModule"
         @toggle-info="toggleInfo"
@@ -90,20 +91,28 @@
       </template>
     </div>
     
-    <!-- Add Sibling Button - On Rows (to add another row below) -->
+    <!-- Section Sibling Button -->
+    <AddModuleButton 
+       v-if="isSection && (isSelected || isHovered) && !isGhost"
+       type="section"
+       :floating="true"
+       @click="addSiblingSection"
+    />
+
+    <!-- Row Sibling Button -->
     <AddModuleButton 
        v-if="isRow && (isSelected || isHovered) && !isGhost"
        type="row"
        :floating="true"
        @click="addSiblingRow"
     />
-    
-    <!-- Add Sibling Button (Add Section) - Only for Sections when selected/hovered -->
+
+    <!-- Column/Module Button (Floating on bottom border) -->
     <AddModuleButton 
-       v-if="isSection && (isSelected || isHovered) && !isGhost"
-       type="section"
+       v-if="(isColumn || isContent) && (isSelected || isHovered) && !isGhost"
+       :type="isColumn ? 'column' : 'module'"
        :floating="true"
-       @click="addSiblingSection"
+       @click="handlePlusClick"
     />
     
     <!-- Module Label (Grid/Wireframe) -->
@@ -180,10 +189,9 @@ const moduleTitle = computed(() =>
 const moduleType = computed(() => props.module.type)
 
 const isSection = computed(() => moduleType.value === 'section')
-
 const isRow = computed(() => moduleType.value === 'row')
-
 const isColumn = computed(() => moduleType.value === 'column')
+const isContent = computed(() => !isSection.value && !isRow.value && !isColumn.value)
 
 const hasChildren = computed(() => 
   Array.isArray(props.module.children)
@@ -196,10 +204,18 @@ const canAddChildren = computed(() => {
 })
 
 const childType = computed(() => {
-  // Section -> Row, Row -> Column, Column -> any module
-  if (moduleType.value === 'section') return 'row'
-  if (moduleType.value === 'row') return 'column'
-  return 'module'
+  // If explicitly defined in registry, use that
+  const def = moduleDefinition.value
+  if (def?.children) {
+      const type = Array.isArray(def.children) ? def.children[0] : def.children
+      if (type === '*') return 'module' // Treat * as generic module insertion
+      return type
+  }
+  // Fallbacks
+  if (isSection.value) return 'row'
+  if (isRow.value) return 'column'
+  if (isColumn.value) return 'module'
+  return null
 })
 
 const shouldShowAddChildButton = computed(() => {
@@ -259,17 +275,40 @@ const openSettings = () => {
   selectModule()
 }
 
+const handlePlusClick = () => {
+    if (canAddChildren.value) {
+        addChild()
+    } else {
+        addSibling()
+    }
+}
+
 const addChild = () => {
-  // Insert appropriate child type
   const type = childType.value
+  if (!type) return
+
   if (type === 'row') {
-     // Use the modal for rows to select column structure
     builder?.openInsertRowModal(props.module.id)
   } else if (type === 'module') {
     builder?.openInsertModal(props.module.id)
   } else {
+    // Direct insertion for specific item types (like accordion_item)
     builder?.insertModule(type, props.module.id)
   }
+}
+
+const addSibling = () => {
+    // Find parent and insert after
+    const parent = builder.findParentById(builder.blocks, props.module.id)
+    const parentId = parent ? parent.id : null
+    
+    if (parentId) {
+        // If parent is a container, we use openInsertModal with index
+        builder?.openInsertModal(parentId, props.index + 1)
+    } else {
+        // Top level (shouldn't happen for content modules, but just in case)
+        builder?.openInsertModal(null, props.index + 1)
+    }
 }
 
 const addSiblingSection = () => {
@@ -284,6 +323,10 @@ const addSiblingRow = () => {
     if (parentSectionId) {
         builder?.openInsertRowModal(parentSectionId)
     }
+}
+
+const openRowLayoutModal = () => {
+    builder?.openUpdateRowModal(props.module.id)
 }
 
 // Helper to find parent module ID
@@ -326,6 +369,8 @@ const handleMoreAction = (action) => {
         if (def && def.defaults) {
             builder?.updateModuleSettings(props.module.id, { ...def.defaults })
         }
+    } else if (action === 'savePreset') {
+        builder?.openSavePresetModal(props.module.id)
     }
     // Handle other actions...
 }
@@ -429,12 +474,13 @@ const handleMoreAction = (action) => {
   z-index: 110; /* Above labels */
 }
 
-/* Specific toolbar positions per type to avoid overlap (Zig-Zag) */
+/* Specific toolbar positions */
 
 /* Section: Top-Left Inside */
 .module-wrapper--section > .module-toolbar {
     top: 0;
     left: 0;
+    right: auto;
     background: var(--builder-toolbar-bg-section);
     border-bottom-right-radius: var(--border-radius-sm);
 }
@@ -448,13 +494,14 @@ const handleMoreAction = (action) => {
     border-bottom-left-radius: var(--border-radius-sm);
 }
 
-/* Column: Top-Left Inside */
+/* Column: Top-Right Inside (Moved from Left to prevent clipping) */
 .module-toolbar--column {
     top: 0;
-    left: 0;
-    right: auto;
+    left: auto;
+    right: 0;
     background: var(--builder-toolbar-bg-module);
-    border-bottom-right-radius: var(--border-radius-sm);
+    border-bottom-left-radius: var(--border-radius-sm);
+    border-bottom-right-radius: 0;
 }
 
 /* Module/Content: Top-Right Inside */
@@ -506,46 +553,31 @@ const handleMoreAction = (action) => {
   transition: all 0.2s ease;
 }
 
-/* SMART STRATEGY: Shift label to RIGHT when toolbar is on LEFT */
-.module-wrapper--selected > .module-label,
-.module-wrapper--hovered > .module-label {
-    left: auto;
-    right: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 4px;
-}
+/* SMART LABEL POSITIONING */
 
-/* For Row and Content (Toolbar is on Right, so move Label to LEFT) */
-/* Wait, labels are already on left. So when selected, Row label should shift? */
-/* Actually, let's just make it consistent: Labels on LEFT by default, shift to RIGHT on active. */
-/* But if toolbar is on right, label can stay left. */
-
-/* Section: Toolbar LEFT -> Shift Label RIGHT */
+/* Section: Toolbar LEFT -> Label shifts RIGHT on select/hover */
 .module-wrapper--section.module-wrapper--selected > .module-label,
 .module-wrapper--section.module-wrapper--hovered > .module-label {
     left: auto;
     right: 0;
-}
-
-/* Row: Toolbar RIGHT -> Label stays LEFT (No change needed) */
-.module-wrapper--row.module-wrapper--selected > .module-label,
-.module-wrapper--row.module-wrapper--hovered > .module-label {
-    left: 0;
-    right: auto;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 0;
-}
-
-/* Column: Toolbar LEFT -> Shift Label RIGHT */
-.module-wrapper--column.module-wrapper--selected > .module-label,
-.module-wrapper--column.module-wrapper--hovered > .module-label {
-    left: auto;
-    right: 0;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 4px;
 }
 
-/* Module: Toolbar RIGHT -> Label stays LEFT (already left) */
+/* Row, Column, Module: Toolbar RIGHT -> Label stays LEFT (No shift usually needed) */
+/* But if we want to ensure visibility if something overlaps, we can keep them left 
+   since the toolbar is on the right. */
+
+/* Explicitly keep them left even on select/hover */
+.module-wrapper--row.module-wrapper--selected > .module-label,
+.module-wrapper--row.module-wrapper--hovered > .module-label,
+.module-wrapper--column.module-wrapper--selected > .module-label,
+.module-wrapper--column.module-wrapper--hovered > .module-label,
+.module-wrapper--content.module-wrapper--selected > .module-label,
+.module-wrapper--content.module-wrapper--hovered > .module-label {
+    left: 0;
+    right: auto;
+}
 
 .module-wrapper--grid.module-wrapper--section > .module-label,
 .module-wrapper--wireframe.module-wrapper--section > .module-label {

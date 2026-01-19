@@ -23,7 +23,7 @@ export default {
     icon: 'Image',
     category: 'fullwidth',
 
-    children: ['fullwidthslide_item'],
+    children: ['fullwidth_slide_item'],
 
     defaults: {
         // Navigation

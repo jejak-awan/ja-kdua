@@ -7,6 +7,7 @@
 export const backgroundSettings = {
     id: 'background',
     label: 'Background',
+    presets: true,
     fields: [
         {
             name: 'background',
@@ -20,6 +21,7 @@ export const backgroundSettings = {
 export const spacingSettings = {
     id: 'spacing',
     label: 'Spacing',
+    presets: true,
     fields: [
         {
             name: 'padding',
@@ -42,6 +44,7 @@ export const spacingSettings = {
 export const borderSettings = {
     id: 'border',
     label: 'Border',
+    presets: true,
     fields: [
         {
             name: 'border',
@@ -55,6 +58,7 @@ export const borderSettings = {
 export const boxShadowSettings = {
     id: 'boxShadow',
     label: 'Box Shadow',
+    presets: true,
     fields: [
         {
             name: 'boxShadow',
@@ -68,6 +72,7 @@ export const boxShadowSettings = {
 export const typographySettings = {
     id: 'typography',
     label: 'Typography',
+    presets: true,
     fields: [
         {
             name: 'font_family',
@@ -155,6 +160,7 @@ export const typographySettings = {
 export const animationSettings = {
     id: 'animation',
     label: 'Animation',
+    presets: true,
     fields: [
         {
             name: 'animation_effect',
@@ -229,6 +235,7 @@ export const cssSettings = {
 export const sizingSettings = {
     id: 'sizing',
     label: 'Sizing',
+    presets: true,
     fields: [
         {
             name: 'width',
@@ -277,6 +284,7 @@ export const sizingSettings = {
 export const filterSettings = {
     id: 'filters',
     label: 'Filters',
+    presets: true,
     fields: [
         {
             name: 'opacity',
@@ -399,6 +407,7 @@ export const filterSettings = {
 export const transformSettings = {
     id: 'transform',
     label: 'Transform',
+    presets: true,
     fields: [
         {
             name: 'transform_scale',

@@ -23,13 +23,16 @@ import LogoBlock from '../blocks/LogoBlock.vue'
 // Media Blocks
 import VideoBlock from '../blocks/VideoBlock.vue'
 import GalleryBlock from '../blocks/GalleryBlock.vue'
+import GalleryItemBlock from '../blocks/GalleryItemBlock.vue'
 import MapBlock from '../blocks/MapBlock.vue'
+import MapPinBlock from '../blocks/MapPinBlock.vue'
 import AudioBlock from '../blocks/AudioBlock.vue'
 import BeforeAfterBlock from '../blocks/BeforeAfterBlock.vue'
 import VideoPopupBlock from '../blocks/VideoPopupBlock.vue'
 import EmbedBlock from '../blocks/EmbedBlock.vue'
 import LottieBlock from '../blocks/LottieBlock.vue'
 import VideoSliderBlock from '../blocks/VideoSliderBlock.vue'
+import VideoSlideItemBlock from '../blocks/VideoSlideItemBlock.vue'
 
 // Content Blocks
 import BlurbBlock from '../blocks/BlurbBlock.vue'
@@ -40,11 +43,13 @@ import SocialLinksBlock from '../blocks/SocialLinksBlock.vue'
 import CountdownBlock from '../blocks/CountdownBlock.vue'
 import ProgressBarBlock from '../blocks/ProgressBarBlock.vue'
 import PricingTableBlock from '../blocks/PricingTableBlock.vue'
+import PricingFeatureBlock from '../blocks/PricingFeatureBlock.vue'
 import AlertBlock from '../blocks/AlertBlock.vue'
 import CodeBlock from '../blocks/CodeBlock.vue'
 import TeamMemberBlock from '../blocks/TeamMemberBlock.vue'
 import CircleCounterBlock from '../blocks/CircleCounterBlock.vue'
 import IconListBlock from '../blocks/IconListBlock.vue'
+import IconListItemBlock from '../blocks/IconListItemBlock.vue'
 import BreadcrumbsBlock from '../blocks/BreadcrumbsBlock.vue'
 import AuthorBlock from '../blocks/AuthorBlock.vue'
 import StarRatingBlock from '../blocks/StarRatingBlock.vue'
@@ -64,14 +69,18 @@ import GroupCarouselBlock from '../blocks/GroupCarouselBlock.vue'
 
 // Interactive Blocks
 import TabsBlock from '../blocks/TabsBlock.vue'
+import TabItemBlock from '../blocks/TabItemBlock.vue'
 import AccordionBlock from '../blocks/AccordionBlock.vue'
+import AccordionItemBlock from '../blocks/AccordionItemBlock.vue'
 import ToggleBlock from '../blocks/ToggleBlock.vue'
 import SliderBlock from '../blocks/SliderBlock.vue'
+import SlideItemBlock from '../blocks/SlideItemBlock.vue'
 
 // Forms Blocks
 import SearchBlock from '../blocks/SearchBlock.vue'
 import LoginBlock from '../blocks/LoginBlock.vue'
 import ContactFormBlock from '../blocks/ContactFormBlock.vue'
+import ContactFieldBlock from '../blocks/ContactFieldBlock.vue'
 import SignupBlock from '../blocks/SignupBlock.vue'
 import NewsletterBlock from '../blocks/NewsletterBlock.vue'
 
@@ -99,6 +108,9 @@ import FullwidthMenuBlock from '../blocks/FullwidthMenuBlock.vue'
 import FullwidthPostContentBlock from '../blocks/FullwidthPostContentBlock.vue'
 import FullwidthPostSliderBlock from '../blocks/FullwidthPostSliderBlock.vue'
 import FullwidthPostTitleBlock from '../blocks/FullwidthPostTitleBlock.vue'
+import FullwidthSlideItemBlock from '../blocks/FullwidthSlideItemBlock.vue'
+import SidebarWidgetBlock from '../blocks/SidebarWidgetBlock.vue'
+import LogoGridItemBlock from '../blocks/LogoGridItemBlock.vue'
 
 /**
  * Register all block components
@@ -122,13 +134,16 @@ export function registerBlockComponents() {
     // Media
     ModuleRegistry.registerComponent('video', VideoBlock)
     ModuleRegistry.registerComponent('gallery', GalleryBlock)
+    ModuleRegistry.registerComponent('gallery_item', GalleryItemBlock)
     ModuleRegistry.registerComponent('map', MapBlock)
+    ModuleRegistry.registerComponent('map_pin', MapPinBlock)
     ModuleRegistry.registerComponent('audio', AudioBlock)
     ModuleRegistry.registerComponent('beforeafter', BeforeAfterBlock)
     ModuleRegistry.registerComponent('videopopup', VideoPopupBlock)
     ModuleRegistry.registerComponent('embed', EmbedBlock)
     ModuleRegistry.registerComponent('lottie', LottieBlock)
     ModuleRegistry.registerComponent('videoslider', VideoSliderBlock)
+    ModuleRegistry.registerComponent('video_slide_item', VideoSlideItemBlock)
 
     // Content
     ModuleRegistry.registerComponent('blurb', BlurbBlock)
@@ -139,22 +154,26 @@ export function registerBlockComponents() {
     ModuleRegistry.registerComponent('countdown', CountdownBlock)
     ModuleRegistry.registerComponent('progressbar', ProgressBarBlock)
     ModuleRegistry.registerComponent('pricingtable', PricingTableBlock)
+    ModuleRegistry.registerComponent('pricing_feature', PricingFeatureBlock)
     ModuleRegistry.registerComponent('alert', AlertBlock)
     ModuleRegistry.registerComponent('code', CodeBlock)
     ModuleRegistry.registerComponent('teammember', TeamMemberBlock)
     ModuleRegistry.registerComponent('circlecounter', CircleCounterBlock)
     ModuleRegistry.registerComponent('iconlist', IconListBlock)
+    ModuleRegistry.registerComponent('icon_list_item', IconListItemBlock)
     ModuleRegistry.registerComponent('breadcrumbs', BreadcrumbsBlock)
     ModuleRegistry.registerComponent('author', AuthorBlock)
     ModuleRegistry.registerComponent('starrating', StarRatingBlock)
     ModuleRegistry.registerComponent('tableofcontents', TableOfContentsBlock)
     ModuleRegistry.registerComponent('quote', QuoteBlock)
     ModuleRegistry.registerComponent('logogrid', LogoGridBlock)
+    ModuleRegistry.registerComponent('logo_grid_item', LogoGridItemBlock)
     ModuleRegistry.registerComponent('faq', FAQBlock)
     ModuleRegistry.registerComponent('feature', FeatureBlock)
     ModuleRegistry.registerComponent('numberbox', NumberBoxBlock)
     ModuleRegistry.registerComponent('sharebuttons', ShareButtonsBlock)
     ModuleRegistry.registerComponent('sidebar', SidebarBlock)
+    ModuleRegistry.registerComponent('sidebar_widget', SidebarWidgetBlock)
     ModuleRegistry.registerComponent('menu', MenuBlock)
     ModuleRegistry.registerComponent('person', PersonBlock)
     ModuleRegistry.registerComponent('numbercounter', NumberCounterBlock)
@@ -163,14 +182,18 @@ export function registerBlockComponents() {
 
     // Interactive
     ModuleRegistry.registerComponent('tabs', TabsBlock)
+    ModuleRegistry.registerComponent('tab_item', TabItemBlock)
     ModuleRegistry.registerComponent('accordion', AccordionBlock)
+    ModuleRegistry.registerComponent('accordion_item', AccordionItemBlock)
     ModuleRegistry.registerComponent('toggle', ToggleBlock)
     ModuleRegistry.registerComponent('slider', SliderBlock)
+    ModuleRegistry.registerComponent('slide_item', SlideItemBlock)
 
     // Forms
     ModuleRegistry.registerComponent('search', SearchBlock)
     ModuleRegistry.registerComponent('login', LoginBlock)
     ModuleRegistry.registerComponent('contactform', ContactFormBlock)
+    ModuleRegistry.registerComponent('contact_field', ContactFieldBlock)
     ModuleRegistry.registerComponent('signup', SignupBlock)
     ModuleRegistry.registerComponent('newsletter', NewsletterBlock)
 
@@ -190,6 +213,7 @@ export function registerBlockComponents() {
     // Fullwidth
     ModuleRegistry.registerComponent('fullwidthheader', FullwidthHeaderBlock)
     ModuleRegistry.registerComponent('fullwidthslider', FullwidthSliderBlock)
+    ModuleRegistry.registerComponent('fullwidth_slide_item', FullwidthSlideItemBlock)
     ModuleRegistry.registerComponent('fullwidthportfolio', FullwidthPortfolioBlock)
     ModuleRegistry.registerComponent('fullwidthcode', FullwidthCodeBlock)
     ModuleRegistry.registerComponent('fullwidthimage', FullwidthImageBlock)

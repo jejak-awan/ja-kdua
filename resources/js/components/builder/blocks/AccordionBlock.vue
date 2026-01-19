@@ -1,48 +1,26 @@
 <template>
   <div class="accordion-block" :style="wrapperStyles">
-    <div 
-      v-for="item in accordionItems" 
-      :key="item.id"
-      class="accordion-item"
-      :style="itemStyles"
+    <draggable
+      v-model="module.children"
+      item-key="id"
+      group="accordion_item"
+      class="accordion-items-container"
+      ghost-class="ja-builder-ghost"
     >
-      <!-- Header -->
-      <button 
-        class="accordion-header"
-        :class="{ 'accordion-header--open': openItems.includes(item.id) }"
-        :style="headerStyles"
-        @click="toggleItem(item.id)"
-      >
-        <ChevronDown 
-          v-if="toggleIcon !== 'none' && iconPosition === 'left'"
-          class="accordion-icon accordion-icon--left"
-          :class="{ 'accordion-icon--rotated': openItems.includes(item.id) }"
-          :style="iconStyles"
+      <template #item="{ element: child, index }">
+        <ModuleWrapper
+          :module="child"
+          :index="index"
         />
-        <span class="accordion-title">{{ item.title }}</span>
-        <ChevronDown 
-          v-if="toggleIcon !== 'none' && iconPosition === 'right'"
-          class="accordion-icon"
-          :class="{ 'accordion-icon--rotated': openItems.includes(item.id) }"
-          :style="iconStyles"
-        />
-      </button>
-      
-      <!-- Content -->
-      <div 
-        v-show="openItems.includes(item.id)"
-        class="accordion-content"
-        :style="contentStyles"
-      >
-        <div v-html="item.content" />
-      </div>
-    </div>
+      </template>
+    </draggable>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { computed, ref, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -92,6 +70,13 @@ const toggleItem = (id) => {
     openItems.value = openItems.value.includes(id) ? [] : [id]
   }
 }
+
+// Provide state to AccordionItemBlock
+provide('accordionState', {
+    openItems,
+    toggleItem,
+    parentSettings: settings
+})
 
 const builder = inject('builder')
 const device = computed(() => builder?.device || 'desktop')

@@ -69,8 +69,10 @@
       />
       <InsertRowModal
         v-if="showInsertRowModal"
+        :mode="insertRowMode"
         @close="showInsertRowModal = false"
         @insert="insertRow"
+        @update="updateRow"
       />
       <InsertSectionModal
         v-if="showInsertSectionModal"
@@ -108,6 +110,13 @@
         :canvas="activeCanvasData"
         @close="showCanvasSettingsModal = false"
         @save="handleSaveCanvasSettings"
+      />
+
+      <SavePresetModal
+        v-if="builder.savePresetModal.visible"
+        :loading="builder.savePresetModal.loading"
+        @close="builder.closeSavePresetModal"
+        @save="builder.handleSavePreset"
       />
       
       <ContextMenu 
@@ -148,6 +157,7 @@ import ResponsiveFieldModal from './modals/ResponsiveFieldModal.vue'
 import AddCanvasModal from './modals/AddCanvasModal.vue'
 import ImportExportModal from './modals/ImportExportModal.vue'
 import CanvasSettingsModal from './modals/CanvasSettingsModal.vue'
+import SavePresetModal from './modals/SavePresetModal.vue'
 import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
@@ -225,6 +235,7 @@ const activePanel = ref('layers')
 // device is managed by builder
 const showInsertModal = ref(false)
 const insertTargetId = ref(null)
+const insertTargetIndex = ref(-1)
 
 const showInsertRowModal = ref(false)
 const insertRowTargetId = ref(null)
@@ -296,13 +307,23 @@ const closeSettings = () => {
   builder.clearSelection()
 }
 
-const openInsertModal = (targetId) => {
+const openInsertModal = (targetId, index = -1) => {
   insertTargetId.value = targetId
+  insertTargetIndex.value = index
   showInsertModal.value = true
 }
 
+const insertRowMode = ref('insert') // 'insert' | 'edit'
+
 const openInsertRowModal = (targetId) => {
   insertRowTargetId.value = targetId
+  insertRowMode.value = 'insert'
+  showInsertRowModal.value = true
+}
+
+const openUpdateRowModal = (rowId) => {
+  insertRowTargetId.value = rowId
+  insertRowMode.value = 'edit'
   showInsertRowModal.value = true
 }
 
@@ -321,7 +342,7 @@ const openStructureTemplateModal = (targetId, targetType) => {
 }
 
 const insertModule = (type) => { // Keep for backward compat if needed, but primary logic is below
-  builder.insertModule(type, insertTargetId.value)
+  builder.insertModule(type, insertTargetId.value, insertTargetIndex.value)
   showInsertModal.value = false
 }
 
@@ -330,6 +351,13 @@ const handleModuleInsert = (type, payload) => {
   if (type === 'row') {
     insertRowTargetId.value = insertTargetId.value
     insertRow(payload)
+    return
+  }
+
+  // Handle Preset insertion
+  if (type === 'preset') {
+    builder.insertFromPreset(payload, insertTargetId.value, insertTargetIndex.value)
+    showInsertModal.value = false
     return
   }
 
@@ -391,6 +419,14 @@ const insertRow = (layout) => {
   }
   
   showInsertRowModal.value = false
+}
+
+const updateRow = (layout) => {
+    const success = builder.updateRowLayout(insertRowTargetId.value, layout)
+    if (!success) {
+        toast.error('Could not update row layout')
+    }
+    showInsertRowModal.value = false
 }
 
 const handleResponsiveUpdate = (updates) => {
@@ -621,6 +657,7 @@ builder.openImportExportModal = (id) => {
 // Assign modal openers to builder (to avoid TDZ)
 builder.openInsertModal = openInsertModal
 builder.openInsertRowModal = openInsertRowModal
+builder.openUpdateRowModal = openUpdateRowModal
 builder.openInsertSectionModal = openInsertSectionModal
 builder.openStructureTemplateModal = openStructureTemplateModal
 builder.openContextMenu = openContextMenu
@@ -632,6 +669,3 @@ provide('darkMode', computed({
   set: (val) => cmsStore.toggleDarkMode(val)
 }))
 </script>
-
-
-

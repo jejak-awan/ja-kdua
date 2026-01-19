@@ -1,24 +1,21 @@
 <template>
   <div class="slider-block" :style="wrapperStyles">
     <div class="slider-container" :style="containerStyles">
-      <!-- Slides -->
-      <div 
-        v-for="(slide, index) in sliderSlides" 
-        :key="slide.id || index"
-        class="slider-slide"
-        :class="{ 'slider-slide--active': currentSlide === index }"
-        :style="slideStyles(slide)"
+      <!-- Slides Container -->
+      <draggable
+        v-model="module.children"
+        item-key="id"
+        group="slide_item"
+        class="slider-slides-container"
+        ghost-class="ja-builder-ghost"
       >
-        <!-- Overlay -->
-        <div v-if="overlayEnabled" class="slider-overlay" :style="overlayStyles" />
-        
-        <!-- Content -->
-        <div class="slider-content" :style="contentStyles">
-          <h2 v-if="slide.title" class="slider-title" :style="titleStyles">{{ slide.title }}</h2>
-          <p v-if="slide.content" class="slider-text" :style="textStyles">{{ slide.content }}</p>
-          <a v-if="slide.buttonText" :href="slide.buttonUrl" class="slider-button" :style="buttonStyles">{{ slide.buttonText }}</a>
-        </div>
-      </div>
+        <template #item="{ element: child, index }">
+          <ModuleWrapper
+            :module="child"
+            :index="index"
+          />
+        </template>
+      </draggable>
       
       <!-- Arrows -->
       <button v-if="showArrows" class="slider-arrow slider-arrow--prev" @click="prevSlide">
@@ -43,7 +40,9 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { computed, ref, onMounted, onUnmounted, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -104,6 +103,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (autoplayInterval) clearInterval(autoplayInterval)
+})
+
+// Provide state to SlideItemBlock
+provide('sliderState', {
+    currentSlide,
+    parentSettings: settings
 })
 
 const wrapperStyles = computed(() => {

@@ -14,7 +14,7 @@
           :key="tab.id"
           class="modal-tab"
           :class="{ 'modal-tab--active': activeTab === tab.id }"
-          @click="activeTab = tab.id"
+          @click="handleTabChange(tab.id)"
         >
           {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : (te('builder.insertSectionModal.tabs.' + tab.id) ? $t('builder.insertSectionModal.tabs.' + tab.id) : tab.label) }}
         </button>
@@ -22,6 +22,19 @@
     </template>
 
     <div class="modal-body-content">
+      <!-- Search (Presets) -->
+      <div v-if="activeTab === 'presets'" class="modal-search-wrapper" style="padding-bottom: 16px;">
+        <BaseInput 
+          v-model="searchQuery"
+          :placeholder="$t('builder.insertModal.searchPlaceholder')"
+          autofocus
+        >
+          <template #prefix>
+             <Search :size="16" />
+          </template>
+        </BaseInput>
+      </div>
+
       <div class="modal-content">
         <div v-if="activeTab === 'section'" class="layout-wrapper">
           
@@ -80,8 +93,36 @@
 
         </div>
         
+        <div v-if="activeTab === 'presets'" class="library-content">
+          <div v-if="loadingPresets" class="no-results">
+            <div class="loading-spinner"></div>
+            <p>{{ $t('common.messages.loading') }}</p>
+          </div>
+          <div v-else-if="filteredPresets.length === 0" class="no-results">
+            {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
+          </div>
+          <div v-else class="module-content">
+            <div v-for="(typePresets, type) in groupedPresets" :key="type" class="module-group">
+              <h4 class="group-title"><span>{{ type }}</span></h4>
+              <div class="module-grid">
+                <button
+                  v-for="preset in typePresets"
+                  :key="preset.id"
+                  class="module-card"
+                  @click="selectPreset(preset)"
+                >
+                  <div class="module-icon">
+                    <component :is="getPreviewIcon({ category: 'hero' })" :size="24" />
+                  </div>
+                  <span class="module-name">{{ preset.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Library Tab - Section Templates -->
-        <div v-else class="library-wrapper">
+        <div v-else-if="activeTab === 'library'" class="library-wrapper">
           <div v-for="group in templateGroups" :key="group.id" class="template-group">
             <h4 class="group-title">
               <span class="category-badge category-badge--template">
@@ -119,7 +160,8 @@
 <script setup>
 import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { BaseModal } from '../ui'
+import { BaseModal, BaseInput } from '../ui'
+import { Search } from 'lucide-vue-next'
 import ModuleRegistry from '../core/ModuleRegistry'
 import { 
     equalLayouts, 
@@ -148,8 +190,43 @@ const { t, te } = useI18n()
 
 const tabs = [
   { id: 'section', label: 'New Section' },
+  { id: 'presets', label: 'Design Presets' },
   { id: 'library', label: 'Add From Library' }
 ]
+
+// Search/Filter logic
+const searchQuery = ref('')
+const loadingPresets = computed(() => builder?.loadingPresets || false)
+const presets = computed(() => builder?.presets || [])
+
+const filteredPresets = computed(() => {
+  const allPresets = presets.value.filter(p => p.type === 'section')
+  if (!searchQuery.value) return allPresets
+  const query = searchQuery.value.toLowerCase()
+  return allPresets.filter(p => p.name.toLowerCase().includes(query))
+})
+
+const groupedPresets = computed(() => {
+  const groups = {}
+  filteredPresets.value.forEach(preset => {
+    const type = preset.type.charAt(0).toUpperCase() + preset.type.slice(1)
+    if (!groups[type]) groups[type] = []
+    groups[type].push(preset)
+  })
+  return groups
+})
+
+const selectPreset = (preset) => {
+  emit('inserted', 'preset', preset)
+  emit('close')
+}
+
+const handleTabChange = (tabId) => {
+  activeTab.value = tabId
+  if (tabId === 'presets' && presets.value.length === 0) {
+    builder?.fetchPresets()
+  }
+}
 
 const allGroups = computed(() => [
   { id: 'equal', type: 'flex', title: 'Equal Columns', items: equalLayouts },
@@ -553,5 +630,52 @@ const selectLayout = (layout) => {
     border: none;
     padding: 0;
     margin-right: 8px;
+}
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.module-card {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px;
+  background: transparent;
+  border: 1px solid var(--builder-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.module-card:hover {
+  border-color: var(--builder-accent);
+  background: var(--builder-bg-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.module-icon {
+  color: var(--builder-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-name {
+  font-size: 11px;
+  color: var(--builder-text-primary);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--builder-text-muted);
+  padding: 40px;
 }
 </style>

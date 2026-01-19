@@ -23,7 +23,7 @@ export default {
     icon: 'List',
     category: 'content',
 
-    children: ['iconlist_item'],
+    children: ['icon_list_item'],
 
     defaults: {
         // Icon

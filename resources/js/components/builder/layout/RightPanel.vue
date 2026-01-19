@@ -34,34 +34,11 @@
         <h3 class="panel-title">{{ moduleTitle }}</h3>
         
         <!-- New: Presets Dropdown (Moved to Header) -->
-        <div class="presets-dropdown-wrapper" style="margin-left: auto;">
-          <BaseDropdown align="right" :width="240">
-            <template #trigger="{ open }">
-              <IconButton 
-                :icon="Library" 
-                :active="open" 
-                :title="$t('builder.presets.title')" 
-              />
-            </template>
-            
-            <template #default="{ close }">
-              <div class="preset-header">
-                <Check :size="14" class="preset-check" />
-                <div class="preset-info">
-                  <div class="preset-name">{{ $t('builder.presets.defaultPreset') }}</div>
-                  <div class="preset-sub">{{ $t('builder.presets.basedOn', { name: 'Preset 1' }) }}</div>
-                </div>
-              </div>
-              <BaseDivider :margin="4" />
-              <button class="dropdown-item primary-action" @click="close">
-                {{ $t('builder.presets.newFromCurrent') }}
-              </button>
-              <button class="dropdown-item accent-action" @click="close">
-                {{ $t('builder.presets.addNew') }}
-              </button>
-            </template>
-          </BaseDropdown>
-        </div>
+        <DesignPresetsSelector 
+          style="margin-left: auto;"
+          :type="module.type"
+          @action="handlePresetAction"
+        />
       </div>
     </header>
     
@@ -159,6 +136,7 @@ import ModuleRegistry from '../core/ModuleRegistry'
 import SettingsPanel from '../settings/SettingsPanel.vue'
 import ResponsiveBreakpointsModal from '../modals/ResponsiveBreakpointsModal.vue'
 import { BaseButton, IconButton, BaseInput, BaseDropdown, BaseDivider } from '../ui'
+import DesignPresetsSelector from '../settings/DesignPresetsSelector.vue'
 
 const icons = { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library }
 
@@ -262,6 +240,15 @@ const handleBreakpointsSave = (breakpointsData) => {
 
 const toggleDeviceView = () => {
   showResponsive.value = !showResponsive.value
+}
+
+const handlePresetAction = (payload) => {
+  const { type, data } = payload
+  if (type === 'addNew' || type === 'newFromCurrent') {
+    builder?.openSavePresetModal(props.module.id)
+  } else if (type === 'apply' && data) {
+    builder?.applyPreset(props.module.id, data)
+  }
 }
 </script>
 

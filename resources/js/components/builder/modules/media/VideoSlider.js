@@ -23,7 +23,7 @@ export default {
     icon: 'Film',
     category: 'media',
 
-    children: ['videoslide_item'],
+    children: ['video_slide_item'],
 
     defaults: {
         // Navigation

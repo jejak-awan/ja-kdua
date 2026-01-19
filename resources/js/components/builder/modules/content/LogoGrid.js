@@ -23,7 +23,7 @@ export default {
     icon: 'Grid',
     category: 'content',
 
-    children: ['logogrid_item'],
+    children: ['logo_grid_item'],
 
     defaults: {
         title: 'Trusted by',

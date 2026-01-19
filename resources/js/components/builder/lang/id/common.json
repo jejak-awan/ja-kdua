@@ -1,4 +1,9 @@
 {
+    "messages": {
+        "loading": "Memuat...",
+        "noResults": "Tidak ada hasil ditemukan.",
+        "confirmDelete": "Apakah Anda yakin ingin menghapus ini?"
+    },
     "fields": {
         "actions": {
             "reset": "Atur Ulang",
@@ -16,7 +21,8 @@
             "upload": "Unggah",
             "select": "Pilih",
             "cancel": "Batal",
-            "apply": "Terapkan"
+            "apply": "Terapkan",
+            "savePreset": "Simpan sebagai Preset"
         },
         "inherited": "Turunan",
         "dynamicContent": "Konten Dinamis",
@@ -397,6 +403,7 @@
         }
     },
     "items": {
+        "layout": "Tata Letak",
         "edit": "Ubah",
         "duplicate": "Duplikat",
         "delete": "Hapus",
@@ -556,6 +563,9 @@
             "emptyDesc": "Coba sesuaikan pencarian atau kategori Anda."
         },
         "presets": {
+            "title": "Preset Gaya",
+            "empty": "Tidak ada preset ditemukan. Simpan modul sebagai preset untuk melihatnya di sini.",
+            "yourPresets": "Preset Anda",
             "categories": {
                 "buttons": "Gaya Tombol",
                 "cards": "Gaya Kartu"
@@ -569,7 +579,15 @@
                 "glassmorphism": "Efek Kaca"
             },
             "actions": {
-                "apply": "Terapkan"
+                "apply": "Terapkan",
+                "delete": "Hapus"
+            },
+            "saveModal": {
+                "title": "Simpan sebagai Preset",
+                "description": "Simpan konfigurasi modul ini untuk digunakan kembali nanti di seluruh situs Anda.",
+                "nameLabel": "Nama Preset",
+                "placeholder": "misal: Tombol Bulat Utama",
+                "saveBtn": "Simpan Preset"
             }
         },
         "portability": {
@@ -647,7 +665,8 @@
             "module": "Modul Baru",
             "row": "Baris Baru",
             "section": "Bagian Baru",
-            "library": "Dari Pustaka"
+            "library": "Dari Pustaka",
+            "presets": "Preset Desain"
         },
         "layoutGroups": {
             "equal": "Kolom Sama",
@@ -840,7 +859,7 @@
     },
     "presets": {
         "title": "Preset Desain",
-        "newFromCurrent": "Preset Baru dari Gaya Saat Ini",
+        "newFromCurrent": "Preset Baru Dari Gaya Saat Ini",
         "addNew": "Tambah Preset Baru",
         "defaultPreset": "Preset Default",
         "basedOn": "Berdasarkan: {name}"

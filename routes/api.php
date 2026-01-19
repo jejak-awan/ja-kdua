@@ -553,6 +553,9 @@ Route::prefix('v1')->group(function () {
             Route::get('dynamic-sources', [App\Http\Controllers\Api\V1\BuilderController::class, 'dynamicSources']);
             Route::post('resolve-dynamic', [App\Http\Controllers\Api\V1\BuilderController::class, 'resolveDynamic']);
         });
+
+        // Builder Presets
+        Route::apiResource('builder-presets', App\Http\Controllers\Api\V1\BuilderPresetController::class);
     });
 });
 

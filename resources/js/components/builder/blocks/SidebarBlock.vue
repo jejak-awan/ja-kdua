@@ -1,51 +1,29 @@
 <template>
   <aside class="sidebar-block" :style="wrapperStyles">
     <!-- Dynamic Widgets -->
-    <div v-for="(widget, index) in widgetList" :key="index" class="sidebar-widget">
-      <!-- Search Widget -->
-      <div v-if="widget.type === 'search'">
-        <h4 v-if="showTitle" class="widget-title" :style="titleStyles">{{ widget.title || 'Search' }}</h4>
-        <div class="search-widget">
-          <input type="text" placeholder="Search..." class="search-input" :style="widgetStyles" />
-          <SearchIcon class="search-icon" />
-        </div>
-      </div>
-
-      <!-- Categories Widget -->
-      <div v-else-if="widget.type === 'categories'">
-        <h4 v-if="showTitle" class="widget-title" :style="titleStyles">{{ widget.title || 'Categories' }}</h4>
-        <ul class="widget-list">
-          <li v-for="cat in categories" :key="cat"><a href="#" :style="widgetStyles">{{ cat }}</a></li>
-        </ul>
-      </div>
-
-      <!-- Recent Posts Widget -->
-      <div v-else-if="widget.type === 'recentposts'">
-        <h4 v-if="showTitle" class="widget-title" :style="titleStyles">{{ widget.title || 'Recent Posts' }}</h4>
-        <ul class="widget-list">
-          <li v-for="i in widget.count || 3" :key="i"><a href="#" :style="widgetStyles">Sample Post Title {{ i }}</a></li>
-        </ul>
-      </div>
-
-      <!-- Tags Widget -->
-      <div v-else-if="widget.type === 'tags'">
-        <h4 v-if="showTitle" class="widget-title" :style="titleStyles">{{ widget.title || 'Tags' }}</h4>
-        <div class="tags-cloud">
-          <a v-for="tag in tags" :key="tag" href="#" class="tag" :style="widgetStyles">{{ tag }}</a>
-        </div>
-      </div>
-      
-      <!-- Text/Generic Widget -->
-      <div v-else>
-         <h4 v-if="showTitle && widget.title" class="widget-title" :style="titleStyles">{{ widget.title }}</h4>
-         <p :style="widgetStyles">Widget content...</p>
-      </div>
-    </div>
+    <!-- Dynamic Widgets -->
+    <draggable
+      v-model="module.children"
+      item-key="id"
+      group="sidebar_widget"
+      class="sidebar-widgets"
+      ghost-class="ja-builder-ghost"
+    >
+      <template #item="{ element: child, index }">
+        <ModuleWrapper
+          :module="child"
+          :index="index"
+          class="sidebar-widget-wrapper"
+        />
+      </template>
+    </draggable>
   </aside>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Search as SearchIcon } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -67,16 +45,10 @@ const device = computed(() => builder?.device || 'desktop')
 
 const showTitle = computed(() => getResponsiveValue(settings.value, 'showTitle', device.value) !== false)
 
-const widgetList = computed(() => {
-  return (props.module.children || []).map(child => ({
-    type: getResponsiveValue(child.settings, 'widgetType', device.value) || 'text',
-    title: getResponsiveValue(child.settings, 'title', device.value) || '',
-    count: getResponsiveValue(child.settings, 'count', device.value) || 5
-  }))
+// Provide state to SidebarWidgetBlock
+provide('sidebarState', {
+    parentSettings: settings
 })
-
-const categories = ['Technology', 'Design', 'Business', 'Lifestyle']
-const tags = ['Design', 'Tech', 'News', 'Updates', 'Tips']
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }

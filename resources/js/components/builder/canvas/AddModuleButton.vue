@@ -91,20 +91,47 @@ const label = computed(() => {
 /* Column/Module: Gray/Standard */
 .add-module-btn--column,
 .add-module-btn--module {
-  background-color: var(--builder-text-secondary);
-  width: 100%; /* Module button is full width bar in wireframe usually, or keep button? */
-  border-radius: 4px; /* Module is rectangle */
+  background-color: var(--builder-grey);
+  width: 100%;
+  border-radius: 4px;
   height: 24px;
 }
 
-.add-module-btn--module {
+/* Floating overrides for Column/Module to be circular */
+.add-btn-wrapper--floating .add-module-btn--column {
+    background-color: var(--builder-column);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Floating overrides for Module to be circular (Consistent shape) */
+.add-btn-wrapper--floating .add-module-btn--module {
+    background-color: var(--builder-module, #4b5563);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    color: white;
+}
+
+.add-btn-wrapper--floating .add-module-btn--module:hover {
+    background-color: var(--builder-module-hover, #374151);
+    transform: scale(1.1);
+    border-color: transparent;
+}
+
+/* Standard (Non-floating) Module Button */
+.add-module-btn--module:not(.add-btn-wrapper--floating &) {
     background-color: var(--builder-bg-tertiary);
     color: var(--builder-text-secondary);
     box-shadow: none;
     border: 1px dashed var(--builder-border);
 }
 
-.add-module-btn--module:hover {
+.add-module-btn--module:not(.add-btn-wrapper--floating &):hover {
     background-color: var(--builder-bg-secondary);
     color: var(--builder-text-primary);
     border-color: var(--builder-accent);

@@ -2,20 +2,22 @@
   <div class="video-slider-block" :style="containerStyles">
     <div class="slider-viewport" :style="viewportStyles">
       <div class="slider-track" :style="trackStyles">
-        <div v-for="(video, index) in videoList" :key="index" class="video-slide" :style="slideStyles">
-          <div class="video-thumbnail" :style="{ aspectRatio: aspectRatioValue }">
-            <img v-if="video.thumbnail" :src="video.thumbnail" :alt="video.title" />
-            <div v-else class="thumbnail-placeholder">
-              <Film />
-            </div>
-            <div v-if="settings.showPlayButton !== false" class="play-overlay" :style="overlayStyles">
-              <button class="play-button" :style="playButtonStyles">
-                <Play />
-              </button>
-            </div>
-          </div>
-          <h4 v-if="video.title" class="video-title" :style="titleStyles">{{ video.title }}</h4>
-        </div>
+        <draggable
+          v-model="module.children"
+          item-key="id"
+          group="video_slide_item"
+          class="slider-draggable-track"
+          :style="{ display: 'flex', gap: `${gap}px`, width: '100%' }"
+          ghost-class="ja-builder-ghost"
+        >
+          <template #item="{ element: child, index }">
+            <ModuleWrapper
+              :module="child"
+              :index="index"
+              class="video-slide-wrapper"
+            />
+          </template>
+        </draggable>
       </div>
     </div>
     
@@ -23,13 +25,15 @@
     <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--next" @click="next"><ChevronRight /></button>
     
     <div v-if="settings.showDots !== false" class="slider-dots">
-      <button v-for="i in Math.ceil(videoList.length / slidesPerView)" :key="i" class="slider-dot" :class="{ 'slider-dot--active': currentPage === i - 1 }" @click="currentPage = i - 1" />
+      <button v-for="i in Math.ceil((module.children?.length || 0) / slidesPerView)" :key="i" class="slider-dot" :class="{ 'slider-dot--active': currentPage === i - 1 }" @click="currentPage = i - 1" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { Film, Play, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -71,10 +75,18 @@ const aspectRatioValue = computed(() => {
 })
 
 const next = () => { 
-  const maxPage = Math.ceil(videoList.value.length / slidesPerView.value) - 1
+  const totalSlides = props.module.children?.length || 0
+  const maxPage = Math.ceil(totalSlides / slidesPerView.value) - 1
   currentPage.value = Math.min(currentPage.value + 1, maxPage)
 }
 const prev = () => { currentPage.value = Math.max(currentPage.value - 1, 0) }
+
+// Provide state to VideoSlideItemBlock
+provide('videoSliderState', {
+    parentSettings: settings,
+    slidesPerView,
+    gap
+})
 
 const containerStyles = computed(() => {
   const styles = { position: 'relative' }

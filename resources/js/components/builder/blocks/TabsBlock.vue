@@ -16,20 +16,28 @@
     
     <!-- Tab Content -->
     <div class="tabs-content" :style="contentStyles">
-      <div 
-        v-for="tab in tabItems" 
-        :key="tab.id"
-        class="tab-pane"
-        :class="{ 'tab-pane--active': activeTabId === tab.id }"
+      <draggable
+        v-model="module.children"
+        item-key="id"
+        group="tab_item"
+        class="tabs-items-container"
+        ghost-class="ja-builder-ghost"
       >
-        <div v-html="tab.content" />
-      </div>
+        <template #item="{ element: child, index }">
+          <ModuleWrapper
+            :module="child"
+            :index="index"
+          />
+        </template>
+      </draggable>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -63,6 +71,12 @@ const tabItems = computed(() => {
 })
 
 const activeTabId = ref(settings.value.activeTab || tabItems.value[0]?.id || '')
+
+// Provide state to TabItemBlock
+provide('tabsState', {
+    activeTabId,
+    parentSettings: settings
+})
 
 const layoutClass = computed(() => {
   const position = getResponsiveValue(settings.value, 'tabPosition', device.value) || 'top'
