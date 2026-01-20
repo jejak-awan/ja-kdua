@@ -136,6 +136,19 @@
         @confirm="builder.closeConfirmModal(true)"
         @cancel="builder.closeConfirmModal(false)"
       />
+
+      <InputModal
+        v-if="builder.inputModal.visible"
+        :is-open="builder.inputModal.visible"
+        :title="builder.inputModal.title"
+        :message="builder.inputModal.message"
+        :placeholder="builder.inputModal.placeholder"
+        :initial-value="builder.inputModal.initialValue"
+        :confirm-text="builder.inputModal.confirmText"
+        :cancel-text="builder.inputModal.cancelText"
+        @confirm="builder.closeInputModal"
+        @cancel="builder.closeInputModal(null)"
+      />
       
       <ContextMenu 
           :visible="contextMenu.visible"
@@ -178,6 +191,7 @@ import CanvasSettingsModal from './modals/CanvasSettingsModal.vue'
 import SavePresetModal from './modals/SavePresetModal.vue'
 import IconPickerModal from './modals/IconPickerModal.vue'
 import ConfirmModal from './modals/ConfirmModal.vue'
+import InputModal from './modals/InputModal.vue'
 import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
@@ -613,7 +627,7 @@ const activeCanvasData = computed(() => {
     return getCanvasById(activeCanvasForModal.value)
 })
 
-const handleContextMenuAction = (action, id, mode = 'module') => {
+const handleContextMenuAction = async (action, id, mode = 'module') => {
     if (mode === 'canvas') {
         handleCanvasAction(action, id)
         return
@@ -683,9 +697,16 @@ const handleContextMenuAction = (action, id, mode = 'module') => {
             
         // Settings
         case 'rename':
-            // Could open a rename modal or inline edit
-            const newLabel = prompt(t('builder.contextMenu.renameLabel'))
-            if (newLabel) {
+            const currentModule = builder.findModuleById(builder.blocks, id)
+            const newLabel = await builder.prompt({
+                title: t('builder.contextMenu.renameLabel'),
+                // message: t('builder.modals.input.renameLabelDesc'), // Optional
+                initialValue: currentModule?.settings?._label || '',
+                // placeholder: t('builder.modals.input.renameLabelPlaceholder'),
+                confirmText: 'OK',
+                cancelText: 'Cancel'
+            })
+            if (newLabel !== null && newLabel !== '') {
                 builder.updateModuleSettings(id, { _label: newLabel })
             }
             break

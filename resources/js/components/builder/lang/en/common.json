@@ -460,6 +460,13 @@
             "title": "Responsive Editor: {label}",
             "done": "Done"
         },
+        "input": {
+            "renameLabel": "Rename Label",
+            "renameLabelDesc": "Enter a new label for this module.",
+            "renameLabelPlaceholder": "Module Label",
+            "rename": "Rename",
+            "cancel": "Cancel"
+        },
         "confirm": {
             "title": "Confirm",
             "deleteModule": "Delete this module?",

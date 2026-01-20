@@ -435,6 +435,13 @@
             "title": "Editor Responsif: {label}",
             "done": "Selesai"
         },
+        "input": {
+            "renameLabel": "Ubah Label",
+            "renameLabelDesc": "Masukkan label baru untuk modul ini.",
+            "renameLabelPlaceholder": "Label Modul",
+            "rename": "Ubah",
+            "cancel": "Batal"
+        },
         "confirm": {
             "title": "Konfirmasi",
             "deleteModule": "Hapus modul ini?",

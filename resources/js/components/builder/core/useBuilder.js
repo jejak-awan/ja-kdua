@@ -87,6 +87,18 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         resolve: null
     })
 
+    // Input Modal State
+    const inputModal = ref({
+        visible: false,
+        title: 'Input',
+        message: '',
+        placeholder: '',
+        initialValue: '',
+        confirmText: 'OK',
+        cancelText: 'Cancel',
+        resolve: null
+    })
+
     // Builder Preferences (persisted to localStorage)
     const PREFS_STORAGE_KEY = 'ja-builder-preferences'
     const loadPreferencesFromStorage = () => {
@@ -598,6 +610,31 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
             }
         }
         return removed
+    }
+
+    function resetModuleStyles(id) {
+        const module = findModuleById(blocks.value, id)
+        if (!module) return
+
+        // Reset specific style categories to defaults or empty
+        module.settings = {
+            ...module.settings,
+            padding: undefined,
+            margin: undefined,
+            backgroundColor: undefined,
+            backgroundImage: undefined,
+            border: undefined,
+            borderRadius: undefined,
+            boxShadow: undefined,
+            textColor: undefined,
+            typography: undefined,
+            width: undefined,
+            maxWidth: undefined,
+            minHeight: undefined
+        }
+
+        takeSnapshot()
+        return true
     }
 
     function duplicateModule(id) {
@@ -1126,7 +1163,9 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         // Clipboard
         clipboard,
         copyModule,
-        pasteModule,
+        removeModule,
+        resetModuleStyles,
+        duplicateModule,
         copyStyles,
         pasteStyles,
 
@@ -1184,6 +1223,33 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
             }
             confirmModal.value = {
                 ...confirmModal.value,
+                visible: false,
+                resolve: null
+            }
+        },
+
+        // Input Modal
+        inputModal,
+        prompt: (options = {}) => {
+            return new Promise((resolve) => {
+                inputModal.value = {
+                    visible: true,
+                    title: options.title || 'Input',
+                    message: options.message || '',
+                    placeholder: options.placeholder || '',
+                    initialValue: options.initialValue || '',
+                    confirmText: options.confirmText || 'OK',
+                    cancelText: options.cancelText || 'Cancel',
+                    resolve
+                }
+            })
+        },
+        closeInputModal: (value = null) => {
+            if (inputModal.value.resolve) {
+                inputModal.value.resolve(value)
+            }
+            inputModal.value = {
+                ...inputModal.value,
                 visible: false,
                 resolve: null
             }
