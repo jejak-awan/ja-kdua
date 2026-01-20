@@ -697,7 +697,7 @@ const handleContextMenuAction = async (action, id, mode = 'module') => {
             
         // Settings
         case 'rename':
-            const currentModule = builder.findModuleById(builder.blocks, id)
+            const currentModule = builder.findModule(id)
             const newLabel = await builder.prompt({
                 title: t('builder.contextMenu.renameLabel'),
                 // message: t('builder.modals.input.renameLabelDesc'), // Optional
@@ -711,7 +711,7 @@ const handleContextMenuAction = async (action, id, mode = 'module') => {
             }
             break
         case 'toggle-visibility':
-            const module = builder.findModuleById(builder.blocks, id)
+            const module = builder.findModule(id)
             if (module) {
                 const isDisabled = module.settings?.disabled === true
                 builder.updateModuleSettings(id, { disabled: !isDisabled })

@@ -198,7 +198,7 @@ const canSaveToLibrary = computed(() => {
 
 const isDisabled = computed(() => {
     if (!props.moduleId || !builder) return false
-    const module = builder.findModuleById?.(builder.blocks, props.moduleId)
+    const module = builder.findModule?.(props.moduleId)
     return module?.settings?.disabled === true
 })
 
