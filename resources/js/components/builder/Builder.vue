@@ -619,23 +619,87 @@ const handleContextMenuAction = (action, id, mode = 'module') => {
         return
     }
 
-    if (action === 'duplicate') {
-        builder.duplicateModule(id)
-    } else if (action === 'delete') {
-        handleDeleteModule(id)
-    } else if (action === 'copy') {
-        builder.copyModule(id)
-    } else if (action === 'paste') {
-        builder.pasteModule(id)
-    } else if (action === 'copy-style') {
-        builder.copyStyles(id)
-    } else if (action === 'paste-style') {
-        builder.pasteStyles(id)
-    } else if (action === 'parent') {
-        const parent = builder.findParentById(builder.blocks, id)
-        if (parent) {
-            builder.selectModule(parent.id)
-        }
+    switch (action) {
+        // Undo/Redo
+        case 'undo':
+            builder.undo()
+            break
+        case 'redo':
+            builder.redo()
+            break
+            
+        // Module actions
+        case 'duplicate':
+            builder.duplicateModule(id)
+            break
+        case 'delete':
+            handleDeleteModule(id)
+            break
+        case 'add-element':
+            // Open insert modal targeting this container
+            insertTargetId.value = id
+            insertTargetIndex.value = -1
+            showInsertModal.value = true
+            break
+            
+        // Copy/Paste
+        case 'copy':
+            builder.copyModule(id)
+            break
+        case 'paste':
+            builder.pasteModule(id)
+            break
+            
+        // Styles
+        case 'copy-style':
+            builder.copyStyles(id)
+            break
+        case 'paste-style':
+            builder.pasteStyles(id)
+            break
+        case 'reset-styles':
+            builder.resetModuleStyles?.(id)
+            break
+            
+        // Navigation
+        case 'parent':
+            const parent = builder.findParentById(builder.blocks, id)
+            if (parent) {
+                builder.selectModule(parent.id)
+            }
+            break
+        case 'go-to-layer':
+            // Open layers panel and scroll to module
+            activePanel.value = 'layers'
+            setTimeout(() => {
+                const layerEl = document.querySelector(`[data-layer-id="${id}"]`)
+                if (layerEl) {
+                    layerEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    layerEl.classList.add('layer-highlight')
+                    setTimeout(() => layerEl.classList.remove('layer-highlight'), 1500)
+                }
+            }, 100)
+            break
+            
+        // Settings
+        case 'rename':
+            // Could open a rename modal or inline edit
+            const newLabel = prompt(t('builder.contextMenu.renameLabel'))
+            if (newLabel) {
+                builder.updateModuleSettings(id, { _label: newLabel })
+            }
+            break
+        case 'toggle-visibility':
+            const module = builder.findModuleById(builder.blocks, id)
+            if (module) {
+                const isDisabled = module.settings?.disabled === true
+                builder.updateModuleSettings(id, { disabled: !isDisabled })
+            }
+            break
+        case 'save-to-library':
+            // Open save preset modal for this module
+            builder.openSavePresetModal?.(id)
+            break
     }
 }
 

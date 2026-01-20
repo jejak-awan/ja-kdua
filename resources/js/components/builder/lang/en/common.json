@@ -81,11 +81,28 @@
             "item": "Item"
         },
         "contextMenu": {
-            "edit": "Edit",
-            "duplicate": "Duplicate",
-            "delete": "Delete",
-            "copy": "Copy",
-            "paste": "Paste"
+            "undo": "Undo",
+            "redo": "Redo",
+            "duplicate": "Duplicate {type}",
+            "delete": "Delete {type}",
+            "addElement": "Add Element",
+            "copy": "Copy {type}",
+            "paste": "Paste",
+            "copyStyles": "Copy Styles",
+            "pasteStyles": "Paste Styles",
+            "resetStyles": "Reset Styles",
+            "goToParent": "Go to Parent",
+            "goToLayer": "Go to Layer",
+            "renameLabel": "Rename Label",
+            "enable": "Enable",
+            "disable": "Disable",
+            "saveToLibrary": "Save to Library",
+            "canvasSettings": "Canvas Settings",
+            "exportCanvas": "Export Canvas",
+            "editCanvas": "Edit Canvas",
+            "makeMainCanvas": "Make Main Canvas",
+            "duplicateCanvas": "Duplicate Canvas",
+            "deleteCanvas": "Delete Canvas"
         },
         "background": {
             "tabs": {

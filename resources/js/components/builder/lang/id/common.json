@@ -82,11 +82,28 @@
             "item": "Item"
         },
         "contextMenu": {
-            "edit": "Edit",
-            "duplicate": "Duplikat",
-            "delete": "Hapus",
-            "copy": "Salin",
-            "paste": "Tempel"
+            "undo": "Batalkan",
+            "redo": "Ulangi",
+            "duplicate": "Duplikat {type}",
+            "delete": "Hapus {type}",
+            "addElement": "Tambah Elemen",
+            "copy": "Salin {type}",
+            "paste": "Tempel",
+            "copyStyles": "Salin Gaya",
+            "pasteStyles": "Tempel Gaya",
+            "resetStyles": "Reset Gaya",
+            "goToParent": "Ke Parent",
+            "goToLayer": "Ke Layer",
+            "renameLabel": "Ubah Label",
+            "enable": "Aktifkan",
+            "disable": "Nonaktifkan",
+            "saveToLibrary": "Simpan ke Pustaka",
+            "canvasSettings": "Pengaturan Canvas",
+            "exportCanvas": "Ekspor Canvas",
+            "editCanvas": "Edit Canvas",
+            "makeMainCanvas": "Jadikan Canvas Utama",
+            "duplicateCanvas": "Duplikat Canvas",
+            "deleteCanvas": "Hapus Canvas"
         },
         "background": {
             "tabs": {
