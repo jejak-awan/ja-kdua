@@ -16,12 +16,12 @@
       <!-- Undo/Redo -->
       <div class="menu-item" :class="{ 'menu-item--disabled': !canUndo }" @click="handleAction('undo')">
          <Undo2 :size="14" />
-         <span>{{ t('builder.contextMenu.undo') }}</span>
+         <span>{{ t('builder.fields.contextMenu.undo') }}</span>
          <span class="shortcut">⌘Z</span>
       </div>
       <div class="menu-item" :class="{ 'menu-item--disabled': !canRedo }" @click="handleAction('redo')">
          <Redo2 :size="14" />
-         <span>{{ t('builder.contextMenu.redo') }}</span>
+         <span>{{ t('builder.fields.contextMenu.redo') }}</span>
          <span class="shortcut">⇧⌘Z</span>
       </div>
 
@@ -30,20 +30,20 @@
       <!-- Module Actions -->
       <div class="menu-item" @click="handleAction('duplicate')">
          <CopyPlus :size="14" />
-         <span>{{ t('builder.contextMenu.duplicate', { type: typeLabel }) }}</span>
+         <span>{{ t('builder.fields.contextMenu.duplicate', { type: typeLabel }) }}</span>
          <span class="shortcut">⌘D</span>
       </div>
 
       <div class="menu-item menu-item--danger" @click="handleAction('delete')">
          <Trash2 :size="14" />
-         <span>{{ t('builder.contextMenu.delete', { type: typeLabel }) }}</span>
+         <span>{{ t('builder.fields.contextMenu.delete', { type: typeLabel }) }}</span>
          <span class="shortcut">Del</span>
       </div>
 
       <!-- Add Element (for containers only) -->
       <div v-if="isContainer" class="menu-item" @click="handleAction('add-element')">
          <Plus :size="14" />
-         <span>{{ t('builder.contextMenu.addElement') }}</span>
+         <span>{{ t('builder.fields.contextMenu.addElement') }}</span>
          <ChevronRight :size="12" class="submenu-arrow" />
       </div>
 
@@ -52,13 +52,13 @@
       <!-- Copy/Paste -->
       <div class="menu-item" @click="handleAction('copy')">
          <Copy :size="14" />
-         <span>{{ t('builder.contextMenu.copy', { type: typeLabel }) }}</span>
+         <span>{{ t('builder.fields.contextMenu.copy', { type: typeLabel }) }}</span>
          <span class="shortcut">⌘C</span>
       </div>
 
       <div class="menu-item" :class="{ 'menu-item--disabled': !hasClipboard }" @click="handleAction('paste')">
          <ClipboardPaste :size="14" />
-         <span>{{ t('builder.contextMenu.paste') }}</span>
+         <span>{{ t('builder.fields.contextMenu.paste') }}</span>
          <span class="shortcut">⌘V</span>
       </div>
 
@@ -67,17 +67,17 @@
       <!-- Styles -->
       <div class="menu-item" @click="handleAction('copy-style')">
          <Palette :size="14" />
-         <span>{{ t('builder.contextMenu.copyStyles') }}</span>
+         <span>{{ t('builder.fields.contextMenu.copyStyles') }}</span>
       </div>
       
       <div class="menu-item" :class="{ 'menu-item--disabled': !hasStyleClipboard }" @click="handleAction('paste-style')">
          <PaintBucket :size="14" />
-         <span>{{ t('builder.contextMenu.pasteStyles') }}</span>
+         <span>{{ t('builder.fields.contextMenu.pasteStyles') }}</span>
       </div>
 
       <div class="menu-item" @click="handleAction('reset-styles')">
          <RotateCcw :size="14" />
-         <span>{{ t('builder.contextMenu.resetStyles') }}</span>
+         <span>{{ t('builder.fields.contextMenu.resetStyles') }}</span>
       </div>
 
       <div class="menu-divider"></div>
@@ -85,12 +85,12 @@
       <!-- Navigation -->
       <div v-if="hasParent" class="menu-item" @click="handleAction('parent')">
          <ArrowUpLeft :size="14" />
-         <span>{{ t('builder.contextMenu.goToParent') }}</span>
+         <span>{{ t('builder.fields.contextMenu.goToParent') }}</span>
       </div>
 
       <div class="menu-item" @click="handleAction('go-to-layer')">
          <Layers :size="14" />
-         <span>{{ t('builder.contextMenu.goToLayer') }}</span>
+         <span>{{ t('builder.fields.contextMenu.goToLayer') }}</span>
       </div>
 
       <div class="menu-divider"></div>
@@ -98,17 +98,17 @@
       <!-- Settings -->
       <div class="menu-item" @click="handleAction('rename')">
          <Type :size="14" />
-         <span>{{ t('builder.contextMenu.renameLabel') }}</span>
+         <span>{{ t('builder.fields.contextMenu.renameLabel') }}</span>
       </div>
 
       <div class="menu-item" @click="handleAction('toggle-visibility')">
          <component :is="isDisabled ? Eye : EyeOff" :size="14" />
-         <span>{{ isDisabled ? t('builder.contextMenu.enable') : t('builder.contextMenu.disable') }}</span>
+         <span>{{ isDisabled ? t('builder.fields.contextMenu.enable') : t('builder.fields.contextMenu.disable') }}</span>
       </div>
 
       <div v-if="canSaveToLibrary" class="menu-item" @click="handleAction('save-to-library')">
          <BookmarkPlus :size="14" />
-         <span>{{ t('builder.contextMenu.saveToLibrary') }}</span>
+         <span>{{ t('builder.fields.contextMenu.saveToLibrary') }}</span>
       </div>
     </template>
 
@@ -116,30 +116,30 @@
     <template v-else-if="mode === 'canvas'">
       <div class="menu-item" @click="handleAction('canvas-settings')">
         <Settings :size="14" />
-        <span>{{ t('builder.contextMenu.canvasSettings') }}</span>
+        <span>{{ t('builder.fields.contextMenu.canvasSettings') }}</span>
       </div>
       <div class="menu-item" @click="handleAction('export-canvas')">
         <Download :size="14" />
-        <span>{{ t('builder.contextMenu.exportCanvas') }}</span>
+        <span>{{ t('builder.fields.contextMenu.exportCanvas') }}</span>
       </div>
       
       <div class="menu-divider"></div>
       
       <div class="menu-item" @click="handleAction('edit-canvas')">
         <Edit :size="14" />
-        <span>{{ t('builder.contextMenu.editCanvas') }}</span>
+        <span>{{ t('builder.fields.contextMenu.editCanvas') }}</span>
       </div>
       <div v-if="!isMainCanvas" class="menu-item" @click="handleAction('make-main-canvas')">
         <CheckCircle :size="14" />
-        <span>{{ t('builder.contextMenu.makeMainCanvas') }}</span>
+        <span>{{ t('builder.fields.contextMenu.makeMainCanvas') }}</span>
       </div>
       <div class="menu-item" @click="handleAction('duplicate-canvas')">
         <Copy :size="14" />
-        <span>{{ t('builder.contextMenu.duplicateCanvas') }}</span>
+        <span>{{ t('builder.fields.contextMenu.duplicateCanvas') }}</span>
       </div>
       <div v-if="!isMainCanvas" class="menu-item menu-item--danger" @click="handleAction('delete-canvas')">
         <Trash2 :size="14" />
-        <span>{{ t('builder.contextMenu.deleteCanvas') }}</span>
+        <span>{{ t('builder.fields.contextMenu.deleteCanvas') }}</span>
       </div>
     </template>
   </div>
