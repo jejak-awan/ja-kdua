@@ -619,7 +619,7 @@ const activeCanvasForModal = ref(null)
 
 const getCanvasById = (id) => {
     if (!id || !builder || !builder.canvases) return null
-    const list = Array.isArray(builder.canvases) ? builder.canvases : (builder.canvases.value || [])
+    const list = Array.isArray(builder.canvases) ? builder.canvases : (builder?.canvases || [])
     return list.find(c => c.id === id)
 }
 

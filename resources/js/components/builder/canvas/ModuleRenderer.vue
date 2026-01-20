@@ -25,7 +25,7 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const currentDevice = computed(() => builder?.device || 'desktop')
+const currentDevice = computed(() => builder?.device?.value || 'desktop')
 
 const BlockComponent = computed(() => {
   return ModuleRegistry.getComponent(props.module.type)
@@ -35,10 +35,10 @@ const resolvedSettings = computed(() => {
   const settings = props.module.settings || {}
   const resolved = {}
   
-  // 1. Get all unique base keys (removing _hover, _tablet, and _phone suffixes)
+  // 1. Get all unique base keys (removing _hover, _tablet, and _mobile suffixes)
   const baseKeys = new Set()
   Object.keys(settings).forEach(key => {
-    const baseKey = key.replace(/(_hover|_tablet|_phone)$/, '')
+    const baseKey = key.replace(/(_hover|_tablet|_mobile)$/, '')
     baseKeys.add(baseKey)
   })
 
@@ -47,7 +47,7 @@ const resolvedSettings = computed(() => {
     // Standard Responsive Resolution
     const desktopValue = settings[key]
     const tabletValue = settings[key + '_tablet']
-    const phoneValue = settings[key + '_phone']
+    const mobileValue = settings[key + '_mobile']
     
     // Hover Resolution (Hover can also be responsive, but usually treated as global first)
     // We prioritize key_hover, but could also check key_tablet_hover etc. if needed.
@@ -59,8 +59,8 @@ const resolvedSettings = computed(() => {
     } else if (currentDevice.value === 'tablet') {
       resolved[key] = (tabletValue !== undefined && tabletValue !== '') ? tabletValue : desktopValue
     } else if (currentDevice.value === 'mobile') {
-      if (phoneValue !== undefined && phoneValue !== '') {
-        resolved[key] = phoneValue
+      if (mobileValue !== undefined && mobileValue !== '') {
+        resolved[key] = mobileValue
       } else if (tabletValue !== undefined && tabletValue !== '') {
         resolved[key] = tabletValue
       } else {

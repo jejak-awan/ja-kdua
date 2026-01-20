@@ -219,12 +219,12 @@ const translateFieldLabel = (field) => {
 }
 
 // Current builder device for highlighting
-const currentDevice = computed(() => builder?.device || 'desktop')
+const currentDevice = computed(() => builder?.device?.value || 'desktop')
 
 // Live settings from builder store (reactive source of truth)
 const liveSettings = computed(() => {
     // Explicitly track blocks to ensure reactivity
-    if (builder?.blocks) { const _ = builder.blocks.value }
+    if (builder?.blocks) { const _ = builder?.blocks }
 
     // We fetch it from builder.findModule to ensure we are tracking the actual state in blocks array
     const moduleItem = builder?.findModule?.(props.module?.id)
@@ -357,7 +357,7 @@ const getModeValue = (id) => {
   const [parentPath, childKey] = props.baseKey.includes('.') ? props.baseKey.split('.') : [null, props.baseKey]
   
   const getVal = (deviceId) => {
-    const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_phone' : `_${deviceId}`)
+    const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`)
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix)
     const settingsObj = liveSettings.value[fullParentKey]
     
@@ -375,7 +375,7 @@ const getGenericValue = (key, id) => {
   const [parentPath, childKey] = key.includes('.') ? key.split('.') : [null, key]
   
   const getVal = (deviceId) => {
-    const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_phone' : `_${deviceId}`)
+    const suffix = deviceId === 'desktop' ? '' : (deviceId === 'mobile' ? '_mobile' : `_${deviceId}`)
     const fullParentKey = parentPath ? (parentPath + suffix) : (childKey + suffix)
     const settingsObj = liveSettings.value[fullParentKey]
     
@@ -431,7 +431,7 @@ const getPreviewStyle = (id) => {
     
     // Resolve helper
     const getVal = (base, modeId) => {
-        const suffix = modeId === 'desktop' ? '' : (modeId === 'mobile' ? '_phone' : `_${modeId}`)
+        const suffix = modeId === 'desktop' ? '' : (modeId === 'mobile' ? '_mobile' : `_${modeId}`)
         const val = liveSettings.value[base + suffix]
         
         if ((val === undefined || val === null || val === '') && modeId !== 'desktop') {
@@ -493,7 +493,7 @@ const getPreviewStyle = (id) => {
 }
 
 const updateModeValue = (id, value) => {
-  const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_phone' : `_${id}`)
+  const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_mobile' : `_${id}`)
   const [parentPath, childKey] = props.baseKey.includes('.') ? props.baseKey.split('.') : [null, props.baseKey]
   
   // Use null for reset
@@ -507,7 +507,7 @@ const updateModeValue = (id, value) => {
 }
 
 const updateGenericValue = (key, id, value) => {
-  const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_phone' : `_${id}`)
+  const suffix = id === 'desktop' ? '' : (id === 'mobile' ? '_mobile' : `_${id}`)
   const [parentPath, childKey] = key.includes('.') ? key.split('.') : [null, key]
   
   // Use null for reset

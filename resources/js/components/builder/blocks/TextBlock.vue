@@ -47,7 +47,7 @@ const content = computed({
   }
 })
 
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const textStyles = computed(() => {
   const styles = { width: '100%' }

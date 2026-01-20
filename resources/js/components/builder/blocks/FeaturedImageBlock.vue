@@ -34,7 +34,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const aspectRatios = { '16:9': '56.25%', '4:3': '75%', '3:2': '66.67%', '1:1': '100%', 'original': 'auto' }
 

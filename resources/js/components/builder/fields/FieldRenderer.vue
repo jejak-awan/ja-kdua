@@ -165,7 +165,7 @@ const translatedDescription = computed(() => {
 })
 
 // Inject builder device
-const currentDevice = computed(() => builder?.device || 'desktop')
+const currentDevice = computed(() => builder?.device?.value || 'desktop')
 
 // Calculate values based on responsive state
 const resolvedValue = computed(() => {
@@ -173,7 +173,7 @@ const resolvedValue = computed(() => {
     return props.value
   }
   
-  const suffix = currentDevice.value === 'mobile' ? '_phone' : `_${currentDevice.value}`
+  const suffix = currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`
   const deviceKey = props.field.name + suffix
   return props.module.settings?.[deviceKey]
 })
@@ -245,7 +245,7 @@ const handleValueUpdate = (val) => {
     return
   }
   
-  const suffix = currentDevice.value === 'mobile' ? '_phone' : `_${currentDevice.value}`
+  const suffix = currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`
   const deviceKey = props.field.name + suffix
   builder?.updateModuleSettings(props.module.id, { [deviceKey]: val })
 }

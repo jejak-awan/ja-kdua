@@ -187,7 +187,7 @@ const moduleTitle = computed(() => {
 })
 
 const currentBreakpoint = computed(() => {
-  return builder?.device || 'desktop'
+  return builder?.device?.value || 'desktop'
 })
 
 const currentBreakpointIcon = computed(() => {

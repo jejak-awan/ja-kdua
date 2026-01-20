@@ -83,7 +83,7 @@ const iconComponent = computed(() => {
 })
 
 const builder = inject('builder')
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const wrapperStyles = computed(() => {
   const position = getResponsiveValue(settings.value, 'iconPosition', device.value) || 'top'

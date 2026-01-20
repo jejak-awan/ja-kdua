@@ -1807,7 +1807,7 @@ const openResponsiveModal = (label, baseKey, type = 'color', options = null, sub
 // Computed module settings to ensure reactivity
 const moduleSettings = computed(() => {
     // Explicitly track blocks to ensure reactivity
-    if (builder?.blocks) { const _ = builder.blocks.value }
+    if (builder?.blocks) { const _ = builder?.blocks }
     
     const currentModule = builder.findModule(props.module.id)
     return currentModule?.settings || {}
@@ -2011,10 +2011,10 @@ const maskOptions = computed(() => {
     ]
 })
 
-const currentDevice = computed(() => builder?.device || 'desktop')
+const currentDevice = computed(() => builder?.device?.value || 'desktop')
 
 const getResponsiveValue = (baseKey) => {
-    const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_phone' : `_${currentDevice.value}`)
+    const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`)
     const val = moduleSettings.value[baseKey + suffix]
     
     return (val === undefined || val === null) ? '' : val
@@ -2031,7 +2031,7 @@ const getResolvedValue = (baseKey) => {
 
 const hasOverride = (baseKey) => {
     if (currentDevice.value === 'desktop') return false
-    const suffix = currentDevice.value === 'mobile' ? '_phone' : (currentDevice.value === 'tablet' ? '_tablet' : '')
+    const suffix = currentDevice.value === 'mobile' ? '_mobile' : (currentDevice.value === 'tablet' ? '_tablet' : '')
     const val = moduleSettings.value[baseKey + suffix]
     return val !== undefined && val !== null && val !== ''
 }
@@ -2231,9 +2231,9 @@ const combinedBackgroundStyle = computed(() => {
 
 const updateSetting = (key, value) => {
     // If key is already responsive-specific (has suffix), use it directly
-    if (key.includes('_tablet') || key.includes('_phone')) {
-        const baseKey = key.replace(/(_tablet|_phone)$/, '')
-        const suffix = key.match(/(_tablet|_phone)$/)[0]
+    if (key.includes('_tablet') || key.includes('_mobile')) {
+        const baseKey = key.replace(/(_tablet|_mobile)$/, '')
+        const suffix = key.match(/(_tablet|_mobile)$/)[0]
         const syncedData = getSyncedDimensionData(baseKey, value, suffix)
         builder.updateModuleSettings(props.module.id, syncedData)
         lastUpdate.value++
@@ -2241,7 +2241,7 @@ const updateSetting = (key, value) => {
     }
 
     // Otherwise, append suffix based on current device
-    const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_phone' : `_${currentDevice.value}`)
+    const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`)
     const syncedData = getSyncedDimensionData(key, value, suffix)
 
     builder.updateModuleSettings(props.module.id, syncedData)
@@ -2269,19 +2269,19 @@ const handleResponsiveUpdate = (data) => {
     Object.entries(data).forEach(([key, value]) => {
         lastUpdate.value++
         if (key.includes('.')) {
-            // key is like "backgroundGradient_phone.direction"
+            // key is like "backgroundGradient_mobile.direction"
             // ... (rest of logic unchanged, just need to integrate sync for flat keys)
             const [parentPath, childKey] = key.split('.')
             let existingParent = currentSettings[parentPath]
             if (!existingParent || Object.keys(existingParent).length === 0) {
-                const baseKey = parentPath.replace(/(_tablet|_phone)$/, '')
+                const baseKey = parentPath.replace(/(_tablet|_mobile)$/, '')
                 existingParent = currentSettings[baseKey] || {}
             }
             finalData[parentPath] = { ...existingParent, [childKey]: value }
         } else {
             // Flat keys - Check for unit sync
-            const baseKey = key.replace(/(_tablet|_phone)$/, '')
-            const suffix = key.match(/(_tablet|_phone)$/)?.[0] || ''
+            const baseKey = key.replace(/(_tablet|_mobile)$/, '')
+            const suffix = key.match(/(_tablet|_mobile)$/)?.[0] || ''
             const syncedData = getSyncedDimensionData(baseKey, value, suffix)
             Object.assign(finalData, syncedData)
         }

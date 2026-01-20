@@ -59,7 +59,7 @@ const props = defineProps({
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 // Provide state to ContactFieldBlock
 provide('contactFormState', {

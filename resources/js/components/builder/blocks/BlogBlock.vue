@@ -71,7 +71,7 @@ const props = defineProps({
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 // Mock posts for preview
 const mockPosts = computed(() => {

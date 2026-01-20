@@ -57,7 +57,7 @@ import {
 const props = defineProps({ module: { type: Object, required: true } })
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const size = computed(() => getResponsiveValue(settings.value, 'size', device.value) || 150)
 const strokeWidth = computed(() => getResponsiveValue(settings.value, 'strokeWidth', device.value) || 10)

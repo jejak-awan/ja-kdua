@@ -33,7 +33,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 const mobileOpen = ref(false)
 const menuItems = ['Home', 'About', 'Services', 'Portfolio', 'Contact']
 const showLogo = computed(() => getResponsiveValue(settings.value, 'showLogo', device.value))

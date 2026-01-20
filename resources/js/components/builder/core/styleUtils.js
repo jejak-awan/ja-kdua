@@ -7,7 +7,7 @@ import { BackgroundPatterns, BackgroundMasks } from './AssetLibrary'
 export function getResponsiveValue(settings, baseKey, device) {
     if (device === 'desktop') return settings[baseKey]
 
-    const suffix = device === 'mobile' ? '_phone' : `_${device}`
+    const suffix = device === 'mobile' ? '_mobile' : `_${device}`
     const deviceValue = settings[baseKey + suffix]
 
     // Fallback: Phone -> Tablet -> Desktop

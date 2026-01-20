@@ -61,7 +61,7 @@ const props = defineProps({
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const layout = computed(() => getResponsiveValue(settings.value, 'layout', device.value) || 'stacked')
 const alignment = computed(() => getResponsiveValue(settings.value, 'alignment', device.value) || 'center')

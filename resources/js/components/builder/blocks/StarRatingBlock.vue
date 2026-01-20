@@ -27,7 +27,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const ratingValue = computed(() => parseFloat(getResponsiveValue(settings.value, 'rating', device.value)) || 4.5)
 const maxRatingValue = computed(() => parseInt(getResponsiveValue(settings.value, 'maxRating', device.value)) || 5)

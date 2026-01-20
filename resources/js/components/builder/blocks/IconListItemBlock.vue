@@ -39,7 +39,7 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 const settings = computed(() => props.module.settings || {})
 
 // Injected from IconListBlock

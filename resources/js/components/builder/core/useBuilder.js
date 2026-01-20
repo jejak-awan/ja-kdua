@@ -681,8 +681,8 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         // Create a new settings object to trigger Vue reactivity
         module.settings = { ...module.settings, ...settings }
 
-        // Force Vue to detect the change in nested objects
-        triggerRef(blocks)
+        // Trigger setter on computed blocks
+        blocks.value = [...blocks.value]
 
         takeSnapshot()
         return true
@@ -698,7 +698,7 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         }
 
         Object.assign(module, data)
-        triggerRef(blocks)
+        blocks.value = [...blocks.value]
         takeSnapshot()
         return true
     }
@@ -718,7 +718,7 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
             module.settings[key] = value
         }
 
-        triggerRef(blocks)
+        blocks.value = [...blocks.value]
         takeSnapshot()
         return true
     }

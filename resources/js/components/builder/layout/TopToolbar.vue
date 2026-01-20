@@ -182,7 +182,7 @@ const props = defineProps({
 const emit = defineEmits(['toggle-sidebar', 'change-device', 'open-pages', 'close-builder', 'save'])
 
 // State
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 const zoom = computed(() => builder?.zoom || 100)
 const wireframeMode = computed(() => builder?.wireframeMode || false)
 

@@ -55,7 +55,7 @@ const props = defineProps({
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const nameValue = computed(() => getResponsiveValue(settings.value, 'name', device.value) || 'Team Member')
 const positionValue = computed(() => getResponsiveValue(settings.value, 'position', device.value) || 'Position')

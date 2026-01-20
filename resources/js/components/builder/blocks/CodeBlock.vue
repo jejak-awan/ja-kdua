@@ -36,7 +36,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const language = computed(() => settings.value.language || 'html')
 const showLineNumbers = computed(() => getResponsiveValue(settings.value, 'showLineNumbers', device.value) !== false)
