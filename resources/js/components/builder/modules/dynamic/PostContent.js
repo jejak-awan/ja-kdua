@@ -26,6 +26,7 @@ export default {
     children: null,
 
     defaults: {
+        content: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt.</p><h2>Section Heading</h2><p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><blockquote>"This is an example blockquote that might appear in the post content. It demonstrates how quotes are styled."</blockquote><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -38,6 +39,13 @@ export default {
 
     settings: {
         content: [
+            {
+                id: 'settings',
+                label: 'Settings',
+                fields: [
+                    { name: 'content', type: 'richtext', label: 'Content' }
+                ]
+            },
             backgroundSettings
         ],
         design: [

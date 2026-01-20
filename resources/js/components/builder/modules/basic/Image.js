@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -47,9 +55,9 @@ export default {
                 id: 'image',
                 label: 'Image',
                 fields: [
-                    { name: 'src', type: 'upload', label: 'Image', allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] },
-                    { name: 'alt', type: 'text', label: 'Alt Text' },
-                    { name: 'caption', type: 'text', label: 'Caption' }
+                    { name: 'src', type: 'upload', label: 'Image', allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'], responsive: true },
+                    { name: 'alt', type: 'text', label: 'Alt Text', responsive: true },
+                    { name: 'caption', type: 'text', label: 'Caption', responsive: true }
                 ]
             },
             {
@@ -57,16 +65,19 @@ export default {
                 label: 'Link',
                 fields: [
                     { name: 'lightbox', type: 'toggle', label: 'Open in Lightbox' },
-                    { name: 'linkUrl', type: 'text', label: 'Link URL' },
+                    { name: 'link_url', type: 'text', label: 'Link URL' },
                     {
-                        name: 'linkTarget', type: 'select', label: 'Link Target', options: [
+                        name: 'link_target', type: 'select', label: 'Link Target', options: [
                             { value: '_self', label: 'Same Window' },
                             { value: '_blank', label: 'New Tab' }
                         ]
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Image')
         ],
         design: [
             {
@@ -119,6 +130,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -80,7 +88,11 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Toggle')
         ],
         design: [
             {
@@ -89,13 +101,9 @@ export default {
                 fields: [
                     {
                         name: 'toggleIcon',
-                        type: 'select',
-                        label: 'Icon Style',
-                        options: [
-                            { value: 'chevron', label: 'Chevron' },
-                            { value: 'plus', label: 'Plus/Minus' },
-                            { value: 'none', label: 'None' }
-                        ],
+                        type: 'icon',
+                        label: 'Select Icon',
+                        default: 'chevron-down',
                         responsive: true
                     },
                     {
@@ -182,6 +190,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

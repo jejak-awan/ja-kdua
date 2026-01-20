@@ -28,6 +28,7 @@ export default {
     defaults: {
         postsPerPage: 6,
         columns: 3,
+        title: 'Blog Posts',
         showImage: true,
         showExcerpt: true,
         showDate: true,
@@ -67,6 +68,13 @@ export default {
 
     settings: {
         content: [
+            {
+                id: 'settings',
+                label: 'Settings',
+                fields: [
+                    { name: 'title', type: 'text', label: 'Title', responsive: true }
+                ]
+            },
             {
                 id: 'query',
                 label: 'Query',

@@ -29,6 +29,7 @@ export default {
         aspectRatio: '16:9',
         objectFit: 'cover',
         showCaption: false,
+        caption: 'Featured image caption',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -51,7 +52,12 @@ export default {
 
     settings: {
         content: [
-            { id: 'display', label: 'Display', fields: [{ name: 'showCaption', type: 'toggle', label: 'Show Caption' }] },
+            {
+                id: 'display', label: 'Display', fields: [
+                    { name: 'showCaption', type: 'toggle', label: 'Show Caption', responsive: true },
+                    { name: 'caption', type: 'text', label: 'Caption', responsive: true }
+                ]
+            },
             backgroundSettings
         ],
         design: [
@@ -59,8 +65,8 @@ export default {
                 id: 'imageStyle',
                 label: 'Image Style',
                 fields: [
-                    { name: 'aspectRatio', type: 'select', label: 'Aspect Ratio', options: [{ value: '16:9', label: '16:9' }, { value: '4:3', label: '4:3' }, { value: '3:2', label: '3:2' }, { value: '1:1', label: '1:1' }, { value: 'original', label: 'Original' }] },
-                    { name: 'objectFit', type: 'select', label: 'Object Fit', options: [{ value: 'cover', label: 'Cover' }, { value: 'contain', label: 'Contain' }] }
+                    { name: 'aspectRatio', type: 'select', label: 'Aspect Ratio', responsive: true, options: [{ value: '16:9', label: '16:9' }, { value: '4:3', label: '4:3' }, { value: '3:2', label: '3:2' }, { value: '1:1', label: '1:1' }, { value: 'original', label: 'Original' }] },
+                    { name: 'objectFit', type: 'select', label: 'Object Fit', responsive: true, options: [{ value: 'cover', label: 'Cover' }, { value: 'contain', label: 'Contain' }] }
                 ]
             },
             {

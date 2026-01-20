@@ -1,5 +1,14 @@
 <template>
   <div class="blog-block" :style="wrapperStyles">
+    <h2 
+      v-if="settings.title || builder?.isEditing" 
+      class="blog-title" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >
+      {{ settings.title }}
+    </h2>
     <div class="blog-grid" :style="gridStyles">
       <article 
         v-for="post in mockPosts" 
@@ -133,6 +142,10 @@ const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', d
 
 <style scoped>
 .blog-block { width: 100%; }
+.blog-title {
+    margin-bottom: 32px;
+    width: 100%;
+}
 .blog-post { 
   background: white; 
 }

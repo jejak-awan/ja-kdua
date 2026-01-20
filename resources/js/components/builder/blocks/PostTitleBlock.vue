@@ -1,6 +1,12 @@
 <template>
-  <component :is="settings.tag || 'h1'" class="post-title-block" :style="titleStyles">
-    {{ postTitle }}
+  <component 
+    :is="settings.tag || 'h1'" 
+    class="post-title-block" 
+    :style="titleStyles"
+    contenteditable="true"
+    @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+  >
+    {{ settings.title || 'Sample Post Title' }}
   </component>
 </template>
 

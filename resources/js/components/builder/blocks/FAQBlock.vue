@@ -1,20 +1,33 @@
 <template>
   <div class="faq-block" :style="wrapperStyles">
-    <div v-for="(item, index) in faqItems" :key="index" class="faq-item" :style="itemStyles">
-      <button class="faq-question" :style="questionStyles" @click="toggle(index)">
-        <span>{{ item.question }}</span>
-        <ChevronDown v-if="isAccordion" class="faq-icon" :class="{ 'faq-icon--expanded': openItems.includes(index) }" :style="iconStyles" />
-      </button>
-      <div v-show="isOpen(index)" class="faq-answer" :style="answerStyles">
-        {{ item.answer }}
-      </div>
+    <draggable
+      :list="module.children || []"
+      item-key="id"
+      group="faq_item"
+      class="faq-container"
+      ghost-class="ja-builder-ghost"
+    >
+      <template #item="{ element: child, index }">
+        <ModuleWrapper
+          :module="child"
+          :index="index"
+        />
+      </template>
+    </draggable>
+    
+    <!-- Empty State -->
+    <div v-if="!module.children || module.children.length === 0" class="empty-faq-placeholder">
+        <HelpCircle :size="24" />
+        <span>Add FAQ items in settings</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { computed, ref, inject, provide } from 'vue'
+import draggable from 'vuedraggable'
+import { HelpCircle } from 'lucide-vue-next'
+import ModuleWrapper from '../canvas/ModuleWrapper.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -33,30 +46,31 @@ const settings = computed(() => props.module.settings || {})
 const builder = inject('builder')
 const device = computed(() => builder?.device || 'desktop')
 
-const openItems = ref([0])
-const isAccordion = computed(() => getResponsiveValue(settings.value, 'layout', device.value) !== 'list')
+const openItems = ref([])
 
-const faqItems = computed(() => {
-  return (props.module.children || []).map(child => ({
-    question: child.settings.question || 'New Question',
-    answer: child.settings.answer || ''
-  }))
-})
+// Ensure at least one item is open by default if accordion
+if (props.module.children && props.module.children.length > 0) {
+    openItems.value = [props.module.children[0].id]
+}
 
-const toggle = (index) => {
-  if (!isAccordion.value) return
-  if (getResponsiveValue(settings.value, 'allowMultiple', device.value)) {
-    if (openItems.value.includes(index)) {
-      openItems.value = openItems.value.filter(i => i !== index)
+const toggleItem = (id) => {
+  const allowMultiple = getResponsiveValue(settings.value, 'allowMultiple', device.value)
+  if (allowMultiple) {
+    if (openItems.value.includes(id)) {
+      openItems.value = openItems.value.filter(i => i !== id)
     } else {
-      openItems.value = [...openItems.value, index]
+      openItems.value = [...openItems.value, id]
     }
   } else {
-    openItems.value = openItems.value.includes(index) ? [] : [index]
+    openItems.value = openItems.value.includes(id) ? [] : [id]
   }
 }
 
-const isOpen = (index) => !isAccordion.value || openItems.value.includes(index)
+provide('faqState', {
+  openItems: computed(() => openItems.value),
+  toggleItem,
+  parentSettings: settings
+})
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }
@@ -69,48 +83,6 @@ const wrapperStyles = computed(() => {
   Object.assign(styles, getFilterStyles(settings.value, device.value))
   Object.assign(styles, getTransformStyles(settings.value, device.value))
   return styles
-})
-
-const itemStyles = computed(() => {
-  const borderColor = getResponsiveValue(settings.value, 'itemBorderColor', device.value) || '#e0e0e0'
-  return { 
-    borderBottom: `1px solid ${borderColor}` 
-  }
-})
-
-const questionStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'question_', device.value)
-  return {
-    ...styles,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    padding: '16px 0',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    textAlign: styles.textAlign || 'left'
-  }
-})
-
-const answerStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'answer_', device.value)
-  return { 
-    ...styles, 
-    padding: '0 0 16px' 
-  }
-})
-
-const iconStyles = computed(() => {
-  const color = getResponsiveValue(settings.value, 'accentColor', device.value) || '#2059ea'
-  return { 
-    color: color,
-    width: '20px',
-    height: '20px',
-    transition: 'transform 0.2s',
-    flexShrink: 0
-  }
 })
 </script>
 

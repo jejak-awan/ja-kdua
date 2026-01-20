@@ -222,7 +222,7 @@
                 },
                 "flipH": "Flip Horizontal",
                 "flipV": "Flip Vertical",
-                "rotate": "90\u00b0 Rotate",
+                "rotate": "90° Rotate",
                 "invert": "Invert Colors",
                 "size": {
                     "label": "Pattern Size",
@@ -283,7 +283,7 @@
                 "transform": "Mask Transform",
                 "flipH": "Flip Horizontal",
                 "flipV": "Flip Vertical",
-                "rotate": "90\u00b0 Rotate",
+                "rotate": "90° Rotate",
                 "invert": "Invert Colors",
                 "size": {
                     "label": "Mask Size",
@@ -796,7 +796,26 @@
             "conditions": "Conditions",
             "attributes": "Attributes",
             "interactions": "Interactions",
-            "scroll_effects": "Scroll Effects"
+            "scroll_effects": "Scroll Effects",
+            "query": "Query",
+            "cardStyle": "Card Style",
+            "titleTypography": "Title Typography",
+            "categoryTypography": "Category Typography",
+            "metaTypography": "Meta Typography",
+            "excerptTypography": "Excerpt Typography",
+            "filterTypography": "Filter Typography",
+            "labelTypography": "Label Typography",
+            "buttonStyle": "Button Style",
+            "avatarSettings": "Avatar Settings",
+            "labels": "Labels",
+            "imageStyle": "Image Style",
+            "filter": "Filter",
+            "display": "Display",
+            "hover": "Hover Effect",
+            "navigation": "Navigation",
+            "postTitleTypography": "Post Title Typography",
+            "captionTypography": "Caption Typography",
+            "linkTypography": "Link Typography"
         },
         "meta_query": {
             "add": "Add Meta Query",
@@ -1049,6 +1068,222 @@
             "link_target": {
                 "label": "Section Link Target"
             }
+        },
+        "blog": {
+            "postsPerPage": {
+                "label": "Posts Per Page"
+            },
+            "category": {
+                "label": "Category Filter"
+            },
+            "orderBy": {
+                "label": "Order By"
+            },
+            "order": {
+                "label": "Order"
+            },
+            "showImage": {
+                "label": "Show Featured Image"
+            },
+            "showExcerpt": {
+                "label": "Show Excerpt"
+            },
+            "showDate": {
+                "label": "Show Date"
+            },
+            "showAuthor": {
+                "label": "Show Author"
+            },
+            "showCategory": {
+                "label": "Show Category"
+            },
+            "layout": {
+                "label": "Layout Style"
+            },
+            "columns": {
+                "label": "Columns"
+            },
+            "gap": {
+                "label": "Gap"
+            },
+            "imageAspectRatio": {
+                "label": "Image Aspect Ratio"
+            },
+            "cardBackgroundColor": {
+                "label": "Card Background"
+            }
+        },
+        "portfolio": {
+            "itemsPerPage": {
+                "label": "Items Per Page"
+            },
+            "showFilter": {
+                "label": "Show Filter"
+            },
+            "filterStyle": {
+                "label": "Filter Style"
+            },
+            "showTitle": {
+                "label": "Show Title"
+            },
+            "showCategory": {
+                "label": "Show Category"
+            },
+            "hoverEffect": {
+                "label": "Hover Effect"
+            },
+            "overlayColor": {
+                "label": "Overlay Color"
+            },
+            "columns": {
+                "label": "Columns"
+            },
+            "gap": {
+                "label": "Gap"
+            },
+            "imageAspectRatio": {
+                "label": "Aspect Ratio"
+            }
+        },
+        "postslider": {
+            "totalPosts": {
+                "label": "Number of Posts"
+            },
+            "showImage": {
+                "label": "Show Image"
+            },
+            "showExcerpt": {
+                "label": "Show Excerpt"
+            },
+            "showMeta": {
+                "label": "Show Meta"
+            },
+            "showArrows": {
+                "label": "Show Arrows"
+            },
+            "showDots": {
+                "label": "Show Dots"
+            },
+            "autoplay": {
+                "label": "Autoplay"
+            },
+            "autoplaySpeed": {
+                "label": "Autoplay Speed"
+            },
+            "height": {
+                "label": "Height"
+            },
+            "overlayEnabled": {
+                "label": "Enable Overlay"
+            },
+            "overlayColor": {
+                "label": "Overlay Color"
+            },
+            "buttonBackgroundColor": {
+                "label": "Button Background"
+            }
+        },
+        "comments": {
+            "title": {
+                "label": "Title"
+            },
+            "showForm": {
+                "label": "Show Comment Form"
+            },
+            "showAvatar": {
+                "label": "Show Avatars"
+            },
+            "showReplyButton": {
+                "label": "Show Reply Button"
+            },
+            "namePlaceholder": {
+                "label": "Name Placeholder"
+            },
+            "emailPlaceholder": {
+                "label": "Email Placeholder"
+            },
+            "commentPlaceholder": {
+                "label": "Comment Placeholder"
+            },
+            "submitText": {
+                "label": "Submit Button Text"
+            },
+            "avatarSize": {
+                "label": "Avatar Size"
+            }
+        },
+        "postnavigation": {
+            "style": {
+                "label": "Style"
+            },
+            "showThumbnails": {
+                "label": "Show Thumbnails"
+            },
+            "showLabels": {
+                "label": "Show Labels"
+            },
+            "prevLabel": {
+                "label": "Previous Label"
+            },
+            "nextLabel": {
+                "label": "Next Label"
+            }
+        },
+        "relatedposts": {
+            "title": {
+                "label": "Title"
+            },
+            "postsCount": {
+                "label": "Number of Posts"
+            },
+            "showImage": {
+                "label": "Show Image"
+            },
+            "showExcerpt": {
+                "label": "Show Excerpt"
+            },
+            "showMeta": {
+                "label": "Show Meta"
+            },
+            "columns": {
+                "label": "Columns"
+            }
+        },
+        "posttitle": {
+            "tag": {
+                "label": "Tag"
+            }
+        },
+        "postmeta": {
+            "showAuthor": {
+                "label": "Show Author"
+            },
+            "showDate": {
+                "label": "Show Date"
+            },
+            "showCategory": {
+                "label": "Show Category"
+            },
+            "showReadTime": {
+                "label": "Show Read Time"
+            },
+            "showComments": {
+                "label": "Show Comments"
+            },
+            "separator": {
+                "label": "Separator"
+            }
+        },
+        "featuredimage": {
+            "showCaption": {
+                "label": "Show Caption"
+            },
+            "aspectRatio": {
+                "label": "Aspect Ratio"
+            },
+            "objectFit": {
+                "label": "Object Fit"
+            }
         }
     },
     "tabs": {
@@ -1107,6 +1342,53 @@
             "configure": "Configure your {type} settings below.",
             "tabDisabled": "Enable {type} to see options.",
             "level": "Intensity"
+        }
+    },
+    "builder": {
+        "settings": {
+            "accordion": {
+                "openHeaderBackgroundColor": {
+                    "label": "Open Toggle Background Color"
+                },
+                "headerBackgroundColor": {
+                    "label": "Closed Toggle Background Color"
+                },
+                "openHeaderTextColor": {
+                    "label": "Open Title Text Color"
+                },
+                "iconColor": {
+                    "label": "Icon Color"
+                },
+                "iconSize": {
+                    "label": "Icon Size"
+                },
+                "itemGap": {
+                    "label": "Spacing Between Items"
+                },
+                "headerPadding": {
+                    "label": "Header Padding"
+                },
+                "contentPadding": {
+                    "label": "Content Padding"
+                },
+                "contentBackgroundColor": {
+                    "label": "Content Background Color"
+                }
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": {
+                    "label": "Open Toggle Background Color"
+                },
+                "headerBackgroundColor": {
+                    "label": "Closed Toggle Background Color"
+                },
+                "openHeaderTextColor": {
+                    "label": "Open Title Text Color"
+                },
+                "iconColor": {
+                    "label": "Icon Color"
+                }
+            }
         }
     }
 }

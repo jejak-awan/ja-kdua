@@ -76,12 +76,14 @@ export default {
                     {
                         name: 'targetDate',
                         type: 'text',
-                        label: 'Date (YYYY-MM-DD)'
+                        label: 'Date (YYYY-MM-DD)',
+                        responsive: true
                     },
                     {
                         name: 'targetTime',
                         type: 'text',
-                        label: 'Time (HH:MM)'
+                        label: 'Time (HH:MM)',
+                        responsive: true
                     }
                 ]
             },
@@ -118,22 +120,26 @@ export default {
                     {
                         name: 'daysLabel',
                         type: 'text',
-                        label: 'Days Label'
+                        label: 'Days Label',
+                        responsive: true
                     },
                     {
                         name: 'hoursLabel',
                         type: 'text',
-                        label: 'Hours Label'
+                        label: 'Hours Label',
+                        responsive: true
                     },
                     {
                         name: 'minutesLabel',
                         type: 'text',
-                        label: 'Minutes Label'
+                        label: 'Minutes Label',
+                        responsive: true
                     },
                     {
                         name: 'secondsLabel',
                         type: 'text',
-                        label: 'Seconds Label'
+                        label: 'Seconds Label',
+                        responsive: true
                     }
                 ]
             },

@@ -3,19 +3,39 @@
     <div class="countdown-items" :style="itemsStyles">
       <div v-if="settings.showDays !== false" class="countdown-item" :style="itemStyles">
         <div class="countdown-number" :style="numberStyles">{{ timeLeft.days }}</div>
-        <div class="countdown-label" :style="labelStyles">{{ settings.daysLabel || 'Days' }}</div>
+        <div 
+          class="countdown-label" 
+          :style="labelStyles"
+          :contenteditable="builder?.isEditing"
+          @blur="(e) => onLabelBlur('daysLabel', e)"
+        >{{ daysLabel }}</div>
       </div>
       <div v-if="settings.showHours !== false" class="countdown-item" :style="itemStyles">
         <div class="countdown-number" :style="numberStyles">{{ timeLeft.hours }}</div>
-        <div class="countdown-label" :style="labelStyles">{{ settings.hoursLabel || 'Hours' }}</div>
+        <div 
+          class="countdown-label" 
+          :style="labelStyles"
+          :contenteditable="builder?.isEditing"
+          @blur="(e) => onLabelBlur('hoursLabel', e)"
+        >{{ hoursLabel }}</div>
       </div>
       <div v-if="settings.showMinutes !== false" class="countdown-item" :style="itemStyles">
         <div class="countdown-number" :style="numberStyles">{{ timeLeft.minutes }}</div>
-        <div class="countdown-label" :style="labelStyles">{{ settings.minutesLabel || 'Minutes' }}</div>
+        <div 
+          class="countdown-label" 
+          :style="labelStyles"
+          :contenteditable="builder?.isEditing"
+          @blur="(e) => onLabelBlur('minutesLabel', e)"
+        >{{ minutesLabel }}</div>
       </div>
       <div v-if="settings.showSeconds !== false" class="countdown-item" :style="itemStyles">
         <div class="countdown-number" :style="numberStyles">{{ timeLeft.seconds }}</div>
-        <div class="countdown-label" :style="labelStyles">{{ settings.secondsLabel || 'Seconds' }}</div>
+        <div 
+          class="countdown-label" 
+          :style="labelStyles"
+          :contenteditable="builder?.isEditing"
+          @blur="(e) => onLabelBlur('secondsLabel', e)"
+        >{{ secondsLabel }}</div>
       </div>
     </div>
   </div>
@@ -49,6 +69,26 @@ const device = computed(() => builder?.device || 'desktop')
 
 const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 let interval = null
+
+const daysLabel = computed(() => getResponsiveValue(settings.value, 'daysLabel', device.value) || 'Days')
+const hoursLabel = computed(() => getResponsiveValue(settings.value, 'hoursLabel', device.value) || 'Hours')
+const minutesLabel = computed(() => getResponsiveValue(settings.value, 'minutesLabel', device.value) || 'Minutes')
+const secondsLabel = computed(() => getResponsiveValue(settings.value, 'secondsLabel', device.value) || 'Seconds')
+
+const onLabelBlur = (field, e) => {
+    updateResponsiveField(field, e.target.innerText)
+}
+
+const updateResponsiveField = (fieldName, value) => {
+    const current = settings.value[fieldName]
+    let newValue
+    if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+        newValue = { ...current, [device.value]: value }
+    } else {
+        newValue = { [device.value]: value }
+    }
+    builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+}
 
 const calculateTimeLeft = () => {
   const targetDate = settings.value.targetDate || new Date().toISOString().split('T')[0]

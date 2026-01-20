@@ -1,6 +1,12 @@
 <template>
   <div class="related-posts-block" :style="wrapperStyles">
-    <h3 v-if="titleValue" class="related-posts-title" :style="titleStyles">{{ titleValue }}</h3>
+    <h3 
+      v-if="titleValue" 
+      class="related-posts-title" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >{{ titleValue }}</h3>
     <div class="related-posts-grid" :style="gridStyles">
       <article v-for="(post, index) in mockPosts" :key="index" class="related-post">
         <div v-if="showImage" class="post-image"><Image class="placeholder-icon" /></div>

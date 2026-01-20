@@ -28,6 +28,7 @@ export default {
     defaults: {
         postsPerSlide: 1,
         totalPosts: 5,
+        title: 'Featured Posts',
         // Navigation
         showArrows: true,
         showDots: true,
@@ -54,10 +55,17 @@ export default {
     settings: {
         content: [
             {
+                id: 'settings',
+                label: 'Settings',
+                fields: [
+                    { name: 'title', type: 'text', label: 'Title', responsive: true }
+                ]
+            },
+            {
                 id: 'query',
                 label: 'Query',
                 fields: [
-                    { name: 'totalPosts', type: 'range', label: 'Number of Posts', min: 1, max: 10, step: 1 }
+                    { name: 'totalPosts', type: 'range', label: 'Number of Posts', min: 1, max: 10, step: 1, responsive: true }
                 ]
             },
             {
@@ -79,7 +87,7 @@ export default {
                     { name: 'showArrows', type: 'toggle', label: 'Show Arrows' },
                     { name: 'showDots', type: 'toggle', label: 'Show Dots' },
                     { name: 'autoplay', type: 'toggle', label: 'Autoplay' },
-                    { name: 'autoplaySpeed', type: 'range', label: 'Autoplay Speed', min: 2000, max: 10000, step: 500, unit: 'ms' }
+                    { name: 'autoplaySpeed', type: 'range', label: 'Autoplay Speed', min: 2000, max: 10000, step: 500, unit: 'ms', responsive: true }
                 ]
             },
             {

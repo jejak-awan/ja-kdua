@@ -87,7 +87,8 @@ export default {
                     {
                         name: 'autoplay',
                         type: 'toggle',
-                        label: 'Autoplay'
+                        label: 'Autoplay',
+                        responsive: true
                     },
                     {
                         name: 'autoplaySpeed',
@@ -96,17 +97,20 @@ export default {
                         min: 1000,
                         max: 10000,
                         step: 500,
-                        unit: 'ms'
+                        unit: 'ms',
+                        responsive: true
                     },
                     {
                         name: 'loop',
                         type: 'toggle',
-                        label: 'Loop'
+                        label: 'Loop',
+                        responsive: true
                     },
                     {
                         name: 'pauseOnHover',
                         type: 'toggle',
-                        label: 'Pause on Hover'
+                        label: 'Pause on Hover',
+                        responsive: true
                     }
                 ]
             },
@@ -117,17 +121,20 @@ export default {
                     {
                         name: 'showArrows',
                         type: 'toggle',
-                        label: 'Show Arrows'
+                        label: 'Show Arrows',
+                        responsive: true
                     },
                     {
                         name: 'showDots',
                         type: 'toggle',
-                        label: 'Show Dots'
+                        label: 'Show Dots',
+                        responsive: true
                     },
                     {
                         name: 'slideTransition',
                         type: 'select',
                         label: 'Transition',
+                        responsive: true,
                         options: [
                             { value: 'slide', label: 'Slide' },
                             { value: 'fade', label: 'Fade' }
@@ -153,12 +160,14 @@ export default {
                     {
                         name: 'overlayEnabled',
                         type: 'toggle',
-                        label: 'Enable Overlay'
+                        label: 'Enable Overlay',
+                        responsive: true
                     },
                     {
                         name: 'overlayColor',
                         type: 'color',
-                        label: 'Overlay Color'
+                        label: 'Overlay Color',
+                        responsive: true
                     }
                 ]
             },

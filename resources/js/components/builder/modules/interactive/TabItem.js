@@ -1,5 +1,4 @@
 import {
-    adminLabelSettings,
     backgroundSettings,
     spacingSettings,
     borderSettings,
@@ -7,7 +6,19 @@ import {
     sizingSettings,
     filterSettings,
     transformSettings,
-    animationSettings
+    animationSettings,
+    visibilitySettings,
+    positionSettings,
+    transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -66,6 +77,15 @@ export default {
             transformSettings,
             animationSettings
         ],
-        advanced: []
+        advanced: [
+            visibilitySettings,
+            positionSettings,
+            transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
+            cssSettings
+        ]
     }
 }

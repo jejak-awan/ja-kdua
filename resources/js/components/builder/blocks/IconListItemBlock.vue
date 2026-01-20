@@ -10,10 +10,21 @@
       
       <!-- Text -->
       <div class="text-content">
-          <span v-if="settings.link_url" class="item-link">
-              <a :href="settings.link_url" :target="settings.link_target" :style="linkStyles">{{ settings.text }}</a>
+          <span v-if="linkUrl" class="item-link">
+              <a 
+                :href="linkUrl" 
+                :target="settings.link_target" 
+                :style="linkStyles"
+                :contenteditable="builder?.isEditing"
+                @blur="onTextBlur"
+                @click.prevent
+              >{{ text }}</a>
           </span>
-          <span v-else>{{ settings.text }}</span>
+          <span 
+            v-else
+            :contenteditable="builder?.isEditing"
+            @blur="onTextBlur"
+          >{{ text }}</span>
       </div>
   </div>
 </template>
@@ -40,6 +51,24 @@ const parentSettings = computed(() => iconListState.parentSettings.value || {})
 const getIcon = (name) => {
     if (!name) return LucideIcons.Check
     return LucideIcons[name] || LucideIcons.Check
+}
+
+const text = computed(() => getResponsiveValue(settings.value, 'text', device.value) || 'List Item')
+const linkUrl = computed(() => getResponsiveValue(settings.value, 'link_url', device.value))
+
+const onTextBlur = (e) => {
+    updateResponsiveField('text', e.target.innerText)
+}
+
+const updateResponsiveField = (fieldName, value) => {
+    const current = settings.value[fieldName]
+    let newValue
+    if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+        newValue = { ...current, [device.value]: value }
+    } else {
+        newValue = { [device.value]: value }
+    }
+    builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
 }
 
 const itemStyles = computed(() => {

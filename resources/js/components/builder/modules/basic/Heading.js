@@ -10,8 +10,15 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -41,7 +48,7 @@ export default {
                 id: 'elements',
                 label: 'Elements',
                 fields: [
-                    { name: 'text', type: 'text', label: 'Heading Text' },
+                    { name: 'text', type: 'text', label: 'Heading Text', responsive: true },
                     {
                         name: 'tag', type: 'select', label: 'HTML Tag', options: [
                             { value: 'h1', label: 'H1' },
@@ -54,7 +61,10 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Heading')
         ],
         design: [
             {
@@ -77,6 +87,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

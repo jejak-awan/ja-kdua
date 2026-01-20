@@ -57,6 +57,7 @@ import TableOfContentsBlock from '../blocks/TableOfContentsBlock.vue'
 import QuoteBlock from '../blocks/QuoteBlock.vue'
 import LogoGridBlock from '../blocks/LogoGridBlock.vue'
 import FAQBlock from '../blocks/FAQBlock.vue'
+import FAQItemBlock from '../blocks/FAQItemBlock.vue'
 import FeatureBlock from '../blocks/FeatureBlock.vue'
 import NumberBoxBlock from '../blocks/NumberBoxBlock.vue'
 import ShareButtonsBlock from '../blocks/ShareButtonsBlock.vue'
@@ -169,6 +170,7 @@ export function registerBlockComponents() {
     ModuleRegistry.registerComponent('logogrid', LogoGridBlock)
     ModuleRegistry.registerComponent('logo_grid_item', LogoGridItemBlock)
     ModuleRegistry.registerComponent('faq', FAQBlock)
+    ModuleRegistry.registerComponent('faq_item', FAQItemBlock)
     ModuleRegistry.registerComponent('feature', FeatureBlock)
     ModuleRegistry.registerComponent('numberbox', NumberBoxBlock)
     ModuleRegistry.registerComponent('sharebuttons', ShareButtonsBlock)

@@ -10,9 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
     adminLabelSettings,
-    typographySettings
+    cssSettings,
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -89,6 +96,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

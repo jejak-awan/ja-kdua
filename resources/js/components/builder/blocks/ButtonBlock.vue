@@ -13,7 +13,13 @@
         :is="iconComponent" 
         class="button-icon button-icon--left"
       />
-      <span class="button-text">{{ settings.text || 'Click Here' }}</span>
+      <div 
+        ref="editableRef"
+        contenteditable="true"
+        class="button-text"
+        @blur="onTextBlur"
+        @click.stop
+      >{{ settings.text || 'Click Here' }}</div>
       <component 
         v-if="settings.icon && settings.iconPosition === 'right'" 
         :is="iconComponent" 
@@ -24,7 +30,7 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject } from 'vue'
+import { computed, defineAsyncComponent, inject, ref } from 'vue'
 import { MousePointer } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -42,6 +48,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device || 'desktop')
+const editableRef = ref(null)
 
 const iconComponent = computed(() => {
   if (!settings.value.icon) return null
@@ -66,6 +73,15 @@ const buttonClasses = computed(() => ([
   `button--${getResponsiveValue(settings.value, 'size', device.value) || 'medium'}`,
   getResponsiveValue(settings.value, 'fullWidth', device.value) ? 'button--full-width' : ''
 ]))
+
+const onTextBlur = (e) => {
+  const newText = e.target.innerText
+  if (newText !== (settings.value.text || 'Click Here')) {
+    builder.updateModule(props.module.id, {
+      settings: { ...settings.value, text: newText }
+    })
+  }
+}
 
 const buttonStyles = computed(() => {
   const styles = {

@@ -14,11 +14,13 @@
         :show-context-menu="showContextMenu"
         :show-reset="hasCustomValue"
         :show-info="!!description"
+        :show-presets="showPresets"
         @reset="$emit('reset')"
         @reset-field="$emit('reset-field')"
         @responsive="$emit('responsive')"
         @select-dynamic-data="$emit('select-dynamic-data', $event)"
         @toggle-info="showInfo = $event"
+        @assign-preset="$emit('assign-preset')"
       />
     </div>
     
@@ -72,10 +74,14 @@ const props = defineProps({
   hasCustomValue: {
     type: Boolean,
     default: false
+  },
+  showPresets: {
+    type: Boolean,
+    default: false
   }
 })
 
-defineEmits(['reset', 'responsive', 'reset-field'])
+defineEmits(['reset', 'responsive', 'reset-field', 'assign-preset', 'select-dynamic-data'])
 
 const showInfo = ref(false)
 

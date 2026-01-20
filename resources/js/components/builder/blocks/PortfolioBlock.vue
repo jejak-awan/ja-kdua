@@ -1,5 +1,14 @@
 <template>
   <div class="portfolio-block" :style="wrapperStyles">
+    <h2 
+      v-if="settings.title || builder?.isEditing" 
+      class="portfolio-title" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >
+      {{ settings.title }}
+    </h2>
     <!-- Filter -->
     <div v-if="settings.showFilter !== false" class="portfolio-filter">
       <button v-for="cat in categories" :key="cat" class="filter-btn" :class="{ 'filter-btn--active': activeFilter === cat }" :style="filterStyles" @click="activeFilter = cat">{{ cat }}</button>
@@ -98,6 +107,11 @@ const categoryStyles = computed(() => getTypographyStyles(settings.value, 'categ
 
 <style scoped>
 .portfolio-block { width: 100%; }
+.portfolio-title {
+    margin-bottom: 24px;
+    text-align: center;
+    width: 100%;
+}
 .portfolio-filter { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
 .filter-btn { padding: 8px 20px; border: 1px solid #e0e0e0; background: #fff; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
 .filter-btn--active, .filter-btn:hover { background: #2059ea; color: #fff; border-color: #2059ea; }

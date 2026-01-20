@@ -10,7 +10,15 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -42,25 +50,16 @@ export default {
                 id: 'icon',
                 label: 'Icon',
                 fields: [
-                    { name: 'icon', type: 'text', label: 'Icon Name (Lucide)' },
+                    { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true },
                     { name: 'size', type: 'range', label: 'Size', min: 16, max: 128, step: 4, unit: 'px', responsive: true },
                     { name: 'color', type: 'color', label: 'Icon Color', responsive: true }
                 ]
             },
-            {
-                id: 'link',
-                label: 'Link',
-                fields: [
-                    { name: 'linkUrl', type: 'text', label: 'Link URL' },
-                    {
-                        name: 'linkTarget', type: 'select', label: 'Link Target', options: [
-                            { value: '_self', label: 'Same Window' },
-                            { value: '_blank', label: 'New Tab' }
-                        ]
-                    }
-                ]
-            },
-            backgroundSettings
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Icon')
         ],
         design: [
             {
@@ -88,6 +87,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

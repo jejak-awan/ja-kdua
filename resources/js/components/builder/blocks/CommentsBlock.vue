@@ -1,6 +1,12 @@
 <template>
   <div class="comments-block" :style="wrapperStyles">
-    <h3 v-if="settings.title" class="comments-title" :style="titleStyles">{{ settings.title }} (3)</h3>
+    <h3 
+      v-if="settings.title" 
+      class="comments-title" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >{{ settings.title }} (3)</h3>
     
     <!-- Comments List -->
     <div class="comments-list">
@@ -99,7 +105,7 @@ const buttonStyles = computed(() => {
 .comments-list { margin-bottom: 32px; }
 .comment-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e0e0e0; }
 .comment-item:last-child { border-bottom: none; }
-.comment-avatar { width: 48px; height: 48px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.comment-avatar { width: v-bind('settings.avatarSize ? settings.avatarSize + "px" : "48px"'); height: v-bind('settings.avatarSize ? settings.avatarSize + "px" : "48px"'); border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .avatar-icon { width: 24px; height: 24px; color: #999; }
 .comment-content { flex: 1; }
 .comment-header { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }

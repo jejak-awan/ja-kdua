@@ -3,13 +3,25 @@
     <a href="#" class="post-nav-item post-nav-item--prev" :style="itemStyles">
       <ChevronLeft :style="iconStyles" />
       <div class="post-nav-content">
-        <span v-if="settings.showLabels !== false" class="post-nav-label" :style="labelStyles">{{ settings.prevLabel || 'Previous Post' }}</span>
+        <span 
+          v-if="settings.showLabels !== false" 
+          class="post-nav-label" 
+          :style="labelStyles"
+          contenteditable="true"
+          @blur="e => builder.updateModuleSetting(module.id, 'prevLabel', e.target.innerText)"
+        >{{ settings.prevLabel || 'Previous Post' }}</span>
         <span class="post-nav-title" :style="titleStyles">How to Build a Website</span>
       </div>
     </a>
     <a href="#" class="post-nav-item post-nav-item--next" :style="itemStyles">
       <div class="post-nav-content" style="text-align: right">
-        <span v-if="settings.showLabels !== false" class="post-nav-label" :style="labelStyles">{{ settings.nextLabel || 'Next Post' }}</span>
+        <span 
+          v-if="settings.showLabels !== false" 
+          class="post-nav-label" 
+          :style="labelStyles"
+          contenteditable="true"
+          @blur="e => builder.updateModuleSetting(module.id, 'nextLabel', e.target.innerText)"
+        >{{ settings.nextLabel || 'Next Post' }}</span>
         <span class="post-nav-title" :style="titleStyles">10 Tips for SEO Success</span>
       </div>
       <ChevronRight :style="iconStyles" />

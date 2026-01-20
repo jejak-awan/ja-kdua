@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -91,7 +99,11 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Testimonial')
         ],
         design: [
             {
@@ -130,6 +142,13 @@ export default {
                         name: 'showQuoteIcon',
                         type: 'toggle',
                         label: 'Show Quote Icon',
+                        responsive: true
+                    },
+                    {
+                        name: 'quoteIconName',
+                        type: 'icon',
+                        label: 'Select Quote Icon',
+                        default: 'quote',
                         responsive: true
                     },
                     {
@@ -189,6 +208,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

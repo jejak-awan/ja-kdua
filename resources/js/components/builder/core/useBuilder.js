@@ -640,6 +640,41 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         return true
     }
 
+    function updateModule(id, data) {
+        const module = findModuleById(blocks.value, id)
+        if (!module) return false
+
+        if (data.settings) {
+            module.settings = { ...module.settings, ...data.settings }
+            delete data.settings
+        }
+
+        Object.assign(module, data)
+        triggerRef(blocks)
+        takeSnapshot()
+        return true
+    }
+
+    function updateModuleSetting(id, key, value) {
+        const module = findModuleById(blocks.value, id)
+        if (!module) return false
+
+        if (!module.settings) module.settings = {}
+
+        const current = module.settings[key]
+        // Check if current is a responsive object
+        if (typeof current === 'object' && current !== null && !Array.isArray(current) &&
+            (current.hasOwnProperty('desktop') || current.hasOwnProperty('tablet') || current.hasOwnProperty('mobile'))) {
+            module.settings[key] = { ...current, [device.value]: value }
+        } else {
+            module.settings[key] = value
+        }
+
+        triggerRef(blocks)
+        takeSnapshot()
+        return true
+    }
+
     function applyPreset(id, preset) {
         const module = findModuleById(blocks.value, id)
         if (!module || !preset.settings) return false
@@ -1059,6 +1094,8 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         duplicateModule,
         moveModule,
         updateModuleSettings,
+        updateModule,
+        updateModuleSetting,
         resetLayout,
 
         // Presets

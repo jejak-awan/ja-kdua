@@ -48,12 +48,12 @@ export default {
                 id: 'display',
                 label: 'Display',
                 fields: [
-                    { name: 'showAuthor', type: 'toggle', label: 'Show Author' },
-                    { name: 'showDate', type: 'toggle', label: 'Show Date' },
-                    { name: 'showCategory', type: 'toggle', label: 'Show Category' },
-                    { name: 'showReadTime', type: 'toggle', label: 'Show Read Time' },
-                    { name: 'showComments', type: 'toggle', label: 'Show Comments' },
-                    { name: 'separator', type: 'text', label: 'Separator' }
+                    { name: 'showAuthor', type: 'toggle', label: 'Show Author', responsive: true },
+                    { name: 'showDate', type: 'toggle', label: 'Show Date', responsive: true },
+                    { name: 'showCategory', type: 'toggle', label: 'Show Category', responsive: true },
+                    { name: 'showReadTime', type: 'toggle', label: 'Show Read Time', responsive: true },
+                    { name: 'showComments', type: 'toggle', label: 'Show Comments', responsive: true },
+                    { name: 'separator', type: 'text', label: 'Separator', responsive: true }
                 ]
             },
             backgroundSettings

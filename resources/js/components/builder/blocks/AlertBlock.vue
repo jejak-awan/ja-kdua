@@ -2,8 +2,21 @@
   <div v-if="!dismissed" class="alert-block" :class="alertClass" :style="wrapperStyles">
     <component :is="alertIcon" v-if="showIcon" class="alert-icon" />
     <div class="alert-content">
-      <div v-if="settings.title" class="alert-title" :style="titleStyles">{{ settings.title }}</div>
-      <div class="alert-message" :style="messageStyles">{{ settings.content }}</div>
+      <div 
+        v-if="title || builder?.isEditing" 
+        class="alert-title" 
+        :style="titleStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onTitleBlur"
+        @input="onTitleInput"
+      >{{ title }}</div>
+      <div 
+        class="alert-message" 
+        :style="messageStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onContentBlur"
+        @input="onContentInput"
+      >{{ content }}</div>
     </div>
     <button v-if="settings.dismissible" class="alert-dismiss" @click="dismissed = true">
       <X class="dismiss-icon" />
@@ -22,7 +35,8 @@ import {
   getSizingStyles, 
   getTypographyStyles,
   getFilterStyles,
-  getTransformStyles 
+  getTransformStyles,
+  getResponsiveValue
 } from '../core/styleUtils'
 
 const props = defineProps({
@@ -42,6 +56,44 @@ const alertIcon = computed(() => {
   const icons = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle }
   return icons[alertType.value] || Info
 })
+
+const title = computed(() => getResponsiveValue(settings.value, 'title', device.value) || '')
+const content = computed(() => getResponsiveValue(settings.value, 'content', device.value) || '')
+
+const onTitleBlur = (e) => {
+  const val = e.target.innerText
+  updateResponsiveField('title', val)
+}
+
+const onTitleInput = (e) => {
+  // Optional: real-time sync if needed
+}
+
+const onContentBlur = (e) => {
+  const val = e.target.innerText
+  updateResponsiveField('content', val)
+}
+
+const onContentInput = (e) => {
+  // Optional
+}
+
+const updateResponsiveField = (fieldName, value) => {
+  const current = settings.value[fieldName]
+  let newValue
+  
+  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+    newValue = { ...current, [device.value]: value }
+  } else {
+    // If it was a string, convert to responsive object or just update if not in responsive mode
+    // But since we enabled responsive: true, it should ideally be an object
+    newValue = { [device.value]: value }
+  }
+  
+  builder?.updateModuleSettings(props.module.id, {
+    [fieldName]: newValue
+  })
+}
 
 const themeColors = computed(() => {
   const colors = {

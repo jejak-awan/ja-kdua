@@ -82,7 +82,8 @@ export default {
                     {
                         name: 'lightbox',
                         type: 'toggle',
-                        label: 'Enable Lightbox'
+                        label: 'Enable Lightbox',
+                        responsive: true
                     }
                 ]
             },

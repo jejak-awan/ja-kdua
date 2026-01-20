@@ -27,6 +27,7 @@ export default {
 
     defaults: {
         tag: 'h1',
+        title: 'Sample Post Title - Dynamic Content',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -39,7 +40,8 @@ export default {
 
     settings: {
         content: [
-            { id: 'tag', label: 'HTML Tag', fields: [{ name: 'tag', type: 'select', label: 'Tag', options: [{ value: 'h1', label: 'H1' }, { value: 'h2', label: 'H2' }, { value: 'h3', label: 'H3' }] }] },
+            { id: 'settings', label: 'Settings', fields: [{ name: 'title', type: 'text', label: 'Title', responsive: true }] },
+            { id: 'tag', label: 'HTML Tag', fields: [{ name: 'tag', type: 'select', label: 'Tag', responsive: true, options: [{ value: 'h1', label: 'H1' }, { value: 'h2', label: 'H2' }, { value: 'h3', label: 'H3' }] }] },
             backgroundSettings
         ],
         design: [

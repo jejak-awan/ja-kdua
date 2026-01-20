@@ -694,5 +694,26 @@
     "fullwidthPostContent": {
         "maxWidth": "Maximum content width.",
         "showSidebar": "Display a sidebar."
+    },
+    "builder": {
+        "info": {
+            "accordion": {
+                "openHeaderBackgroundColor": "Set the background color for the header when the accordion item is expanded.",
+                "headerBackgroundColor": "Set the background color for the header when the accordion item is collapsed.",
+                "openHeaderTextColor": "Set the text color for the title when the accordion item is expanded.",
+                "iconColor": "Set the color of the toggle icon.",
+                "iconSize": "Adjust the size of the toggle icon in pixels.",
+                "itemGap": "Define the vertical space between each accordion item.",
+                "headerPadding": "Adjust the padding inside the header area of the accordion items.",
+                "contentPadding": "Adjust the padding inside the content area of the accordion items.",
+                "contentBackgroundColor": "Set the background color specifically for the content area."
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": "Override the parent background color for this specific item when expanded.",
+                "headerBackgroundColor": "Override the parent background color for this specific item when collapsed.",
+                "openHeaderTextColor": "Override the parent title color for this specific item when expanded.",
+                "iconColor": "Override the parent icon color for this specific item."
+            }
+        }
     }
 }

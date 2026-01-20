@@ -691,5 +691,26 @@
     "fullwidthPostContent": {
         "maxWidth": "Lebar konten maksimum.",
         "showSidebar": "Tampilkan sidebar."
+    },
+    "builder": {
+        "info": {
+            "accordion": {
+                "openHeaderBackgroundColor": "Atur warna latar belakang untuk header saat item akordeon terbuka.",
+                "headerBackgroundColor": "Atur warna latar belakang untuk header saat item akordeon tertutup.",
+                "openHeaderTextColor": "Atur warna teks untuk judul saat item akordeon terbuka.",
+                "iconColor": "Atur warna ikon toggle.",
+                "iconSize": "Sesuaikan ukuran ikon toggle dalam piksel.",
+                "itemGap": "Tentukan jarak vertikal antara setiap item akordeon.",
+                "headerPadding": "Sesuaikan padding di dalam area header item akordeon.",
+                "contentPadding": "Sesuaikan padding di dalam area konten item akordeon.",
+                "contentBackgroundColor": "Atur warna latar belakang khusus untuk area konten."
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": "Ganti warna latar belakang induk untuk item khusus ini saat terbuka.",
+                "headerBackgroundColor": "Ganti warna latar belakang induk untuk item khusus ini saat tertutup.",
+                "openHeaderTextColor": "Ganti warna teks judul induk untuk item khusus ini saat terbuka.",
+                "iconColor": "Ganti warna ikon induk untuk item khusus ini."
+            }
+        }
     }
 }

@@ -28,6 +28,7 @@ export default {
     defaults: {
         itemsPerPage: 9,
         columns: 3,
+        title: 'Portfolio',
         // Filter
         showFilter: true,
         filterStyle: 'buttons',
@@ -51,10 +52,17 @@ export default {
     settings: {
         content: [
             {
+                id: 'settings',
+                label: 'Settings',
+                fields: [
+                    { name: 'title', type: 'text', label: 'Title', responsive: true }
+                ]
+            },
+            {
                 id: 'query',
                 label: 'Query',
                 fields: [
-                    { name: 'itemsPerPage', type: 'range', label: 'Items Per Page', min: 3, max: 24, step: 3 }
+                    { name: 'itemsPerPage', type: 'range', label: 'Items Per Page', min: 3, max: 24, step: 3, responsive: true }
                 ]
             },
             {

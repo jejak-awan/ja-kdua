@@ -1,5 +1,14 @@
 <template>
   <div class="post-slider-block" :style="wrapperStyles">
+    <h2 
+      v-if="settings.title || builder?.isEditing" 
+      class="slider-title-main" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >
+      {{ settings.title }}
+    </h2>
     <div class="slider-container" :style="containerStyles">
       <div v-for="(post, index) in mockPosts" :key="index" class="slider-slide" :class="{ 'slider-slide--active': currentSlide === index }">
         <div v-if="overlayEnabled" class="slide-overlay" :style="overlayStyles" />
@@ -105,6 +114,11 @@ const buttonStyles = computed(() => {
 
 <style scoped>
 .post-slider-block { width: 100%; }
+.slider-title-main { 
+    margin-bottom: 32px; 
+    text-align: center; 
+    width: 100%;
+}
 .slider-slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s; }
 .slider-slide--active { opacity: 1; }
 .slide-overlay { position: absolute; inset: 0; }

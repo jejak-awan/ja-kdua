@@ -10,10 +10,15 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
     loopSettings,
     orderSettings,
     adminLabelSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -69,28 +74,7 @@ export default {
                     }
                 ]
             },
-            {
-                id: 'link',
-                label: 'Link',
-                fields: [
-                    {
-                        name: 'link_url',
-                        type: 'text',
-                        label: 'Section Link URL',
-                        description: 'Input your destination URL here.'
-                    },
-                    {
-                        name: 'link_target',
-                        type: 'select',
-                        label: 'Section Link Target',
-                        options: [
-                            { label: 'In The Current Tab', value: '_self' },
-                            { label: 'In The New Tab', value: '_blank' }
-                        ],
-                        default: '_self'
-                    }
-                ]
-            },
+            linkSettings,
             backgroundSettings,
             loopSettings,
             orderSettings,
@@ -120,6 +104,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

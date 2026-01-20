@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -45,10 +53,10 @@ export default {
                 id: 'button',
                 label: 'Button',
                 fields: [
-                    { name: 'text', type: 'text', label: 'Button Text' },
-                    { name: 'url', type: 'text', label: 'Link URL' },
+                    { name: 'text', type: 'text', label: 'Button Text', responsive: true },
+                    { name: 'link_url', type: 'text', label: 'Link URL', responsive: true },
                     {
-                        name: 'target', type: 'select', label: 'Link Target', options: [
+                        name: 'link_target', type: 'select', label: 'Link Target', options: [
                             { value: '_self', label: 'In The Current Tab' },
                             { value: '_blank', label: 'In The New Tab' }
                         ]
@@ -59,7 +67,7 @@ export default {
                 id: 'icon',
                 label: 'Icon',
                 fields: [
-                    { name: 'icon', type: 'text', label: 'Icon Name (Lucide)' },
+                    { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true },
                     {
                         name: 'iconPosition', type: 'buttonGroup', label: 'Icon Position', options: [
                             { value: 'left', label: 'Left' },
@@ -68,7 +76,10 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Button')
         ],
         design: [
             {
@@ -106,6 +117,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

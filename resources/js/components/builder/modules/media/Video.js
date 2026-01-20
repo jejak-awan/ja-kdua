@@ -86,24 +86,28 @@ export default {
                     {
                         name: 'youtubeUrl',
                         type: 'text',
-                        label: 'YouTube URL'
+                        label: 'YouTube URL',
+                        responsive: true
                     },
                     {
                         name: 'vimeoUrl',
                         type: 'text',
-                        label: 'Vimeo URL'
+                        label: 'Vimeo URL',
+                        responsive: true
                     },
                     {
                         name: 'selfHostedUrl',
                         type: 'upload',
                         label: 'Video File',
-                        allowedExtensions: ['mp4', 'mov', 'm4v', 'webm']
+                        allowedExtensions: ['mp4', 'mov', 'm4v', 'webm'],
+                        responsive: true
                     },
                     {
                         name: 'posterImage',
                         type: 'upload',
                         label: 'Poster Image',
-                        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+                        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+                        responsive: true
                     }
                 ]
             },

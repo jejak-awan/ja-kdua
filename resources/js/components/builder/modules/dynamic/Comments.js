@@ -52,9 +52,16 @@ export default {
                 label: 'Display',
                 fields: [
                     { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'showForm', type: 'toggle', label: 'Show Comment Form' },
-                    { name: 'showAvatar', type: 'toggle', label: 'Show Avatars' },
-                    { name: 'showReplyButton', type: 'toggle', label: 'Show Reply Button' }
+                    { name: 'showForm', type: 'toggle', label: 'Show Comment Form', responsive: true },
+                    { name: 'showAvatar', type: 'toggle', label: 'Show Avatars', responsive: true },
+                    { name: 'showReplyButton', type: 'toggle', label: 'Show Reply Button', responsive: true }
+                ]
+            },
+            {
+                id: 'avatarSettings',
+                label: 'Avatar Settings',
+                fields: [
+                    { name: 'avatarSize', type: 'range', label: 'Avatar Size', min: 20, max: 100, step: 2, unit: 'px', responsive: true }
                 ]
             },
             {

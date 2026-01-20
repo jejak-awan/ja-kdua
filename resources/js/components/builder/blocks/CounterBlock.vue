@@ -1,9 +1,21 @@
 <template>
   <div class="counter-block" :style="wrapperStyles">
-    <div class="counter-number" :style="numberStyles">
-      {{ prefixValue }}{{ displayNumber }}{{ suffixValue }}
+    <div 
+      class="counter-number" 
+      :style="numberStyles"
+      :contenteditable="builder?.isEditing"
+      @blur="onNumberBlur"
+      @input="onNumberInput"
+    >
+      {{ prefixValue }}{{ isEditing ? targetNumber : displayNumber }}{{ suffixValue }}
     </div>
-    <div v-if="titleValue" class="counter-title" :style="titleStyles">
+    <div 
+      v-if="titleValue || builder?.isEditing" 
+      class="counter-title" 
+      :style="titleStyles"
+      :contenteditable="builder?.isEditing"
+      @blur="onTitleBlur"
+    >
       {{ titleValue }}
     </div>
   </div>
@@ -34,12 +46,38 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device || 'desktop')
 
-const targetNumber = computed(() => parseInt(getResponsiveValue(settings.value, 'number', device.value)) || 100)
+const targetNumber = computed(() => parseInt(getResponsiveValue(settings.value, 'number', device.value)) || 0)
 const prefixValue = computed(() => getResponsiveValue(settings.value, 'prefix', device.value) || '')
 const suffixValue = computed(() => getResponsiveValue(settings.value, 'suffix', device.value) || '')
 const titleValue = computed(() => getResponsiveValue(settings.value, 'title', device.value))
 
 const displayNumber = ref(0)
+const isEditing = ref(false)
+
+const onNumberBlur = (e) => {
+    isEditing.value = false
+    const val = parseInt(e.target.innerText.replace(prefixValue.value, '').replace(suffixValue.value, '')) || 0
+    updateResponsiveField('number', val)
+}
+
+const onNumberInput = () => {
+    isEditing.value = true
+}
+
+const onTitleBlur = (e) => {
+    updateResponsiveField('title', e.target.innerText)
+}
+
+const updateResponsiveField = (fieldName, value) => {
+    const current = settings.value[fieldName]
+    let newValue
+    if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+        newValue = { ...current, [device.value]: value }
+    } else {
+        newValue = { [device.value]: value }
+    }
+    builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+}
 
 onMounted(() => {
   if (getResponsiveValue(settings.value, 'animateOnView', device.value) !== false) {

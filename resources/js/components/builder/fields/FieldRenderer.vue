@@ -6,11 +6,13 @@
     :show-responsive="field.responsive"
     :show-dynamic-data="supportsDynamicData"
     :show-context-menu="supportsContextMenu"
+    :show-presets="supportsPresets"
     :has-custom-value="hasCustomValue"
     @reset="resetFullModule"
     @reset-field="resetSpecificField"
     @responsive="handleResponsiveClick"
     @select-dynamic-data="handleDynamicDataClick"
+    @assign-preset="handleAssignPreset"
   >
     <component
       :is="FieldComponent"
@@ -69,6 +71,7 @@ const fieldComponents = {
   meta_query: defineAsyncComponent(() => import('./MetaQueryField.vue')),
   advanced_number: defineAsyncComponent(() => import('./AdvancedNumberField.vue')),
   icon: defineAsyncComponent(() => import('./IconField.vue')),
+  font: defineAsyncComponent(() => import('./FontFamilyField.vue')),
   dimension: defineAsyncComponent(() => import('./DimensionField.vue')),
   filters: defineAsyncComponent(() => import('./FilterField.vue')),
   transform: defineAsyncComponent(() => import('./TransformField.vue')),
@@ -260,6 +263,18 @@ const resetSpecificField = () => {
     }
 
     handleValueUpdate(valueToSet)
+}
+
+const supportsPresets = computed(() => {
+    // Design fields and some others support presets
+    const designFieldTypes = ['color', 'spacing', 'border', 'shadow', 'typography', 'background', 'filters', 'transform', 'animation']
+    return designFieldTypes.includes(props.field.type)
+})
+
+const handleAssignPreset = () => {
+    // Open a preset manager or show a list of presets for the current field type
+    console.log('Assign preset clicked for field:', props.field.name)
+    // This would likely open another popover or modal
 }
 
 const handleDynamicDataClick = (target) => {

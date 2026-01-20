@@ -5,7 +5,19 @@
     :style="headingStyles"
     :class="cssClass"
   >
-    {{ displayText }}
+    <template v-if="!isDynamic">
+       <div 
+         ref="editableRef"
+         contenteditable="true"
+         @blur="onTextBlur"
+         @input="onTextInput"
+         v-html="displayText"
+         style="display: inline-block; width: 100%; outline: none;"
+       ></div>
+    </template>
+    <template v-else>
+      {{ displayText }}
+    </template>
   </component>
 </template>
 
@@ -34,6 +46,8 @@ const device = computed(() => builder?.device || 'desktop')
 
 const rawText = computed(() => settings.value.text || 'Your Heading Here')
 const tag = computed(() => settings.value.tag || 'h2')
+
+const editableRef = ref(null)
 
 // Dynamic resolution state
 const resolvedText = ref(null)
@@ -73,6 +87,19 @@ const displayText = computed(() => {
   // Show resolved value or fallback to label
   return resolvedText.value || getTagLabel(extractTag(rawText.value))
 })
+
+const onTextInput = (e) => {
+  // We can handle live updates if needed, but usually on blur is safer for performance
+}
+
+const onTextBlur = (e) => {
+  const newText = e.target.innerText
+  if (newText !== rawText.value) {
+    builder.updateModule(props.module.id, {
+      settings: { ...settings.value, text: newText }
+    })
+  }
+}
 
 const headingStyles = computed(() => {
   const styles = { width: '100%' }

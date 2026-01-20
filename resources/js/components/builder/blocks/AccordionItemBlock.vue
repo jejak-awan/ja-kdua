@@ -171,8 +171,8 @@ const headerStyles = computed(() => {
     border: 'none',
     cursor: 'pointer',
     backgroundColor: isOpen.value 
-      ? (settings.value.openHeaderBackgroundColor || parentSettings.value.openHeaderBackgroundColor || '#ffffff') 
-      : (settings.value.headerBackgroundColor || parentSettings.value.headerBackgroundColor || '#f7f7f7'),
+      ? (getResponsiveValue(settings.value, 'openHeaderBackgroundColor', device.value) || getResponsiveValue(parentSettings.value, 'openHeaderBackgroundColor', device.value) || '#ffffff') 
+      : (getResponsiveValue(settings.value, 'headerBackgroundColor', device.value) || getResponsiveValue(parentSettings.value, 'headerBackgroundColor', device.value) || '#f7f7f7'),
     textAlign: 'left',
     transition: 'var(--transition-premium)'
   }
@@ -197,9 +197,9 @@ const headerStyles = computed(() => {
 })
 
 const iconStyles = computed(() => {
-  const size = settings.value.iconSize || parentSettings.value.iconSize || 14
+  const size = getResponsiveValue(settings.value, 'iconSize', device.value) || getResponsiveValue(parentSettings.value, 'iconSize', device.value) || 14
   return {
-    color: settings.value.iconColor || parentSettings.value.iconColor || 'inherit',
+    color: getResponsiveValue(settings.value, 'iconColor', device.value) || getResponsiveValue(parentSettings.value, 'iconColor', device.value) || 'inherit',
     strokeWidth: toggleIcon.value === 'plus' ? 3 : 2,
     width: `${size}px`,
     height: `${size}px`
@@ -208,7 +208,7 @@ const iconStyles = computed(() => {
 
 const contentStyles = computed(() => {
   const styles = {
-    backgroundColor: settings.value.contentBackgroundColor || parentSettings.value.contentBackgroundColor || 'transparent'
+    backgroundColor: getResponsiveValue(settings.value, 'contentBackgroundColor', device.value) || getResponsiveValue(parentSettings.value, 'contentBackgroundColor', device.value) || 'transparent'
   }
   
   Object.assign(styles, getTypographyStyles(parentSettings.value, 'content_', device.value))

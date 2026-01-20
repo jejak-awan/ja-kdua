@@ -94,7 +94,12 @@ import { useResponsiveDevice } from '../core/useResponsiveDevice'
 const device = useResponsiveDevice()
 
 const rowStyles = computed(() => {
-  const gutterRaw = getResponsiveValue(settings.value, 'gutterWidth', device.value)
+  // Resolve Gutter (prefer new gap_x, fallback to gutterWidth)
+  const gapX = getResponsiveValue(settings.value, 'gap_x', device.value)
+  const gutterRaw = gapX !== undefined && gapX !== null && gapX !== '' 
+    ? gapX 
+    : getResponsiveValue(settings.value, 'gutterWidth', device.value)
+    
   const gutter = (gutterRaw !== undefined && gutterRaw !== null && gutterRaw !== '') ? gutterRaw : 30
   
   const styles = {

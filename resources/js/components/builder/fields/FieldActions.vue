@@ -26,6 +26,11 @@
        <Layers :size="14" />
     </div>
 
+    <!-- Assign Preset Button (Sparkles) -->
+    <div v-if="showPresets" class="action-icon" :title="$t('builder.fields.actions.assignPreset', 'Assign Preset')" @click="$emit('assign-preset')">
+        <Sparkles :size="14" />
+    </div>
+
     <!-- Legacy Device Toggle (Smartphone) -->
     <div v-if="responsive && !showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')">
         <Smartphone :size="12" />
@@ -58,7 +63,7 @@
 
 <script setup>
 import { ref, inject } from 'vue'
-import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy } from 'lucide-vue-next'
+import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy, Sparkles } from 'lucide-vue-next'
 
 const builder = inject('builder')
 
@@ -71,10 +76,11 @@ const props = defineProps({
   showDynamicData: { type: Boolean, default: true },
   showContextMenu: { type: Boolean, default: true },
   showInfo: { type: Boolean, default: false },
+  showPresets: { type: Boolean, default: false },
   infoContent: { type: String, default: '' }
 })
 
-const emit = defineEmits(['reset', 'responsive', 'select-dynamic-data', 'duplicate', 'toggle-info', 'reset-field'])
+const emit = defineEmits(['reset', 'responsive', 'select-dynamic-data', 'duplicate', 'toggle-info', 'reset-field', 'assign-preset'])
 
 const showMenu = ref(false)
 const showInfoPanel = ref(false)

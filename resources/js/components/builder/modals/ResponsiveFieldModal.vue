@@ -332,7 +332,14 @@ const fieldComponents = {
   pattern: defineAsyncComponent(() => import('../fields/PatternField.vue')),
   mask: defineAsyncComponent(() => import('../fields/MaskField.vue')),
   advanced_number: defineAsyncComponent(() => import('../fields/AdvancedNumberField.vue')),
-  icon: defineAsyncComponent(() => import('../fields/IconField.vue'))
+  icon: defineAsyncComponent(() => import('../fields/IconField.vue')),
+  font: defineAsyncComponent(() => import('../fields/FontFamilyField.vue')),
+  filters: defineAsyncComponent(() => import('../fields/FilterField.vue')),
+  transform: defineAsyncComponent(() => import('../fields/TransformField.vue')),
+  animation: defineAsyncComponent(() => import('../fields/AnimationField.vue')),
+  number: defineAsyncComponent(() => import('../fields/NumberField.vue')),
+  richtext: defineAsyncComponent(() => import('../fields/RichtextField.vue')),
+  background: defineAsyncComponent(() => import('../fields/BackgroundField.vue'))
 }
 
 const FieldComponent = computed(() => {

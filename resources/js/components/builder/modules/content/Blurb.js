@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -83,12 +91,14 @@ export default {
                     {
                         name: 'title',
                         type: 'text',
-                        label: 'Title'
+                        label: 'Title',
+                        responsive: true
                     },
                     {
                         name: 'content',
                         type: 'textarea',
-                        label: 'Content'
+                        label: 'Content',
+                        responsive: true
                     }
                 ]
             },
@@ -108,37 +118,23 @@ export default {
                     },
                     {
                         name: 'icon',
-                        type: 'text',
-                        label: 'Icon Name (Lucide)'
+                        type: 'icon',
+                        label: 'Select Icon',
+                        responsive: true
                     },
                     {
                         name: 'image',
                         type: 'upload',
-                        label: 'Image'
+                        label: 'Image',
+                        responsive: true
                     }
                 ]
             },
-            {
-                id: 'link',
-                label: 'Link',
-                fields: [
-                    {
-                        name: 'linkUrl',
-                        type: 'text',
-                        label: 'Link URL'
-                    },
-                    {
-                        name: 'linkTarget',
-                        type: 'select',
-                        label: 'Link Target',
-                        options: [
-                            { value: '_self', label: 'Same Window' },
-                            { value: '_blank', label: 'New Tab' }
-                        ]
-                    }
-                ]
-            },
-            backgroundSettings
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Blurb')
         ],
         design: [
             {
@@ -239,6 +235,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

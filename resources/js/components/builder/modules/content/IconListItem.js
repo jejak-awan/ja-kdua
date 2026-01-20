@@ -1,5 +1,4 @@
 import {
-    adminLabelSettings,
     backgroundSettings,
     spacingSettings,
     borderSettings,
@@ -7,7 +6,19 @@ import {
     sizingSettings,
     filterSettings,
     transformSettings,
-    animationSettings
+    animationSettings,
+    visibilitySettings,
+    positionSettings,
+    transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -52,15 +63,15 @@ export default {
                 id: 'text',
                 label: 'Text',
                 fields: [
-                    { name: 'text', type: 'text', label: 'Text' },
-                    { name: 'icon', type: 'text', label: 'Icon (Lucide)' }
+                    { name: 'text', type: 'text', label: 'Text', responsive: true },
+                    { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true }
                 ]
             },
             {
                 id: 'link',
                 label: 'Link',
                 fields: [
-                    { name: 'link_url', type: 'text', label: 'URL' },
+                    { name: 'link_url', type: 'text', label: 'URL', responsive: true },
                     {
                         name: 'link_target',
                         type: 'select',
@@ -73,6 +84,8 @@ export default {
                 ]
             },
             backgroundSettings,
+            loopSettings,
+            orderSettings,
             adminLabelSettings('Item')
         ],
         design: [
@@ -84,6 +97,15 @@ export default {
             transformSettings,
             animationSettings
         ],
-        advanced: []
+        advanced: [
+            visibilitySettings,
+            positionSettings,
+            transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
+            cssSettings
+        ]
     }
 }

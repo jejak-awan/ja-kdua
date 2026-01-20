@@ -1,13 +1,10 @@
 <template>
-  <article class="post-content-block" :style="contentStyles">
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt.</p>
-    <h2>Section Heading</h2>
-    <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <blockquote>
-      "This is an example blockquote that might appear in the post content. It demonstrates how quotes are styled."
-    </blockquote>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</p>
-  </article>
+  <div class="post-content-block" :style="contentStyles">
+    <InlineRichtext 
+      :model-value="settings.content"
+      @update:modelValue="val => builder.updateModuleSetting(module.id, 'content', val)"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -22,6 +19,7 @@ import {
   getFilterStyles,
   getTransformStyles
 } from '../core/styleUtils'
+import InlineRichtext from '../canvas/InlineRichtext.vue'
 
 const props = defineProps({ module: { type: Object, required: true } })
 

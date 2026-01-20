@@ -11,7 +11,15 @@
         </button>
       </div>
     </div>
-    <h4 v-if="settings.title" class="video-title" :style="titleStyles">{{ settings.title }}</h4>
+    <h4 
+      v-if="settings.title || builder?.isEditing" 
+      class="video-title" 
+      :style="titleStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+    >
+      {{ settings.title }}
+    </h4>
   </div>
 </template>
 

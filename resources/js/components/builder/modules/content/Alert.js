@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -73,12 +81,14 @@ export default {
                     {
                         name: 'title',
                         type: 'text',
-                        label: 'Title (optional)'
+                        label: 'Title (optional)',
+                        responsive: true
                     },
                     {
                         name: 'content',
                         type: 'textarea',
-                        label: 'Message'
+                        label: 'Message',
+                        responsive: true
                     },
                     {
                         name: 'dismissible',
@@ -92,7 +102,11 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            linkSettings,
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Alert')
         ],
         design: [
             {
@@ -125,6 +139,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

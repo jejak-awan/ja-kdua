@@ -10,8 +10,15 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -40,10 +47,13 @@ export default {
                 id: 'elements',
                 label: 'Elements',
                 fields: [
-                    { name: 'content', type: 'richtext', label: 'Body Text' }
+                    { name: 'content', type: 'richtext', label: 'Body Text', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Text')
         ],
         design: [
             typographySettings,
@@ -59,6 +69,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

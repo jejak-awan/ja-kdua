@@ -18,11 +18,23 @@
     
     <!-- Content -->
     <div class="blurb-content" :style="contentWrapperStyles">
-      <h3 v-if="settings.title" class="blurb-title" :style="titleStyles">
-        {{ settings.title }}
+      <h3 
+        v-if="title || builder?.isEditing" 
+        class="blurb-title" 
+        :style="titleStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onTitleBlur"
+      >
+        {{ title }}
       </h3>
-      <div v-if="settings.content" class="blurb-text" :style="textStyles">
-        {{ settings.content }}
+      <div 
+        v-if="content || builder?.isEditing" 
+        class="blurb-text" 
+        :style="textStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onContentBlur"
+      >
+        {{ content }}
       </div>
     </div>
   </div>
@@ -143,6 +155,28 @@ const titleStyles = computed(() => {
 const textStyles = computed(() => {
   return getTypographyStyles(settings.value, 'content_', device.value)
 })
+
+const title = computed(() => getResponsiveValue(settings.value, 'title', device.value) || '')
+const content = computed(() => getResponsiveValue(settings.value, 'content', device.value) || '')
+
+const onTitleBlur = (e) => {
+  updateResponsiveField('title', e.target.innerText)
+}
+
+const onContentBlur = (e) => {
+  updateResponsiveField('content', e.target.innerText)
+}
+
+const updateResponsiveField = (fieldName, value) => {
+  const current = settings.value[fieldName]
+  let newValue
+  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+    newValue = { ...current, [device.value]: value }
+  } else {
+    newValue = { [device.value]: value }
+  }
+  builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+}
 </script>
 
 <style scoped>

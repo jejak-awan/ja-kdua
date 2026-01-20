@@ -47,9 +47,9 @@ export default {
                 id: 'display',
                 label: 'Display',
                 fields: [
-                    { name: 'style', type: 'select', label: 'Style', options: [{ value: 'simple', label: 'Simple' }, { value: 'card', label: 'Card' }] },
-                    { name: 'showThumbnails', type: 'toggle', label: 'Show Thumbnails' },
-                    { name: 'showLabels', type: 'toggle', label: 'Show Labels' }
+                    { name: 'style', type: 'select', label: 'Style', responsive: true, options: [{ value: 'simple', label: 'Simple' }, { value: 'card', label: 'Card' }] },
+                    { name: 'showThumbnails', type: 'toggle', label: 'Show Thumbnails', responsive: true },
+                    { name: 'showLabels', type: 'toggle', label: 'Show Labels', responsive: true }
                 ]
             },
             {

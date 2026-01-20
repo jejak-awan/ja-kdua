@@ -3,7 +3,15 @@
     <div class="image-container" :style="containerStyles">
       <ImageIcon class="placeholder-icon" />
     </div>
-    <figcaption v-if="settings.showCaption" class="image-caption" :style="captionStyles">Featured image caption</figcaption>
+    <figcaption 
+      v-if="settings.showCaption || builder?.isEditing" 
+      class="image-caption" 
+      :style="captionStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'caption', e.target.innerText)"
+    >
+      {{ settings.caption }}
+    </figcaption>
   </figure>
 </template>
 

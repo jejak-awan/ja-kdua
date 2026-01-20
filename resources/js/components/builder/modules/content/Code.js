@@ -63,7 +63,8 @@ export default {
                     {
                         name: 'code',
                         type: 'textarea',
-                        label: 'Code'
+                        label: 'Code',
+                        responsive: true
                     },
                     {
                         name: 'language',

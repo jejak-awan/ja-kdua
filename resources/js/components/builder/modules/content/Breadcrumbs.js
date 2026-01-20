@@ -10,8 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    loopSettings,
+    orderSettings,
+    adminLabelSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -66,7 +74,10 @@ export default {
                     { name: 'homeIcon', type: 'toggle', label: 'Use Home Icon' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            loopSettings,
+            orderSettings,
+            adminLabelSettings('Breadcrumbs')
         ],
         design: [
             {
@@ -106,6 +117,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

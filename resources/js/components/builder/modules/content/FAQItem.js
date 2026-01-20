@@ -50,8 +50,8 @@ export default {
                 id: 'main',
                 label: 'FAQ Content',
                 fields: [
-                    { name: 'question', type: 'text', label: 'Question' },
-                    { name: 'answer', type: 'richtext', label: 'Answer' }
+                    { name: 'question', type: 'text', label: 'Question', responsive: true },
+                    { name: 'answer', type: 'richtext', label: 'Answer', responsive: true }
                 ]
             },
             backgroundSettings,

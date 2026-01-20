@@ -9,9 +9,32 @@
     
     <!-- Content -->
     <div class="slider-content" :style="contentStyles">
-      <h2 v-if="settings.title" class="slider-title" :style="titleStyles">{{ settings.title }}</h2>
-      <div v-if="settings.content" class="slider-text" :style="textStyles" v-html="settings.content"></div>
-      <a v-if="settings.buttonText" :href="settings.buttonUrl" class="slider-button" :style="buttonStyles">{{ settings.buttonText }}</a>
+      <h2 
+        v-if="settings.title || builder?.isEditing" 
+        class="slider-title" 
+        :style="titleStyles"
+        contenteditable="true"
+        @blur="e => builder.updateModuleSetting(module.id, 'title', e.target.innerText)"
+      >
+        {{ settings.title }}
+      </h2>
+      <InlineRichtext 
+        v-if="settings.content || builder?.isEditing"
+        class="slider-text"
+        :style="textStyles"
+        :model-value="settings.content"
+        @update:modelValue="val => builder.updateModuleSetting(module.id, 'content', val)"
+      />
+      <a 
+        v-if="settings.buttonText || builder?.isEditing" 
+        :href="settings.buttonUrl" 
+        class="slider-button" 
+        :style="buttonStyles"
+        contenteditable="true"
+        @blur="e => builder.updateModuleSetting(module.id, 'buttonText', e.target.innerText)"
+      >
+        {{ settings.buttonText }}
+      </a>
     </div>
   </div>
 </template>
@@ -22,6 +45,7 @@ import {
   getTypographyStyles,
   getResponsiveValue
 } from '../core/styleUtils'
+import InlineRichtext from '../canvas/InlineRichtext.vue'
 
 const props = defineProps({
   module: {

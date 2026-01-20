@@ -10,10 +10,16 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
+    linkSettings,
+    layoutSettings,
     loopSettings,
     orderSettings,
     adminLabelSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -68,50 +74,14 @@ export default {
                     }
                 ]
             },
-            {
-                id: 'link',
-                label: 'Link',
-                fields: [
-                    {
-                        name: 'link_url',
-                        type: 'text',
-                        label: 'Column Link URL',
-                        description: 'Input your destination URL here.'
-                    },
-                    {
-                        name: 'link_target',
-                        type: 'select',
-                        label: 'Column Link Target',
-                        options: [
-                            { label: 'In The Current Tab', value: '_self' },
-                            { label: 'In The New Tab', value: '_blank' }
-                        ],
-                        default: '_self'
-                    }
-                ]
-            },
+            linkSettings,
             backgroundSettings,
+            loopSettings,
             orderSettings,
             adminLabelSettings('Column')
         ],
         design: [
-            {
-                id: 'layout',
-                label: 'Layout',
-                fields: [
-                    {
-                        name: 'verticalAlignment',
-                        type: 'buttonGroup',
-                        label: 'Vertical Alignment',
-                        responsive: true,
-                        options: [
-                            { value: 'top', label: 'Top', icon: 'AlignStartVertical' },
-                            { value: 'center', label: 'Center', icon: 'AlignCenterVertical' },
-                            { value: 'bottom', label: 'Bottom', icon: 'AlignEndVertical' }
-                        ]
-                    }
-                ]
-            },
+            layoutSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,
@@ -124,7 +94,10 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            loopSettings,
+            scrollEffectsSettings,
+            interactionsSettings,
+            conditionsSettings,
+            attributesSettings,
             cssSettings
         ]
     }

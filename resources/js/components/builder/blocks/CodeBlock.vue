@@ -6,8 +6,14 @@
         <Copy class="copy-icon" />
       </button>
     </div>
-    <pre class="code-content" :class="themeClass" :style="codeStyles"><code><template v-for="(line, index) in codeLines" :key="index"><span v-if="showLineNumbers" class="line-number">{{ index + 1 }}</span>{{ line }}
-</template></code></pre>
+    <pre 
+      class="code-content" 
+      :class="themeClass" 
+      :style="codeStyles"
+    ><code
+      :contenteditable="builder?.isEditing"
+      @blur="onCodeBlur"
+    ><template v-for="(line, index) in codeLines" :key="index"><span v-if="showLineNumbers" class="line-number">{{ index + 1 }}</span>{{ line }}{{ index < codeLines.length - 1 ? '\n' : '' }}</template></code></pre>
   </div>
 </template>
 
@@ -43,6 +49,22 @@ const codeLines = computed(() => {
 
 const copyCode = () => {
   navigator.clipboard?.writeText(settings.value.code || '')
+}
+
+const onCodeBlur = (e) => {
+    const val = e.target.innerText
+    updateResponsiveField('code', val)
+}
+
+const updateResponsiveField = (fieldName, value) => {
+    const current = settings.value[fieldName]
+    let newValue
+    if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+        newValue = { ...current, [device.value]: value }
+    } else {
+        newValue = { [device.value]: value }
+    }
+    builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
 }
 
 const wrapperStyles = computed(() => {

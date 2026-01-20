@@ -100,12 +100,14 @@ export default {
                     {
                         name: 'showMarker',
                         type: 'toggle',
-                        label: 'Show Marker'
+                        label: 'Show Marker',
+                        responsive: true
                     },
                     {
                         name: 'markerTitle',
                         type: 'text',
-                        label: 'Marker Title'
+                        label: 'Marker Title',
+                        responsive: true
                     }
                 ]
             },
@@ -155,22 +157,26 @@ export default {
                     {
                         name: 'showZoomControl',
                         type: 'toggle',
-                        label: 'Zoom Control'
+                        label: 'Zoom Control',
+                        responsive: true
                     },
                     {
                         name: 'showStreetView',
                         type: 'toggle',
-                        label: 'Street View'
+                        label: 'Street View',
+                        responsive: true
                     },
                     {
                         name: 'draggable',
                         type: 'toggle',
-                        label: 'Draggable'
+                        label: 'Draggable',
+                        responsive: true
                     },
                     {
                         name: 'grayscale',
                         type: 'toggle',
-                        label: 'Grayscale Style'
+                        label: 'Grayscale Style',
+                        responsive: true
                     }
                 ]
             },

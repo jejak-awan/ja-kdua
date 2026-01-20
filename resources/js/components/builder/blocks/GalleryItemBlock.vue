@@ -14,7 +14,14 @@
         <ZoomIn class="overlay-icon" />
       </div>
     </div>
-    <p v-if="showCaptions && settings.caption && captionPosition === 'below'" class="gallery-caption" :style="captionStyles">
+    <p 
+      v-if="(showCaptions && captionPosition === 'below') || builder?.isEditing" 
+      v-show="showCaptions && captionPosition === 'below'"
+      class="gallery-caption" 
+      :style="captionStyles"
+      contenteditable="true"
+      @blur="e => builder.updateModuleSetting(module.id, 'caption', e.target.innerText)"
+    >
       {{ settings.caption }}
     </p>
   </div>

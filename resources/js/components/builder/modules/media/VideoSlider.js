@@ -83,10 +83,10 @@ export default {
                 id: 'videoSettings',
                 label: 'Video Settings',
                 fields: [
-                    { name: 'videoAutoplay', type: 'toggle', label: 'Autoplay Video' },
-                    { name: 'videoMuted', type: 'toggle', label: 'Muted' },
-                    { name: 'videoLoop', type: 'toggle', label: 'Loop' },
-                    { name: 'showControls', type: 'toggle', label: 'Show Controls' }
+                    { name: 'videoAutoplay', type: 'toggle', label: 'Autoplay Video', responsive: true },
+                    { name: 'videoMuted', type: 'toggle', label: 'Muted', responsive: true },
+                    { name: 'videoLoop', type: 'toggle', label: 'Loop', responsive: true },
+                    { name: 'showControls', type: 'toggle', label: 'Show Controls', responsive: true }
                 ]
             },
             backgroundSettings
@@ -96,18 +96,18 @@ export default {
                 id: 'navigation',
                 label: 'Navigation',
                 fields: [
-                    { name: 'showArrows', type: 'toggle', label: 'Show Arrows' },
-                    { name: 'showDots', type: 'toggle', label: 'Show Dots' },
-                    { name: 'showThumbnails', type: 'toggle', label: 'Show Thumbnails' },
+                    { name: 'showArrows', type: 'toggle', label: 'Show Arrows', responsive: true },
+                    { name: 'showDots', type: 'toggle', label: 'Show Dots', responsive: true },
+                    { name: 'showThumbnails', type: 'toggle', label: 'Show Thumbnails', responsive: true },
                     {
-                        name: 'thumbnailPosition', type: 'select', label: 'Thumbnail Position', options: [
+                        name: 'thumbnailPosition', type: 'select', label: 'Thumbnail Position', responsive: true, options: [
                             { value: 'bottom', label: 'Bottom' },
                             { value: 'left', label: 'Left' },
                             { value: 'right', label: 'Right' }
                         ]
                     },
-                    { name: 'autoplay', type: 'toggle', label: 'Autoplay Slider' },
-                    { name: 'autoplaySpeed', type: 'range', label: 'Speed', min: 2000, max: 10000, step: 500, unit: 'ms' }
+                    { name: 'autoplay', type: 'toggle', label: 'Autoplay Slider', responsive: true },
+                    { name: 'autoplaySpeed', type: 'range', label: 'Speed', min: 2000, max: 10000, step: 500, unit: 'ms', responsive: true }
                 ]
             },
             {
@@ -115,7 +115,7 @@ export default {
                 label: 'Layout',
                 fields: [
                     {
-                        name: 'aspectRatio', type: 'select', label: 'Aspect Ratio', options: [
+                        name: 'aspectRatio', type: 'select', label: 'Aspect Ratio', responsive: true, options: [
                             { value: '16:9', label: '16:9' },
                             { value: '4:3', label: '4:3' },
                             { value: '21:9', label: '21:9' },
@@ -130,7 +130,7 @@ export default {
                 id: 'overlay',
                 label: 'Overlay',
                 fields: [
-                    { name: 'showPlayButton', type: 'toggle', label: 'Show Play Button' },
+                    { name: 'showPlayButton', type: 'toggle', label: 'Show Play Button', responsive: true },
                     { name: 'playButtonSize', type: 'range', label: 'Button Size', min: 40, max: 120, step: 10, unit: 'px', responsive: true },
                     { name: 'playButtonColor', type: 'color', label: 'Button Color', responsive: true },
                     { name: 'overlayColor', type: 'color', label: 'Overlay Color', responsive: true }

@@ -42,7 +42,8 @@ export const backgroundSettings = {
         {
             name: 'background',
             type: 'background',
-            label: 'Background'
+            label: 'Background',
+            responsive: true
         }
     ]
 }
@@ -79,7 +80,8 @@ export const borderSettings = {
         {
             name: 'border',
             type: 'border',
-            label: 'Border'
+            label: 'Border',
+            responsive: true
         }
     ]
 }
@@ -93,7 +95,8 @@ export const boxShadowSettings = {
         {
             name: 'boxShadow',
             type: 'shadow',
-            label: 'Box Shadow'
+            label: 'Box Shadow',
+            responsive: true
         }
     ]
 }
@@ -108,12 +111,14 @@ export const typographySettings = {
             name: 'font_family',
             type: 'font',
             label: 'Font Family',
+            responsive: true,
             default: ''
         },
         {
             name: 'font_weight',
             type: 'select',
             label: 'Font Weight',
+            responsive: true,
             options: [
                 { label: 'Default', value: '' },
                 { label: 'Thin (100)', value: '100' },
@@ -176,12 +181,14 @@ export const typographySettings = {
             name: 'text_color',
             type: 'color',
             label: 'Text Color',
+            responsive: true,
             default: ''
         },
         {
             name: 'text_shadow',
             type: 'shadow',
-            label: 'Text Shadow'
+            label: 'Text Shadow',
+            responsive: true
         }
     ]
 }

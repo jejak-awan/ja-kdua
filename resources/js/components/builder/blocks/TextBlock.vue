@@ -3,8 +3,12 @@
     class="text-block"
     :style="textStyles"
     :class="cssClass"
-    v-html="content"
-  />
+  >
+    <InlineRichtext
+      v-model="content"
+      placeholder="Type your text..."
+    />
+  </div>
 </template>
 
 <script setup>
@@ -17,8 +21,10 @@ import {
   getSizingStyles, 
   getTypographyStyles,
   getFilterStyles,
-  getTransformStyles
+  getTransformStyles,
+  getResponsiveValue
 } from '../core/styleUtils'
+import InlineRichtext from '../canvas/InlineRichtext.vue'
 
 const builder = inject('builder')
 
@@ -32,9 +38,14 @@ const props = defineProps({
 // Computed
 const settings = computed(() => props.module?.settings || {})
 
-const content = computed(() => 
-  settings.value.content || '<p>Your text goes here. Edit this in the settings panel.</p>'
-)
+const content = computed({
+  get: () => settings.value.content || '<p>Your text goes here. Edit this in the settings panel.</p>',
+  set: (val) => {
+    builder.updateModule(props.module.id, {
+      settings: { ...settings.value, content: val }
+    })
+  }
+})
 
 const device = computed(() => builder?.device || 'desktop')
 

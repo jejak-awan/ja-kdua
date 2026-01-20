@@ -1,11 +1,23 @@
 <template>
   <div class="cta-block" :style="wrapperStyles">
     <div class="cta-content" :style="contentStyles">
-      <h2 v-if="settings.title" class="cta-title" :style="titleStyles">
-        {{ settings.title }}
+      <h2 
+        v-if="title || builder?.isEditing" 
+        class="cta-title" 
+        :style="titleStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onTitleBlur"
+      >
+        {{ title }}
       </h2>
-      <p v-if="settings.content" class="cta-text" :style="textStyles">
-        {{ settings.content }}
+      <p 
+        v-if="content || builder?.isEditing" 
+        class="cta-text" 
+        :style="textStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onContentBlur"
+      >
+        {{ content }}
       </p>
     </div>
     
@@ -15,9 +27,11 @@
         :target="settings.buttonTarget || '_self'"
         class="cta-button"
         :style="buttonStyles"
+        :contenteditable="builder?.isEditing"
+        @blur="onButtonBlur"
         @click.prevent
       >
-        {{ settings.buttonText || 'Get Started' }}
+        {{ buttonText || 'Get Started' }}
       </a>
     </div>
   </div>
@@ -81,6 +95,25 @@ const contentStyles = computed(() => ({
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
+
+const title = computed(() => getResponsiveValue(settings.value, 'title', device.value) || '')
+const content = computed(() => getResponsiveValue(settings.value, 'content', device.value) || '')
+const buttonText = computed(() => getResponsiveValue(settings.value, 'buttonText', device.value) || '')
+
+const onTitleBlur = (e) => updateResponsiveField('title', e.target.innerText)
+const onContentBlur = (e) => updateResponsiveField('content', e.target.innerText)
+const onButtonBlur = (e) => updateResponsiveField('buttonText', e.target.innerText)
+
+const updateResponsiveField = (fieldName, value) => {
+  const current = settings.value[fieldName]
+  let newValue
+  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+    newValue = { ...current, [device.value]: value }
+  } else {
+    newValue = { [device.value]: value }
+  }
+  builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+}
 
 const buttonStyles = computed(() => {
   const styles = {

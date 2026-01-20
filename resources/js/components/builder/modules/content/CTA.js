@@ -78,12 +78,14 @@ export default {
                     {
                         name: 'title',
                         type: 'text',
-                        label: 'Title'
+                        label: 'Title',
+                        responsive: true
                     },
                     {
                         name: 'content',
                         type: 'textarea',
-                        label: 'Content'
+                        label: 'Content',
+                        responsive: true
                     }
                 ]
             },
@@ -94,12 +96,14 @@ export default {
                     {
                         name: 'buttonText',
                         type: 'text',
-                        label: 'Button Text'
+                        label: 'Button Text',
+                        responsive: true
                     },
                     {
                         name: 'buttonUrl',
                         type: 'text',
-                        label: 'Button URL'
+                        label: 'Button URL',
+                        responsive: true
                     },
                     {
                         name: 'buttonTarget',

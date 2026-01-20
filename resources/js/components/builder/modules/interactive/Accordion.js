@@ -99,7 +99,7 @@ export default {
                     {
                         name: 'toggleIcon',
                         type: 'icon',
-                        label: 'Icon Style',
+                        label: 'Select Toggle Icon',
                         default: 'plus',
                         responsive: true
                     }
@@ -130,7 +130,8 @@ export default {
                     {
                         name: 'iconColor',
                         type: 'color',
-                        label: 'Icon Color'
+                        label: 'Icon Color',
+                        responsive: true
                     },
                     {
                         name: 'iconSize',
@@ -151,12 +152,14 @@ export default {
                     {
                         name: 'openHeaderBackgroundColor',
                         type: 'color',
-                        label: 'Open Toggle Background Color'
+                        label: 'Open Toggle Background Color',
+                        responsive: true
                     },
                     {
                         name: 'headerBackgroundColor',
                         type: 'color',
-                        label: 'Closed Toggle Background Color'
+                        label: 'Closed Toggle Background Color',
+                        responsive: true
                     }
                 ]
             },
@@ -176,7 +179,8 @@ export default {
                     {
                         name: 'openHeaderTextColor',
                         type: 'color',
-                        label: 'Open Title Text Color'
+                        label: 'Open Title Text Color',
+                        responsive: true
                     },
                     ...typographySettings.fields.map(f => ({
                         ...f,

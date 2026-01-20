@@ -24,20 +24,35 @@ export function getResponsiveValue(settings, baseKey, device) {
 export function getTypographyStyles(settings, prefix = '', device = 'desktop') {
     const css = {}
     const fields = [
-        { key: 'fontSize', prop: 'fontSize', unit: 'px' },
-        { key: 'lineHeight', prop: 'lineHeight' },
-        { key: 'letterSpacing', prop: 'letterSpacing', unit: 'px' },
-        { key: 'textColor', prop: 'color' },
-        { key: 'fontWeight', prop: 'fontWeight' },
-        { key: 'fontStyle', prop: 'fontStyle' },
-        { key: 'textAlignment', prop: 'textAlign' },
-        { key: 'textTransform', prop: 'textTransform' },
-        { key: 'textDecoration', prop: 'textDecoration' }
+        { key: 'font_family', prop: 'fontFamily' },
+        { key: 'font_size', prop: 'fontSize', unit: 'px' },
+        { key: 'line_height', prop: 'lineHeight' },
+        { key: 'letter_spacing', prop: 'letterSpacing', unit: 'px' },
+        { key: 'text_color', prop: 'color' },
+        { key: 'font_weight', prop: 'fontWeight' },
+        { key: 'font_style', prop: 'fontStyle' },
+        { key: 'text_align', prop: 'textAlign' },
+        { key: 'text_transform', prop: 'textTransform' },
+        { key: 'text_decoration', prop: 'textDecoration' }
     ]
 
     fields.forEach(f => {
-        const fullKey = prefix ? `${prefix}_${f.key}` : f.key
-        const val = getResponsiveValue(settings, fullKey, device)
+        // Handle prefix (ensure no double underscores)
+        const cleanPrefix = prefix ? (prefix.endsWith('_') ? prefix.slice(0, -1) : prefix) : ''
+        const snakeKey = cleanPrefix ? `${cleanPrefix}_${f.key}` : f.key
+
+        // Try snake_case first (new standard)
+        let val = getResponsiveValue(settings, snakeKey, device)
+
+        // Fallback to old camelCase naming if snake_case is missing
+        if (val === undefined || val === null || val === '') {
+            const camelBase = f.key.split('_').map((word, index) =>
+                index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+            ).join('')
+            const camelKey = cleanPrefix ? `${cleanPrefix}_${camelBase}` : camelBase
+            val = getResponsiveValue(settings, camelKey, device)
+        }
+
         if (val !== undefined && val !== null && val !== '') {
             css[f.prop] = f.unit ? `${val}${f.unit}` : val
         }
@@ -50,16 +65,27 @@ export function getSizingStyles(settings, device = 'desktop') {
     const css = {}
     const fields = [
         { key: 'width', prop: 'width' },
-        { key: 'maxWidth', prop: 'maxWidth' },
-        { key: 'minHeight', prop: 'minHeight' },
+        { key: 'max_width', prop: 'maxWidth' },
+        { key: 'min_height', prop: 'minHeight' },
         { key: 'height', prop: 'height' },
-        { key: 'maxHeight', prop: 'maxHeight' },
+        { key: 'max_height', prop: 'maxHeight' },
         { key: 'align', prop: 'margin' },
         { key: 'column_class', prop: 'width' }
     ]
 
     fields.forEach(f => {
-        const val = getResponsiveValue(settings, f.key, device)
+        // Try snake_case first (standard)
+        let val = getResponsiveValue(settings, f.key, device)
+
+        // Fallback to camelCase if snake_case is missing and keys are different
+        const camelKey = f.key.split('_').map((word, index) =>
+            index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+        ).join('')
+
+        if ((val === undefined || val === null || val === '') && camelKey !== f.key) {
+            val = getResponsiveValue(settings, camelKey, device)
+        }
+
         if (val !== undefined && val !== null && val !== '') {
             if (f.key === 'align') {
                 if (val === 'center') { css.marginLeft = 'auto'; css.marginRight = 'auto' }

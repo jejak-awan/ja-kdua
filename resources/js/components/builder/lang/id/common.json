@@ -222,7 +222,7 @@
                 },
                 "flipH": "Balik Horizontal",
                 "flipV": "Balik Vertikal",
-                "rotate": "Putar 90\u00b0",
+                "rotate": "Putar 90°",
                 "invert": "Balikkan Warna (Invert)",
                 "size": {
                     "label": "Ukuran Pola",
@@ -267,7 +267,7 @@
                 "transform": "Transformasi Masker",
                 "flipH": "Balik Horizontal",
                 "flipV": "Balik Vertikal",
-                "rotate": "Putar 90\u00b0",
+                "rotate": "Putar 90°",
                 "invert": "Balikkan Warna (Invert)",
                 "size": {
                     "label": "Ukuran Masker",
@@ -768,7 +768,26 @@
             "conditions": "Kondisi",
             "attributes": "Atribut",
             "interactions": "Interaksi",
-            "scroll_effects": "Efek Gulir"
+            "scroll_effects": "Efek Gulir",
+            "query": "Query",
+            "cardStyle": "Gaya Kartu",
+            "titleTypography": "Tipografi Judul",
+            "categoryTypography": "Tipografi Kategori",
+            "metaTypography": "Tipografi Meta",
+            "excerptTypography": "Tipografi Kutipan",
+            "filterTypography": "Tipografi Filter",
+            "labelTypography": "Tipografi Label",
+            "buttonStyle": "Gaya Tombol",
+            "avatarSettings": "Pengaturan Avatar",
+            "labels": "Label",
+            "imageStyle": "Gaya Gambar",
+            "filter": "Filter",
+            "display": "Tampilan",
+            "hover": "Efek Hover",
+            "navigation": "Navigasi",
+            "postTitleTypography": "Tipografi Judul Post",
+            "captionTypography": "Tipografi Keterangan",
+            "linkTypography": "Tipografi Link"
         },
         "meta_query": {
             "add": "Tambah Meta Query",
@@ -1019,6 +1038,222 @@
             "link_target": {
                 "label": "Target Tautan Bagian"
             }
+        },
+        "blog": {
+            "postsPerPage": {
+                "label": "Post Per Halaman"
+            },
+            "category": {
+                "label": "Filter Kategori"
+            },
+            "orderBy": {
+                "label": "Urutkan Berdasarkan"
+            },
+            "order": {
+                "label": "Urutan"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar Unggulan"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showDate": {
+                "label": "Tampilkan Tanggal"
+            },
+            "showAuthor": {
+                "label": "Tampilkan Penulis"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "layout": {
+                "label": "Gaya Tata Letak"
+            },
+            "columns": {
+                "label": "Kolom"
+            },
+            "gap": {
+                "label": "Jarak"
+            },
+            "imageAspectRatio": {
+                "label": "Rasio Aspek Gambar"
+            },
+            "cardBackgroundColor": {
+                "label": "Latar Belakang Kartu"
+            }
+        },
+        "portfolio": {
+            "itemsPerPage": {
+                "label": "Item Per Halaman"
+            },
+            "showFilter": {
+                "label": "Tampilkan Filter"
+            },
+            "filterStyle": {
+                "label": "Gaya Filter"
+            },
+            "showTitle": {
+                "label": "Tampilkan Judul"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "hoverEffect": {
+                "label": "Efek Hover"
+            },
+            "overlayColor": {
+                "label": "Warna Overlay"
+            },
+            "columns": {
+                "label": "Kolom"
+            },
+            "gap": {
+                "label": "Jarak"
+            },
+            "imageAspectRatio": {
+                "label": "Rasio Aspek"
+            }
+        },
+        "postslider": {
+            "totalPosts": {
+                "label": "Jumlah Post"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showMeta": {
+                "label": "Tampilkan Meta"
+            },
+            "showArrows": {
+                "label": "Tampilkan Panah"
+            },
+            "showDots": {
+                "label": "Tampilkan Titik"
+            },
+            "autoplay": {
+                "label": "Putar Otomatis"
+            },
+            "autoplaySpeed": {
+                "label": "Kecepatan Putar Otomatis"
+            },
+            "height": {
+                "label": "Tinggi"
+            },
+            "overlayEnabled": {
+                "label": "Aktifkan Overlay"
+            },
+            "overlayColor": {
+                "label": "Warna Overlay"
+            },
+            "buttonBackgroundColor": {
+                "label": "Latar Belakang Tombol"
+            }
+        },
+        "comments": {
+            "title": {
+                "label": "Judul"
+            },
+            "showForm": {
+                "label": "Tampilkan Formulir Komentar"
+            },
+            "showAvatar": {
+                "label": "Tampilkan Avatar"
+            },
+            "showReplyButton": {
+                "label": "Tampilkan Tombol Balas"
+            },
+            "namePlaceholder": {
+                "label": "Placeholder Nama"
+            },
+            "emailPlaceholder": {
+                "label": "Placeholder Email"
+            },
+            "commentPlaceholder": {
+                "label": "Placeholder Komentar"
+            },
+            "submitText": {
+                "label": "Teks Tombol Kirim"
+            },
+            "avatarSize": {
+                "label": "Ukuran Avatar"
+            }
+        },
+        "postnavigation": {
+            "style": {
+                "label": "Gaya"
+            },
+            "showThumbnails": {
+                "label": "Tampilkan Thumbnail"
+            },
+            "showLabels": {
+                "label": "Tampilkan Label"
+            },
+            "prevLabel": {
+                "label": "Label Sebelumnya"
+            },
+            "nextLabel": {
+                "label": "Label Berikutnya"
+            }
+        },
+        "relatedposts": {
+            "title": {
+                "label": "Judul"
+            },
+            "postsCount": {
+                "label": "Jumlah Post"
+            },
+            "showImage": {
+                "label": "Tampilkan Gambar"
+            },
+            "showExcerpt": {
+                "label": "Tampilkan Kutipan"
+            },
+            "showMeta": {
+                "label": "Tampilkan Meta"
+            },
+            "columns": {
+                "label": "Kolom"
+            }
+        },
+        "posttitle": {
+            "tag": {
+                "label": "Tag"
+            }
+        },
+        "postmeta": {
+            "showAuthor": {
+                "label": "Tampilkan Penulis"
+            },
+            "showDate": {
+                "label": "Tampilkan Tanggal"
+            },
+            "showCategory": {
+                "label": "Tampilkan Kategori"
+            },
+            "showReadTime": {
+                "label": "Tampilkan Waktu Baca"
+            },
+            "showComments": {
+                "label": "Tampilkan Komentar"
+            },
+            "separator": {
+                "label": "Pemisah"
+            }
+        },
+        "featuredimage": {
+            "showCaption": {
+                "label": "Tampilkan Keterangan"
+            },
+            "aspectRatio": {
+                "label": "Rasio Aspek"
+            },
+            "objectFit": {
+                "label": "Kesesuaian Objek"
+            }
         }
     },
     "tabs": {
@@ -1077,6 +1312,53 @@
             "configure": "Konfigurasikan pengaturan {type} Anda di bawah ini.",
             "tabDisabled": "Aktifkan {type} untuk melihat opsi.",
             "level": "Intensitas"
+        }
+    },
+    "builder": {
+        "settings": {
+            "accordion": {
+                "openHeaderBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Terbuka"
+                },
+                "headerBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Tertutup"
+                },
+                "openHeaderTextColor": {
+                    "label": "Warna Teks Judul Terbuka"
+                },
+                "iconColor": {
+                    "label": "Warna Ikon"
+                },
+                "iconSize": {
+                    "label": "Ukuran Ikon"
+                },
+                "itemGap": {
+                    "label": "Jarak Antar Item"
+                },
+                "headerPadding": {
+                    "label": "Padding Header"
+                },
+                "contentPadding": {
+                    "label": "Padding Konten"
+                },
+                "contentBackgroundColor": {
+                    "label": "Warna Latar Belakang Konten"
+                }
+            },
+            "accordion_item": {
+                "openHeaderBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Terbuka"
+                },
+                "headerBackgroundColor": {
+                    "label": "Warna Latar Belakang Toggle Tertutup"
+                },
+                "openHeaderTextColor": {
+                    "label": "Warna Teks Judul Terbuka"
+                },
+                "iconColor": {
+                    "label": "Warna Ikon"
+                }
+            }
         }
     }
 }
