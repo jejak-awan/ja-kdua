@@ -20,7 +20,7 @@
         @responsive="$emit('responsive')"
         @select-dynamic-data="$emit('select-dynamic-data', $event)"
         @toggle-info="showInfo = $event"
-        @assign-preset="$emit('assign-preset')"
+        @assign-preset="$emit('assign-preset', $event)"
       />
     </div>
     

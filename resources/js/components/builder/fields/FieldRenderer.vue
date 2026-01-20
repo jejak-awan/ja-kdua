@@ -38,6 +38,22 @@
         @select="handleDynamicSelection" 
       />
     </BasePopover>
+
+    <!-- Preset Popover -->
+    <BasePopover
+      :is-open="isPresetPopoverOpen"
+      :trigger-rect="presetPopoverRect"
+      :title="$t('builder.presets.title', 'Presets')"
+      :width="280"
+      :no-padding="true"
+      @close="isPresetPopoverOpen = false"
+    >
+      <PresetPopoverContent
+        :type="module.type"
+        :field-name="field.name"
+        @action="handlePresetAction"
+      />
+    </BasePopover>
   </FieldWrapper>
 </template>
 
@@ -47,6 +63,7 @@ import { useI18n } from 'vue-i18n'
 import FieldWrapper from './FieldWrapper.vue'
 import BasePopover from '../ui/BasePopover.vue'
 import DynamicDataPopover from '../ui/DynamicDataPopover.vue'
+import PresetPopoverContent from '../ui/PresetPopoverContent.vue'
 
 // Inject builder
 const builder = inject('builder')
@@ -186,6 +203,10 @@ const placeholderValue = computed(() => {
 const isDynamicPopoverOpen = ref(false)
 const dynamicPopoverRect = ref(null)
 
+// Preset Popover State
+const isPresetPopoverOpen = ref(false)
+const presetPopoverRect = ref(null)
+
 const loopContextSource = computed(() => {
     // Always fetch all sources from API - the popover will display all available data
     // The loop context is detected for highlighting but we want all sources available
@@ -271,10 +292,28 @@ const supportsPresets = computed(() => {
     return designFieldTypes.includes(props.field.type)
 })
 
-const handleAssignPreset = () => {
-    // Open a preset manager or show a list of presets for the current field type
-    console.log('Assign preset clicked for field:', props.field.name)
-    // This would likely open another popover or modal
+const handleAssignPreset = (target) => {
+    const el = target && typeof target.getBoundingClientRect === 'function' 
+        ? target 
+        : (target?.target && typeof target.target.getBoundingClientRect === 'function' ? target.target : null)
+
+    if (el) {
+        presetPopoverRect.value = el.getBoundingClientRect()
+        isPresetPopoverOpen.value = true
+    }
+}
+
+const handlePresetAction = (payload) => {
+    const { type, data } = payload
+    if (type === 'addNew' || type === 'newFromCurrent') {
+        builder?.openSavePresetModal(props.module.id, props.field.name)
+    } else if (type === 'apply' && data) {
+        // Apply preset values to the current field
+        if (data.settings && data.settings[props.field.name] !== undefined) {
+            handleValueUpdate(data.settings[props.field.name])
+        }
+    }
+    isPresetPopoverOpen.value = false
 }
 
 const handleDynamicDataClick = (target) => {

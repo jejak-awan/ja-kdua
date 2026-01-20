@@ -11,6 +11,7 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
+    layoutSettings,
     loopSettings,
     orderSettings,
     adminLabelSettings,
@@ -81,17 +82,7 @@ export default {
             adminLabelSettings('Section')
         ],
         design: [
-            {
-                id: 'layout',
-                label: 'Layout',
-                fields: [
-                    {
-                        name: 'fullWidth',
-                        type: 'toggle',
-                        label: 'Full Width'
-                    }
-                ]
-            },
+            layoutSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,

@@ -26,10 +26,6 @@
        <Layers :size="14" />
     </div>
 
-    <!-- Assign Preset Button (Sparkles) -->
-    <div v-if="showPresets" class="action-icon" :title="$t('builder.fields.actions.assignPreset', 'Assign Preset')" @click="$emit('assign-preset')">
-        <Sparkles :size="14" />
-    </div>
 
     <!-- Legacy Device Toggle (Smartphone) -->
     <div v-if="responsive && !showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')">
