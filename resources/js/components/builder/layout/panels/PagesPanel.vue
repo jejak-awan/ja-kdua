@@ -94,7 +94,14 @@ const handleCreate = () => {
 }
 
 const handleDelete = async (page) => {
-    if (confirm(t('builder.panels.pages.confirmDelete', { title: page.title }))) {
+    const confirmed = await builder?.confirm({
+        title: t('builder.modals.confirm.deletePage'),
+        message: t('builder.modals.confirm.deletePageDesc'),
+        confirmText: t('builder.modals.confirm.delete'),
+        cancelText: t('builder.modals.confirm.cancel'),
+        type: 'delete'
+    })
+    if (confirmed) {
         try {
             await builder?.deletePage(page.id)
         } catch (error) {

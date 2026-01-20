@@ -659,8 +659,15 @@ const validateInputs = () => {
     return true
 }
 
-const cancelChanges = () => {
-    if (confirm(t('builder.panels.globalVariables.messages.discardConfirm'))) {
+const cancelChanges = async () => {
+    const confirmed = await builder?.confirm({
+        title: t('builder.modals.confirm.discardChanges'),
+        message: t('builder.modals.confirm.discardChangesDesc'),
+        confirmText: t('builder.modals.confirm.discard'),
+        cancelText: t('builder.modals.confirm.cancel'),
+        type: 'warning'
+    })
+    if (confirmed) {
         // Use loadVariables to restore state
         loadVariables(originalState.value)
     }

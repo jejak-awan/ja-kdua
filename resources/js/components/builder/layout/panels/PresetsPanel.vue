@@ -126,8 +126,16 @@ const handlePresetClick = (preset) => {
     }
 }
 
-const deletePreset = (id) => {
-    if (id && confirm(t('builder.messages.confirmDelete'))) {
+const deletePreset = async (id) => {
+    if (!id) return
+    const confirmed = await builder?.confirm({
+        title: t('builder.modals.confirm.deletePreset'),
+        message: t('builder.modals.confirm.deletePresetDesc'),
+        confirmText: t('builder.modals.confirm.delete'),
+        cancelText: t('builder.modals.confirm.cancel'),
+        type: 'delete'
+    })
+    if (confirmed) {
         builder?.deletePreset(id)
     }
 }

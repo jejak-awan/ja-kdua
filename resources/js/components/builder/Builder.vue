@@ -124,6 +124,18 @@
         @close="builder.closeSavePresetModal"
         @save="builder.handleSavePreset"
       />
+
+      <ConfirmModal
+        v-if="builder.confirmModal.visible"
+        :is-open="builder.confirmModal.visible"
+        :title="builder.confirmModal.title"
+        :message="builder.confirmModal.message"
+        :confirm-text="builder.confirmModal.confirmText"
+        :cancel-text="builder.confirmModal.cancelText"
+        :type="builder.confirmModal.type"
+        @confirm="builder.closeConfirmModal(true)"
+        @cancel="builder.closeConfirmModal(false)"
+      />
       
       <ContextMenu 
           :visible="contextMenu.visible"
@@ -165,6 +177,7 @@ import ImportExportModal from './modals/ImportExportModal.vue'
 import CanvasSettingsModal from './modals/CanvasSettingsModal.vue'
 import SavePresetModal from './modals/SavePresetModal.vue'
 import IconPickerModal from './modals/IconPickerModal.vue'
+import ConfirmModal from './modals/ConfirmModal.vue'
 import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
@@ -475,8 +488,23 @@ const handleKeydown = (e) => {
 }
 
 import { useToast } from '@/composables/useToast'
+import { useI18n } from 'vue-i18n'
 
 const toast = useToast()
+const { t } = useI18n()
+
+const handleDeleteModule = async (id) => {
+    const confirmed = await builder.confirm({
+        title: t('builder.modals.confirm.deleteModule'),
+        message: t('builder.modals.confirm.deleteModuleDesc'),
+        confirmText: t('builder.modals.confirm.delete'),
+        cancelText: t('builder.modals.confirm.cancel'),
+        type: 'delete'
+    })
+    if (confirmed) {
+        builder.removeModule(id)
+    }
+}
 
 const handleSave = async (status = null) => {
   if (props.contentId || builder.content.id) {
@@ -594,9 +622,7 @@ const handleContextMenuAction = (action, id, mode = 'module') => {
     if (action === 'duplicate') {
         builder.duplicateModule(id)
     } else if (action === 'delete') {
-        if (confirm('Delete this module?')) {
-            builder.removeModule(id)
-        }
+        handleDeleteModule(id)
     } else if (action === 'copy') {
         builder.copyModule(id)
     } else if (action === 'paste') {

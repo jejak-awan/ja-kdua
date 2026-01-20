@@ -40,6 +40,7 @@
 
 <script setup>
 import { computed, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { BaseModal } from '../ui'
 import ModuleRegistry from '../core/ModuleRegistry'
 import { pageTemplates } from '../templates/PageTemplates.js'
@@ -47,16 +48,23 @@ import { LayoutTemplate, AlertTriangle } from 'lucide-vue-next'
 
 const emit = defineEmits(['close', 'inserted'])
 const builder = inject('builder')
+const { t } = useI18n()
 
 const templates = computed(() => pageTemplates)
 
 // Insert a template into the builder (REPLACES CONTENT)
-const insertTemplate = (template) => {
+const insertTemplate = async (template) => {
   if (!template.factory) return
   
-  if (!confirm('Are you sure? This will replace all existing content on this page.')) {
-      return
-  }
+  const confirmed = await builder?.confirm({
+    title: t('builder.modals.confirm.resetLayout'),
+    message: t('builder.modals.confirm.resetLayoutDesc'),
+    confirmText: t('builder.modals.confirm.confirm'),
+    cancelText: t('builder.modals.confirm.cancel'),
+    type: 'warning'
+  })
+  
+  if (!confirmed) return
   
   // Generate the page data (array of sections)
   const pageData = template.factory()

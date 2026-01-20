@@ -304,12 +304,19 @@ const getPreviewIcon = (template) => {
     return iconMap[template.category] || Layout
 }
 
-const insertTemplate = (template) => {
+const insertTemplate = async (template) => {
     if (!builder || !template.factory) return
     
     // Handle Page Templates (Full Content Replacement)
     if (template.templateType === 'page') {
-        if (confirm(t('builder.pageTemplateModal.warning', 'Warning: Importing a template will replace all current content. Do you want to proceed?'))) {
+        const confirmed = await builder?.confirm({
+            title: t('builder.modals.confirm.resetLayout'),
+            message: t('builder.modals.confirm.resetLayoutDesc'),
+            confirmText: t('builder.modals.confirm.confirm'),
+            cancelText: t('builder.modals.confirm.cancel'),
+            type: 'warning'
+        })
+        if (confirmed) {
             const blocks = template.factory()
             
             // Regenerate all IDs for safety

@@ -76,6 +76,17 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         loading: false
     })
 
+    // Confirm Modal State
+    const confirmModal = ref({
+        visible: false,
+        title: 'Confirm',
+        message: 'Are you sure?',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+        type: 'warning',
+        resolve: null
+    })
+
     // Builder Preferences (persisted to localStorage)
     const PREFS_STORAGE_KEY = 'ja-builder-preferences'
     const loadPreferencesFromStorage = () => {
@@ -1151,6 +1162,32 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         // Responsive Modal
         openResponsiveModal,
         closeResponsiveModal,
+
+        // Confirm Modal
+        confirmModal,
+        confirm: (options = {}) => {
+            return new Promise((resolve) => {
+                confirmModal.value = {
+                    visible: true,
+                    title: options.title || 'Confirm',
+                    message: options.message || 'Are you sure?',
+                    confirmText: options.confirmText || 'Confirm',
+                    cancelText: options.cancelText || 'Cancel',
+                    type: options.type || 'warning',
+                    resolve
+                }
+            })
+        },
+        closeConfirmModal: (confirmed = false) => {
+            if (confirmModal.value.resolve) {
+                confirmModal.value.resolve(confirmed)
+            }
+            confirmModal.value = {
+                ...confirmModal.value,
+                visible: false,
+                resolve: null
+            }
+        },
 
         // Preferences
         showGrid,

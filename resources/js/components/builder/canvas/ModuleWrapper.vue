@@ -142,6 +142,9 @@ const props = defineProps({
 // Inject
 const builder = inject('builder')
 
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
 import { getAnimationStyles, getResponsiveValue } from '../core/styleUtils'
 
 const currentDevice = computed(() => builder?.device || 'desktop')
@@ -352,8 +355,15 @@ const duplicateModule = () => {
   builder?.duplicateModule(props.module.id)
 }
 
-const deleteModule = () => {
-  if (confirm('Delete this module?')) {
+const deleteModule = async () => {
+  const confirmed = await builder?.confirm({
+    title: t('builder.modals.confirm.deleteModule'),
+    message: t('builder.modals.confirm.deleteModuleDesc'),
+    confirmText: t('builder.modals.confirm.delete'),
+    cancelText: t('builder.modals.confirm.cancel'),
+    type: 'delete'
+  })
+  if (confirmed) {
     builder?.removeModule(props.module.id)
   }
 }

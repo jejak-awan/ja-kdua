@@ -442,6 +442,28 @@
         "responsive": {
             "title": "Responsive Editor: {label}",
             "done": "Done"
+        },
+        "confirm": {
+            "title": "Confirm",
+            "deleteModule": "Delete this module?",
+            "deleteModuleDesc": "This action cannot be undone.",
+            "deletePage": "Delete this page?",
+            "deletePageDesc": "The page and all its content will be permanently deleted.",
+            "deletePreset": "Delete this preset?",
+            "deletePresetDesc": "This preset will be permanently removed.",
+            "deleteVariable": "Delete this variable?",
+            "deleteVariableDesc": "This variable will be permanently removed.",
+            "deleteLayout": "Delete this layout?",
+            "deleteLayoutDesc": "This layout will be permanently removed.",
+            "resetLayout": "Reset layout?",
+            "resetLayoutDesc": "All modules on this page will be removed.",
+            "switchLayout": "Switching to a complex nested layout will reset columns. Continue?",
+            "discardChanges": "Discard unsaved changes?",
+            "discardChangesDesc": "Your changes will be lost.",
+            "confirm": "Confirm",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "discard": "Discard"
         }
     },
     "items": {

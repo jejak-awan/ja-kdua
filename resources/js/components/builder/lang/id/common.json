@@ -417,6 +417,28 @@
         "responsive": {
             "title": "Editor Responsif: {label}",
             "done": "Selesai"
+        },
+        "confirm": {
+            "title": "Konfirmasi",
+            "deleteModule": "Hapus modul ini?",
+            "deleteModuleDesc": "Tindakan ini tidak dapat dibatalkan.",
+            "deletePage": "Hapus halaman ini?",
+            "deletePageDesc": "Halaman dan semua kontennya akan dihapus permanen.",
+            "deletePreset": "Hapus preset ini?",
+            "deletePresetDesc": "Preset ini akan dihapus secara permanen.",
+            "deleteVariable": "Hapus variabel ini?",
+            "deleteVariableDesc": "Variabel ini akan dihapus secara permanen.",
+            "deleteLayout": "Hapus tata letak ini?",
+            "deleteLayoutDesc": "Tata letak ini akan dihapus secara permanen.",
+            "resetLayout": "Reset tata letak?",
+            "resetLayoutDesc": "Semua modul di halaman ini akan dihapus.",
+            "switchLayout": "Beralih ke tata letak bersarang yang kompleks akan mengatur ulang kolom. Lanjutkan?",
+            "discardChanges": "Buang perubahan?",
+            "discardChangesDesc": "Perubahan Anda akan hilang.",
+            "confirm": "Konfirmasi",
+            "cancel": "Batal",
+            "delete": "Hapus",
+            "discard": "Buang"
         }
     },
     "items": {
