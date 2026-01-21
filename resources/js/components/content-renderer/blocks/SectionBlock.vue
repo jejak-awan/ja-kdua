@@ -22,7 +22,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
 import BackgroundMedia from './BackgroundMedia.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles } from '../utils'
 
 const props = defineProps({
   id: String,
@@ -142,6 +142,15 @@ const styles = computed(() => {
   // Apply Sizing (Height, MinHeight, Overflow, ZIndex)
   if(settings) {
       Object.assign(s, getSizingStyles(settings))
+      Object.assign(s, getTransformStyles(settings))
+
+      // Vertical Alignment Logic
+      const vAlign = settings.verticalAlign || 'start'
+      s.display = 'flex'
+      s.flexDirection = 'column'
+      if (vAlign === 'center') s.justifyContent = 'center'
+      else if (vAlign === 'end') s.justifyContent = 'flex-end'
+      else s.justifyContent = 'flex-start'
   }
   
   return s

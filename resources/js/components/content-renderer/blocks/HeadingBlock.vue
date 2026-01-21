@@ -32,6 +32,7 @@ defineOptions({
 });
 
 import { computed } from 'vue';
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles } from '../utils';
 
 const props = defineProps({
     text: { type: String, default: 'Heading Text' },
@@ -42,38 +43,52 @@ const props = defineProps({
     decoration: { type: String, default: 'none' },
     textColor: { type: String, default: '' },
     // Container/Common Styles
-    width: { type: String, default: 'max-w-4xl' },
-    padding: { type: [String, Object], default: '' },
-    margin: { type: [String, Object], default: '' },
-    backgroundColor: { type: String, default: '' },
-    backgroundImage: { type: String, default: '' },
-    boxShadow: { type: String, default: 'none' },
-    border: { type: String, default: '' },
-    borderRadius: { type: String, default: '' },
-    
+    padding: Object,
+    margin: Object,
+    backgroundColor: String,
+    border: Object,
+    boxShadow: [String, Object],
+    borderRadius: [String, Object],
+    settings: { type: Object, default: () => ({}) },
     animation: { type: String, default: '' }
 });
 
 const wrapperStyles = computed(() => {
-    // If props are passed as simple strings/numbers, use them
-    // If they are passed as objects (responsive), we might need a utility or just take the default/desktop value
-    // Assuming flat props for now for simplicity in this pass, or using what's available
-    return {
-        backgroundColor: props.backgroundColor || 'transparent',
-        padding: typeof props.padding === 'string' ? props.padding : (props.padding?.desktop || props.padding),
-        margin: typeof props.margin === 'string' ? props.margin : (props.margin?.desktop || props.margin),
-        boxShadow: props.boxShadow,
-        border: props.border,
-        borderRadius: props.borderRadius,
-        textAlign: props.alignment // Apply alignment to wrapper for block flow
+    const s = {
+        textAlign: props.alignment
     };
+    
+    if (props.backgroundColor) s.backgroundColor = props.backgroundColor
+    if (props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
+    if (props.margin) Object.assign(s, getSpacingStyles(props.margin, 'margin'))
+    if (props.border) Object.assign(s, getBorderStyles(props.border))
+    if (props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
+    
+    if (props.settings) {
+        Object.assign(s, getBackgroundStyles(props.settings))
+        Object.assign(s, getSizingStyles(props.settings))
+        Object.assign(s, getTransformStyles(props.settings))
+    }
+    
+    return s
 });
 
 const headingStyles = computed(() => {
-    return {
+    const s = {
         color: props.textColor || 'inherit',
         textAlign: props.alignment
     }
+    // Size logic
+    const sizes = {
+        'small': { fontSize: '1.25rem' },
+        'medium': { fontSize: '1.875rem' },
+        'large': { fontSize: '2.5rem' },
+        'xlarge': { fontSize: '3.75rem' },
+        'display': { fontSize: '4.5rem' }
+    }
+    if (sizes[props.size]) Object.assign(s, sizes[props.size])
+    
+    return s
 });
 
 const subtitleSizeClass = computed(() => ({

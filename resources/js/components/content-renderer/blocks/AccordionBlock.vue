@@ -1,10 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import LucideIcon from '../../ui/LucideIcon.vue';
-
-defineOptions({
-    inheritAttrs: false
-});
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles } from '../utils';
 
 const props = defineProps({
     items: { type: Array, default: () => [] },
@@ -18,12 +15,13 @@ const props = defineProps({
     openHeaderBackgroundColor: { type: String, default: '' },
     contentBackgroundColor: { type: String, default: '' },
     // Container Styles
-    padding: { type: [String, Object], default: '' },
-    margin: { type: [String, Object], default: '' },
-    backgroundColor: { type: String, default: '' },
-    border: { type: String, default: '' },
-    borderRadius: { type: String, default: '' },
-    boxShadow: { type: String, default: 'none' }
+    padding: Object,
+    margin: Object,
+    backgroundColor: String,
+    border: Object,
+    borderRadius: [String, Object],
+    boxShadow: [String, Object],
+    settings: { type: Object, default: () => ({}) }
 });
 
 const openIndices = ref([]);
@@ -47,18 +45,14 @@ const toggle = (index) => {
 };
 
 const getIconName = (index) => {
-    // If user selected "plus" specifically (legacy naming or explicit choice), handle toggle
     if (props.toggleIcon === 'plus') {
         return openIndices.value.includes(index) ? 'minus' : 'plus';
     }
-    // Otherwise use the selected icon (e.g. chevron-down)
-    // We handle rotation for chevron/arrow types via CSS class in template
     return props.toggleIcon;
 };
 
-// Check if we should rotate this icon when open
 const shouldRotate = computed(() => {
-    const icon = props.toggleIcon.toLowerCase();
+    const icon = String(props.toggleIcon).toLowerCase();
     return icon.includes('chevron') || icon.includes('arrow');
 });
 
@@ -69,15 +63,24 @@ const iconStyles = computed(() => ({
 }));
 
 
-const wrapperStyles = computed(() => ({
-    gap: `${props.gap}px`,
-    backgroundColor: props.backgroundColor,
-    padding: typeof props.padding === 'string' ? props.padding : (props.padding?.desktop || props.padding),
-    margin: typeof props.margin === 'string' ? props.margin : (props.margin?.desktop || props.margin),
-    border: props.border,
-    borderRadius: props.borderRadius,
-    boxShadow: props.boxShadow
-}));
+const wrapperStyles = computed(() => {
+    const s = {
+        gap: `${props.gap}px`
+    }
+    
+    if (props.backgroundColor) s.backgroundColor = props.backgroundColor
+    if (props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
+    if (props.margin) Object.assign(s, getSpacingStyles(props.margin, 'margin'))
+    if (props.border) Object.assign(s, getBorderStyles(props.border))
+    if (props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
+    
+    if (props.settings) {
+        Object.assign(s, getSizingStyles(props.settings))
+        Object.assign(s, getTransformStyles(props.settings))
+    }
+    
+    return s
+});
 </script>
 
 <template>
