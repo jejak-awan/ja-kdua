@@ -209,3 +209,44 @@ export function getBackgroundStyles(settings) {
 
     return css
 }
+
+export function getSizingStyles(settings) {
+    if (!settings) return {}
+    const css = {}
+
+    // Width
+    if (settings.width && settings.width !== 'auto') {
+        css.width = settings.width
+    }
+    if (settings.maxWidth && settings.maxWidth !== 'none') {
+        css.maxWidth = settings.maxWidth
+    }
+    if (settings.minWidth) {
+        css.minWidth = settings.minWidth
+    }
+
+    // Height
+    if (settings.height && settings.height !== 'auto') {
+        css.height = settings.height
+    }
+    if (settings.minHeight) {
+        css.minHeight = settings.minHeight
+    }
+    if (settings.maxHeight && settings.maxHeight !== 'none') {
+        css.maxHeight = settings.maxHeight
+    }
+
+    // Overflow
+    if (settings.overflow && settings.overflow !== 'visible') {
+        css.overflow = settings.overflow
+        if (settings.overflowX) css.overflowX = settings.overflowX
+        if (settings.overflowY) css.overflowY = settings.overflowY
+    }
+
+    // Z-Index
+    if (settings.zIndex !== undefined && settings.zIndex !== '') {
+        css.zIndex = settings.zIndex
+    }
+
+    return css
+}

@@ -22,7 +22,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
 import BackgroundMedia from './BackgroundMedia.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles } from '../utils'
 
 const props = defineProps({
   id: String,
@@ -138,6 +138,11 @@ const styles = computed(() => {
   if(props.margin) Object.assign(s, getSpacingStyles(props.margin, 'margin'))
   if(props.border) Object.assign(s, getBorderStyles(props.border))
   if(props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
+  
+  // Apply Sizing (Height, MinHeight, Overflow, ZIndex)
+  if(settings) {
+      Object.assign(s, getSizingStyles(settings))
+  }
   
   return s
 })
