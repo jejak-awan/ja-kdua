@@ -11,7 +11,7 @@
 <script setup>
 import { computed } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles, getVal } from '../utils'
 
 const props = defineProps({
     backgroundColor: String,
@@ -54,5 +54,10 @@ const styles = computed(() => {
 
     return s
 })
-
 </script>
+
+<style scoped>
+.column-block {
+    width: 100%;
+}
+</style>

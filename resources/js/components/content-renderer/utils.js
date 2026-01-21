@@ -54,7 +54,10 @@ export function getVal(obj, key, device = 'desktop') {
             'maxHeight': ['max_height'],
             'minWidth': ['min_width'],
             'maxWidth': ['max_width'],
-            'verticalAlign': ['vertical_align', 'verticalAlignment']
+            'verticalAlign': ['vertical_align', 'verticalAlignment'],
+            'fullWidth': ['full_width'],
+            'gutterWidth': ['gutter_width'],
+            'equalizeColumns': ['equalize_columns']
         };
 
         if (aliases[innerKey]) {
@@ -84,8 +87,10 @@ export function getVal(obj, key, device = 'desktop') {
  */
 export function toCSS(val, unit = 'px') {
     if (val === undefined || val === null || val === '' || typeof val === 'object') return undefined;
-    if (typeof val === 'string' && (val.includes('px') || val.includes('rem') || val.includes('%') || val.includes('vh') || val.includes('vw') || val === 'auto' || val === 'inherit')) return val;
-    return `${val}${unit}`;
+    const s = String(val);
+    if (s.includes('px') || s.includes('rem') || s.includes('%') || s.includes('vh') || s.includes('vw') || s === 'auto' || s === 'inherit') return s;
+    if (s.match(/^-?\d*\.?\d+$/)) return `${s}${unit}`;
+    return s;
 }
 
 export function getBorderStyles(borderSettings, device = 'desktop') {

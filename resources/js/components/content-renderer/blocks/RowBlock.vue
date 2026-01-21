@@ -26,7 +26,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import ColumnBlock from './ColumnBlock.vue'
-import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles } from '../utils'
+import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles, getVal } from '../utils'
 
 const props = defineProps({
     columns: { type: String, default: '1' },
@@ -50,7 +50,7 @@ const mouseY = ref(0)
 const rowRef = ref(null)
 
 const handleMouseMove = (e) => {
-    if (!props.isPreview) return
+    if (!props.isPreview || !rowRef.value) return
     const rect = rowRef.value.getBoundingClientRect()
     mouseX.value = ((e.clientX - rect.left) / rect.width) * 2 - 1
     mouseY.value = ((e.clientY - rect.top) / rect.height) * 2 - 1
@@ -92,44 +92,13 @@ const styles = computed(() => {
         gap: `${props.gutterWidth}px`
     }
     
+    const settings = props.settings || {}
+
     if(props.backgroundColor) s.backgroundColor = props.backgroundColor
 
-    // Use robust background logic from utils
-    const settings = props.settings || {}
     if (settings) {
         const bgStyles = getBackgroundStyles(settings)
         Object.assign(s, bgStyles)
-
-        // Handle "True Parallax" (JS-based)
-        const isParallax = settings.parallax === true || settings.parallax === 'true'
-        const isTrueParallax = isParallax && (settings.parallaxMethod === 'true' || settings.parallaxMethod === true)
-        
-        if (isTrueParallax && rowRef.value) {
-            const speed = 0.5
-            const itemTop = rowRef.value.offsetTop || 0
-            const scrollOffset = (scrollY.value - itemTop) * speed
-            
-            // More noticeable mouse nudge
-            const mouseNudgeX = mouseX.value * 30
-            const mouseNudgeY = mouseY.value * 30
-
-            const basePos = bgStyles.backgroundPosition || 'center center'
-            const parts = basePos.split(',').map(pos => {
-                const p = pos.trim().split(/\s+/)
-                let x = p[0] || 'center'
-                let y = p[1] || 'center'
-                
-                const xNorm = x === 'left' ? '0%' : x === 'right' ? '100%' : x === 'center' ? '50%' : x
-                const yNorm = y === 'top' ? '0%' : y === 'bottom' ? '100%' : y === 'center' ? '50%' : y
-                
-                const xFinal = xNorm.includes('%') || xNorm.includes('px') ? `calc(${xNorm} + ${mouseNudgeX}px)` : xNorm
-                const yFinal = `calc(${yNorm} + ${scrollOffset + mouseNudgeY}px)`
-                
-                return `${xFinal} ${yFinal}`
-            })
-            s.backgroundPosition = parts.join(', ')
-            s.backgroundAttachment = 'scroll'
-        }
     }
 
     if(props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
@@ -158,21 +127,6 @@ const widths = computed(() => {
 const getColumnWrapperStyle = (index) => {
     const w = widths.value[index] || 100
     const gap = Number(props.gutterWidth) || 0
-    
-    // Simplified width logic accounting for gap
-    // Use calc to subtract appropriate gap portion
-    // Note: This logic assumes gap is handled by flex gap.
-    // If 2 columns, each needs (100% - gap) / 2
-    // If 3 columns, each needs (100% - 2*gap) / 3
-    
-    // Robust logic:
-    // flex-grow: 0, flex-shrink: 0
-    // flex-basis: calc(X% - (gap * (N-1) / N) ?) -- too complex for dynamic N
-    
-    // Fallback: Just subtract gap?
-    // calc(${w}% - ${gap}px) is safe for 2 cols (50% - 30px). 
-    // Total = 100% - 60px + 30px gap = 100%-30px. Leaves space.
-    // It's a bit loose but works safe.
     
     return {
         flex: `0 0 calc(${w}% - ${gap}px)`,

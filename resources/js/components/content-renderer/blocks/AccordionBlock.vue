@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import LucideIcon from '../../ui/LucideIcon.vue';
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles } from '../utils';
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles, getVal } from '../utils';
 
 const props = defineProps({
     items: { type: Array, default: () => [] },

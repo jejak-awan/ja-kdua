@@ -32,7 +32,7 @@ defineOptions({
 });
 
 import { computed } from 'vue';
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles } from '../utils';
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles, getVal } from '../utils';
 
 const props = defineProps({
     text: { type: String, default: 'Heading Text' },
