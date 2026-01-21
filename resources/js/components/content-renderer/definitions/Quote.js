@@ -6,7 +6,7 @@ export default {
     label: 'Quote',
     icon: Quote,
     description: 'Styled blockquote with author.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/QuoteBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/QuoteBlock.vue')),
     settings: [
         {
             key: 'quote',

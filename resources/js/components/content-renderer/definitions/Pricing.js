@@ -6,7 +6,7 @@ export default {
     label: 'Pricing Table',
     icon: CreditCard,
     description: 'Compare plans and pricing.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/PricingBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/PricingBlock.vue')),
     settings: [
         {
             key: 'title',

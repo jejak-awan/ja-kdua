@@ -6,7 +6,7 @@ export default {
     label: 'Divider',
     icon: Minus,
     description: 'Visual separator line with multiple styles.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/DividerBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/DividerBlock.vue')),
     settings: [
         {
             key: 'style',

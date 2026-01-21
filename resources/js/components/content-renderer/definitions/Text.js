@@ -14,7 +14,7 @@ export default {
     icon: Type,
     description: 'Rich text content with title and body text.',
     category: 'basic',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/TextBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/TextBlock.vue')),
 
     settings: [
         // ============ CONTENT TAB ============

@@ -429,7 +429,7 @@ import { useI18n } from 'vue-i18n';
 import { useTheme } from '../../../../composables/useTheme';
 import { useMenu } from '../../../../composables/useMenu';
 import { useCmsStore } from '../../../../stores/cms';
-import { useResponsiveDevice } from '../../../../components/builder/core/useResponsiveDevice';
+import { useResponsiveDevice } from '../../../../shared/utils/useResponsiveDevice';
 import ThemeToggle from '../../../../components/ThemeToggle.vue';
 import LanguageSwitcher from '../../../../components/LanguageSwitcher.vue';
 import { ChevronDown, ArrowRight, Quote } from 'lucide-vue-next';

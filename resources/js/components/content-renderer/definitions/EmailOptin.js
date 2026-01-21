@@ -6,7 +6,7 @@ export default {
     label: 'Email Optin',
     icon: Mail,
     description: 'Newsletter signup form to capture emails.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/EmailOptinBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/NewsletterBlock.vue')),
     settings: [
         { key: 'title', type: 'text', label: 'Title', default: 'Subscribe to Our Newsletter' },
         { key: 'description', type: 'textarea', label: 'Description', default: 'Get the latest updates and news delivered to your inbox.' },

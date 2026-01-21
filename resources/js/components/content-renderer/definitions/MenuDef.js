@@ -6,7 +6,7 @@ export default {
     label: 'Navigation Menu',
     icon: Menu,
     description: 'Navigation menu with dropdowns.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/MenuBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/MenuBlock.vue')),
     settings: [
         {
             key: 'menu_id',

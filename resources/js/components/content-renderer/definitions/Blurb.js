@@ -6,7 +6,7 @@ export default {
     label: 'Blurb',
     icon: Info,
     description: 'A versatile container for an icon, title, and description.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/BlurbBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/BlurbBlock.vue')),
     settings: [
         { type: 'header', label: 'Typography', tab: 'content' },
         { key: 'title', type: 'text', label: 'Title', tab: 'content' },

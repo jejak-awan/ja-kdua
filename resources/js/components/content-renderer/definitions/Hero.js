@@ -31,7 +31,7 @@ export default {
     icon: LayoutTemplate,
     description: 'Large hero banner with title, subtitle, and CTA buttons.',
     category: 'content',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/HeroBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/HeroBlock.vue')),
 
     settings: [
         // ============ CONTENT TAB ============

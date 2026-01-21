@@ -54,9 +54,9 @@
 
     :root {
         /* Janari Theme Integration - Using variables from useTheme.js */
-        --primary: var(--theme-color-primary-hsl, 222 47% 11%);
-        --background: var(--theme-color-background-hsl, 0 0% 100%);
-        --card: var(--theme-color-background-hsl, 0 0% 100%);
+        --primary: var(--theme-primary-color-hsl, 222 47% 11%);
+        --background: var(--theme-background-color-hsl, 0 0% 100%);
+        --card: var(--theme-background-color-hsl, 0 0% 100%);
 
         /* Shadcn UI Design Tokens - Premium Enterprise Grade */
         /* Light Mode - Matching Builder (Slate) */

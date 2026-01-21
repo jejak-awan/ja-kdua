@@ -6,7 +6,7 @@ export default {
     label: 'Accordion',
     icon: List,
     description: 'Expandable list for FAQs or details.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/AccordionBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/AccordionBlock.vue')),
     settings: [
         {
             key: 'title',

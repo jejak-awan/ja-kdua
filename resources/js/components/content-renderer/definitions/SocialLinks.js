@@ -6,7 +6,7 @@ export default {
     label: 'Social Media Follow',
     icon: Share2,
     description: 'Add icons linking to your social media profiles.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SocialLinksBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SocialLinksBlock.vue')),
     settings: [
         {
             key: 'links',

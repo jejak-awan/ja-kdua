@@ -2,6 +2,7 @@
   <div 
     class="module-wrapper"
     :class="wrapperClasses"
+    :style="[wrapperStyles, animationStyles]"
     @click.stop="selectModule"
     @mouseenter="hoverModule"
     @mouseleave="unhoverModule"
@@ -145,7 +146,7 @@ const builder = inject('builder')
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
-import { getAnimationStyles, getResponsiveValue } from '../core/styleUtils'
+import { getAnimationStyles, getResponsiveValue } from '@/shared/utils/styleUtils'
 
 const currentDevice = computed(() => builder?.device?.value || 'desktop')
 
@@ -243,6 +244,30 @@ const wrapperClasses = computed(() => ({
   'module-wrapper--content': !isSection.value && !isRow.value && !isColumn.value, // Generic content module class
   'module-wrapper--loop': isLoopEnabled.value
 }))
+
+const wrapperStyles = computed(() => {
+    const styles = {}
+    
+    // Column Layout Logic - mimic frontend renderer
+    if (isColumn.value) {
+        // Check for specific width settings
+        const width = getResponsiveValue(props.module.settings, 'width', currentDevice.value)
+        const flexGrow = getResponsiveValue(props.module.settings, 'flexGrow', currentDevice.value)
+        
+        if (width) {
+            styles.flex = `0 0 ${width}`
+            styles.maxWidth = width
+        } else if (flexGrow) {
+           styles.flex = `${flexGrow} 1 0%`
+        } else {
+           // Default auto-width/equal width behavior
+           styles.flex = '1 1 0%' 
+           styles.minWidth = '50px' // Prevent collapse
+        }
+    }
+
+    return styles
+})
 
 const isLoopEnabled = computed(() => props.module.settings?.loop_enable === true)
 

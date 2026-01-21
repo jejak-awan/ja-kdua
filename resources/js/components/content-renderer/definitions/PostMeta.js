@@ -5,34 +5,35 @@ export default {
     name: 'postmeta',
     label: 'Post Meta',
     icon: User,
-    category: 'Dynamic',
     description: 'Displays post author, date, and categories.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/PostMeta.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/PostMetaBlock.vue')),
     settings: [
         { key: 'showAuthor', type: 'boolean', label: 'Show Author', default: true },
         { key: 'showDate', type: 'boolean', label: 'Show Date', default: true },
         { key: 'showCategories', type: 'boolean', label: 'Show Categories', default: true },
+        { key: 'showReadingTime', type: 'boolean', label: 'Show Reading Time', default: false },
         { key: 'showComments', type: 'boolean', label: 'Show Comments Count', default: false },
+        { key: 'separator', type: 'text', label: 'Separator', default: '•' },
         {
             key: 'alignment',
             type: 'select',
             label: 'Alignment',
             options: [
-                { label: 'Left', value: 'justify-start' },
-                { label: 'Center', value: 'justify-center' },
-                { label: 'Right', value: 'justify-end' }
+                { label: 'Left', value: 'left' },
+                { label: 'Center', value: 'center' },
+                { label: 'Right', value: 'right' }
             ],
-            default: 'justify-start'
-        },
-        { key: 'color', type: 'color', label: 'Custom Text Color', default: '' }
+            default: 'left'
+        }
     ],
     defaultSettings: {
         showAuthor: true,
         showDate: true,
         showCategories: true,
+        showReadingTime: false,
         showComments: false,
-        alignment: 'justify-start',
-        color: '',
+        separator: '•',
+        alignment: 'left',
         visibility: { mobile: true, tablet: true, desktop: true }
     }
 };

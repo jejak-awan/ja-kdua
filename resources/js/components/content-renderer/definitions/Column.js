@@ -17,7 +17,7 @@ export default {
     description: 'Individual column with layout and styling controls.',
     category: 'structure',
     hidden: true, // Not directly addable from sidebar, only via ColumnsBlock
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ColumnBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ColumnBlock.vue')),
 
     settings: [
         // ============ LAYOUT ============

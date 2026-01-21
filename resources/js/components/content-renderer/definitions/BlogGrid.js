@@ -6,7 +6,7 @@ export default {
     label: 'Blog Grid',
     icon: LayoutGrid,
     description: 'Display a grid of blog posts with dynamic filtering.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/BlogGridBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/BlogBlock.vue')),
     settings: [
         {
             key: 'title',

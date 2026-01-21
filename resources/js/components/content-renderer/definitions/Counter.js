@@ -6,7 +6,7 @@ export default {
     label: 'Counter',
     icon: Hash,
     description: 'Animated number counter for statistics.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/CounterBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/CounterBlock.vue')),
     settings: [
         {
             key: 'number',

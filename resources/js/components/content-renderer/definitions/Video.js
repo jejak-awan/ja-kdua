@@ -6,7 +6,7 @@ export default {
     label: 'Video Player',
     icon: Clapperboard,
     description: 'Embed cinematic video content.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/VideoBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/VideoBlock.vue')),
     settings: [
         {
             key: 'title',

@@ -6,7 +6,7 @@ export default {
     label: 'Icon',
     icon: Sparkles,
     description: 'Display a single icon with styling options.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/IconBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/IconBlock.vue')),
     settings: [
         {
             key: 'icon',

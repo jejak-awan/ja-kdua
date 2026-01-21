@@ -6,7 +6,7 @@ export default {
     label: 'Testimonial',
     icon: Quote,
     description: 'A stylish quote from a customer or client.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/TestimonialBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/TestimonialBlock.vue')),
     settings: [
         { type: 'header', label: 'Quote', tab: 'content' },
         {

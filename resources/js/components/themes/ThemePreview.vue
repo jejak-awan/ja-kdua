@@ -60,73 +60,72 @@ const injectThemeStyles = () => {
             css += props.theme.css_variables + '\n\n';
         }
 
-        // Apply settings as CSS variables if not already done
+        // Apply settings as CSS variables (Matching useTheme.js logic)
         if (props.theme.settings) {
             const settings = props.theme.settings;
-            
-            // Color variables
-            if (settings.primary_color) {
-                css += `:root { --theme-primary-color: ${settings.primary_color}; }\n`;
-            }
-            if (settings.secondary_color) {
-                css += `:root { --theme-secondary-color: ${settings.secondary_color}; }\n`;
-            }
-            if (settings.accent_color) {
-                css += `:root { --theme-accent-color: ${settings.accent_color}; }\n`;
-            }
-            if (settings.background_color) {
-                css += `body { background-color: ${settings.background_color}; }\n`;
-            }
-            if (settings.text_color) {
-                css += `body { color: ${settings.text_color}; }\n`;
-            }
+            const variables = [];
 
-            // Typography
-            if (settings.heading_font) {
-                css += `h1, h2, h3, h4, h5, h6 { font-family: '${settings.heading_font}', sans-serif; }\n`;
-            }
-            if (settings.body_font) {
-                css += `body { font-family: '${settings.body_font}', sans-serif; }\n`;
-            }
-            if (settings.font_size_base) {
-                css += `html { font-size: ${settings.font_size_base}px; }\n`;
-            }
-
-            // Layout
-            if (settings.container_width) {
-                 css += `.container, .max-w-\\[1280px\\] { max-width: ${settings.container_width}; }\n`;
-            }
-
-            // Buttons
-            if (settings.button_radius) {
-                css += `:root { --btn-radius: ${settings.button_radius}; }\n`;
-            }
-            if (settings.button_border_width) {
-                css += `:root { --btn-border-width: ${settings.button_border_width}px; }\n`;
-            }
-            if (settings.button_shadow) {
-                // If value contains var(--theme-primary-color), it works because we defined it above
-                css += `:root { --btn-shadow: ${settings.button_shadow}; }\n`;
-            }
-
-            // Inject Global Button Override Styles
-            // We need to be aggressive to override Tailwind utilities
-            css += `
-                button, 
-                .btn, 
-                .button,
-                a[class*="bg-primary"],
-                a[class*="bg-white"],
-                a[class*="border-2"],
-                a[class*="px-"][class*="py-"] {
-                    border-radius: var(--btn-radius, 8px) !important;
-                    border-width: var(--btn-border-width, 1px) !important;
-                    box-shadow: var(--btn-shadow, 0 1px 2px 0 rgb(0 0 0 / 0.05)) !important;
+            // Helper for conversion (simplified for injection)
+            const hexToHsl = (hex) => {
+                if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return null;
+                let r = 0, g = 0, b = 0;
+                if (hex.length === 4) {
+                    r = parseInt('0x' + hex[1] + hex[1]);
+                    g = parseInt('0x' + hex[2] + hex[2]);
+                    b = parseInt('0x' + hex[3] + hex[3]);
+                } else if (hex.length === 7) {
+                    r = parseInt('0x' + hex[1] + hex[2]);
+                    g = parseInt('0x' + hex[3] + hex[4]);
+                    b = parseInt('0x' + hex[5] + hex[6]);
                 }
+                r /= 255; g /= 255; b /= 255;
+                const cmin = Math.min(r, g, b), cmax = Math.max(r, g, b), delta = cmax - cmin;
+                let h = 0, s = 0, l = 0;
+                if (delta === 0) h = 0;
+                else if (cmax === r) h = ((g - b) / delta) % 6;
+                else if (cmax === g) h = (b - r) / delta + 2;
+                else h = (r - g) / delta + 4;
+                h = Math.round(h * 60); if (h < 0) h += 360;
+                l = (cmax + cmin) / 2; s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+                return `${h} ${(s * 100).toFixed(1)}% ${(l * 100).toFixed(1)}%`;
+            };
+
+            Object.keys(settings).forEach(key => {
+                const value = settings[key];
+                if (!value) return;
+
+                const cssKey = '--theme-' + key.replace(/_/g, '-');
                 
-                /* Override specific Tailwind rounded utilities if they collide */
-                [class*="rounded-"] {
-                     border-radius: var(--btn-radius, 8px) !important;
+                if (typeof value === 'string' && value.startsWith('#')) {
+                    variables.push(`${cssKey}: ${value};`);
+                    const hsl = hexToHsl(value);
+                    if (hsl) variables.push(`${cssKey}-hsl: ${hsl};`);
+                } else {
+                    variables.push(`${cssKey}: ${value};`);
+                }
+            });
+
+            if (variables.length > 0) {
+                css += `:root {\n  ${variables.join('\n  ')}\n}\n`;
+            }
+
+            // Global Typography Fallbacks
+            if (settings.font_heading) {
+                css += `h1, h2, h3, h4, h5, h6 { font-family: '${settings.font_heading}', sans-serif; }\n`;
+            }
+            if (settings.font_body) {
+                css += `body { font-family: '${settings.font_body}', sans-serif; }\n`;
+            }
+
+            // Buttons Override Logic
+            css += `
+                :root {
+                    --btn-radius: ${settings.button_radius || '8px'};
+                    --btn-border-width: ${settings.button_border_width || '1'}px;
+                }
+                button, .btn, .button, [class*="bg-primary"] {
+                    border-radius: var(--btn-radius) !important;
+                    border-width: var(--btn-border-width) !important;
                 }
             `;
         }

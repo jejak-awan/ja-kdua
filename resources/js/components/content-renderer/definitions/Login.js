@@ -6,7 +6,7 @@ export default {
     label: 'Login Form',
     icon: LogIn,
     description: 'Add a login form to your page.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/LoginBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/LoginBlock.vue')),
     settings: [
         {
             key: 'title',

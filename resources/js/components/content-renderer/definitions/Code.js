@@ -6,7 +6,7 @@ export default {
     label: 'Code Block',
     icon: Code,
     description: 'Display code with syntax highlighting.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/CodeBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/CodeBlock.vue')),
     settings: [
         { key: 'code', type: 'textarea', label: 'Code', default: '// Your code here\nconst hello = "world";' },
         {

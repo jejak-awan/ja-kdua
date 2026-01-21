@@ -37,7 +37,7 @@ export default {
     icon: MousePointer,
     description: 'Customizable call-to-action button with icons and effects.',
     category: 'basic',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ButtonBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ButtonBlock.vue')),
 
     settings: [
         // ============ CONTENT TAB ============

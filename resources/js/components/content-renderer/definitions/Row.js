@@ -6,6 +6,6 @@ export default {
     label: 'Row',
     icon: Columns,
     description: 'A row layout container.',
-    component: defineAsyncComponent(() => import('../blocks/RowBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/RowBlock.vue')),
     settings: [] // Settings handled by builder metadata
 };

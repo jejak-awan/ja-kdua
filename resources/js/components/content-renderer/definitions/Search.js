@@ -6,7 +6,7 @@ export default {
     label: 'Search Bar',
     icon: Search,
     description: 'Allow users to search your content.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SearchBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SearchBlock.vue')),
     settings: [
         {
             key: 'placeholder',

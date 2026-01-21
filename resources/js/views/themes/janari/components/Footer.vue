@@ -141,7 +141,7 @@ import { useMenu } from '../../../../composables/useMenu'
 import { useCmsStore } from '../../../../stores/cms'
 import { useToast } from '../../../../composables/useToast'
 import { useFormValidation } from '../../../../composables/useFormValidation'
-import { useResponsiveDevice } from '../../../../components/builder/core/useResponsiveDevice';
+import { useResponsiveDevice } from '../../../../shared/utils/useResponsiveDevice';
 import { newsletterSchema } from '../../../../schemas'
 
 const { t } = useI18n()

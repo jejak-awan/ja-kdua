@@ -6,7 +6,7 @@ export default {
     label: 'Spacer',
     icon: MoveVertical,
     description: 'Add vertical space between sections.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SpacerBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SpacerBlock.vue')),
     settings: [
         {
             key: 'height',

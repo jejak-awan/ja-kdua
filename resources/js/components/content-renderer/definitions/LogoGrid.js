@@ -1,7 +1,8 @@
+import { defineAsyncComponent } from 'vue';
 export default {
     type: 'logogrid',
     name: 'Logo Grid',
-    component: 'LogoGridBlock',
+    component: defineAsyncComponent(() => import('@/shared/blocks/LogoGridBlock.vue')),
     settings: [
         { name: 'items', type: 'repeater' },
         { name: 'showTitle', type: 'boolean' },

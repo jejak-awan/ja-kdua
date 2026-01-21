@@ -6,7 +6,7 @@ export default {
     label: 'Fullwidth Slider',
     icon: Image,
     description: 'Image slider with autoplay and navigation.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SliderBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SliderBlock.vue')),
     settings: [
         {
             key: 'slides',

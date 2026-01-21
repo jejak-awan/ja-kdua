@@ -6,7 +6,7 @@ export default {
     label: 'Map',
     icon: Map,
     description: 'Embed Google Maps or other map services.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/MapBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/MapBlock.vue')),
     settings: [
         {
             key: 'embedUrl',

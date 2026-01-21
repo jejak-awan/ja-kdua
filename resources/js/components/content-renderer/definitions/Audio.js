@@ -6,7 +6,7 @@ export default {
     label: 'Audio Player',
     icon: Music,
     description: 'Audio player with custom controls.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/AudioBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/AudioBlock.vue')),
     settings: [
         { key: 'src', type: 'image', label: 'Audio URL', default: '', tab: 'content' },
         { key: 'title', type: 'text', label: 'Title', default: '', tab: 'content' },

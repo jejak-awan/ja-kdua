@@ -6,110 +6,112 @@
 import ModuleRegistry from './ModuleRegistry'
 
 // Structure Blocks
-import SectionBlock from '../blocks/SectionBlock.vue'
-import RowBlock from '../blocks/RowBlock.vue'
-import ColumnBlock from '../blocks/ColumnBlock.vue'
+import SectionBlock from '../../../shared/blocks/SectionBlock.vue'
+import RowBlock from '../../../shared/blocks/RowBlock.vue'
+import ColumnBlock from '../../../shared/blocks/ColumnBlock.vue'
 
 // Basic Blocks
-import HeadingBlock from '../blocks/HeadingBlock.vue'
-import TextBlock from '../blocks/TextBlock.vue'
-import ButtonBlock from '../blocks/ButtonBlock.vue'
-import ImageBlock from '../blocks/ImageBlock.vue'
-import IconBlock from '../blocks/IconBlock.vue'
-import DividerBlock from '../blocks/DividerBlock.vue'
-import SpacerBlock from '../blocks/SpacerBlock.vue'
-import LogoBlock from '../blocks/LogoBlock.vue'
+import HeadingBlock from '../../../shared/blocks/HeadingBlock.vue'
+import RichTextBlock from '../../../shared/blocks/RichTextBlock.vue'
+import TextBlock from '../../../shared/blocks/TextBlock.vue'
+import ButtonBlock from '../../../shared/blocks/ButtonBlock.vue'
+import ImageBlock from '../../../shared/blocks/ImageBlock.vue'
+import IconBlock from '../../../shared/blocks/IconBlock.vue'
+import DividerBlock from '../../../shared/blocks/DividerBlock.vue'
+import SpacerBlock from '../../../shared/blocks/SpacerBlock.vue'
+import LogoBlock from '../../../shared/blocks/LogoBlock.vue'
 
 // Media Blocks
-import VideoBlock from '../blocks/VideoBlock.vue'
-import GalleryBlock from '../blocks/GalleryBlock.vue'
-// import GalleryItemBlock from '../blocks/GalleryItemBlock.vue' // REMOVED
-import MapBlock from '../blocks/MapBlock.vue'
-import MapPinBlock from '../blocks/MapPinBlock.vue'
-import AudioBlock from '../blocks/AudioBlock.vue'
-import BeforeAfterBlock from '../blocks/BeforeAfterBlock.vue'
-import VideoPopupBlock from '../blocks/VideoPopupBlock.vue'
-import EmbedBlock from '../blocks/EmbedBlock.vue'
-import LottieBlock from '../blocks/LottieBlock.vue'
-import VideoSliderBlock from '../blocks/VideoSliderBlock.vue'
+import VideoBlock from '../../../shared/blocks/VideoBlock.vue'
+import GalleryBlock from '../../../shared/blocks/GalleryBlock.vue'
+import MapBlock from '../../../shared/blocks/MapBlock.vue'
+import MapPinBlock from '../../../shared/blocks/MapPinBlock.vue'
+import AudioBlock from '../../../shared/blocks/AudioBlock.vue'
+import BeforeAfterBlock from '../../../shared/blocks/BeforeAfterBlock.vue'
+import VideoPopupBlock from '../../../shared/blocks/VideoPopupBlock.vue'
+import EmbedBlock from '../../../shared/blocks/EmbedBlock.vue'
+import LottieBlock from '../../../shared/blocks/LottieBlock.vue'
+import VideoSliderBlock from '../../../shared/blocks/VideoSliderBlock.vue'
 // import VideoSlideItemBlock from '../blocks/VideoSlideItemBlock.vue' // REMOVED
 
 // Content Blocks
-import BlurbBlock from '../blocks/BlurbBlock.vue'
-import CTABlock from '../blocks/CTABlock.vue'
-import CounterBlock from '../blocks/CounterBlock.vue'
-import TestimonialBlock from '../blocks/TestimonialBlock.vue'
-import SocialLinksBlock from '../blocks/SocialLinksBlock.vue'
-import CountdownBlock from '../blocks/CountdownBlock.vue'
-import ProgressBarBlock from '../blocks/ProgressBarBlock.vue'
-import PricingTableBlock from '../blocks/PricingTableBlock.vue'
-import PricingFeatureBlock from '../blocks/PricingFeatureBlock.vue'
-import AlertBlock from '../blocks/AlertBlock.vue'
-import CodeBlock from '../blocks/CodeBlock.vue'
-import TeamMemberBlock from '../blocks/TeamMemberBlock.vue'
-import CircleCounterBlock from '../blocks/CircleCounterBlock.vue'
-import IconListBlock from '../blocks/IconListBlock.vue'
+import BlurbBlock from '../../../shared/blocks/BlurbBlock.vue'
+import CTABlock from '../../../shared/blocks/CTABlock.vue'
+import CounterBlock from '../../../shared/blocks/CounterBlock.vue'
+import TestimonialBlock from '../../../shared/blocks/TestimonialBlock.vue'
+import SocialLinksBlock from '../../../shared/blocks/SocialLinksBlock.vue'
+import CountdownBlock from '../../../shared/blocks/CountdownBlock.vue'
+import ProgressBarBlock from '../../../shared/blocks/ProgressBarBlock.vue'
+import PricingTableBlock from '../../../shared/blocks/PricingBlock.vue'
+import PricingFeatureBlock from '../../../shared/blocks/PricingFeatureBlock.vue'
+import AlertBlock from '../../../shared/blocks/AlertBlock.vue'
+import CodeBlock from '../../../shared/blocks/CodeBlock.vue'
+import TeamMemberBlock from '../../../shared/blocks/TeamMemberBlock.vue'
+import CircleCounterBlock from '../../../shared/blocks/CircleCounterBlock.vue'
+import IconListBlock from '../../../shared/blocks/IconListBlock.vue'
 // import IconListItemBlock from '../blocks/IconListItemBlock.vue' // REMOVED
-import BreadcrumbsBlock from '../blocks/BreadcrumbsBlock.vue'
-import AuthorBlock from '../blocks/AuthorBlock.vue'
-import StarRatingBlock from '../blocks/StarRatingBlock.vue'
-import TableOfContentsBlock from '../blocks/TableOfContentsBlock.vue'
-import QuoteBlock from '../blocks/QuoteBlock.vue'
-import LogoGridBlock from '../blocks/LogoGridBlock.vue'
-import FAQBlock from '../blocks/FAQBlock.vue'
+import BreadcrumbsBlock from '../../../shared/blocks/BreadcrumbsBlock.vue'
+import AuthorBlock from '../../../shared/blocks/AuthorBlock.vue'
+import StarRatingBlock from '../../../shared/blocks/StarRatingBlock.vue'
+import TableOfContentsBlock from '../../../shared/blocks/TableOfContentsBlock.vue'
+import QuoteBlock from '../../../shared/blocks/QuoteBlock.vue'
+import LogoGridBlock from '../../../shared/blocks/LogoGridBlock.vue'
+import FAQBlock from '../../../shared/blocks/FAQBlock.vue'
 // import FAQItemBlock from '../blocks/FAQItemBlock.vue' // REMOVED
-import FeatureBlock from '../blocks/FeatureBlock.vue'
-import NumberBoxBlock from '../blocks/NumberBoxBlock.vue'
-import ShareButtonsBlock from '../blocks/ShareButtonsBlock.vue'
-import SidebarBlock from '../blocks/SidebarBlock.vue'
-import MenuBlock from '../blocks/MenuBlock.vue'
+import FeatureBlock from '../../../shared/blocks/FeatureBlock.vue'
+import HeroBlock from '../../../shared/blocks/HeroBlock.vue'
+import NumberBoxBlock from '../../../shared/blocks/NumberBoxBlock.vue'
+import ShareButtonsBlock from '../../../shared/blocks/ShareButtonsBlock.vue'
+import SidebarBlock from '../../../shared/blocks/SidebarBlock.vue'
+import MenuBlock from '../../../shared/blocks/MenuBlock.vue'
 
-import NumberCounterBlock from '../blocks/NumberCounterBlock.vue'
-import GroupBlock from '../blocks/GroupBlock.vue'
-import GroupCarouselBlock from '../blocks/GroupCarouselBlock.vue'
+import NumberCounterBlock from '../../../shared/blocks/NumberCounterBlock.vue'
+import GroupBlock from '../../../shared/blocks/GroupBlock.vue'
+import GroupCarouselBlock from '../../../shared/blocks/GroupCarouselBlock.vue'
 
 // Interactive Blocks
-import TabsBlock from '../blocks/TabsBlock.vue'
+import TabsBlock from '../../../shared/blocks/TabsBlock.vue'
 // import TabItemBlock from '../blocks/TabItemBlock.vue' // REMOVED
-import AccordionBlock from '../blocks/AccordionBlock.vue'
+import AccordionBlock from '../../../shared/blocks/AccordionBlock.vue'
 // import AccordionItemBlock from '../blocks/AccordionItemBlock.vue' // REMOVED
-import ToggleBlock from '../blocks/ToggleBlock.vue'
-import SliderBlock from '../blocks/SliderBlock.vue'
+import ToggleBlock from '../../../shared/blocks/ToggleBlock.vue'
+import SliderBlock from '../../../shared/blocks/SliderBlock.vue'
 // import SlideItemBlock from '../blocks/SlideItemBlock.vue' // REMOVED
 
 // Forms Blocks
-import SearchBlock from '../blocks/SearchBlock.vue'
-import LoginBlock from '../blocks/LoginBlock.vue'
-import ContactFormBlock from '../blocks/ContactFormBlock.vue'
+import SearchBlock from '../../../shared/blocks/SearchBlock.vue'
+import LoginBlock from '../../../shared/blocks/LoginBlock.vue'
+import ContactFormBlock from '../../../shared/blocks/ContactFormBlock.vue'
 // import ContactFieldBlock from '../blocks/ContactFieldBlock.vue' // REMOVED
-import SignupBlock from '../blocks/SignupBlock.vue'
-import NewsletterBlock from '../blocks/NewsletterBlock.vue'
+import SignupBlock from '../../../shared/blocks/SignupBlock.vue'
+import NewsletterBlock from '../../../shared/blocks/NewsletterBlock.vue'
 
 // Dynamic Blocks
-import BlogBlock from '../blocks/BlogBlock.vue'
-import PortfolioBlock from '../blocks/PortfolioBlock.vue'
-import PostSliderBlock from '../blocks/PostSliderBlock.vue'
-import CommentsBlock from '../blocks/CommentsBlock.vue'
-import PostNavigationBlock from '../blocks/PostNavigationBlock.vue'
-import RelatedPostsBlock from '../blocks/RelatedPostsBlock.vue'
-import PostTitleBlock from '../blocks/PostTitleBlock.vue'
-import PostMetaBlock from '../blocks/PostMetaBlock.vue'
-import FeaturedImageBlock from '../blocks/FeaturedImageBlock.vue'
-import PostContentBlock from '../blocks/PostContentBlock.vue'
-import FilterablePortfolioBlock from '../blocks/FilterablePortfolioBlock.vue'
+import BlogBlock from '../../../shared/blocks/BlogBlock.vue'
+import PortfolioBlock from '../../../shared/blocks/PortfolioBlock.vue'
+import PostSliderBlock from '../../../shared/blocks/PostSliderBlock.vue'
+import CommentsBlock from '../../../shared/blocks/CommentsBlock.vue'
+import PostNavigationBlock from '../../../shared/blocks/PostNavigationBlock.vue'
+import RelatedPostsBlock from '../../../shared/blocks/RelatedPostsBlock.vue'
+import PostTitleBlock from '../../../shared/blocks/PostTitleBlock.vue'
+import PostMetaBlock from '../../../shared/blocks/PostMetaBlock.vue'
+import FeaturedImageBlock from '../../../shared/blocks/FeaturedImageBlock.vue'
+import PostContentBlock from '../../../shared/blocks/PostContentBlock.vue'
+import FilterablePortfolioBlock from '../../../shared/blocks/FilterablePortfolioBlock.vue'
+import TabbedPostsBlock from '../../../shared/blocks/TabbedPostsBlock.vue'
 
 // Fullwidth Blocks
-import FullwidthHeaderBlock from '../blocks/FullwidthHeaderBlock.vue'
-import FullwidthSliderBlock from '../blocks/FullwidthSliderBlock.vue'
-import FullwidthPortfolioBlock from '../blocks/FullwidthPortfolioBlock.vue'
-import FullwidthCodeBlock from '../blocks/FullwidthCodeBlock.vue'
-import FullwidthImageBlock from '../blocks/FullwidthImageBlock.vue'
-import FullwidthMapBlock from '../blocks/FullwidthMapBlock.vue'
-import FullwidthMenuBlock from '../blocks/FullwidthMenuBlock.vue'
-import FullwidthPostContentBlock from '../blocks/FullwidthPostContentBlock.vue'
-import FullwidthPostSliderBlock from '../blocks/FullwidthPostSliderBlock.vue'
-import FullwidthPostTitleBlock from '../blocks/FullwidthPostTitleBlock.vue'
-import FullwidthSlideItemBlock from '../blocks/FullwidthSlideItemBlock.vue'
+import FullwidthHeaderBlock from '../../../shared/blocks/FullwidthHeaderBlock.vue'
+import FullwidthSliderBlock from '../../../shared/blocks/FullwidthSliderBlock.vue'
+import FullwidthPortfolioBlock from '../../../shared/blocks/FullwidthPortfolioBlock.vue'
+import FullwidthCodeBlock from '../../../shared/blocks/FullwidthCodeBlock.vue'
+import FullwidthImageBlock from '../../../shared/blocks/FullwidthImageBlock.vue'
+import FullwidthMapBlock from '../../../shared/blocks/FullwidthMapBlock.vue'
+import FullwidthMenuBlock from '../../../shared/blocks/FullwidthMenuBlock.vue'
+import FullwidthPostContentBlock from '../../../shared/blocks/FullwidthPostContentBlock.vue'
+import FullwidthPostSliderBlock from '../../../shared/blocks/FullwidthPostSliderBlock.vue'
+import FullwidthPostTitleBlock from '../../../shared/blocks/FullwidthPostTitleBlock.vue'
+import FullwidthSlideItemBlock from '../../../shared/blocks/FullwidthSlideItemBlock.vue'
 // import SidebarWidgetBlock from '../blocks/SidebarWidgetBlock.vue' // REMOVED
 // import LogoGridItemBlock from '../blocks/LogoGridItemBlock.vue' // REMOVED
 
@@ -124,6 +126,7 @@ export function registerBlockComponents() {
 
     // Basic
     ModuleRegistry.registerComponent('heading', HeadingBlock)
+    ModuleRegistry.registerComponent('richtext', RichTextBlock)
     ModuleRegistry.registerComponent('text', TextBlock)
     ModuleRegistry.registerComponent('button', ButtonBlock)
     ModuleRegistry.registerComponent('image', ImageBlock)
@@ -177,6 +180,7 @@ export function registerBlockComponents() {
     ModuleRegistry.registerComponent('sidebar', SidebarBlock)
     // ModuleRegistry.registerComponent('sidebar_widget', SidebarWidgetBlock) // REMOVED
     ModuleRegistry.registerComponent('menu', MenuBlock)
+    ModuleRegistry.registerComponent('hero', HeroBlock)
 
     ModuleRegistry.registerComponent('numbercounter', NumberCounterBlock)
     ModuleRegistry.registerComponent('group', GroupBlock)
@@ -211,6 +215,7 @@ export function registerBlockComponents() {
     ModuleRegistry.registerComponent('featuredimage', FeaturedImageBlock)
     ModuleRegistry.registerComponent('postcontent', PostContentBlock)
     ModuleRegistry.registerComponent('filterableportfolio', FilterablePortfolioBlock)
+    ModuleRegistry.registerComponent('tabbedposts', TabbedPostsBlock)
 
     // Fullwidth
     ModuleRegistry.registerComponent('fullwidthheader', FullwidthHeaderBlock)

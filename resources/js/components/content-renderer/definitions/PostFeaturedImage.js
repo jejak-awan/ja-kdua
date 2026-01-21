@@ -1,59 +1,33 @@
-import { Image as ImageIcon } from 'lucide-vue-next';
+import { Image } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'featuredimage',
+    name: 'postfeaturedimage',
     label: 'Post Featured Image',
-    icon: ImageIcon,
-    category: 'Dynamic',
-    description: 'Displays the dynamic featured image of the post.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/PostFeaturedImage.vue')),
+    icon: Image,
+    description: 'Display the featured image of the post.',
+    component: defineAsyncComponent(() => import('@/shared/blocks/FeaturedImageBlock.vue')),
     settings: [
         {
             key: 'aspectRatio',
             type: 'select',
             label: 'Aspect Ratio',
             options: [
-                { label: 'Auto', value: 'aspect-auto' },
-                { label: 'Square (1:1)', value: 'aspect-square' },
-                { label: 'Video (16:9)', value: 'aspect-video' },
-                { label: 'Standard (4:3)', value: 'aspect-4/3' }
+                { label: '16:9', value: '16:9' },
+                { label: '4:3', value: '4:3' },
+                { label: '3:2', value: '3:2' },
+                { label: '1:1', value: '1:1' },
+                { label: 'Original', value: 'original' }
             ],
-            default: 'aspect-video'
+            default: '16:9'
         },
-        {
-            key: 'rounded',
-            type: 'select',
-            label: 'Corners',
-            options: [
-                { label: 'None', value: 'rounded-none' },
-                { label: 'Small', value: 'rounded' },
-                { label: 'Medium', value: 'rounded-lg' },
-                { label: 'Large', value: 'rounded-2xl' }
-            ],
-            default: 'rounded-lg'
-        },
-        {
-            key: 'shadow',
-            type: 'select',
-            label: 'Shadow',
-            options: [
-                { label: 'None', value: 'shadow-none' },
-                { label: 'Small', value: 'shadow-sm' },
-                { label: 'Medium', value: 'shadow-md' },
-                { label: 'Large', value: 'shadow-xl' }
-            ],
-            default: 'shadow-md'
-        },
-        { key: 'overlay', type: 'boolean', label: 'Enable Overlay', default: false },
-        { key: 'customHeight', type: 'text', label: 'Custom Height (e.g., 400px)', default: '' }
+        { key: 'showCaption', type: 'boolean', label: 'Show Caption', default: true },
+        { key: 'caption', type: 'text', label: 'Static Caption', default: '' }
     ],
     defaultSettings: {
-        aspectRatio: 'aspect-video',
-        rounded: 'rounded-lg',
-        shadow: 'shadow-md',
-        overlay: false,
-        customHeight: '',
+        aspectRatio: '16:9',
+        showCaption: true,
+        caption: '',
         visibility: { mobile: true, tablet: true, desktop: true }
     }
 };

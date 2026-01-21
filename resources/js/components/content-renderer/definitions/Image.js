@@ -14,7 +14,7 @@ export default {
     icon: ImageIcon,
     description: 'Display images with filters, effects, and responsive sizing.',
     category: 'media',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ImageBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ImageBlock.vue')),
 
     settings: [
         // ============ CONTENT TAB ============

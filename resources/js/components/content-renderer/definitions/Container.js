@@ -17,7 +17,7 @@ export default {
     icon: Box,
     description: 'A flexible container for grouping and laying out other blocks.',
     category: 'structure',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ContainerBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ContainerBlock.vue')),
 
     settings: [
         // ============ LAYOUT TAB ============

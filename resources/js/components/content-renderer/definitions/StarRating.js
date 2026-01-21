@@ -6,7 +6,7 @@ export default {
     label: 'Star Rating',
     icon: Star,
     description: 'Display star ratings for reviews and feedback.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/StarRatingBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/StarRatingBlock.vue')),
     settings: [
         { key: 'rating', type: 'slider', label: 'Rating', min: 0, max: 5, step: 0.5, default: 4 },
         { key: 'max', type: 'number', label: 'Maximum Stars', default: 5 },

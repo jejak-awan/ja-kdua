@@ -58,7 +58,7 @@ const props = defineProps({
 // Inject builder
 const builder = inject('builder')
 
-import { useResponsiveDevice } from '../core/useResponsiveDevice'
+import { useResponsiveDevice } from '../../../shared/utils/useResponsiveDevice'
 
 // Computed
 const settings = computed(() => props.module?.settings || {})

@@ -6,7 +6,7 @@ export default {
     label: 'Tabs',
     icon: LayoutList,
     description: 'Tabbed content sections.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/TabsBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/TabsBlock.vue')),
     settings: [
         {
             key: 'tabs',

@@ -7,6 +7,7 @@ import Column from './Column';
 
 // Basic
 import Heading from './Heading';
+import RichText from './RichText';
 import Text from './Text';
 import Button from './Button';
 import Icon from './Icon';
@@ -70,6 +71,17 @@ import StarRating from './StarRating';
 import FAQ from './FAQ';
 import LogoGrid from './LogoGrid';
 import VideoSlider from './VideoSlider';
+import FullwidthSlider from './FullwidthSlider';
+import FullwidthSlideItem from './FullwidthSlideItem';
+import FullwidthHeader from './FullwidthHeader';
+import FullwidthPortfolio from './FullwidthPortfolio';
+import FullwidthCode from './FullwidthCode';
+import FullwidthImage from './FullwidthImage';
+import FullwidthMap from './FullwidthMap';
+import FullwidthMenu from './FullwidthMenu';
+import FullwidthPostContent from './FullwidthPostContent';
+import FullwidthPostSlider from './FullwidthPostSlider';
+import FullwidthPostTitle from './FullwidthPostTitle';
 
 export default [
     // Structure
@@ -81,6 +93,7 @@ export default [
 
     // Basic
     Heading,
+    RichText,
     Text,
     Button,
     Icon,
@@ -143,5 +156,16 @@ export default [
     StarRating,
     FAQ,
     LogoGrid,
-    VideoSlider
+    VideoSlider,
+    FullwidthSlider,
+    FullwidthSlideItem,
+    FullwidthHeader,
+    FullwidthPortfolio,
+    FullwidthCode,
+    FullwidthImage,
+    FullwidthMap,
+    FullwidthMenu,
+    FullwidthPostContent,
+    FullwidthPostSlider,
+    FullwidthPostTitle
 ];

@@ -6,7 +6,7 @@ export default {
     label: 'Image Gallery',
     icon: Images,
     description: 'Grid of images with captions.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/GalleryBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/GalleryBlock.vue')),
     settings: [
         {
             key: 'title',

@@ -6,7 +6,7 @@ export default {
     label: 'Circle Counter',
     icon: PieChart,
     description: 'Animated circular progress indicator.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/CircleCounterBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/CircleCounterBlock.vue')),
     settings: [
         { key: 'value', type: 'slider', label: 'Value', min: 0, max: 100, step: 1, default: 75 },
         { key: 'max', type: 'number', label: 'Maximum', default: 100 },

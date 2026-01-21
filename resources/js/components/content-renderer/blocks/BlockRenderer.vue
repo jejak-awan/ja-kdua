@@ -1,48 +1,48 @@
 <template>
     <div class="block-renderer w-full h-full">
-        <template v-for="block in (blocks || [])" :key="block.id">
+        <template v-for="blockInstance in internalBlocks" :key="blockInstance.id">
             <!-- Visibility Condition Check -->
-            <template v-if="ConditionEvaluator.evaluate(block, context)">
+            <template v-if="ConditionEvaluator.evaluate(blockInstance, context)">
                 <div 
-                    v-if="block && block.settings" 
+                    v-if="blockInstance && blockInstance.settings" 
                     :class="[
-                        getVisibilityClasses(block.settings.visibility), 
-                        resolveResponsiveValue(block.settings._css_class || block.settings.cssClass),
-                        resolveAdvancedStyles(block.settings),
-                        resolveBoxModelStyles(block.settings),
-                        resolveAdvancedStyles(block.hoverSettings, 'hover'),
-                        resolveResponsiveValue(block.settings.animation_effect),
-                        resolveResponsiveValue(block.settings._position || block.settings.position),
-                        getColorClasses(block),
+                        getVisibilityClasses(blockInstance.settings.visibility), 
+                        resolveResponsiveValue(blockInstance.settings._css_class || blockInstance.settings.cssClass),
+                        resolveAdvancedStyles(blockInstance.settings),
+                        resolveBoxModelStyles(blockInstance.settings),
+                        resolveAdvancedStyles(blockInstance.hoverSettings, 'hover'),
+                        resolveResponsiveValue(blockInstance.settings.animation_effect),
+                        resolveResponsiveValue(blockInstance.settings._position || blockInstance.settings.position),
+                        getColorClasses(blockInstance),
                         'h-full'
                     ].filter(Boolean)"
-                    :id="String(resolveResponsiveValue(block.settings._css_id || block.settings.cssId)).trim().replace(/\s/g, '-') || undefined"
+                    :id="String(resolveResponsiveValue(blockInstance.settings._css_id || blockInstance.settings.cssId)).trim().replace(/\s/g, '-') || undefined"
                     :style="[
-                        block.settings._custom_css || block.settings.custom_css,
-                        getAnimationStyles(block.settings),
-                        getPositioningStyles(block.settings),
-                        getColorStyles(block)
+                        blockInstance.settings._custom_css || blockInstance.settings.custom_css,
+                        getAnimationStyles(blockInstance.settings),
+                        getPositioningStyles(blockInstance.settings),
+                        getColorStyles(blockInstance)
                     ]"
-                    v-bind="resolveAttributes(block.settings)"
+                    v-bind="resolveAttributes(blockInstance.settings)"
                 >
                     <component 
-                        :is="getBlockComponent(block.type)" 
-                        v-bind="resolveBlockSettings(block)"
+                        :is="getBlockComponent(blockInstance.type)" 
+                        v-bind="resolveBlockSettings(blockInstance)"
                         :context="context"
                         :is-preview="isPreview"
-                        :id="block.id"
+                        :id="blockInstance.id"
                         class="block-item h-full"
                     />
                 </div>
-                <div v-else-if="block" class="p-4 border border-dashed rounded-lg bg-muted/20 text-xs text-muted-foreground text-center">
-                    Invalid Block: {{ block.type || 'Unknown' }}
+                <div v-else-if="blockInstance" class="p-4 border border-dashed rounded-lg bg-muted/20 text-xs text-muted-foreground text-center">
+                    Invalid Block: {{ blockInstance.type || 'Unknown' }}
                 </div>
             </template>
             <!-- Hidden placeholder for builder mode -->
             <div v-else-if="!isPreview" class="p-4 border border-dashed border-primary/20 bg-primary/5 rounded-lg text-[10px] text-primary/60 text-center mb-4">
                 <div class="flex items-center justify-center gap-2">
                     <Database class="w-3 h-3" />
-                    <span>Hidden Block: {{ block.type }} (Rules not met)</span>
+                    <span>Hidden Block: {{ blockInstance.type }} (Rules not met)</span>
                 </div>
             </div>
         </template>
@@ -50,6 +50,7 @@
 </template>
 
 <script setup>
+import { computed, provide, getCurrentInstance } from 'vue';
 import { blockRegistry } from '../BlockRegistry';
 import { dynamicContent } from '@/services/DynamicContentService';
 import { ConditionEvaluator } from '@/services/ConditionEvaluator.js';
@@ -60,6 +61,10 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    block: {
+        type: Object,
+        default: null
+    },
     context: {
         type: Object,
         default: () => ({})
@@ -69,6 +74,16 @@ const props = defineProps({
         default: false
     }
 });
+
+const internalBlocks = computed(() => {
+    if (props.block) return [props.block];
+    return props.blocks || [];
+});
+
+const instance = getCurrentInstance();
+if (instance) {
+    provide('BlockRenderer', instance.type);
+}
 
 const applyPrefix = (str, prefix) => {
     if (!str && str !== 0) return [];
@@ -145,6 +160,8 @@ const resolveBlockSettings = (block) => {
     }
     
     propsToPass.settings = settings;
+    propsToPass.module = block;
+    propsToPass.nestedBlocks = block.children || [];
 
     if (block.dynamicSettings) {
         Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {

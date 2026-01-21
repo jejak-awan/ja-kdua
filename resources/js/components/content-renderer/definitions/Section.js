@@ -16,7 +16,7 @@ export default {
     label: 'Section',
     icon: LayoutPanelTop,
     category: 'structure',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SectionBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SectionBlock.vue')),
 
     settings: [
         // ============ LAYOUT TAB ============

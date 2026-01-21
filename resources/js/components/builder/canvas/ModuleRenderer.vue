@@ -2,8 +2,10 @@
   <component 
     v-if="BlockComponent"
     :is="BlockComponent"
-    :module="resolvedModule"
+    :module="module"
     :is-preview="true"
+    :mode="'edit'"
+    :device="currentDevice"
   >
     <!-- Pass children through slot -->
     <slot />
@@ -25,65 +27,10 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const currentDevice = computed(() => builder?.device?.value || 'desktop')
+const currentDevice = computed(() => builder?.device || 'desktop')
 
 const BlockComponent = computed(() => {
   return ModuleRegistry.getComponent(props.module.type)
-})
-
-const resolvedSettings = computed(() => {
-  const settings = props.module.settings || {}
-  const resolved = {}
-  
-  // 1. Get all unique base keys (removing _hover, _tablet, and _mobile suffixes)
-  const baseKeys = new Set()
-  Object.keys(settings).forEach(key => {
-    const baseKey = key.replace(/(_hover|_tablet|_mobile)$/, '')
-    baseKeys.add(baseKey)
-  })
-
-  // 2. Resolve each base key for the current device and hover
-  baseKeys.forEach(key => {
-    // Standard Responsive Resolution
-    const desktopValue = settings[key]
-    const tabletValue = settings[key + '_tablet']
-    const mobileValue = settings[key + '_mobile']
-    
-    // Hover Resolution (Hover can also be responsive, but usually treated as global first)
-    // We prioritize key_hover, but could also check key_tablet_hover etc. if needed.
-    const hoverValue = settings[key + '_hover']
-
-    // Resolve current value based on device
-    if (currentDevice.value === 'desktop') {
-      resolved[key] = desktopValue
-    } else if (currentDevice.value === 'tablet') {
-      resolved[key] = (tabletValue !== undefined && tabletValue !== '') ? tabletValue : desktopValue
-    } else if (currentDevice.value === 'mobile') {
-      if (mobileValue !== undefined && mobileValue !== '') {
-        resolved[key] = mobileValue
-      } else if (tabletValue !== undefined && tabletValue !== '') {
-        resolved[key] = tabletValue
-      } else {
-        resolved[key] = desktopValue
-      }
-    } else {
-      resolved[key] = desktopValue
-    }
-
-    // Resolve hover value
-    if (hoverValue !== undefined && hoverValue !== '') {
-        resolved[key + '_hover'] = hoverValue
-    }
-  })
-
-  return resolved
-})
-
-const resolvedModule = computed(() => {
-  return {
-    ...props.module,
-    settings: resolvedSettings.value
-  }
 })
 </script>
 

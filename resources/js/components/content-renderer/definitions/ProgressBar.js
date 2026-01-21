@@ -6,7 +6,7 @@ export default {
     label: 'Progress Bar',
     icon: BarChart3,
     description: 'Visual progress indicator.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ProgressBarBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ProgressBarBlock.vue')),
     settings: [
         {
             key: 'label',

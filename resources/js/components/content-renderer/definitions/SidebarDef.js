@@ -6,7 +6,7 @@ export default {
     label: 'Sidebar',
     icon: LayoutDashboard,
     description: 'Sidebar with widgets.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/SidebarBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/SidebarBlock.vue')),
     settings: [
         { key: 'showTitle', type: 'boolean', label: 'Show Widget Titles', default: true },
         {

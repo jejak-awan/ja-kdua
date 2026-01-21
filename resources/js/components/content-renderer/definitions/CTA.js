@@ -7,7 +7,7 @@ export default {
     label: 'Action Bar',
     icon: MousePointerClick,
     description: 'Eye-catching section with a primary button.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/CTABlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/CTABlock.vue')),
     settings: [
         {
             key: 'title',

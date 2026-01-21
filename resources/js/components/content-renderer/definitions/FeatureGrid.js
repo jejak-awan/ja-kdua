@@ -6,7 +6,7 @@ export default {
     label: 'Feature Grid',
     icon: Grid,
     description: 'Display features in a responsive grid.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/FeatureGridBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/FeatureGridBlock.vue')),
     settings: [
         { type: 'header', label: 'Content', tab: 'content' },
         {

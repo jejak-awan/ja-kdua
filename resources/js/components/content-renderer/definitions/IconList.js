@@ -6,7 +6,7 @@ export default {
     label: 'Icon List',
     icon: List,
     description: 'Bulleted list with customizable icons.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/IconListBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/IconListBlock.vue')),
     settings: [
         {
             key: 'title',

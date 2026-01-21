@@ -6,7 +6,7 @@ export default {
     label: 'Countdown Timer',
     icon: Timer,
     description: 'Display a countdown to a specific date and time.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/CountdownBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/CountdownBlock.vue')),
     settings: [
         {
             key: 'end_date',

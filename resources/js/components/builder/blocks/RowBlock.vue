@@ -88,7 +88,7 @@ const columnWidths = computed(() => {
   return parts.map(p => (p / total) * 100)
 })
 
-import { useResponsiveDevice } from '../core/useResponsiveDevice'
+import { useResponsiveDevice } from '../../../shared/utils/useResponsiveDevice'
 
 // Styles
 const device = useResponsiveDevice()

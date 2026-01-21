@@ -6,7 +6,7 @@ export default {
     label: 'Alert',
     icon: Bell,
     description: 'Info, warning, success, or error notices.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/AlertBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/AlertBlock.vue')),
     settings: [
         {
             key: 'title',

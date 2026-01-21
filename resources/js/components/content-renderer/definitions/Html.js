@@ -7,7 +7,7 @@ export default {
     icon: Code,
     description: 'Embed raw HTML content.',
     category: 'advanced',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/HtmlBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/HtmlBlock.vue')),
 
     settings: [
         { type: 'header', label: 'HTML Content', tab: 'content' },

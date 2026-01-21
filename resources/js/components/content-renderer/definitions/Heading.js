@@ -6,7 +6,7 @@ export default {
     label: 'Heading',
     icon: Heading,
     description: 'Customizable heading with typography controls.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/HeadingBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/HeadingBlock.vue')),
     settings: [
         {
             key: 'text',

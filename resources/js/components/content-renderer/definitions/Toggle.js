@@ -6,7 +6,7 @@ export default {
     label: 'Toggle',
     icon: ToggleRight,
     description: 'Collapsible toggle section.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ToggleBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ToggleBlock.vue')),
     settings: [
         { key: 'title', type: 'text', label: 'Title', default: 'Toggle Title' },
         { key: 'content', type: 'textarea', label: 'Content', default: 'Toggle content goes here.' },

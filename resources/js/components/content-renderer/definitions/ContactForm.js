@@ -6,7 +6,7 @@ export default {
     label: 'Contact Form',
     icon: Mail,
     description: 'A customizable contact form for lead generation.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ContactFormBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ContactFormBlock.vue')),
     settings: [
         {
             key: 'title',

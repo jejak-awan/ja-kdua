@@ -6,7 +6,7 @@ export default {
     label: 'Columns',
     icon: ColumnsIcon,
     description: 'Create multi-column layouts.',
-    component: defineAsyncComponent(() => import('@/components/content-renderer/blocks/ColumnsBlock.vue')),
+    component: defineAsyncComponent(() => import('@/shared/blocks/ColumnsBlock.vue')),
     settings: [
         {
             key: 'layout',
