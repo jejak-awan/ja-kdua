@@ -11,7 +11,7 @@
 <script setup>
 import { computed } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles } from '../utils'
 
 const props = defineProps({
     backgroundColor: String,
@@ -19,6 +19,7 @@ const props = defineProps({
     border: Object,
     boxShadow: Object,
     verticalAlignment: String,
+    settings: { type: Object, default: () => ({}) },
     nestedBlocks: { type: Array, default: () => [] },
     context: Object,
     isPreview: Boolean
@@ -43,6 +44,10 @@ const styles = computed(() => {
     if(props.border) Object.assign(s, getBorderStyles(props.border))
     if(props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
     
+    if (props.settings) {
+        Object.assign(s, getSizingStyles(props.settings))
+    }
+
     return s
 })
 </script>

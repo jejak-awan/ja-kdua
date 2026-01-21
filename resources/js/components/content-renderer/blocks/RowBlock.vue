@@ -14,6 +14,7 @@
     >
         <ColumnBlock 
             v-bind="col.settings" 
+            :settings="col.settings"
             :nestedBlocks="col.children"
             :context="context"
             :isPreview="isPreview"
@@ -25,7 +26,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import ColumnBlock from './ColumnBlock.vue'
-import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles } from '../utils'
+import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles } from '../utils'
 
 const props = defineProps({
     columns: { type: String, default: '1' },
@@ -136,6 +137,11 @@ const styles = computed(() => {
     if(props.border) Object.assign(s, getBorderStyles(props.border))
     if(props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
     
+    // Apply Sizing styles
+    if (settings) {
+        Object.assign(s, getSizingStyles(settings))
+    }
+
     if(props.equalizeColumns) s.alignItems = 'stretch'
     
     return s

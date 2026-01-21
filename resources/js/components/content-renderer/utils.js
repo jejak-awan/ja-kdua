@@ -8,13 +8,38 @@ export const generateUUID = () => {
     });
 };
 
+/**
+ * Robust value getter that checks for both camelCase and snake_case keys.
+ */
+function getVal(obj, key) {
+    if (!obj) return undefined;
+    if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+
+    // Check snake_case variant
+    const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    if (obj[snakeKey] !== undefined && obj[snakeKey] !== null && obj[snakeKey] !== '') return obj[snakeKey];
+
+    return undefined;
+}
+
+/**
+ * Appends px unit if value is numeric.
+ */
+function addPx(val) {
+    if (val === undefined || val === null || val === '') return val;
+    if (typeof val === 'number') return `${val}px`;
+    if (typeof val === 'string' && val.match(/^\-?\d+$/)) return `${val}px`;
+    return val;
+}
+
 export function getBorderStyles(borderSettings) {
     if (!borderSettings) return {}
     const css = {}
 
     // Radius
-    if (borderSettings.radius) {
-        const { tl, tr, bl, br } = borderSettings.radius
+    const radius = getVal(borderSettings, 'radius')
+    if (radius) {
+        const { tl, tr, bl, br } = radius
         if (tl !== undefined) css.borderTopLeftRadius = `${tl}px`
         if (tr !== undefined) css.borderTopRightRadius = `${tr}px`
         if (bl !== undefined) css.borderBottomLeftRadius = `${bl}px`
@@ -22,10 +47,11 @@ export function getBorderStyles(borderSettings) {
     }
 
     // Border Sides
-    if (borderSettings.styles) {
+    const borderStyles = getVal(borderSettings, 'styles')
+    if (borderStyles) {
         const sides = ['top', 'right', 'bottom', 'left']
         sides.forEach(side => {
-            const conf = borderSettings.styles[side]
+            const conf = borderStyles[side]
             if (conf) {
                 const sideCap = side.charAt(0).toUpperCase() + side.slice(1)
 
@@ -45,13 +71,17 @@ export function getBorderStyles(borderSettings) {
 export function getSpacingStyles(spacingSettings, type = 'padding') {
     if (!spacingSettings) return {}
     const css = {}
-    const { top, bottom, left, right, unit } = spacingSettings
-    const u = unit || 'px'
 
-    if (top !== undefined) css[`${type}Top`] = `${top}${u}`
-    if (bottom !== undefined) css[`${type}Bottom`] = `${bottom}${u}`
-    if (left !== undefined) css[`${type}Left`] = `${left}${u}`
-    if (right !== undefined) css[`${type}Right`] = `${right}${u}`
+    const top = getVal(spacingSettings, 'top')
+    const bottom = getVal(spacingSettings, 'bottom')
+    const left = getVal(spacingSettings, 'left')
+    const right = getVal(spacingSettings, 'right')
+    const unit = getVal(spacingSettings, 'unit') || 'px'
+
+    if (top !== undefined) css[`${type}Top`] = `${top}${unit}`
+    if (bottom !== undefined) css[`${type}Bottom`] = `${bottom}${unit}`
+    if (left !== undefined) css[`${type}Left`] = `${left}${unit}`
+    if (right !== undefined) css[`${type}Right`] = `${right}${unit}`
 
     return css
 }
@@ -100,8 +130,9 @@ export function getBackgroundStyles(settings) {
     const css = {}
 
     // Background Color
-    if (settings.backgroundColor) {
-        css.backgroundColor = settings.backgroundColor
+    const bgColor = getVal(settings, 'backgroundColor')
+    if (bgColor) {
+        css.backgroundColor = bgColor
     }
 
     // Background Image & Gradients (Multiple Layers)
@@ -109,19 +140,20 @@ export function getBackgroundStyles(settings) {
     const sizes = []
 
     // 1. Resolve Gradients
-    const gradientList = settings.backgroundGradients || (settings.backgroundGradient ? [settings.backgroundGradient] : [])
+    const gradientList = getVal(settings, 'backgroundGradients') || (getVal(settings, 'backgroundGradient') ? [getVal(settings, 'backgroundGradient')] : [])
     const gradientCSSList = gradientList.map(g => generateGradientCSS(g)).filter(c => !!c)
 
     // 2. Resolve Image
-    const imageCSS = settings.backgroundImage ? `url(${settings.backgroundImage})` : ''
+    const bgImage = getVal(settings, 'backgroundImage')
+    const imageCSS = bgImage ? `url(${bgImage})` : ''
 
     // 3. Assemble Layers
     let resolvedImageSize = ''
     if (imageCSS) {
-        let size = settings.backgroundImageSize || 'cover'
+        let size = getVal(settings, 'backgroundImageSize') || 'cover'
         if (size === 'custom') {
-            const w = settings.backgroundImageWidth || 'auto'
-            const h = settings.backgroundImageHeight || 'auto'
+            const w = getVal(settings, 'backgroundImageWidth') || 'auto'
+            const h = getVal(settings, 'backgroundImageHeight') || 'auto'
             size = `${w} ${h}`
         } else if (size === 'stretch') {
             size = '100% 100%'
@@ -132,7 +164,7 @@ export function getBackgroundStyles(settings) {
     }
 
     // 3.2. Add Gradient & Image based on "Above Image" setting
-    if (settings.backgroundGradientShowAboveImage) {
+    if (getVal(settings, 'backgroundGradientShowAboveImage')) {
         gradientCSSList.forEach((gcss, index) => {
             layers.push(gcss)
             const g = gradientList[index]
@@ -162,19 +194,19 @@ export function getBackgroundStyles(settings) {
     const repeatList = []
     const blendList = []
 
-    if (settings.backgroundGradientShowAboveImage) {
+    if (getVal(settings, 'backgroundGradientShowAboveImage')) {
         gradientCSSList.forEach(() => {
             repeatList.push('no-repeat')
             blendList.push('normal')
         })
         if (imageCSS) {
-            repeatList.push(settings.backgroundImageRepeat || 'no-repeat')
-            blendList.push(settings.backgroundImageBlendMode || 'normal')
+            repeatList.push(getVal(settings, 'backgroundImageRepeat') || 'no-repeat')
+            blendList.push(getVal(settings, 'backgroundImageBlendMode') || 'normal')
         }
     } else {
         if (imageCSS) {
-            repeatList.push(settings.backgroundImageRepeat || 'no-repeat')
-            blendList.push(settings.backgroundImageBlendMode || 'normal')
+            repeatList.push(getVal(settings, 'backgroundImageRepeat') || 'no-repeat')
+            blendList.push(getVal(settings, 'backgroundImageBlendMode') || 'normal')
         }
         gradientCSSList.forEach(() => {
             repeatList.push('no-repeat')
@@ -189,19 +221,21 @@ export function getBackgroundStyles(settings) {
         css.backgroundBlendMode = blendList.join(', ')
 
         // Attachment / Parallax
-        if (settings.parallax && (settings.parallaxMethod === 'css' || !settings.parallaxMethod)) {
+        const parallax = getVal(settings, 'parallax')
+        const parallaxMethod = getVal(settings, 'parallaxMethod')
+        if (parallax && (parallaxMethod === 'css' || !parallaxMethod)) {
             css.backgroundAttachment = layers.map(() => 'fixed').join(', ')
-        } else if (settings.backgroundImageAttachment) {
-            css.backgroundAttachment = layers.map(() => settings.backgroundImageAttachment).join(', ')
+        } else if (getVal(settings, 'backgroundImageAttachment')) {
+            css.backgroundAttachment = layers.map(() => getVal(settings, 'backgroundImageAttachment')).join(', ')
         }
 
         // Position
         const posList = []
-        if (settings.backgroundGradientShowAboveImage) {
+        if (getVal(settings, 'backgroundGradientShowAboveImage')) {
             gradientCSSList.forEach(() => posList.push('center'))
-            if (imageCSS) posList.push(settings.backgroundImagePosition || 'center')
+            if (imageCSS) posList.push(getVal(settings, 'backgroundImagePosition') || 'center')
         } else {
-            if (imageCSS) posList.push(settings.backgroundImagePosition || 'center')
+            if (imageCSS) posList.push(getVal(settings, 'backgroundImagePosition') || 'center')
             gradientCSSList.forEach(() => posList.push('center'))
         }
         css.backgroundPosition = posList.join(', ')
@@ -215,37 +249,37 @@ export function getSizingStyles(settings) {
     const css = {}
 
     // Width
-    if (settings.width && settings.width !== 'auto') {
-        css.width = settings.width
-    }
-    if (settings.maxWidth && settings.maxWidth !== 'none') {
-        css.maxWidth = settings.maxWidth
-    }
-    if (settings.minWidth) {
-        css.minWidth = settings.minWidth
-    }
+    const width = getVal(settings, 'width')
+    if (width && width !== 'auto') css.width = addPx(width)
+
+    const maxWidth = getVal(settings, 'maxWidth')
+    if (maxWidth && maxWidth !== 'none') css.maxWidth = addPx(maxWidth)
+
+    const minWidth = getVal(settings, 'minWidth')
+    if (minWidth) css.minWidth = addPx(minWidth)
 
     // Height
-    if (settings.height && settings.height !== 'auto') {
-        css.height = settings.height
-    }
-    if (settings.minHeight) {
-        css.minHeight = settings.minHeight
-    }
-    if (settings.maxHeight && settings.maxHeight !== 'none') {
-        css.maxHeight = settings.maxHeight
-    }
+    const height = getVal(settings, 'height')
+    if (height && height !== 'auto') css.height = addPx(height)
+
+    const minHeight = getVal(settings, 'minHeight')
+    if (minHeight) css.minHeight = addPx(minHeight)
+
+    const maxHeight = getVal(settings, 'maxHeight')
+    if (maxHeight && maxHeight !== 'none') css.maxHeight = addPx(maxHeight)
 
     // Overflow
-    if (settings.overflow && settings.overflow !== 'visible') {
-        css.overflow = settings.overflow
-        if (settings.overflowX) css.overflowX = settings.overflowX
-        if (settings.overflowY) css.overflowY = settings.overflowY
+    const overflow = getVal(settings, 'overflow')
+    if (overflow && overflow !== 'visible') {
+        css.overflow = overflow
+        if (getVal(settings, 'overflowX')) css.overflowX = getVal(settings, 'overflowX')
+        if (getVal(settings, 'overflowY')) css.overflowY = getVal(settings, 'overflowY')
     }
 
     // Z-Index
-    if (settings.zIndex !== undefined && settings.zIndex !== '') {
-        css.zIndex = settings.zIndex
+    const zIndex = getVal(settings, 'zIndex')
+    if (zIndex !== undefined && zIndex !== null && zIndex !== '') {
+        css.zIndex = zIndex
     }
 
     return css
