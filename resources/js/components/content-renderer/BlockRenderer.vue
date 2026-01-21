@@ -12,8 +12,7 @@
                         resolveAdvancedStyles(block.hoverSettings, 'hover'),
                         resolveResponsiveValue(block.settings.animation_effect),
                         resolveResponsiveValue(block.settings._position),
-                        getColorClasses(block),
-                        'h-full'
+                        getColorClasses(block)
                     ].filter(Boolean)"
                     :id="block.settings._css_id ? String(resolveResponsiveValue(block.settings._css_id)).trim().replace(/\s/g, '-') : undefined"
                     :style="[
@@ -29,7 +28,7 @@
                         :context="context"
                         :is-preview="isPreview"
                         :id="block.id"
-                        class="block-item h-full"
+                        class="block-item"
                     />
                 </div>
                 <div v-else-if="block" class="p-4 border border-dashed rounded-lg bg-muted/20 text-xs text-muted-foreground text-center">

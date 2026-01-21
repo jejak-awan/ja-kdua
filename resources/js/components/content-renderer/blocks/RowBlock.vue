@@ -26,7 +26,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import ColumnBlock from './ColumnBlock.vue'
-import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles } from '../utils'
+import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles } from '../utils'
 
 const props = defineProps({
     columns: { type: String, default: '1' },
@@ -140,6 +140,7 @@ const styles = computed(() => {
     // Apply Sizing styles
     if (settings) {
         Object.assign(s, getSizingStyles(settings))
+        Object.assign(s, getTransformStyles(settings))
     }
 
     if(props.equalizeColumns) s.alignItems = 'stretch'

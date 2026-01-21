@@ -13,33 +13,51 @@ export const generateUUID = () => {
  */
 function getVal(obj, key) {
     if (!obj) return undefined;
-    if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
 
-    // Check shorthand aliases
-    const aliases = {
-        'backgroundColor': ['bgColor'],
-        'backgroundImage': ['bgImage'],
-        'backgroundSize': ['bgSize'],
-        'backgroundPosition': ['bgPos', 'bgPosition'],
-        'backgroundRepeat': ['bgRepeat'],
-        'borderRadius': ['radius', 'r'],
-        'minHeight': ['min_height'],
-        'maxHeight': ['max_height'],
-        'minWidth': ['min_width'],
-        'maxWidth': ['max_width']
-    };
+    // Internal helper to get raw value including aliases and snake_case
+    const getRaw = (innerObj, innerKey) => {
+        if (!innerObj) return undefined;
+        if (innerObj[innerKey] !== undefined && innerObj[innerKey] !== null && innerObj[innerKey] !== '') return innerObj[innerKey];
 
-    if (aliases[key]) {
-        for (const alias of aliases[key]) {
-            if (obj[alias] !== undefined && obj[alias] !== null && obj[alias] !== '') return obj[alias];
+        const aliases = {
+            'backgroundColor': ['bgColor'],
+            'backgroundImage': ['bgImage'],
+            'backgroundSize': ['bgSize'],
+            'backgroundPosition': ['bgPos', 'bgPosition', 'background_position'],
+            'backgroundRepeat': ['bgRepeat', 'background_repeat'],
+            'borderRadius': ['radius', 'r', 'border_radius'],
+            'minHeight': ['min_height'],
+            'maxHeight': ['max_height'],
+            'minWidth': ['min_width'],
+            'maxWidth': ['max_width']
+        };
+
+        if (aliases[innerKey]) {
+            for (const alias of aliases[innerKey]) {
+                if (innerObj[alias] !== undefined && innerObj[alias] !== null && innerObj[alias] !== '') return innerObj[alias];
+            }
         }
+
+        const snakeKey = innerKey.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+        if (innerObj[snakeKey] !== undefined && innerObj[snakeKey] !== null && innerObj[snakeKey] !== '') return innerObj[snakeKey];
+
+        return undefined;
     }
 
-    // Check snake_case variant
-    const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-    if (obj[snakeKey] !== undefined && obj[snakeKey] !== null && obj[snakeKey] !== '') return obj[snakeKey];
+    let val = getRaw(obj, key);
 
-    return undefined;
+    // If still undefined, check if obj itself is a responsive object from a parent key
+    // This happens if spacingSettings is passed as a responsive object
+    if (val === undefined && (obj.desktop !== undefined || obj.mobile !== undefined)) {
+        val = obj.desktop; // Default to desktop for now
+    }
+
+    // If the RESOLVED value is still an object with desktop/mobile keys, resolve it too
+    if (val && typeof val === 'object' && !Array.isArray(val) && (val.desktop !== undefined || val.mobile !== undefined)) {
+        val = val.desktop;
+    }
+
+    return val;
 }
 
 /**

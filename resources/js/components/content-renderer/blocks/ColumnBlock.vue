@@ -11,7 +11,7 @@
 <script setup>
 import { computed } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getSizingStyles, getTransformStyles, getBackgroundStyles } from '../utils'
 
 const props = defineProps({
     backgroundColor: String,
@@ -30,22 +30,25 @@ const styles = computed(() => {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        // height: '100%' // careful with height if content is short
     }
     
-    if (props.verticalAlignment) {
-        if (props.verticalAlignment === 'center') s.justifyContent = 'center'
-        else if (props.verticalAlignment === 'bottom') s.justifyContent = 'flex-end'
-        else s.justifyContent = 'flex-start'
-    }
+    const settings = props.settings || {}
 
-    if(props.backgroundColor) s.backgroundColor = props.backgroundColor
+    // Background
+    if (props.backgroundColor) s.backgroundColor = props.backgroundColor
+    if (settings) Object.assign(s, getBackgroundStyles(settings))
+
+    if (props.verticalAlignment === 'center' || settings.verticalAlign === 'center') s.justifyContent = 'center'
+    else if (props.verticalAlignment === 'bottom' || settings.verticalAlign === 'end') s.justifyContent = 'flex-end'
+    else s.justifyContent = 'flex-start'
+
     if(props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
     if(props.border) Object.assign(s, getBorderStyles(props.border))
     if(props.boxShadow) Object.assign(s, getBoxShadowStyles(props.boxShadow))
     
-    if (props.settings) {
-        Object.assign(s, getSizingStyles(props.settings))
+    if (settings) {
+        Object.assign(s, getSizingStyles(settings))
+        Object.assign(s, getTransformStyles(settings))
     }
 
     return s
