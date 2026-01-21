@@ -1,5 +1,5 @@
 <template>
-    <div class="block-renderer w-full h-full">
+    <div class="block-renderer w-full h-auto">
         <template v-for="block in (blocks || [])" :key="block.id">
             <!-- Visibility Condition Check -->
             <template v-if="ConditionEvaluator.evaluate(block, context)">
