@@ -264,22 +264,25 @@ const getVisibilityClasses = (visibility) => {
 };
 
 const getAnimationStyles = (settings) => {
-    if (!settings.animation_effect) return {};
+    const effect = resolveResponsiveValue(settings.animation_effect, false);
+    if (!effect) return {};
     
     return {
-        animationDuration: `${settings.animation_duration || 600}ms`,
-        animationDelay: `${settings.animation_delay || 0}ms`,
-        animationIterationCount: settings.animation_repeat === 'infinite' ? 'infinite' : '1'
+        animationDuration: `${resolveResponsiveValue(settings.animation_duration, false) || 600}ms`,
+        animationDelay: `${resolveResponsiveValue(settings.animation_delay, false) || 0}ms`,
+        animationIterationCount: resolveResponsiveValue(settings.animation_repeat, false) === 'infinite' ? 'infinite' : '1'
     };
 };
 
 const getPositioningStyles = (settings) => {
     let styles = {};
-    if (settings._z_index !== undefined && settings._z_index !== 0) {
-        styles.zIndex = settings._z_index;
+    const zIndex = resolveResponsiveValue(settings._z_index, false);
+    if (zIndex !== undefined && zIndex !== 0) {
+        styles.zIndex = zIndex;
     }
-    if (settings._position === 'sticky' || settings._position === 'fixed') {
-        styles.top = `${settings._sticky_top || 0}px`;
+    const pos = resolveResponsiveValue(settings._position, false);
+    if (pos === 'sticky' || pos === 'fixed') {
+        styles.top = `${resolveResponsiveValue(settings._sticky_top, false) || 0}px`;
     }
     return styles;
 };
@@ -292,11 +295,11 @@ const getColorStyles = (block) => {
     const hover = block.hoverSettings || {};
     
     // Check for textColor or color (legacy/alt names)
-    const textColor = settings.textColor || settings.color;
-    const hoverTextColor = hover.textColor || hover.color;
+    const textColor = resolveResponsiveValue(settings.textColor || settings.color, false);
+    const hoverTextColor = resolveResponsiveValue(hover.textColor || hover.color, false);
     
-    const bgColor = settings.bgColor || settings.background_color;
-    const hoverBgColor = hover.bgColor || hover.background_color;
+    const bgColor = resolveResponsiveValue(settings.bgColor || settings.background_color, false);
+    const hoverBgColor = resolveResponsiveValue(hover.bgColor || hover.background_color, false);
     
     const styles = {};
     
