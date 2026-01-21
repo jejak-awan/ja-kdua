@@ -148,7 +148,7 @@ const styles = computed(() => {
       s.display = 'flex'
       s.flexDirection = 'column'
       
-      const vAlign = settings.verticalAlign || 'start'
+      const vAlign = getVal(settings, 'verticalAlign') || 'start'
       if (vAlign === 'center') s.justifyContent = 'center'
       else if (vAlign === 'end') s.justifyContent = 'flex-end'
       else s.justifyContent = 'flex-start'

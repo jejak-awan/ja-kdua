@@ -38,8 +38,9 @@ const styles = computed(() => {
     if (props.backgroundColor) s.backgroundColor = props.backgroundColor
     if (settings) Object.assign(s, getBackgroundStyles(settings))
 
-    if (props.verticalAlignment === 'center' || settings.verticalAlign === 'center') s.justifyContent = 'center'
-    else if (props.verticalAlignment === 'bottom' || settings.verticalAlign === 'end') s.justifyContent = 'flex-end'
+    const vAlign = getVal(settings, 'verticalAlign') || props.verticalAlignment || 'start'
+    if (vAlign === 'center') s.justifyContent = 'center'
+    else if (vAlign === 'bottom' || vAlign === 'end') s.justifyContent = 'flex-end'
     else s.justifyContent = 'flex-start'
 
     if(props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
@@ -53,4 +54,5 @@ const styles = computed(() => {
 
     return s
 })
+
 </script>

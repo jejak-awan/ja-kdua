@@ -122,21 +122,22 @@ const resolveBlockSettings = (block) => {
         let val = settings[key];
         
         // Resolve responsive objects
-        if (val && typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val)) {
-             // Unlike before, we ALWAYS try to resolve to a single value for JS props (Desktop)
-             // or keep it if the component can handle objects (rare).
-             // For standard props, we take the desktop value to ensure stability.
+        if (val && typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val || 'tablet' in val)) {
+             // Inheritance Logic for the whole prop
+             const desktop = val.desktop;
+             const tablet = (val.tablet !== undefined && val.tablet !== null && val.tablet !== '') ? val.tablet : desktop;
+             const mobile = (val.mobile !== undefined && val.mobile !== null && val.mobile !== '') ? val.mobile : tablet;
              
-             // Check if it's likely class-based (string with spaces or dashes)
-             const isProbablyClasses = typeof val.desktop === 'string' && (val.desktop.includes('-') || val.desktop.includes(' '));
+             // For props, we always default to desktop value for stability in component logic
+             // (unless the component expects an object, which our standard blocks don't)
+             
+             // Check if it's likely class-based (string containing spaces or dashes)
+             const isProbablyClasses = typeof desktop === 'string' && (desktop.includes('-') || desktop.includes(' '));
              
              if (isProbablyClasses) {
-                 // If it looks like classes, we want the full array
                  propsToPass[key] = resolveResponsiveValue(val, true).join(' ');
              } else {
-                // Otherwise, it's a raw value (e.g. number for a counter).
-                // We default to desktop to avoid breaking the component logic.
-                propsToPass[key] = val.desktop; 
+                propsToPass[key] = desktop; 
              }
         } else {
             propsToPass[key] = val;
