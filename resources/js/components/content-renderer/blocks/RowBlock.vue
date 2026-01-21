@@ -7,7 +7,7 @@
     @mouseleave="handleMouseLeave"
   >
     <div 
-        v-for="(col, index) in nestedBlocks" 
+        v-for="(col, index) in (props.nestedBlocks || [])" 
         :key="col.id" 
         class="row-column"
         :style="getColumnWrapperStyle(index)"
@@ -126,7 +126,7 @@ const widths = computed(() => {
 
 const getColumnWrapperStyle = (index) => {
     const w = widths.value[index] || 100
-    const numCols = nestedBlocks.value?.length || 1
+    const numCols = props.nestedBlocks?.length || 1
     const rawGap = getVal(props.settings, 'gutterWidth') || props.gutterWidth || 0
     const gap = parseFloat(String(rawGap).replace('px', '')) || 0
     

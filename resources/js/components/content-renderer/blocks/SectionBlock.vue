@@ -10,7 +10,7 @@
          <BackgroundMedia :settings="settings" />
          <div class="relative z-10" :class="[ isFullWidth ? 'w-full' : 'container mx-auto px-4' ]">
               <BlockRenderer 
-                 :blocks="nestedBlocks" 
+                 :blocks="props.nestedBlocks" 
                  :context="context"
                  :is-preview="isPreview"
               />

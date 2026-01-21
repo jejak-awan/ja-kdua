@@ -1,7 +1,7 @@
 <template>
     <div class="column-block" :style="styles">
         <BlockRenderer 
-            :blocks="nestedBlocks" 
+            :blocks="props.nestedBlocks" 
             :context="context"
             :isPreview="isPreview"
         />
