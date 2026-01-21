@@ -1,7 +1,7 @@
 <template>
     <section 
-        :class="['transition-all duration-500', padding, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
+        :class="['transition-all duration-500', animation]"
+        :style="wrapperStyles"
     >
         <div :class="['mx-auto px-6', width]">
             <component 
@@ -9,10 +9,10 @@
                 :class="[
                     'font-bold tracking-tight transition-all',
                     sizeClass,
-                    alignmentClass,
+                    // alignmentClass, // Handled by style now
                     decorationClass
                 ]"
-                :style="{ color: 'var(--text-color, ' + (textColor || 'inherit') + ')' }"
+                :style="headingStyles"
             >
                 {{ text || 'Heading Text' }}
             </component>
@@ -41,19 +41,40 @@ const props = defineProps({
     alignment: { type: String, default: 'left' },
     decoration: { type: String, default: 'none' },
     textColor: { type: String, default: '' },
+    // Container/Common Styles
     width: { type: String, default: 'max-w-4xl' },
-    padding: { type: String, default: 'py-8' },
-    bgColor: String,
+    padding: { type: [String, Object], default: '' },
+    margin: { type: [String, Object], default: '' },
+    backgroundColor: { type: String, default: '' },
+    backgroundImage: { type: String, default: '' },
+    boxShadow: { type: String, default: 'none' },
+    border: { type: String, default: '' },
+    borderRadius: { type: String, default: '' },
+    
     animation: { type: String, default: '' }
 });
 
-const sizeClass = computed(() => ({
-    'small': 'text-xl md:text-2xl',
-    'medium': 'text-2xl md:text-3xl',
-    'large': 'text-3xl md:text-4xl',
-    'xlarge': 'text-4xl md:text-5xl',
-    'display': 'text-5xl md:text-7xl'
-}[props.size] || 'text-3xl md:text-4xl'));
+const wrapperStyles = computed(() => {
+    // If props are passed as simple strings/numbers, use them
+    // If they are passed as objects (responsive), we might need a utility or just take the default/desktop value
+    // Assuming flat props for now for simplicity in this pass, or using what's available
+    return {
+        backgroundColor: props.backgroundColor || 'transparent',
+        padding: typeof props.padding === 'string' ? props.padding : (props.padding?.desktop || props.padding),
+        margin: typeof props.margin === 'string' ? props.margin : (props.margin?.desktop || props.margin),
+        boxShadow: props.boxShadow,
+        border: props.border,
+        borderRadius: props.borderRadius,
+        textAlign: props.alignment // Apply alignment to wrapper for block flow
+    };
+});
+
+const headingStyles = computed(() => {
+    return {
+        color: props.textColor || 'inherit',
+        textAlign: props.alignment
+    }
+});
 
 const subtitleSizeClass = computed(() => ({
     'small': 'text-sm',

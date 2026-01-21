@@ -16,7 +16,14 @@ const props = defineProps({
     gap: { type: [Number, String], default: 16 },
     headerBackgroundColor: { type: String, default: '' },
     openHeaderBackgroundColor: { type: String, default: '' },
-    contentBackgroundColor: { type: String, default: '' }
+    contentBackgroundColor: { type: String, default: '' },
+    // Container Styles
+    padding: { type: [String, Object], default: '' },
+    margin: { type: [String, Object], default: '' },
+    backgroundColor: { type: String, default: '' },
+    border: { type: String, default: '' },
+    borderRadius: { type: String, default: '' },
+    boxShadow: { type: String, default: 'none' }
 });
 
 const openIndices = ref([]);
@@ -60,10 +67,21 @@ const iconStyles = computed(() => ({
     width: `${props.iconSize}px`,
     height: `${props.iconSize}px`
 }));
+
+
+const wrapperStyles = computed(() => ({
+    gap: `${props.gap}px`,
+    backgroundColor: props.backgroundColor,
+    padding: typeof props.padding === 'string' ? props.padding : (props.padding?.desktop || props.padding),
+    margin: typeof props.margin === 'string' ? props.margin : (props.margin?.desktop || props.margin),
+    border: props.border,
+    borderRadius: props.borderRadius,
+    boxShadow: props.boxShadow
+}));
 </script>
 
 <template>
-    <div class="accordion-renderer w-full flex flex-col" :style="{ gap: `${gap}px` }">
+    <div class="accordion-renderer w-full flex flex-col" :style="wrapperStyles">
         <div 
             v-for="(item, index) in items" 
             :key="index"
