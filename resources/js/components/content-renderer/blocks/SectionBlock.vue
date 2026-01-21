@@ -84,14 +84,23 @@ const styles = computed(() => {
       Object.assign(s, getSizingStyles(settings))
       Object.assign(s, getTransformStyles(settings))
 
-      // Vertical Alignment Logic
-      s.display = 'flex'
-      s.flexDirection = 'column'
-      
+      // Layout Logic (Responsive)
+      const layoutDisplay = getVal(settings, 'display')
+      const layoutFlexDir = getVal(settings, 'flexDirection') || getVal(settings, 'direction')
       const vAlign = getVal(settings, 'verticalAlign') || 'start'
-      if (vAlign === 'center') s.justifyContent = 'center'
-      else if (vAlign === 'end') s.justifyContent = 'flex-end'
-      else s.justifyContent = 'flex-start'
+
+      if (layoutDisplay) {
+          s.display = layoutDisplay
+          if (layoutFlexDir) s.flexDirection = layoutFlexDir
+      } else {
+          // Default to Flex Column
+          s.display = 'flex'
+          s.flexDirection = 'column'
+          
+          if (vAlign === 'center') s.justifyContent = 'center'
+          else if (vAlign === 'end') s.justifyContent = 'flex-end'
+          else s.justifyContent = 'flex-start'
+      }
   }
   
   return s

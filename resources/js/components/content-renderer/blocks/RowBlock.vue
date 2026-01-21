@@ -126,11 +126,21 @@ const widths = computed(() => {
 
 const getColumnWrapperStyle = (index) => {
     const w = widths.value[index] || 100
-    const gap = Number(props.gutterWidth) || 0
+    const numCols = nestedBlocks.value?.length || 1
+    const rawGap = getVal(props.settings, 'gutterWidth') || props.gutterWidth || 0
+    const gap = parseFloat(String(rawGap).replace('px', '')) || 0
+    
+    // Formula: calc(P% - (TotalGap / NumCols))
+    // We share the total gap burden equally across all columns
+    const totalGapBurden = (numCols - 1) * gap
+    const share = totalGapBurden / numCols
+    
+    const widthCalc = `calc(${w}% - ${share}px)`
     
     return {
-        flex: `0 0 calc(${w}% - ${gap}px)`,
-        maxWidth: `calc(${w}% - ${gap}px)`
+        flex: `0 0 ${widthCalc}`,
+        width: widthCalc,
+        maxWidth: widthCalc
     }
 }
 </script>
