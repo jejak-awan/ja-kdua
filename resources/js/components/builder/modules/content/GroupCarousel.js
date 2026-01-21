@@ -13,7 +13,11 @@ import {
     cssSettings,
     loopSettings,
     orderSettings,
-    adminLabelSettings
+    adminLabelSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -170,7 +174,11 @@ export default {
             positionSettings,
             transitionSettings,
             orderSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

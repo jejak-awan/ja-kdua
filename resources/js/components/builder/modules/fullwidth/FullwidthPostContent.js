@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -56,7 +61,8 @@ export default {
                     { name: 'maxWidth', type: 'range', label: 'Max Width', min: 800, max: 1600, step: 50, unit: 'px', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Post Content')
         ],
         design: [
             {
@@ -128,7 +134,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

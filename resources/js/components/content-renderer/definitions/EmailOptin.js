@@ -2,7 +2,7 @@ import { Mail } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'email_optin',
+    name: 'newsletter',
     label: 'Email Optin',
     icon: Mail,
     description: 'Newsletter signup form to capture emails.',

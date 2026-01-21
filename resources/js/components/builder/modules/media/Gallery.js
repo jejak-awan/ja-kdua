@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,7 +28,7 @@ export default {
     icon: 'LayoutGrid',
     category: 'media',
 
-    children: ['gallery_item'],
+    // children: ['gallery_item'], // Deprecated in favor of repeater
 
     defaults: {
         columns: 3,
@@ -69,9 +74,16 @@ export default {
                 label: 'Images',
                 fields: [
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Gallery Images'
+                        name: 'images',
+                        type: 'repeater',
+                        label: 'Gallery Images',
+                        addButtonLabel: 'Add Image',
+                        fields: [
+                            { name: 'url', type: 'image', label: 'Image', responsive: true },
+                            { name: 'alt', type: 'text', label: 'Alt Text', responsive: true },
+                            { name: 'caption', type: 'text', label: 'Caption', responsive: true }
+                        ],
+                        default: []
                     }
                 ]
             },
@@ -87,7 +99,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Gallery')
         ],
         design: [
             {
@@ -204,7 +217,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

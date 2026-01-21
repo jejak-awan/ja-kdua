@@ -10,7 +10,7 @@
       <!-- Fields -->
       <div class="login-fields">
         <div class="form-field">
-          <label v-if="settings.showLabels !== false" class="field-label" :style="labelStyles">Email</label>
+          <label v-if="settings.showLabels !== false" class="field-label" :style="labelStyles">{{ settings.usernameLabel || 'Email' }}</label>
           <input 
             type="email" 
             class="field-input"
@@ -19,7 +19,7 @@
           />
         </div>
         <div class="form-field">
-          <label v-if="settings.showLabels !== false" class="field-label" :style="labelStyles">Password</label>
+          <label v-if="settings.showLabels !== false" class="field-label" :style="labelStyles">{{ settings.passwordLabel || 'Password' }}</label>
           <input 
             type="password" 
             class="field-input"

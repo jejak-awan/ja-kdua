@@ -2,7 +2,7 @@ import { FileText } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'post_content',
+    name: 'postcontent',
     label: 'Post Content',
     icon: FileText,
     description: 'Display dynamic post body content.',

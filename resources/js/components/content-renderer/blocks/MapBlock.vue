@@ -6,8 +6,8 @@
         <div :class="['mx-auto px-6', width]">
             <div :class="['overflow-hidden shadow-lg', radius]">
                 <iframe 
-                    v-if="embedUrl"
-                    :src="embedUrl"
+                    v-if="finalSrc"
+                    :src="finalSrc"
                     :height="height"
                     class="w-full border-0"
                     allowfullscreen
@@ -37,7 +37,9 @@ import { computed } from 'vue';
 import { MapPin } from 'lucide-vue-next';
 
 const props = defineProps({
+    address: { type: String, default: '' },
     embedUrl: { type: String, default: '' },
+    zoom: { type: [Number, String], default: 14 },
     height: { type: [Number, String], default: 400 },
     caption: { type: String, default: '' },
     radius: { type: String, default: 'rounded-xl' },
@@ -46,4 +48,18 @@ const props = defineProps({
     bgColor: String,
     animation: { type: String, default: '' }
 });
+
+const finalSrc = computed(() => {
+    // 1. Explicit Embed URL
+    if (props.embedUrl) return props.embedUrl;
+    
+    // 2. Generate from Address
+    if (props.address) {
+        const q = encodeURIComponent(props.address);
+        const z = props.zoom || 14;
+        return `https://maps.google.com/maps?q=${q}&z=${z}&output=embed`;
+    }
+    
+    return '';
+})
 </script>

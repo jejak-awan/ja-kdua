@@ -23,8 +23,8 @@
       
       <!-- Self-hosted -->
       <video 
-        v-else-if="videoType === 'selfHosted' && settings.selfHostedUrl"
-        :src="settings.selfHostedUrl"
+        v-else-if="videoType === 'selfHosted' && videoUrl"
+        :src="videoUrl"
         :poster="settings.posterImage"
         :autoplay="settings.autoplay"
         :loop="settings.loop"
@@ -64,13 +64,25 @@ const props = defineProps({
   }
 })
 
+const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
+const device = computed(() => builder?.device?.value || 'desktop')
 
-const videoType = computed(() => settings.value.videoType || 'youtube')
+// Unified URL
+const videoUrl = computed(() => getResponsiveValue(settings.value, 'url', device.value) || '')
+
+// Detect Type
+const videoType = computed(() => {
+  const url = videoUrl.value
+  if (!url) return 'none'
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube'
+  if (url.includes('vimeo.com')) return 'vimeo'
+  return 'selfHosted'
+})
 
 // Extract YouTube ID
 const youtubeId = computed(() => {
-  const url = settings.value.youtubeUrl || ''
+  const url = videoUrl.value
   const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
   return match ? match[1] : null
 })
@@ -88,7 +100,7 @@ const youtubeEmbedUrl = computed(() => {
 
 // Extract Vimeo ID
 const vimeoId = computed(() => {
-  const url = settings.value.vimeoUrl || ''
+  const url = videoUrl.value
   const match = url.match(/vimeo\.com\/(\d+)/)
   return match ? match[1] : null
 })
@@ -115,9 +127,6 @@ const aspectRatioPadding = computed(() => {
   const ratio = getResponsiveValue(settings.value, 'aspectRatio', device.value) || '16:9'
   return ratioMap[ratio] || '56.25%'
 })
-
-const builder = inject('builder')
-const device = computed(() => builder?.device?.value || 'desktop')
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }

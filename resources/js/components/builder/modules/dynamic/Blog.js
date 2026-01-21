@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -26,7 +31,7 @@ export default {
     children: null,
 
     defaults: {
-        postsPerPage: 6,
+        itemsPerPage: 6,
         columns: 3,
         title: 'Blog Posts',
         showImage: true,
@@ -80,18 +85,19 @@ export default {
                 label: 'Query',
                 fields: [
                     {
-                        name: 'postsPerPage',
+                        name: 'itemsPerPage',
                         type: 'range',
                         label: 'Posts Per Page',
                         min: 1,
-                        max: 12,
+                        max: 24,
                         step: 1,
                         responsive: true
                     },
                     {
                         name: 'category',
                         type: 'text',
-                        label: 'Category Filter'
+                        label: 'Category Filter',
+                        responsive: true
                     },
                     {
                         name: 'orderBy',
@@ -121,31 +127,37 @@ export default {
                     {
                         name: 'showImage',
                         type: 'toggle',
-                        label: 'Show Featured Image'
+                        label: 'Show Featured Image',
+                        responsive: true
                     },
                     {
                         name: 'showExcerpt',
                         type: 'toggle',
-                        label: 'Show Excerpt'
+                        label: 'Show Excerpt',
+                        responsive: true
                     },
                     {
                         name: 'showDate',
                         type: 'toggle',
-                        label: 'Show Date'
+                        label: 'Show Date',
+                        responsive: true
                     },
                     {
                         name: 'showAuthor',
                         type: 'toggle',
-                        label: 'Show Author'
+                        label: 'Show Author',
+                        responsive: true
                     },
                     {
                         name: 'showCategory',
                         type: 'toggle',
-                        label: 'Show Category'
+                        label: 'Show Category',
+                        responsive: true
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Blog Posts')
         ],
         design: [
             {
@@ -167,7 +179,7 @@ export default {
                         type: 'range',
                         label: 'Columns',
                         min: 1,
-                        max: 4,
+                        max: 6,
                         step: 1,
                         responsive: true
                     },
@@ -175,8 +187,8 @@ export default {
                         name: 'gap',
                         type: 'range',
                         label: 'Gap',
-                        min: 8,
-                        max: 48,
+                        min: 0,
+                        max: 80,
                         step: 4,
                         unit: 'px',
                         responsive: true
@@ -185,10 +197,12 @@ export default {
                         name: 'imageAspectRatio',
                         type: 'select',
                         label: 'Image Aspect Ratio',
+                        responsive: true,
                         options: [
                             { value: '16:9', label: '16:9' },
                             { value: '4:3', label: '4:3' },
-                            { value: '1:1', label: '1:1' }
+                            { value: '1:1', label: '1:1' },
+                            { value: 'custom', label: 'Original' }
                         ]
                     }
                 ]
@@ -200,7 +214,8 @@ export default {
                     {
                         name: 'cardBackgroundColor',
                         type: 'color',
-                        label: 'Card Background'
+                        label: 'Card Background',
+                        responsive: true
                     }
                 ]
             },
@@ -252,7 +267,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

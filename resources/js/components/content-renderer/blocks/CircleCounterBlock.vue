@@ -13,7 +13,8 @@ const props = defineProps({
     size: { type: String, default: 'medium' },
     thickness: { type: Number, default: 8 },
     color: { type: String, default: '' },
-    show_value: { type: Boolean, default: true },
+    trackColor: { type: String, default: '#e0e0e0' },
+    showValue: { type: Boolean, default: true },
     animate: { type: Boolean, default: true },
     padding: { type: String, default: 'py-8' },
     alignment: { type: String, default: 'center' }
@@ -25,6 +26,11 @@ const hasAnimated = ref(false);
 const percentage = computed(() => Math.min(100, Math.max(0, ((props.value || 0) / (props.max || 100)) * 100)));
 
 const sizeConfig = computed(() => {
+    // If props.size is a number (from builder)
+    if (!isNaN(props.size)) {
+        const s = parseInt(props.size);
+        return { size: s, fontSize: 'text-[20%] text-current' }; // Dynamic font size relying on current color
+    }
     const sizes = {
         small: { size: 100, fontSize: 'text-xl' },
         medium: { size: 150, fontSize: 'text-3xl' },
@@ -100,7 +106,7 @@ watch(() => props.value, () => {
                         :cy="sizeConfig.size / 2"
                         :r="(sizeConfig.size - (thickness || 8)) / 2"
                         fill="none"
-                        stroke="hsl(var(--muted))"
+                        :stroke="trackColor"
                         :stroke-width="thickness || 8"
                     />
                     <!-- Progress circle -->
@@ -121,7 +127,7 @@ watch(() => props.value, () => {
                 <!-- Center Content -->
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
                     <span 
-                        v-if="show_value" 
+                        v-if="showValue" 
                         :class="['font-extrabold tabular-nums', sizeConfig.fontSize]"
                         :style="{ color: strokeColor }"
                     >

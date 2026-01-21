@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -28,7 +33,11 @@ export default {
     defaults: {
         code: '<div class="custom-element">\n  <p>Your HTML code here</p>\n</div>',
         language: 'html',
+        language: 'html',
         showLineNumbers: true,
+        showCopyButton: true,
+        windowChrome: false,
+        maxHeight: '',
         // Theme
         theme: 'dark',
         // Background
@@ -81,7 +90,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Code')
         ],
         design: [
             {
@@ -92,6 +102,24 @@ export default {
                         name: 'showLineNumbers',
                         type: 'toggle',
                         label: 'Show Line Numbers',
+                        responsive: true
+                    },
+                    {
+                        name: 'showCopyButton',
+                        type: 'toggle',
+                        label: 'Show Copy Button',
+                        responsive: true
+                    },
+                    {
+                        name: 'windowChrome',
+                        type: 'toggle',
+                        label: 'Window Chrome',
+                        responsive: true
+                    },
+                    {
+                        name: 'maxHeight',
+                        type: 'text',
+                        label: 'Max Height (e.g. 400px)',
                         responsive: true
                     },
                     {
@@ -127,7 +155,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -26,8 +31,8 @@ export default {
     children: null,
 
     defaults: {
-        targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        targetTime: '00:00',
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        endTime: '00:00',
         // Display
         showDays: true,
         showHours: true,
@@ -74,13 +79,13 @@ export default {
                 label: 'Target Date',
                 fields: [
                     {
-                        name: 'targetDate',
+                        name: 'endDate',
                         type: 'text',
                         label: 'Date (YYYY-MM-DD)',
                         responsive: true
                     },
                     {
-                        name: 'targetTime',
+                        name: 'endTime',
                         type: 'text',
                         label: 'Time (HH:MM)',
                         responsive: true
@@ -143,7 +148,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Countdown Timer')
         ],
         design: [
             {
@@ -234,7 +240,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

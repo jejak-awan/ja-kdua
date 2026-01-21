@@ -1,5 +1,6 @@
 <template>
   <FieldWrapper 
+    v-if="isVisible"
     :label="translatedLabel"
     :description="translatedDescription"
     :responsive="field.responsive"
@@ -97,7 +98,8 @@ const fieldComponents = {
   attributes: defineAsyncComponent(() => import('./AttributeField.vue')),
   custom_css: defineAsyncComponent(() => import('./CSSField.vue')),
   interactions: defineAsyncComponent(() => import('./InteractionField.vue')),
-  scroll_effects: defineAsyncComponent(() => import('./ScrollEffectsField.vue'))
+  scroll_effects: defineAsyncComponent(() => import('./ScrollEffectsField.vue')),
+  repeater: defineAsyncComponent(() => import('./RepeaterField.vue'))
 }
 
 const props = defineProps({
@@ -199,6 +201,50 @@ const placeholderValue = computed(() => {
   return desktopValue
 })
 
+// Visibility Logic
+const isVisible = computed(() => {
+    if (!props.field.show_if) return true;
+
+    const checkCondition = (condition, settings) => {
+        // Handle nested AND
+        if (condition.AND) {
+            // First check the base condition of this object
+            const basePass = checkSingleCondition(condition, settings);
+            if (!basePass) return false;
+            
+            // Then check the nested AND condition (recursively)
+            return checkCondition(condition.AND, settings);
+        }
+        
+        return checkSingleCondition(condition, settings);
+    }
+    
+    const checkSingleCondition = (condition, settings) => {
+        const targetField = condition.field;
+        const targetValue = condition.value;
+        const operator = condition.operator || 'eq';
+        
+        const currentValue = settings[targetField];
+        
+        switch (operator) {
+            case 'eq': 
+                if (Array.isArray(targetValue)) return targetValue.includes(currentValue); // Support value: ['flex', 'grid'] as "in" check if operator is missing/eq
+                return currentValue === targetValue;
+            case 'neq': return currentValue !== targetValue;
+            case 'in': return Array.isArray(targetValue) && targetValue.includes(currentValue);
+            case 'not_in': return Array.isArray(targetValue) && !targetValue.includes(currentValue);
+            case 'contains': return Array.isArray(currentValue) && currentValue.includes(targetValue);
+            default: return currentValue === targetValue;
+        }
+    }
+    
+    // Support multiple conditions (Array) as AND
+    const conditions = Array.isArray(props.field.show_if) ? props.field.show_if : [props.field.show_if];
+    const settings = props.module.settings || {};
+    
+    return conditions.every(condition => checkCondition(condition, settings));
+})
+
 // Dynamic Data State
 const isDynamicPopoverOpen = ref(false)
 const dynamicPopoverRect = ref(null)
@@ -219,7 +265,7 @@ const FieldComponent = computed(() => {
 
 const supportsDynamicData = computed(() => {
    // Disable dynamic data for specific field types
-   const excludedTypes = ['background', 'select', 'toggle', 'buttonGroup', 'range', 'children_manager', 'shadow', 'border', 'spacing', 'icon', 'number']
+   const excludedTypes = ['background', 'select', 'toggle', 'buttonGroup', 'range', 'children_manager', 'shadow', 'border', 'spacing', 'icon', 'number', 'repeater']
    return !excludedTypes.includes(props.field.type)
 })
 

@@ -12,11 +12,9 @@ import {
     transitionSettings,
     cssSettings,
     typographySettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     linkSettings,
-    layoutSettings,
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
@@ -32,198 +30,134 @@ export default {
     icon: 'List',
     category: 'interactive',
 
-    children: ['accordion_item'],
-    defaultChildren: ['accordion_item'],
+    children: null, // Converted to repeater
 
-    // Default settings
     defaults: {
-        // Behavior
+        items: [
+            { title: 'What is our mission?', content: 'Our mission is to provide high-quality building blocks for modern web applications.', open: true },
+            { title: 'How does it work?', content: 'Simple. You drag, you drop, you customize. No code required but fully extensible.' },
+            { title: 'Is it responsive?', content: 'Absolutely. Every setting can be tuned for desktop, tablet, and mobile devices.' }
+        ],
         allowMultiple: false,
-        // Layout
-        layout_type: 'flex',
-        direction: 'column',
-        justify_content: 'flex-start',
-        align_items: 'stretch',
-        flex_wrap: 'nowrap',
-        align_content: 'flex-start',
-        gap_x: '0px',
-        gap_y: '0px',
         // Toggle Icon
-        toggleIcon: 'plus',
+        toggleIcon: 'chevron', // Simplified default
         iconPosition: 'right',
-        iconColor: '#333333',
+        iconColor: '',
+        // Layout
+        gap: 16,
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
-        headerBackgroundColor: '#f7f7f7',
-        openHeaderBackgroundColor: '#f7f7f7',
-        openHeaderTextColor: '#333333',
+        headerBackgroundColor: '#f8fafc',
+        openHeaderBackgroundColor: '#f1f5f9',
         contentBackgroundColor: '#ffffff',
         // Spacing
-        itemGap: 24,
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
-        headerPadding: { top: 15, bottom: 15, left: 20, right: 20, unit: 'px' },
-        contentPadding: { top: 20, bottom: 20, left: 20, right: 20, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
-            styles: {
-                all: { width: 1, color: '#e5e5e5', style: 'solid' }
-            }
+            radius: { tl: 12, tr: 12, bl: 12, br: 12, linked: true },
+            styles: { all: { width: 1, color: '#e2e8f0', style: 'solid' } }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        // Animation
-        animation_effect: '',
-        animation_duration: 1000,
-        animation_delay: 0,
-        animation_repeat: '1'
+        animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
     settings: {
         content: [
             {
-                id: 'items',
-                label: 'Elements',
+                id: 'accordion',
+                label: 'Accordion',
                 fields: [
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Accordion Items'
-                    }
+                        name: 'items',
+                        type: 'repeater',
+                        label: 'Accordions',
+                        itemLabel: 'title',
+                        fields: [
+                            { name: 'title', type: 'text', label: 'Title' },
+                            { name: 'content', type: 'richtext', label: 'Content' },
+                            { name: 'open', type: 'toggle', label: 'Open by Default' }
+                        ]
+                    },
+                    { name: 'allowMultiple', type: 'toggle', label: 'Allow Multiple Open', responsive: true }
                 ]
             },
             {
-                id: 'toggleIcon',
+                id: 'icon',
                 label: 'Toggle Icon',
                 fields: [
                     {
                         name: 'toggleIcon',
                         type: 'icon',
-                        label: 'Select Toggle Icon',
-                        default: 'plus',
+                        label: 'Icon',
+                        default: 'chevron-down',
                         responsive: true
-                    }
-                ]
-            },
-            linkSettings,
-            backgroundSettings,
-            loopSettings,
-            orderSettings,
-            adminLabelSettings('Accordion')
-        ],
-        design: [
-            layoutSettings,
-            {
-                id: 'icon_design',
-                label: 'Icon',
-                fields: [
+                    },
                     {
                         name: 'iconPosition',
                         type: 'buttonGroup',
                         label: 'Icon Position',
-                        responsive: true,
                         options: [
                             { value: 'left', label: 'Left' },
                             { value: 'right', label: 'Right' }
-                        ]
-                    },
-                    {
-                        name: 'iconColor',
-                        type: 'color',
-                        label: 'Icon Color',
+                        ],
                         responsive: true
                     },
-                    {
-                        name: 'iconSize',
-                        type: 'range',
-                        label: 'Icon Size',
-                        min: 10,
-                        max: 50,
-                        unit: 'px',
-                        default: 14,
-                        responsive: true
-                    }
+                    { name: 'iconColor', type: 'color', label: 'Icon Color', responsive: true },
+                    { name: 'iconSize', type: 'range', label: 'Icon Size', min: 10, max: 40, step: 2, unit: 'px', responsive: true }
                 ]
             },
+            linkSettings,
+            backgroundSettings,
+            orderSettings,
+            adminLabelSettings('Accordion')
+        ],
+        design: [
             {
-                id: 'toggle_design',
-                label: 'Toggle',
+                id: 'accordionStyle',
+                label: 'Accordion Style',
                 fields: [
-                    {
-                        name: 'openHeaderBackgroundColor',
-                        type: 'color',
-                        label: 'Open Toggle Background Color',
-                        responsive: true
-                    },
-                    {
-                        name: 'headerBackgroundColor',
-                        type: 'color',
-                        label: 'Closed Toggle Background Color',
-                        responsive: true
-                    }
+                    { name: 'gap', type: 'range', label: 'Item Gap', min: 0, max: 50, step: 2, unit: 'px', responsive: true },
+                    { name: 'headerBackgroundColor', type: 'color', label: 'Header Background', responsive: true },
+                    { name: 'openHeaderBackgroundColor', type: 'color', label: 'Open Header Background', responsive: true },
+                    { name: 'contentBackgroundColor', type: 'color', label: 'Content Background', responsive: true }
                 ]
             },
             {
-                id: 'text_design',
-                label: 'Text',
+                id: 'headerTypography',
+                label: 'Header Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
-                    name: `text_${f.name}`,
-                    label: `Text ${f.label}`
+                    name: `header_${f.name}`,
+                    label: `Header ${f.label}`
                 }))
             },
             {
-                id: 'title_text_design',
-                label: 'Title Text',
-                fields: [
-                    {
-                        name: 'openHeaderTextColor',
-                        type: 'color',
-                        label: 'Open Title Text Color',
-                        responsive: true
-                    },
-                    ...typographySettings.fields.map(f => ({
-                        ...f,
-                        name: `header_${f.name}`,
-                        label: `Title ${f.label}`
-                    }))
-                ]
-            },
-            {
-                id: 'closed_title_text_design',
-                label: 'Closed Title Text',
-                fields: typographySettings.fields.map(f => ({
-                    ...f,
-                    name: `closed_header_${f.name}`,
-                    label: `Closed Title ${f.label}`
-                }))
-            },
-            {
-                id: 'body_text_design',
-                label: 'Body Text',
+                id: 'contentTypography',
+                label: 'Content Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
                     name: `content_${f.name}`,
-                    label: `Body ${f.label}`
+                    label: `Content ${f.label}`
                 }))
             },
-            sizingSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,
+            sizingSettings,
             filterSettings,
             transformSettings,
             animationSettings
         ],
         advanced: [
-            attributesSettings,
+            visibilitySettings,
+            positionSettings,
+            transitionSettings,
             cssSettings,
             conditionsSettings,
             interactionsSettings,
-            visibilitySettings,
-            transitionSettings,
-            positionSettings,
-            scrollEffectsSettings
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -5,7 +5,7 @@
     >
         <div :class="['container mx-auto px-6 text-center space-y-8', width]">
             <h2 v-if="title" class="text-4xl md:text-6xl font-extrabold tracking-tight">{{ title }}</h2>
-            <p v-if="subtitle" class="text-xl opacity-90 leading-relaxed max-w-2xl mx-auto">{{ subtitle }}</p>
+            <p v-if="content || subtitle" class="text-xl opacity-90 leading-relaxed max-w-2xl mx-auto">{{ content || subtitle }}</p>
             <div class="pt-4 mb-4">
                 <a 
                     :href="buttonUrl || '#'" 
@@ -43,7 +43,8 @@ import BlockRenderer from '../BlockRenderer.vue';
 const props = defineProps({
     id: String,
     title: String,
-    subtitle: String,
+    subtitle: String, // Legacy support
+    content: String, // Standard prop
     buttonText: String,
     buttonUrl: String,
     padding: { type: String, default: 'py-24' },

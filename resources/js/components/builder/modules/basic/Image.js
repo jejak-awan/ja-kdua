@@ -10,8 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -34,11 +32,11 @@ export default {
     children: null,
 
     defaults: {
-        src: '',
+        url: '',
         alt: '',
         caption: '',
         linkUrl: '',
-        linkTarget: '_self',
+        linkNewTab: false,
         lightbox: false,
         objectFit: 'cover',
         alignment: 'center',
@@ -55,7 +53,7 @@ export default {
                 id: 'image',
                 label: 'Image',
                 fields: [
-                    { name: 'src', type: 'upload', label: 'Image', allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'], responsive: true },
+                    { name: 'url', type: 'upload', label: 'Image', allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'], responsive: true },
                     { name: 'alt', type: 'text', label: 'Alt Text', responsive: true },
                     { name: 'caption', type: 'text', label: 'Caption', responsive: true }
                 ]
@@ -65,17 +63,11 @@ export default {
                 label: 'Link',
                 fields: [
                     { name: 'lightbox', type: 'toggle', label: 'Open in Lightbox' },
-                    { name: 'link_url', type: 'text', label: 'Link URL' },
-                    {
-                        name: 'link_target', type: 'select', label: 'Link Target', options: [
-                            { value: '_self', label: 'Same Window' },
-                            { value: '_blank', label: 'New Tab' }
-                        ]
-                    }
+                    { name: 'linkUrl', type: 'text', label: 'Link URL' },
+                    { name: 'linkNewTab', type: 'toggle', label: 'Open in New Tab' }
                 ]
             },
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Image')
         ],

@@ -10,7 +10,7 @@
           :r="radius"
           fill="none"
           :stroke="trackColor"
-          :stroke-width="normalizedStrokeWidth"
+          :stroke-width="normalizedThickness"
         />
         <!-- Progress Circle -->
         <circle
@@ -19,8 +19,8 @@
           cy="50"
           :r="radius"
           fill="none"
-          :stroke="circleColor"
-          :stroke-width="normalizedStrokeWidth"
+          :stroke="color"
+          :stroke-width="normalizedThickness"
           :stroke-dasharray="circumference"
           :stroke-dashoffset="dashOffset"
           stroke-linecap="round"
@@ -29,8 +29,8 @@
       
       <!-- Inner Content -->
       <div class="circle-content">
-        <span v-if="showPercentageValue" class="circle-percentage" :style="percentageStyles">
-          {{ percentageValue }}%
+        <span v-if="showValue" class="circle-percentage" :style="valueStyles">
+          {{ value }}%
         </span>
         <span v-if="titleValue" class="circle-title" :style="titleStyles">
           {{ titleValue }}
@@ -60,17 +60,17 @@ const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
 const size = computed(() => getResponsiveValue(settings.value, 'size', device.value) || 150)
-const strokeWidth = computed(() => getResponsiveValue(settings.value, 'strokeWidth', device.value) || 10)
-const percentageValue = computed(() => Math.min(100, Math.max(0, getResponsiveValue(settings.value, 'percentage', device.value) || 75)))
+const thickness = computed(() => getResponsiveValue(settings.value, 'thickness', device.value) || 10)
+const value = computed(() => Math.min(100, Math.max(0, getResponsiveValue(settings.value, 'value', device.value) || 75)))
 const titleValue = computed(() => getResponsiveValue(settings.value, 'title', device.value))
-const showPercentageValue = computed(() => getResponsiveValue(settings.value, 'showPercentage', device.value) !== false)
+const showValue = computed(() => getResponsiveValue(settings.value, 'showValue', device.value) !== false)
 
-const normalizedStrokeWidth = computed(() => (strokeWidth.value / size.value) * 100)
-const radius = computed(() => 50 - normalizedStrokeWidth.value / 2)
+const normalizedThickness = computed(() => (thickness.value / size.value) * 100)
+const radius = computed(() => 50 - normalizedThickness.value / 2)
 const circumference = computed(() => 2 * Math.PI * radius.value)
-const dashOffset = computed(() => circumference.value * (1 - percentageValue.value / 100))
+const dashOffset = computed(() => circumference.value * (1 - value.value / 100))
 
-const circleColor = computed(() => getResponsiveValue(settings.value, 'circleColor', device.value) || '#2059ea')
+const color = computed(() => getResponsiveValue(settings.value, 'color', device.value) || '#2059ea')
 const trackColor = computed(() => getResponsiveValue(settings.value, 'trackColor', device.value) || '#e0e0e0')
 
 const wrapperStyles = computed(() => {
@@ -93,7 +93,7 @@ const counterStyles = computed(() => ({
   height: `${size.value}px`
 }))
 
-const percentageStyles = computed(() => getTypographyStyles(settings.value, 'percentage_', device.value))
+const valueStyles = computed(() => getTypographyStyles(settings.value, 'value_', device.value))
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 </script>
 

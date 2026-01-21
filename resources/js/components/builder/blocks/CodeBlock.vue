@@ -1,8 +1,13 @@
 <template>
   <div class="code-block" :style="wrapperStyles">
     <div class="code-header" :class="themeClass">
+      <div v-if="windowChrome" class="code-chrome">
+        <span class="chrome-dot red"></span>
+        <span class="chrome-dot yellow"></span>
+        <span class="chrome-dot green"></span>
+      </div>
       <span class="code-language">{{ language.toUpperCase() }}</span>
-      <button class="code-copy" @click="copyCode">
+      <button v-if="showCopyButton" class="code-copy" @click="copyCode">
         <Copy class="copy-icon" />
       </button>
     </div>
@@ -40,6 +45,9 @@ const device = computed(() => builder?.device?.value || 'desktop')
 
 const language = computed(() => settings.value.language || 'html')
 const showLineNumbers = computed(() => getResponsiveValue(settings.value, 'showLineNumbers', device.value) !== false)
+const showCopyButton = computed(() => getResponsiveValue(settings.value, 'showCopyButton', device.value) !== false)
+const windowChrome = computed(() => getResponsiveValue(settings.value, 'windowChrome', device.value) === true)
+const maxHeight = computed(() => getResponsiveValue(settings.value, 'maxHeight', device.value))
 const themeClass = computed(() => `code--${getResponsiveValue(settings.value, 'theme', device.value) || 'dark'}`)
 
 const codeLines = computed(() => {
@@ -80,15 +88,28 @@ const wrapperStyles = computed(() => {
   return styles
 })
 
-const codeStyles = computed(() => getTypographyStyles(settings.value, 'code_', device.value))
+const codeStyles = computed(() => {
+    const s = getTypographyStyles(settings.value, 'code_', device.value) || {}
+    if (maxHeight.value) {
+        s.maxHeight = maxHeight.value
+    }
+    return s
+})
 </script>
 
 <style scoped>
 .code-block { width: 100%; }
-.code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; }
+.code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; gap: 12px; }
+
+.code-chrome { display: flex; gap: 6px; margin-right: auto; }
+.chrome-dot { width: 10px; height: 10px; border-radius: 50%; }
+.chrome-dot.red { background-color: #ef4444; }
+.chrome-dot.yellow { background-color: #f59e0b; }
+.chrome-dot.green { background-color: #22c55e; }
+
 .code-header.code--dark { background: #1e1e1e; color: #888; }
 .code-header.code--light { background: #f5f5f5; color: #666; }
-.code-language { font-size: 12px; font-weight: 600; }
+.code-language { font-size: 12px; font-weight: 600; margin-left: auto; margin-right: 8px; }
 .code-copy { background: none; border: none; cursor: pointer; padding: 4px; opacity: 0.6; color: inherit; }
 .code-copy:hover { opacity: 1; }
 .copy-icon { width: 16px; height: 16px; }

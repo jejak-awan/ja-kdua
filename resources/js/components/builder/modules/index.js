@@ -39,7 +39,7 @@ import Testimonial from './content/Testimonial'
 import SocialLinks from './content/SocialLinks'
 import Countdown from './content/Countdown'
 import ProgressBar from './content/ProgressBar'
-import PricingTable from './content/PricingTable'
+import PricingTables from './content/PricingTables'
 import Alert from './content/Alert'
 import Code from './content/Code'
 import TeamMember from './content/TeamMember'
@@ -57,27 +57,24 @@ import NumberBox from './content/NumberBox'
 import ShareButtons from './content/ShareButtons'
 import Sidebar from './content/Sidebar'
 import Menu from './content/Menu'
-import Person from './content/Person'
+
 import NumberCounter from './content/NumberCounter'
 import Group from './content/Group'
 import GroupCarousel from './content/GroupCarousel'
-import IconListItem from './content/IconListItem'
-import SocialLinkItem from './content/SocialLinkItem'
-import TabItem from './interactive/TabItem'
-import AccordionItem from './interactive/AccordionItem'
-import SlideItem from './interactive/SlideItem'
-import VideoSlideItem from './media/VideoSlideItem'
-import GalleryItem from './media/GalleryItem'
-import FAQItem from './content/FAQItem'
-import LogoGridItem from './content/LogoGridItem'
-
 // Interactive (4)
 import Tabs from './interactive/Tabs'
 import Accordion from './interactive/Accordion'
 import Toggle from './interactive/Toggle'
 import Slider from './interactive/Slider'
+// import TabItem from './interactive/TabItem' // REMOVED
+// import AccordionItem from './interactive/AccordionItem' // REMOVED
+// import SlideItem from './interactive/SlideItem' // REMOVED
+// import VideoSlideItem from './media/VideoSlideItem' // REMOVED
+// import GalleryItem from './media/GalleryItem' // REMOVED
+// import FAQItem from './content/FAQItem' // REMOVED
+// import LogoGridItem from './content/LogoGridItem' // REMOVED
 
-// Forms (5)
+// Forms
 import Search from './forms/Search'
 import Login from './forms/Login'
 import ContactForm from './forms/ContactForm'
@@ -111,10 +108,10 @@ import FullwidthPostTitle from './fullwidth/FullwidthPostTitle'
 import FullwidthMapPin from './fullwidth/FullwidthMapPin'
 import FullwidthSlideItem from './fullwidth/FullwidthSlideItem'
 import Hero from './content/Hero'
-import ContactField from './forms/ContactField'
+// import ContactField from './forms/ContactField' // REMOVED
 import PricingFeature from './content/PricingFeature'
 import ShareNetwork from './content/ShareNetwork'
-import SidebarWidget from './content/SidebarWidget'
+// import SidebarWidget from './content/SidebarWidget' // REMOVED
 import MapPin from './media/MapPin'
 
 // Register all modules
@@ -124,15 +121,14 @@ const modules = [
     // Basic
     Heading, Text, Button, Image, Icon, Divider, Spacer, Logo,
     // Media
-    Video, Gallery, Map, Audio, BeforeAfter, VideoPopup, Embed, Lottie, VideoSlider, VideoSlideItem, GalleryItem,
+    Video, Gallery, Map, Audio, BeforeAfter, VideoPopup, Embed, Lottie, VideoSlider,
     // Content
     Blurb, CTA, Counter, Testimonial, SocialLinks, Countdown, ProgressBar,
-    PricingTable, Alert, Code, TeamMember, CircleCounter, IconList, Breadcrumbs,
+    PricingTables, Alert, Code, TeamMember, CircleCounter, IconList, Breadcrumbs,
     Author, StarRating, TableOfContents, Quote, LogoGrid, FAQ, Feature, NumberBox,
-    ShareButtons, Sidebar, Menu, Person, NumberCounter, Group, GroupCarousel, IconListItem, SocialLinkItem,
-    FAQItem, LogoGridItem,
+    ShareButtons, Sidebar, Menu, NumberCounter, Group, GroupCarousel,
     // Interactive
-    Tabs, Accordion, Toggle, Slider, TabItem, AccordionItem, SlideItem,
+    Tabs, Accordion, Toggle, Slider,
     // Forms
     Search, Login, ContactForm, Signup, Newsletter,
     // Dynamic
@@ -141,8 +137,7 @@ const modules = [
     // Fullwidth
     FullwidthHeader, FullwidthSlider, FullwidthPortfolio, FullwidthCode, FullwidthImage,
     FullwidthMap, FullwidthMenu, FullwidthPostContent, FullwidthPostSlider, FullwidthPostTitle,
-    FullwidthMapPin, FullwidthSlideItem, Hero, ContactField, PricingFeature, ShareNetwork,
-    SidebarWidget, MapPin
+    FullwidthMapPin, FullwidthSlideItem, Hero, PricingFeature, ShareNetwork, MapPin
 ]
 
 modules.forEach(m => ModuleRegistry.register(m))
@@ -153,15 +148,14 @@ export {
     // Basic
     Heading, Text, Button, Image, Icon, Divider, Spacer, Logo,
     // Media
-    Video, Gallery, Map, Audio, BeforeAfter, VideoPopup, Embed, Lottie, VideoSlider, VideoSlideItem, GalleryItem,
+    Video, Gallery, Map, Audio, BeforeAfter, VideoPopup, Embed, Lottie, VideoSlider,
     // Content
     Blurb, CTA, Counter, Testimonial, SocialLinks, Countdown, ProgressBar,
-    PricingTable, Alert, Code, TeamMember, CircleCounter, IconList, Breadcrumbs,
+    PricingTables, Alert, Code, TeamMember, CircleCounter, IconList, Breadcrumbs,
     Author, StarRating, TableOfContents, Quote, LogoGrid, FAQ, Feature, NumberBox,
-    ShareButtons, Sidebar, Menu, Person, NumberCounter, Group, GroupCarousel, IconListItem, SocialLinkItem,
-    FAQItem, LogoGridItem,
+    ShareButtons, Sidebar, Menu, NumberCounter, Group, GroupCarousel,
     // Interactive
-    Tabs, Accordion, Toggle, Slider, TabItem, AccordionItem, SlideItem,
+    Tabs, Accordion, Toggle, Slider,
     // Forms
     Search, Login, ContactForm, Signup, Newsletter,
     // Dynamic
@@ -170,6 +164,5 @@ export {
     // Fullwidth
     FullwidthHeader, FullwidthSlider, FullwidthPortfolio, FullwidthCode, FullwidthImage,
     FullwidthMap, FullwidthMenu, FullwidthPostContent, FullwidthPostSlider, FullwidthPostTitle,
-    FullwidthMapPin, FullwidthSlideItem, Hero, ContactField, PricingFeature, ShareNetwork,
-    SidebarWidget, MapPin
+    FullwidthMapPin, FullwidthSlideItem, Hero, PricingFeature, ShareNetwork, MapPin
 }

@@ -11,10 +11,10 @@
                 {{ prefix }}{{ displayNumber }}{{ suffix }}
             </div>
             <p 
-                v-if="label" 
+                v-if="title" 
                 class="mt-4 text-lg font-medium opacity-80"
             >
-                {{ label }}
+                {{ title }}
             </p>
         </div>
     </section>
@@ -31,7 +31,7 @@ const props = defineProps({
     number: { type: [Number, String], default: 100 },
     prefix: { type: String, default: '' },
     suffix: { type: String, default: '' },
-    label: { type: String, default: '' },
+    title: { type: String, default: '' },
     duration: { type: Number, default: 2000 },
     alignment: { type: String, default: 'center' },
     numberColor: { type: String, default: '' },

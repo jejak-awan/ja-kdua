@@ -10,7 +10,11 @@ import {
     transitionSettings,
     cssSettings,
     adminLabelSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -29,8 +33,10 @@ export default {
         subtitle: 'Enter your credentials to access your account',
         // Fields
         showLabels: true,
-        usernamePlaceholder: 'Email address',
-        passwordPlaceholder: 'Password',
+        usernameLabel: 'Email Address',
+        passwordLabel: 'Password',
+        usernamePlaceholder: 'name@example.com',
+        passwordPlaceholder: '••••••••',
         buttonText: 'Sign In',
         // Options
         showRememberMe: true,
@@ -214,9 +220,19 @@ export default {
                         label: 'Show Labels'
                     },
                     {
+                        name: 'usernameLabel',
+                        type: 'text',
+                        label: 'Username Label'
+                    },
+                    {
                         name: 'usernamePlaceholder',
                         type: 'text',
                         label: 'Username Placeholder'
+                    },
+                    {
+                        name: 'passwordLabel',
+                        type: 'text',
+                        label: 'Password Label'
                     },
                     {
                         name: 'passwordPlaceholder',
@@ -310,7 +326,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

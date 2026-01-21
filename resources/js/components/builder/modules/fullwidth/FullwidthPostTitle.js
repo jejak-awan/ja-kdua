@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -93,7 +98,8 @@ export default {
                     { name: 'showFeaturedImage', type: 'toggle', label: 'Show as Background' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Post Title')
         ],
         design: [
             {
@@ -154,7 +160,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

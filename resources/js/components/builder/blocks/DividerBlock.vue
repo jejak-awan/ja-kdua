@@ -56,10 +56,10 @@ const wrapperStyles = computed(() => {
 })
 
 const lineStyles = computed(() => {
-  const weight = getResponsiveValue(settings.value, 'weight', device.value) || 1
-  const width = getResponsiveValue(settings.value, 'width', device.value) || '100%'
-  const style = getResponsiveValue(settings.value, 'style', device.value) || 'solid'
-  const color = getResponsiveValue(settings.value, 'color', device.value) || '#cccccc'
+  const weight = getResponsiveValue(settings.value, 'lineWeight', device.value) || 1
+  const width = getResponsiveValue(settings.value, 'lineWidth', device.value) || '100%'
+  const style = getResponsiveValue(settings.value, 'lineStyle', device.value) || 'solid'
+  const color = getResponsiveValue(settings.value, 'lineColor', device.value) || '#cccccc'
   
   return {
     border: 'none',

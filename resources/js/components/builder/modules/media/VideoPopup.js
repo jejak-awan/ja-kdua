@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -65,7 +70,8 @@ export default {
                     { name: 'buttonText', type: 'text', label: 'Button Text' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Video Popup')
         ],
         design: [
             {
@@ -105,7 +111,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

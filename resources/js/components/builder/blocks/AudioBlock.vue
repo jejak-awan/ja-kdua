@@ -8,8 +8,8 @@
       
       <!-- Info -->
       <div class="audio-info">
-        <div class="audio-title" :style="titleStyles">{{ settings.title || 'Audio Track' }}</div>
-        <div v-if="settings.artist" class="audio-artist" :style="artistStyles">{{ settings.artist }}</div>
+        <div class="audio-title" :style="trackNameStyles">{{ settings.trackName || 'Audio Track' }}</div>
+        <div v-if="settings.artistName" class="audio-artist" :style="artistNameStyles">{{ settings.artistName }}</div>
       </div>
       
       <!-- Progress -->
@@ -21,7 +21,7 @@
       </div>
       
       <!-- Download -->
-      <a v-if="settings.showDownload && settings.audioUrl" :href="settings.audioUrl" download class="download-button">
+      <a v-if="settings.showDownload && settings.url" :href="settings.url" download class="download-button">
         <Download class="download-icon" />
       </a>
     </div>
@@ -97,8 +97,8 @@ const playButtonStyles = computed(() => {
   }
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const artistStyles = computed(() => getTypographyStyles(settings.value, 'artist_', device.value))
+const trackNameStyles = computed(() => getTypographyStyles(settings.value, 'trackName_', device.value))
+const artistNameStyles = computed(() => getTypographyStyles(settings.value, 'artistName_', device.value))
 
 const progressBarStyles = computed(() => ({
   height: '4px',
@@ -117,7 +117,7 @@ const progressFillStyles = computed(() => {
 })
 
 const timeStyles = computed(() => {
-  const base = getTypographyStyles(settings.value, 'artist_', device.value)
+  const base = getTypographyStyles(settings.value, 'artistName_', device.value)
   return {
     fontSize: base.fontSize || '11px',
     opacity: 0.6,

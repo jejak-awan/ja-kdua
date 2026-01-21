@@ -11,7 +11,6 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -42,7 +41,7 @@ export default {
         content: 'Add your content here. This is a blurb module with icon, title, and text.',
         // Media Type
         mediaType: 'icon',
-        icon: 'Star',
+        iconName: 'Star',
         image: '',
         // Layout
         iconPosition: 'top',
@@ -117,7 +116,7 @@ export default {
                         ]
                     },
                     {
-                        name: 'icon',
+                        name: 'iconName',
                         type: 'icon',
                         label: 'Select Icon',
                         responsive: true
@@ -132,7 +131,6 @@ export default {
             },
             linkSettings,
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Blurb')
         ],

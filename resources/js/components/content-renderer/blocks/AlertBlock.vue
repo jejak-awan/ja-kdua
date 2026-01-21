@@ -1,11 +1,11 @@
 <template>
     <section 
         :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
+        :style="{ backgroundColor: bgColor || 'transparent', ...paddingStyle }"
     >
         <div :class="['mx-auto px-6', width || 'max-w-4xl']">
             <div :class="['flex gap-4 p-4 rounded-xl', variantClass]">
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0" v-if="showIcon">
                     <component :is="variantIcon" class="w-5 h-5 mt-0.5" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -37,16 +37,36 @@ const props = defineProps({
     message: { type: String, default: 'This is an important message for your visitors.' },
     variant: { type: String, default: 'info' },
     dismissible: { type: Boolean, default: false },
+    showIcon: { type: Boolean, default: true },
     width: { type: String, default: 'max-w-4xl' },
-    padding: { type: String, default: 'py-6' },
+    padding: { type: [String, Object], default: null }, // Accepting object or string
     bgColor: String,
     animation: { type: String, default: '' }
 });
 
 const dismissed = ref(false);
 
+const paddingStyle = computed(() => {
+    if (typeof props.padding === 'object' && props.padding !== null) {
+         return {
+             paddingTop: `${props.padding.top}${props.padding.unit || 'px'}`,
+             paddingBottom: `${props.padding.bottom}${props.padding.unit || 'px'}`,
+             paddingLeft: `${props.padding.left}${props.padding.unit || 'px'}`,
+             paddingRight: `${props.padding.right}${props.padding.unit || 'px'}`
+         };
+    }
+    return {};
+});
+
 const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding, props.animation].filter(Boolean);
+    const classes = ['transition-all duration-500', props.animation];
+    // Only add padding class if it's a string, otherwise style handles it
+    if (typeof props.padding === 'string') {
+        classes.push(props.padding);
+    } else if (!props.padding) {
+        classes.push('py-6'); // Default backup
+    }
+    return classes.filter(Boolean);
 });
 
 const variantIcons = {

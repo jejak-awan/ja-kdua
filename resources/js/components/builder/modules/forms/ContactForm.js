@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,15 +28,19 @@ export default {
     icon: 'Mail',
     category: 'forms',
 
-    children: ['contact_field'],
+    children: null, // Converted to repeater
 
     defaults: {
         title: 'Contact Us',
-        subtitle: "We'd love to hear from you. Send us a message!",
+        description: "We'd love to hear from you. Send us a message!",
         buttonText: 'Send Message',
         successMessage: 'Thank you! Your message has been sent.',
-        // Email
-        recipientEmail: '',
+        emailTo: '',
+        fields: [
+            { fieldId: 'name', type: 'text', label: 'Name', placeholder: 'Your Name', required: true, width: '100%' },
+            { fieldId: 'email', type: 'email', label: 'Email', placeholder: 'Your Email', required: true, width: '100%' },
+            { fieldId: 'message', type: 'textarea', label: 'Message', placeholder: 'Your Message', required: true, width: '100%' }
+        ],
         // Background
         background: { color: '#ffffff', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -58,27 +67,69 @@ export default {
                 id: 'text',
                 label: 'General',
                 fields: [
-                    { name: 'title', type: 'text', label: 'Title' },
-                    { name: 'subtitle', type: 'text', label: 'Subtitle' },
-                    { name: 'buttonText', type: 'text', label: 'Button Text' },
-                    { name: 'successMessage', type: 'text', label: 'Success Message' }
+                    { name: 'title', type: 'text', label: 'Title', responsive: true },
+                    { name: 'description', type: 'text', label: 'Description', responsive: true },
+                    { name: 'buttonText', type: 'text', label: 'Button Text', responsive: true },
+                    { name: 'successMessage', type: 'text', label: 'Success Message', responsive: true }
                 ]
             },
             {
                 id: 'fields',
                 label: 'Form Fields',
                 fields: [
-                    { name: 'module_manager', type: 'children_manager', label: 'Fields' }
+                    {
+                        name: 'fields',
+                        type: 'repeater',
+                        label: 'Form Fields',
+                        itemLabel: 'label',
+                        fields: [
+                            { name: 'fieldId', type: 'text', label: 'Field ID (Unique)', description: 'Used for form submission data key.' },
+                            {
+                                name: 'type',
+                                type: 'select',
+                                label: 'Type',
+                                options: [
+                                    { value: 'text', label: 'Text Input' },
+                                    { value: 'email', label: 'Email' },
+                                    { value: 'textarea', label: 'Message / Textarea' },
+                                    { value: 'checkbox', label: 'Checkbox' },
+                                    { value: 'radio', label: 'Radio Buttons' },
+                                    { value: 'select', label: 'Select Dropdown' }
+                                ]
+                            },
+                            { name: 'label', type: 'text', label: 'Label' },
+                            { name: 'placeholder', type: 'text', label: 'Placeholder' },
+                            { name: 'required', type: 'toggle', label: 'Required' },
+                            {
+                                name: 'width',
+                                type: 'select',
+                                label: 'Width',
+                                options: [
+                                    { value: '100%', label: 'Full Width (100%)' },
+                                    { value: '50%', label: 'Half Width (50%)' },
+                                    { value: '33.33%', label: 'One Third (33%)' }
+                                ]
+                            },
+                            {
+                                name: 'options',
+                                type: 'textarea',
+                                label: 'Options',
+                                description: 'One option per line (for Select, Radio, Checkbox).',
+                                visible: (item) => ['select', 'radio', 'checkbox'].includes(item.type)
+                            }
+                        ]
+                    }
                 ]
             },
             {
                 id: 'email',
                 label: 'Email Settings',
                 fields: [
-                    { name: 'recipientEmail', type: 'text', label: 'Recipient Email' }
+                    { name: 'emailTo', type: 'text', label: 'Email To' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Contact Form')
         ],
         design: [
             {
@@ -137,7 +188,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

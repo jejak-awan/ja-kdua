@@ -2,7 +2,7 @@ import { Mail } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'contact_form',
+    name: 'contactform', // Matches builder module name
     label: 'Contact Form',
     icon: Mail,
     description: 'A customizable contact form for lead generation.',

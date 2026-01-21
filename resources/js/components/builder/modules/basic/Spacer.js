@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -50,7 +55,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Spacer')
         ],
         design: [
             spacingSettings,
@@ -65,7 +71,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

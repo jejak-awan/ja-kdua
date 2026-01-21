@@ -11,7 +11,6 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -34,9 +33,9 @@ export default {
     children: null,
 
     defaults: {
-        type: 'info',
+        variant: 'info',
         title: '',
-        content: 'This is an informational alert message.',
+        message: 'This is an informational alert message.',
         dismissible: false,
         showIcon: true,
         // Spacing
@@ -68,7 +67,7 @@ export default {
                 label: 'Alert',
                 fields: [
                     {
-                        name: 'type',
+                        name: 'variant',
                         type: 'select',
                         label: 'Alert Type',
                         options: [
@@ -85,7 +84,7 @@ export default {
                         responsive: true
                     },
                     {
-                        name: 'content',
+                        name: 'message',
                         type: 'textarea',
                         label: 'Message',
                         responsive: true
@@ -104,7 +103,6 @@ export default {
             },
             linkSettings,
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Alert')
         ],
@@ -119,12 +117,12 @@ export default {
                 }))
             },
             {
-                id: 'contentTypography',
-                label: 'Content Typography',
+                id: 'messageTypography',
+                label: 'Message Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
-                    name: `content_${f.name}`,
-                    label: `Content ${f.label}`
+                    name: `message_${f.name}`,
+                    label: `Message ${f.label}`
                 }))
             },
             spacingSettings,

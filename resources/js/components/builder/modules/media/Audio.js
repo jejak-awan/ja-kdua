@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -26,9 +31,10 @@ export default {
     children: null,
 
     defaults: {
-        audioUrl: '',
-        title: 'Audio Track',
-        artist: '',
+        url: '',
+        coverImage: '',
+        trackName: 'Audio Track',
+        artistName: '',
         // Options
         autoplay: false,
         loop: false,
@@ -63,20 +69,27 @@ export default {
                 label: 'Audio',
                 fields: [
                     {
-                        name: 'audioUrl',
+                        name: 'url',
                         type: 'upload',
                         label: 'Audio File',
                         allowedExtensions: ['mp3', 'wav', 'ogg', 'm4a']
                     },
                     {
-                        name: 'title',
-                        type: 'text',
-                        label: 'Title'
+                        name: 'coverImage',
+                        type: 'upload',
+                        label: 'Cover Image',
+                        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                        responsive: true
                     },
                     {
-                        name: 'artist',
+                        name: 'trackName',
                         type: 'text',
-                        label: 'Artist'
+                        label: 'Track Name'
+                    },
+                    {
+                        name: 'artistName',
+                        type: 'text',
+                        label: 'Artist Name'
                     }
                 ]
             },
@@ -101,7 +114,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Audio Player')
         ],
         design: [
             {
@@ -121,8 +135,8 @@ export default {
                 label: 'Title Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
-                    name: `title_${f.name}`,
-                    label: `Title ${f.label}`
+                    name: `trackName_${f.name}`,
+                    label: `Track Name ${f.label}`
                 }))
             },
             {
@@ -130,7 +144,7 @@ export default {
                 label: 'Artist Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
-                    name: `artist_${f.name}`,
+                    name: `artistName_${f.name}`,
                     label: `Artist ${f.label}`
                 }))
             },
@@ -146,7 +160,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

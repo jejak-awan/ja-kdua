@@ -2,14 +2,14 @@
   <div class="button-block" :style="wrapperStyles">
     <a 
       :href="settings.url || '#'" 
-      :target="settings.target || '_self'"
+      :target="settings.openNewTab ? '_blank' : '_self'"
       class="button-element"
       :class="buttonClasses"
       :style="buttonStyles"
       @click.prevent
     >
       <component 
-        v-if="settings.icon && settings.iconPosition === 'left'" 
+        v-if="settings.iconName && settings.iconPosition === 'left'" 
         :is="iconComponent" 
         class="button-icon button-icon--left"
       />
@@ -21,7 +21,7 @@
         @click.stop
       >{{ settings.text || 'Click Here' }}</div>
       <component 
-        v-if="settings.icon && settings.iconPosition === 'right'" 
+        v-if="settings.iconName && settings.iconPosition === 'right'" 
         :is="iconComponent" 
         class="button-icon button-icon--right"
       />
@@ -51,10 +51,10 @@ const device = computed(() => builder?.device?.value || 'desktop')
 const editableRef = ref(null)
 
 const iconComponent = computed(() => {
-  if (!settings.value.icon) return null
+  if (!settings.value.iconName) return null
   try {
     return defineAsyncComponent(() => 
-      import('lucide-vue-next').then(m => m[settings.value.icon] || MousePointer)
+      import('lucide-vue-next').then(m => m[settings.value.iconName] || MousePointer)
     )
   } catch { return MousePointer }
 })
@@ -97,7 +97,7 @@ const buttonStyles = computed(() => {
     overflow: 'hidden'
   }
   
-  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getBackgroundStyles(settings.value, device.value))
   Object.assign(styles, getTypographyStyles(settings.value, '', device.value))
   
   const sizeMap = {

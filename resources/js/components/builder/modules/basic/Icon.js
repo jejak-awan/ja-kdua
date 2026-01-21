@@ -11,7 +11,6 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -35,7 +34,8 @@ export default {
     defaults: {
         icon: 'Star',
         size: 48,
-        color: '#333333',
+        iconColor: '#333333',
+        shape: 'none',
         alignment: 'center',
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
@@ -52,12 +52,19 @@ export default {
                 fields: [
                     { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true },
                     { name: 'size', type: 'range', label: 'Size', min: 16, max: 128, step: 4, unit: 'px', responsive: true },
-                    { name: 'color', type: 'color', label: 'Icon Color', responsive: true }
+                    { name: 'iconColor', type: 'color', label: 'Icon Color', responsive: true },
+                    {
+                        name: 'shape', type: 'select', label: 'Shape', options: [
+                            { value: 'none', label: 'None' },
+                            { value: 'circle', label: 'Circle' },
+                            { value: 'rounded', label: 'Rounded' },
+                            { value: 'square', label: 'Square' }
+                        ]
+                    }
                 ]
             },
             linkSettings,
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Icon')
         ],

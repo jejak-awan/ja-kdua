@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,11 +28,16 @@ export default {
     icon: 'HelpCircle',
     category: 'content',
 
-    children: ['faq_item'],
+    children: null,
 
     defaults: {
         layout: 'accordion',
         allowMultiple: false,
+        items: [
+            { question: 'What is your return policy?', answer: 'We offer a 30-day money-back guarantee for all our products.' },
+            { question: 'How do I track my order?', answer: 'Once your order ships, you will receive a tracking number via email.' },
+            { question: 'Do you ship internationally?', answer: 'Yes, we ship to over 100 countries worldwide.' }
+        ],
         // Background
         background: { color: '#ffffff', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -54,7 +64,16 @@ export default {
                 id: 'items',
                 label: 'FAQ Items',
                 fields: [
-                    { name: 'module_manager', type: 'children_manager', label: 'FAQ Items' }
+                    {
+                        name: 'items',
+                        type: 'repeater',
+                        label: 'FAQ Items',
+                        itemLabel: 'Question',
+                        fields: [
+                            { name: 'question', type: 'text', label: 'Question' },
+                            { name: 'answer', type: 'textarea', label: 'Answer' }
+                        ]
+                    }
                 ]
             },
             {
@@ -65,7 +84,8 @@ export default {
                     { name: 'allowMultiple', type: 'toggle', label: 'Allow Multiple Open', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('FAQ')
         ],
         design: [
             {
@@ -106,7 +126,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

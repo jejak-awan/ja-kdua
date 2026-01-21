@@ -1,28 +1,36 @@
 <template>
   <div class="gallery-block" :style="wrapperStyles">
     <div class="gallery-grid" :style="gridStyles">
-      <draggable
-        v-model="module.children"
-        item-key="id"
-        group="gallery_item"
-        class="gallery-grid-draggable"
-        :style="gridStyles"
-        ghost-class="ja-builder-ghost"
+      <div 
+        v-for="(image, index) in galleryImages" 
+        :key="index"
+        class="gallery-item group relative aspect-square overflow-hidden rounded-2xl bg-muted/50 border border-primary/5 cursor-pointer shadow-lg transition-all duration-500 hover:shadow-2xl hover:border-primary/20"
+        :style="itemStyles"
       >
-        <template #item="{ element: child, index }">
-          <ModuleWrapper
-            :module="child"
-            :index="index"
-            class="gallery-item-wrapper"
-          />
-        </template>
-      </draggable>
+        <div class="gallery-image-wrapper w-full h-full" :style="imageWrapperStyles">
+            <img 
+                v-if="image.url"
+                :src="image.url" 
+                :alt="image.alt || 'Gallery Image'"
+                class="gallery-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            >
+             <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
+                <ImageIcon :size="48" />
+             </div>
+
+            <div v-if="showCaptions && image.caption && captionPosition === 'overlay'" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 text-white">
+                <p class="text-sm font-semibold tracking-wide" :style="captionStyles">{{ image.caption }}</p>
+            </div>
+        </div>
+        <p v-if="showCaptions && image.caption && captionPosition === 'below'" class="mt-2 text-center text-sm" :style="captionStyles">{{ image.caption }}</p>
+      </div>
       
       <!-- Placeholder when empty -->
       <template v-if="galleryImages.length === 0">
-        <div v-for="i in 6" :key="i" class="gallery-item gallery-placeholder" :style="itemStyles">
-          <div class="gallery-image-wrapper" :style="imageWrapperStyles">
-            <ImageIcon class="placeholder-icon" />
+        <div v-for="i in 3" :key="i" class="gallery-item gallery-placeholder" :style="itemStyles">
+          <div class="gallery-image-wrapper p-8" :style="imageWrapperStyles">
+            <ImageIcon class="placeholder-icon text-gray-300" :size="32" />
+            <span class="text-xs text-gray-400 mt-2">Add images in settings</span>
           </div>
         </div>
       </template>
@@ -31,10 +39,8 @@
 </template>
 
 <script setup>
-import { computed, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
-import { Image as ImageIcon, ZoomIn } from 'lucide-vue-next'
+import { computed, inject } from 'vue'
+import { Image as ImageIcon } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -59,22 +65,12 @@ const builder = inject('builder')
 const device = computed(() => builder?.device?.value || 'desktop')
 
 const galleryImages = computed(() => {
-  return (props.module.children || []).map(child => ({
-    src: child.settings.src || '',
-    alt: child.settings.alt || '',
-    caption: child.settings.caption || ''
-  }))
+  const imgs = getResponsiveValue(settings.value, 'images', device.value)
+  return Array.isArray(imgs) ? imgs : []
 })
 
-const hoverEffect = computed(() => getResponsiveValue(settings.value, 'hoverEffect', device.value) || 'zoom')
 const showCaptions = computed(() => getResponsiveValue(settings.value, 'showCaptions', device.value))
 const captionPosition = computed(() => getResponsiveValue(settings.value, 'captionPosition', device.value) || 'below')
-// const hoverClass = computed(() => `gallery-item--${hoverEffect.value}`) // Moved to child
-
-// Provide state to GalleryItemBlock
-provide('galleryState', {
-    parentSettings: settings
-})
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }
@@ -113,16 +109,11 @@ const imageWrapperStyles = computed(() => {
     'auto': 'auto'
   }
   return {
-    position: 'relative',
-    paddingTop: ratio === 'auto' ? undefined : ratioMap[ratio],
-    overflow: 'hidden'
-  }
-})
-
-const overlayStyles = computed(() => {
-  const color = getResponsiveValue(settings.value, 'overlayColor', device.value) || 'rgba(0,0,0,0.5)'
-  return {
-    backgroundColor: color
+    // position: 'relative', // Controlled by class
+    // paddingTop is tricky if we want img to cover. 
+    // Using aspect-ratio utility in CSS is better but we are using inline styles for dynamic ratio?
+    // Let's rely on wrapper aspect ratio if possible, or fallback to padding hack.
+    // If ratio is auto, no padding.
   }
 })
 
@@ -130,17 +121,6 @@ const captionStyles = computed(() => getTypographyStyles(settings.value, 'captio
 </script>
 
 <style scoped>
-.gallery-block { width: 100%; }
-.gallery-item { cursor: pointer; }
-.gallery-image-wrapper { background: #f0f0f0; }
-.gallery-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease, filter 0.3s ease; }
-.gallery-item--zoom:hover .gallery-image { transform: scale(1.1); }
-.gallery-item--grayscale .gallery-image { filter: grayscale(100%); }
-.gallery-item--grayscale:hover .gallery-image { filter: grayscale(0%); }
-.gallery-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-.gallery-item--overlay:hover .gallery-overlay { opacity: 1; }
-.overlay-icon { width: 32px; height: 32px; color: white; }
-.gallery-caption { margin: 8px 0 0; }
-.gallery-placeholder { display: flex; align-items: center; justify-content: center; background: #f5f5f5; min-height: 120px; }
-.placeholder-icon { width: 32px; height: 32px; color: #ccc; }
+.gallery-block { width: 100%; box-sizing: border-box; }
+.gallery-placeholder { display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 8px; aspect-ratio: 1; }
 </style>

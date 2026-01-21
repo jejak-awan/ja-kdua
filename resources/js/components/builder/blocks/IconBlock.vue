@@ -7,9 +7,9 @@
       :target="settings.linkUrl ? (settings.linkTarget || '_self') : undefined"
       :style="iconWrapperStyles"
     >
-      <component 
-        :is="iconComponent" 
-        class="icon-element"
+      <LucideIcon 
+        :name="iconName" 
+        :size="iconSize" 
         :style="iconStyles"
       />
     </component>
@@ -17,8 +17,8 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject } from 'vue'
-import { Star } from 'lucide-vue-next'
+import { computed, inject } from 'vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -38,16 +38,8 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const iconComponent = computed(() => {
-  const iconName = settings.value.icon || 'Star'
-  try {
-    return defineAsyncComponent(() => 
-      import('lucide-vue-next').then(m => m[iconName] || Star)
-    )
-  } catch {
-    return Star
-  }
-})
+const iconName = computed(() => settings.value.icon || 'Star')
+const iconSize = computed(() => getResponsiveValue(settings.value, 'size', device.value) || 48)
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }
@@ -74,16 +66,13 @@ const iconWrapperStyles = computed(() => {
     textDecoration: 'none',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease'
   }
-  
   return styles
 })
 
 const iconStyles = computed(() => {
-  const size = getResponsiveValue(settings.value, 'size', device.value) || 48
   const color = getResponsiveValue(settings.value, 'color', device.value) || '#333333'
+  // Width/Height handled by LucideIcon size prop, but we can enforce it if needed or add styling
   return {
-    width: `${size}px`,
-    height: `${size}px`,
     color: color,
     display: 'block'
   }

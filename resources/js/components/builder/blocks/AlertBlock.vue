@@ -49,7 +49,7 @@ const device = computed(() => builder?.device?.value || 'desktop')
 
 const dismissed = ref(false)
 const showIcon = computed(() => settings.value.showIcon !== false)
-const alertType = computed(() => settings.value.type || 'info')
+const alertType = computed(() => settings.value.variant || 'info')
 const alertClass = computed(() => `alert--${alertType.value}`)
 
 const alertIcon = computed(() => {
@@ -58,7 +58,7 @@ const alertIcon = computed(() => {
 })
 
 const title = computed(() => getResponsiveValue(settings.value, 'title', device.value) || '')
-const content = computed(() => getResponsiveValue(settings.value, 'content', device.value) || '')
+const content = computed(() => getResponsiveValue(settings.value, 'message', device.value) || '')
 
 const onTitleBlur = (e) => {
   const val = e.target.innerText
@@ -71,7 +71,7 @@ const onTitleInput = (e) => {
 
 const onContentBlur = (e) => {
   const val = e.target.innerText
-  updateResponsiveField('content', val)
+  updateResponsiveField('message', val)
 }
 
 const onContentInput = (e) => {
@@ -124,7 +124,7 @@ const wrapperStyles = computed(() => {
 })
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const messageStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
+const messageStyles = computed(() => getTypographyStyles(settings.value, 'message_', device.value))
 </script>
 
 <style scoped>

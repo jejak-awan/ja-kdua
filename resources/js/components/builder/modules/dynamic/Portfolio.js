@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -62,43 +67,45 @@ export default {
                 id: 'query',
                 label: 'Query',
                 fields: [
-                    { name: 'itemsPerPage', type: 'range', label: 'Items Per Page', min: 3, max: 24, step: 3, responsive: true }
+                    { name: 'itemsPerPage', type: 'range', label: 'Items Per Page', min: 1, max: 24, step: 1, responsive: true },
+                    { name: 'filterCategory', type: 'text', label: 'Initial Category (Slug)', responsive: true }
                 ]
             },
             {
                 id: 'filter',
                 label: 'Filter',
                 fields: [
-                    { name: 'showFilter', type: 'toggle', label: 'Show Filter' },
-                    { name: 'filterStyle', type: 'select', label: 'Filter Style', options: [{ value: 'buttons', label: 'Buttons' }, { value: 'dropdown', label: 'Dropdown' }] }
+                    { name: 'showFilter', type: 'toggle', label: 'Show Filter', responsive: true },
+                    { name: 'filterStyle', type: 'select', label: 'Filter Style', options: [{ value: 'buttons', label: 'Buttons' }, { value: 'dropdown', label: 'Dropdown' }], responsive: true }
                 ]
             },
             {
                 id: 'display',
                 label: 'Display',
                 fields: [
-                    { name: 'showTitle', type: 'toggle', label: 'Show Title' },
-                    { name: 'showCategory', type: 'toggle', label: 'Show Category' }
+                    { name: 'showTitle', type: 'toggle', label: 'Show Title', responsive: true },
+                    { name: 'showCategory', type: 'toggle', label: 'Show Category', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Portfolio')
         ],
         design: [
             {
                 id: 'layout',
                 label: 'Layout',
                 fields: [
-                    { name: 'columns', type: 'range', label: 'Columns', min: 2, max: 5, step: 1, responsive: true },
-                    { name: 'gap', type: 'range', label: 'Gap', min: 0, max: 40, step: 4, unit: 'px', responsive: true },
-                    { name: 'imageAspectRatio', type: 'select', label: 'Aspect Ratio', options: [{ value: '1:1', label: 'Square' }, { value: '4:3', label: '4:3' }, { value: '16:9', label: '16:9' }] }
+                    { name: 'columns', type: 'range', label: 'Columns', min: 1, max: 6, step: 1, responsive: true },
+                    { name: 'gap', type: 'range', label: 'Gap', min: 0, max: 80, step: 4, unit: 'px', responsive: true },
+                    { name: 'imageAspectRatio', type: 'select', label: 'Aspect Ratio', responsive: true, options: [{ value: '1:1', label: 'Square' }, { value: '4:3', label: '4:3' }, { value: '16:9', label: '16:9' }, { value: 'custom', label: 'Original' }] }
                 ]
             },
             {
                 id: 'hover',
                 label: 'Hover Effect',
                 fields: [
-                    { name: 'hoverEffect', type: 'select', label: 'Hover Effect', options: [{ value: 'overlay', label: 'Overlay' }, { value: 'zoom', label: 'Zoom' }, { value: 'grayscale', label: 'Grayscale' }] },
-                    { name: 'overlayColor', type: 'color', label: 'Overlay Color' }
+                    { name: 'hoverEffect', type: 'select', label: 'Hover Effect', responsive: true, options: [{ value: 'overlay', label: 'Overlay' }, { value: 'zoom', label: 'Zoom' }, { value: 'grayscale', label: 'Grayscale' }, { value: 'none', label: 'None' }] },
+                    { name: 'overlayColor', type: 'color', label: 'Overlay Color', responsive: true }
                 ]
             },
             {
@@ -140,7 +147,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

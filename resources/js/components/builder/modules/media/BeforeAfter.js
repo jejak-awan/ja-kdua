@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -59,7 +64,8 @@ export default {
                     { name: 'showLabels', type: 'toggle', label: 'Show Labels' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Before/After')
         ],
         design: [
             {
@@ -92,7 +98,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

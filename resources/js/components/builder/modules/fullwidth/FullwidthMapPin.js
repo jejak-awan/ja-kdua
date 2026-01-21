@@ -1,7 +1,11 @@
 import {
     adminLabelSettings,
     visibilitySettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -39,7 +43,11 @@ export default {
         design: [],
         advanced: [
             visibilitySettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,13 +28,18 @@ export default {
     icon: 'List',
     category: 'content',
 
-    children: ['icon_list_item'],
+    children: null,
 
     defaults: {
+        items: [
+            { text: 'First benefit or feature', icon: 'Check' },
+            { text: 'Second benefit or feature', icon: 'Check' },
+            { text: 'Third benefit or feature', icon: 'Check' }
+        ],
         // Icon
         iconColor: '#22c55e',
         iconSize: 20,
-        iconBackgroundColor: '',
+        iconBgColor: '',
         iconBackgroundShape: 'none',
         // Layout
         gap: 12,
@@ -64,13 +74,19 @@ export default {
                 label: 'List Items',
                 fields: [
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Items'
+                        name: 'items',
+                        type: 'repeater',
+                        label: 'List Items',
+                        itemLabel: 'text',
+                        fields: [
+                            { name: 'text', type: 'text', label: 'Text' },
+                            { name: 'icon', type: 'icon', label: 'Icon' }
+                        ]
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Icon List')
         ],
         design: [
             {
@@ -93,7 +109,7 @@ export default {
                         responsive: true
                     },
                     {
-                        name: 'iconBackgroundColor',
+                        name: 'iconBgColor',
                         type: 'color',
                         label: 'Icon Background'
                     },
@@ -156,7 +172,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -1,34 +1,43 @@
 <template>
   <div class="slider-block" :style="wrapperStyles">
-    <div class="slider-container" :style="containerStyles">
-      <!-- Slides Container -->
-      <draggable
-        v-model="module.children"
-        item-key="id"
-        group="slide_item"
-        class="slider-slides-container"
-        ghost-class="ja-builder-ghost"
-      >
-        <template #item="{ element: child, index }">
-          <ModuleWrapper
-            :module="child"
-            :index="index"
-          />
-        </template>
-      </draggable>
+    <div class="slider-container" :style="containerStyles" @mouseenter="pause" @mouseleave="resume">
+      <!-- Slides -->
+      <div class="slider-slides">
+        <div 
+          v-for="(slide, index) in items" 
+          :key="index"
+          class="slider-slide"
+          :class="{ 'slider-slide--active': currentSlide === index }"
+          :style="getSlideStyles(slide)"
+        >
+          <!-- Overlay -->
+          <div v-if="overlayEnabled" class="slider-overlay" :style="overlayStyles"></div>
+          
+          <!-- Content -->
+          <div class="slider-content" :style="getContentStyles(slide)">
+            <h2 class="slider-title" :style="titleStyles">{{ slide.title || 'Slide Title' }}</h2>
+            <div class="slider-text prose prose-invert" :style="contentStyles" v-html="slide.content"></div>
+            <a v-if="slide.buttonText" :href="slide.buttonUrl || '#'" class="slider-button" :style="buttonStyles" @click.prevent>
+              {{ slide.buttonText }}
+            </a>
+          </div>
+        </div>
+      </div>
       
       <!-- Arrows -->
-      <button v-if="showArrows" class="slider-arrow slider-arrow--prev" @click="prevSlide">
-        <ChevronLeft />
-      </button>
-      <button v-if="showArrows" class="slider-arrow slider-arrow--next" @click="nextSlide">
-        <ChevronRight />
-      </button>
+      <template v-if="showArrows && items.length > 1">
+        <button class="slider-arrow slider-arrow--prev" @click="prevSlide">
+          <ChevronLeft />
+        </button>
+        <button class="slider-arrow slider-arrow--next" @click="nextSlide">
+          <ChevronRight />
+        </button>
+      </template>
       
       <!-- Dots -->
-      <div v-if="showDots" class="slider-dots">
+      <div v-if="showDots && items.length > 1" class="slider-dots">
         <button 
-          v-for="(slide, index) in sliderSlides" 
+          v-for="(_, index) in items" 
           :key="index"
           class="slider-dot"
           :class="{ 'slider-dot--active': currentSlide === index }"
@@ -40,9 +49,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
+import { computed, ref, onMounted, onUnmounted, inject, watch } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -57,59 +64,51 @@ import {
 } from '../core/styleUtils'
 
 const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
+  module: { type: Object, required: true }
 })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const sliderSlides = computed(() => {
-  return (props.module.children || []).map(child => ({
-    id: child.id,
-    title: child.settings.title,
-    content: child.settings.content,
-    image: child.settings.image,
-    buttonText: child.settings.buttonText,
-    buttonUrl: child.settings.buttonUrl
-  }))
-})
-
+const items = computed(() => settings.value.items || [])
 const currentSlide = ref(0)
-const showArrows = computed(() => settings.value.showArrows !== false)
-const showDots = computed(() => settings.value.showDots !== false)
-const overlayEnabled = computed(() => settings.value.overlayEnabled !== false)
+
+const showArrows = computed(() => getResponsiveValue(settings.value, 'showArrows', device.value) !== false)
+const showDots = computed(() => getResponsiveValue(settings.value, 'showDots', device.value) !== false)
+const overlayEnabled = computed(() => getResponsiveValue(settings.value, 'overlayEnabled', device.value) !== false)
+const autoplay = computed(() => getResponsiveValue(settings.value, 'autoplay', device.value) !== false)
+const autoplaySpeed = computed(() => parseInt(getResponsiveValue(settings.value, 'autoplaySpeed', device.value)) || 5000)
 
 let autoplayInterval = null
 
 const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % sliderSlides.value.length
+  if (items.value.length <= 1) return
+  currentSlide.value = (currentSlide.value + 1) % items.value.length
 }
 
 const prevSlide = () => {
+  if (items.value.length <= 1) return
   currentSlide.value = currentSlide.value === 0 
-    ? sliderSlides.value.length - 1 
+    ? items.value.length - 1 
     : currentSlide.value - 1
 }
 
-onMounted(() => {
-  if (settings.value.autoplay !== false) {
-    autoplayInterval = setInterval(nextSlide, settings.value.autoplaySpeed || 5000)
-  }
-})
-
-onUnmounted(() => {
+const pause = () => {
   if (autoplayInterval) clearInterval(autoplayInterval)
-})
+}
 
-// Provide state to SlideItemBlock
-provide('sliderState', {
-    currentSlide,
-    parentSettings: settings
-})
+const resume = () => {
+  if (autoplay.value && items.value.length > 1) {
+    pause()
+    autoplayInterval = setInterval(nextSlide, autoplaySpeed.value)
+  }
+}
+
+onMounted(resume)
+onUnmounted(pause)
+
+watch([autoplay, autoplaySpeed, items], resume)
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }
@@ -124,7 +123,7 @@ const wrapperStyles = computed(() => {
 })
 
 const containerStyles = computed(() => {
-  const height = getResponsiveValue(settings.value, 'height', device.value) || 400
+  const height = getResponsiveValue(settings.value, 'height', device.value) || 500
   const styles = {
     position: 'relative',
     height: `${height}px`,
@@ -134,55 +133,59 @@ const containerStyles = computed(() => {
   return styles
 })
 
-const slideStyles = (slide) => ({
-  backgroundImage: slide.image ? `url(${slide.image})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center'
-})
+const getSlideStyles = (slide) => {
+    const transition = getResponsiveValue(settings.value, 'slideTransition', device.value) || 'fade'
+    return {
+        backgroundImage: slide.image ? `url(${slide.image})` : 'none',
+        backgroundColor: slide.image ? 'transparent' : '#1a1a1a',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transition: transition === 'fade' ? 'opacity 0.6s ease' : 'transform 0.6s ease'
+    }
+}
 
 const overlayStyles = computed(() => ({
-  backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.4)',
+  backgroundColor: getResponsiveValue(settings.value, 'overlayColor', device.value) || 'rgba(0,0,0,0.4)',
   position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%'
+  inset: 0,
+  zIndex: 1
 }))
 
-const contentStyles = computed(() => {
-  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'center'
+const getContentStyles = (slide) => {
+  const alignment = slide.alignment || 'center'
   return {
     textAlign: alignment,
     maxWidth: '800px',
-    padding: '40px'
+    padding: '40px',
+    zIndex: 2,
+    position: 'relative'
   }
-})
+}
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
-const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
+const contentStyles = computed(() => getTypographyStyles(settings.value, 'content_', device.value))
 const buttonStyles = computed(() => {
     const styles = getTypographyStyles(settings.value, 'button_', device.value)
     return {
         ...styles,
         display: 'inline-block',
-        marginTop: '20px',
-        padding: '10px 20px',
-        backgroundColor: settings.value.buttonBackgroundColor || styles.color || '#ffffff',
+        marginTop: '24px',
+        padding: '12px 32px',
+        backgroundColor: styles.color || '#ffffff',
+        color: styles.color ? '#ffffff' : '#000000',
+        filter: styles.color ? 'invert(1)' : 'none',
         textDecoration: 'none',
-        borderRadius: '4px'
+        borderRadius: '99px',
+        fontWeight: '700'
     }
 })
 </script>
 
 <style scoped>
-.slider-block {
-  width: 100%;
-}
+.slider-block { width: 100%; }
+.slider-container { width: 100%; }
 
-.slider-container {
-  background: #1a1a1a;
-}
-
+.slider-slides { position: relative; width: 100%; height: 100%; }
 .slider-slide {
   position: absolute;
   inset: 0;
@@ -190,33 +193,12 @@ const buttonStyles = computed(() => {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  pointer-events: none;
 }
 
 .slider-slide--active {
   opacity: 1;
-}
-
-.slider-overlay {
-  position: absolute;
-  inset: 0;
-}
-
-.slider-content {
-  position: relative;
-  z-index: 1;
-  padding: 40px;
-  max-width: 800px;
-}
-
-.slider-title {
-  margin: 0 0 16px;
-  font-weight: 700;
-}
-
-.slider-text {
-  margin: 0;
-  opacity: 0.9;
+  pointer-events: auto;
 }
 
 .slider-arrow {
@@ -224,43 +206,30 @@ const buttonStyles = computed(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 50%;
-  color: var(--builder-text-primary);
+  color: white;
   cursor: pointer;
-  transition: var(--transition-normal);
-  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
 }
 
-.slider-arrow:hover {
-  background: white;
-  color: var(--builder-accent);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: var(--shadow-lg);
-}
-
-.slider-arrow--prev {
-  left: 24px;
-}
-
-.slider-arrow--next {
-  right: 24px;
-}
+.slider-arrow:hover { background: white; color: black; transform: translateY(-50%) scale(1.1); }
+.slider-arrow--prev { left: 20px; }
+.slider-arrow--next { right: 20px; }
 
 .slider-dots {
   position: absolute;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 10;
   display: flex;
   gap: 8px;
 }
@@ -268,16 +237,15 @@ const buttonStyles = computed(() => {
 .slider-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 40px;
   border: none;
   background: rgba(255,255,255,0.3);
   cursor: pointer;
-  transition: var(--transition-normal);
+  transition: all 0.3s ease;
 }
 
 .slider-dot--active {
+  width: 24px;
   background: white;
-  transform: scale(1.5);
-  box-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 </style>

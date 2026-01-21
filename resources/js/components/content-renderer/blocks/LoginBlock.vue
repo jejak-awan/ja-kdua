@@ -7,7 +7,7 @@
 
             <form @submit.prevent="handleLogin" class="space-y-4">
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-muted-foreground ml-1">{{ username_label || 'Email Address' }}</label>
+                    <label class="text-xs font-bold text-muted-foreground ml-1">{{ usernameLabel || 'Email Address' }}</label>
                     <input 
                         type="email" 
                         class="w-full h-11 rounded-xl border bg-background px-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
@@ -16,8 +16,8 @@
                 </div>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between px-1">
-                        <label class="text-xs font-bold text-muted-foreground">{{ password_label || 'Password' }}</label>
-                        <a v-if="show_forgot_password" href="#" class="text-[10px] font-bold text-primary hover:underline">Forgot password?</a>
+                        <label class="text-xs font-bold text-muted-foreground">{{ passwordLabel || 'Password' }}</label>
+                        <a v-if="showForgotPassword" href="#" class="text-[10px] font-bold text-primary hover:underline">Forgot password?</a>
                     </div>
                     <input 
                         type="password" 
@@ -29,11 +29,13 @@
                     type="submit" 
                     class="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2 mt-6"
                 >
-                    {{ button_text || 'Login' }}
+                    width="100%"
+                >
+                    {{ buttonText || 'Login' }}
                 </button>
             </form>
 
-            <div v-if="show_registration" class="mt-8 pt-6 border-t border-border text-center">
+            <div v-if="showRegistration" class="mt-8 pt-6 border-t border-border text-center">
                 <p class="text-xs text-muted-foreground">
                     Don't have an account? 
                     <a href="#" class="text-primary font-bold hover:underline">Register now</a>
@@ -52,11 +54,11 @@ defineOptions({
 
 const props = defineProps({
     title: { type: String, default: '' },
-    username_label: { type: String, default: 'Email Address' },
-    password_label: { type: String, default: 'Password' },
-    button_text: { type: String, default: 'Login' },
-    show_forgot_password: { type: Boolean, default: true },
-    show_registration: { type: Boolean, default: true },
+    usernameLabel: { type: String, default: 'Email Address' },
+    passwordLabel: { type: String, default: 'Password' },
+    buttonText: { type: String, default: 'Login' },
+    showForgotPassword: { type: Boolean, default: true },
+    showRegistration: { type: Boolean, default: true },
     style: { type: String, default: 'bg-card border shadow-sm p-8 rounded-2xl' },
     padding: { type: String, default: '' },
     width: { type: String, default: 'max-w-md' },

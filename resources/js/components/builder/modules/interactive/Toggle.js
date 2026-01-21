@@ -11,7 +11,6 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -40,6 +39,10 @@ export default {
         // Toggle Icon
         toggleIcon: 'chevron',
         iconPosition: 'right',
+        iconColor: '#333333',
+        // Style
+        headerStyle: 'bordered',
+        headerBackgroundColor: '#f5f5f5',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -47,13 +50,9 @@ export default {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 4, tr: 4, bl: 4, br: 4, linked: true },
+            radius: { tl: 8, tr: 8, bl: 8, br: 8, linked: true },
             styles: {
-                all: { width: 1, color: '#e0e0e0', style: 'solid' },
-                top: { width: 1, color: '#e0e0e0', style: 'solid' },
-                right: { width: 1, color: '#e0e0e0', style: 'solid' },
-                bottom: { width: 1, color: '#e0e0e0', style: 'solid' },
-                left: { width: 1, color: '#e0e0e0', style: 'solid' }
+                all: { width: 1, color: '#e0e0e0', style: 'solid' }
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
@@ -77,8 +76,9 @@ export default {
                     },
                     {
                         name: 'content',
-                        type: 'textarea',
-                        label: 'Content'
+                        type: 'richtext',
+                        label: 'Content',
+                        responsive: true
                     },
                     {
                         name: 'defaultOpen',
@@ -90,7 +90,6 @@ export default {
             },
             linkSettings,
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Toggle')
         ],
@@ -101,9 +100,13 @@ export default {
                 fields: [
                     {
                         name: 'toggleIcon',
-                        type: 'icon',
-                        label: 'Select Icon',
-                        default: 'chevron-down',
+                        type: 'select',
+                        label: 'Icon Style',
+                        options: [
+                            { value: 'chevron', label: 'Chevron' },
+                            { value: 'plus', label: 'Plus / Minus' },
+                            { value: 'none', label: 'None' }
+                        ],
                         responsive: true
                     },
                     {
@@ -128,6 +131,17 @@ export default {
                 id: 'headerStyle',
                 label: 'Header Style',
                 fields: [
+                    {
+                        name: 'headerStyle',
+                        type: 'select',
+                        label: 'Header Preset',
+                        options: [
+                            { value: 'bordered', label: 'Bordered' },
+                            { value: 'filled', label: 'Filled' },
+                            { value: 'minimal', label: 'Minimal' }
+                        ],
+                        responsive: true
+                    },
                     {
                         name: 'headerBackgroundColor',
                         type: 'color',

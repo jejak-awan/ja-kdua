@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -57,7 +62,8 @@ export default {
                     { name: 'carouselMode', type: 'toggle', label: 'Carousel Mode' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Portfolio')
         ],
         design: [
             {
@@ -106,7 +112,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

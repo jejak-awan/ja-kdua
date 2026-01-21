@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -80,7 +85,8 @@ export default {
                     { name: 'module_manager', type: 'children_manager', label: 'Pins' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Map')
         ],
         design: [
             {
@@ -121,7 +127,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -46,7 +51,8 @@ export default {
                     { name: 'content', type: 'richtext', label: 'Content' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Post Content')
         ],
         design: [
             {
@@ -79,7 +85,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

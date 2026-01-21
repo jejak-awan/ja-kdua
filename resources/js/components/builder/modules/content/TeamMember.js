@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    adminLabelSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**
@@ -23,13 +28,17 @@ export default {
     icon: 'User',
     category: 'content',
 
-    children: ['sociallink_item'],
+    children: null, // Converted to repeater
 
     defaults: {
         name: 'John Doe',
         position: 'CEO & Founder',
         bio: 'A short bio about the team member goes here.',
         image: '',
+        socialLinks: [
+            { network: 'twitter', url: '#', useCustomColor: false },
+            { network: 'linkedin', url: '#', useCustomColor: false }
+        ],
         // Layout
         layout: 'stacked',
         alignment: 'center',
@@ -86,7 +95,8 @@ export default {
                     {
                         name: 'image',
                         type: 'upload',
-                        label: 'Photo'
+                        label: 'Photo',
+                        responsive: true
                     }
                 ]
             },
@@ -94,10 +104,46 @@ export default {
                 id: 'social',
                 label: 'Social Links',
                 fields: [
-                    { name: 'module_manager', type: 'children_manager', label: 'Social Links' }
+                    {
+                        name: 'socialLinks',
+                        type: 'repeater',
+                        label: 'Social Links',
+                        itemLabel: 'network',
+                        fields: [
+                            {
+                                name: 'network',
+                                type: 'select',
+                                label: 'Network',
+                                options: [
+                                    { value: 'facebook', label: 'Facebook', icon: 'Facebook' },
+                                    { value: 'twitter', label: 'Twitter / X', icon: 'Twitter' },
+                                    { value: 'instagram', label: 'Instagram', icon: 'Instagram' },
+                                    { value: 'linkedin', label: 'LinkedIn', icon: 'Linkedin' },
+                                    { value: 'youtube', label: 'YouTube', icon: 'Youtube' },
+                                    { value: 'email', label: 'Email', icon: 'Mail' },
+                                    { value: 'website', label: 'Website', icon: 'Globe' }
+                                ]
+                            },
+                            { name: 'url', type: 'text', label: 'Link URL' },
+                            { name: 'useCustomColor', type: 'toggle', label: 'Use Custom Colors' },
+                            {
+                                name: 'iconColor',
+                                type: 'color',
+                                label: 'Icon Color',
+                                visible: (item) => item.useCustomColor
+                            },
+                            {
+                                name: 'backgroundColor',
+                                type: 'color',
+                                label: 'Background Color',
+                                visible: (item) => item.useCustomColor
+                            }
+                        ]
+                    }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Team Member')
         ],
         design: [
             {
@@ -192,7 +238,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

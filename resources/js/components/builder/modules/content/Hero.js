@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -83,7 +88,8 @@ export default {
                     { name: 'button2Url', type: 'text', label: 'Secondary URL', visible: s => s.showButton2 }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Hero / Header')
         ],
         design: [
             {
@@ -142,7 +148,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

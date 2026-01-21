@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -58,7 +63,8 @@ export default {
                     { name: 'caption', type: 'text', label: 'Caption', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Featured Image')
         ],
         design: [
             {
@@ -90,7 +96,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

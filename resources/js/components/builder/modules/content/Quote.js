@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -63,7 +68,8 @@ export default {
                     { name: 'authorTitle', type: 'text', label: 'Author Title', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Quote')
         ],
         design: [
             {
@@ -104,7 +110,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

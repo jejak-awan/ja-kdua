@@ -72,7 +72,7 @@ const layoutClass = computed(() => {
 })
 
 const iconComponent = computed(() => {
-  const iconName = settings.value.icon || 'Star'
+  const iconName = settings.value.iconName || 'Star'
   try {
     return defineAsyncComponent(() => 
       import('lucide-vue-next').then(m => m[iconName] || Star)

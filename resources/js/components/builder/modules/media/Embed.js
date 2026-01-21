@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -62,7 +67,8 @@ export default {
                     { name: 'embedUrl', type: 'text', label: 'Embed URL' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Embed')
         ],
         design: [
             {
@@ -84,7 +90,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

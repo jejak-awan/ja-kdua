@@ -1,7 +1,7 @@
 import { defineAsyncComponent } from 'vue';
 import { LayoutGrid } from 'lucide-vue-next';
 
-export const TabbedPosts = {
+export default {
     name: 'TabbedPosts',
     label: 'Tabbed Posts',
     category: 'Magazine',

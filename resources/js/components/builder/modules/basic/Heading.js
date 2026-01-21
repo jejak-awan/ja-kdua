@@ -10,7 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -34,7 +33,10 @@ export default {
 
     defaults: {
         text: 'Your Heading Here',
+        subtitle: '',
         tag: 'h2',
+        size: 'large',
+        decoration: 'none',
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
@@ -49,6 +51,7 @@ export default {
                 label: 'Elements',
                 fields: [
                     { name: 'text', type: 'text', label: 'Heading Text', responsive: true },
+                    { name: 'subtitle', type: 'text', label: 'Subtitle', responsive: true },
                     {
                         name: 'tag', type: 'select', label: 'HTML Tag', options: [
                             { value: 'h1', label: 'H1' },
@@ -58,11 +61,27 @@ export default {
                             { value: 'h5', label: 'H5' },
                             { value: 'h6', label: 'H6' }
                         ]
+                    },
+                    {
+                        name: 'size', type: 'select', label: 'Size', responsive: true, options: [
+                            { value: 'small', label: 'Small' },
+                            { value: 'medium', label: 'Medium' },
+                            { value: 'large', label: 'Large' },
+                            { value: 'xlarge', label: 'Extra Large' },
+                            { value: 'display', label: 'Display' }
+                        ]
+                    },
+                    {
+                        name: 'decoration', type: 'select', label: 'Decoration', options: [
+                            { value: 'none', label: 'None' },
+                            { value: 'underline', label: 'Underline' },
+                            { value: 'highlight', label: 'Highlight' },
+                            { value: 'gradient', label: 'Gradient Text' }
+                        ]
                     }
                 ]
             },
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Heading')
         ],

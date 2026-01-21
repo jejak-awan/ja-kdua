@@ -10,7 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -33,6 +32,9 @@ export default {
     children: null,
 
     defaults: {
+        showTitle: true,
+        title: 'Section Title',
+        titleTag: 'h2',
         content: '<p>Your text goes here. Edit this text to add your own content.</p>',
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
@@ -44,14 +46,30 @@ export default {
     settings: {
         content: [
             {
+                id: 'title',
+                label: 'Title',
+                fields: [
+                    { name: 'showTitle', type: 'toggle', label: 'Show Title', responsive: true },
+                    { name: 'title', type: 'text', label: 'Title Text', responsive: true },
+                    {
+                        name: 'titleTag', type: 'select', label: 'Title Tag', options: [
+                            { value: 'h1', label: 'H1' },
+                            { value: 'h2', label: 'H2' },
+                            { value: 'h3', label: 'H3' },
+                            { value: 'h4', label: 'H4' },
+                            { value: 'div', label: 'Div' }
+                        ]
+                    }
+                ]
+            },
+            {
                 id: 'elements',
-                label: 'Elements',
+                label: 'Content',
                 fields: [
                     { name: 'content', type: 'richtext', label: 'Body Text', responsive: true }
                 ]
             },
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Text')
         ],

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -78,7 +83,8 @@ export default {
                     { name: 'overlayTextColor', type: 'color', label: 'Text Color' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Image')
         ],
         design: [
             {
@@ -119,7 +125,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -2,7 +2,7 @@ import { Image as ImageIcon } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'post_featured_image',
+    name: 'featuredimage',
     label: 'Post Featured Image',
     icon: ImageIcon,
     category: 'Dynamic',

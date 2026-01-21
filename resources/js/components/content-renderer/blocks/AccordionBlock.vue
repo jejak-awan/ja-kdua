@@ -1,60 +1,126 @@
-<template>
-    <section 
-        :class="['transition-all duration-500', padding, radius, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width]">
-            <h2 v-if="title" class="text-3xl font-bold text-center mb-12 tracking-tight">{{ title }}</h2>
-            
-            <div class="max-w-3xl mx-auto space-y-4">
-                <div 
-                    v-for="(faq, index) in items" 
-                    :key="index"
-                    class="border rounded-2xl overflow-hidden bg-card/30 backdrop-blur-sm transition-all duration-300"
-                    :class="{ 'ring-1 ring-primary/20 border-primary/20 bg-primary/5': openIndex === index }"
-                >
-                    <button 
-                        @click="openIndex = openIndex === index ? null : index"
-                        class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
-                    >
-                        <span class="font-bold text-lg">{{ faq.question }}</span>
-                        <svg 
-                            class="w-5 h-5 transition-transform duration-300" 
-                            :class="{ 'rotate-180': openIndex === index }"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    
-                    <div 
-                        v-show="openIndex === index"
-                        class="p-6 pt-0 opacity-80 leading-relaxed animate-in slide-in-from-top-2 duration-300"
-                    >
-                        {{ faq.answer }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
+import { ref, computed, onMounted } from 'vue';
+import LucideIcon from '../../ui/LucideIcon.vue';
 
-import { ref } from 'vue';
+defineOptions({
+    inheritAttrs: false
+});
 
 const props = defineProps({
-    title: String,
     items: { type: Array, default: () => [] },
-    width: { type: String, default: 'max-w-5xl' },
-    padding: { type: String, default: 'py-20' },
-    bgColor: String,
-    radius: { type: String, default: 'rounded-none' },
-    animation: { type: String, default: '' }
+    allowMultiple: { type: Boolean, default: false },
+    toggleIcon: { type: String, default: 'chevron-down' },
+    iconPosition: { type: String, default: 'right' },
+    iconColor: { type: String, default: '' },
+    iconSize: { type: [Number, String], default: 18 },
+    gap: { type: [Number, String], default: 16 },
+    headerBackgroundColor: { type: String, default: '' },
+    openHeaderBackgroundColor: { type: String, default: '' },
+    contentBackgroundColor: { type: String, default: '' }
 });
 
-const openIndex = ref(null);
+const openIndices = ref([]);
+
+onMounted(() => {
+    props.items.forEach((item, index) => {
+        if (item.open) openIndices.value.push(index);
+    });
+});
+
+const toggle = (index) => {
+    if (props.allowMultiple) {
+        if (openIndices.value.includes(index)) {
+            openIndices.value = openIndices.value.filter(i => i !== index);
+        } else {
+            openIndices.value.push(index);
+        }
+    } else {
+        openIndices.value = openIndices.value.includes(index) ? [] : [index];
+    }
+};
+
+const getIconName = (index) => {
+    // If user selected "plus" specifically (legacy naming or explicit choice), handle toggle
+    if (props.toggleIcon === 'plus') {
+        return openIndices.value.includes(index) ? 'minus' : 'plus';
+    }
+    // Otherwise use the selected icon (e.g. chevron-down)
+    // We handle rotation for chevron/arrow types via CSS class in template
+    return props.toggleIcon;
+};
+
+// Check if we should rotate this icon when open
+const shouldRotate = computed(() => {
+    const icon = props.toggleIcon.toLowerCase();
+    return icon.includes('chevron') || icon.includes('arrow');
+});
+
+const iconStyles = computed(() => ({
+    color: props.iconColor || 'currentColor',
+    width: `${props.iconSize}px`,
+    height: `${props.iconSize}px`
+}));
 </script>
+
+<template>
+    <div class="accordion-renderer w-full flex flex-col" :style="{ gap: `${gap}px` }">
+        <div 
+            v-for="(item, index) in items" 
+            :key="index"
+            class="accordion-item border rounded-xl overflow-hidden transition-all duration-300"
+            :class="{ 'shadow-sm': openIndices.includes(index) }"
+        >
+            <!-- Header -->
+            <button 
+                @click="toggle(index)"
+                class="w-full flex items-center gap-4 p-4 text-left font-bold transition-colors"
+                :style="{ 
+                    backgroundColor: openIndices.includes(index) 
+                        ? (openHeaderBackgroundColor || 'hsl(var(--muted)/0.3)') 
+                        : (headerBackgroundColor || 'transparent')
+                }"
+                type="button"
+            >
+                <!-- Left Icon -->
+                <div 
+                    v-if="toggleIcon !== 'none' && iconPosition === 'left'"
+                    class="shrink-0 transition-transform duration-300"
+                    :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
+                    :style="iconStyles"
+                >
+                    <LucideIcon :name="getIconName(index)" class="w-full h-full" :size="iconSize" />
+                </div>
+
+                <span class="flex-1">{{ item.title || 'Accordion Item' }}</span>
+
+                <!-- Right Icon -->
+                <div 
+                    v-if="toggleIcon !== 'none' && iconPosition === 'right'"
+                    class="shrink-0 transition-transform duration-300"
+                    :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
+                    :style="iconStyles"
+                >
+                    <LucideIcon :name="getIconName(index)" class="w-full h-full" :size="iconSize" />
+                </div>
+            </button>
+
+            <!-- Content -->
+            <div 
+                class="overflow-hidden transition-all duration-300 ease-in-out"
+                :class="openIndices.includes(index) ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'"
+                :style="{ backgroundColor: contentBackgroundColor || 'transparent' }"
+            >
+                <div 
+                    class="p-4 pt-2 prose prose-sm dark:prose-invert max-w-none"
+                    v-html="item.content || ''"
+                ></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.accordion-item:hover button {
+    opacity: 0.95;
+}
+</style>

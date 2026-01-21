@@ -2,7 +2,7 @@ import { List } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'icon-list',
+    name: 'iconlist',
     label: 'Icon List',
     icon: List,
     description: 'Bulleted list with customizable icons.',

@@ -1,7 +1,7 @@
 <template>
   <div class="social-links-block" :style="wrapperStyles">
     <a 
-      v-for="(link, index) in socialLinks" 
+      v-for="(link, index) in links" 
       :key="index"
       :href="link.url || '#'"
       target="_blank"
@@ -11,13 +11,13 @@
       :style="getLinkStyles(link)"
       @click.prevent
     >
-      <component :is="getIcon(link.platform)" class="social-icon" :style="iconStyles" />
+      <component :is="getIcon(link.network)" class="social-icon" :style="iconStyles" />
     </a>
   </div>
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject } from 'vue'
+import { computed, inject } from 'vue'
 import { 
   Facebook, Twitter, Instagram, Linkedin, Youtube, 
   Github, Dribbble, MessageCircle, Mail, Globe
@@ -34,25 +34,14 @@ import {
 } from '../core/styleUtils'
 
 const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
+  module: { type: Object, required: true }
 })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const socialLinks = computed(() => {
-  return (props.module.children || []).map(child => ({
-    platform: getResponsiveValue(child.settings, 'network', device.value) || 'website',
-    url: getResponsiveValue(child.settings, 'url', device.value) || '#',
-    useCustomColor: getResponsiveValue(child.settings, 'useCustomColor', device.value),
-    iconColor: getResponsiveValue(child.settings, 'iconColor', device.value),
-    backgroundColor: getResponsiveValue(child.settings, 'backgroundColor', device.value)
-  }))
-})
+const links = computed(() => settings.value.links || [])
 
 const iconMap = {
   facebook: Facebook,
@@ -67,15 +56,15 @@ const iconMap = {
   website: Globe
 }
 
-const getIcon = (platform) => iconMap[platform] || Globe
+const getIcon = (network) => iconMap[network] || Globe
 
 const linkClass = computed(() => {
-  const style = getResponsiveValue(settings.value, 'style', device.value) || 'icon-only'
+  const style = getResponsiveValue(settings.value, 'displayStyle', device.value) || 'icon-only'
   return `social-link--${style}`
 })
 
 const wrapperStyles = computed(() => {
-  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 16
+  const gap = parseInt(getResponsiveValue(settings.value, 'gap', device.value)) || 16
   const styles = {
     display: 'flex',
     gap: `${gap}px`,
@@ -117,22 +106,22 @@ const getLinkStyles = (link) => {
     '--hover-bg': hoverBg
   }
   
-  const style = getResponsiveValue(settings.value, 'style', device.value) || 'icon-only'
-  const size = getResponsiveValue(settings.value, 'size', device.value) || 24
+  const style = getResponsiveValue(settings.value, 'displayStyle', device.value) || 'icon-only'
+  const size = parseInt(getResponsiveValue(settings.value, 'iconSize', device.value)) || 24
   
   if (style === 'icon-circle' || style === 'icon-square') {
     const dim = size * 1.8
     styles.width = `${dim}px`
     styles.height = `${dim}px`
-    styles.borderRadius = style === 'icon-circle' ? '50%' : '4px'
-    styles.backgroundColor = link.useCustomColor ? link.backgroundColor : (settings.value.backgroundColor || '#f0f0f0')
+    styles.borderRadius = style === 'icon-circle' ? '50%' : '8px'
+    styles.backgroundColor = link.useCustomColor ? link.backgroundColor : '#f3f4f6'
   }
   
   return styles
 }
 
 const iconStyles = computed(() => {
-  const size = getResponsiveValue(settings.value, 'size', device.value) || 24
+  const size = parseInt(getResponsiveValue(settings.value, 'iconSize', device.value)) || 24
   return {
     width: `${size}px`,
     height: `${size}px`
@@ -142,6 +131,6 @@ const iconStyles = computed(() => {
 
 <style scoped>
 .social-links-block { width: 100%; }
-.social-link:hover { color: var(--hover-color) !important; background-color: var(--hover-bg); transform: translateY(-2px); }
+.social-link:hover { color: var(--hover-color) !important; background-color: var(--hover-bg); transform: translateY(-3px); }
 .social-icon { display: block; }
 </style>

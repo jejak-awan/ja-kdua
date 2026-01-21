@@ -1,31 +1,57 @@
 <template>
-  <div 
-    class="accordion-block" 
-    :style="wrapperStyles"
-    @click="handleWrapperClick"
-  >
-    <draggable
-      v-model="module.children"
-      item-key="id"
-      group="accordion_item"
-      class="accordion-items-container"
-      :style="containerStyles"
-      ghost-class="ja-builder-ghost"
-    >
-      <template #item="{ element: child, index }">
-        <ModuleWrapper
-          :module="child"
-          :index="index"
-        />
-      </template>
-    </draggable>
+  <div class="accordion-block" :style="wrapperStyles">
+    <div class="accordion-list" :style="listStyles">
+      <div 
+        v-for="(item, index) in items" 
+        :key="index"
+        class="accordion-item"
+        :class="{ 'accordion-item--open': openIndices.includes(index) }"
+        :style="getItemStyles(index)"
+      >
+        <!-- Header -->
+        <button 
+          class="accordion-header"
+          :style="getHeaderStyles(index)"
+          @click="toggle(index)"
+        >
+          <!-- Left Icon -->
+          <div 
+            v-if="toggleIcon !== 'none' && iconPosition === 'left'"
+            class="accordion-icon"
+            :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
+            :style="iconStyles"
+          >
+            <LucideIcon :name="getIconName(index)" :size="iconSize" />
+          </div>
+
+          <span class="accordion-title flex-1" :style="titleStyles">{{ item.title || 'Accordion Title' }}</span>
+
+          <!-- Right Icon -->
+          <div 
+            v-if="toggleIcon !== 'none' && iconPosition === 'right'"
+            class="accordion-icon"
+            :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
+            :style="iconStyles"
+          >
+            <LucideIcon :name="getIconName(index)" :size="iconSize" />
+          </div>
+        </button>
+
+        <!-- Content -->
+        <div 
+          v-if="openIndices.includes(index)"
+          class="accordion-content prose prose-sm max-w-none"
+          :style="contentStyles"
+          v-html="item.content || 'Content goes here...'"
+        ></div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
+import { computed, ref, inject, onMounted } from 'vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -38,117 +64,121 @@ import {
   getTransformStyles
 } from '../core/styleUtils'
 
-const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
-})
-
-const settings = computed(() => props.module.settings || {})
-
-const accordionItems = computed(() => {
-  return (props.module.children || []).map(child => ({
-    id: child.id,
-    title: child.settings.title || 'Accordion Item',
-    content: child.settings.content || '',
-    open: child.settings.open || false
-  }))
-})
-
-// Initialize open items based on defaults
-const openItems = ref(
-  accordionItems.value.filter(i => i.open).map(i => i.id)
-)
-
-const toggleIcon = computed(() => settings.value.toggleIcon || 'chevron')
-const iconPosition = computed(() => getResponsiveValue(settings.value, 'iconPosition', device.value) || 'right')
-
-const toggleItem = (id) => {
-  if (settings.value.allowMultiple) {
-    if (openItems.value.includes(id)) {
-      openItems.value = openItems.value.filter(i => i !== id)
-    } else {
-      openItems.value.push(id)
-    }
-  } else {
-    openItems.value = openItems.value.includes(id) ? [] : [id]
-  }
-}
-
-// Provide state to AccordionItemBlock
-provide('accordionState', {
-    openItems,
-    toggleItem,
-    parentSettings: settings
-})
+const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-import { getLayoutStyles } from '../core/styleUtils'
+// Support Repeater Items
+const items = computed(() => settings.value.items || [])
+const openIndices = ref([])
 
-const containerStyles = computed(() => {
-    const layout = getLayoutStyles(settings.value, device.value)
-    
-    // Fallback for legacy 'standard' layout or if layout_type is missing
-    if (!layout.display && !layout.gridTemplateColumns) {
-        const gap = getResponsiveValue(settings.value, 'itemGap', device.value) || 24
-        return {
-            display: 'flex',
-            flexDirection: 'column',
-            gap: `${gap}px`,
-            width: '100%'
+const allowMultiple = computed(() => getResponsiveValue(settings.value, 'allowMultiple', device.value) === true)
+const toggleIcon = computed(() => getResponsiveValue(settings.value, 'toggleIcon', device.value) || 'chevron-down')
+const iconPosition = computed(() => getResponsiveValue(settings.value, 'iconPosition', device.value) || 'right')
+const iconSize = computed(() => getResponsiveValue(settings.value, 'iconSize', device.value) || 18)
+
+onMounted(() => {
+    items.value.forEach((item, index) => {
+        if (item.open) openIndices.value.push(index)
+    })
+})
+
+const toggle = (index) => {
+    if (allowMultiple.value) {
+        if (openIndices.value.includes(index)) {
+            openIndices.value = openIndices.value.filter(i => i !== index)
+        } else {
+            openIndices.value.push(index)
         }
+    } else {
+        openIndices.value = openIndices.value.includes(index) ? [] : [index]
     }
-    
-    // Ensure width 100% if flex column to stretch items?
-    // Or let alignment settings handle it. 
-    // Usually container should accept full width.
-    layout.width = '100%'
-    
-    return layout
+}
+
+const getIconName = (index) => {
+    const icon = toggleIcon.value;
+    if (icon === 'plus') return openIndices.value.includes(index) ? 'minus' : 'plus';
+    if (icon === 'chevron') return 'chevron-down'; 
+    return icon;
+}
+
+const shouldRotate = computed(() => {
+    const icon = toggleIcon.value.toLowerCase();
+    return icon.includes('chevron') || icon.includes('arrow');
 })
 
 const wrapperStyles = computed(() => {
-  const styles = {
-    position: 'relative', // Ensure containment
-    width: '100%',
-    transition: 'var(--transition-premium)'
-  }
-  
+  const styles = { width: '100%', overflow: 'hidden' }
   Object.assign(styles, getBackgroundStyles(settings.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
   Object.assign(styles, getSizingStyles(settings.value, device.value))
   Object.assign(styles, getFilterStyles(settings.value, device.value))
   Object.assign(styles, getTransformStyles(settings.value, device.value))
-  
-  if (settings.value.link_url) {
-    styles.cursor = 'pointer'
-  }
-  
   return styles
 })
 
-const handleWrapperClick = () => {
-    if (settings.value.link_url) {
-        if (settings.value.link_target === '_blank') {
-            window.open(settings.value.link_url, '_blank')
-        } else {
-            window.location.href = settings.value.link_url
-        }
+const listStyles = computed(() => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${getResponsiveValue(settings.value, 'gap', device.value) || 16}px`
+}))
+
+const getItemStyles = (index) => {
+    const styles = { overflow: 'hidden' }
+    Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+    return styles
+}
+
+const getHeaderStyles = (index) => {
+    const isOpen = openIndices.value.includes(index)
+    const bgColor = isOpen 
+        ? getResponsiveValue(settings.value, 'openHeaderBackgroundColor', device.value) || '#f1f5f9'
+        : getResponsiveValue(settings.value, 'headerBackgroundColor', device.value) || '#f8fafc'
+    
+    return {
+        backgroundColor: bgColor,
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        width: '100%',
+        border: 'none',
+        cursor: 'pointer',
+        textAlign: 'left'
     }
 }
 
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'header_', device.value))
+
+const iconStyles = computed(() => {
+    const color = getResponsiveValue(settings.value, 'iconColor', device.value) || 'currentColor'
+    const size = iconSize.value // used for container size matching
+    return {
+        color: color,
+        width: `${size}px`,
+        height: `${size}px`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'transform 0.3s ease'
+    }
+})
+
+const contentStyles = computed(() => {
+    const styles = {
+        padding: '20px',
+        backgroundColor: getResponsiveValue(settings.value, 'contentBackgroundColor', device.value) || '#ffffff'
+    }
+    Object.assign(styles, getTypographyStyles(settings.value, 'content_', device.value))
+    return styles
+})
 </script>
 
 <style scoped>
-.accordion-block { width: 100%; }
-.accordion-items-container {
-  display: flex;
-  flex-direction: column;
-  /* gap handled by inline style */
-  width: 100%;
-}
+.accordion-header:hover { opacity: 0.9; }
 </style>

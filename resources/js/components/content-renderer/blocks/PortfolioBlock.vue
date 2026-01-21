@@ -9,15 +9,16 @@ defineOptions({
 
 const props = defineProps({
     title: { type: String, default: '' },
-    category: { type: String, default: '' },
-    limit: { type: Number, default: 9 },
-    columns: { type: String, default: '3' },
-    show_filter: { type: Boolean, default: true },
-    show_title: { type: Boolean, default: true },
-    show_category: { type: Boolean, default: true },
-    style: { type: String, default: 'cards' },
-    padding: { type: String, default: 'py-16' },
-    bgColor: { type: String, default: '' }
+    filterCategory: { type: String, default: '' },
+    itemsPerPage: { type: [Number, String], default: 9 },
+    columns: { type: [Number, String], default: 3 },
+    gap: { type: [Number, String], default: 20 },
+    showFilter: { type: Boolean, default: true },
+    showTitle: { type: Boolean, default: true },
+    showCategory: { type: Boolean, default: true },
+    hoverEffect: { type: String, default: 'overlay' },
+    imageAspectRatio: { type: String, default: '1:1' },
+    overlayColor: { type: String, default: 'rgba(0,0,0,0.6)' }
 });
 
 const projects = ref([]);
@@ -25,17 +26,26 @@ const loading = ref(true);
 const activeFilter = ref('all');
 const categories = ref(['all']);
 
-const containerClasses = computed(() => {
-    return ['transition-all duration-500', props.padding].filter(Boolean);
+const gridStyles = computed(() => {
+    // Handling responsive columns and gap if passed as strings (though renderer usually gets single values per device)
+    const cols = parseInt(props.columns) || 3;
+    const gapVal = parseInt(props.gap) || 20;
+    
+    return {
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gap: `${gapVal}px`
+    };
 });
 
-const gridClass = computed(() => {
-    const cols = {
-        '2': 'grid-cols-1 md:grid-cols-2',
-        '3': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-        '4': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
-    };
-    return cols[props.columns] || cols['3'];
+const imageStyles = computed(() => {
+    if (props.imageAspectRatio === 'custom') return {};
+    const ratio = { '1:1': '100%', '4:3': '75%', '16:9': '56.25%' }[props.imageAspectRatio] || '100%';
+    return { paddingBottom: ratio, position: 'relative' };
+});
+
+const overlayStyles = computed(() => {
+    return { backgroundColor: props.overlayColor };
 });
 
 const filteredProjects = computed(() => {
@@ -50,10 +60,10 @@ const fetchProjects = async () => {
     try {
         const params = {
             type: 'project',
-            limit: props.limit,
+            limit: parseInt(props.itemsPerPage) || 9,
             status: 'published'
         };
-        if (props.category) params.category = props.category;
+        if (props.filterCategory) params.category = props.filterCategory;
         
         const response = await api.get('/cms/contents', { params });
         projects.value = response.data?.data || response.data || [];
@@ -68,7 +78,7 @@ const fetchProjects = async () => {
     } catch (err) {
         console.warn('Portfolio: Failed to fetch projects', err);
         // Fallback demo data
-        projects.value = Array.from({ length: props.limit }, (_, i) => ({
+        projects.value = Array.from({ length: parseInt(props.itemsPerPage) || 9 }, (_, i) => ({
             id: i + 1,
             title: `Project ${i + 1}`,
             featured_image: null,
@@ -82,83 +92,107 @@ const fetchProjects = async () => {
 };
 
 onMounted(fetchProjects);
-watch(() => [props.category, props.limit], fetchProjects);
+watch(() => [props.filterCategory, props.itemsPerPage], fetchProjects);
 </script>
 
 <template>
-    <section 
-        :class="containerClasses"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div class="container mx-auto px-6">
-            <h2 v-if="title" class="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight text-center">{{ title }}</h2>
-            
-            <!-- Filter -->
-            <div v-if="show_filter && categories.length > 1" class="flex flex-wrap justify-center gap-2 mb-10">
-                <button 
-                    v-for="cat in categories" 
-                    :key="cat"
-                    @click="activeFilter = cat"
-                    :class="[
-                        'px-4 py-2 text-sm font-medium rounded-full transition-all',
-                        activeFilter === cat 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted hover:bg-muted/80 text-foreground'
-                    ]"
-                >
-                    {{ cat === 'all' ? 'All' : cat }}
-                </button>
-            </div>
-            
-            <!-- Loading -->
-            <div v-if="loading" class="flex items-center justify-center py-20">
-                <Loader2 class="w-8 h-8 animate-spin text-primary" />
-            </div>
-            
-            <!-- Grid -->
-            <div v-else :class="['grid gap-6', gridClass]">
-                <article 
-                    v-for="project in filteredProjects" 
-                    :key="project.id"
-                    :class="[
-                        'group relative overflow-hidden transition-all duration-300',
-                        style === 'cards' ? 'bg-card border rounded-2xl shadow-sm hover:shadow-xl' : 'rounded-xl'
-                    ]"
-                >
-                    <!-- Image -->
-                    <div class="aspect-[4/3] overflow-hidden bg-muted">
-                        <img 
-                            v-if="project.featured_image" 
-                            :src="project.featured_image" 
-                            :alt="project.title"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <span class="text-xs">No Image</span>
-                        </div>
-                        
-                        <!-- Overlay -->
-                        <div 
-                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
-                        >
+    <div class="portfolio-block">
+        <h2 v-if="title" class="portfolio-title">{{ title }}</h2>
+        
+        <!-- Filter -->
+        <div v-if="showFilter && categories.length > 1" class="portfolio-filter">
+            <button 
+                v-for="cat in categories" 
+                :key="cat"
+                @click="activeFilter = cat"
+                :class="['filter-btn', { 'filter-btn--active': activeFilter === cat }]"
+            >
+                {{ cat === 'all' ? 'All' : cat }}
+            </button>
+        </div>
+        
+        <!-- Loading -->
+        <div v-if="loading" class="portfolio-loading">
+            <Loader2 class="loading-icon" />
+        </div>
+        
+        <!-- Grid -->
+        <div v-else class="portfolio-grid" :style="gridStyles">
+            <article 
+                v-for="project in filteredProjects" 
+                :key="project.id"
+                :class="['portfolio-item', `portfolio-item--${hoverEffect}`]"
+            >
+                <div class="item-media" :style="imageStyles">
+                    <img 
+                        v-if="project.featured_image" 
+                        :src="project.featured_image" 
+                        :alt="project.title"
+                        class="item-img"
+                    />
+                    <div v-else class="item-placeholder">
+                        <span>No Image</span>
+                    </div>
+                    
+                    <!-- Overlay -->
+                    <div v-if="hoverEffect !== 'none'" class="item-overlay" :style="overlayStyles">
+                        <div class="overlay-content">
+                            <span v-if="showCategory" class="item-category">
+                                {{ project.category?.name || project.category || 'Project' }}
+                            </span>
+                            <h3 v-if="showTitle" class="item-title">{{ project.title }}</h3>
                             <a 
                                 :href="`/project/${project.slug || project.id}`"
-                                class="w-12 h-12 rounded-full bg-background text-foreground flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform"
+                                class="item-link"
                             >
-                                <ExternalLink class="w-5 h-5" />
+                                <ExternalLink :size="20" />
                             </a>
                         </div>
                     </div>
-                    
-                    <!-- Info -->
-                    <div v-if="style === 'cards' && (show_title || show_category)" class="p-4">
-                        <span v-if="show_category" class="text-[10px] font-bold text-primary">
-                            {{ project.category?.name || project.category || 'Project' }}
-                        </span>
-                        <h3 v-if="show_title" class="font-bold mt-1 line-clamp-1">{{ project.title }}</h3>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
         </div>
-    </section>
+    </div>
 </template>
+
+<style scoped>
+.portfolio-block { width: 100%; }
+.portfolio-title { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 2rem; }
+
+.portfolio-filter { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 2.5rem; }
+.filter-btn { padding: 8px 24px; font-size: 0.875rem; font-weight: 600; border-radius: 9999px; background: #f3f4f6; color: #374151; transition: all 0.2s; border: none; cursor: pointer; }
+.filter-btn:hover { background: #e5e7eb; }
+.filter-btn--active { background: #3b82f6; color: #ffffff; }
+
+.portfolio-loading { display: flex; align-items: center; justify-content: center; padding: 4rem 0; }
+.loading-icon { width: 2rem; height: 2rem; animation: spin 1s linear infinite; color: #3b82f6; }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.portfolio-grid { width: 100%; }
+
+.portfolio-item { position: relative; overflow: hidden; border-radius: 12px; transition: all 0.3s; }
+
+.item-media { width: 100%; overflow: hidden; background: #f3f4f6; }
+.item-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+.item-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #9ca3af; }
+
+.item-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; color: #ffffff; }
+.overlay-content { text-align: center; padding: 1.5rem; }
+
+.portfolio-item:hover .item-overlay { opacity: 1; }
+
+.item-category { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.item-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; }
+
+.item-link { display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border-radius: 50%; background: #ffffff; color: #111827; transition: transform 0.2s; }
+.item-link:hover { transform: scale(1.1); }
+
+/* Hover Effects */
+.portfolio-item--zoom:hover .item-img { transform: scale(1.1); }
+.portfolio-item--grayscale .item-img { filter: grayscale(100%); }
+.portfolio-item--grayscale:hover .item-img { filter: grayscale(0); }
+</style>

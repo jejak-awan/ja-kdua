@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -22,13 +27,11 @@ export default {
     icon: 'MapPin',
     category: 'media',
 
-    children: ['map_pin'],
+    // children: ['map_pin'], // Deprecated
 
     defaults: {
-        children: [],
         address: 'New York, NY, USA',
-        lat: 40.7128,
-        lng: -74.0060,
+        embedUrl: '',
         zoom: 14,
         mapType: 'roadmap',
         // Size
@@ -74,22 +77,12 @@ export default {
                     {
                         name: 'address',
                         type: 'text',
-                        label: 'Address'
+                        label: 'Address (City, State, or Zip)'
                     },
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Pins'
-                    },
-                    {
-                        name: 'lat',
+                        name: 'embedUrl',
                         type: 'text',
-                        label: 'Latitude'
-                    },
-                    {
-                        name: 'lng',
-                        type: 'text',
-                        label: 'Longitude'
+                        label: 'Custom Embed URL (Optional override)'
                     }
                 ]
             },
@@ -111,7 +104,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Map')
         ],
         design: [
             {
@@ -192,7 +186,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

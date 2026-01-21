@@ -80,7 +80,7 @@
 import { ref, computed, watch } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { BaseModal, BaseInput, BaseButton } from '../ui'
-import LucideIcon from '../ui/LucideIcon.vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { allIcons, categories } from '../core/assets/icons'
 
 const props = defineProps({

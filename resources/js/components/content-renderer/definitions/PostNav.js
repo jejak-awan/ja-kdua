@@ -2,7 +2,7 @@ import { Navigation } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'post_nav',
+    name: 'postnavigation',
     label: 'Post Navigation',
     icon: Navigation,
     description: 'Previous and next post navigation links.',

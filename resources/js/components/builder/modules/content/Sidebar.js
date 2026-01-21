@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,11 +28,14 @@ export default {
     icon: 'PanelRight',
     category: 'content',
 
-    children: ['sidebar_widget'],
+    children: null, // Converted to repeater
 
     defaults: {
-        children: [],
         showTitle: true,
+        widgets: [
+            { widgetType: 'search', title: 'Search' },
+            { widgetType: 'categories', title: 'Categories', count: 5 }
+        ],
         // Background
         background: { color: '#f9f9f9', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -54,11 +62,47 @@ export default {
                 id: 'widgets',
                 label: 'Widgets',
                 fields: [
-                    { name: 'module_manager', type: 'children_manager', label: 'Widgets' },
-                    { name: 'showTitle', type: 'toggle', label: 'Show Widget Titles', responsive: true }
+                    { name: 'showTitle', type: 'toggle', label: 'Show Widget Titles', responsive: true },
+                    {
+                        name: 'widgets',
+                        type: 'repeater',
+                        label: 'Widgets',
+                        itemLabel: 'title',
+                        fields: [
+                            {
+                                name: 'widgetType',
+                                type: 'select',
+                                label: 'Widget Type',
+                                options: [
+                                    { value: 'search', label: 'Search Box' },
+                                    { value: 'categories', label: 'Categories List' },
+                                    { value: 'recentposts', label: 'Recent Posts' },
+                                    { value: 'tags', label: 'Tag Cloud' },
+                                    { value: 'text', label: 'Text / HTML' }
+                                ]
+                            },
+                            { name: 'title', type: 'text', label: 'Title (Optional)', description: 'Leave empty to use default widget title.' },
+                            {
+                                name: 'count',
+                                type: 'range',
+                                label: 'Count',
+                                min: 3,
+                                max: 20,
+                                step: 1,
+                                visible: (item) => ['categories', 'recentposts', 'tags'].includes(item.widgetType)
+                            },
+                            {
+                                name: 'content',
+                                type: 'textarea',
+                                label: 'Content',
+                                visible: (item) => item.widgetType === 'text'
+                            }
+                        ]
+                    }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Sidebar')
         ],
         design: [
             {
@@ -91,7 +135,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

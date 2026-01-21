@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -77,7 +82,8 @@ export default {
                     { name: 'showMeta', type: 'toggle', label: 'Show Meta' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Post Slider')
         ],
         design: [
             {
@@ -150,7 +156,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

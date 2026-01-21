@@ -1,9 +1,16 @@
 <template>
   <div 
-    class="text-block"
+    class="text-block text-content"
     :style="textStyles"
     :class="cssClass"
   >
+    <component
+      :is="settings.titleTag || 'h2'"
+      v-if="settings.showTitle"
+      class="text-block-title"
+      contenteditable="true"
+      @blur="updateTitle"
+    >{{ settings.title }}</component>
     <InlineRichtext
       v-model="content"
       placeholder="Type your text..."
@@ -49,9 +56,15 @@ const content = computed({
 
 const device = computed(() => builder?.device?.value || 'desktop')
 
+const updateTitle = (e) => {
+  builder.updateModule(props.module.id, {
+    settings: { ...settings.value, title: e.target.innerText }
+  })
+}
+
 const textStyles = computed(() => {
   const styles = { width: '100%' }
-  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getBackgroundStyles(settings.value, device.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
   Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))

@@ -7,7 +7,8 @@
         @mousemove="handleMouseMove"
         @mouseleave="handleMouseLeave"
     >
-         <div :class="[ fullWidth ? 'w-full' : 'container mx-auto px-4' ]">
+         <BackgroundMedia :settings="settings" />
+         <div class="relative z-10" :class="[ fullWidth ? 'w-full' : 'container mx-auto px-4' ]">
               <BlockRenderer 
                  :blocks="nestedBlocks" 
                  :context="context"
@@ -20,6 +21,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
+import BackgroundMedia from './BackgroundMedia.vue'
 import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles } from '../utils'
 
 const props = defineProps({

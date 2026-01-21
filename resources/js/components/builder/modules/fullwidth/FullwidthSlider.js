@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -47,7 +52,8 @@ export default {
     settings: {
         content: [
             { id: 'slides', label: 'Slides', fields: [{ name: 'module_manager', type: 'children_manager', label: 'Slides' }] },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Fullwidth Slider')
         ],
         design: [
             {
@@ -121,7 +127,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

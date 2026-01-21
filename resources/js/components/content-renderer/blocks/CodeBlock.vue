@@ -10,11 +10,11 @@ defineOptions({
 const props = defineProps({
     code: { type: String, default: '' },
     language: { type: String, default: 'javascript' },
-    show_line_numbers: { type: Boolean, default: true },
-    show_copy_button: { type: Boolean, default: true },
-    window_chrome: { type: Boolean, default: false },
+    showLineNumbers: { type: Boolean, default: true },
+    showCopyButton: { type: Boolean, default: true },
+    windowChrome: { type: Boolean, default: false },
     theme: { type: String, default: 'dark' },
-    max_height: { type: String, default: '' },
+    maxHeight: { type: String, default: '' },
     padding: { type: String, default: 'py-6' }
 });
 
@@ -52,14 +52,14 @@ const copyCode = async () => {
     <div :class="containerClasses">
         <div 
             :class="['relative rounded-xl overflow-hidden font-mono text-sm', themeClasses]"
-            :style="{ maxHeight: max_height || 'auto' }"
+            :style="{ maxHeight: maxHeight || 'auto' }"
         >
             <!-- Header -->
             <div 
                 class="flex items-center justify-between px-4 py-3 border-b border-white/10"
-                :class="window_chrome ? 'bg-black/20' : ''"
+                :class="windowChrome ? 'bg-black/20' : ''"
             >
-                <div v-if="window_chrome" class="flex items-center gap-2 mr-4">
+                <div v-if="windowChrome" class="flex items-center gap-2 mr-4">
                     <div class="w-3 h-3 rounded-full bg-red-500"></div>
                     <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
@@ -70,7 +70,7 @@ const copyCode = async () => {
                 <div class="flex-1"></div>
 
                 <button 
-                    v-if="show_copy_button"
+                    v-if="showCopyButton"
                     @click="copyCode"
                     class="flex items-center gap-1.5 text-xs opacity-60 hover:opacity-100 transition-opacity ml-4"
                 >
@@ -83,13 +83,13 @@ const copyCode = async () => {
             <!-- Code -->
             <div 
                 class="overflow-auto p-4"
-                :style="{ maxHeight: max_height ? `calc(${max_height} - 40px)` : 'auto' }"
+                :style="{ maxHeight: maxHeight ? `calc(${maxHeight} - 40px)` : 'auto' }"
             >
                 <table class="w-full">
                     <tbody>
                         <tr v-for="(line, index) in lines" :key="index" class="leading-relaxed">
                             <td 
-                                v-if="show_line_numbers" 
+                                v-if="showLineNumbers" 
                                 class="pr-4 text-right select-none opacity-40 w-8"
                             >
                                 {{ index + 1 }}

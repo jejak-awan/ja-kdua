@@ -2,7 +2,7 @@ import { Share2 } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'social_links',
+    name: 'sociallinks',
     label: 'Social Media Follow',
     icon: Share2,
     description: 'Add icons linking to your social media profiles.',

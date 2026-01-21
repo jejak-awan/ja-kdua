@@ -13,19 +13,33 @@
                 >
                     <div 
                         :class="[
-                            'flex-shrink-0 flex items-center justify-center rounded-full',
+                            'flex-shrink-0 flex items-center justify-center',
                             iconSizeClass
                         ]"
                         :style="{ 
-                            backgroundColor: iconBgColor || 'hsl(var(--primary) / 0.1)',
-                            color: iconColor || 'hsl(var(--primary))'
+                            backgroundColor: iconBgColor || 'transparent',
+                            color: iconColor || 'hsl(var(--primary))',
+                            width: !isNaN(iconSize) ? 'auto' : undefined,
+                            height: !isNaN(iconSize) ? 'auto' : undefined,
+                            padding: iconBgColor ? '8px' : '0',
+                            borderRadius: '50%'
                         }"
                     >
-                        <component :is="getIcon(item.icon || defaultIcon)" :class="iconInnerClass" />
+                        <LucideIcon 
+                            :name="item.icon || defaultIcon" 
+                            :class="iconInnerClass"
+                            :size="numericSize"
+                            :style="{
+                                width: !isNaN(iconSize) ? `${iconSize}px` : undefined,
+                                height: !isNaN(iconSize) ? `${iconSize}px` : undefined
+                            }"
+                        />
                     </div>
                     <div class="flex-1 pt-0.5">
                         <h4 v-if="item.title" class="font-bold text-lg">{{ item.title }}</h4>
                         <p v-if="item.description" class="opacity-80 mt-1">{{ item.description }}</p>
+                        <!-- Fallback for text only items -->
+                        <span v-if="item.text && !item.title" class="text-base">{{ item.text }}</span>
                     </div>
                 </li>
             </ul>
@@ -39,23 +53,16 @@ defineOptions({
 });
 
 import { computed } from 'vue';
-import { 
-    Check, Star, ArrowRight, Zap, Shield, Heart,
-    CheckCircle, Circle, Square, Diamond, Sparkles
-} from 'lucide-vue-next';
+import LucideIcon from '../../ui/LucideIcon.vue';
 
 const props = defineProps({
     title: { type: String, default: '' },
     items: { 
         type: Array, 
-        default: () => [
-            { title: 'First Item', description: 'Description for the first item.', icon: 'check' },
-            { title: 'Second Item', description: 'Description for the second item.', icon: 'check' },
-            { title: 'Third Item', description: 'Description for the third item.', icon: 'check' }
-        ] 
+        default: () => [] 
     },
     defaultIcon: { type: String, default: 'check' },
-    iconSize: { type: String, default: 'medium' },
+    iconSize: { type: [String, Number], default: 20 },
     iconColor: { type: String, default: '' },
     iconBgColor: { type: String, default: '' },
     alignment: { type: String, default: 'left' },
@@ -65,37 +72,31 @@ const props = defineProps({
     animation: { type: String, default: '' }
 });
 
-const icons = {
-    check: Check,
-    'check-circle': CheckCircle,
-    star: Star,
-    'arrow-right': ArrowRight,
-    zap: Zap,
-    shield: Shield,
-    heart: Heart,
-    circle: Circle,
-    square: Square,
-    diamond: Diamond,
-    sparkles: Sparkles
-};
-
-const getIcon = (name) => icons[name] || Check;
-
 const alignmentClass = computed(() => ({
     'left': 'text-left',
     'center': 'text-center mx-auto',
     'right': 'text-right ml-auto'
 }[props.alignment] || 'text-left'));
 
-const iconSizeClass = computed(() => ({
-    'small': 'w-8 h-8',
-    'medium': 'w-10 h-10',
-    'large': 'w-12 h-12'
-}[props.iconSize] || 'w-10 h-10'));
+const iconSizeClass = computed(() => {
+    if (!isNaN(props.iconSize)) return '';
+    return {
+        'small': 'w-8 h-8',
+        'medium': 'w-10 h-10',
+        'large': 'w-12 h-12'
+    }[props.iconSize] || 'w-10 h-10';
+});
 
-const iconInnerClass = computed(() => ({
-    'small': 'w-4 h-4',
-    'medium': 'w-5 h-5',
-    'large': 'w-6 h-6'
-}[props.iconSize] || 'w-5 h-5'));
+const iconInnerClass = computed(() => {
+    if (!isNaN(props.iconSize)) return '';
+    return {
+        'small': 'w-4 h-4',
+        'medium': 'w-5 h-5',
+        'large': 'w-6 h-6'
+    }[props.iconSize] || 'w-5 h-5';
+});
+
+const numericSize = computed(() => {
+    return !isNaN(props.iconSize) ? props.iconSize : 20;
+});
 </script>

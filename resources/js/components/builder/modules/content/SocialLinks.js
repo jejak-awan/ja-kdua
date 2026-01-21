@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -22,12 +27,18 @@ export default {
     icon: 'Share2',
     category: 'content',
 
-    children: ['sociallink_item'],
+    children: null, // Converted to repeater
 
     defaults: {
+        links: [
+            { network: 'facebook', url: '#', iconColor: '#1877F2', backgroundColor: '#e7f3ff', useCustomColor: true },
+            { network: 'twitter', url: '#', iconColor: '#1DA1F2', backgroundColor: '#e8f5fe', useCustomColor: true },
+            { network: 'instagram', url: '#', iconColor: '#E4405F', backgroundColor: '#fef0f3', useCustomColor: true },
+            { network: 'linkedin', url: '#', iconColor: '#0A66C2', backgroundColor: '#e7f0f7', useCustomColor: true }
+        ],
         // Style
-        style: 'icon-only',
-        size: 24,
+        displayStyle: 'icon-only',
+        iconSize: 24,
         color: '#333333',
         hoverColor: '#2059ea',
         hoverBackgroundColor: '',
@@ -39,22 +50,9 @@ export default {
         // Spacing
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
-        // Border
-        border: {
-            radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
-            styles: {
-                all: { width: 0, color: '#333333', style: 'solid' },
-                top: { width: 0, color: '#333333', style: 'solid' },
-                right: { width: 0, color: '#333333', style: 'solid' },
-                bottom: { width: 0, color: '#333333', style: 'solid' },
-                left: { width: 0, color: '#333333', style: 'solid' }
-            }
-        },
+        border: { radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true }, styles: { all: { width: 0, color: '#333333', style: 'solid' } } },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        animation_effect: '',
-        animation_duration: 1000,
-        animation_delay: 0,
-        animation_repeat: '1'
+        animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
     settings: {
@@ -64,13 +62,37 @@ export default {
                 label: 'Social Links',
                 fields: [
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Social Networks'
+                        name: 'links',
+                        type: 'repeater',
+                        label: 'Social Networks',
+                        itemLabel: 'network',
+                        fields: [
+                            {
+                                name: 'network',
+                                type: 'select',
+                                label: 'Network',
+                                options: [
+                                    { value: 'facebook', label: 'Facebook' },
+                                    { value: 'twitter', label: 'Twitter' },
+                                    { value: 'instagram', label: 'Instagram' },
+                                    { value: 'linkedin', label: 'LinkedIn' },
+                                    { value: 'youtube', label: 'YouTube' },
+                                    { value: 'github', label: 'GitHub' },
+                                    { value: 'whatsapp', label: 'WhatsApp' },
+                                    { value: 'email', label: 'Email' },
+                                    { value: 'website', label: 'Website' }
+                                ]
+                            },
+                            { name: 'url', type: 'text', label: 'Profile URL' },
+                            { name: 'useCustomColor', type: 'toggle', label: 'Use Custom Color' },
+                            { name: 'iconColor', type: 'color', label: 'Icon Color', showIf: { useCustomColor: true } },
+                            { name: 'backgroundColor', type: 'color', label: 'Background Color', showIf: { useCustomColor: true } }
+                        ]
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Social Links')
         ],
         design: [
             {
@@ -78,7 +100,7 @@ export default {
                 label: 'Style',
                 fields: [
                     {
-                        name: 'style',
+                        name: 'displayStyle',
                         type: 'select',
                         label: 'Display Style',
                         responsive: true,
@@ -89,7 +111,7 @@ export default {
                         ]
                     },
                     {
-                        name: 'size',
+                        name: 'iconSize',
                         type: 'range',
                         label: 'Icon Size',
                         min: 16,
@@ -103,7 +125,7 @@ export default {
                         type: 'range',
                         label: 'Gap',
                         min: 8,
-                        max: 32,
+                        max: 64,
                         step: 4,
                         unit: 'px',
                         responsive: true
@@ -112,26 +134,11 @@ export default {
             },
             {
                 id: 'iconColors',
-                label: 'Icon Colors',
+                label: 'Global Icon Colors',
                 fields: [
-                    {
-                        name: 'color',
-                        type: 'color',
-                        label: 'Icon Color',
-                        responsive: true
-                    },
-                    {
-                        name: 'hoverColor',
-                        type: 'color',
-                        label: 'Hover Color',
-                        responsive: true
-                    },
-                    {
-                        name: 'hoverBackgroundColor',
-                        type: 'color',
-                        label: 'Hover Background',
-                        responsive: true
-                    }
+                    { name: 'color', type: 'color', label: 'Icon Color', responsive: true },
+                    { name: 'hoverColor', type: 'color', label: 'Hover Color', responsive: true },
+                    { name: 'hoverBackgroundColor', type: 'color', label: 'Hover Background', responsive: true }
                 ]
             },
             {
@@ -163,7 +170,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

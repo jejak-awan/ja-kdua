@@ -91,8 +91,8 @@ const updateResponsiveField = (fieldName, value) => {
 }
 
 const calculateTimeLeft = () => {
-  const targetDate = settings.value.targetDate || new Date().toISOString().split('T')[0]
-  const targetTime = settings.value.targetTime || '00:00'
+  const targetDate = settings.value.endDate || new Date().toISOString().split('T')[0]
+  const targetTime = settings.value.endTime || '00:00'
   const target = new Date(`${targetDate}T${targetTime}:00`)
   const now = new Date()
   const diff = target - now

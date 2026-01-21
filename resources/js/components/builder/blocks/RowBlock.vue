@@ -107,7 +107,7 @@ const rowStyles = computed(() => {
     transition: 'background 0.2s ease, box-shadow 0.2s ease'
   }
   
-  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getBackgroundStyles(settings.value, device.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
   Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))

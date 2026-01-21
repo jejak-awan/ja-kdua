@@ -1,34 +1,37 @@
 <template>
   <div class="icon-list-block" :style="containerStyles">
-    <draggable
-        v-model="module.children"
-        item-key="id"
-        group="icon_list_item"
-        class="icon-list-container"
-        ghost-class="ja-builder-ghost"
-    >
-        <template #item="{ element: child, index }">
-            <ModuleWrapper
-                :module="child"
-                :index="index"
-            />
-        </template>
-    </draggable>
+    <div class="icon-list-items" :style="listStyles">
+        <div 
+            v-for="(item, index) in items" 
+            :key="index"
+            class="icon-list-item"
+            :style="itemStyles"
+        >
+            <div class="icon-wrapper" :style="iconWrapperStyles">
+                <LucideIcon 
+                    :name="item.icon || defaultIcon" 
+                    :size="iconSize" 
+                    :style="iconStyles"
+                />
+            </div>
+            <div class="icon-list-content">
+                <span class="icon-list-text" :style="textStyles">{{ item.text || item.title || 'List Item' }}</span>
+                <p v-if="item.description" class="icon-list-desc">{{ item.description }}</p>
+            </div>
+        </div>
+    </div>
     
     <!-- Empty State -->
-    <div v-if="!module.children || module.children.length === 0" class="empty-list-placeholder">
-        <List :size="24" />
+    <div v-if="items.length === 0" class="empty-list-placeholder p-4 text-center text-gray-400 border dashed border-gray-300 rounded">
+        <LucideIcon name="List" :size="24" class="mx-auto mb-2" />
         <span>Add items in settings</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
-import * as LucideIcons from 'lucide-vue-next'
-import { List } from 'lucide-vue-next'
+import { computed, inject } from 'vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -49,22 +52,16 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-const getIcon = (name) => {
-    if (!name) return LucideIcons.Check
-    return LucideIcons[name] || LucideIcons.Check
-}
+const items = computed(() => settings.value.items || [])
+const defaultIcon = computed(() => 'check')
+const iconSize = computed(() => getResponsiveValue(settings.value, 'iconSize', device.value) || 20)
 
 const containerStyles = computed(() => {
   const styles = {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    gap: `${getResponsiveValue(settings.value, 'gap', device.value) || 12}px`
   }
-  
-  const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
-  if (align === 'center') styles.alignItems = 'center'
-  
   Object.assign(styles, getBackgroundStyles(settings.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
@@ -73,21 +70,26 @@ const containerStyles = computed(() => {
   Object.assign(styles, getSizingStyles(settings.value, device.value))
   Object.assign(styles, getFilterStyles(settings.value, device.value))
   Object.assign(styles, getTransformStyles(settings.value, device.value))
-  
   return styles
+})
+
+const listStyles = computed(() => {
+  return {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${getResponsiveValue(settings.value, 'gap', device.value) || 12}px`
+  }
 })
 
 const itemStyles = computed(() => {
     const align = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
-    const styles = {
+    return {
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start', // Align to top (icon/text)
         gap: '12px',
         justifyContent: align === 'center' ? 'center' : 'flex-start',
-        width: align === 'center' ? 'auto' : '100%'
+        textAlign: align
     }
-    Object.assign(styles, getTypographyStyles(settings.value, 'text_', device.value))
-    return styles
 })
 
 const iconWrapperStyles = computed(() => {
@@ -98,32 +100,26 @@ const iconWrapperStyles = computed(() => {
         flexShrink: 0
     }
     
-    if (settings.value.iconBackgroundColor) {
-        s.backgroundColor = settings.value.iconBackgroundColor
+    if (settings.value.iconBgColor) {
+        s.backgroundColor = settings.value.iconBgColor
         s.padding = '8px'
+        // Simple shape handling
         s.borderRadius = settings.value.iconBackgroundShape === 'circle' ? '50%' : settings.value.iconBackgroundShape === 'square' ? '4px' : '0'
     }
     
     return s
 })
 
-// Provide state to IconListItemBlock
-provide('iconListState', {
-    parentSettings: settings
-})
-
 const iconStyles = computed(() => {
-    const size = getResponsiveValue(settings.value, 'iconSize', device.value) || 20
     return {
-        width: `${size}px`,
-        height: `${size}px`,
         color: settings.value.iconColor || 'inherit'
     }
 })
+
+const textStyles = computed(() => getTypographyStyles(settings.value, 'text_', device.value))
+
 </script>
 
 <style scoped>
-.icon-list-block {
-  width: 100%;
-}
+.icon-list-block { width: 100%; }
 </style>

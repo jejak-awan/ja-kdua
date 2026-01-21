@@ -2,7 +2,7 @@ import { Type } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'post_title',
+    name: 'posttitle',
     label: 'Post Title',
     icon: Type,
     description: 'Display dynamic post title with meta.',

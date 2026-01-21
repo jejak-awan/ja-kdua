@@ -2,7 +2,7 @@ import { User } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'post_meta',
+    name: 'postmeta',
     label: 'Post Meta',
     icon: User,
     category: 'Dynamic',

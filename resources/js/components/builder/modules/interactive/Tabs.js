@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -23,12 +28,14 @@ export default {
     icon: 'RectangleHorizontal',
     category: 'interactive',
 
-    // Has tab children
-    children: ['tab_item'],
+    children: null, // Converted to repeater
 
-    // Default settings
     defaults: {
-        activeTab: '',
+        items: [
+            { title: 'Overview', content: '<p>Standardize your content with our powerful tab system. It supports rich text, images, and custom styling for each tab.</p>', icon: 'Layout' },
+            { title: 'Features', content: '<p>Our tab system is highly responsive, ensuring your content looks great on any device.</p>', icon: 'Zap' },
+            { title: 'Pricing', content: '<p>Flexible pricing plans tailored to your needs. Contact us for more information.</p>', icon: 'DollarSign' }
+        ],
         // Layout
         tabPosition: 'top',
         tabAlignment: 'left',
@@ -39,24 +46,13 @@ export default {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 4, tr: 4, bl: 4, br: 4, linked: true },
-            styles: {
-                all: { width: 1, color: '#e0e0e0', style: 'solid' },
-                top: { width: 1, color: '#e0e0e0', style: 'solid' },
-                right: { width: 1, color: '#e0e0e0', style: 'solid' },
-                bottom: { width: 1, color: '#e0e0e0', style: 'solid' },
-                left: { width: 1, color: '#e0e0e0', style: 'solid' }
-            }
+            radius: { tl: 12, tr: 12, bl: 12, br: 12, linked: true },
+            styles: { all: { width: 1, color: '#e0e0e0', style: 'solid' } }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        // Animation
-        animation_effect: '',
-        animation_duration: 1000,
-        animation_delay: 0,
-        animation_repeat: '1'
+        animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
-    // Settings panel configuration
     settings: {
         content: [
             {
@@ -64,13 +60,20 @@ export default {
                 label: 'Tabs',
                 fields: [
                     {
-                        name: 'module_manager',
-                        type: 'children_manager',
-                        label: 'Tabs'
+                        name: 'items',
+                        type: 'repeater',
+                        label: 'Tabs',
+                        itemLabel: 'title',
+                        fields: [
+                            { name: 'title', type: 'text', label: 'Tab Title' },
+                            { name: 'icon', type: 'icon', label: 'Tab Icon' },
+                            { name: 'content', type: 'richtext', label: 'Tab Content' }
+                        ]
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Tabs')
         ],
         design: [
             {
@@ -106,18 +109,8 @@ export default {
                 id: 'tabStyle',
                 label: 'Tab Style',
                 fields: [
-                    {
-                        name: 'tabBackgroundColor',
-                        type: 'color',
-                        label: 'Tab Background',
-                        responsive: true
-                    },
-                    {
-                        name: 'tabActiveBackgroundColor',
-                        type: 'color',
-                        label: 'Active Tab Background',
-                        responsive: true
-                    }
+                    { name: 'tabBackgroundColor', type: 'color', label: 'Tab Background', responsive: true },
+                    { name: 'tabActiveBackgroundColor', type: 'color', label: 'Active Tab Background', responsive: true }
                 ]
             },
             {
@@ -142,18 +135,8 @@ export default {
                 id: 'contentStyle',
                 label: 'Content Style',
                 fields: [
-                    {
-                        name: 'contentBackgroundColor',
-                        type: 'color',
-                        label: 'Content Background',
-                        responsive: true
-                    },
-                    {
-                        name: 'contentPadding',
-                        type: 'spacing',
-                        label: 'Content Padding',
-                        responsive: true
-                    }
+                    { name: 'contentBackgroundColor', type: 'color', label: 'Content Background', responsive: true },
+                    { name: 'contentPadding', type: 'spacing', label: 'Content Padding', responsive: true }
                 ]
             },
             {
@@ -177,7 +160,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

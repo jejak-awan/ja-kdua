@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -116,7 +121,8 @@ export default {
                     { name: 'triggerOffset', type: 'range', label: 'Trigger Offset', min: 0, max: 100, step: 5, unit: '%' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Lottie Animation')
         ],
         design: [
             {
@@ -165,7 +171,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

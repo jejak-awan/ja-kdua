@@ -6,15 +6,15 @@ defineOptions({
 });
 
 const props = defineProps({
-    end_date: { type: String, default: '' },
-    end_time: { type: String, default: '00:00' },
+    endDate: { type: String, default: '' },
+    endTime: { type: String, default: '00:00' },
     title: { type: String, default: '' },
-    expired_message: { type: String, default: 'Time is up!' },
-    show_days: { type: Boolean, default: true },
-    show_hours: { type: Boolean, default: true },
-    show_minutes: { type: Boolean, default: true },
-    show_seconds: { type: Boolean, default: true },
-    digit_style: { type: String, default: 'boxed' },
+    expiredMessage: { type: String, default: 'Time is up!' },
+    showDays: { type: Boolean, default: true },
+    showHours: { type: Boolean, default: true },
+    showMinutes: { type: Boolean, default: true },
+    showSeconds: { type: Boolean, default: true },
+    digitStyle: { type: String, default: 'boxed' },
     size: { type: String, default: 'large' },
     alignment: { type: String, default: 'text-center' },
     padding: { type: String, default: 'py-16' },
@@ -35,8 +35,8 @@ onUnmounted(() => {
 });
 
 const targetTime = computed(() => {
-    if (!props.end_date) return null;
-    const dateStr = `${props.end_date}T${props.end_time || '00:00'}`;
+    if (!props.endDate) return null;
+    const dateStr = `${props.endDate}T${props.endTime || '00:00'}`;
     return new Date(dateStr).getTime();
 });
 
@@ -69,7 +69,7 @@ const digitClass = computed(() => {
         medium: 'w-20 h-20 text-3xl',
         large: 'w-24 h-24 text-4xl md:text-5xl'
     };
-    return `${base} ${styles[props.digit_style] || styles.boxed} ${sizes[props.size] || sizes.large}`;
+    return `${base} ${styles[props.digitStyle] || styles.boxed} ${sizes[props.size] || sizes.large}`;
 });
 
 const labelClass = computed(() => {
@@ -97,25 +97,25 @@ const pad = (num) => String(num).padStart(2, '0');
         
         <div v-if="!timeRemaining.expired" class="flex flex-wrap gap-4 md:gap-6" :class="{ 'justify-center': alignment === 'text-center', 'justify-start': alignment === 'text-left', 'justify-end': alignment === 'text-right' }">
             <!-- Days -->
-            <div v-if="show_days" :class="digitClass">
+            <div v-if="showDays" :class="digitClass">
                 <span>{{ pad(timeRemaining.days) }}</span>
                 <span :class="labelClass">Days</span>
             </div>
             
             <!-- Hours -->
-            <div v-if="show_hours" :class="digitClass">
+            <div v-if="showHours" :class="digitClass">
                 <span>{{ pad(timeRemaining.hours) }}</span>
                 <span :class="labelClass">Hours</span>
             </div>
             
             <!-- Minutes -->
-            <div v-if="show_minutes" :class="digitClass">
+            <div v-if="showMinutes" :class="digitClass">
                 <span>{{ pad(timeRemaining.minutes) }}</span>
                 <span :class="labelClass">Minutes</span>
             </div>
             
             <!-- Seconds -->
-            <div v-if="show_seconds" :class="digitClass">
+            <div v-if="showSeconds" :class="digitClass">
                 <span>{{ pad(timeRemaining.seconds) }}</span>
                 <span :class="labelClass">Seconds</span>
             </div>
@@ -123,7 +123,7 @@ const pad = (num) => String(num).padStart(2, '0');
         
         <!-- Expired State -->
         <div v-else class="py-10">
-            <p class="text-2xl md:text-3xl font-bold text-primary animate-pulse">{{ expired_message }}</p>
+            <p class="text-2xl md:text-3xl font-bold text-primary animate-pulse">{{ expiredMessage }}</p>
         </div>
     </section>
 </template>

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -26,14 +31,14 @@ export default {
     children: null,
 
     defaults: {
-        percentage: 75,
+        value: 75,
         title: 'Progress',
-        showPercentage: true,
+        showValue: true,
         // Circle
         size: 150,
-        strokeWidth: 10,
+        thickness: 10,
         // Colors
-        circleColor: '#2059ea',
+        color: '#2059ea',
         trackColor: '#e0e0e0',
         // Background
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
@@ -65,9 +70,9 @@ export default {
                 label: 'Counter',
                 fields: [
                     {
-                        name: 'percentage',
+                        name: 'value',
                         type: 'range',
-                        label: 'Percentage',
+                        label: 'Value',
                         min: 0,
                         max: 100,
                         step: 1,
@@ -81,14 +86,15 @@ export default {
                         responsive: true
                     },
                     {
-                        name: 'showPercentage',
+                        name: 'showValue',
                         type: 'toggle',
-                        label: 'Show Percentage',
+                        label: 'Show Value',
                         responsive: true
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Circle Counter')
         ],
         design: [
             {
@@ -106,9 +112,9 @@ export default {
                         responsive: true
                     },
                     {
-                        name: 'strokeWidth',
+                        name: 'thickness',
                         type: 'range',
-                        label: 'Stroke Width',
+                        label: 'Thickness',
                         min: 4,
                         max: 24,
                         step: 2,
@@ -116,9 +122,9 @@ export default {
                         responsive: true
                     },
                     {
-                        name: 'circleColor',
+                        name: 'color',
                         type: 'color',
-                        label: 'Circle Color',
+                        label: 'Color',
                         responsive: true
                     },
                     {
@@ -134,8 +140,8 @@ export default {
                 label: 'Percentage Typography',
                 fields: typographySettings.fields.map(f => ({
                     ...f,
-                    name: `percentage_${f.name}`,
-                    label: `Percentage ${f.label}`
+                    name: `value_${f.name}`,
+                    label: `Value ${f.label}`
                 }))
             },
             {
@@ -159,7 +165,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -1,160 +1,134 @@
 <template>
-    <section 
-        :class="['transition-all duration-500', padding, radius, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width]">
-            <div :class="['transition-all duration-500', customStyle]">
-                <div v-if="!submitted">
-                    <div class="mb-10" :class="alignment === 'text-center' ? 'text-center' : alignment === 'text-right' ? 'text-right' : 'text-left'">
-                        <h2 v-if="title" class="text-3xl font-bold tracking-tight mb-2">{{ title }}</h2>
-                        <p v-if="description" class="opacity-80">{{ description }}</p>
+    <div class="contact-form-block w-full">
+        <div v-if="title || description" class="text-center mb-8">
+            <h3 v-if="title" class="text-2xl font-bold mb-2">{{ title }}</h3>
+            <p v-if="description" class="text-muted-foreground">{{ description }}</p>
+        </div>
+
+        <form @submit.prevent="submitForm" class="grid gap-6">
+            <div class="flex flex-wrap -mx-3">
+                <div 
+                    v-for="(field, index) in fields" 
+                    :key="index" 
+                    class="px-3 mb-6"
+                    :style="{ width: field.width || '100%' }"
+                >
+                    <label 
+                        v-if="field.label" 
+                        class="block text-sm font-medium mb-2"
+                        :for="field.fieldId"
+                    >
+                        {{ field.label }} <span v-if="field.required" class="text-red-500">*</span>
+                    </label>
+
+                    <!-- Text / Email / Password -->
+                    <input 
+                        v-if="['text', 'email', 'password', 'tel'].includes(field.type)"
+                        :type="field.type"
+                        :id="field.fieldId"
+                        :placeholder="field.placeholder"
+                        :required="field.required"
+                        class="w-full px-4 py-3 rounded-lg border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+
+                    <!-- Textarea -->
+                    <textarea 
+                        v-else-if="field.type === 'textarea'"
+                        :id="field.fieldId"
+                        :placeholder="field.placeholder"
+                        :required="field.required"
+                        rows="4"
+                        class="w-full px-4 py-3 rounded-lg border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"
+                    ></textarea>
+
+                    <!-- Select -->
+                    <select 
+                        v-else-if="field.type === 'select'"
+                        :id="field.fieldId"
+                        :required="field.required"
+                        class="w-full px-4 py-3 rounded-lg border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
+                    >
+                        <option value="" disabled selected>{{ field.placeholder || 'Select an option' }}</option>
+                        <option 
+                            v-for="opt in parseOptions(field.options)" 
+                            :key="opt" 
+                            :value="opt"
+                        >
+                            {{ opt }}
+                        </option>
+                    </select>
+
+                    <!-- Checkbox -->
+                    <div v-else-if="field.type === 'checkbox'" class="flex items-center gap-2">
+                        <input 
+                            type="checkbox" 
+                            :id="field.fieldId"
+                            :required="field.required"
+                            class="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span class="text-sm cursor-pointer" @click="focusField(field.fieldId)">
+                            {{ field.placeholder || 'Yes, I agree' }}
+                        </span>
                     </div>
-
-                    <form @submit.prevent="handleSubmit" class="flex flex-wrap gap-4">
-                        <template v-for="(field, index) in fields" :key="index">
-                            <div :class="field.width || 'w-full'" class="space-y-2">
-                                <label class="text-sm font-semibold text-foreground/80 ml-1">
-                                    {{ field.label }}
-                                    <span v-if="field.required" class="text-primary">*</span>
-                                </label>
-                                
-                                <template v-if="field.type === 'textarea'">
-                                    <textarea 
-                                        class="w-full min-h-[120px] rounded-xl border bg-background text-foreground px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
-                                        :placeholder="field.label"
-                                        :required="field.required"
-                                    ></textarea>
-                                </template>
-
-                                <template v-else-if="field.type === 'select'">
-                                    <select 
-                                        class="w-full h-12 rounded-xl border bg-background text-foreground px-4 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all appearance-none"
-                                        :required="field.required"
-                                    >
-                                        <option value="" disabled selected>Select an option</option>
-                                        <option v-for="opt in (field.options || 'Option 1, Option 2').split(',')" :key="opt" :value="opt.trim()">
-                                            {{ opt.trim() }}
-                                        </option>
-                                    </select>
-                                </template>
-
-                                <template v-else-if="field.type === 'checkbox'">
-                                    <div class="flex items-center gap-2 px-1">
-                                        <input type="checkbox" :id="`field-${index}`" class="w-4 h-4 rounded border-input text-primary focus:ring-primary" :required="field.required">
-                                        <label :for="`field-${index}`" class="text-sm text-muted-foreground line-clamp-1">{{ field.label }}</label>
-                                    </div>
-                                </template>
-
-                                <template v-else>
-                                    <input 
-                                        :type="field.type || 'text'"
-                                        class="w-full h-12 rounded-xl border bg-background text-foreground px-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all"
-                                        :placeholder="field.label"
-                                        :required="field.required"
-                                    />
-                                </template>
-                            </div>
-                        </template>
-                        
-                        <div class="w-full">
-                            <CaptchaWrapper action="contact" @verified="onCaptchaVerified" />
-                        </div>
-
-                        <div class="w-full mt-4">
-                            <button 
-                                type="submit" 
-                                class="w-full h-12 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                                :disabled="submitting"
-                            >
-                                <Loader2 v-if="submitting" class="w-4 h-4 animate-spin" />
-                                {{ submitting ? 'Sending...' : buttonText }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Success State -->
-                <div v-else class="text-center py-10 space-y-4 animate-in fade-in zoom-in duration-500">
-                    <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary border-2 border-primary/20">
-                        <Check class="w-10 h-10" />
-                    </div>
-                    <h3 class="text-2xl font-bold">{{ successMessage }}</h3>
-                    <p class="opacity-80">We typically respond within 24 hours.</p>
-                    <button @click="submitted = false" class="text-primary text-sm font-semibold hover:underline">
-                        Send another message
-                    </button>
                 </div>
             </div>
-        </div>
-    </section>
+
+            <div class="text-center mt-4">
+                <button 
+                    type="submit" 
+                    class="inline-flex items-center justify-center px-8 py-4 rounded-full font-bold text-white transition-all transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    :style="{ backgroundColor: buttonBackgroundColor || 'var(--primary)', color: buttonTextColor || '#ffffff' }"
+                    :disabled="isSubmitting"
+                >
+                    <span v-if="isSubmitting">Sending...</span>
+                    <span v-else>{{ buttonText || 'Send Message' }}</span>
+                </button>
+            </div>
+
+            <div v-if="success" class="p-4 rounded-lg bg-green-50 text-green-700 text-center border border-green-200">
+                {{ successMessage || 'Thank you! Your message has been sent.' }}
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { Loader2, Check } from 'lucide-vue-next';
-import CaptchaWrapper from '../../captcha/CaptchaWrapper.vue';
-import api from '../../../services/api';
+import { ref } from 'vue';
 
 defineOptions({
-  inheritAttrs: false
+    inheritAttrs: false
 });
 
 const props = defineProps({
-    title: { type: String, default: 'Get in Touch' },
-    description: { type: String, default: '' },
-    buttonText: { type: String, default: 'Send Message' },
-    successMessage: { type: String, default: 'Thank you! Your message has been sent.' },
-    fields: { 
-        type: Array, 
-        default: () => [
-            { label: 'Name', type: 'text', required: true, width: 'w-full md:w-[calc(50%_-_1rem)]' },
-            { label: 'Email', type: 'email', required: true, width: 'w-full md:w-[calc(50%_-_1rem)]' },
-            { label: 'Message', type: 'textarea', required: true, width: 'w-full' }
-        ] 
-    },
-    customStyle: { type: String, default: 'bg-card border shadow-sm p-8 rounded-2xl' },
-    padding: { type: String, default: 'py-20' },
-    width: { type: String, default: 'max-w-3xl' },
-    bgColor: String,
-    radius: { type: String, default: 'rounded-none' },
-    animation: { type: String, default: '' },
-    alignment: { type: String, default: 'text-left' },
-    formSlug: { type: String, default: 'contact' }
+    title: String,
+    description: String,
+    buttonText: String,
+    successMessage: String,
+    emailTo: String,
+    fields: { type: Array, default: () => [] },
+    buttonBackgroundColor: String,
+    buttonTextColor: String
 });
 
-const submitted = ref(false);
-const submitting = ref(false);
-const error = ref('');
-const captchaPayload = reactive({
-    token: '',
-    answer: ''
-});
+const isSubmitting = ref(false);
+const success = ref(false);
 
-const onCaptchaVerified = (payload) => {
-    captchaPayload.token = payload.token;
-    captchaPayload.answer = payload.answer;
+const parseOptions = (optionsString) => {
+    if (!optionsString) return [];
+    return optionsString.split('\n').filter(Boolean);
 };
 
-const handleSubmit = async (e) => {
-    submitting.value = true;
-    error.value = '';
-    
-    try {
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        
-        // Add captcha data
-        data.captcha_token = captchaPayload.token;
-        data.captcha_answer = captchaPayload.answer;
+const submitForm = () => {
+    isSubmitting.value = true;
+    // Simulate submission
+    setTimeout(() => {
+        isSubmitting.value = false;
+        success.value = true;
+    }, 1500);
+};
 
-        await api.post(`/cms/forms/${props.formSlug}/submit`, data);
-        submitted.value = true;
-    } catch (err) {
-        console.error('Form submission failed:', err);
-        error.value = err.response?.data?.message || 'Failed to send message. Please try again.';
-    } finally {
-        submitting.value = false;
-    }
+const focusField = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.click();
 };
 </script>

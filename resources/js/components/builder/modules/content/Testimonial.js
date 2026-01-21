@@ -11,7 +11,6 @@ import {
     positionSettings,
     transitionSettings,
     linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -45,6 +44,7 @@ export default {
         showQuoteIcon: true,
         quoteIconColor: '#e0e0e0',
         quoteIconSize: 48,
+        quoteIconName: 'quote',
         // Background
         background: { color: '#f9f9f9', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         // Spacing
@@ -54,11 +54,7 @@ export default {
         border: {
             radius: { tl: 8, tr: 8, bl: 8, br: 8, linked: true },
             styles: {
-                all: { width: 0, color: '#333333', style: 'solid' },
-                top: { width: 0, color: '#333333', style: 'solid' },
-                right: { width: 0, color: '#333333', style: 'solid' },
-                bottom: { width: 0, color: '#333333', style: 'solid' },
-                left: { width: 0, color: '#333333', style: 'solid' }
+                all: { width: 0, color: '#333333', style: 'solid' }
             }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
@@ -95,13 +91,13 @@ export default {
                     {
                         name: 'authorImage',
                         type: 'upload',
-                        label: 'Author Photo'
+                        label: 'Author Photo',
+                        responsive: true
                     }
                 ]
             },
             linkSettings,
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Testimonial')
         ],
@@ -148,7 +144,6 @@ export default {
                         name: 'quoteIconName',
                         type: 'icon',
                         label: 'Select Quote Icon',
-                        default: 'quote',
                         responsive: true
                     },
                     {

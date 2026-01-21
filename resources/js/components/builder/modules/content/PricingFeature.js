@@ -10,8 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,

@@ -75,7 +75,7 @@ const device = computed(() => builder?.device?.value || 'desktop')
 
 // Mock posts for preview
 const mockPosts = computed(() => {
-  const count = getResponsiveValue(settings.value, 'postsPerPage', device.value) || 6
+  const count = getResponsiveValue(settings.value, 'itemsPerPage', device.value) || 6
   return Array.from({ length: Math.min(count, 12) }, (_, i) => ({
     id: i + 1,
     title: `Blog Post Title ${i + 1}`,

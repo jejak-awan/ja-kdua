@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -51,7 +56,8 @@ export default {
                     { name: 'openInNewTab', type: 'toggle', label: 'Open in New Tab' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Logo')
         ],
         design: [
             {
@@ -80,7 +86,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

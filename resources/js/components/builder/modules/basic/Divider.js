@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -26,10 +31,10 @@ export default {
 
     defaults: {
         visible: true,
-        style: 'solid',
-        weight: 1,
-        color: '#cccccc',
-        width: '100%',
+        lineStyle: 'solid',
+        lineWeight: 1,
+        lineColor: '#cccccc',
+        lineWidth: '100%',
         alignment: 'center',
         padding: { top: 20, bottom: 20, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' }
@@ -44,7 +49,8 @@ export default {
                     { name: 'visible', type: 'toggle', label: 'Show Divider Line' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Divider')
         ],
         design: [
             {
@@ -52,16 +58,16 @@ export default {
                 label: 'Style',
                 fields: [
                     {
-                        name: 'style', type: 'select', label: 'Line Style', responsive: true, options: [
+                        name: 'lineStyle', type: 'select', label: 'Line Style', responsive: true, options: [
                             { value: 'solid', label: 'Solid' },
                             { value: 'dashed', label: 'Dashed' },
                             { value: 'dotted', label: 'Dotted' },
                             { value: 'double', label: 'Double' }
                         ]
                     },
-                    { name: 'weight', type: 'range', label: 'Line Weight', min: 1, max: 20, step: 1, unit: 'px', responsive: true },
-                    { name: 'color', type: 'color', label: 'Line Color', responsive: true },
-                    { name: 'width', type: 'text', label: 'Width (e.g., 100%, 200px)', responsive: true },
+                    { name: 'lineWeight', type: 'range', label: 'Line Weight', min: 1, max: 20, step: 1, unit: 'px', responsive: true },
+                    { name: 'lineColor', type: 'color', label: 'Line Color', responsive: true },
+                    { name: 'lineWidth', type: 'text', label: 'Width (e.g., 100%, 200px)', responsive: true },
                     {
                         name: 'alignment', type: 'buttonGroup', label: 'Alignment', responsive: true, options: [
                             { value: 'left', label: 'Left', icon: 'AlignLeft' },
@@ -83,7 +89,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -42,7 +47,8 @@ export default {
         content: [
             { id: 'settings', label: 'Settings', fields: [{ name: 'title', type: 'text', label: 'Title', responsive: true }] },
             { id: 'tag', label: 'HTML Tag', fields: [{ name: 'tag', type: 'select', label: 'Tag', responsive: true, options: [{ value: 'h1', label: 'H1' }, { value: 'h2', label: 'H2' }, { value: 'h3', label: 'H3' }] }] },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Post Title')
         ],
         design: [
             {
@@ -66,7 +72,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

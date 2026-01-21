@@ -1,74 +1,115 @@
-<template>
-    <section 
-        :class="['transition-all duration-500', padding, animation]"
-        :style="{ backgroundColor: bgColor || 'transparent' }"
-    >
-        <div :class="['mx-auto px-6', width]">
-            <Tabs :defaultValue="tabs[0]?.id || 'tab-0'" class="w-full">
-                <TabsList :class="['w-full', tabsListClass]">
-                    <TabsTrigger 
-                        v-for="(tab, index) in tabs" 
-                        :key="tab.id || 'tab-' + index"
-                        :value="tab.id || 'tab-' + index"
-                        :class="tabsTriggerClass"
-                    >
-                        <component v-if="tab.icon" :is="getIcon(tab.icon)" class="w-4 h-4 mr-2" />
-                        {{ tab.title || 'Tab ' + (index + 1) }}
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent 
-                    v-for="(tab, index) in tabs" 
-                    :key="'content-' + (tab.id || index)"
-                    :value="tab.id || 'tab-' + index"
-                    class="mt-6 focus-visible:outline-none"
-                >
-                    <div class="prose prose-sm max-w-none dark:prose-invert" v-html="tab.content || 'Tab content goes here...'"></div>
-                </TabsContent>
-            </Tabs>
-        </div>
-    </section>
-</template>
-
 <script setup>
-defineOptions({
-  inheritAttrs: false
-});
+import { ref, computed } from 'vue';
+import * as Icons from 'lucide-vue-next';
 
-import { computed } from 'vue';
-import Tabs from '@/components/ui/tabs.vue';
-import TabsList from '@/components/ui/tabs-list.vue';
-import TabsTrigger from '@/components/ui/tabs-trigger.vue';
-import TabsContent from '@/components/ui/tabs-content.vue';
-import { Home, User, Settings, Star, Heart, Zap, Mail, Phone } from 'lucide-vue-next';
+defineOptions({
+    inheritAttrs: false
+});
 
 const props = defineProps({
-    tabs: { 
-        type: Array, 
-        default: () => [
-            { id: 'tab-1', title: 'Tab 1', content: '<p>Content for tab 1</p>', icon: '' },
-            { id: 'tab-2', title: 'Tab 2', content: '<p>Content for tab 2</p>', icon: '' },
-            { id: 'tab-3', title: 'Tab 3', content: '<p>Content for tab 3</p>', icon: '' }
-        ] 
+    items: {
+        type: Array,
+        default: () => []
     },
-    style: { type: String, default: 'underline' },
-    width: { type: String, default: 'max-w-4xl' },
-    padding: { type: String, default: 'py-12' },
-    bgColor: String,
-    animation: { type: String, default: '' }
+    tabPosition: { type: String, default: 'top' },
+    tabAlignment: { type: String, default: 'left' },
+    tabBackgroundColor: { type: String, default: '' },
+    tabActiveBackgroundColor: { type: String, default: '' },
+    contentBackgroundColor: { type: String, default: '' },
+    padding: { type: [String, Object], default: '' }
 });
 
-const icons = { home: Home, user: User, settings: Settings, star: Star, heart: Heart, zap: Zap, mail: Mail, phone: Phone };
-const getIcon = (name) => icons[name] || null;
+const activeIndex = ref(0);
 
-const tabsListClass = computed(() => ({
-    'underline': 'bg-transparent border-b border-border rounded-none gap-4 justify-start',
-    'pills': 'bg-muted p-1 rounded-lg gap-1',
-    'boxed': 'bg-transparent gap-2'
-}[props.style] || 'bg-transparent'));
+const getIcon = (name) => {
+    if (!name) return null;
+    const normalized = name.charAt(0).toUpperCase() + name.slice(1);
+    return Icons[normalized] || null;
+};
 
-const tabsTriggerClass = computed(() => ({
-    'underline': 'rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 pb-3',
-    'pills': 'rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2',
-    'boxed': 'border rounded-lg data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-2'
-}[props.style] || ''));
+const tabsContainerClass = computed(() => {
+    const isLeft = props.tabPosition === 'left';
+    return [
+        'tabs-renderer w-full',
+        isLeft ? 'flex items-start' : 'flex flex-col'
+    ].filter(Boolean);
+});
+
+const listClass = computed(() => {
+    const isLeft = props.tabPosition === 'left';
+    const align = props.tabAlignment;
+    
+    return [
+        'tabs-list flex shrink-0',
+        isLeft ? 'flex-col w-48 border-r' : 'w-full border-b',
+        !isLeft && align === 'center' ? 'justify-center' : '',
+        !isLeft && align === 'right' ? 'justify-end' : '',
+        props.tabPosition === 'bottom' ? 'order-last border-t border-b-0' : ''
+    ].filter(Boolean);
+});
+
+const getTabButtonClass = (index) => {
+    const isActive = activeIndex.value === index;
+    const isLeft = props.tabPosition === 'left';
+    const isBottom = props.tabPosition === 'bottom';
+    
+    return [
+        'tabs-trigger flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-all duration-300 relative',
+        isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30',
+        isActive && !isLeft && !isBottom ? 'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary' : '',
+        isActive && isLeft ? 'after:absolute after:right-0 after:top-0 after:bottom-0 after:w-0.5 after:bg-primary' : '',
+        isActive && isBottom ? 'after:absolute after:top-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary' : '',
+        props.tabAlignment === 'fill' ? 'flex-1 justify-center' : ''
+    ].filter(Boolean);
+};
 </script>
+
+<template>
+    <div :class="tabsContainerClass">
+        <!-- Tabs Header -->
+        <div :class="listClass" :style="{ backgroundColor: tabBackgroundColor || 'transparent' }">
+            <button 
+                v-for="(item, index) in items" 
+                :key="index"
+                @click="activeIndex = index"
+                :class="getTabButtonClass(index)"
+                :style="index === activeIndex ? { backgroundColor: tabActiveBackgroundColor } : {}"
+                type="button"
+            >
+                <component v-if="item.icon" :is="getIcon(item.icon)" class="w-4 h-4 shrink-0" />
+                <span class="truncate">{{ item.title || 'Tab ' + (index + 1) }}</span>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div 
+            class="tabs-content flex-1 p-6" 
+            :style="{ backgroundColor: contentBackgroundColor || 'transparent' }"
+        >
+            <transition name="tab-fade" mode="out-in">
+                <div 
+                    v-for="(item, index) in items" 
+                    v-show="index === activeIndex"
+                    :key="index"
+                    class="tab-pane prose prose-sm max-w-none dark:prose-invert"
+                    v-html="item.content || ''"
+                ></div>
+            </transition>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.tab-fade-enter-active,
+.tab-fade-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.tab-fade-enter-from {
+    opacity: 0;
+    transform: translateY(4px);
+}
+.tab-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+</style>

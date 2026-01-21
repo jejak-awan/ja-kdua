@@ -13,11 +13,14 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
-    menu_id: { type: [String, Number], default: null },
+    menuId: { type: [String, Number], default: null },
     style: { type: String, default: 'horizontal' },
     alignment: { type: String, default: 'center' },
-    show_mobile_toggle: { type: Boolean, default: true },
-    mobile_breakpoint: { type: String, default: 'md' },
+    showMobileToggle: { type: Boolean, default: true },
+    mobileBreakpoint: { type: String, default: 'md' },
+    showLogo: { type: Boolean, default: false },
+    logoImage: { type: String, default: '' },
+    logoPosition: { type: String, default: 'left' },
     padding: { type: String, default: 'py-4' },
     bgColor: { type: String, default: '' }
 });
@@ -28,7 +31,7 @@ const mobileOpen = ref(false);
 const openDropdown = ref(null);
 
 const displayItems = computed(() => {
-    if (props.menu_id && systemItems.value) {
+    if (props.menuId && systemItems.value) {
         return systemItems.value;
     }
     return props.items && props.items.length > 0 ? props.items : [
@@ -39,14 +42,14 @@ const displayItems = computed(() => {
 });
 
 const fetchSystemMenu = async () => {
-    if (!props.menu_id) {
+    if (!props.menuId) {
         systemItems.value = null;
         return;
     }
 
     loading.value = true;
     try {
-        const response = await api.get(`/cms/menus/${props.menu_id}`);
+        const response = await api.get(`/cms/menus/${props.menuId}`);
         const data = parseSingleResponse(response);
         // Menu item format might need transformation
         systemItems.value = ensureArray(data?.items);
@@ -58,7 +61,7 @@ const fetchSystemMenu = async () => {
 };
 
 onMounted(fetchSystemMenu);
-watch(() => props.menu_id, fetchSystemMenu);
+watch(() => props.menuId, fetchSystemMenu);
 
 const containerClasses = computed(() => {
     return ['transition-all duration-300', props.padding].filter(Boolean);
@@ -70,7 +73,13 @@ const navClasses = computed(() => {
         center: 'justify-center',
         right: 'justify-end'
     };
-    return ['hidden md:flex items-center gap-1', alignments[props.alignment] || 'justify-center'];
+    return ['hidden md:flex items-center gap-6', alignments[props.alignment] || 'justify-center'];
+});
+
+const logoClasses = computed(() => {
+    if (props.logoPosition === 'center') return 'mx-auto';
+    if (props.logoPosition === 'right') return 'order-last ml-auto';
+    return 'mr-auto';
 });
 
 const toggleDropdown = (index) => {
@@ -89,6 +98,11 @@ const toggleDropdown = (index) => {
         </div>
 
         <div class="container mx-auto px-6">
+            <!-- Logo -->
+            <div v-if="showLogo && logoImage" class="flex-shrink-0" :class="logoClasses">
+                <img :src="logoImage" alt="Logo" class="h-10 w-auto object-contain" />
+            </div>
+
             <!-- Desktop Menu -->
             <ul :class="navClasses">
                 <li 
@@ -129,7 +143,7 @@ const toggleDropdown = (index) => {
             </ul>
             
             <!-- Mobile Toggle -->
-            <div v-if="show_mobile_toggle" class="flex md:hidden justify-end">
+            <div v-if="showMobileToggle" class="flex md:hidden justify-end">
                 <button 
                     @click="mobileOpen = !mobileOpen"
                     class="p-2 rounded-lg hover:bg-muted transition-colors"

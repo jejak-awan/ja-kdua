@@ -1,7 +1,7 @@
 import { defineAsyncComponent } from 'vue';
 import { GalleryHorizontal } from 'lucide-vue-next';
 
-export const PostCarousel = {
+export default {
     name: 'PostCarousel',
     label: 'Post Carousel',
     category: 'Magazine',

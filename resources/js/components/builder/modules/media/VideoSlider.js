@@ -11,11 +11,16 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
- * Video Slider Module Definition (Divi 5 Reference)
+ * Video Slider Module Definition
  */
 export default {
     name: 'videoslider',
@@ -23,9 +28,13 @@ export default {
     icon: 'Film',
     category: 'media',
 
-    children: ['video_slide_item'],
+    children: null, // Converted to repeater
 
     defaults: {
+        items: [
+            { title: 'Nature Cinematic', type: 'youtube', videoId: 'aqz-KE-bpKQ', thumbnail: '' },
+            { title: 'City Lights', type: 'vimeo', videoId: '446698547', thumbnail: '' }
+        ],
         // Navigation
         showArrows: true,
         showDots: true,
@@ -54,20 +63,11 @@ export default {
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         // Border
         border: {
-            radius: { tl: 8, tr: 8, bl: 8, br: 8, linked: true },
-            styles: {
-                all: { width: 0, color: '#333333', style: 'solid' },
-                top: { width: 0, color: '#333333', style: 'solid' },
-                right: { width: 0, color: '#333333', style: 'solid' },
-                bottom: { width: 0, color: '#333333', style: 'solid' },
-                left: { width: 0, color: '#333333', style: 'solid' }
-            }
+            radius: { tl: 12, tr: 12, bl: 12, br: 12, linked: true },
+            styles: { all: { width: 0, color: '#333333', style: 'solid' } }
         },
         boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
-        animation_effect: '',
-        animation_duration: 1000,
-        animation_delay: 0,
-        animation_repeat: '1'
+        animation_effect: '', animation_duration: 1000, animation_delay: 0, animation_repeat: '1'
     },
 
     settings: {
@@ -76,7 +76,27 @@ export default {
                 id: 'videos',
                 label: 'Videos',
                 fields: [
-                    { name: 'module_manager', type: 'children_manager', label: 'Videos' }
+                    {
+                        name: 'items',
+                        type: 'repeater',
+                        label: 'Videos',
+                        itemLabel: 'title',
+                        fields: [
+                            { name: 'title', type: 'text', label: 'Video Title' },
+                            {
+                                name: 'type',
+                                type: 'select',
+                                label: 'Type',
+                                options: [
+                                    { value: 'youtube', label: 'YouTube' },
+                                    { value: 'vimeo', label: 'Vimeo' },
+                                    { value: 'mp4', label: 'Self Hosted (MP4)' }
+                                ]
+                            },
+                            { name: 'videoId', type: 'text', label: 'Video ID / URL' },
+                            { name: 'thumbnail', type: 'image', label: 'Custom Thumbnail' }
+                        ]
+                    }
                 ]
             },
             {
@@ -89,7 +109,8 @@ export default {
                     { name: 'showControls', type: 'toggle', label: 'Show Controls', responsive: true }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Video Slider')
         ],
         design: [
             {
@@ -107,7 +128,7 @@ export default {
                         ]
                     },
                     { name: 'autoplay', type: 'toggle', label: 'Autoplay Slider', responsive: true },
-                    { name: 'autoplaySpeed', type: 'range', label: 'Speed', min: 2000, max: 10000, step: 500, unit: 'ms', responsive: true }
+                    { name: 'autoplaySpeed', type: 'range', label: 'Slider Speed', min: 2000, max: 10000, step: 500, unit: 'ms', responsive: true }
                 ]
             },
             {
@@ -157,7 +178,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

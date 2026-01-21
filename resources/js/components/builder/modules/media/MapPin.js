@@ -7,7 +7,11 @@ import {
     sizingSettings,
     filterSettings,
     transformSettings,
-    animationSettings
+    animationSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings
 } from '../commonSettings';
 
 /**

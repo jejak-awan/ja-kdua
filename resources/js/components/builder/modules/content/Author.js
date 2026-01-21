@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -76,7 +81,8 @@ export default {
                     { name: 'socialLinks', type: 'textarea', label: 'Links (JSON)' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Author Box')
         ],
         design: [
             {
@@ -126,7 +132,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

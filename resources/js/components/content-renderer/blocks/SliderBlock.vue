@@ -7,36 +7,34 @@ defineOptions({
 });
 
 const props = defineProps({
-    slides: {
+    items: {
         type: Array,
-        default: () => [
-            { title: 'Slide 1', subtitle: 'First slide content', image: '', button_text: '', button_url: '' },
-            { title: 'Slide 2', subtitle: 'Second slide content', image: '', button_text: '', button_url: '' }
-        ]
+        default: () => []
     },
     autoplay: { type: Boolean, default: true },
-    autoplay_speed: { type: Number, default: 5000 },
-    show_arrows: { type: Boolean, default: true },
-    show_dots: { type: Boolean, default: true },
-    height: { type: String, default: 'h-[500px]' },
-    overlay_color: { type: String, default: 'rgba(0,0,0,0.4)' },
-    animation: { type: String, default: 'fade' }
+    autoplaySpeed: { type: [Number, String], default: 5000 },
+    showArrows: { type: Boolean, default: true },
+    showDots: { type: Boolean, default: true },
+    height: { type: [Number, String], default: 500 },
+    overlayEnabled: { type: Boolean, default: true },
+    overlayColor: { type: String, default: 'rgba(0,0,0,0.4)' },
+    slideTransition: { type: String, default: 'fade' }
 });
 
 const currentIndex = ref(0);
 let autoplayInterval = null;
 
-const safeSlides = computed(() => props.slides || []);
+const safeItems = computed(() => props.items || []);
 
 const nextSlide = () => {
-    if (safeSlides.value.length > 0) {
-        currentIndex.value = (currentIndex.value + 1) % safeSlides.value.length;
+    if (safeItems.value.length > 1) {
+        currentIndex.value = (currentIndex.value + 1) % safeItems.value.length;
     }
 };
 
 const prevSlide = () => {
-    if (safeSlides.value.length > 0) {
-        currentIndex.value = (currentIndex.value - 1 + safeSlides.value.length) % safeSlides.value.length;
+    if (safeItems.value.length > 1) {
+        currentIndex.value = (currentIndex.value - 1 + safeItems.value.length) % safeItems.value.length;
     }
 };
 
@@ -45,8 +43,9 @@ const goToSlide = (index) => {
 };
 
 const startAutoplay = () => {
-    if (props.autoplay && safeSlides.value.length > 1) {
-        autoplayInterval = setInterval(nextSlide, props.autoplay_speed || 5000);
+    if (props.autoplay && safeItems.value.length > 1) {
+        const speed = parseInt(props.autoplaySpeed) || 5000;
+        autoplayInterval = setInterval(nextSlide, speed);
     }
 };
 
@@ -57,12 +56,13 @@ const stopAutoplay = () => {
     }
 };
 
-const containerClasses = computed(() => {
-    return ['relative overflow-hidden group', props.height || 'h-[500px]'].filter(Boolean);
-});
-
-const transitionName = computed(() => {
-    return props.animation === 'slide' ? 'slide' : 'fade';
+const containerStyles = computed(() => {
+    const h = typeof props.height === 'number' ? `${props.height}px` : props.height;
+    return {
+        height: h,
+        position: 'relative',
+        overflow: 'hidden'
+    };
 });
 
 onMounted(startAutoplay);
@@ -76,44 +76,60 @@ watch(() => props.autoplay, (newVal) => {
 
 <template>
     <div 
-        :class="containerClasses"
+        class="slider-renderer group"
+        :style="containerStyles"
         @mouseenter="stopAutoplay"
         @mouseleave="startAutoplay"
     >
         <!-- Slides -->
         <div class="relative w-full h-full">
             <transition-group
-                :name="transitionName"
+                :name="slideTransition"
                 tag="div"
                 class="relative w-full h-full"
             >
                 <div
-                    v-for="(slide, index) in safeSlides"
+                    v-for="(item, index) in safeItems"
                     v-show="index === currentIndex"
                     :key="index"
-                    class="absolute inset-0 w-full h-full"
+                    class="absolute inset-0 w-full h-full flex items-center justify-center translate-gpu"
                 >
                     <!-- Background -->
                     <div 
                         class="absolute inset-0 bg-cover bg-center"
                         :style="{ 
-                            backgroundImage: slide.image ? `url(${slide.image})` : 'none',
-                            backgroundColor: slide.image ? 'transparent' : 'hsl(var(--muted))'
+                            backgroundImage: item.image ? `url(${item.image})` : 'none',
+                            backgroundColor: item.image ? 'transparent' : '#1a1a1a'
                         }"
                     >
-                        <div class="absolute inset-0" :style="{ backgroundColor: overlay_color || 'rgba(0,0,0,0.4)' }"></div>
+                        <!-- Overlay -->
+                        <div 
+                            v-if="overlayEnabled"
+                            class="absolute inset-0" 
+                            :style="{ backgroundColor: overlayColor || 'rgba(0,0,0,0.4)' }"
+                        ></div>
                     </div>
                     
                     <!-- Content -->
-                    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
-                        <h2 class="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">{{ slide.title || '' }}</h2>
-                        <p class="text-lg md:text-2xl opacity-90 max-w-2xl mb-8 drop-shadow-md">{{ slide.subtitle || '' }}</p>
+                    <div 
+                        class="relative z-10 px-6 max-w-4xl"
+                        :class="[
+                            item.alignment === 'left' ? 'text-left mr-auto' : 
+                            item.alignment === 'right' ? 'text-right ml-auto' : 
+                            'text-center mx-auto'
+                        ]"
+                    >
+                        <h2 v-if="item.title" class="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 text-white drop-shadow-md leading-tight">
+                            {{ item.title }}
+                        </h2>
+                        <div v-if="item.content" class="text-base md:text-lg lg:text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-sm prose prose-invert" v-html="item.content"></div>
+                        
                         <a 
-                            v-if="slide.button_text" 
-                            :href="slide.button_url || '#'"
-                            class="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-full hover:opacity-90 transition-all shadow-xl"
+                            v-if="item.buttonText" 
+                            :href="item.buttonUrl || '#'"
+                            class="inline-block px-8 py-3.5 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform shadow-xl"
                         >
-                            {{ slide.button_text }}
+                            {{ item.buttonText }}
                         </a>
                     </div>
                 </div>
@@ -121,29 +137,29 @@ watch(() => props.autoplay, (newVal) => {
         </div>
         
         <!-- Navigation Arrows -->
-        <template v-if="show_arrows && safeSlides.length > 1">
+        <template v-if="showArrows && safeItems.length > 1">
             <button 
                 @click="prevSlide"
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
+                class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100 z-20"
             >
                 <ChevronLeft class="w-6 h-6" />
             </button>
             <button 
                 @click="nextSlide"
-                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
+                class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100 z-20"
             >
                 <ChevronRight class="w-6 h-6" />
             </button>
         </template>
         
         <!-- Dots -->
-        <div v-if="show_dots && safeSlides.length > 1" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+        <div v-if="showDots && safeItems.length > 1" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             <button 
-                v-for="(slide, index) in safeSlides" 
+                v-for="(_, index) in safeItems" 
                 :key="index"
                 @click="goToSlide(index)"
-                class="w-3 h-3 rounded-full transition-all"
-                :class="index === currentIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'"
+                class="h-2 rounded-full transition-all"
+                :class="index === currentIndex ? 'bg-white w-6' : 'bg-white/40 w-2 hover:bg-white/60'"
             ></button>
         </div>
     </div>
@@ -152,7 +168,7 @@ watch(() => props.autoplay, (newVal) => {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s ease;
+    transition: opacity 0.6s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -161,12 +177,16 @@ watch(() => props.autoplay, (newVal) => {
 
 .slide-enter-active,
 .slide-leave-active {
-    transition: transform 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .slide-enter-from {
     transform: translateX(100%);
 }
 .slide-leave-to {
     transform: translateX(-100%);
+}
+
+.prose-invert {
+    color: white;
 }
 </style>

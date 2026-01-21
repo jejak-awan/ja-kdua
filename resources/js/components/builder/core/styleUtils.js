@@ -23,6 +23,26 @@ export function getResponsiveValue(settings, baseKey, device) {
 
 export function getTypographyStyles(settings, prefix = '', device = 'desktop') {
     const css = {}
+
+    // Support nested typography settings key if it exists (e.g. settings.typography.text_color)
+    const getVal = (key) => {
+        // 1. Try flat key (with prefix)
+        const cleanPrefix = prefix ? (prefix.endsWith('_') ? prefix.slice(0, -1) : prefix) : ''
+        const snakeKey = cleanPrefix ? `${cleanPrefix}_${key}` : key
+        let val = getResponsiveValue(settings, snakeKey, device)
+
+        // 2. Try nested text_design/typography object if flat failed
+        if (val === undefined || val === null || val === '') {
+            const nestedGroup = settings[cleanPrefix || 'typography']
+            if (nestedGroup && typeof nestedGroup === 'object') {
+                // Try key mapping inside object
+                val = getResponsiveValue(nestedGroup, key, device)
+            }
+        }
+
+        return val
+    }
+
     const fields = [
         { key: 'font_family', prop: 'fontFamily' },
         { key: 'font_size', prop: 'fontSize', unit: 'px' },
@@ -37,15 +57,12 @@ export function getTypographyStyles(settings, prefix = '', device = 'desktop') {
     ]
 
     fields.forEach(f => {
-        // Handle prefix (ensure no double underscores)
-        const cleanPrefix = prefix ? (prefix.endsWith('_') ? prefix.slice(0, -1) : prefix) : ''
-        const snakeKey = cleanPrefix ? `${cleanPrefix}_${f.key}` : f.key
+        // Use robust getter
+        let val = getVal(f.key)
 
-        // Try snake_case first (new standard)
-        let val = getResponsiveValue(settings, snakeKey, device)
-
-        // Fallback to old camelCase naming if snake_case is missing
+        // Fallback to old camelCase naming if snake_case is missing (Legacy support)
         if (val === undefined || val === null || val === '') {
+            const cleanPrefix = prefix ? (prefix.endsWith('_') ? prefix.slice(0, -1) : prefix) : ''
             const camelBase = f.key.split('_').map((word, index) =>
                 index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
             ).join('')
@@ -198,13 +215,57 @@ export function generateGradientCSS(gradient) {
     return ''
 }
 
-export function getBackgroundStyles(settings) {
+export function getBackgroundStyles(settings, device = 'desktop') {
     if (!settings) return {}
     const css = {}
 
+    // Helper to get value from either flat key OR nested 'background' object
+    const getVal = (key) => {
+        // 1. Try flat key first (User overrides usually write here via Field)
+        let val = getResponsiveValue(settings, key, device) // Note: getBackgroundStyles doesn't take device arg but we should probably add it or rely on settings being pre-resolved?
+        // Wait, getBackgroundStyles signature is (settings). It doesn't take device.
+        // BUT getResponsiveValue uses device? 
+        // getResponsiveValue(settings, baseKey, device) -> lines 7-22.
+        // getBackgroundStyles calls getResponsiveValue BUT usually it relies on settings being the raw object.
+        // Wait, getBackgroundStyles usage in line 201 doesn't accept device.
+        // And check usage in TextBlock: getBackgroundStyles(settings.value). NO DEVICE.
+
+        // Fix: We need to check if 'settings' involves responsive keys or if we are pre-processing?
+        // In TextBlock.vue (line 67): Object.assign(styles, getBackgroundStyles(settings.value))
+        // getBackgroundStyles implementations below (line 206) use `settings.backgroundColor`.
+        // This implies it treats 'settings' as a resolved object OR it accesses specific keys.
+
+        // Looking at lines 206 `settings.backgroundColor` -> direct property access.
+        // BUT looking at `getFilterStyles` (line 644), it takes `device`.
+        // `getBackgroundStyles` DOES NOT take `device`. THIS IS A BUG.
+        // It accesses `settings.backgroundColor` directly. This returns the raw value (likely desktop or undefined/mobile key ignored).
+        // IF settings contains `backgroundColor_mobile`, accessing `.backgroundColor` returns desktop value.
+        // So Backgrounds ARE NOT RESPONSIVE currently?
+
+        // We should update getBackgroundStyles to accept device.
+
+        if (val !== undefined && val !== null && val !== '') return val
+
+        // 2. Try nested background object (from Defaults)
+        if (settings.background && typeof settings.background === 'object') {
+            // Map standard keys: backgroundColor -> color, backgroundImage -> image
+            const shortKeyMap = {
+                'backgroundColor': 'color',
+                'backgroundImage': 'image',
+                'backgroundRepeat': 'repeat',
+                'backgroundPosition': 'position',
+                'backgroundSize': 'size'
+            }
+            const shortKey = shortKeyMap[key] || key
+            return settings.background[shortKey]
+        }
+        return undefined
+    }
+
     // Background Color
-    if (settings.backgroundColor) {
-        css.backgroundColor = settings.backgroundColor
+    // Note: We need to fix the missing device argument in the strict signature below, but for now we patch functionality
+    if (settings.backgroundColor || (settings.background && settings.background.color)) {
+        css.backgroundColor = settings.backgroundColor || settings.background.color
     }
 
     // Background Image & Gradients (Multiple Layers)
@@ -215,11 +276,12 @@ export function getBackgroundStyles(settings) {
     const posList = []
 
     // 1. Resolve Gradients
-    const gradientList = settings.backgroundGradients || (settings.backgroundGradient ? [settings.backgroundGradient] : [])
+    const gradientList = settings.backgroundGradients || (getVal('backgroundGradient') ? [getVal('backgroundGradient')] : [])
     const gradientCSSList = gradientList.map(g => generateGradientCSS(g)).filter(c => !!c)
 
     // 2. Resolve Image
-    const imageCSS = settings.backgroundImage ? `url(${settings.backgroundImage})` : ''
+    const bgImage = getVal('backgroundImage')
+    const imageCSS = bgImage ? `url(${bgImage})` : ''
 
     // 3. Assemble Layers (Respecting "Show Above Image" setting)
     // Order: Pattern > [Gradient/Image depending on setting]
@@ -227,10 +289,10 @@ export function getBackgroundStyles(settings) {
     // Resolve Image Size and String
     let resolvedImageSize = ''
     if (imageCSS) {
-        let size = settings.backgroundImageSize || 'cover'
+        let size = getVal('backgroundImageSize') || 'cover'
         if (size === 'custom') {
-            const w = settings.backgroundImageWidth || 'auto'
-            const h = settings.backgroundImageHeight || 'auto'
+            const w = getVal('backgroundImageWidth') || 'auto'
+            const h = getVal('backgroundImageHeight') || 'auto'
             size = `${w} ${h}`
         } else if (size === 'stretch') {
             size = '100% 100%'
@@ -241,15 +303,15 @@ export function getBackgroundStyles(settings) {
     }
 
     // 3.1. Add Pattern (Topmost)
-    if (settings.backgroundPattern && settings.backgroundPattern !== 'none') {
-        const pattern = BackgroundPatterns.find(p => p.id === settings.backgroundPattern)
+    const bgPattern = getVal('backgroundPattern')
+    if (bgPattern && bgPattern !== 'none') {
+        const pattern = BackgroundPatterns.find(p => p.id === bgPattern)
         if (pattern) {
-            // Resolve SVG based on rotate/invert state
-            // Nested structure: svg.regular.default/rotated, svg.inverted.default/rotated
-            // Legacy structure: svg.default, svg.rotated, svg.inverted
+            // ... (Pattern SVG Generation logic) ...
+            // We need to fetch sub-settings using getVal
             let svgStr = ''
-            const patternRotate = settings.backgroundPatternRotate
-            const patternInvert = settings.backgroundPatternInvert
+            const patternRotate = getVal('backgroundPatternRotate')
+            const patternInvert = getVal('backgroundPatternInvert')
 
             let matchedRotateVariant = false
             let matchedInvertVariant = false
@@ -286,40 +348,31 @@ export function getBackgroundStyles(settings) {
 
             // Apply generic inversion if no variant found
             if (patternInvert && !matchedInvertVariant) {
-                // Wrap in a group with evenodd to "cut out" the pattern from a solid rect
                 svgStr = `<rect width="${pattern.width}" height="${pattern.height}" fill="currentColor" /><g fill-rule="evenodd">${svgStr}</g>`
             }
 
-            // Handle if svgStr is still an object (nested by aspect ratio)
             if (typeof svgStr === 'object') {
                 svgStr = svgStr.landscape || svgStr.square || svgStr.default || ''
             }
 
-            const color = settings.backgroundPatternColor || 'rgba(0,0,0,0.1)'
+            const color = getVal('backgroundPatternColor') || 'rgba(0,0,0,0.1)'
 
-            // Modern processing: Replace ALL instances of currentColor
-            // And inject fill="currentColor" to any path/circle/rect that lacks it for legacy support
             svgStr = svgStr.replace(/currentColor/g, color)
-
-            // Robust injection: Only if it's not already using stroke or has a fill defined
             if (!svgStr.includes('fill=') && !svgStr.includes('stroke=')) {
                 svgStr = svgStr.replace(/<(path|circle|rect|ellipse|polygon|polyline)\s/g, `<$1 fill="${color}" `)
-            } else if (svgStr.includes('stroke=') && !svgStr.includes('stroke="none"')) {
-                // If it has stroke but no fill, ensure stroke gets the color if it was using currentColor or was missing it
-                // Note: replace(/currentColor/g, color) already handled explicit currentColor
             }
 
             let transform = ''
-            if (settings.backgroundPatternFlipH) transform += 'scaleX(-1) '
-            if (settings.backgroundPatternFlipV) transform += 'scaleY(-1) '
+            if (getVal('backgroundPatternFlipH')) transform += 'scaleX(-1) '
+            if (getVal('backgroundPatternFlipV')) transform += 'scaleY(-1) '
             if (patternRotate && !matchedRotateVariant) transform += 'rotate(90deg) '
 
             const finalSvg = `<svg width="${pattern.width}" height="${pattern.height}" viewBox="0 0 ${pattern.width} ${pattern.height}" xmlns="http://www.w3.org/2000/svg" style="${transform ? `transform: ${transform}` : ''}">${svgStr}</svg>`
             layers.push(`url("data:image/svg+xml,${encodeURIComponent(finalSvg)}")`)
 
-            let pSize = settings.backgroundPatternSize || 'actual'
+            let pSize = getVal('backgroundPatternSize') || 'actual'
             if (pSize === 'custom') {
-                pSize = `${settings.backgroundPatternWidth || 'auto'} ${settings.backgroundPatternHeight || 'auto'}`
+                pSize = `${getVal('backgroundPatternWidth') || 'auto'} ${getVal('backgroundPatternHeight') || 'auto'}`
             } else if (pSize === 'actual') {
                 pSize = `${pattern.width}px ${pattern.height}px`
             } else if (pSize === 'stretch') {
@@ -332,7 +385,7 @@ export function getBackgroundStyles(settings) {
     }
 
     // 3.2. Add Gradient & Image based on "Above Image" setting
-    if (settings.backgroundGradientShowAboveImage) {
+    if (getVal('backgroundGradientShowAboveImage')) {
         // Gradient Above Image
         gradientCSSList.forEach((gcss, index) => {
             layers.push(gcss)
@@ -365,27 +418,27 @@ export function getBackgroundStyles(settings) {
     blendList.length = 0
 
     // 1. Pattern (if any)
-    if (settings.backgroundPattern && settings.backgroundPattern !== 'none') {
-        repeatList.push(settings.backgroundPatternRepeat || 'repeat')
-        blendList.push(settings.backgroundPatternBlendMode || 'normal')
+    if (bgPattern && bgPattern !== 'none') {
+        repeatList.push(getVal('backgroundPatternRepeat') || 'repeat')
+        blendList.push(getVal('backgroundPatternBlendMode') || 'normal')
     }
 
     // 2. Gradients and Image
-    if (settings.backgroundGradientShowAboveImage) {
+    if (getVal('backgroundGradientShowAboveImage')) {
         // Gradients first
         gradientCSSList.forEach(() => {
             repeatList.push('no-repeat')
-            blendList.push('normal') // Gradients don't usually have blend mode in this flat model
+            blendList.push('normal')
         })
         if (imageCSS) {
-            repeatList.push(settings.backgroundImageRepeat || 'no-repeat')
-            blendList.push(settings.backgroundImageBlendMode || 'normal')
+            repeatList.push(getVal('backgroundImageRepeat') || 'no-repeat')
+            blendList.push(getVal('backgroundImageBlendMode') || 'normal')
         }
     } else {
         // Image first
         if (imageCSS) {
-            repeatList.push(settings.backgroundImageRepeat || 'no-repeat')
-            blendList.push(settings.backgroundImageBlendMode || 'normal')
+            repeatList.push(getVal('backgroundImageRepeat') || 'no-repeat')
+            blendList.push(getVal('backgroundImageBlendMode') || 'normal')
         }
         gradientCSSList.forEach(() => {
             repeatList.push('no-repeat')
@@ -400,44 +453,27 @@ export function getBackgroundStyles(settings) {
         css.backgroundBlendMode = blendList.join(', ')
 
         // Attachment (Shared or per-layer)
-        if (settings.parallax && (settings.parallaxMethod === 'css' || !settings.parallaxMethod)) {
+        if (getVal('parallax') && (getVal('parallaxMethod') === 'css' || !getVal('parallaxMethod'))) {
             // CSS Parallax (Fixed)
             css.backgroundAttachment = layers.map(() => 'fixed').join(', ')
-        } else if (settings.backgroundImageAttachment) {
-            css.backgroundAttachment = layers.map(() => settings.backgroundImageAttachment).join(', ')
+        } else if (getVal('backgroundImageAttachment')) {
+            css.backgroundAttachment = layers.map(() => getVal('backgroundImageAttachment')).join(', ')
         }
 
         // Position
         posList.length = 0
         // Pattern Position: Use setting or default to center
-        if (settings.backgroundPattern && settings.backgroundPattern !== 'none') {
-            let origin = settings.backgroundPatternRepeatOrigin || 'center'
-
-            // If offsets are present and origin is NOT center (simple), try 4-value syntax
-            // Values: 'left top', 'center top', 'right top', etc.
-            // 4-value syntax: [x-edge] [x-offset] [y-edge] [y-offset]
-            // We need to parse origin.
-
+        if (bgPattern && bgPattern !== 'none') {
+            let origin = getVal('backgroundPatternRepeatOrigin') || 'center'
             if (origin === 'center') origin = 'center center'
 
             const parts = origin.split(' ')
             if (parts.length === 2) {
                 const [xEdge, yEdge] = parts
-                const xOff = settings.backgroundPatternHorizontalOffset || '0'
-                const yOff = settings.backgroundPatternVerticalOffset || '0'
+                const xOff = getVal('backgroundPatternHorizontalOffset') || '0'
+                const yOff = getVal('backgroundPatternVerticalOffset') || '0'
 
-                // Only use 4-value syntax if we have offsets OR if we want to be explicit.
-                // However, 'center 10px' invalid. 'center' must be used with edge keywords? 
-                // Actually 'center' is compatible. 'left 10px top 20px' works.
-                // 'center 10px' -> 'center' is x-pos? CSS says: "If one value is center, the other value is the offset" -> no.
-                // 4-value syntax requires explicit edges. 'center' is valid edge keyword?
-                // MDN: "background-position: bottom 10px right 20px;"
-                // "center" is NOT a valid edge for 4-value syntax in some browsers / contexts if mixed?
-                // Actually "center" *can* be used.
-                // But let's stick to what the user provides.
-                // If origin is "left top", use "left xOff top yOff".
-
-                if (settings.backgroundPatternRepeatOrigin && settings.backgroundPatternRepeatOrigin !== 'center' && settings.backgroundPatternRepeatOrigin !== 'center center') {
+                if (getVal('backgroundPatternRepeatOrigin') && getVal('backgroundPatternRepeatOrigin') !== 'center' && getVal('backgroundPatternRepeatOrigin') !== 'center center') {
                     posList.push(`${xEdge} ${xOff} ${yEdge} ${yOff}`)
                 } else {
                     posList.push(origin)
@@ -446,11 +482,11 @@ export function getBackgroundStyles(settings) {
                 posList.push(origin)
             }
         }
-        if (settings.backgroundGradientShowAboveImage) {
+        if (getVal('backgroundGradientShowAboveImage')) {
             gradientCSSList.forEach(() => posList.push('center'))
-            if (imageCSS) posList.push(settings.backgroundImagePosition || 'center')
+            if (imageCSS) posList.push(getVal('backgroundImagePosition') || 'center')
         } else {
-            if (imageCSS) posList.push(settings.backgroundImagePosition || 'center')
+            if (imageCSS) posList.push(getVal('backgroundImagePosition') || 'center')
             gradientCSSList.forEach(() => posList.push('center'))
         }
         css.backgroundPosition = posList.join(', ')
@@ -812,7 +848,21 @@ export function getAnimationStyles(settings, device = 'desktop') {
 
 export function getLayoutStyles(settings, device = 'desktop') {
     const css = {}
-    const layoutType = getResponsiveValue(settings, 'layout_type', device)
+
+    // Helper to try camelCase if snake_case is missing
+    const getVal = (snakeKey) => {
+        // 1. Try snake_case
+        let val = getResponsiveValue(settings, snakeKey, device)
+
+        // 2. Try camelCase fallback
+        if (val === undefined || null || val === '') {
+            const camelKey = snakeKey.replace(/_([a-z])/g, (g) => g[1].toUpperCase())
+            val = getResponsiveValue(settings, camelKey, device)
+        }
+        return val
+    }
+
+    const layoutType = getVal('layout_type')
 
     if (layoutType === 'block') {
         css.display = 'block'
@@ -820,28 +870,27 @@ export function getLayoutStyles(settings, device = 'desktop') {
         css.display = 'flex'
 
         // Direction
-        css.flexDirection = getResponsiveValue(settings, 'direction', device) || 'column'
+        css.flexDirection = getVal('direction') || 'column'
 
         // Wrap
-        css.flexWrap = getResponsiveValue(settings, 'flex_wrap', device) || 'nowrap'
+        css.flexWrap = getVal('flex_wrap') || 'nowrap'
 
         // Justify Content
-        css.justifyContent = getResponsiveValue(settings, 'justify_content', device) || 'flex-start'
+        css.justifyContent = getVal('justify_content') || 'flex-start'
 
         // Align Items
-        css.alignItems = getResponsiveValue(settings, 'align_items', device) || 'stretch'
+        css.alignItems = getVal('align_items') || 'stretch'
 
         // Align Content
-        const alignContent = getResponsiveValue(settings, 'align_content', device)
+        const alignContent = getVal('align_content')
         if (alignContent) css.alignContent = alignContent
 
         // Gaps
-        const gapX = getResponsiveValue(settings, 'gap_x', device)
-        const gapY = getResponsiveValue(settings, 'gap_y', device)
+        const gapX = getVal('gap_x')
+        const gapY = getVal('gap_y')
 
         const formatGap = (v) => {
             if (v === undefined || v === null || v === '') return undefined
-            // If it's a number, or a numeric string without non-digit chars (except dot), append px
             if (typeof v === 'number' || (typeof v === 'string' && !isNaN(parseFloat(v)) && isFinite(v))) {
                 return `${v}px`
             }
@@ -867,89 +916,73 @@ export function getLayoutStyles(settings, device = 'desktop') {
         // --- 1. Columns & Rows ---
 
         // Columns
-        const colWidths = getResponsiveValue(settings, 'column_widths', device) || 'equal'
+        const colWidths = getVal('column_widths') || 'equal'
 
         if (colWidths === 'equal') {
-            // Standard: repeat(N, 1fr)
-            const cols = getResponsiveValue(settings, 'column_count', device) || 3
-            // Handle if cols is a number or string like 'auto'? 
-            // If cols is 'auto', we can't really do repeat(auto, 1fr) validly in CSS grid without auto-fit/fill context
-            // But if user sets 'auto' in column_count while in 'equal' mode, we might assume they want auto-fit?
-            // Let's coerce:
+            const cols = getVal('column_count') || 3
             if (cols === 'auto') {
                 css.gridTemplateColumns = `repeat(auto-fit, minmax(0, 1fr))`
             } else {
                 css.gridTemplateColumns = `repeat(${cols}, 1fr)`
             }
         } else if (colWidths === 'equal_min') {
-            // Responsive Auto-Fit: repeat(auto-fit, minmax(MIN_WIDTH, 1fr))
-            const minW = getResponsiveValue(settings, 'column_min_width', device) || '250px'
-            // Ensure unit? Dimension field usually provides unit.
+            const minW = getVal('column_min_width') || '250px'
             const minWStr = typeof minW === 'number' ? `${minW}px` : minW
             css.gridTemplateColumns = `repeat(auto-fit, minmax(${minWStr}, 1fr))`
         } else if (colWidths === 'auto') {
-            // Auto Width: repeat(auto-fit, minmax(min-content, 1fr)) or similar
-            // This distributes columns based on content size, but ensuring they fill space?
-            // Or maybe Just auto? 
-            // "Auto Width Columns" usually means: let content dictate width.
-            // `repeat(auto-fit, minmax(auto, 1fr))`?
             css.gridTemplateColumns = `repeat(auto-fit, minmax(min-content, 1fr))`
         } else if (colWidths === 'manual') {
-            // Manual: Direct use of value
-            const manualVal = getResponsiveValue(settings, 'grid_template_columns', device)
+            const manualVal = getVal('grid_template_columns')
             if (manualVal) css.gridTemplateColumns = manualVal
         } else {
-            // Fallback
             css.gridTemplateColumns = 'repeat(3, 1fr)'
         }
 
         // Rows
-        const rowHeights = getResponsiveValue(settings, 'row_heights', device) || 'auto'
+        const rowHeights = getVal('row_heights') || 'auto'
         if (rowHeights === 'auto') {
-            css.gridTemplateRows = 'auto' // Default
+            css.gridTemplateRows = 'auto'
         } else {
-            // If user selects custom, maybe they want explicit rows?
-            // Since we don't have a complex repeater yet, let's look for row_count
-            const rows = getResponsiveValue(settings, 'row_count', device)
+            const rows = getVal('row_count')
             if (rows && rows !== 'auto') {
                 css.gridTemplateRows = `repeat(${rows}, 1fr)`
             }
         }
 
-        // Auto Columns/Rows (Implicit Grid)
-        const autoCol = getResponsiveValue(settings, 'auto_columns', device)
+        // Auto Columns/Rows
+        const autoCol = getVal('auto_columns')
         if (autoCol && autoCol !== 'auto') css.gridAutoColumns = autoCol
 
-        const autoRow = getResponsiveValue(settings, 'auto_rows', device)
+        const autoRow = getVal('auto_rows')
         if (autoRow && autoRow !== 'auto') css.gridAutoRows = autoRow
 
 
         // --- 2. Alignment & Distibution ---
 
-        // Direction & Density (grid-auto-flow)
-        const gridDir = getResponsiveValue(settings, 'grid_direction', device) || 'row'
-        const gridDense = getResponsiveValue(settings, 'grid_density', device) === 'dense'
+        // Direction & Density
+        const gridDir = getVal('grid_direction') || 'row'
+        const gridDense = getVal('grid_density') === 'dense'
         css.gridAutoFlow = `${gridDir}${gridDense ? ' dense' : ''}`
 
-        // Justify Content (distribution along row axis)
-        const justifyContent = getResponsiveValue(settings, 'justify_content', device)
+        // Justify Content
+        const justifyContent = getVal('justify_content')
         if (justifyContent) css.justifyContent = justifyContent
 
-        // Align Content (distribution along block axis)
-        const alignContent = getResponsiveValue(settings, 'align_content', device)
+        // Align Content
+        const alignContent = getVal('align_content')
         if (alignContent) css.alignContent = alignContent
 
-        // Justify Items (alignment within cell - inline axis)
-        const justifyItems = getResponsiveValue(settings, 'justify_items', device)
+        // Justify Items
+        const justifyItems = getVal('justify_items')
         if (justifyItems) css.justifyItems = justifyItems
 
-        // Align Items (alignment within cell - block axis)
-        const alignItems = getResponsiveValue(settings, 'align_items', device)
+        // Align Items
+        const alignItems = getVal('align_items')
         if (alignItems) css.alignItems = alignItems
 
         // --- 3. Gaps ---
-        const gapX = getResponsiveValue(settings, 'gap_x', device)
-        const gapY = getResponsiveValue(settings, 'gap_y', device)
+        const gapX = getVal('gap_x')
+        const gapY = getVal('gap_y')
 
         const formatGap = (v) => {
             if (v === undefined || v === null || v === '') return undefined

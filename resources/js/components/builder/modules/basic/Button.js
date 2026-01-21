@@ -10,8 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -36,8 +34,11 @@ export default {
     defaults: {
         text: 'Click Here',
         url: '#',
-        target: '_self',
+        openNewTab: false,
+        iconName: '',
+        iconPosition: 'right',
         alignment: 'left',
+        variant: 'primary',
         size: 'medium',
         fullWidth: false,
         background: { color: '#2059ea', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
@@ -54,20 +55,15 @@ export default {
                 label: 'Button',
                 fields: [
                     { name: 'text', type: 'text', label: 'Button Text', responsive: true },
-                    { name: 'link_url', type: 'text', label: 'Link URL', responsive: true },
-                    {
-                        name: 'link_target', type: 'select', label: 'Link Target', options: [
-                            { value: '_self', label: 'In The Current Tab' },
-                            { value: '_blank', label: 'In The New Tab' }
-                        ]
-                    }
+                    { name: 'url', type: 'text', label: 'Link URL', responsive: true },
+                    { name: 'openNewTab', type: 'toggle', label: 'Open in New Tab' }
                 ]
             },
             {
                 id: 'icon',
                 label: 'Icon',
                 fields: [
-                    { name: 'icon', type: 'icon', label: 'Select Icon', responsive: true },
+                    { name: 'iconName', type: 'icon', label: 'Select Icon', responsive: true },
                     {
                         name: 'iconPosition', type: 'buttonGroup', label: 'Icon Position', options: [
                             { value: 'left', label: 'Left' },
@@ -77,7 +73,6 @@ export default {
                 ]
             },
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Button')
         ],

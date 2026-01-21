@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -62,7 +67,8 @@ export default {
                     { name: 'description', type: 'textarea', label: 'Description' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Number Box')
         ],
         design: [
             {
@@ -114,7 +120,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

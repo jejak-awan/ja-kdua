@@ -7,21 +7,23 @@
                     v-if="block && block.settings" 
                     :class="[
                         getVisibilityClasses(block.settings.visibility), 
-                        resolveResponsiveValue(block.settings._css_class),
+                        resolveResponsiveValue(block.settings._css_class || block.settings.cssClass),
                         resolveAdvancedStyles(block.settings),
+                        resolveBoxModelStyles(block.settings),
                         resolveAdvancedStyles(block.hoverSettings, 'hover'),
                         resolveResponsiveValue(block.settings.animation_effect),
-                        resolveResponsiveValue(block.settings._position),
+                        resolveResponsiveValue(block.settings._position || block.settings.position),
                         getColorClasses(block),
                         'h-full'
                     ].filter(Boolean)"
-                    :id="block.settings._css_id ? String(resolveResponsiveValue(block.settings._css_id)).trim().replace(/\s/g, '-') : undefined"
+                    :id="String(resolveResponsiveValue(block.settings._css_id || block.settings.cssId)).trim().replace(/\s/g, '-') || undefined"
                     :style="[
-                        block.settings._custom_css,
+                        block.settings._custom_css || block.settings.custom_css,
                         getAnimationStyles(block.settings),
                         getPositioningStyles(block.settings),
                         getColorStyles(block)
                     ]"
+                    v-bind="resolveAttributes(block.settings)"
                 >
                     <component 
                         :is="getBlockComponent(block.type)" 
@@ -273,11 +275,15 @@ const getAnimationStyles = (settings) => {
 
 const getPositioningStyles = (settings) => {
     let styles = {};
-    if (settings._z_index !== undefined && settings._z_index !== 0) {
-        styles.zIndex = settings._z_index;
+    const zIndex = settings._z_index !== undefined ? settings._z_index : settings.z_index;
+    const position = settings._position || settings.position;
+    const stickyTop = settings._sticky_top || settings.sticky_top || 0;
+
+    if (zIndex !== undefined && zIndex !== 0 && zIndex !== '') {
+        styles.zIndex = zIndex;
     }
-    if (settings._position === 'sticky' || settings._position === 'fixed') {
-        styles.top = `${settings._sticky_top || 0}px`;
+    if (position === 'sticky' || position === 'fixed') {
+        styles.top = `${stickyTop}px`;
     }
     return styles;
 };
@@ -320,5 +326,115 @@ const getColorClasses = (block) => {
     }
     
     return classes.join(' ');
+};
+
+const resolveAttributes = (settings) => {
+    if (!settings || !settings.attributes || !Array.isArray(settings.attributes)) return {};
+    
+    const attrs = {};
+    settings.attributes.forEach(attr => {
+        if (attr.key && attr.value) {
+            attrs[attr.key] = attr.value;
+        }
+    });
+    return attrs;
+};
+
+const resolveBoxModelStyles = (settings) => {
+    if (!settings) return [];
+    
+    const classes = [];
+    const breakpoints = ['desktop', 'tablet', 'mobile'];
+    const prefixMap = { desktop: '', tablet: 'md:', mobile: 'lg:' }; // Mobile-first logic in resolveResponsiveValue is different? 
+    // Wait, resolveResponsiveValue assumes: mobile (base) -> tablet -> desktop (lg).
+    // Let's match resolveResponsiveValue logic: mobile is base, tablet is md:, desktop is lg:
+    const bpMap = { mobile: '', tablet: 'md:', desktop: 'lg:' };
+
+    // Helper to add classes
+    const addClass = (bp, cls) => {
+        const prefix = bpMap[bp];
+        if (cls) classes.push(`${prefix}${cls}`);
+    };
+
+    // 1. Padding & Margin
+    ['padding', 'margin'].forEach(prop => {
+        const val = settings[prop];
+        if (!val) return;
+        const short = prop === 'padding' ? 'p' : 'm';
+        
+        // If object (responsive)
+        if (typeof val === 'object' && !Array.isArray(val) && ('desktop' in val || 'mobile' in val)) {
+             breakpoints.forEach(bp => {
+                 // Inheritance: desktop is fallback? No, usually distinct. 
+                 // But let's assume we handle each explicitly if present.
+                 // Actually, simpler to just start with what's there.
+                 const data = val[bp];
+                 if (!data) return;
+                 
+                 // data is like { top: 10, right: 10, bottom: 10, left: 10, unit: 'px' }
+                 // Check if valid values exist
+                 const u = data.unit || 'px';
+                 if (data.top !== undefined && data.top !== '') addClass(bp, `${short}t-[${data.top}${u}]`);
+                 if (data.bottom !== undefined && data.bottom !== '') addClass(bp, `${short}b-[${data.bottom}${u}]`);
+                 if (data.left !== undefined && data.left !== '') addClass(bp, `${short}l-[${data.left}${u}]`);
+                 if (data.right !== undefined && data.right !== '') addClass(bp, `${short}r-[${data.right}${u}]`);
+             });
+        }
+    });
+
+    // 2. Border
+    const border = settings.border;
+    if (border) {
+        // Border is often { radius: {}, styles: {} }
+        // Radius
+        if (border.radius) {
+            breakpoints.forEach(bp => {
+                // border.radius might differ structure? nested responsive?
+                // Usually border.radius is { tl: 10, tr: 10 ... linked: true } 
+                // Checks for responsive override of radius?
+                // For simplicity, let's assume radius is NOT responsive object itself, 
+                // but if it IS, we handle it. 
+                // Actually commonSettings says responsive: true for border.
+                // So block.settings.border might be { desktop: { radius: ... }, mobile: ... }
+                // OR border might be { radius: { desktop: ..., mobile: ... } }
+                // Let's assume the top-level 'border' is responsive object.
+                /* 
+                   If border is responsive:
+                   border = { 
+                      desktop: { radius: { tl:10...}, styles: { ... } },
+                      mobile: { ... }
+                   }
+                */
+               /*
+                  If border is NOT responsive at root but has responsive fields?
+                  commonSettings: responsive: true for 'border'.
+                  So yes, top level keys are desktop/tablet/mobile.
+               */
+               
+               const data = border[bp];
+               if (!data) return;
+               
+               // Radius
+               if (data.radius) {
+                   const r = data.radius;
+                   const u = 'px'; // Radius usually px
+                   if (r.tl !== undefined && r.tl !== '') addClass(bp, `rounded-tl-[${r.tl}${u}]`);
+                   if (r.tr !== undefined && r.tr !== '') addClass(bp, `rounded-tr-[${r.tr}${u}]`);
+                   if (r.bl !== undefined && r.bl !== '') addClass(bp, `rounded-bl-[${r.bl}${u}]`);
+                   if (r.br !== undefined && r.br !== '') addClass(bp, `rounded-br-[${r.br}${u}]`);
+               }
+               
+               // Styles
+               if (data.styles && data.styles.all) {
+                   const s = data.styles.all;
+                   if (s.width !== undefined && s.width !== '') addClass(bp, `border-[${s.width}px]`);
+                   if (s.color) addClass(bp, `border-[${s.color}]`);
+                   if (s.style) addClass(bp, `border-${s.style}`);
+               }
+            });
+        }
+    }
+
+    return classes;
 };
 </script>

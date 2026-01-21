@@ -10,7 +10,12 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    cssSettings
+    cssSettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -27,10 +32,7 @@ export default {
 
     // Default settings
     defaults: {
-        videoType: 'youtube',
-        youtubeUrl: '',
-        vimeoUrl: '',
-        selfHostedUrl: '',
+        url: '',
         // Poster Image
         posterImage: '',
         // Aspect Ratio
@@ -74,32 +76,10 @@ export default {
                 label: 'Video',
                 fields: [
                     {
-                        name: 'videoType',
-                        type: 'select',
-                        label: 'Video Type',
-                        options: [
-                            { value: 'youtube', label: 'YouTube' },
-                            { value: 'vimeo', label: 'Vimeo' },
-                            { value: 'selfHosted', label: 'Self Hosted' }
-                        ]
-                    },
-                    {
-                        name: 'youtubeUrl',
+                        name: 'url',
                         type: 'text',
-                        label: 'YouTube URL',
-                        responsive: true
-                    },
-                    {
-                        name: 'vimeoUrl',
-                        type: 'text',
-                        label: 'Vimeo URL',
-                        responsive: true
-                    },
-                    {
-                        name: 'selfHostedUrl',
-                        type: 'upload',
-                        label: 'Video File',
-                        allowedExtensions: ['mp4', 'mov', 'm4v', 'webm'],
+                        label: 'Video URL',
+                        placeholder: 'YouTube, Vimeo, or direct file URL',
                         responsive: true
                     },
                     {
@@ -137,7 +117,8 @@ export default {
                     }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Video')
         ],
         design: [
             {
@@ -182,7 +163,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

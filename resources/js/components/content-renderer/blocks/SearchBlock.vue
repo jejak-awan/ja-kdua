@@ -1,25 +1,3 @@
-<template>
-    <div :class="containerClasses">
-        <form @submit.prevent="handleSearch" class="flex gap-2">
-            <div class="relative flex-1">
-                <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input 
-                    type="text"
-                    :placeholder="placeholder || 'Search...'"
-                    :class="inputClasses"
-                />
-            </div>
-            <button 
-                v-if="show_button"
-                type="submit"
-                :class="buttonClasses"
-            >
-                {{ button_text || 'Search' }}
-            </button>
-        </form>
-    </div>
-</template>
-
 <script setup>
 import { computed } from 'vue';
 import { Search as SearchIcon } from 'lucide-vue-next';
@@ -30,28 +8,59 @@ defineOptions({
 
 const props = defineProps({
     placeholder: { type: String, default: 'Search...' },
-    button_text: { type: String, default: 'Search' },
-    show_button: { type: Boolean, default: true },
-    style: { type: String, default: 'border-input bg-background' },
-    radius: { type: String, default: 'rounded-md' },
+    showButton: { type: Boolean, default: true },
+    buttonStyle: { type: String, default: 'icon' },
+    buttonText: { type: String, default: 'Search' },
+    buttonBackgroundColor: { type: String, default: '#2059ea' },
+    buttonTextColor: { type: String, default: '#ffffff' },
     padding: { type: String, default: '' },
-    width: { type: String, default: 'max-w-xl' },
     alignment: { type: String, default: 'text-left' }
 });
 
 const containerClasses = computed(() => {
-    return ['transition-all duration-300 w-full', props.padding, props.width, props.alignment, 'mx-auto'].filter(Boolean);
+    return ['transition-all duration-300 w-full', props.padding, props.alignment, 'mx-auto'].filter(Boolean);
 });
 
-const inputClasses = computed(() => {
-    return ['w-full h-11 pl-10 pr-4 text-sm text-foreground ring-offset-background border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2', props.style, props.radius].filter(Boolean);
-});
-
-const buttonClasses = computed(() => {
-    return ['h-11 px-6 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-sm', props.radius].filter(Boolean);
-});
+const buttonStyles = computed(() => ({
+    backgroundColor: props.buttonBackgroundColor,
+    color: props.buttonTextColor
+}));
 
 const handleSearch = () => {
     // Simulated
 };
 </script>
+
+<template>
+    <div :class="containerClasses">
+        <form @submit.prevent="handleSearch" class="search-form flex gap-0 overflow-hidden border rounded-lg bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <div class="relative flex-1 flex items-center">
+                <SearchIcon class="absolute left-4 w-4 h-4 text-muted-foreground" />
+                <input 
+                    type="text"
+                    :placeholder="placeholder"
+                    class="w-full h-12 pl-11 pr-4 text-sm bg-transparent border-none outline-none focus:ring-0"
+                />
+            </div>
+            
+            <button 
+                v-if="showButton"
+                type="submit"
+                class="search-button h-12 px-6 flex items-center justify-center gap-2 font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
+                :style="buttonStyles"
+            >
+                <SearchIcon v-if="buttonStyle !== 'text'" class="w-4 h-4" />
+                <span v-if="buttonStyle !== 'icon'">{{ buttonText }}</span>
+            </button>
+        </form>
+    </div>
+</template>
+
+<style scoped>
+.search-form {
+    border-color: #e0e0e0;
+}
+.search-button {
+    border-radius: 0;
+}
+</style>

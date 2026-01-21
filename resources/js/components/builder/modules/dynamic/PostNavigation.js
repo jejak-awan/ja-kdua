@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -60,7 +65,8 @@ export default {
                     { name: 'nextLabel', type: 'text', label: 'Next Label' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Post Navigation')
         ],
         design: [
             {
@@ -93,7 +99,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

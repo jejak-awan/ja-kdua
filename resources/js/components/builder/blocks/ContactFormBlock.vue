@@ -4,7 +4,7 @@
       <!-- Header -->
       <div v-if="settings.title" class="form-header">
         <h2 class="form-title" :style="titleStyles">{{ settings.title }}</h2>
-        <p v-if="settings.subtitle" class="form-subtitle">{{ settings.subtitle }}</p>
+        <p v-if="settings.description" class="form-subtitle">{{ settings.description }}</p>
       </div>
       
       <!-- Fields -->

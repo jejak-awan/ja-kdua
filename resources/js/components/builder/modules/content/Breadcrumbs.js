@@ -10,8 +10,6 @@ import {
     visibilitySettings,
     positionSettings,
     transitionSettings,
-    linkSettings,
-    loopSettings,
     orderSettings,
     adminLabelSettings,
     cssSettings,
@@ -75,7 +73,6 @@ export default {
                 ]
             },
             backgroundSettings,
-            loopSettings,
             orderSettings,
             adminLabelSettings('Breadcrumbs')
         ],

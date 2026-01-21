@@ -4,12 +4,12 @@
       :is="settings.linkUrl ? 'a' : 'div'"
       class="image-wrapper"
       :href="settings.linkUrl || undefined"
-      :target="settings.linkUrl ? (settings.linkTarget || '_self') : undefined"
+      :target="settings.linkUrl ? (settings.linkNewTab ? '_blank' : '_self') : undefined"
       :style="imageWrapperStyles"
     >
       <img 
-        v-if="settings.src"
-        :src="settings.src" 
+        v-if="settings.url"
+        :src="settings.url" 
         :alt="settings.alt || ''"
         :style="imageStyles"
         class="image-element"
@@ -62,7 +62,7 @@ const wrapperStyles = computed(() => {
     textAlign: alignment
   }
   
-  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getBackgroundStyles(settings.value, device.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))

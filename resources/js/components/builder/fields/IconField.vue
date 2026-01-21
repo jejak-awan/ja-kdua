@@ -48,7 +48,7 @@
 import { computed, ref, inject } from 'vue'
 import { Search, Plus, Maximize2 } from 'lucide-vue-next'
 import { BaseInput, BaseButton } from '../ui'
-import LucideIcon from '../ui/LucideIcon.vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { commonIcons, allIcons } from '../core/assets/icons'
 
 const props = defineProps({

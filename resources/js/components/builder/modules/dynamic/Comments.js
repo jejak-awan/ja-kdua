@@ -11,7 +11,12 @@ import {
     positionSettings,
     transitionSettings,
     cssSettings,
-    typographySettings
+    typographySettings,
+    conditionsSettings,
+    interactionsSettings,
+    scrollEffectsSettings,
+    attributesSettings,
+    adminLabelSettings,
 } from '../commonSettings';
 
 /**
@@ -74,7 +79,8 @@ export default {
                     { name: 'submitText', type: 'text', label: 'Submit Button Text' }
                 ]
             },
-            backgroundSettings
+            backgroundSettings,
+            adminLabelSettings('Comments')
         ],
         design: [
             {
@@ -134,7 +140,11 @@ export default {
             visibilitySettings,
             positionSettings,
             transitionSettings,
-            cssSettings
+            cssSettings,
+            conditionsSettings,
+            interactionsSettings,
+            scrollEffectsSettings,
+            attributesSettings
         ]
     }
 }

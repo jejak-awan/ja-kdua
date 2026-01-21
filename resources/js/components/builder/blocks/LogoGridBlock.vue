@@ -1,31 +1,43 @@
 <template>
   <div class="logo-grid-block" :style="wrapperStyles">
-    <h4 v-if="settings.showTitle !== false && settings.title" class="logo-grid-title" :style="titleStyles">{{ settings.title }}</h4>
-    <div class="logo-grid">
-      <draggable
-        v-model="module.children"
-        item-key="id"
-        group="logo_grid_item"
-        class="logo-grid-draggable"
-        :style="gridStyles"
-        ghost-class="ja-builder-ghost"
+    <!-- Title -->
+    <div 
+      v-if="showTitle && title" 
+      class="logo-grid-title" 
+      :style="titleStyles"
+    >
+      {{ title }}
+    </div>
+
+    <!-- Grid -->
+    <div class="logo-grid" :style="gridStyles">
+      <div 
+        v-for="(item, index) in items" 
+        :key="index"
+        class="logo-item"
+        :class="{ 
+          'logo-item--grayscale': grayscale, 
+          'logo-item--hover-color': hoverColor 
+        }"
       >
-        <template #item="{ element: child, index }">
-          <ModuleWrapper
-            :module="child"
-            :index="index"
-            class="logo-grid-wrapper"
+        <div class="logo-container" :style="logoContainerStyles">
+          <img 
+            v-if="item.image" 
+            :src="item.image" 
+            :alt="item.name" 
+            :style="logoImgStyles"
           />
-        </template>
-      </draggable>
+          <div v-else class="logo-placeholder" :style="placeholderStyles">
+            <Building />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
+import { computed, inject } from 'vue'
 import { Building } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
@@ -45,13 +57,14 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-// Provide state to LogoGridItemBlock
-provide('logoGridState', {
-    parentSettings: settings
-})
+const items = computed(() => settings.value.items || [])
+const showTitle = computed(() => getResponsiveValue(settings.value, 'showTitle', device.value) !== false)
+const title = computed(() => getResponsiveValue(settings.value, 'title', device.value))
+const grayscale = computed(() => getResponsiveValue(settings.value, 'grayscale', device.value) !== false)
+const hoverColor = computed(() => getResponsiveValue(settings.value, 'hoverColor', device.value) !== false)
 
 const wrapperStyles = computed(() => {
-  const styles = { textAlign: 'center', width: '100%' }
+  const styles = { width: '100%', textAlign: 'center' }
   Object.assign(styles, getBackgroundStyles(settings.value))
   Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
@@ -63,49 +76,58 @@ const wrapperStyles = computed(() => {
   return styles
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const titleStyles = computed(() => {
+    const styles = getTypographyStyles(settings.value, 'title_', device.value)
+    return {
+        ...styles,
+        marginBottom: '40px'
+    }
+})
 
 const gridStyles = computed(() => {
-  const cols = getResponsiveValue(settings.value, 'columns', device.value) || 4
-  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 32
-  return { 
-    display: 'grid', 
-    gridTemplateColumns: `repeat(${cols}, 1fr)`, 
-    gap: `${gap}px`, 
-    alignItems: 'center', 
-    justifyItems: 'center' 
-  }
+    const cols = getResponsiveValue(settings.value, 'columns', device.value) || 4
+    const gap = getResponsiveValue(settings.value, 'gap', device.value) || 40
+    return {
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gap: `${gap}px`,
+        alignItems: 'center',
+        justifyItems: 'center'
+    }
 })
 
-const logoStyles = computed(() => {
-  const logoSize = getResponsiveValue(settings.value, 'logoSize', device.value) || 120
-  return { 
-    maxWidth: `${logoSize}px`, 
-    maxHeight: `${logoSize * 0.5}px`, 
-    objectFit: 'contain' 
-  }
+const logoContainerStyles = computed(() => {
+    const size = getResponsiveValue(settings.value, 'logoSize', device.value) || 140
+    const opacity = getResponsiveValue(settings.value, 'logoOpacity', device.value) || 0.6
+    return {
+        width: '100%',
+        maxWidth: `${size}px`,
+        opacity: opacity,
+        transition: 'all 0.3s ease'
+    }
 })
 
-const placeholderStyles = computed(() => {
-  const logoSize = getResponsiveValue(settings.value, 'logoSize', device.value) || 120
-  return { 
-    width: `${logoSize}px`, 
-    height: `${logoSize * 0.4}px`, 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    backgroundColor: '#f0f0f0', 
-    borderRadius: '4px', 
-    color: '#ccc' 
-  }
-})
+const logoImgStyles = computed(() => ({
+    width: '100%',
+    height: 'auto',
+    maxHeight: '80px',
+    objectFit: 'contain'
+}))
+
+const placeholderStyles = computed(() => ({
+    width: '100%',
+    aspectRatio: '2/1',
+    backgroundColor: '#f1f5f9',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#cbd5e1'
+}))
 </script>
 
 <style scoped>
-.logo-grid-block { width: 100%; }
-.logo-grid-title { margin: 0 0 24px; }
-.logo-item { transition: all 0.3s; }
-.logo-item--grayscale img { filter: grayscale(100%); opacity: 0.6; }
-.logo-item--grayscale.logo-item--hover-color:hover img { filter: grayscale(0); opacity: 1; }
-.logo-link { display: block; }
+.logo-item { width: 100%; transition: all 0.3s; }
+.logo-item--grayscale .logo-container { filter: grayscale(100%); }
+.logo-item--hover-color:hover .logo-container { filter: grayscale(0); opacity: 1 !important; transform: scale(1.05); }
 </style>

@@ -1,56 +1,52 @@
 <template>
-  <div class="pricing-block" :style="wrapperStyles">
-    <div class="pricing-card" :style="cardStyles" :class="{ 'pricing-card--featured': isFeatured }">
-      <!-- Featured Badge -->
-      <div v-if="isFeatured" class="pricing-badge">
-        {{ featuredLabelValue }}
-      </div>
-      
-      <!-- Header -->
-      <div class="pricing-header" :style="headerStyles">
-        <h3 class="pricing-title">{{ titleValue }}</h3>
-        <p v-if="subtitleValue" class="pricing-subtitle" :style="subtitleStyles">{{ subtitleValue }}</p>
-      </div>
-      
-      <!-- Price -->
-      <div class="pricing-price" :style="priceStyles">
-        <span class="price-currency">{{ currencyValue }}</span>
-        <span class="price-amount">{{ priceValue }}</span>
-        <span class="price-period">{{ periodValue }}</span>
-      </div>
-      
-      <!-- Features -->
-      <draggable
-          tag="ul"
-          v-model="module.children"
-          item-key="id"
-          group="pricing_feature"
-          class="pricing-features"
-          ghost-class="ja-builder-ghost"
+  <div class="pricing-tables" :style="wrapperStyles">
+    <div class="pricing-grid" :style="gridStyles">
+      <div 
+        v-for="(item, index) in items" 
+        :key="index"
+        class="pricing-card" 
+        :class="{ 'pricing-card--featured': item.isFeatured }"
+        :style="getCardStyles(item)"
       >
-          <template #item="{ element: child, index }">
-              <ModuleWrapper
-                  :module="child"
-                  :index="index"
-                  tag="li"   
-                  class="pricing-feature-wrapper"
-              />
-          </template>
-      </draggable>
-      
-      <!-- Button -->
-      <a :href="buttonUrlValue" class="pricing-button" :style="buttonStyles" @click.prevent>
-        {{ buttonTextValue }}
-      </a>
+        <!-- Featured Badge -->
+        <div v-if="item.isFeatured" class="pricing-badge" :style="{ backgroundColor: accentColor }">
+          Featured
+        </div>
+        
+        <!-- Header -->
+        <div class="pricing-header" :style="getHeaderStyles(item)">
+          <h3 class="pricing-title" :style="titleStyles">{{ item.title || 'Plan' }}</h3>
+        </div>
+        
+        <!-- Price -->
+        <div class="pricing-price" :style="priceStyles">
+          <span class="price-currency">{{ item.currency || '$' }}</span>
+          <span class="price-amount">{{ item.price || '0' }}</span>
+          <span class="price-period">{{ item.period || '/mo' }}</span>
+        </div>
+        
+        <!-- Features -->
+        <ul class="pricing-features">
+          <li v-for="(feature, fIndex) in parseFeatures(item.features)" :key="fIndex" class="pricing-feature">
+            <Check :size="14" class="check-icon" :style="{ color: accentColor }" />
+            <span>{{ feature }}</span>
+          </li>
+        </ul>
+        
+        <!-- Button -->
+        <div class="pricing-footer">
+            <a :href="item.buttonUrl || '#'" class="pricing-button" :style="getButtonStyles(item)" @click.prevent>
+              {{ item.buttonText || 'Get Started' }}
+            </a>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, inject, provide } from 'vue'
-import draggable from 'vuedraggable'
-import ModuleWrapper from '../canvas/ModuleWrapper.vue'
-import { Check, X } from 'lucide-vue-next'
+import { computed, inject } from 'vue'
+import { Check } from 'lucide-vue-next'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -64,160 +60,115 @@ import {
 } from '../core/styleUtils'
 
 const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
+  module: { type: Object, required: true }
 })
-
-const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
+const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 
-// Provide state to PricingFeatureBlock
-provide('pricingState', {
-    parentSettings: settings
-})
-
-const isFeatured = computed(() => getResponsiveValue(settings.value, 'featured', device.value))
-const titleValue = computed(() => getResponsiveValue(settings.value, 'title', device.value) || 'Plan')
-const subtitleValue = computed(() => getResponsiveValue(settings.value, 'subtitle', device.value))
-const currencyValue = computed(() => getResponsiveValue(settings.value, 'currency', device.value) || '$')
-const priceValue = computed(() => getResponsiveValue(settings.value, 'price', device.value) || '0')
-const periodValue = computed(() => getResponsiveValue(settings.value, 'period', device.value) || '/month')
-const buttonTextValue = computed(() => getResponsiveValue(settings.value, 'buttonText', device.value) || 'Get Started')
-const buttonUrlValue = computed(() => getResponsiveValue(settings.value, 'buttonUrl', device.value) || '#')
-const featuredLabelValue = computed(() => getResponsiveValue(settings.value, 'featuredLabel', device.value) || 'Best Value')
+const items = computed(() => settings.value.items || [])
+const columns = computed(() => getResponsiveValue(settings.value, 'columns', device.value) || 3)
+const gap = computed(() => getResponsiveValue(settings.value, 'gap', device.value) || 24)
+const accentColor = computed(() => getResponsiveValue(settings.value, 'accentColor', device.value) || '#2059ea')
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }
+  Object.assign(styles, getBackgroundStyles(settings.value))
+  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
   Object.assign(styles, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
+  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
+  Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
   Object.assign(styles, getSizingStyles(settings.value, device.value))
   Object.assign(styles, getFilterStyles(settings.value, device.value))
   Object.assign(styles, getTransformStyles(settings.value, device.value))
   return styles
 })
 
-const cardStyles = computed(() => {
-  const styles = {
-    position: 'relative',
-    overflow: 'visible',
-    transform: isFeatured.value ? 'scale(1.05)' : 'none',
-    zIndex: isFeatured.value ? '10' : '1',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    borderRadius: '16px'
-  }
-  Object.assign(styles, getBackgroundStyles(settings.value))
-  Object.assign(styles, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
-  Object.assign(styles, getBorderStyles(settings.value, 'border', device.value))
-  
-  if (!settings.value.boxShadow) {
-    styles.boxShadow = isFeatured.value ? 'var(--shadow-premium)' : 'var(--shadow-lg)'
-  } else {
-    Object.assign(styles, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
-  }
-  
-  return styles
-})
-
-const headerStyles = computed(() => {
-  const styles = {
-    backgroundColor: getResponsiveValue(settings.value, 'headerBackgroundColor', device.value) || '#2059ea',
-    color: getResponsiveValue(settings.value, 'headerTextColor', device.value) || '#ffffff',
-    padding: '24px',
-    textAlign: 'center'
-  }
-  Object.assign(styles, getTypographyStyles(settings.value, 'title_', device.value))
-  return styles
-})
-
-const subtitleStyles = computed(() => getTypographyStyles(settings.value, 'subtitle_', device.value))
-
-const priceStyles = computed(() => {
-  const styles = {
-    padding: '24px',
-    textAlign: 'center',
-    display: 'flex',
-    alignItems: 'baseline',
-    justifyContent: 'center',
-    gap: '4px',
-    color: getResponsiveValue(settings.value, 'priceColor', device.value) || '#2059ea'
-  }
-  Object.assign(styles, getTypographyStyles(settings.value, 'price_', device.value))
-  return styles
-})
-
-const featureStyles = computed(() => ({
-  color: getResponsiveValue(settings.value, 'textColor', device.value) || '#666666'
+const gridStyles = computed(() => ({
+  display: 'grid',
+  gridTemplateColumns: `repeat(${columns.value}, 1fr)`,
+  gap: `${gap.value}px`
 }))
 
-const buttonStyles = computed(() => {
-  const styles = getTypographyStyles(settings.value, 'button_', device.value)
-  const bgColor = getResponsiveValue(settings.value, 'buttonBackgroundColor', device.value) || '#2059ea'
-  
+const getCardStyles = (item) => {
+  const isFeatured = item.isFeatured
   return {
-    ...styles,
+    backgroundColor: isFeatured 
+        ? (getResponsiveValue(settings.value, 'featuredCardBackgroundColor', device.value) || '#ffffff')
+        : (getResponsiveValue(settings.value, 'cardBackgroundColor', device.value) || '#ffffff'),
+    borderRadius: '16px',
+    overflow: 'hidden',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '32px 24px 24px',
-    padding: '16px 32px',
-    backgroundColor: bgColor,
-    textAlign: 'center',
-    textDecoration: 'none',
-    borderRadius: '12px',
-    fontWeight: '700',
-    letterSpacing: '0.01em',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+    flexDirection: 'column',
+    transition: 'all 0.3s ease',
+    boxShadow: isFeatured ? '0 10px 25px -5px rgba(0,0,0,0.1)' : '0 4px 6px -1px rgba(0,0,0,0.05)',
+    border: isFeatured ? `2px solid ${accentColor.value}` : '1px solid #f1f5f9',
+    position: 'relative',
+    transform: isFeatured ? 'scale(1.05)' : 'none',
+    zIndex: isFeatured ? '10' : '1'
   }
+}
+
+const getHeaderStyles = (item) => ({
+  padding: '32px 24px 16px',
+  textAlign: 'center'
 })
+
+const getButtonStyles = (item) => ({
+  backgroundColor: item.isFeatured ? accentColor.value : '#f1f5f9',
+  color: item.isFeatured ? '#ffffff' : '#1e293b',
+  padding: '12px 24px',
+  borderRadius: '8px',
+  fontWeight: '600',
+  textDecoration: 'none',
+  display: 'block',
+  textAlign: 'center',
+  transition: 'all 0.2s ease'
+})
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
+const priceStyles = computed(() => {
+    const styles = getTypographyStyles(settings.value, 'price_', device.value)
+    return { ...styles, textAlign: 'center', padding: '0 24px 24px' }
+})
+
+const parseFeatures = (features) => {
+  if (!features) return []
+  return features.split('\n').filter(f => f.trim() !== '')
+}
 </script>
 
 <style scoped>
-.pricing-block { width: 100%; padding: 40px 20px; }
-.pricing-card { position: relative; background: #ffffff; }
-.pricing-card:hover { transform: translateY(-8px) scale(1.02); }
-.pricing-card--featured:hover { transform: translateY(-8px) scale(1.07); }
+.pricing-tables { width: 100%; }
+.pricing-grid { width: 100%; margin: 0 auto; }
+.pricing-card { background: white; }
 
-.pricing-badge { 
-  position: absolute; 
-  top: 20px; 
-  right: 20px; 
-  background: linear-gradient(135deg, #ff6b6b, #ee5253); 
-  color: white; 
-  padding: 6px 16px; 
-  font-size: 11px; 
-  font-weight: 800; 
+.pricing-badge {
+  position: absolute;
+  top: 12px;
+  right: -30px;
+  color: white;
+  padding: 4px 40px;
+  font-size: 10px;
+  font-weight: 800;
+  transform: rotate(45deg);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 20px;
-  z-index: 10; 
-  box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.pricing-header { border-radius: 16px 16px 0 0; }
-.pricing-title { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; }
-.pricing-subtitle { margin: 8px 0 0; font-size: 13px; opacity: 0.7; }
+.pricing-title { margin: 0; font-size: 1.25rem; font-weight: 700; }
 
-.pricing-price { padding: 40px 24px; color: #0f172a !important; }
-.price-amount { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
-.price-currency { font-size: 24px; font-weight: 600; vertical-align: super; margin-right: 2px; }
-.price-period { font-size: 14px; font-weight: 500; opacity: 0.5; margin-left: 4px; }
+.pricing-price { display: flex; align-items: baseline; justify-content: center; gap: 2px; color: #0f172a; }
+.price-currency { font-size: 1.5rem; font-weight: 600; }
+.price-amount { font-size: 3rem; font-weight: 800; line-height: 1; }
+.price-period { font-size: 0.875rem; opacity: 0.6; }
 
-.pricing-features { list-style: none; padding: 0 32px; margin: 0; }
-.pricing-feature-wrapper { 
-  padding: 16px 0; 
-  border-bottom: 1px solid rgba(0,0,0,0.04); 
-  transition: all 0.2s ease;
-}
-.pricing-feature-wrapper:last-child { border-bottom: none; }
-.pricing-feature-wrapper:hover { background: rgba(0,0,0,0.01); padding-left: 4px; }
+.pricing-features { list-style: none; padding: 0 24px 24px; margin: 0; flex: 1; }
+.pricing-feature { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; margin-bottom: 12px; color: #475569; }
+.check-icon { flex-shrink: 0; }
 
-.pricing-button:hover { 
-  transform: translateY(-2px); 
-  box-shadow: 0 10px 20px -10px rgba(var(--builder-accent-rgb), 0.5);
-  filter: brightness(1.1);
-}
+.pricing-footer { padding: 24px; margin-top: auto; }
+.pricing-button:hover { filter: brightness(0.95); transform: translateY(-1px); }
 .pricing-button:active { transform: translateY(0); }
 </style>

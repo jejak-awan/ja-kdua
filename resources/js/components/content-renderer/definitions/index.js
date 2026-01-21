@@ -29,7 +29,11 @@ import FeatureGrid from './FeatureGrid';
 import Quote from './Quote';
 import Testimonial from './Testimonial';
 import Blurb from './Blurb';
-import Person from './Person';
+// Imports updated
+import TeamMember from './TeamMember';
+import Lottie from './Lottie';
+import BeforeAfter from './BeforeAfter';
+
 import Alert from './Alert';
 import IconList from './IconList';
 import SocialLinks from './SocialLinks';
@@ -44,27 +48,28 @@ import Countdown from './Countdown';
 import EmailOptin from './EmailOptin';
 import Portfolio from './Portfolio';
 
-// Layout
 import Accordion from './Accordion';
 import Tabs from './Tabs';
 import Toggle from './Toggle';
-import Menu from './MenuDef';
-import Sidebar from './SidebarDef';
+import Menu from './MenuDef'; // Note: File is MenuDef.js
+import Sidebar from './SidebarDef'; // Note: File is SidebarDef.js
 import Login from './Login';
 
-// Blog / Posts
 import BlogGrid from './BlogGrid';
 import PostContent from './PostContent';
 import PostTitle from './PostTitle';
 import PostFeaturedImage from './PostFeaturedImage';
 import PostMeta from './PostMeta';
 import PostNav from './PostNav';
-import { TabbedPosts } from './TabbedPosts';
+import TabbedPosts from './TabbedPosts';
 import PostSlider from './PostSlider';
-import { PostCarousel } from './PostCarousel';
+import PostCarousel from './PostCarousel';
 import Comments from './Comments';
 
 import StarRating from './StarRating';
+import FAQ from './FAQ';
+import LogoGrid from './LogoGrid';
+import VideoSlider from './VideoSlider';
 
 export default [
     // Structure
@@ -90,6 +95,8 @@ export default [
     Audio,
     Slider,
     Map,
+    Lottie,
+    BeforeAfter,
 
     // Content
     Hero,
@@ -98,7 +105,7 @@ export default [
     Quote,
     Testimonial,
     Blurb,
-    Person,
+    TeamMember, // Was Person
     Alert,
     IconList,
     SocialLinks,
@@ -133,5 +140,8 @@ export default [
     PostCarousel,
     Comments,
 
-    StarRating
+    StarRating,
+    FAQ,
+    LogoGrid,
+    VideoSlider
 ];

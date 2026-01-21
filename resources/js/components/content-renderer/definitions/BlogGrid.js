@@ -2,7 +2,7 @@ import { LayoutGrid } from 'lucide-vue-next';
 import { defineAsyncComponent } from 'vue';
 
 export default {
-    name: 'blog-grid',
+    name: 'blog',
     label: 'Blog Grid',
     icon: LayoutGrid,
     description: 'Display a grid of blog posts with dynamic filtering.',
