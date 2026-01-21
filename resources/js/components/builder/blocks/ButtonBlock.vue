@@ -8,9 +8,9 @@
       :style="buttonStyles"
       @click.prevent
     >
-      <component 
+      <LucideIcon 
         v-if="settings.iconName && settings.iconPosition === 'left'" 
-        :is="iconComponent" 
+        :name="settings.iconName" 
         class="button-icon button-icon--left"
       />
       <div 
@@ -20,9 +20,9 @@
         @blur="onTextBlur"
         @click.stop
       >{{ settings.text || 'Click Here' }}</div>
-      <component 
+      <LucideIcon 
         v-if="settings.iconName && settings.iconPosition === 'right'" 
-        :is="iconComponent" 
+        :name="settings.iconName" 
         class="button-icon button-icon--right"
       />
     </a>
@@ -30,8 +30,8 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject, ref } from 'vue'
-import { MousePointer } from 'lucide-vue-next'
+import { computed, inject, ref } from 'vue'
+import LucideIcon from '../../ui/LucideIcon.vue'
 import { 
   getBackgroundStyles, 
   getSpacingStyles, 
@@ -49,15 +49,6 @@ const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
 const device = computed(() => builder?.device?.value || 'desktop')
 const editableRef = ref(null)
-
-const iconComponent = computed(() => {
-  if (!settings.value.iconName) return null
-  try {
-    return defineAsyncComponent(() => 
-      import('lucide-vue-next').then(m => m[settings.value.iconName] || MousePointer)
-    )
-  } catch { return MousePointer }
-})
 
 const wrapperStyles = computed(() => {
   const styles = { width: '100%' }

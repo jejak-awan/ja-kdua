@@ -25,24 +25,26 @@
                 ></div>
 
                 <!-- Icon Left -->
-                <component 
+                <LucideIcon 
                     v-if="iconPosition === 'left' && iconName" 
-                    :is="iconComponent" 
+                    :name="iconName" 
                     class="z-10 transition-transform duration-300"
                     :class="['shrink-0', iconSizeClass]"
                     :style="{ transform: isHovered && hoverEffect === 'lift' ? 'translateX(-2px)' : 'none' }"
+                    :size="iconSize"
                 />
 
                 <!-- Text -->
                 <span class="z-10 relative">{{ text || 'Click Here' }}</span>
 
                 <!-- Icon Right -->
-                <component 
+                <LucideIcon 
                     v-if="iconPosition === 'right' && iconName" 
-                    :is="iconComponent" 
+                    :name="iconName" 
                     class="z-10 transition-transform duration-300"
                     :class="['shrink-0', iconSizeClass]"
                     :style="{ transform: isHovered && hoverEffect === 'lift' ? 'translateX(2px)' : 'none' }"
+                    :size="iconSize"
                 />
             </a>
         </div>
@@ -55,11 +57,7 @@ defineOptions({
 });
 
 import { computed, ref } from 'vue';
-import { 
-    ArrowRight, ArrowUpRight, ChevronRight, ExternalLink, Download, Play, 
-    PlayCircle, Mail, Phone, Send, Check, Plus, Heart, Star, ShoppingCart, 
-    User, Sparkles 
-} from 'lucide-vue-next';
+import LucideIcon from '../../ui/LucideIcon.vue';
 
 const props = defineProps({
     // Content
@@ -96,28 +94,6 @@ const props = defineProps({
 });
 
 const isHovered = ref(false);
-
-const icons = {
-    'arrow-right': ArrowRight,
-    'arrow-up-right': ArrowUpRight,
-    'chevron-right': ChevronRight,
-    'external-link': ExternalLink,
-    'download': Download,
-    'play': Play,
-    'play-circle': PlayCircle,
-    'mail': Mail,
-    'phone': Phone,
-    'send': Send,
-    'check': Check,
-    'plus': Plus,
-    'heart': Heart,
-    'star': Star,
-    'shopping-cart': ShoppingCart,
-    'user': User,
-    'sparkles': Sparkles
-};
-
-const iconComponent = computed(() => icons[props.iconName] || null);
 
 const containerStyle = computed(() => {
     const p = props.padding || {};
