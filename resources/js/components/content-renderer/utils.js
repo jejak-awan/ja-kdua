@@ -56,8 +56,22 @@ export function getVal(obj, key, device = 'desktop') {
             'maxWidth': ['max_width'],
             'verticalAlign': ['vertical_align', 'verticalAlignment'],
             'fullWidth': ['full_width'],
-            'gutterWidth': ['gutter_width'],
-            'equalizeColumns': ['equalize_columns']
+            'equalizeColumns': ['equalize_columns'],
+            'layoutType': ['layout_type'],
+            'layout_type': ['layoutType'],
+            'direction': ['flexDirection', 'flex_direction', 'grid_direction'],
+            'flexWrap': ['flex_wrap', 'wrap'],
+            'justifyContent': ['justify_content'],
+            'alignItems': ['align_items'],
+            'alignContent': ['align_content'],
+            'justifyItems': ['justify_items'],
+            'alignItems': ['align_items'],
+            'gapX': ['gap_x', 'columnGap', 'column_gap'],
+            'gapY': ['gap_y', 'rowGap', 'row_gap'],
+            'columnCount': ['column_count'],
+            'columnWidths': ['column_widths'],
+            'gridTemplateColumns': ['grid_template_columns'],
+            'gridTemplateRows': ['grid_template_rows']
         };
 
         if (aliases[innerKey]) {
@@ -282,5 +296,72 @@ export function getTransformStyles(settings, device = 'desktop') {
     const css = {}
     if (transforms.length > 0) css.transform = transforms.join(' ')
     if (origin && origin !== 'center') css.transformOrigin = origin
+    return css
+}
+export function getLayoutStyles(settings, device = 'desktop') {
+    const css = {}
+
+    const layoutType = getVal(settings, 'layoutType', device)
+
+    if (layoutType === 'flex') {
+        css.display = 'flex'
+        css.flexDirection = getVal(settings, 'direction', device) || 'column'
+        css.flexWrap = getVal(settings, 'flexWrap', device) || 'nowrap'
+        css.justifyContent = getVal(settings, 'justifyContent', device) || 'flex-start'
+        css.alignItems = getVal(settings, 'alignItems', device) || 'stretch'
+
+        const alignContent = getVal(settings, 'alignContent', device)
+        if (alignContent) css.alignContent = alignContent
+
+        const gapX = toCSS(getVal(settings, 'gapX', device))
+        const gapY = toCSS(getVal(settings, 'gapY', device))
+
+        if (gapX && gapY) css.gap = `${gapY} ${gapX}`
+        else if (gapX) css.columnGap = gapX
+        else if (gapY) css.rowGap = gapY
+
+    } else if (layoutType === 'grid') {
+        css.display = 'grid'
+
+        // Columns
+        const colWidths = getVal(settings, 'columnWidths', device) || 'equal'
+        if (colWidths === 'equal') {
+            const cols = getVal(settings, 'columnCount', device) || 3
+            css.gridTemplateColumns = cols === 'auto' ? `repeat(auto-fit, minmax(0, 1fr))` : `repeat(${cols}, 1fr)`
+        } else if (colWidths === 'equal_min') {
+            const minW = toCSS(getVal(settings, 'columnMinWidth', device) || 250)
+            css.gridTemplateColumns = `repeat(auto-fit, minmax(${minW}, 1fr))`
+        } else if (colWidths === 'manual') {
+            const manual = getVal(settings, 'gridTemplateColumns', device)
+            if (manual) css.gridTemplateColumns = manual
+        }
+
+        // Rows
+        const rowHeights = getVal(settings, 'rowHeights', device) || 'auto'
+        if (rowHeights !== 'auto') {
+            const rows = getVal(settings, 'rowCount', device)
+            if (rows && rows !== 'auto') css.gridTemplateRows = `repeat(${rows}, 1fr)`
+        }
+
+        // Gaps
+        const gapX = toCSS(getVal(settings, 'gapX', device))
+        const gapY = toCSS(getVal(settings, 'gapY', device))
+        if (gapX && gapY) css.gap = `${gapY} ${gapX}`
+        else if (gapX) css.columnGap = gapX
+        else if (gapY) css.rowGap = gapY
+
+        // Alignment
+        const jc = getVal(settings, 'justifyContent', device)
+        if (jc) css.justifyContent = jc
+        const ac = getVal(settings, 'alignContent', device)
+        if (ac) css.alignContent = ac
+        const ji = getVal(settings, 'justifyItems', device)
+        if (ji) css.justifyItems = ji
+        const ai = getVal(settings, 'alignItems', device)
+        if (ai) css.alignItems = ai
+    } else if (layoutType === 'block') {
+        css.display = 'block'
+    }
+
     return css
 }

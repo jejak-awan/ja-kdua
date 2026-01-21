@@ -22,7 +22,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import BlockRenderer from '../BlockRenderer.vue'
 import BackgroundMedia from './BackgroundMedia.vue'
-import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles, getVal } from '../utils'
+import { getBorderStyles, getSpacingStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles, getLayoutStyles, getVal } from '../utils'
 
 const props = defineProps({
   id: String,
@@ -85,18 +85,14 @@ const styles = computed(() => {
       Object.assign(s, getTransformStyles(settings))
 
       // Layout Logic (Responsive)
-      const layoutDisplay = getVal(settings, 'display')
-      const layoutFlexDir = getVal(settings, 'flexDirection') || getVal(settings, 'direction')
-      const vAlign = getVal(settings, 'verticalAlign') || 'start'
-
-      if (layoutDisplay) {
-          s.display = layoutDisplay
-          if (layoutFlexDir) s.flexDirection = layoutFlexDir
+      const layoutStyles = getLayoutStyles(settings)
+      if (Object.keys(layoutStyles).length > 0) {
+          Object.assign(s, layoutStyles)
       } else {
-          // Default to Flex Column
+          // Default fallback
           s.display = 'flex'
           s.flexDirection = 'column'
-          
+          const vAlign = getVal(settings, 'verticalAlign') || 'start'
           if (vAlign === 'center') s.justifyContent = 'center'
           else if (vAlign === 'end') s.justifyContent = 'flex-end'
           else s.justifyContent = 'flex-start'

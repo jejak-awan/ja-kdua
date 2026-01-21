@@ -26,7 +26,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import ColumnBlock from './ColumnBlock.vue'
-import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles, getVal } from '../utils'
+import { getSpacingStyles, getBorderStyles, getBoxShadowStyles, getBackgroundStyles, getSizingStyles, getTransformStyles, getLayoutStyles, getVal } from '../utils'
 
 const props = defineProps({
     columns: { type: String, default: '1' },
@@ -94,12 +94,15 @@ const styles = computed(() => {
     
     const settings = props.settings || {}
 
-    if(props.backgroundColor) s.backgroundColor = props.backgroundColor
-
     if (settings) {
+        const layoutStyles = getLayoutStyles(settings)
+        Object.assign(s, layoutStyles)
+        
         const bgStyles = getBackgroundStyles(settings)
         Object.assign(s, bgStyles)
     }
+
+    if(props.backgroundColor) s.backgroundColor = props.backgroundColor
 
     if(props.padding) Object.assign(s, getSpacingStyles(props.padding, 'padding'))
     if(props.margin) Object.assign(s, getSpacingStyles(props.margin, 'margin'))
