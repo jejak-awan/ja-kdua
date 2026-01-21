@@ -43,6 +43,7 @@ const props = defineProps({
     decoration: { type: String, default: 'none' },
     textColor: { type: String, default: '' },
     // Container/Common Styles
+    width: { type: String, default: 'max-w-4xl' },
     padding: Object,
     margin: Object,
     backgroundColor: String,

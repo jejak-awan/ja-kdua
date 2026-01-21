@@ -9,20 +9,22 @@ export const generateUUID = () => {
 };
 
 /**
- * Robust value getter that checks for both camelCase and snake_case keys.
+ * Robust value getter that handles camelCase, snake_case, and Responsive Objects.
  */
 function getVal(obj, key) {
     if (!obj) return undefined;
 
     // Internal helper to get raw value including aliases and snake_case
     const getRaw = (innerObj, innerKey) => {
-        if (!innerObj) return undefined;
+        if (!innerObj || typeof innerObj !== 'object') return undefined;
+        if (innerKey === undefined) return innerObj; // Direct access
+
         if (innerObj[innerKey] !== undefined && innerObj[innerKey] !== null && innerObj[innerKey] !== '') return innerObj[innerKey];
 
         const aliases = {
-            'backgroundColor': ['bgColor'],
-            'backgroundImage': ['bgImage'],
-            'backgroundSize': ['bgSize'],
+            'backgroundColor': ['bgColor', 'background_color'],
+            'backgroundImage': ['bgImage', 'background_image'],
+            'backgroundSize': ['bgSize', 'background_size'],
             'backgroundPosition': ['bgPos', 'bgPosition', 'background_position'],
             'backgroundRepeat': ['bgRepeat', 'background_repeat'],
             'borderRadius': ['radius', 'r', 'border_radius'],
@@ -44,16 +46,19 @@ function getVal(obj, key) {
         return undefined;
     }
 
-    let val = getRaw(obj, key);
-
-    // If still undefined, check if obj itself is a responsive object from a parent key
-    // This happens if spacingSettings is passed as a responsive object
-    if (val === undefined && (obj.desktop !== undefined || obj.mobile !== undefined)) {
-        val = obj.desktop; // Default to desktop for now
+    // 1. Resolve if the container object itself is a responsive object
+    // (Common for 'padding', 'margin', etc. passed as a whole)
+    let source = obj;
+    if (obj.desktop !== undefined || obj.mobile !== undefined || obj.tablet !== undefined) {
+        source = obj.desktop || obj;
     }
 
-    // If the RESOLVED value is still an object with desktop/mobile keys, resolve it too
-    if (val && typeof val === 'object' && !Array.isArray(val) && (val.desktop !== undefined || val.mobile !== undefined)) {
+    // 2. Try to get the key from the source
+    let val = getRaw(source, key);
+
+    // 3. Resolve if the result itself is a responsive object
+    // (Common for specific fields like 'minHeight')
+    if (val && typeof val === 'object' && !Array.isArray(val) && (val.desktop !== undefined || val.mobile !== undefined || val.tablet !== undefined)) {
         val = val.desktop;
     }
 
@@ -61,10 +66,13 @@ function getVal(obj, key) {
 }
 
 /**
- * Appends px unit if value is numeric.
+ * Appends px unit if value is numeric and sanitizes objects.
  */
 function addPx(val) {
-    if (val === undefined || val === null || val === '') return val;
+    if (val === undefined || val === null || val === '') return '';
+    // If it's still an object at this point, it's an error in resolution, stringify to catch it
+    if (typeof val === 'object') return '';
+
     if (typeof val === 'number') return `${val}px`;
     if (typeof val === 'string' && val.match(/^\-?\d+$/)) return `${val}px`;
     return val;
@@ -79,10 +87,12 @@ export function getBorderStyles(borderSettings) {
     if (radius) {
         if (typeof radius === 'object') {
             const { tl, tr, bl, br } = radius
-            if (tl !== undefined) css.borderTopLeftRadius = `${tl}px`
-            if (tr !== undefined) css.borderTopRightRadius = `${tr}px`
-            if (bl !== undefined) css.borderBottomLeftRadius = `${bl}px`
-            if (br !== undefined) css.borderBottomRightRadius = `${br}px`
+            if (tl !== undefined) css.borderTopLeftRadius = addPx(tl)
+            if (tr !== undefined) css.borderTopRightRadius = addPx(tr)
+            if (bl !== undefined) css.borderBottomLeftRadius = addPx(bl)
+            if (br !== undefined) css.borderBottomRightRadius = addPx(br)
+        } else {
+            css.borderRadius = addPx(radius)
         }
     }
 
@@ -95,7 +105,7 @@ export function getBorderStyles(borderSettings) {
             if (conf) {
                 const sideCap = side.charAt(0).toUpperCase() + side.slice(1)
                 if (conf.width > 0 && conf.style !== 'none') {
-                    css[`border${sideCap}Width`] = `${conf.width}px`
+                    css[`border${sideCap}Width`] = addPx(conf.width)
                     css[`border${sideCap}Style`] = conf.style || 'solid'
                     css[`border${sideCap}Color`] = conf.color || 'transparent'
                 }
@@ -103,9 +113,9 @@ export function getBorderStyles(borderSettings) {
         })
     } else {
         const w = getVal(borderSettings, 'borderWidth')
-        if (w !== undefined) {
+        if (w !== undefined && w > 0) {
             const c = getVal(borderSettings, 'borderColor') || '#000'
-            css.borderWidth = `${w}px`
+            css.borderWidth = addPx(w)
             css.borderStyle = 'solid'
             css.borderColor = c
         }
@@ -125,7 +135,7 @@ export function getSpacingStyles(spacingSettings, type = 'padding') {
     const unit = getVal(spacingSettings, 'unit') || 'px'
 
     const glue = (v) => {
-        if (v === undefined || v === null || v === '') return undefined
+        if (v === undefined || v === null || v === '' || typeof v === 'object') return undefined
         if (typeof v === 'string' && (v.includes('px') || v.includes('rem') || v.includes('%') || v.includes('vh') || v.includes('vw'))) return v
         return `${v}${unit}`
     }
@@ -140,14 +150,18 @@ export function getSpacingStyles(spacingSettings, type = 'padding') {
 
 export function getBoxShadowStyles(shadowSettings) {
     if (!shadowSettings || shadowSettings === 'none' || shadowSettings.preset === 'none') return {}
-    const { horizontal, vertical, blur, spread, color, inset } = shadowSettings
+
+    // Resolve if responsive
+    const s = (shadowSettings.desktop || shadowSettings.mobile) ? shadowSettings.desktop : shadowSettings;
+
+    const { horizontal, vertical, blur, spread, color, inset } = s
     const h = horizontal || 0
     const v = vertical || 0
     const b = blur || 0
-    const s = spread || 0
+    const s_val = spread || 0
     const c = color || 'rgba(0,0,0,0)'
     const i = inset ? 'inset ' : ''
-    return { boxShadow: `${i}${h}px ${v}px ${b}px ${s}px ${c}` }
+    return { boxShadow: `${i}${h}px ${v}px ${b}px ${s_val}px ${c}` }
 }
 
 export function generateGradientCSS(gradient) {
@@ -190,7 +204,7 @@ export function getBackgroundStyles(settings) {
         if (size === 'custom') {
             const w = getVal(settings, 'backgroundImageWidth') || 'auto'
             const h = getVal(settings, 'backgroundImageHeight') || 'auto'
-            size = `${w} ${h}`
+            size = `${addPx(w)} ${addPx(h)}`
         } else if (size === 'stretch') size = '100% 100%'
         else if (size === 'fit') size = 'contain'
         resolvedImageSize = size
