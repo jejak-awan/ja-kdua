@@ -67,7 +67,7 @@ const onContentUpdate = (newContent, settings) => {
 }
 .text-block :deep(p) {
   margin: 0 0 1.5em;
-  line-height: 1.7;
+  line-height: inherit;
   color: inherit;
 }
 .text-block :deep(p:last-child) {

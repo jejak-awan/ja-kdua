@@ -1,12 +1,12 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ mode: blockMode, settings, device: blockDevice }">
+  <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ mode: blockMode, settings, device: blockDevice, getAttributes }">
       <div class="heading-container">
         <component 
           :is="tag(settings)"
           class="heading-block"
           :style="headingStyles(settings, blockDevice)"
           :class="[sizeClass(settings), decorationClass(settings)]"
+          v-bind="getAttributes('title')"
         >
           <template v-if="blockMode === 'edit' && !isDynamic(settings)">
             <div 
@@ -22,7 +22,7 @@
           </template>
         </component>
 
-        <div v-if="subtitle(settings) || blockMode === 'edit'" class="heading-subtitle" :class="subtitleSizeClass(settings)" :style="subtitleStyles(settings, blockDevice)">
+        <div v-if="subtitle(settings) || blockMode === 'edit'" class="heading-subtitle" :class="subtitleSizeClass(settings)" :style="subtitleStyles(settings, blockDevice)" v-bind="getAttributes('subtitle')">
           <div 
             :contenteditable="blockMode === 'edit'"
             @blur="onSubtitleBlur($event, settings)"
@@ -32,7 +32,6 @@
         </div>
         
       </div>
-    </template>
   </BaseBlock>
 </template>
 

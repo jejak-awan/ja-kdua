@@ -1,14 +1,14 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="hero-block">
+  <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ settings, getAttributes }">
     <div class="hero-content relative z-10 w-full" :style="contentStyles">
-        <h1 v-if="settings.title" class="hero-title leading-tight font-bold mb-6" :style="titleStyles">
+        <h1 v-if="settings.title" class="hero-title leading-tight font-bold mb-6" :style="titleStyles" v-bind="getAttributes('title')">
             {{ settings.title }}
         </h1>
-        <p v-if="settings.subtitle" class="hero-subtitle text-lg md:text-xl opacity-90 mb-10 max-w-2xl" :style="subtitleStyles">
+        <p v-if="settings.subtitle" class="hero-subtitle text-lg md:text-xl opacity-90 mb-10 max-w-2xl" :style="subtitleStyles" v-bind="getAttributes('subtitle')">
             {{ settings.subtitle }}
         </p>
         <div v-if="settings.show_cta" class="hero-actions flex gap-4" :style="actionsStyles">
-            <button class="px-8 py-4 bg-primary text-white rounded-full font-bold shadow-xl hover:scale-105 transition-transform">
+            <button class="px-8 py-4 bg-primary text-white rounded-full font-bold shadow-xl hover:scale-105 transition-transform" v-bind="getAttributes('button')">
                 {{ settings.buttonText || 'Get Started' }}
             </button>
         </div>

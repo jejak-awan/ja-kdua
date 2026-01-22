@@ -1,6 +1,5 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
+  <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ styles: wrapperBaseStyles, settings, getAttributes }">
       <div class="cta-block" :style="ctaBlockStyles">
         <div class="cta-content" :style="contentStyles">
           <h2 
@@ -9,6 +8,7 @@
             :style="titleStyles"
             :contenteditable="mode === 'edit'"
             @blur="e => updateResponsiveField('title', e.target.innerText)"
+            v-bind="getAttributes('title')"
           >
             {{ title }}
           </h2>
@@ -18,6 +18,7 @@
             :style="textStyles"
             :contenteditable="mode === 'edit'"
             @blur="e => updateResponsiveField('content', e.target.innerText)"
+            v-bind="getAttributes('content')"
           >
             {{ content }}
           </p>
@@ -32,12 +33,12 @@
             :contenteditable="mode === 'edit'"
             @blur="e => updateResponsiveField('buttonText', e.target.innerText)"
             @click="mode === 'edit' ? e => e.preventDefault() : undefined"
+            v-bind="getAttributes('button')"
           >
             {{ buttonText || 'Get Started' }}
           </a>
         </div>
       </div>
-    </template>
   </BaseBlock>
 </template>
 

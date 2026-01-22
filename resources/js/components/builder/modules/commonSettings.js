@@ -361,8 +361,8 @@ export const visibilitySettings = {
             label: 'Disable On',
             multiple: true,
             options: [
-                { label: 'Phone', value: 'phone', icon: 'Smartphone' },
-                { label: 'Tablet', value: 'italy', icon: 'Tablet' },
+                { label: 'Phone', value: 'mobile', icon: 'Smartphone' },
+                { label: 'Tablet', value: 'tablet', icon: 'Tablet' },
                 { label: 'Desktop', value: 'desktop', icon: 'Monitor' }
             ],
             responsive: false
@@ -422,6 +422,34 @@ export const positionSettings = {
             label: 'Z Index',
             default: '',
             responsive: true
+        },
+        {
+            name: 'top',
+            type: 'dimension',
+            label: 'Top',
+            responsive: true,
+            show_if: { field: 'position', value: ['absolute', 'fixed', 'relative', 'sticky'] }
+        },
+        {
+            name: 'bottom',
+            type: 'dimension',
+            label: 'Bottom',
+            responsive: true,
+            show_if: { field: 'position', value: ['absolute', 'fixed', 'relative', 'sticky'] }
+        },
+        {
+            name: 'left',
+            type: 'dimension',
+            label: 'Left',
+            responsive: true,
+            show_if: { field: 'position', value: ['absolute', 'fixed', 'relative', 'sticky'] }
+        },
+        {
+            name: 'right',
+            type: 'dimension',
+            label: 'Right',
+            responsive: true,
+            show_if: { field: 'position', value: ['absolute', 'fixed', 'relative', 'sticky'] }
         }
     ]
 }
@@ -1036,7 +1064,22 @@ export const attributesSettings = {
         {
             name: 'attributes',
             type: 'attributes',
-            label: 'Attributes'
+            label: 'Wrapper Attributes'
+        },
+        {
+            name: 'title_attributes',
+            type: 'attributes',
+            label: 'Title Attributes'
+        },
+        {
+            name: 'subtitle_attributes',
+            type: 'attributes',
+            label: 'Subtitle Attributes'
+        },
+        {
+            name: 'button_attributes',
+            type: 'attributes',
+            label: 'Button Attributes'
         }
     ]
 }

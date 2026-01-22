@@ -1,30 +1,65 @@
 <template>
   <div class="attribute-field">
     <div v-if="localValue.length > 0" class="attributes-list mb-3">
-      <div v-for="(attr, index) in localValue" :key="index" class="attribute-item">
-        <div class="attribute-info">
-          <div class="attribute-name">{{ attr.name }}</div>
-          <div class="attribute-value text-xs text-muted">{{ attr.value || '(no value)' }}</div>
+      <div v-for="(attr, index) in localValue" :key="index" class="attribute-item-wrapper mb-2 border border-builder-border rounded-md overflow-hidden">
+        <div class="attribute-item flex items-center justify-between p-3 bg-builder-bg-secondary">
+          <div class="attribute-info">
+            <div class="attribute-name font-bold text-sm">{{ attr.name }}</div>
+            <div class="attribute-value text-xs text-muted">{{ attr.value || '(no value)' }}</div>
+          </div>
+          <div class="attribute-actions flex gap-1">
+            <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
+            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeAttribute(index)" />
+          </div>
         </div>
-        <div class="attribute-actions">
-          <IconButton icon="Settings2" size="sm" @click="editAttribute(index)" />
-          <IconButton icon="Trash2" size="sm" variant="danger" @click="removeAttribute(index)" />
+
+        <!-- Inline Editor -->
+        <div v-if="editingIndex === index" class="attribute-editor p-3 bg-builder-bg-secondary/30 border-t border-builder-border">
+            <div class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Attribute Name</BaseLabel>
+                <input 
+                    type="text" 
+                    class="builder-input w-full" 
+                    v-model="attr.name" 
+                    placeholder="e.g. data-id"
+                    @input="updateValue"
+                >
+            </div>
+            <div class="editor-row">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Attribute Value</BaseLabel>
+                <input 
+                    type="text" 
+                    class="builder-input w-full" 
+                    v-model="attr.value" 
+                    placeholder="Value"
+                    @input="updateValue"
+                >
+            </div>
         </div>
       </div>
     </div>
 
-    <div class="relative">
+    <div class="relative" ref="pickerTrigger">
       <BaseButton 
         variant="outline" 
         class="w-full justify-start gap-2 h-9"
-        @click="isDropdownOpen = !isDropdownOpen"
-        ref="addButton"
+        @click.stop="togglePicker"
       >
         <Plus :size="14" />
         {{ $t('builder.advanced.attributes.add', 'Add Attribute') }}
       </BaseButton>
+    </div>
 
-      <div v-if="isDropdownOpen" class="attribute-dropdown custom-scrollbar" v-click-outside="() => isDropdownOpen = false">
+    <BasePopover
+      v-if="isPickerOpen"
+      :is-open="isPickerOpen"
+      :trigger-rect="pickerRect"
+      :width="280"
+      :no-padding="true"
+      :show-close="false"
+      @close="isPickerOpen = false"
+    >
+      <div class="popover-content custom-scrollbar">
         <button v-for="opt in presetOptions" :key="opt" class="dropdown-item" @click="selectPreset(opt)">
           {{ opt }}
         </button>
@@ -33,14 +68,14 @@
           {{ $t('builder.advanced.attributes.custom', 'Enter Custom Attribute') }}
         </button>
       </div>
-    </div>
+    </BasePopover>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { Plus, Settings2, Trash2 } from 'lucide-vue-next'
-import { BaseButton, IconButton } from '../ui'
+import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
+import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
 const props = defineProps({
   field: Object,
@@ -54,62 +89,57 @@ const props = defineProps({
 const emit = defineEmits(['update:value'])
 
 const localValue = ref([...(props.value || [])])
-const isDropdownOpen = ref(false)
+const isPickerOpen = ref(false)
+const pickerRect = ref(null)
+const pickerTrigger = ref(null)
+const editingIndex = ref(-1)
 
 const presetOptions = [
   'class', 'id', 'title', 'alt', 'rel', 'target', 'role', 'aria-label', 'data-'
 ]
 
+const togglePicker = () => {
+  isPickerOpen.value = !isPickerOpen.value
+  if (isPickerOpen.value && pickerTrigger.value) {
+    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
+  }
+}
+
 const selectPreset = (name) => {
   addAttribute(name)
-  isDropdownOpen.value = false
+  isPickerOpen.value = false
 }
 
 const startCustomEntry = () => {
-  const name = prompt('Enter attribute name:')
-  if (name) {
-    addAttribute(name)
-  }
-  isDropdownOpen.value = false
+  addAttribute('custom-attr')
+  isPickerOpen.value = false
 }
 
 const addAttribute = (name) => {
   localValue.value.push({ name, value: '' })
-  emit('update:value', localValue.value)
+  updateValue()
+  editingIndex.value = localValue.value.length - 1
 }
 
 const removeAttribute = (index) => {
   localValue.value.splice(index, 1)
-  emit('update:value', localValue.value)
+  updateValue()
+  if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const editAttribute = (index) => {
-  const attr = localValue.value[index]
-  const val = prompt(`Enter value for ${attr.name}:`, attr.value)
-  if (val !== null) {
-    attr.value = val
+const toggleEdit = (index) => {
+  editingIndex.value = editingIndex.value === index ? -1 : index
+}
+
+const updateValue = () => {
     emit('update:value', localValue.value)
-  }
 }
 
 watch(() => props.value, (newVal) => {
   localValue.value = [...(newVal || [])]
 }, { deep: true })
 
-// Simple click outside directive implementation helper
-const vClickOutside = {
-  mounted(el, binding) {
-    el.clickOutsideEvent = (event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value(event)
-      }
-    }
-    document.addEventListener('click', el.clickOutsideEvent)
-  },
-  unmounted(el) {
-    document.removeEventListener('click', el.clickOutsideEvent)
-  }
-}
+
 </script>
 
 <style scoped>
@@ -139,40 +169,37 @@ const vClickOutside = {
   gap: var(--spacing-xs);
 }
 
-.attribute-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: #1e293b; /* Dark background as per Image 2 */
-  border: 1px solid var(--builder-border);
-  border-radius: var(--radius-md);
-  margin-top: 4px;
-  z-index: 100;
-  box-shadow: var(--shadow-lg);
+.popover-content {
   max-height: 250px;
   overflow-y: auto;
+  padding: 4px;
+  background: var(--builder-bg-popover);
 }
 
 .dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  text-align: left;
-  font-size: var(--font-size-sm);
-  color: #f8fafc;
+  color: var(--builder-text-secondary);
+  font-size: var(--font-size-md);
   cursor: pointer;
-  transition: background 0.2s;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+  text-align: left;
 }
 
 .dropdown-item:hover {
-  background: #334155;
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-text-primary);
 }
 
 .dropdown-divider {
   height: 1px;
-  background: #334155;
+  background: var(--builder-border);
   margin: 4px 0;
 }
 

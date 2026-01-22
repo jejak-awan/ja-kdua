@@ -32,7 +32,9 @@ export function getVal(settings, key, device = 'desktop') {
     if (!settings) return undefined
 
     const aliases = {
-        'backgroundColor': ['bgColor', 'background_color', 'color'],
+        'backgroundColor': ['bgColor', 'background_color'],
+        'text_color': ['color', 'textColor'],
+        'text_shadow': ['textShadow'],
         'backgroundImage': ['bgImage', 'background_image', 'image'],
         'backgroundSize': ['bgSize', 'background_size', 'size'],
         'backgroundPosition': ['bgPos', 'bgPosition', 'background_position', 'position'],
@@ -54,11 +56,32 @@ export function getVal(settings, key, device = 'desktop') {
     const tryKeys = [key]
     if (aliases[key]) tryKeys.push(...aliases[key])
 
+    // Support prefixed aliases (e.g. title_text_color -> title_color)
+    for (const [baseKey, propAliases] of Object.entries(aliases)) {
+        if (key.endsWith(`_${baseKey}`)) {
+            const prefix = key.substring(0, key.length - baseKey.length - 1)
+            propAliases.forEach(a => {
+                const aliasedKey = `${prefix}_${a}`
+                if (!tryKeys.includes(aliasedKey)) tryKeys.push(aliasedKey)
+            })
+        }
+    }
+
     // Add snake_case and camelCase variants
     const snake = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
     const camel = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase())
     if (!tryKeys.includes(snake)) tryKeys.push(snake)
     if (!tryKeys.includes(camel)) tryKeys.push(camel)
+
+    // Also add camel/snake variants for aliases? 
+    // Usually not needed as they are defined manually, but let's be safe for the first few keys
+    const originalTryKeys = [...tryKeys]
+    originalTryKeys.forEach(k => {
+        const s = k.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+        const c = k.replace(/_([a-z])/g, (g) => g[1].toUpperCase())
+        if (!tryKeys.includes(s)) tryKeys.push(s)
+        if (!tryKeys.includes(c)) tryKeys.push(c)
+    })
 
     for (const k of tryKeys) {
         const val = getResponsiveValue(settings, k, device)
@@ -71,7 +94,7 @@ export function getVal(settings, key, device = 'desktop') {
 export function toCSS(val, unit = 'px') {
     if (val === undefined || val === null || val === '' || typeof val === 'object') return undefined
     const s = String(val)
-    if (s.includes('px') || s.includes('rem') || s.includes('%') || s.includes('vh') || s.includes('vw') || s === 'auto' || s === 'inherit') return s
+    if (s.includes('px') || s.includes('rem') || s.includes('em') || s.includes('%') || s.includes('vh') || s.includes('vw') || s.includes('calc') || s.includes('var') || s === 'auto' || s === 'inherit') return s
     if (s.match(/^-?\d*\.?\d+$/)) return `${s}${unit}`
     return s
 }
@@ -81,21 +104,28 @@ export function getTypographyStyles(settings, prefix = '', device = 'desktop') {
     const fields = [
         { key: 'font_family', prop: 'fontFamily' },
         { key: 'font_size', prop: 'fontSize', unit: 'px' },
-        { key: 'line_height', prop: 'lineHeight' },
+        { key: 'line_height', prop: 'lineHeight', unit: 'em' },
         { key: 'letter_spacing', prop: 'letterSpacing', unit: 'px' },
         { key: 'text_color', prop: 'color' },
         { key: 'font_weight', prop: 'fontWeight' },
         { key: 'font_style', prop: 'fontStyle' },
         { key: 'text_align', prop: 'textAlign' },
         { key: 'text_transform', prop: 'textTransform' },
-        { key: 'text_decoration', prop: 'textDecoration' }
+        { key: 'text_decoration', prop: 'textDecoration' },
+        { key: 'text_shadow', prop: 'textShadow' }
     ]
 
     fields.forEach(f => {
-        const fullKey = prefix ? `${prefix}_${f.key}` : f.key
+        const sep = (prefix && !prefix.endsWith('_')) ? '_' : ''
+        const fullKey = prefix ? `${prefix}${sep}${f.key}` : f.key
         let val = getVal(settings, fullKey, device)
         if (val !== undefined && val !== null && val !== '') {
-            css[f.prop] = f.unit ? toCSS(val, f.unit) : val
+            if (f.key === 'text_shadow') {
+                const shadowStyles = getTextShadowStyles(settings, fullKey, device)
+                if (shadowStyles.textShadow) css.textShadow = shadowStyles.textShadow
+            } else {
+                css[f.prop] = f.unit ? toCSS(val, f.unit) : val
+            }
         }
     })
 
@@ -160,6 +190,15 @@ export function getBoxShadowStyles(settings, baseKey = 'boxShadow', device = 'de
     const { horizontal = 0, vertical = 0, blur = 0, spread = 0, color = 'rgba(0,0,0,0)', inset } = s
     const i = inset ? 'inset ' : ''
     return { boxShadow: `${i}${horizontal}px ${vertical}px ${blur}px ${spread}px ${color}` }
+}
+
+export function getTextShadowStyles(settings, baseKey = 'text_shadow', device = 'desktop') {
+    const s = getResponsiveValue(settings, baseKey, device)
+    if (!s || s === 'none' || s.preset === 'none') return {}
+
+    // text-shadow does NOT support spread or inset
+    const { horizontal = 0, vertical = 0, blur = 0, color = 'rgba(0,0,0,0)' } = s
+    return { textShadow: `${horizontal}px ${vertical}px ${blur}px ${color}` }
 }
 
 export function getSizingStyles(settings, device = 'desktop') {
@@ -407,7 +446,11 @@ export function getFilterStyles(settings, device = 'desktop') {
 
     const getFilterVal = (key) => {
         const nested = getResponsiveValue(settings, 'filter', device)
-        if (nested && nested[key] !== undefined) return nested[key]
+        if (nested) {
+            if (nested[key] !== undefined) return nested[key]
+            const snake = key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`)
+            if (nested[snake] !== undefined) return nested[snake]
+        }
         return getVal(settings, key, device)
     }
 
@@ -449,7 +492,11 @@ export function getTransformStyles(settings, device = 'desktop') {
     const transforms = []
     const getTransVal = (key) => {
         const nested = getResponsiveValue(settings, 'transform', device)
-        if (nested && nested[key] !== undefined) return nested[key]
+        if (nested) {
+            if (nested[key] !== undefined) return nested[key]
+            const snake = key.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`)
+            if (nested[snake] !== undefined) return nested[snake]
+        }
         return getVal(settings, key, device)
     }
 
@@ -585,43 +632,83 @@ export function getAnimationStyles(settings, device = 'desktop') {
 }
 
 export function getVisibilityStyles(settings, device = 'desktop') {
+    const css = {}
+
+    // Support old object format
     const visibility = settings.visibility
-    if (!visibility) return {}
+    if (visibility && !Array.isArray(getVal(settings, 'disable_on', device))) {
+        const desktop = visibility.desktop !== false
+        const tablet = visibility.tablet !== undefined ? visibility.tablet !== false : desktop
+        const mobile = visibility.mobile !== undefined ? visibility.mobile !== false : tablet
 
-    const desktop = visibility.desktop !== false
-    const tablet = visibility.tablet !== undefined ? visibility.tablet !== false : desktop
-    const mobile = visibility.mobile !== undefined ? visibility.mobile !== false : tablet
+        let isVisible = true
+        if (device === 'desktop') isVisible = desktop
+        else if (device === 'tablet') isVisible = tablet
+        else if (device === 'mobile') isVisible = mobile
 
-    let isVisible = true
-    if (device === 'desktop') isVisible = desktop
-    else if (device === 'tablet') isVisible = tablet
-    else if (device === 'mobile') isVisible = mobile
+        if (!isVisible) css.display = 'none'
+    }
 
-    return isVisible ? {} : { display: 'none' }
+    // Overflow logic
+    const ox = getVal(settings, 'overflow_x', device)
+    const oy = getVal(settings, 'overflow_y', device)
+    if (ox && ox !== 'visible') css.overflowX = ox
+    if (oy && oy !== 'visible') css.overflowY = oy
+
+    return css
+}
+
+export function getVisibilityClasses(settings, device = 'desktop', isBuilder = false) {
+    const disabledOn = getVal(settings, 'disable_on', device)
+    const isHidden = Array.isArray(disabledOn) && disabledOn.includes(device)
+
+    if (isHidden) {
+        return isBuilder ? 'opacity-30 pointer-events-auto' : 'hidden'
+    }
+
+    return ''
+}
+
+export function getAnimationClasses(settings, device = 'desktop') {
+    const nested = getResponsiveValue(settings, 'animation', device)
+    const effect = (nested && nested.effect) || getResponsiveValue(settings, 'animation_effect', device)
+    return effect || ''
 }
 
 export function getPositioningStyles(settings, device = 'desktop') {
     const styles = {}
-    const zIndex = getResponsiveValue(settings, 'zIndex', device)
+    const zIndex = getVal(settings, 'z_index', device) || getResponsiveValue(settings, 'zIndex', device)
 
     if (zIndex !== undefined && zIndex !== '' && zIndex !== 0) {
         styles.zIndex = zIndex
     }
 
-    const pos = getResponsiveValue(settings, 'position', device)
-    if (pos === 'sticky' || pos === 'fixed') {
+    const pos = getVal(settings, 'position', device)
+    if (pos && pos !== 'static' && pos !== 'default') {
         styles.position = pos
-        const top = getResponsiveValue(settings, 'stickyTop', device)
-        if (top !== undefined) styles.top = toCSS(top)
-    } else if (pos === 'relative' || pos === 'absolute') {
-        styles.position = pos
-        const top = getResponsiveValue(settings, 'top', device); if (top) styles.top = toCSS(top)
-        const bottom = getResponsiveValue(settings, 'bottom', device); if (bottom) styles.bottom = toCSS(bottom)
-        const left = getResponsiveValue(settings, 'left', device); if (left) styles.left = toCSS(left)
-        const right = getResponsiveValue(settings, 'right', device); if (right) styles.right = toCSS(right)
+        const top = getVal(settings, 'top', device); if (top) styles.top = toCSS(top)
+        const bottom = getVal(settings, 'bottom', device); if (bottom) styles.bottom = toCSS(bottom)
+        const left = getVal(settings, 'left', device); if (left) styles.left = toCSS(left)
+        const right = getVal(settings, 'right', device); if (right) styles.right = toCSS(right)
     }
 
     return styles
+}
+
+export function getTransitionStyles(settings, device = 'desktop') {
+    const css = {}
+    const duration = getVal(settings, 'transition_duration', device)
+    const delay = getVal(settings, 'transition_delay', device)
+    const curve = getVal(settings, 'transition_curve', device)
+
+    if (duration !== undefined && duration > 0) {
+        css.transitionDuration = `${duration}ms`
+        css.transitionProperty = 'all' // Default to all
+        if (delay) css.transitionDelay = `${delay}ms`
+        if (curve && curve !== 'auto') css.transitionTimingFunction = curve
+    }
+
+    return css
 }
 
 export function getColorVariables(settings, hoverSettings = {}, device = 'desktop') {

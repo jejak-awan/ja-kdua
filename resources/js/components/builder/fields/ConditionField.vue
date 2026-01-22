@@ -1,35 +1,73 @@
 <template>
   <div class="condition-field">
     <div v-if="localValue.length > 0" class="conditions-list mb-3">
-      <div v-for="(condition, index) in localValue" :key="index" class="condition-item">
-        <div class="condition-info">
-          <div class="condition-label">{{ getConditionLabel(condition) }}</div>
-          <div class="condition-summary text-xs text-muted">{{ getConditionSummary(condition) }}</div>
+      <div v-for="(condition, index) in localValue" :key="index" class="condition-item-wrapper mb-2 border border-builder-border rounded-md overflow-hidden">
+        <div class="condition-item flex items-center justify-between p-3 bg-builder-bg-secondary">
+          <div class="condition-info">
+            <div class="condition-label font-bold text-sm">{{ getConditionLabel(condition) }}</div>
+            <div class="condition-summary text-xs text-muted">{{ getConditionSummary(condition) }}</div>
+          </div>
+          <div class="condition-actions flex gap-1">
+            <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
+            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeCondition(index)" />
+          </div>
         </div>
-        <div class="condition-actions">
-          <IconButton icon="Settings2" size="sm" @click="editCondition(index)" />
-          <IconButton icon="Trash2" size="sm" variant="danger" @click="removeCondition(index)" />
+
+        <!-- Inline Editor for Condition Rules -->
+        <div v-if="editingIndex === index" class="condition-editor p-3 bg-builder-bg-secondary/30 border-t border-builder-border">
+            <div class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Condition</BaseLabel>
+                <select class="builder-select w-full" v-model="condition.condition" @change="updateValue">
+                    <option value="is">Is</option>
+                    <option value="is_not">Is Not</option>
+                    <option value="contains">Contains</option>
+                    <option value="exists" v-if="['url_param', 'cookie'].includes(condition.type)">Exists</option>
+                </select>
+            </div>
+
+            <div v-if="['post_meta', 'url_param', 'cookie'].includes(condition.type)" class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Key (Meta/Param/Cookie Name)</BaseLabel>
+                <input 
+                    type="text" 
+                    class="builder-input w-full" 
+                    v-model="condition.key" 
+                    placeholder="e.g. promo_code"
+                    @input="updateValue"
+                >
+            </div>
+
+            <div v-if="condition.condition !== 'exists'" class="editor-row">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Value</BaseLabel>
+                <input 
+                    type="text" 
+                    class="builder-input w-full" 
+                    v-model="condition.value" 
+                    placeholder="Value to match"
+                    @input="updateValue"
+                >
+            </div>
         </div>
       </div>
     </div>
 
-    <BaseButton 
-      variant="outline" 
-      class="w-full justify-start gap-2 h-9"
-      @click="togglePicker"
-      ref="addButton"
-    >
-      <Plus :size="14" />
-      {{ $t('builder.advanced.conditions.add', 'Add Condition') }}
-    </BaseButton>
+    <div class="relative" ref="pickerTrigger">
+      <BaseButton 
+        variant="outline" 
+        class="w-full justify-start gap-2 h-9"
+        @click.stop="togglePicker"
+      >
+        <Plus :size="14" />
+        {{ $t('builder.advanced.conditions.add', 'Add Condition') }}
+      </BaseButton>
+    </div>
 
     <BasePopover
       v-if="isPickerOpen"
       :is-open="isPickerOpen"
       :trigger-rect="pickerRect"
-      :title="$t('builder.advanced.conditions.pickerTitle', 'Select Condition')"
       :width="280"
       :no-padding="true"
+      :show-close="false"
       @close="isPickerOpen = false"
     >
       <div class="condition-picker">
@@ -64,8 +102,8 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { Plus, Search, Settings2, Trash2 } from 'lucide-vue-next'
-import { BaseButton, BasePopover, IconButton } from '../ui'
+import { Plus, Search, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
+import { BaseButton, BasePopover, IconButton, BaseLabel } from '../ui'
 
 const props = defineProps({
   field: Object,
@@ -79,10 +117,11 @@ const props = defineProps({
 const emit = defineEmits(['update:value'])
 
 const localValue = ref([...(props.value || [])])
+const editingIndex = ref(-1)
 
 const isPickerOpen = ref(false)
 const pickerRect = ref(null)
-const addButton = ref(null)
+const pickerTrigger = ref(null)
 const searchQuery = ref('')
 
 const conditionGroups = {
@@ -93,7 +132,7 @@ const conditionGroups = {
       { id: 'post_category', label: 'Post Category' },
       { id: 'post_tag', label: 'Post Tag' },
       { id: 'author', label: 'Author' },
-      { id: 'custom_field', label: 'Custom Field' }
+      { id: 'post_meta', label: 'Custom Field (Post Meta)' }
     ]
   },
   location: {
@@ -158,13 +197,16 @@ const getConditionLabel = (condition) => {
 }
 
 const getConditionSummary = (condition) => {
-  return condition.summary || 'Click settings to configure'
+  if (!condition.condition) return 'Click settings to configure'
+  let summary = `${condition.condition} ${condition.value || ''}`
+  if (condition.key) summary = `${condition.key}: ${summary}`
+  return summary
 }
 
 const togglePicker = () => {
-  if (addButton.value?.$el) {
-    pickerRect.value = addButton.value.$el.getBoundingClientRect()
-    isPickerOpen.value = true
+  isPickerOpen.value = !isPickerOpen.value
+  if (isPickerOpen.value && pickerTrigger.value) {
+    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
   }
 }
 
@@ -172,19 +214,27 @@ const selectCondition = (item) => {
   localValue.value.push({
     type: item.id,
     enabled: true,
-    rules: []
+    condition: 'is',
+    value: '',
+    key: ''
   })
   isPickerOpen.value = false
-  emit('update:value', localValue.value)
+  updateValue()
+  editingIndex.value = localValue.value.length - 1
 }
 
 const removeCondition = (index) => {
   localValue.value.splice(index, 1)
-  emit('update:value', localValue.value)
+  updateValue()
+  if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const editCondition = (index) => {
-  // Logic for opening condition rule editor
+const toggleEdit = (index) => {
+  editingIndex.value = editingIndex.value === index ? -1 : index
+}
+
+const updateValue = () => {
+    emit('update:value', localValue.value)
 }
 
 watch(() => props.value, (newVal) => {
@@ -231,7 +281,7 @@ watch(() => props.value, (newVal) => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 8px 12px;
   border-bottom: 1px solid var(--builder-border);
   color: var(--builder-text-muted);
 }
@@ -240,7 +290,7 @@ watch(() => props.value, (newVal) => {
   flex: 1;
   background: transparent;
   border: none;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   color: var(--builder-text-primary);
   outline: none;
 }
@@ -248,15 +298,16 @@ watch(() => props.value, (newVal) => {
 .popover-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-xs) 0;
+  padding: 4px;
+  background: var(--builder-bg-popover);
 }
 
 .data-group {
-  padding: var(--spacing-xs) 0;
+  padding-bottom: 8px;
 }
 
 .group-title {
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: 8px 12px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -273,18 +324,21 @@ watch(() => props.value, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  text-align: left;
+  color: var(--builder-text-secondary);
+  font-size: var(--font-size-md);
   cursor: pointer;
-  transition: background 0.2s;
-  color: var(--builder-text-primary);
-  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+  text-align: left;
 }
 
 .data-item:hover {
-  background: var(--builder-bg-secondary);
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-text-primary);
 }
 
 .custom-scrollbar::-webkit-scrollbar {

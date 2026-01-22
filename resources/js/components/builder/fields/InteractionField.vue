@@ -1,42 +1,100 @@
 <template>
   <div class="interaction-field">
     <div v-if="localValue.length > 0" class="interactions-list mb-3">
-      <div v-for="(interaction, index) in localValue" :key="index" class="interaction-item">
-        <div class="interaction-info">
-          <div class="interaction-label">{{ getInteractionLabel(interaction.trigger) }}</div>
-          <div class="interaction-summary text-xs text-muted">{{ interaction.action || '(no action)' }}</div>
+      <div v-for="(interaction, index) in localValue" :key="index" class="interaction-item-wrapper">
+        <div class="interaction-item">
+          <div class="interaction-info">
+            <div class="interaction-label">{{ getInteractionLabel(interaction.trigger) }}</div>
+            <div class="interaction-summary text-xs text-muted">
+                {{ getActionLabel(interaction.action) }} 
+                <span v-if="interaction.targetId" class="text-primary-400">→ {{ getTargetLabel(interaction.targetId) }}</span>
+            </div>
+          </div>
+          <div class="interaction-actions">
+            <IconButton :icon="editingIndex === index ? ChevronUp : Settings2" size="sm" @click="toggleEdit(index)" />
+            <IconButton :icon="Trash2" size="sm" variant="danger" @click="removeInteraction(index)" />
+          </div>
         </div>
-        <div class="interaction-actions">
-          <IconButton icon="Settings2" size="sm" @click="editInteraction(index)" />
-          <IconButton icon="Trash2" size="sm" variant="danger" @click="removeInteraction(index)" />
+        
+        <!-- Inline Editor -->
+        <div v-if="editingIndex === index" class="interaction-editor p-3 border-t border-builder-border bg-builder-bg-secondary/50">
+            <div class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Action</BaseLabel>
+                <select class="builder-select w-full" v-model="interaction.action" @change="updateValue">
+                    <option value="">Select Action</option>
+                    <option v-for="act in availableActions" :key="act.id" :value="act.id">{{ act.label }}</option>
+                </select>
+            </div>
+
+            <div class="editor-row mb-3">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Target Block</BaseLabel>
+                <select class="builder-select w-full" v-model="interaction.targetId" @change="updateValue">
+                    <option :value="module.id">This Block (Self)</option>
+                    <optgroup label="Other Blocks">
+                        <option v-for="m in allModules" :key="m.id" :value="m.id">
+                            {{ m.title || m.type }} ({{ m.id.substring(0,5) }})
+                        </option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div v-if="interaction.action?.includes('class')" class="editor-row">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">CSS Class Name</BaseLabel>
+                <input 
+                    type="text" 
+                    class="builder-input w-full" 
+                    v-model="interaction.className" 
+                    placeholder="e.g. is-active"
+                    @input="updateValue"
+                >
+            </div>
+
+            <div v-if="interaction.action === 'play-animation'" class="editor-row">
+                <BaseLabel class="mb-1 text-[10px] uppercase opacity-60">Animation Name</BaseLabel>
+                 <select class="builder-select w-full" v-model="interaction.animationName" @change="updateValue">
+                    <option value="animate-fade">Fade In</option>
+                    <option value="animate-fade-up">Fade In Up</option>
+                    <option value="animate-zoom">Zoom In</option>
+                    <option value="animate-bounce-in">Bounce In</option>
+                </select>
+            </div>
         </div>
       </div>
     </div>
 
-    <div class="relative">
+    <div class="relative" ref="pickerTrigger">
       <BaseButton 
         variant="outline" 
         class="w-full justify-start gap-2 h-9"
-        @click="isDropdownOpen = !isDropdownOpen"
-        ref="addButton"
+        @click.stop="togglePicker"
       >
         <Plus :size="14" />
         {{ $t('builder.advanced.interactions.add', 'Add Interaction') }}
       </BaseButton>
+    </div>
 
-      <div v-if="isDropdownOpen" class="interaction-dropdown custom-scrollbar" v-click-outside="() => isDropdownOpen = false">
+    <BasePopover
+      v-if="isPickerOpen"
+      :is-open="isPickerOpen"
+      :trigger-rect="pickerRect"
+      :width="280"
+      :no-padding="true"
+      :show-close="false"
+      @close="isPickerOpen = false"
+    >
+      <div class="popover-content custom-scrollbar">
         <button v-for="opt in triggers" :key="opt.id" class="dropdown-item" @click="selectTrigger(opt.id)">
           {{ opt.label }}
         </button>
       </div>
-    </div>
+    </BasePopover>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { Plus, Settings2, Trash2 } from 'lucide-vue-next'
-import { BaseButton, IconButton } from '../ui'
+import { ref, watch, inject, computed } from 'vue'
+import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
+import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
 const props = defineProps({
   field: Object,
@@ -49,60 +107,86 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value'])
 
+const builder = inject('builder')
 const localValue = ref([...(props.value || [])])
-const isDropdownOpen = ref(false)
+const isPickerOpen = ref(false)
+const pickerRect = ref(null)
+const pickerTrigger = ref(null)
+const editingIndex = ref(-1)
 
 const triggers = [
   { id: 'click', label: 'Click' },
   { id: 'mouseenter', label: 'Mouse Enter' },
   { id: 'mouseleave', label: 'Mouse Exit' },
   { id: 'viewportenter', label: 'Viewport Enter' },
-  { id: 'viewportexit', label: 'Viewport Exit' },
-  { id: 'load', label: 'Load' }
+  { id: 'viewportexit', label: 'Viewport Exit' }
 ]
+
+const availableActions = [
+    { id: 'toggle-class', label: 'Toggle CSS Class' },
+    { id: 'add-class', label: 'Add CSS Class' },
+    { id: 'remove-class', label: 'Remove CSS Class' },
+    { id: 'play-animation', label: 'Play Animation' }
+]
+
+const allModules = computed(() => {
+    // Collect all modules from builder for target selection
+    if (!builder?.allModules) return []
+    return builder.allModules.value.filter(m => m.id !== props.module.id)
+})
 
 const getInteractionLabel = (id) => {
   return triggers.find(t => t.id === id)?.label || id
 }
 
+const getActionLabel = (id) => {
+    return availableActions.find(a => a.id === id)?.label || id || '(no action)'
+}
+
+const getTargetLabel = (id) => {
+    if (id === props.module.id) return 'Self'
+    const m = builder?.allModules?.value.find(mod => mod.id === id)
+    return m ? (m.title || m.type) : id.substring(0, 8)
+}
+
+const togglePicker = () => {
+  isPickerOpen.value = !isPickerOpen.value
+  if (isPickerOpen.value && pickerTrigger.value) {
+    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
+  }
+}
+
 const selectTrigger = (trigger) => {
-  localValue.value.push({ trigger, action: '' })
-  emit('update:value', localValue.value)
-  isDropdownOpen.value = false
+  localValue.value.push({ 
+    trigger, 
+    action: 'toggle-class', 
+    targetId: props.module.id,
+    className: 'is-active'
+  })
+  updateValue()
+  isPickerOpen.value = false
+  editingIndex.value = localValue.value.length - 1
 }
 
 const removeInteraction = (index) => {
   localValue.value.splice(index, 1)
-  emit('update:value', localValue.value)
+  updateValue()
+  if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const editInteraction = (index) => {
-  const interaction = localValue.value[index]
-  const action = prompt(`Enter action for ${getInteractionLabel(interaction.trigger)}:`, interaction.action)
-  if (action !== null) {
-    interaction.action = action
+const toggleEdit = (index) => {
+  editingIndex.value = editingIndex.value === index ? -1 : index
+}
+
+const updateValue = () => {
     emit('update:value', localValue.value)
-  }
 }
 
 watch(() => props.value, (newVal) => {
   localValue.value = [...(newVal || [])]
 }, { deep: true })
 
-// Simple click outside directive
-const vClickOutside = {
-  mounted(el, binding) {
-    el.clickOutsideEvent = (event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value(event)
-      }
-    }
-    document.addEventListener('click', el.clickOutsideEvent)
-  },
-  unmounted(el) {
-    document.removeEventListener('click', el.clickOutsideEvent)
-  }
-}
+
 </script>
 
 <style scoped>
@@ -132,35 +216,32 @@ const vClickOutside = {
   gap: var(--spacing-xs);
 }
 
-.interaction-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: #1e293b;
-  border: 1px solid var(--builder-border);
-  border-radius: var(--radius-md);
-  margin-top: 4px;
-  z-index: 100;
-  box-shadow: var(--shadow-lg);
+.popover-content {
   max-height: 250px;
   overflow-y: auto;
+  padding: 4px;
+  background: var(--builder-bg-popover);
 }
 
 .dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  text-align: left;
-  font-size: var(--font-size-sm);
-  color: #f8fafc;
+  color: var(--builder-text-secondary);
+  font-size: var(--font-size-md);
   cursor: pointer;
-  transition: background 0.2s;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+  text-align: left;
 }
 
 .dropdown-item:hover {
-  background: #334155;
+  background: var(--builder-bg-tertiary);
+  color: var(--builder-text-primary);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
