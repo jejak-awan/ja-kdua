@@ -27,10 +27,8 @@
                     <PanelRightClose v-if="isSidebarOpen" class="w-4 h-4" />
                     <PanelRightOpen v-else class="w-4 h-4" />
                 </Button>
-                 <Button variant="ghost" asChild>
-                    <router-link :to="{ name: 'contents' }">
-                        {{ $t('features.content.form.cancel') }}
-                    </router-link>
+                <Button variant="ghost" @click="handleCancel">
+                    {{ $t('features.content.form.cancel') }}
                 </Button>
                 <Button
                     @click="handleSubmit"
@@ -56,6 +54,8 @@
                     v-model="form"
                     @save="handleSubmit"
                     @mode-selected="handleModeSelected"
+                    @toggle-auto-save="handleAutoSaveToggle"
+                    @cancel="handleCancel"
                 />
             </div>
 
@@ -70,6 +70,26 @@
                 />
             </div>
         </div>
+
+        <!-- Confirm Dialog -->
+        <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Confirm Navigation</DialogTitle>
+                    <DialogDescription>
+                        {{ $t('features.content.messages.unsavedChanges') }}
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showConfirmDialog = false">
+                        {{ $t('features.content.form.cancel') }}
+                    </Button>
+                    <Button @click="confirmCancel">
+                         {{ $t('common.actions.confirm') || 'OK' }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -86,6 +106,12 @@ import {
     PanelRightClose, 
     PanelRightOpen 
 } from 'lucide-vue-next';
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogDescription from '@/components/ui/dialog-description.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
 import ContentMain from '../../../components/content/ContentMain.vue';
@@ -178,14 +204,16 @@ const isValid = computed(() => {
 });
 
 // Auto-save setup
+const autoSaveEnabled = ref(true); // Default to true
+
 const {
     isSaving: autoSaving,
     lastSaved,
     saveStatus: autoSaveStatus,
     hasChanges,
 } = useAutoSave(formWithTags, contentId, {
-    interval: 30000, // 30 seconds
-    enabled: true,
+    interval: 30000, 
+    enabled: computed(() => autoSaveEnabled.value),
     onSave: (response) => {
         // Update contentId if new content was created
         if (response?.data?.id && !contentId.value) {
@@ -193,6 +221,10 @@ const {
         }
     },
 });
+
+const handleAutoSaveToggle = (isEnabled) => {
+    autoSaveEnabled.value = isEnabled;
+};
 
 const fetchCategories = async () => {
     try {
@@ -235,7 +267,12 @@ const handleModeSelected = (mode) => {
     }
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (status = null) => {
+    // Update status if provided (from Builder save/publish buttons)
+    if (status && (status === 'draft' || status === 'published')) {
+        form.value.status = status;
+    }
+
     if (!validateWithZod(form.value)) return;
 
     loading.value = true;
@@ -272,8 +309,21 @@ const handleSubmit = async () => {
             ? await api.put(endpoint, payload)
             : await api.post(endpoint, payload);
         
+        if (response.data?.updated_at) {
+            lastSaved.value = new Date(response.data.updated_at);
+        }
+        
         toast.success.create('Content');
-        router.push({ name: 'contents' });
+        
+        // Only redirect if not saving from within the builder
+        if (typeof status !== 'string') {
+            router.push({ name: 'contents' });
+        } else {
+             // If staying, update contentId for future saves (though auto-save handles this too)
+             if (response.data?.id && !contentId.value) {
+                 contentId.value = response.data.id;
+             }
+        }
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
@@ -284,6 +334,21 @@ const handleSubmit = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const showConfirmDialog = ref(false);
+
+const handleCancel = () => {
+    if (hasChanges.value) {
+        showConfirmDialog.value = true;
+    } else {
+        router.push({ name: 'contents' });
+    }
+};
+
+const confirmCancel = () => {
+    showConfirmDialog.value = false;
+    router.push({ name: 'contents' });
 };
 
 onMounted(() => {

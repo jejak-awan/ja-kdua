@@ -229,7 +229,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['update', 'save', 'update:modelValue', 'close', 'update:fullscreen'])
+const emit = defineEmits(['update', 'save', 'update:modelValue', 'close', 'update:fullscreen', 'update:autoSave'])
 
 // Initialize builder state
 // Prefer modelValue (array of blocks) if provided, otherwise fallback to initialData object
@@ -299,6 +299,11 @@ watch(builder.blocks, (newBlocks) => {
   emit('update', { blocks: newBlocks })
   emit('update:modelValue', newBlocks)
 }, { deep: true })
+
+// Watch for autoSave preference
+watch(() => builder.autoSave, (val) => {
+  emit('update:autoSave', val)
+}, { immediate: true })
 
 
 
@@ -521,17 +526,11 @@ const handleDeleteModule = async (id) => {
 }
 
 const handleSave = async (status = null) => {
-  if (props.contentId || builder.content.id) {
-    try {
-      if (status) {
-        builder.content.status = status
-      }
-      await builder.saveContent()
-      toast.success.save()
-    } catch (err) {
-      toast.error.action(err)
-    }
-  }
+  // Emit save event to parent (allows external handling)
+  emit('save', status)
+  
+  // Optimistically mark as saved to disable buttons
+  builder.markAsSaved()
 }
 
 const canvasAreaRef = ref(null)

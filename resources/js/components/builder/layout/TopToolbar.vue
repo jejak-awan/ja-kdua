@@ -127,6 +127,8 @@
         <button 
           class="save-draft-btn" 
           @click="$emit('save', 'draft')"
+          :disabled="!builder.isDirty"
+          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty }"
           :title="$t('builder.toolbar.saveDraft') || 'Save as Draft'"
         >
           {{ $t('builder.toolbar.draft') || 'Draft' }}
@@ -134,6 +136,8 @@
         <button 
           class="publish-btn" 
           @click="$emit('save', 'published')"
+          :disabled="!builder.isDirty"
+          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty }"
           :title="builder.content.status === 'published' ? $t('builder.toolbar.update') : $t('builder.toolbar.publish')"
         >
           <Save class="w-3.5 h-3.5 mr-1.5" />

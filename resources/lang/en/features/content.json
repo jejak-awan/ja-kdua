@@ -92,7 +92,8 @@
         "rejectFailed": "Failed to reject content",
         "duplicateFailed": "Failed to duplicate content",
         "restoreFailed": "Failed to restore content",
-        "rescheduleFailed": "Failed to reschedule content"
+        "rescheduleFailed": "Failed to reschedule content",
+        "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?"
     },
     "status": {
         "draft": "Draft",

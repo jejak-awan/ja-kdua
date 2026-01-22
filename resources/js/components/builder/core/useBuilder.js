@@ -178,6 +178,13 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
     const availableTags = ref([])
     const menus = ref([])
 
+    // Dirty State Tracking
+    const lastSavedBlocks = ref(JSON.stringify(initialData.blocks || []))
+    const isDirty = computed(() => {
+        // Simple string comparison for dirty checking
+        return JSON.stringify(blocks.value) !== lastSavedBlocks.value
+    })
+
     // ============================================
     // COMPUTED
     // ============================================
@@ -343,10 +350,30 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
                     }
                 }
 
-                if (data.blocks) {
+                if (data.blocks && data.blocks.length > 0) {
                     blocks.value = data.blocks
+                } else if (data.body) {
+                    // Migration: Convert legacy body content to Builder Blocks
+                    // Create a Section > Row > Column > RichText structure
+                    const richTextBlock = ModuleRegistry.createInstance('richtext')
+                    richTextBlock.settings.content = data.body
+
+                    const column = ModuleRegistry.createInstance('column')
+                    column.children.push(richTextBlock)
+
+                    const row = ModuleRegistry.createInstance('row')
+                    row.children.push(column)
+
+                    const section = ModuleRegistry.createInstance('section')
+                    section.children.push(row)
+
+                    blocks.value = [section]
+                }
+
+                if (blocks.value.length > 0) {
                     triggerRef(blocks)
                     takeSnapshot()
+                    markAsSaved()
                 }
 
                 if (data.global_variables) {
@@ -358,6 +385,10 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
             console.error('Failed to load content for builder:', error)
             throw error
         }
+    }
+
+    function markAsSaved() {
+        lastSavedBlocks.value = JSON.stringify(blocks.value)
     }
 
     async function saveContent() {
@@ -1119,6 +1150,8 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
         menus,
 
         // Computed
+        isDirty,
+        markAsSaved,
         selectedModule,
         canUndo,
         canRedo,

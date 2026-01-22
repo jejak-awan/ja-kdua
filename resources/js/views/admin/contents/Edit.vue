@@ -59,10 +59,8 @@
                     {{ $t('features.content.form.preview') }}
                 </Button>
                 
-                 <Button variant="ghost" asChild>
-                    <router-link :to="{ name: 'contents' }">
-                        {{ $t('features.content.form.cancel') }}
-                    </router-link>
+                 <Button variant="ghost" @click="handleCancel">
+                    {{ $t('features.content.form.cancel') }}
                 </Button>
                 <Button
                     @click="handleSubmit"
@@ -102,6 +100,8 @@
                     v-model="form"
                     @save="handleSubmit"
                     @mode-selected="handleModeSelected"
+                    @toggle-auto-save="handleAutoSaveToggle"
+                    @cancel="handleCancel"
                 />
             </div>
 
@@ -132,6 +132,26 @@
             @close="showPreviewModal = false"
             @publish="handlePublishFromPreview"
         />
+
+        <!-- Confirm Dialog -->
+        <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Confirm Navigation</DialogTitle>
+                    <DialogDescription>
+                        {{ $t('features.content.messages.unsavedChanges') }}
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showConfirmDialog = false">
+                        {{ $t('features.content.form.cancel') }}
+                    </Button>
+                    <Button @click="confirmCancel">
+                         {{ $t('common.actions.confirm') || 'OK' }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -154,6 +174,12 @@ import {
     PanelRightClose,
     PanelRightOpen
 } from 'lucide-vue-next';
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogDescription from '@/components/ui/dialog-description.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
 import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
 import ContentPreviewModal from '../../../components/admin/ContentPreviewModal.vue';
 import ContentMain from '../../../components/content/ContentMain.vue';
@@ -264,10 +290,17 @@ const {
     startAutoSave,
 } = useAutoSave(formWithTags, contentId, {
     interval: 30000, // 30 seconds
+    // enabled is a getter that listens to autoSaveEnabled ref
     get enabled() {
         return autoSaveEnabled.value;
     },
 });
+
+const handleAutoSaveToggle = (isEnabled) => {
+    // Only update if we are in builder mode to avoid disabling it for classic? 
+    // Actually, if builder emits it, it means we are in builder mode.
+    autoSaveEnabled.value = isEnabled;
+};
 
 const fetchContent = async () => {
     loading.value = true;
@@ -453,7 +486,12 @@ const handleModeSelected = (mode) => {
     }
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (status = null) => {
+    // Update status if provided (from Builder save/publish buttons)
+    if (status && (status === 'draft' || status === 'published')) {
+        form.value.status = status;
+    }
+
     if (!validateWithZod(form.value)) return;
 
     loading.value = true;
@@ -509,7 +547,11 @@ const handleSubmit = async () => {
         }));
         
         toast.success.update('Content');
-        router.push({ name: 'contents' });
+        
+        // Only redirect if not saving from within the builder (status will be a string if from builder)
+        if (typeof status !== 'string') {
+            router.push({ name: 'contents' });
+        }
     } catch (error) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
@@ -520,6 +562,21 @@ const handleSubmit = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const showConfirmDialog = ref(false);
+
+const handleCancel = () => {
+    if (isDirty.value) {
+        showConfirmDialog.value = true;
+    } else {
+        router.push({ name: 'contents' });
+    }
+};
+
+const confirmCancel = () => {
+    showConfirmDialog.value = false;
+    router.push({ name: 'contents' });
 };
 
 onMounted(() => {

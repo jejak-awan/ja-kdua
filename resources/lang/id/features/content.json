@@ -92,7 +92,8 @@
         "rejectFailed": "Gagal menolak konten",
         "duplicateFailed": "Gagal menduplikasi konten",
         "restoreFailed": "Gagal memulihkan konten",
-        "rescheduleFailed": "Gagal menjadwalkan ulang konten"
+        "rescheduleFailed": "Gagal menjadwalkan ulang konten",
+        "unsavedChanges": "Anda memiliki perubahan yang belum disimpan. Apakah Anda yakin ingin meninggalkan halaman ini?"
     },
     "status": {
         "draft": "Draf",

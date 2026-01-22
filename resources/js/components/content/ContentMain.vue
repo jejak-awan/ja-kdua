@@ -73,7 +73,8 @@
                 :model-value="modelValue.blocks || []"
                 :mode="'page'"
                 @update:model-value="updateField('blocks', $event)"
-                @save="$emit('save')"
+                @save="(status) => $emit('save', status)"
+                @update:auto-save="(val) => $emit('toggle-auto-save', val)"
                 @close="handleBuilderClose"
             />
         </div>
@@ -100,7 +101,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'save', 'mode-selected']);
+const emit = defineEmits(['update:modelValue', 'save', 'mode-selected', 'toggle-auto-save', 'cancel']);
 
 // ... (methods)
 
@@ -158,8 +159,7 @@ const confirmInitialMode = (mode) => {
 };
 
 const handleBuilderClose = () => {
-    // If we have a router, navigate back to contents list
-    router.push({ name: 'contents' });
+    emit('cancel');
 };
 
 const updateField = (field, value) => {
