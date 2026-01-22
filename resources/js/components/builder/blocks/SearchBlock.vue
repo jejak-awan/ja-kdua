@@ -36,7 +36,7 @@ const props = defineProps({
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const currentButtonStyle = computed(() => getResponsiveValue(settings.value, 'buttonStyle', device.value) || 'icon')
 const placeholderValue = computed(() => getResponsiveValue(settings.value, 'placeholder', device.value) || 'Search...')

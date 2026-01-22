@@ -182,6 +182,13 @@ export function getSizingStyles(settings, device = 'desktop') {
     return css
 }
 
+const svgToDataUri = (svgStr) => {
+    const encoded = encodeURIComponent(svgStr)
+        .replace(/'/g, '%27')
+        .replace(/"/g, '%22')
+    return `data:image/svg+xml;charset=utf-8,${encoded}`
+}
+
 export function getBackgroundStyles(settings, device = 'desktop') {
     if (!settings) return {}
     const css = {}
@@ -195,9 +202,74 @@ export function getBackgroundStyles(settings, device = 'desktop') {
     const posList = []
     const blendList = []
 
-    // 1. Gradients
+    // --- 0. Pattern (Top Layer) ---
+    const patternId = getVal(settings, 'backgroundPattern', device)
+    if (patternId && patternId !== 'none') {
+        const patternObj = BackgroundPatterns.find(p => p.id === patternId)
+        if (patternObj) {
+            const rawSvg = patternObj.svg
+            // Resolve object structure if necessary
+            let svg = typeof rawSvg === 'object'
+                ? (rawSvg.default || rawSvg.regular || '')
+                : rawSvg
+
+            if (svg) {
+                // Wrap in full SVG tag if it's just a fragment
+                if (!svg.startsWith('<svg')) {
+                    const w = patternObj.width || 100
+                    const h = patternObj.height || 100
+                    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${svg}</svg>`
+                }
+
+                // Pattern Color
+                const pColor = getVal(settings, 'backgroundPatternColor', device)
+                if (pColor) {
+                    svg = svg.replace(/fill="currentColor"/g, `fill="${pColor}"`)
+                        .replace(/stroke="currentColor"/g, `stroke="${pColor}"`)
+                        .replace(/fill="[^"]*"/g, `fill="${pColor}"`)
+                        .replace(/stroke="[^"]*"/g, `stroke="${pColor}"`)
+                }
+
+                layers.push(`url("${svgToDataUri(svg)}")`)
+
+                const pSize = getVal(settings, 'backgroundPatternSize', device) || 'auto'
+                const pWidth = getVal(settings, 'backgroundPatternWidth', device)
+                const pHeight = getVal(settings, 'backgroundPatternHeight', device)
+
+                if (pSize === 'custom' && pWidth && pHeight) {
+                    sizes.push(`${toCSS(pWidth)} ${toCSS(pHeight)}`)
+                } else if (pSize === 'cover' || pSize === 'contain') {
+                    sizes.push(pSize)
+                } else {
+                    sizes.push('auto')
+                }
+
+                const pRepeat = getVal(settings, 'backgroundPatternRepeat', device) || 'repeat'
+                repeatList.push(pRepeat)
+
+                // Pattern Position (Offset via position)
+                // Or simple center if not specified
+                posList.push('0 0')
+
+                const pBlend = getVal(settings, 'backgroundPatternBlendMode', device) || 'normal'
+                blendList.push(pBlend)
+            }
+        }
+    }
+
+    // --- 1. Gradients ---
     const gradientList = getVal(settings, 'backgroundGradients', device) || []
-    const gradientCSSList = gradientList.map(g => {
+    // Allow single gradient fallback
+    const singleGradient = getVal(settings, 'backgroundGradient', device)
+    let finalGradientList = []
+
+    if (gradientList.length > 0) {
+        finalGradientList = gradientList
+    } else if (singleGradient) {
+        finalGradientList = [singleGradient]
+    }
+
+    const gradientCSSList = finalGradientList.map(g => {
         if (!g || !g.stops || g.stops.length < 2) return ''
         const { type = 'linear', direction = '180deg', stops, repeat = false } = g
         const prefix = repeat ? 'repeating-' : ''
@@ -207,16 +279,29 @@ export function getBackgroundStyles(settings, device = 'desktop') {
         return `${prefix}radial-gradient(circle, ${stopString})`
     }).filter(c => !!c)
 
-    // 2. Image
+    // --- 2. Image ---
     const bgImage = getVal(settings, 'backgroundImage', device)
-    const imageCSS = bgImage ? `url(${bgImage})` : ''
+    const imageCSS = bgImage ? `url("${bgImage}")` : ''
 
-    // Assemble layers
+    // Assemble Image/Gradient Layers
+    // "Show Gradient Above Image" logic
     if (getVal(settings, 'backgroundGradientShowAboveImage', device)) {
         gradientCSSList.forEach(g => { layers.push(g); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
-        if (imageCSS) { layers.push(imageCSS); sizes.push(getVal(settings, 'backgroundSize', device) || 'cover'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') }
+        if (imageCSS) {
+            layers.push(imageCSS);
+            sizes.push(getVal(settings, 'backgroundImageSize', device) || 'cover');
+            repeatList.push(getVal(settings, 'backgroundImageRepeat', device) || 'no-repeat');
+            posList.push(getVal(settings, 'backgroundImagePosition', device) || 'center');
+            blendList.push(getVal(settings, 'backgroundImageBlendMode', device) || 'normal')
+        }
     } else {
-        if (imageCSS) { layers.push(imageCSS); sizes.push(getVal(settings, 'backgroundSize', device) || 'cover'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') }
+        if (imageCSS) {
+            layers.push(imageCSS);
+            sizes.push(getVal(settings, 'backgroundImageSize', device) || 'cover');
+            repeatList.push(getVal(settings, 'backgroundImageRepeat', device) || 'no-repeat');
+            posList.push(getVal(settings, 'backgroundImagePosition', device) || 'center');
+            blendList.push(getVal(settings, 'backgroundImageBlendMode', device) || 'normal')
+        }
         gradientCSSList.forEach(g => { layers.push(g); sizes.push('100% 100%'); repeatList.push('no-repeat'); posList.push('center'); blendList.push('normal') })
     }
 
@@ -226,6 +311,58 @@ export function getBackgroundStyles(settings, device = 'desktop') {
         css.backgroundRepeat = repeatList.join(', ')
         css.backgroundPosition = posList.join(', ')
         css.backgroundBlendMode = blendList.join(', ')
+    }
+
+    // --- 3. Mask ---
+    const maskId = getVal(settings, 'backgroundMask', device)
+    if (maskId && maskId !== 'none') {
+        const maskObj = BackgroundMasks.find(m => m.id === maskId)
+        if (maskObj) {
+            // Resolve variant based on device
+            const variant = device === 'mobile' || device === 'phone' ? 'portrait' : (device === 'tablet' ? 'square' : 'landscape')
+
+            const rawSvgSet = maskObj.svg?.default || maskObj.svg
+            let maskSvg = typeof rawSvgSet === 'object' ? (rawSvgSet[variant] || rawSvgSet.landscape || rawSvgSet.default || '') : rawSvgSet
+
+            if (maskSvg) {
+                // Wrap in full SVG tag if it's just a fragment
+                if (!maskSvg.startsWith('<svg')) {
+                    const vb = maskObj.viewBox?.[variant] || maskObj.viewBox?.landscape || '0 0 100 100'
+                    // For mask-image, currentColor must be resolved to a solid color (e.g. black)
+                    // because Data URIs are isolated and don't inherit CSS currentColor.
+                    const safeSvg = maskSvg.replace(/currentColor/g, 'black')
+                    maskSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="100%" height="100%" preserveAspectRatio="none">${safeSvg}</svg>`
+                } else {
+                    // Even if it has <svg> tag, replace currentColor
+                    maskSvg = maskSvg.replace(/currentColor/g, 'black')
+                }
+
+                const maskUri = `url("${svgToDataUri(maskSvg)}")`
+                css.maskImage = maskUri
+                css.webkitMaskImage = maskUri
+
+                const mSize = getVal(settings, 'backgroundMaskSize', device) || 'fit'
+                let sizeVal = 'contain'
+                if (mSize === 'custom') {
+                    const mW = getVal(settings, 'backgroundMaskWidth', device)
+                    const mH = getVal(settings, 'backgroundMaskHeight', device)
+                    sizeVal = (mW && mH) ? `${toCSS(mW)} ${toCSS(mH)}` : 'contain'
+                } else if (mSize === 'fit') {
+                    sizeVal = 'contain'
+                } else if (mSize === 'fill') {
+                    sizeVal = '100% 100%'
+                } else {
+                    sizeVal = mSize
+                }
+
+                css.maskSize = sizeVal
+                css.webkitMaskSize = sizeVal
+                css.maskPosition = 'center'
+                css.webkitMaskPosition = 'center'
+                css.maskRepeat = 'no-repeat'
+                css.webkitMaskRepeat = 'no-repeat'
+            }
+        }
     }
 
     return css

@@ -30,7 +30,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const hasContent = computed(() => (settings.value.embedType === 'url' && settings.value.embedUrl) || settings.value.embedCode)
 

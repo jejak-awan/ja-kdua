@@ -12,6 +12,7 @@
       <div 
         v-for="mode in modes" 
         :key="mode.id" 
+        :ref="el => setItemRef(el, mode.id)"
         class="responsive-item"
         :class="{ 'is-active': currentDevice === mode.id }"
       >
@@ -110,6 +111,7 @@
             :hide-preview="type === 'color'"
             :hide-label="true"
             :preview-style="getPreviewStyle(mode.id)"
+            :device="mode.id"
             v-bind="type === 'upload' ? options : {}"
             @update:value="updateModeValue(mode.id, $event)"
           />
@@ -178,7 +180,7 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject, ref, watch, reactive } from 'vue'
+import { computed, defineAsyncComponent, inject, ref, watch, reactive, onMounted } from 'vue'
 import { Monitor, Tablet, Smartphone, MousePointer, ChevronDown, Plus, Trash2, FlipHorizontal, FlipVertical, RefreshCw, Contrast } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { BaseModal, BaseButton, BaseDropdown } from '../ui'
@@ -219,7 +221,7 @@ const translateFieldLabel = (field) => {
 }
 
 // Current builder device for highlighting
-const currentDevice = computed(() => builder?.device?.value || 'desktop')
+const currentDevice = computed(() => builder?.device || 'desktop')
 
 // Live settings from builder store (reactive source of truth)
 const liveSettings = computed(() => {
@@ -228,6 +230,11 @@ const liveSettings = computed(() => {
 
     // We fetch it from builder.findModule to ensure we are tracking the actual state in blocks array
     const moduleItem = builder?.findModule?.(props.module?.id)
+    
+    // Fallback hierarchy: 
+    // 1. Live module from store (Reactivity source)
+    // 2. Props module (Snapshot when opened)
+    // 3. Props settings (Values passed directly)
     return moduleItem?.settings || props.module?.settings || props.settings || {}
 })
 
@@ -521,6 +528,30 @@ const updateGenericValue = (key, id, value) => {
     emit('update', { [fullKey]: valToSet })
   }
 }
+
+// Auto-scroll to active device
+const itemRefs = ref({})
+const setItemRef = (el, id) => {
+  if (el) itemRefs.value[id] = el
+}
+
+onMounted(() => {
+   // Wait for render
+   setTimeout(() => {
+       const activeId = currentDevice.value
+       const el = itemRefs.value[activeId]
+       if (el) {
+           el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+       }
+   }, 100)
+})
+
+watch(currentDevice, (newId) => {
+    const el = itemRefs.value[newId]
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+})
 </script>
 
 <style scoped>

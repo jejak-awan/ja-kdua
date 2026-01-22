@@ -8,7 +8,7 @@
         'is-inherited': !hasColorValue && placeholderValue,
         'is-empty': !hasColorValue && !placeholderValue 
       }"
-      :style="{ '--preview-bg': hasColorValue ? value : (placeholderValue || 'none') }"
+      :style="{ backgroundColor: hasColorValue ? value : (placeholderValue || 'transparent') }"
       @click="openPicker"
       @mouseenter="isHovered = true"
       @mouseleave="isHovered = false"
@@ -758,5 +758,98 @@ defineExpose({ openPicker })
 /* Alpha Slider Row - wrapper for BaseColorSlider */
 .alpha-slider-row {
     padding: 8px 0 12px 40px; /* Align with input after larger preview box */
+}
+
+/* Large Preview Box Styles (Copied/Adapted from BackgroundField) */
+.bg-preview-box {
+    position: relative;
+    width: 100%;
+    min-height: 80px; /* Bit smaller than panel to fit modal better */
+    background: var(--builder-bg-primary);
+    border: 1px solid var(--builder-border);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    cursor: crosshair;
+}
+
+.bg-preview-box:hover {
+    border-color: var(--builder-accent);
+}
+
+.bg-preview-box.is-empty {
+    border-style: dashed;
+}
+
+.bg-preview-box.is-inherited::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px dashed rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+.inherited-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.preview-actions-overlay {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+}
+
+.action-btn-group {
+    display: flex;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.action-icon-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.action-icon-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.action-icon-btn.remove:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.empty-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--builder-text-muted);
+    font-size: 11px;
 }
 </style>

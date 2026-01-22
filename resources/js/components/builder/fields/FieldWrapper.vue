@@ -10,6 +10,7 @@
         :label="label"
         :responsive="responsive"
         :show-responsive="showResponsive"
+        :active-device="activeDevice"
         :show-dynamic-data="showDynamicData"
         :show-context-menu="showContextMenu"
         :show-reset="hasCustomValue"
@@ -78,6 +79,10 @@ const props = defineProps({
   showPresets: {
     type: Boolean,
     default: false
+  },
+  activeDevice: {
+    type: String,
+    default: 'desktop'
   }
 })
 

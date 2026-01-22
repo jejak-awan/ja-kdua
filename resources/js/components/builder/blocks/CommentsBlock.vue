@@ -55,7 +55,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const mockComments = [
   { id: 1, author: 'John Doe', date: 'Jan 10, 2026', text: 'Great article! Thanks for sharing.' },

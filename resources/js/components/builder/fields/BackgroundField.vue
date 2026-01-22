@@ -1704,7 +1704,8 @@ import { BackgroundPatterns, BackgroundMasks } from '../core/AssetLibrary'
 
 const props = defineProps({
   field: { type: Object, required: true },
-  module: { type: Object, required: true }
+  module: { type: Object, required: true },
+  device: { type: String, default: null }
 })
 
 const { t } = useI18n()
@@ -2011,10 +2012,21 @@ const maskOptions = computed(() => {
     ]
 })
 
-const currentDevice = computed(() => builder?.device?.value || 'desktop')
+// Add device prop for strict mode rendering
+// (device prop added to main defineProps above)
+
+const currentDevice = computed(() => {
+    // If explicit device prop is passed (e.g. from ResponsiveFieldModal), use it.
+    if (props.device) return props.device
+    // Otherwise fallback to global builder device
+    return builder?.device || 'desktop'
+})
 
 const getResponsiveValue = (baseKey) => {
-    const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`)
+    // builder?.device is a string (primitive) if accessed via useBuilder's return, 
+    // but here we are using the computed wrapper locally.
+    const dev = currentDevice.value
+    const suffix = dev === 'desktop' ? '' : (dev === 'mobile' ? '_mobile' : `_${dev}`)
     const val = moduleSettings.value[baseKey + suffix]
     
     return (val === undefined || val === null) ? '' : val

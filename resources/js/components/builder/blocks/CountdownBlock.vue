@@ -65,7 +65,7 @@ const props = defineProps({
 const settings = computed(() => props.module.settings || {})
 
 const builder = inject('builder')
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 let interval = null

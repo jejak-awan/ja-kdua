@@ -21,16 +21,29 @@
         <Database :size="14" />
     </div>
 
-    <!-- Responsive Editor Button (Stacked Squares) -->
-    <div v-if="showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')" @click="$emit('responsive')">
+    <!-- Responsive Editor Button (Stacked Squares) - Desktop only -->
+    <div v-if="showResponsive && activeDevice === 'desktop'" class="action-icon" :title="$t('builder.fields.actions.responsive')" @click="$emit('responsive')">
        <Layers :size="14" />
     </div>
 
-
-    <!-- Legacy Device Toggle (Smartphone) -->
-    <div v-if="responsive && !showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')">
-        <Smartphone :size="12" />
+    <!-- Active Device Indicator (When not showResponsive, or inline) -->
+    <!-- The user wants to see the ACTIVE device icon. 
+         If showResponsive is true, we show Layers (which opens modal).
+         But we can ALSO show the specific device icon as an indicator if responsive is true. -->
+    <div 
+        v-if="responsive && activeDevice && activeDevice !== 'desktop'" 
+        class="action-icon active-device-indicator" 
+        :title="$t('builder.breakpoints.' + activeDevice)"
+        @click="$emit('responsive')"
+    >
+        <component :is="getDeviceIcon(activeDevice)" :size="12" />
     </div>
+
+
+    <!-- Legacy Device Toggle (Smartphone) - REMOVED/REPLACED by above -->
+    <!-- <div v-if="responsive && !showResponsive" class="action-icon" :title="$t('builder.fields.actions.responsive')">
+        <Smartphone :size="12" />
+    </div> -->
 
     <!-- More Options -->
     <div v-if="showContextMenu" class="action-icon relative">
@@ -59,7 +72,7 @@
 
 <script setup>
 import { ref, inject } from 'vue'
-import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy, Sparkles } from 'lucide-vue-next'
+import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy, Sparkles, Monitor, Tablet, MousePointer } from 'lucide-vue-next'
 
 const builder = inject('builder')
 
@@ -67,6 +80,7 @@ const props = defineProps({
   label: { type: String, required: true },
   responsive: { type: Boolean, default: false },
   showResponsive: { type: Boolean, default: false },
+  activeDevice: { type: String, default: 'desktop' },
   showReset: { type: Boolean, default: false },
   showDuplicate: { type: Boolean, default: false },
   showDynamicData: { type: Boolean, default: true },
@@ -75,6 +89,15 @@ const props = defineProps({
   showPresets: { type: Boolean, default: false },
   infoContent: { type: String, default: '' }
 })
+
+const getDeviceIcon = (device) => {
+    switch (device) {
+        case 'tablet': return Tablet
+        case 'mobile': return Smartphone
+        case 'hover': return MousePointer
+        default: return Monitor
+    }
+}
 
 const emit = defineEmits(['reset', 'responsive', 'select-dynamic-data', 'duplicate', 'toggle-info', 'reset-field', 'assign-preset'])
 
@@ -189,6 +212,12 @@ const findReplace = () => {
 
 .action-icon .text-accent {
     color: var(--builder-accent) !important;
+}
+
+.active-device-indicator {
+    color: var(--builder-accent);
+    background-color: rgba(32, 89, 234, 0.1);
+    border-radius: 4px;
 }
 
 /* Dropdown Menu */

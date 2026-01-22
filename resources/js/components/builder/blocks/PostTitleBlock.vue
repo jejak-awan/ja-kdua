@@ -27,7 +27,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const postTitle = computed(() => 'Sample Post Title - Dynamic Content')
 

@@ -58,8 +58,15 @@ const getMaskPreview = (mask) => {
     const stateObj = svg.regular || svg.default || svg
     const rotateObj = stateObj.default || stateObj
     
-    if (typeof rotateObj === 'string') return rotateObj
-    return rotateObj.square || rotateObj.landscape || rotateObj.portrait || ''
+    let path = ''
+    if (typeof rotateObj === 'string') {
+        path = rotateObj
+    } else {
+        path = rotateObj.square || rotateObj.landscape || rotateObj.portrait || ''
+    }
+
+    // Ensure currentColor is visible in preview
+    return path.replace(/currentColor/g, 'var(--builder-text-primary)')
 }
 </script>
 

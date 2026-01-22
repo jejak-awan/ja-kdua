@@ -9,6 +9,7 @@
     :show-context-menu="supportsContextMenu"
     :show-presets="supportsPresets"
     :has-custom-value="hasCustomValue"
+    :active-device="currentDevice"
     @reset="resetFullModule"
     @reset-field="resetSpecificField"
     @responsive="handleResponsiveClick"

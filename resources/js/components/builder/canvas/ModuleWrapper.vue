@@ -148,7 +148,7 @@ const { t } = useI18n()
 
 import { getAnimationStyles, getResponsiveValue } from '@/shared/utils/styleUtils'
 
-const currentDevice = computed(() => builder?.device?.value || 'desktop')
+const currentDevice = computed(() => builder?.device || 'desktop')
 
 const animationClasses = computed(() => {
     // 1. Try nested object

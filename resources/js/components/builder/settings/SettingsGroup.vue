@@ -32,6 +32,7 @@
           :field="field"
           :value="getFieldValue(field.name)"
           :module="module"
+          :device="device"
           @update="updateField(field.name, $event)"
         />
       </div>
@@ -59,6 +60,10 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     default: false
+  },
+  device: {
+    type: String,
+    default: 'desktop'
   }
 })
 

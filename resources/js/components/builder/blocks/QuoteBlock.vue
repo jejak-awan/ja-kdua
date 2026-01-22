@@ -30,7 +30,7 @@ const props = defineProps({ module: { type: Object, required: true } })
 
 const builder = inject('builder')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device || 'desktop')
 
 const quoteStyle = computed(() => getResponsiveValue(settings.value, 'quoteStyle', device.value) || 'modern')
 const quoteContent = computed(() => getResponsiveValue(settings.value, 'content', device.value) || 'Your quote here...')
