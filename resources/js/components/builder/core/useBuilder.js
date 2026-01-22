@@ -1114,6 +1114,15 @@ export default function useBuilder(initialData = { blocks: [] }, options = {}) {
     // Fetch presets
     fetchPresets()
 
+    // Initialize Site Mode
+    if (mode.value === 'site') {
+        fetchPages().then(() => {
+            if (pages.value.length > 0 && !currentPageId.value) {
+                setCurrentPage(pages.value[0].id)
+            }
+        })
+    }
+
     // ============================================
     // RETURN
     // ============================================

@@ -243,6 +243,10 @@ const builderInitialData = computed(() => {
 const builderBase = useBuilder(builderInitialData.value, {
   mode: props.mode
 })
+
+// Expose builder instance (for SiteEditor or other parents)
+defineExpose({ builder: builderBase })
+
 const globalAction = ref(null)
 const cmsStore = useCmsStore()
 
@@ -263,7 +267,7 @@ onUnmounted(() => {
 })
 
 const sidebarVisible = ref(true)
-const activePanel = ref('layers')
+const activePanel = ref(props.mode === 'site' ? 'pages' : 'layers')
 // device is managed by builder
 const showInsertModal = ref(false)
 const insertTargetId = ref(null)

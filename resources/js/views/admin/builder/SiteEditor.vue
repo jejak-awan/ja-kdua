@@ -3,10 +3,32 @@
     <div v-if="!isFullscreen" class="site-editor-overlay" @click="handleClose"></div>
     <div class="site-editor-container">
       <Builder 
+        ref="builderRef"
         mode="site" 
         @close="handleClose" 
+        @save="handleSave"
         @update:fullscreen="handleFullscreenUpdate"
       />
+      
+      <!-- Confirm Dialog -->
+      <Dialog :open="showConfirmDialog" @update:open="showConfirmDialog = $event">
+            <DialogContent class="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Confirm Navigation</DialogTitle>
+                    <DialogDescription>
+                        You have unsaved changes. Are you sure you want to leave?
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" @click="showConfirmDialog = false">
+                        Cancel
+                    </Button>
+                    <Button @click="confirmClose">
+                         Confirm
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
   </div>
 </template>
@@ -14,13 +36,51 @@
 <script setup>
 import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from '@/services/toast'
 import Builder from '@/components/builder/Builder.vue'
+import Dialog from '@/components/ui/dialog.vue';
+import DialogContent from '@/components/ui/dialog-content.vue';
+import DialogHeader from '@/components/ui/dialog-header.vue';
+import DialogTitle from '@/components/ui/dialog-title.vue';
+import DialogDescription from '@/components/ui/dialog-description.vue';
+import DialogFooter from '@/components/ui/dialog-footer.vue';
+import Button from '@/components/ui/button.vue';
 
 const router = useRouter()
 const isFullscreen = ref(false)
+const builderRef = ref(null)
+const showConfirmDialog = ref(false)
+
+const handleSave = async (status) => {
+    if (!builderRef.value?.builder) return
+    
+    // In site mode, we might just use saveContent logic from builder
+    // Or we might need to handle status if it's draft/published.
+    // Assuming builder.saveContent handles it (it uses internal content state)
+    if (status) {
+        builderRef.value.builder.content.value.status = status
+    }
+    
+    try {
+        await builderRef.value.builder.saveContent()
+        toast.success(status === 'published' ? 'Site published successfully' : 'Site saved successfully')
+    } catch (err) {
+        toast.error('Failed to save site')
+        console.error(err)
+    }
+}
 
 const handleClose = () => {
-  router.push({ name: 'dashboard' })
+    if (builderRef.value?.builder?.isDirty) {
+        showConfirmDialog.value = true
+    } else {
+        router.push({ name: 'dashboard' })
+    }
+}
+
+const confirmClose = () => {
+    showConfirmDialog.value = false
+    router.push({ name: 'dashboard' })
 }
 
 const handleFullscreenUpdate = (val) => {
@@ -99,4 +159,20 @@ onUnmounted(() => {
    We should hide our container to avoid ghost elements? 
    No, Teleport moves the DOM nodes, so the container will be empty anyway.
 */
+
+/* Ensure Dialog is above Fullscreen Builder */
+:global(.group[data-state="open"] .fixed.inset-0.z-50) {
+    z-index: 100000 !important; /* Overlay */
+}
+:global(.group[data-state="open"] .fixed.z-50) {
+    z-index: 100001 !important; /* Content */
+}
+/* Fallback for Shadcn Dialog classes if they differ */
+:global([role="dialog"]),
+:global([role="alertdialog"]) {
+    z-index: 100001 !important;
+}
+:global([data-state="open"].fixed.inset-0.bg-black\/80) {
+    z-index: 100000 !important;
+}
 </style>
