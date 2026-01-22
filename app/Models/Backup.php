@@ -15,11 +15,13 @@ class Backup extends Model
         'status',
         'error_message',
         'completed_at',
+        'password',
     ];
 
     protected $casts = [
         'size' => 'integer',
         'completed_at' => 'datetime',
+        'password' => 'encrypted',
     ];
 
     public function getSizeHumanAttribute()

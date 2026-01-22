@@ -16,7 +16,7 @@
             </DialogHeader>
 
             <div v-if="message" class="py-4">
-                <p class="text-sm text-muted-foreground">{{ message }}</p>
+                <p class="text-sm text-muted-foreground whitespace-pre-wrap break-words">{{ message }}</p>
             </div>
 
             <DialogFooter class="gap-2 sm:gap-0">

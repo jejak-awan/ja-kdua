@@ -149,7 +149,10 @@ return [
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
-            'persistent' => env('REDIS_PERSISTENT', false),
+            'persistent' => env('REDIS_PERSISTENT', true),
+            'read_timeout' => env('REDIS_READ_TIMEOUT', 60),
+            'timeout' => env('REDIS_TIMEOUT', 5),
+            'ping_interval' => env('REDIS_PING_INTERVAL', 10), // Keepalive checking
         ],
 
         'default' => [

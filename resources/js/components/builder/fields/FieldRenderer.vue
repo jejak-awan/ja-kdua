@@ -114,6 +114,10 @@ const props = defineProps({
   module: {
     type: Object,
     default: () => ({})
+  },
+  device: {
+     type: String,
+     default: null
   }
 })
 
@@ -167,7 +171,8 @@ const translatedDescription = computed(() => {
 })
 
 // Inject builder device
-const currentDevice = computed(() => builder?.device?.value || 'desktop')
+// Prioritize prop, then injected builder state (unwrapped)
+const currentDevice = computed(() => props.device || builder?.device || 'desktop')
 
 // Calculate values based on responsive state
 const resolvedValue = computed(() => {

@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('contents', function (Blueprint $table) {
-            if (!Schema::hasColumn('contents', 'editor_type')) {
-                $table->string('editor_type')->default('classic')->after('type'); // classic, builder
-            }
+        Schema::table('backups', function (Blueprint $table) {
+            $table->text('password')->nullable()->after('completed_at');
         });
     }
 
@@ -23,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('contents', function (Blueprint $table) {
-            $table->dropColumn('editor_type');
+        Schema::table('backups', function (Blueprint $table) {
+            $table->dropColumn('password');
         });
     }
 };

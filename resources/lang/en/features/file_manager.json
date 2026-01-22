@@ -3,6 +3,7 @@
     "actions": {
         "newFolder": "New Folder",
         "uploadFiles": "Upload Files",
+        "delete_file": "Delete File",
         "delete": "Delete",
         "remove": "Remove",
         "cancel": "Cancel",
@@ -39,7 +40,16 @@
         "uploadFailed": "Failed to upload files",
         "createFolderFailed": "Failed to create folder",
         "uploadedSuccess": "Files uploaded successfully",
-        "folderCreatedSuccess": "Folder created successfully"
+        "folderCreatedSuccess": "Folder created successfully",
+        "trashEmptied": "Trash emptied successfully",
+        "emptyTrashFailed": "Failed to empty trash",
+        "folderDeleted": "Folder deleted permanently",
+        "fileDeleted": "File deleted permanently",
+        "deleteFailed": "Failed to delete item"
+    },
+    "trash": {
+        "empty": "Empty Trash",
+        "permanent_delete": "Delete Permanently"
     },
     "modals": {
         "upload": {

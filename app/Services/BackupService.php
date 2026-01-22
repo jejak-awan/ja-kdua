@@ -154,8 +154,14 @@ class BackupService
                 // Add SQL file
                 $zip->addFile($tempSqlFile, $sqlFilename);
 
-                // Encrypt if password provided (default to APP_KEY)
-                $encryptionPassword = env('BACKUP_ARCHIVE_PASSWORD') ?: config('app.key');
+                // Encrypt with generated password or Env
+                $encryptionPassword = env('BACKUP_ARCHIVE_PASSWORD');
+                
+                // If no env password, generate a unique one (per user request) 
+                // We prefer unique passwords over APP_KEY fallback for security isolation
+                if (! $encryptionPassword) {
+                     $encryptionPassword = \Illuminate\Support\Str::random(16);
+                }
 
                 if ($encryptionPassword && method_exists($zip, 'setEncryptionName')) {
                     if (! $zip->setEncryptionName($sqlFilename, \ZipArchive::EM_AES_256, $encryptionPassword)) {
@@ -182,6 +188,7 @@ class BackupService
                 'size' => $size,
                 'status' => 'completed',
                 'completed_at' => now(),
+                'password' => $encryptionPassword, // Store the password (model casts it to encrypted)
             ]);
 
             return $backup;
@@ -229,8 +236,9 @@ class BackupService
                         mkdir($tempExtractDir, 0755, true);
                     }
 
-                    // Set password if encrypted
-                    $encryptionPassword = env('BACKUP_ARCHIVE_PASSWORD') ?: config('app.key');
+                    // Get password from DB or Env or App Key
+                    $encryptionPassword = $backup->password ?? env('BACKUP_ARCHIVE_PASSWORD') ?: config('app.key');
+                    
                     if ($encryptionPassword) {
                         $zip->setPassword($encryptionPassword);
                     }

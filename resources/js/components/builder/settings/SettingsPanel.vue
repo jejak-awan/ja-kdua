@@ -7,6 +7,7 @@
         :group="group"
         :module="module"
         :is-open="activeGroupId === group.id"
+        :device="device"
         @toggle="toggleGroup(group.id)"
       />
     </template>
@@ -33,6 +34,10 @@ const props = defineProps({
   searchQuery: {
     type: String,
     default: ''
+  },
+  device: {
+    type: String, // 'desktop', 'tablet', 'mobile'
+    default: 'desktop'
   }
 })
 

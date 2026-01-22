@@ -686,105 +686,127 @@
                 :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
                 @click.stop
             >
-                <!-- File-specific options -->
-                <template v-if="contextMenu.type === 'file'">
+                <!-- Trash specific options -->
+                <template v-if="showTrashView">
                     <button
                         class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('open')"
+                        @click="contextMenuAction('restore')"
                     >
-                        <Eye class="w-4 h-4" />
-                        Open / Preview
-                    </button>
-                    <button
-                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('download')"
-                    >
-                        <Download class="w-4 h-4" />
-                        Download
+                        <RotateCcw class="w-4 h-4" />
+                        Restore
                     </button>
                     <div class="h-px bg-border my-1"></div>
+                    <button
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
+                        @click="contextMenuAction('delete')"
+                    >
+                        <Trash2 class="w-4 h-4" />
+                        Delete Permanently
+                    </button>
                 </template>
 
-                <!-- Folder-specific options -->
-                <template v-if="contextMenu.type === 'folder'">
+                <template v-else>
+                    <!-- Normal options -->
+                    <!-- File-specific options -->
+                    <template v-if="contextMenu.type === 'file'">
+                        <button
+                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                            @click="contextMenuAction('open')"
+                        >
+                            <Eye class="w-4 h-4" />
+                            Open / Preview
+                        </button>
+                        <button
+                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                            @click="contextMenuAction('download')"
+                        >
+                            <Download class="w-4 h-4" />
+                            Download
+                        </button>
+                        <div class="h-px bg-border my-1"></div>
+                    </template>
+    
+                    <!-- Folder-specific options -->
+                    <template v-if="contextMenu.type === 'folder'">
+                        <button
+                            class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                            @click="contextMenuAction('openFolder')"
+                        >
+                            <Folder class="w-4 h-4" />
+                            Open Folder
+                        </button>
+                        <div class="h-px bg-border my-1"></div>
+                    </template>
+    
+                    <!-- Common options -->
                     <button
                         class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                        @click="contextMenuAction('openFolder')"
+                        @click="contextMenuAction('copyPath')"
                     >
-                        <Folder class="w-4 h-4" />
-                        Open Folder
+                        <Link class="w-4 h-4" />
+                        Copy Path
                     </button>
+                    <button
+                        v-if="contextMenu.type === 'file'"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('copyUrl')"
+                    >
+                        <Copy class="w-4 h-4" />
+                        Copy URL
+                    </button>
+                    
+                    <!-- Extract option for archive files -->
+                    <button
+                        v-if="contextMenu.type === 'file' && isArchive(contextMenu.item)"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('extract')"
+                    >
+                        <PackageOpen class="w-4 h-4" />
+                        Extract Here
+                    </button>
+                    
+                    <!-- Compress option for files and folders -->
+                    <button
+                        v-if="contextMenu.type !== 'background'"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('compress')"
+                    >
+                        <Archive class="w-4 h-4" />
+                        Compress to ZIP
+                    </button>
+                    
                     <div class="h-px bg-border my-1"></div>
+    
+                    <!-- Copy option -->
+                    <button
+                        v-if="contextMenu.type !== 'background'"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('copy')"
+                    >
+                        <Clipboard class="w-4 h-4" />
+                        Copy
+                    </button>
+    
+                    <!-- Paste option (only for folders or background) -->
+                    <button
+                        v-if="(contextMenu.type === 'folder' || contextMenu.type === 'background') && clipboardCount > 0"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
+                        @click="contextMenuAction('paste')"
+                    >
+                        <ClipboardPaste class="w-4 h-4" />
+                        Paste ({{ clipboardCount }})
+                    </button>
+    
+                    <div class="h-px bg-border my-1"></div>
+                    <button
+                        v-if="contextMenu.type !== 'background'"
+                        class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
+                        @click="contextMenuAction('delete')"
+                    >
+                        <Trash2 class="w-4 h-4" />
+                        Delete
+                    </button>
                 </template>
-
-                <!-- Common options -->
-                <button
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('copyPath')"
-                >
-                    <Link class="w-4 h-4" />
-                    Copy Path
-                </button>
-                <button
-                    v-if="contextMenu.type === 'file'"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('copyUrl')"
-                >
-                    <Copy class="w-4 h-4" />
-                    Copy URL
-                </button>
-                
-                <!-- Extract option for archive files -->
-                <button
-                    v-if="contextMenu.type === 'file' && isArchive(contextMenu.item)"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('extract')"
-                >
-                    <PackageOpen class="w-4 h-4" />
-                    Extract Here
-                </button>
-                
-                <!-- Compress option for files and folders -->
-                <button
-                    v-if="contextMenu.type !== 'background'"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('compress')"
-                >
-                    <Archive class="w-4 h-4" />
-                    Compress to ZIP
-                </button>
-                
-                <div class="h-px bg-border my-1"></div>
-
-                <!-- Copy option -->
-                <button
-                    v-if="contextMenu.type !== 'background'"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('copy')"
-                >
-                    <Clipboard class="w-4 h-4" />
-                    Copy
-                </button>
-
-                <!-- Paste option (only for folders or background) -->
-                <button
-                    v-if="(contextMenu.type === 'folder' || contextMenu.type === 'background') && clipboardCount > 0"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-foreground"
-                    @click="contextMenuAction('paste')"
-                >
-                    <ClipboardPaste class="w-4 h-4" />
-                    Paste ({{ clipboardCount }})
-                </button>
-
-                <div class="h-px bg-border my-1"></div>
-                <button
-                    v-if="contextMenu.type !== 'background'"
-                    class="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-accent text-destructive"
-                    @click="contextMenuAction('delete')"
-                >
-                    <Trash2 class="w-4 h-4" />
-                    Delete
-                </button>
             </div>
         </Teleport>
     </div>
@@ -1382,11 +1404,16 @@ const contextMenuAction = async (action) => {
             }
             break;
         case 'delete':
-            if (type === 'folder') {
+            if (showTrashView.value) {
+                deleteFromTrash(item);
+            } else if (type === 'folder') {
                 deleteFolderAction(item);
             } else {
                 deleteFileAction(item);
             }
+            break;
+        case 'restore':
+            restoreItem(item);
             break;
     }
     
@@ -1789,7 +1816,7 @@ const emptyTrash = async () => {
     try {
         await api.post('/admin/ja/file-manager/trash/empty');
         toast.success(t('features.file_manager.messages.trashEmptied'));
-        fetchTrashItems();
+        fetchTrash();
     } catch (error) {
         console.error('Failed to empty trash:', error);
         toast.error('Error', error.response?.data?.message || t('features.file_manager.messages.emptyTrashFailed'));
@@ -1797,7 +1824,7 @@ const emptyTrash = async () => {
 };
 
 // Permanently delete item from trash
-const permanentDelete = async (item) => {
+const deleteFromTrash = async (item) => {
     const confirmed = await confirm({
         title: t('features.file_manager.trash.permanent_delete'),
         message: `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`,
@@ -1809,13 +1836,13 @@ const permanentDelete = async (item) => {
 
     try {
         if (item.type === 'folder') {
-            await api.delete(`/admin/ja/file-manager/trash/folder/${item.id}`);
+            await api.delete(`/admin/ja/file-manager/trash/folder/${item.id}`); // This might need POST since we added alias, but delete is standard
             toast.success(t('features.file_manager.messages.folderDeleted'));
         } else {
-            await api.delete(`/admin/ja/file-manager/trash/${item.id}`);
+            await api.post('/admin/ja/file-manager/trash/permanent', { id: item.id }); // Use the POST alias we created
             toast.success(t('features.file_manager.messages.fileDeleted'));
         }
-        fetchTrashItems();
+        fetchTrash();
     } catch (error) {
         console.error('Failed to permanently delete item:', error);
         toast.error('Error', error.response?.data?.message || t('features.file_manager.messages.deleteFailed'));

@@ -114,6 +114,7 @@
         :module="module"
         :active-tab="activeTab"
         :search-query="searchQuery"
+        :device="currentBreakpoint"
       />
     </div>
   </aside>
@@ -187,7 +188,7 @@ const moduleTitle = computed(() => {
 })
 
 const currentBreakpoint = computed(() => {
-  return builder?.device?.value || 'desktop'
+  return builder?.device || 'desktop'
 })
 
 const currentBreakpointIcon = computed(() => {

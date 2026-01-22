@@ -21,11 +21,18 @@ class MediaService
      */
     public function upload(UploadedFile $file, ?int $folderId = null, bool $optimize = true, ?int $authorId = null, bool $isShared = false): Media
     {
+        // Check for SVG and sanitize BEFORE optimization or other processing
+        if ($file->getMimeType() === 'image/svg+xml' || strtolower($file->getClientOriginalExtension()) === 'svg') {
+            $this->sanitizeSvg($file->getRealPath());
+        }
+
         $path = $file->store('media', 'public');
         $fullPath = Storage::disk('public')->path($path);
 
-        // Optimize image if requested
-        if ($optimize && str_starts_with($file->getMimeType(), 'image/')) {
+        // Optimize image if requested (and not SVG, since we just sanitized/saved it, but optimizeImage might support it?)
+        // optimizeImage uses Intervention which might not handle SVGs well depending on driver.
+        // Usually we don't optimize SVGs with ImageManager.
+        if ($optimize && str_starts_with($file->getMimeType(), 'image/') && $file->getMimeType() !== 'image/svg+xml') {
             $this->optimizeImage($fullPath);
         }
 
@@ -549,12 +556,37 @@ class MediaService
                 } catch (\Exception $e) {
                     $stats['errors']++;
                     Log::error("Failed to import file during scan: {$filePath} - " . $e->getMessage());
-                }
+                    }
             }
         } catch (\Exception $e) {
             Log::error("Media scan failed: " . $e->getMessage());
         }
 
         return $stats;
+    }
+
+    /**
+     * Sanitize SVG file content
+     */
+    protected function sanitizeSvg(string $filePath): void
+    {
+        if (! class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
+            Log::warning('SVG Sanitizer class not found. Skipping sanitization.');
+            return;
+        }
+
+        try {
+            $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+            $sanitizer->removeRemoteReferences(true);
+            
+            $content = file_get_contents($filePath);
+            $cleanContent = $sanitizer->sanitize($content);
+            
+            file_put_contents($filePath, $cleanContent);
+        } catch (\Exception $e) {
+            Log::error('SVG sanitization failed: '.$e->getMessage());
+            // We do not stop the upload, but maybe we should?
+            // For now, log the error.
+        }
     }
 }

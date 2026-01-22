@@ -146,6 +146,7 @@
                         <TableRow>
                             <TableHead>{{ t('features.system.backups.table.name') }}</TableHead>
                             <TableHead>{{ t('features.system.backups.table.size') }}</TableHead>
+                            <TableHead>Password</TableHead>
                             <TableHead>{{ t('features.system.backups.table.created') }}</TableHead>
                             <TableHead class="text-right">{{ t('features.system.backups.table.actions') }}</TableHead>
                         </TableRow>
@@ -165,6 +166,38 @@
                             </TableCell>
                             <TableCell class="text-sm tabular-nums">
                                 {{ formatFileSize(backup.size) }}
+                            </TableCell>
+                            <TableCell>
+                                <div class="flex items-center gap-2 max-w-[200px]">
+                                    <div class="relative flex-1">
+                                        <input 
+                                            :type="visiblePasswords[backup.id] ? 'text' : 'password'" 
+                                            :value="backup.password || '****************'" 
+                                            readonly
+                                            class="w-full h-8 px-2 pr-8 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                        <button 
+                                            v-if="backup.password"
+                                            @click="togglePasswordVisibility(backup.id)"
+                                            class="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                                            tabindex="-1"
+                                        >
+                                            <EyeOff v-if="visiblePasswords[backup.id]" class="w-3.5 h-3.5" />
+                                            <Eye v-else class="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                    <Button
+                                        v-if="backup.password"
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8 shrink-0"
+                                        @click="copyPassword(backup.id, backup.password)"
+                                    >
+                                        <Check v-if="copiedPasswords[backup.id]" class="w-3.5 h-3.5 text-green-500" />
+                                        <Copy v-else class="w-3.5 h-3.5" />
+                                    </Button>
+                                    <span v-else class="text-xs text-muted-foreground italic">No Password</span>
+                                </div>
                             </TableCell>
                             <TableCell class="text-sm text-muted-foreground">
                                 {{ formatDate(backup.created_at) }}
@@ -309,7 +342,11 @@ import {
     FileArchive,
     Download,
     RotateCcw,
-    Trash2
+    Trash2,
+    Eye,
+    EyeOff,
+    Copy,
+    Check
 } from 'lucide-vue-next';
 
 const { t } = useI18n();
@@ -330,6 +367,27 @@ const scheduleForm = ref({
     backup_max_count: 10
 });
 const initialScheduleForm = ref(null);
+
+// Visibility toggle state for each backup row
+const visiblePasswords = ref({});
+const copiedPasswords = ref({});
+
+const togglePasswordVisibility = (id) => {
+    visiblePasswords.value[id] = !visiblePasswords.value[id];
+};
+
+const copyPassword = async (id, password) => {
+    try {
+        await navigator.clipboard.writeText(password);
+        copiedPasswords.value[id] = true;
+        toast.success.action(t('common.messages.copied'));
+        setTimeout(() => {
+            copiedPasswords.value[id] = false;
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy password:', err);
+    }
+};
 
 const isScheduleDirty = computed(() => {
     if (!initialScheduleForm.value) return false;

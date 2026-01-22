@@ -3,6 +3,7 @@
     "actions": {
         "newFolder": "Folder Baru",
         "uploadFiles": "Unggah Berkas",
+        "delete_file": "Hapus Berkas",
         "delete": "Hapus",
         "remove": "Hapus",
         "cancel": "Batal",
@@ -39,7 +40,16 @@
         "uploadFailed": "Gagal mengunggah berkas",
         "createFolderFailed": "Gagal membuat folder",
         "uploadedSuccess": "Berkas berhasil diunggah",
-        "folderCreatedSuccess": "Folder berhasil dibuat"
+        "folderCreatedSuccess": "Folder berhasil dibuat",
+        "trashEmptied": "Sampah berhasil dikosongkan",
+        "emptyTrashFailed": "Gagal mengosongkan sampah",
+        "folderDeleted": "Folder dihapus secara permanen",
+        "fileDeleted": "Berkas dihapus secara permanen",
+        "deleteFailed": "Gagal menghapus item"
+    },
+    "trash": {
+        "empty": "Kosongkan Sampah",
+        "permanent_delete": "Hapus Permanen"
     },
     "modals": {
         "upload": {

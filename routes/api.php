@@ -500,14 +500,17 @@ Route::prefix('v1')->group(function () {
         Route::get('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'index'])->middleware('permission:manage files');
         Route::post('file-manager/upload', [App\Http\Controllers\Api\V1\FileManagerController::class, 'upload'])->middleware('permission:manage files');
         Route::delete('file-manager', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage files');
+        Route::post('file-manager/delete', [App\Http\Controllers\Api\V1\FileManagerController::class, 'delete'])->middleware('permission:manage files'); // Frontend compat
         Route::post('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'createFolder'])->middleware('permission:manage files');
         Route::delete('file-manager/folder', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deleteFolder'])->middleware('permission:manage files');
         Route::post('file-manager/move', [App\Http\Controllers\Api\V1\FileManagerController::class, 'move'])->middleware('permission:manage files');
         Route::post('file-manager/rename', [App\Http\Controllers\Api\V1\FileManagerController::class, 'rename'])->middleware('permission:manage files');
         Route::get('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'trash'])->middleware('permission:manage files');
+        Route::post('file-manager/trash/empty', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage files'); // Frontend compat
         Route::post('file-manager/restore', [App\Http\Controllers\Api\V1\FileManagerController::class, 'restore'])->middleware('permission:manage files');
         Route::delete('file-manager/trash', [App\Http\Controllers\Api\V1\FileManagerController::class, 'emptyTrash'])->middleware('permission:manage files');
         Route::delete('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage files');
+        Route::post('file-manager/trash/permanent', [App\Http\Controllers\Api\V1\FileManagerController::class, 'deletePermanently'])->middleware('permission:manage files'); // Frontend compat
         Route::post('file-manager/extract', [App\Http\Controllers\Api\V1\FileManagerController::class, 'extract'])->middleware('permission:manage files');
         Route::post('file-manager/compress', [App\Http\Controllers\Api\V1\FileManagerController::class, 'compress'])->middleware('permission:manage files');
         Route::post('file-manager/copy', [App\Http\Controllers\Api\V1\FileManagerController::class, 'copy'])->middleware('permission:manage files');

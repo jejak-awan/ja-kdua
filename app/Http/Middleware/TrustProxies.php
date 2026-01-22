@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 class TrustProxies
 {
@@ -32,33 +33,73 @@ class TrustProxies
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Set trusted proxies
-        if ($this->proxies === '*') {
-            // Trust all proxies - useful when behind dynamic proxies
+        // Emergency kill-switch to revert to "trust all" behavior
+        if (env('TRUST_ALL_PROXIES', false)) {
             $request::setTrustedProxies(
                 [$request->server->get('REMOTE_ADDR')],
                 $this->headers
             );
-        } elseif (is_array($this->proxies) && count($this->proxies) > 0) {
-            $request::setTrustedProxies($this->proxies, $this->headers);
+            $this->setRealIpFromHeaders($request, true);
+            return $next($request);
         }
 
-        // Additional headers check for various proxy/CDN providers
-        $this->setRealIpFromHeaders($request);
+        // Load trusted IPs from cache (Cloudflare) + Private Networks
+        $trustedIps = $this->getTrustedProxies();
+        
+        if (count($trustedIps) > 0) {
+            $request::setTrustedProxies($trustedIps, $this->headers);
+        }
+
+        // Additional headers check (guarded by trust check)
+        $this->setRealIpFromHeaders($request, false);
 
         return $next($request);
     }
 
     /**
-     * Try to get real IP from various proxy headers.
-     * Priority order:
-     * 1. CF-Connecting-IP (Cloudflare)
-     * 2. X-Real-IP (Nginx)
-     * 3. True-Client-IP (Akamai, Cloudflare Enterprise)
-     * 4. X-Forwarded-For (Standard)
+     * Get trusted proxies list.
      */
-    protected function setRealIpFromHeaders(Request $request): void
+    protected function getTrustedProxies(): array
     {
+        $proxies = [];
+
+        // 1. Load Cloudflare IPs from cache
+        $cachePath = storage_path('framework/cache/cloudflare_ips.php');
+        if (file_exists($cachePath)) {
+            $proxies = include $cachePath;
+        }
+
+        // 2. Add Private Networks (RFC 1918)
+        // This is safe because if an attacker is in our private network, 
+        // we have bigger problems. Valid upstream LB/Nginx usually sit here.
+        $proxies = array_merge($proxies, [
+            '127.0.0.1',
+            '::1',
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+            'fc00::/7', // Unique Local Address
+        ]);
+
+        return $proxies;
+    }
+
+    /**
+     * Try to get real IP from various proxy headers.
+     */
+    protected function setRealIpFromHeaders(Request $request, bool $forceTrust): void
+    {
+        // Security: Only parse headers if the remote address is trusted
+        if (!$forceTrust) {
+            $remoteAddr = $request->server->get('REMOTE_ADDR');
+            $trustedProxies = $this->getTrustedProxies();
+            
+            if (!IpUtils::checkIp($remoteAddr, $trustedProxies)) {
+                 // Current proxy is NOT trusted. Do not spoof IP based on headers.
+                 return;
+            }
+        }
+
         $realIp = null;
 
         // Priority 1: Cloudflare
@@ -86,6 +127,7 @@ class TrustProxies
             $request->attributes->set('real_client_ip', $realIp);
 
             // Override server REMOTE_ADDR if we have a valid IP
+            // Note: This relies on setTrustedProxies correctly processing the headers first
             $request->server->set('REMOTE_ADDR', $realIp);
         }
     }

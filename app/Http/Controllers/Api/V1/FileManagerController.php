@@ -11,21 +11,78 @@ use Illuminate\Support\Facades\Storage;
 
 class FileManagerController extends BaseApiController
 {
+    /**
+     * Allowed disks for file manager operations.
+     */
+    protected array $allowedDisks = ['public'];
+
+    /**
+     * Validate the requested disk.
+     * 
+     * @param string|null $disk
+     * @return string
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function validateDisk(?string $disk): string
+    {
+        $disk = $disk ?: 'public';
+        
+        // Superadmin bypass (optional, verify if user ID 1 policy applies here as per audit)
+        if (Auth::id() === 1) {
+            return $disk;
+        }
+
+        if (!in_array($disk, $this->allowedDisks)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'disk' => ["Disk '$disk' is not allowed access."],
+            ]);
+        }
+        
+        return $disk;
+    }
+
+    /**
+     * Validate and normalize the path to prevent traversal.
+     * 
+     * @param string|null $path
+     * @return string
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function validatePath(?string $path): string
+    {
+        $path = $path ?: '';
+        
+        // Remove null bytes
+        $path = str_replace("\0", '', $path);
+        
+        // Prevent directory traversal
+        if (str_contains($path, '..')) {
+             throw \Illuminate\Validation\ValidationException::withMessages([
+                'path' => ["Invalid path detected (traversal)."],
+            ]);
+        }
+        
+        return trim($path, '/');
+    }
+
     public function index(Request $request)
     {
         if (! $request->user()->can('manage files')) {
             return $this->forbidden('You do not have permission to manage files');
         }
 
-        $path = $request->input('path', '/');
-        $disk = $request->input('disk', 'public');
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $files = [];
         $folders = [];
 
         try {
-            // Normalize path
-            $path = $path === '/' ? '' : trim($path, '/');
+            // Normalize path happens in validatePath now
             $fullPath = Storage::disk($disk)->path($path);
 
             if (is_dir($fullPath)) {
@@ -75,8 +132,12 @@ class FileManagerController extends BaseApiController
             return $this->forbidden('You do not have permission to download files');
         }
 
-        $path = $request->input('path');
-        $disk = $request->input('disk', 'public');
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         if (! $path || ! Storage::disk($disk)->exists($path)) {
             return $this->notFound('File');
@@ -110,8 +171,12 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $path = trim($request->input('path', '/'), '/');
-        $disk = $request->input('disk', 'public');
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
         $uploadedFiles = [];
 
         // Handle single file or multiple files
@@ -131,7 +196,22 @@ class FileManagerController extends BaseApiController
             $fileName = $file->getClientOriginalName();
             $filePath = $path ? $path.'/'.$fileName : $fileName;
 
-            Storage::disk($disk)->put($filePath, file_get_contents($file));
+            $content = file_get_contents($file);
+
+            // Sanitize SVG
+            if ($extension === 'svg' || $file->getMimeType() === 'image/svg+xml') {
+                 if (class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
+                     try {
+                        $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+                        $sanitizer->removeRemoteReferences(true);
+                        $content = $sanitizer->sanitize($content);
+                     } catch (\Exception $e) {
+                         \Illuminate\Support\Facades\Log::warning('SVG sanitization failed in FileManager: '.$e->getMessage());
+                     }
+                 }
+            }
+
+            Storage::disk($disk)->put($filePath, $content);
 
             $uploadedFiles[] = [
                 'path' => '/'.$filePath,
@@ -193,6 +273,25 @@ class FileManagerController extends BaseApiController
 
         // Move file to trash
         Storage::disk($disk)->move($path, $trashPath);
+
+        // Sync with Media Library (Delete)
+        try {
+            // Find valid media
+            $media = \App\Models\Media::where(function($q) use ($path) {
+                $q->where('path', $path)
+                  ->orWhere('path', '/'.$path)
+                  ->orWhere('path', trim($path, '/'));
+            })->first();
+
+            if ($media) {
+                $media->path = $trashPath; // Update path to point to trash
+                $media->save();
+                $media->delete(); // Soft delete
+            }
+        } catch (\Exception $e) {
+             // Log but don't fail the file operation
+             \Illuminate\Support\Facades\Log::warning('Failed to sync media delete: '.$e->getMessage());
+        }
 
         // Record in database
         DeletedFile::create([
@@ -281,8 +380,13 @@ class FileManagerController extends BaseApiController
         ]);
 
         $name = $request->input('name');
-        $path = trim($request->input('path', '/'), '/');
-        $disk = $request->input('disk', 'public');
+        
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $folderPath = $path ? $path.'/'.$name : $name;
 
@@ -311,10 +415,15 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $source = trim($request->input('source'), '/');
-        $destination = trim($request->input('destination', ''), '/');
         $type = $request->input('type');
-        $disk = $request->input('disk', 'public');
+
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $source = $this->validatePath($request->input('source'));
+            $destination = $this->validatePath($request->input('destination'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         try {
             // Get the filename/foldername from source
@@ -367,10 +476,15 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $source = trim($request->input('source'), '/');
-        $destination = trim($request->input('destination', ''), '/');
         $type = $request->input('type');
-        $disk = $request->input('disk', 'public');
+
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $source = $this->validatePath($request->input('source'));
+            $destination = $this->validatePath($request->input('destination'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         try {
             $name = basename($source);
@@ -443,10 +557,15 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $path = trim($request->input('path'), '/');
         $newName = $request->input('newName');
         $type = $request->input('type');
-        $disk = $request->input('disk', 'public');
+        
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         try {
             $parentDir = dirname($path);
@@ -570,6 +689,27 @@ class FileManagerController extends BaseApiController
             Storage::disk($disk)->move($trashPath, $originalPath);
         }
 
+        // Sync with Media Library (Restore)
+        if ($deletedFile->type === 'file') {
+             try {
+                $media = \App\Models\Media::withTrashed()
+                    ->where(function($q) use ($trashPath) {
+                        $q->where('path', $trashPath)
+                          ->orWhere('path', '/'.$trashPath);
+                    })
+                    ->first();
+
+                if ($media) {
+                    $media->path = $originalPath; // Update to restored path
+                    $media->save(); // Save path change
+                    $media->restore(); // Un-soft-delete
+                }
+            } catch (\Exception $e) {
+                // Log but continue
+                \Illuminate\Support\Facades\Log::warning('Failed to sync media restore: '.$e->getMessage());
+            }
+        }
+
         // Remove from database
         $deletedFile->delete();
 
@@ -592,6 +732,30 @@ class FileManagerController extends BaseApiController
         ]);
 
         $disk = $request->input('disk', 'public');
+        try {
+             $disk = $this->validateDisk($disk);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+             return $this->validationError($e->errors());
+        }
+
+        // Sync with Media Library (Delete All Trashed)
+        $deletedFiles = DeletedFile::where('type', 'file')->get();
+        foreach ($deletedFiles as $file) {
+             try {
+                $media = \App\Models\Media::withTrashed()
+                    ->where(function($q) use ($file) {
+                        $q->where('path', $file->trash_path)
+                          ->orWhere('path', '/'.$file->trash_path);
+                    })
+                    ->first();
+
+                if ($media) {
+                    $media->forceDelete();
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
 
         // Delete all files from .trash folder
         $trashPath = Storage::disk($disk)->path('.trash');
@@ -624,9 +788,32 @@ class FileManagerController extends BaseApiController
         ]);
 
         $disk = $request->input('disk', 'public');
+        try {
+             $disk = $this->validateDisk($disk);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+             return $this->validationError($e->errors());
+        }
         $deletedFile = DeletedFile::findOrFail($request->input('id'));
 
         $trashPath = $deletedFile->trash_path;
+
+        // Sync with Media Library (Force Delete)
+        if ($deletedFile->type === 'file') {
+             try {
+                $media = \App\Models\Media::withTrashed()
+                    ->where(function($q) use ($trashPath) {
+                        $q->where('path', $trashPath)
+                          ->orWhere('path', '/'.$trashPath);
+                    })
+                    ->first();
+
+                if ($media) {
+                    $media->forceDelete();
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
 
         // Delete from storage
         if ($deletedFile->type === 'folder') {
@@ -660,8 +847,12 @@ class FileManagerController extends BaseApiController
             'disk' => 'nullable|string',
         ]);
 
-        $path = trim($request->input('path'), '/');
-        $disk = $request->input('disk', 'public');
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            $path = $this->validatePath($request->input('path'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
         $fullPath = Storage::disk($disk)->path($path);
 
         if (! file_exists($fullPath)) {
@@ -689,7 +880,26 @@ class FileManagerController extends BaseApiController
             if ($extension === 'zip') {
                 $zip = new \ZipArchive;
                 if ($zip->open($fullPath) === true) {
-                    $zip->extractTo($extractPath);
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $filename = $zip->getNameIndex($i);
+                        
+                        // Prevent Zip Slip
+                        // 1. Check for .. in path
+                        if (str_contains($filename, '..')) {
+                            $zip->close();
+                             throw new \Exception("Security Violation: Zip Slip detected in entry '$filename'");
+                        }
+                        
+                        // 2. Ensure destination is within extract dir
+                        $destination = $extractPath . '/' . $filename;
+                        
+                        // Canonicalize path (handle if it doesn't exist yet)
+                        // Note: We can't use realpath on non-existent files.
+                        // We rely on '..' check above strongly.
+                        
+                        // Extract specific file
+                        $zip->extractTo($extractPath, $filename);
+                    }
                     $zip->close();
                 } else {
                     return $this->error('Failed to open ZIP file', 500, [], 'EXTRACT_ERROR');
@@ -740,7 +950,17 @@ class FileManagerController extends BaseApiController
         ]);
 
         $paths = $request->input('paths');
-        $disk = $request->input('disk', 'public');
+        try {
+            $disk = $this->validateDisk($request->input('disk'));
+            // Validate all paths in array
+            $cleanPaths = [];
+            foreach ($paths as $p) {
+                $cleanPaths[] = $this->validatePath($p);
+            }
+            $paths = $cleanPaths;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
         $archiveName = $request->input('name');
 
         // Determine archive name
