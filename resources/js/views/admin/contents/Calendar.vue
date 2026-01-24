@@ -47,30 +47,40 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import api from '../../../services/api';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import Card from '@/components/ui/card.vue';
-import Button from '@/components/ui/button.vue';
-import Select from '@/components/ui/select.vue';
-import SelectContent from '@/components/ui/select-content.vue';
-import SelectItem from '@/components/ui/select-item.vue';
-import SelectTrigger from '@/components/ui/select-trigger.vue';
-import SelectValue from '@/components/ui/select-value.vue';
+import api from '@/services/api';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
+import toast from '@/services/toast';
 import { Plus } from 'lucide-vue-next';
-import toast from '../../../services/toast';
+import type { Content, Category } from '@/types/cms';
+
+// Shadcn Components
+// @ts-ignore
+import Card from '@/components/ui/card.vue';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Select from '@/components/ui/select.vue';
+// @ts-ignore
+import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
+import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
+import SelectValue from '@/components/ui/select-value.vue';
 
 const { t } = useI18n();
 const router = useRouter();
-const calendar = ref(null);
-const contents = ref([]);
-const categories = ref([]);
+const calendar = ref<any>(null);
+const contents = ref<Content[]>([]);
+const categories = ref<Category[]>([]);
 const statusFilter = ref('all');
 const categoryFilter = ref('all');
 
@@ -100,12 +110,12 @@ const calendarEvents = computed(() => {
             return true;
         })
         .map(content => ({
-            id: content.id,
+            id: String(content.id),
             title: content.title,
             start: content.published_at || content.created_at,
             allDay: true,
-            backgroundColor: getStatusColor(content.status),
-            borderColor: getStatusColor(content.status),
+            backgroundColor: getStatusColor(content.status || ''),
+            borderColor: getStatusColor(content.status || ''),
             extendedProps: {
                 status: content.status,
                 category: content.category,
@@ -114,8 +124,8 @@ const calendarEvents = computed(() => {
         }));
 });
 
-const getStatusColor = (status) => {
-    const colors = {
+const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
         draft: '#6b7280',
         scheduled: '#f59e0b',
         published: '#10b981',
@@ -124,12 +134,12 @@ const getStatusColor = (status) => {
     return colors[status] || '#6b7280';
 };
 
-const getEventClassNames = (arg) => {
+const getEventClassNames = (arg: any) => {
     const status = arg.event.extendedProps.status;
     return [`status-${status}`];
 };
 
-const renderEventContent = (arg) => {
+const renderEventContent = (arg: any) => {
     const content = arg.event.extendedProps;
     const categoryName = content.category?.name || '';
     return {
@@ -142,7 +152,7 @@ const renderEventContent = (arg) => {
     };
 };
 
-const handleEventDrop = async (info) => {
+const handleEventDrop = async (info: any) => {
     const contentId = info.event.id;
     const newDate = info.event.start;
 
@@ -151,18 +161,18 @@ const handleEventDrop = async (info) => {
             published_at: newDate.toISOString().split('T')[0],
         });
         await fetchContents();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to reschedule content:', error);
-        toast.error(t('common.messages.toast.error'), t('features.content.messages.rescheduleFailed'));
+        toast.error(t('features.content.messages.rescheduleFailed'));
         info.revert();
     }
 };
 
-const handleEventClick = (info) => {
+const handleEventClick = (info: any) => {
     router.push({ name: 'contents.edit', params: { id: info.event.id } });
 };
 
-const handleDateClick = (info) => {
+const handleDateClick = (info: any) => {
     router.push({
         name: 'contents.create',
         query: { date: info.dateStr },

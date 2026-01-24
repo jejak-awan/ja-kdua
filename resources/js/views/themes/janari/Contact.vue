@@ -81,7 +81,7 @@ import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import { useCmsStore } from '@/stores/cms'
 import BlockRenderer from '@/components/content-renderer/BlockRenderer.vue'
-import ContactFormBlock from '@/components/content-renderer/ContactFormBlock.vue'
+import ContactFormBlock from '@/shared/blocks/ContactFormBlock.vue'
 import Card from '@/components/ui/card.vue'
 import { 
     Mail, 

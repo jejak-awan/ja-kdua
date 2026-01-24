@@ -44,7 +44,7 @@
         <PropertiesPopover 
             v-model:open="showPropertiesModal"
             :node="selectedNodeForProperties"
-            :anchor="propertiesAnchor"
+            :anchor="(propertiesAnchor as any)"
             @save="saveMediaProperties"
         />
 
@@ -73,8 +73,8 @@
     </div>
 </template>
 
-<script setup>
-import { ref, watch, onBeforeUnmount, reactive, nextTick } from 'vue'
+<script setup lang="ts">
+import { ref, watch, onBeforeUnmount, reactive, nextTick, type Ref } from 'vue'
 import Card from '@/components/ui/card.vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { useI18n } from 'vue-i18n'
@@ -99,6 +99,7 @@ import MediaBubbleMenu from './editor/MediaBubbleMenu.vue'
 import ContextMenu from './editor/ContextMenu.vue'
 import PropertiesPopover from './editor/PropertiesPopover.vue'
 import TableInsertDialog from './editor/TableInsertDialog.vue'
+// @ts-ignore
 import MediaPicker from './MediaPicker.vue'
 
 // Custom Extensions
@@ -135,18 +136,19 @@ import {
     RemoveFormatting
 } from 'lucide-vue-next'
 
-const props = defineProps({
-    modelValue: {
-        type: String,
-        default: '',
-    },
-    placeholder: {
-        type: String,
-        default: 'Start writing...',
-    }
+interface Props {
+    modelValue: string;
+    placeholder?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    modelValue: '',
+    placeholder: 'Start writing...'
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: string): void;
+}>()
 
 const showMediaPicker = ref(false)
 const showTableDialog = ref(false)
@@ -155,15 +157,22 @@ const htmlContent = ref('')
 
 // Properties Popover State
 const showPropertiesModal = ref(false)
-const selectedNodeForProperties = ref(null)
-const propertiesAnchor = ref(null)
+const selectedNodeForProperties = ref<any>(null)
+const propertiesAnchor = ref<HTMLElement | null>(null)
 
 // Context Menu State
+interface ContextMenuItem {
+    label?: string;
+    icon?: any;
+    action?: string;
+    type?: string;
+}
+
 const contextMenu = reactive({
     show: false,
     x: 0,
     y: 0,
-    items: [],
+    items: [] as ContextMenuItem[],
     position: { x: 0, y: 0 }
 })
 
@@ -241,7 +250,9 @@ const editor = useEditor({
         }
     },
     onUpdate: () => {
-        emit('update:modelValue', editor.value.getHTML())
+        if (editor.value) {
+            emit('update:modelValue', editor.value.getHTML())
+        }
     },
 })
 
@@ -249,14 +260,14 @@ const editor = useEditor({
 watch(() => props.modelValue, (newValue) => {
     const isSame = editor.value?.getHTML() === newValue
     if (editor.value && !isSame) {
-        editor.value.commands.setContent(newValue, false)
+        editor.value.commands.setContent(newValue, { emitUpdate: false })
     }
 })
 
 // Media Handlers
-function handleMediaSelect(media) {
+function handleMediaSelect(media: any) {
     const url = media?.url || media?.path || media?.file_url
-    if (url) {
+    if (url && editor.value) {
         editor.value.chain().focus().setImage({ 
             src: url, 
             alt: media?.alt || media?.name || '' 
@@ -266,6 +277,8 @@ function handleMediaSelect(media) {
 }
 
 function openProperties() {
+    if (!editor.value) return;
+    
     let type = 'image'
     if (editor.value.isActive('video')) type = 'video'
     else if (editor.value.isActive('htmlEmbed')) type = 'htmlEmbed'
@@ -287,8 +300,10 @@ function openProperties() {
     showPropertiesModal.value = true
 }
 
-function saveMediaProperties(properties) {
-    const { type, pos } = selectedNodeForProperties.value
+function saveMediaProperties(properties: any) {
+    if (!editor.value || !selectedNodeForProperties.value) return;
+    
+    const { pos } = selectedNodeForProperties.value
     // Use setNodeMarkup to update specific node by position, keeping focus in popover
     editor.value.chain().command(({ tr }) => {
         tr.setNodeMarkup(pos, undefined, properties)
@@ -297,16 +312,20 @@ function saveMediaProperties(properties) {
 }
 
 // Table Handlers
-function insertTable(config) {
-    editor.value.chain().focus().insertTable({ 
-        rows: config.rows, 
-        cols: config.cols, 
-        withHeaderRow: true 
-    }).run()
+function insertTable(config: { rows: number, cols: number }) {
+    if (editor.value) {
+        editor.value.chain().focus().insertTable({ 
+            rows: config.rows, 
+            cols: config.cols, 
+            withHeaderRow: true 
+        }).run()
+    }
 }
 
 // HTML View Handlers
 function toggleHtmlView() {
+    if (!editor.value) return;
+    
     if (!showHtmlView.value) {
         htmlContent.value = editor.value.getHTML()
     } else {
@@ -317,17 +336,19 @@ function toggleHtmlView() {
 
 function applyHtmlChanges() {
     if (editor.value && htmlContent.value !== editor.value.getHTML()) {
-        editor.value.commands.setContent(htmlContent.value, false)
+        editor.value.commands.setContent(htmlContent.value, { emitUpdate: false })
         emit('update:modelValue', htmlContent.value)
     }
 }
 
 function insertHtmlEmbed() {
-    editor.value.chain().focus().insertHtmlEmbed('').run()
+    if (editor.value) {
+        editor.value.chain().focus().insertHtmlEmbed('').run()
+    }
 }
 
-function insertIcon(iconName) {
-    if (iconName) {
+function insertIcon(iconName: string) {
+    if (iconName && editor.value) {
         editor.value.chain().focus().insertContent({
             type: 'icon',
             attrs: {
@@ -338,7 +359,7 @@ function insertIcon(iconName) {
 }
 
 // Context Menu Logic
-const handleContextMenu = (e) => {
+const handleContextMenu = (e: MouseEvent) => {
     if (!editor.value) return 
     
     // Allow default browser context menu inside the text area in HTML view
@@ -346,7 +367,7 @@ const handleContextMenu = (e) => {
 
     e.preventDefault()
 
-    const items = []
+    const items: ContextMenuItem[] = []
 
     // Contextual actions based on selection
     if (editor.value.isActive('image') || editor.value.isActive('video') || editor.value.isActive('htmlEmbed') || editor.value.isActive('icon')) {
@@ -367,13 +388,16 @@ const handleContextMenu = (e) => {
     if (items.length === 0) return
 
     contextMenu.position = { x: e.clientX, y: e.clientY }
+    // @ts-ignore
     contextMenu.items = items
     contextMenu.show = true
 }
 
-const handleContextMenuAction = (action) => {
+const handleContextMenuAction = (action: string) => {
     contextMenu.show = false
     
+    if (!editor.value) return;
+
     switch (action) {
         case 'properties':
             openProperties()
@@ -406,4 +430,3 @@ onBeforeUnmount(() => {
     editor.value?.destroy()
 })
 </script>
-

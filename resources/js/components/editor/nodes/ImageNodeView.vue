@@ -70,7 +70,7 @@
     </node-view-wrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { nodeViewProps, NodeViewWrapper } from '@tiptap/vue-3'
 import { Check } from 'lucide-vue-next'
@@ -93,18 +93,18 @@ const applySrc = () => {
 let isResizing = false
 let startX = 0
 let startWidth = 0
-let startHeight = 0
+// let startHeight = 0 // Uncomment if used
 let aspectRatio = 1
 
-const startResize = (e) => {
+const startResize = (e: PointerEvent) => {
     isResizing = true
     startX = e.clientX
     
     // Get current dimensions
-    const img = e.target.closest('.relative').querySelector('img')
+    const img = (e.target as HTMLElement).closest('.relative')?.querySelector('img') as HTMLImageElement
     startWidth = img.clientWidth
-    startHeight = img.clientHeight
-    aspectRatio = startWidth / startHeight
+    // startHeight = img.clientHeight
+    aspectRatio = startWidth / img.clientHeight
     
     document.addEventListener('pointermove', onResize)
     document.addEventListener('pointerup', stopResize)
@@ -112,7 +112,7 @@ const startResize = (e) => {
     document.body.style.userSelect = 'none'
 }
 
-const onResize = (e) => {
+const onResize = (e: PointerEvent) => {
     if (!isResizing) return
     
     const dx = e.clientX - startX

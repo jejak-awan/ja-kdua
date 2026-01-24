@@ -6,29 +6,20 @@
       :max="field.max"
       :step="field.step"
       :unit="field.unit"
-      :placeholder-value="placeholderValue !== null ? Number(placeholderValue) : null"
-      @update:model-value="(val) => $emit('update:value', val)"
+      :placeholder-value="placeholderValue !== null && placeholderValue !== undefined ? Number(placeholderValue) : undefined"
+      @update:model-value="(val: number | string) => $emit('update:value', val)"
     />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { BaseSliderInput } from '../ui'
 
-defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: [Number, String],
-    default: 0
-  },
-  placeholderValue: {
-    type: [Number, String],
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: number | string;
+  placeholderValue?: number | string | null;
+}>()
 
 defineEmits(['update:value'])
 </script>

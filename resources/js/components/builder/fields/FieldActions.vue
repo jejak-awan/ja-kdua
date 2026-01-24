@@ -70,27 +70,28 @@
   
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, inject } from 'vue'
+import type { BuilderInstance } from '../../../types/builder'
 import { Smartphone, Database, MoreVertical, Layers, HelpCircle, RotateCcw, Copy, Sparkles, Monitor, Tablet, MousePointer } from 'lucide-vue-next'
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
-const props = defineProps({
-  label: { type: String, required: true },
-  responsive: { type: Boolean, default: false },
-  showResponsive: { type: Boolean, default: false },
-  activeDevice: { type: String, default: 'desktop' },
-  showReset: { type: Boolean, default: false },
-  showDuplicate: { type: Boolean, default: false },
-  showDynamicData: { type: Boolean, default: true },
-  showContextMenu: { type: Boolean, default: true },
-  showInfo: { type: Boolean, default: false },
-  showPresets: { type: Boolean, default: false },
-  infoContent: { type: String, default: '' }
-})
+const props = defineProps<{
+  label: string;
+  responsive?: boolean;
+  showResponsive?: boolean;
+  activeDevice?: string;
+  showReset?: boolean;
+  showDuplicate?: boolean;
+  showDynamicData?: boolean;
+  showContextMenu?: boolean;
+  showInfo?: boolean;
+  showPresets?: boolean;
+  infoContent?: string;
+}>()
 
-const getDeviceIcon = (device) => {
+const getDeviceIcon = (device: string) => {
     switch (device) {
         case 'tablet': return Tablet
         case 'mobile': return Smartphone
@@ -103,18 +104,19 @@ const emit = defineEmits(['reset', 'responsive', 'select-dynamic-data', 'duplica
 
 const showMenu = ref(false)
 const showInfoPanel = ref(false)
-const contextMenuIconRef = ref(null)
-const dropdownStyle = ref({})
+const contextMenuIconRef = ref<any>(null)
+const dropdownStyle = ref<Record<string, any>>({})
 
-const toggleInfo = (e) => {
+const toggleInfo = (e: Event) => {
     e.stopPropagation()
     showInfoPanel.value = !showInfoPanel.value
     emit('toggle-info', showInfoPanel.value)
 }
 
-const updateDropdownPosition = (anchorEl) => {
+const updateDropdownPosition = (anchorEl: any) => {
     if (!anchorEl) return
-    const rect = anchorEl.getBoundingClientRect()
+    const el = anchorEl.$el || anchorEl
+    const rect = el.getBoundingClientRect()
     dropdownStyle.value = {
         position: 'fixed',
         top: `${rect.bottom + 4}px`,
@@ -124,15 +126,15 @@ const updateDropdownPosition = (anchorEl) => {
 }
 
 const vClickOutside = {
-  mounted(el, binding) {
-    el.clickOutsideEvent = function(event) {
-      if (!(el === event.target || el.contains(event.target))) {
+  mounted(el: any, binding: any) {
+    el.clickOutsideEvent = function(event: Event) {
+      if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value(event, el);
       }
     };
     document.body.addEventListener('click', el.clickOutsideEvent);
   },
-  unmounted(el) {
+  unmounted(el: any) {
     document.body.removeEventListener('click', el.clickOutsideEvent);
   }
 }
@@ -142,7 +144,7 @@ const closeMenu = () => {
     showMenu.value = false
 }
 
-const toggleMenu = (e) => {
+const toggleMenu = (e: Event) => {
     e.stopPropagation()
     showMenu.value = !showMenu.value
 

@@ -21,23 +21,19 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import Button from '../../ui/button.vue';
 import { GripVertical, Plus, FileText, File, Tag, Link as LinkIcon } from 'lucide-vue-next';
 
-const props = defineProps({
-    item: {
-        type: Object,
-        required: true
-    },
-    type: {
-        type: String,
-        default: 'custom'
-    }
-});
+const props = defineProps<{
+    item: Record<string, any>;
+    type?: string;
+}>();
 
-defineEmits(['add']);
+defineEmits<{
+    (e: 'add'): void;
+}>();
 
 const label = computed(() => props.item.title || props.item.name || 'Untitled');
 

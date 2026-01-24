@@ -12,17 +12,17 @@
         <div v-if="activePanel === 'layers'" class="panel-actions">
             <button 
                 class="panel-action-btn" 
-                :class="{ 'panel-action-btn--active': builder.gridViewMode }"
-                @click="builder.gridViewMode = !builder.gridViewMode"
-                :title="$t('builder.toolbar.gridView', 'Grid View')"
+                :class="{ 'panel-action-btn--active': builder.gridViewMode.value }"
+                @click="builder.gridViewMode.value = !builder.gridViewMode.value"
+                :title="t('builder.toolbar.gridView', 'Grid View')"
             >
                 <component :is="icons.LayoutGrid" :size="16" />
             </button>
             <button 
                 class="panel-action-btn" 
-                :class="{ 'panel-action-btn--active': builder.wireframeMode }"
-                @click="builder.wireframeMode = !builder.wireframeMode"
-                :title="$t('builder.toolbar.wireframe', 'Wireframe Mode')"
+                :class="{ 'panel-action-btn--active': builder.wireframeMode.value }"
+                @click="builder.wireframeMode.value = !builder.wireframeMode.value"
+                :title="t('builder.toolbar.wireframe', 'Wireframe Mode')"
             >
                 <component :is="icons.Eye" :size="16" />
             </button>
@@ -41,22 +41,22 @@
               <input 
                 type="text" 
                 v-model="searchTerm" 
-                :placeholder="$t('builder.panels.layers.searchPlaceholder', 'Search Layout')"
+                :placeholder="t('builder.panels.layers.searchPlaceholder', 'Search Layout')"
                 class="search-input"
               />
               <component :is="icons.Filter" :size="14" class="filter-icon" />
             </div>
             <button class="close-all-btn" @click="collapseAll">
-              {{ $t('builder.panels.layers.closeAll', 'Close All') }}
+              {{ t('builder.panels.layers.closeAll', 'Close All') }}
             </button>
           </div>
 
           <div class="layers-tree-container">
             <div v-if="blocks.length === 0" class="empty-state">
-            <p class="mb-2 text-muted text-center text-xs">{{ $t('builder.panels.layers.empty') }}</p>
+            <p class="mb-2 text-muted text-center text-xs">{{ t('builder.panels.layers.empty') }}</p>
             <button class="btn-link text-xs text-accent flex items-center justify-center gap-1 mx-auto" @click="builder.insertModule('section')">
               <component :is="icons.Plus || 'span'" :size="12" />
-              {{ $t('builder.actions.addSection', 'Add Section') }}
+              {{ t('builder.actions.addSection', 'Add Section') }}
             </button>
           </div>
             <LayersTree 
@@ -100,14 +100,14 @@
         <!-- Fallback -->
         <div v-else class="panel-placeholder">
           <component :is="icons.Construction" :size="32" />
-          <p>{{ title }} {{ $t('builder.panels.comingSoon') }}</p>
+          <p>{{ title }} {{ t('builder.panels.comingSoon') }}</p>
         </div>
       </div>
     </div>
   </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical } from 'lucide-vue-next'
@@ -122,26 +122,27 @@ import PortabilityPanel from './panels/PortabilityPanel.vue'
 import HelpPanel from './panels/HelpPanel.vue'
 import PreferencesPanel from './panels/PreferencesPanel.vue'
 import GlobalVariablesPanel from './panels/GlobalVariablesPanel.vue'
+import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
-const icons = { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical }
+const icons: Record<string, any> = { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical }
 
-const props = defineProps({
-  activePanel: {
-    type: String,
-    required: true
-  },
-  visible: {
-    type: Boolean,
-    default: false
-  }
+interface Props {
+  activePanel: string;
+  visible?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  visible: false
 })
 
-defineEmits(['close'])
+defineEmits<{
+  (e: 'close'): void;
+}>()
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder') as any // Using any for simplicity with complex reactive proxy
 const { t } = useI18n()
-const blocks = computed(() => builder?.blocks || [])
-const selectedModuleId = computed(() => builder?.selectedModuleId)
+const blocks = computed<BlockInstance[]>(() => builder?.blocks.value || [])
+const selectedModuleId = computed(() => builder?.selectedModuleId.value)
 
 const searchTerm = ref('')
 const collapseSignal = ref(0)
@@ -162,22 +163,21 @@ const currentWidth = computed(() => {
     return '300px'
 })
 
-const selectModule = (id) => {
+const selectModule = (id: string) => {
   builder?.selectModule(id)
 }
 </script>
 
 <style scoped>
-
 .left-panel {
-  width: 0; /* Fallback for inactive state, overruled by inline style when active */
-  height: 100%; /* Ensure it takes full height of ja-builder__main */
+  width: 0;
+  height: 100%;
   border-right: 1px solid var(--builder-border-layout);
   border-bottom: 1px solid var(--builder-border-layout);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   opacity: 0;
-  flex-shrink: 0; /* Ensure container doesn't shrink in builder layout */
+  flex-shrink: 0;
 }
 
 .left-panel--visible {
@@ -253,13 +253,12 @@ const selectModule = (id) => {
 
 .panel-content {
   flex: 1;
-  min-height: 0; /* Critical for flex child scrolling */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* Let child panels manage their own scrolling */
 .panel-content > * {
   flex: 1;
   min-height: 0;
@@ -268,7 +267,7 @@ const selectModule = (id) => {
 }
 
 .layers-controls {
-    flex: none; /* Keep natural height for search bar */
+    flex: none;
     padding: 8px 12px;
     border-bottom: 1px solid var(--builder-border);
     display: flex;
@@ -277,7 +276,7 @@ const selectModule = (id) => {
 }
 
 .layers-tree-container {
-    flex: 1; /* Tree container takes remaining space */
+    flex: 1;
     min-height: 0;
     overflow-y: auto;
     padding: var(--spacing-sm);
@@ -328,8 +327,6 @@ const selectModule = (id) => {
     opacity: 0.8;
 }
 
-
-
 .empty-state {
   text-align: center;
   color: var(--builder-text-muted);
@@ -356,7 +353,7 @@ const selectModule = (id) => {
     z-index: 900; 
     width: 85% !important; 
     max-width: 320px;
-    background: var(--builder-bg-primary) !important; /* Fix transparency */
+    background: var(--builder-bg-primary) !important;
     box-shadow: var(--shadow-xl);
     border-right: 1px solid var(--builder-border);
   }

@@ -45,7 +45,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
@@ -54,13 +54,21 @@ import { forgotPasswordSchema } from '../../schemas/auth';
 import { Loader2, ArrowLeft } from 'lucide-vue-next';
 
 // Shadcn Components
+// @ts-ignore
 import Card from '../../components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '../../components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '../../components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '../../components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '../../components/ui/card-content.vue';
+// @ts-ignore
 import Button from '../../components/ui/button.vue';
+// @ts-ignore
 import Input from '../../components/ui/input.vue';
+// @ts-ignore
 import Label from '../../components/ui/label.vue';
 
 const { t } = useI18n();
@@ -92,10 +100,10 @@ const handleSubmit = async () => {
     const result = await authStore.forgotPassword(form.email);
 
     if (result.success) {
-        message.value = result.message;
+        message.value = result.message || '';
         messageType.value = 'success';
     } else {
-        message.value = result.message;
+        message.value = result.message || '';
         messageType.value = 'error';
     }
 

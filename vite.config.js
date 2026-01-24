@@ -12,9 +12,9 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
-    // esbuild: {
-    //     drop: ['console', 'debugger'],
-    // },
+    esbuild: {
+        drop: ['console', 'debugger'],
+    },
     resolve: {
         alias: {
             'vue': 'vue/dist/vue.esm-bundler.js',
@@ -24,20 +24,52 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
-                    // Vue core libraries
-                    'vendor-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-                    // Chart and Calendar libraries
-                    'vendor-ui': ['chart.js', 'vue-chartjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],
-                    // Utility libraries
-                    'vendor-utils': ['axios', 'lodash'],
-                    // Icon library (large but infrequently changes)
-                    'lucide-vue-next': ['lucide-vue-next'],
+                manualChunks: (id) => {
+                    // 1. Lucide icons (Very specific)
+                    if (id.includes('lucide-vue-next')) {
+                        return 'vendor-icons';
+                    }
+
+                    // 2. Tiptap and related extensions (Specific)
+                    if (id.includes('@tiptap') || id.includes('prosemirror') || id.includes('lowlight') || id.includes('dompurify')) {
+                        return 'vendor-tiptap';
+                    }
+
+                    // 3. UI Framework components (Radix)
+                    if (id.includes('radix-vue') || id.includes('class-variance-authority')) {
+                        return 'vendor-ui-framework';
+                    }
+
+                    // 4. FullCalendar
+                    if (id.includes('@fullcalendar')) {
+                        return 'vendor-ui-calendar';
+                    }
+
+                    // 5. Chart.js
+                    if (id.includes('chart.js')) {
+                        return 'vendor-ui-charts';
+                    }
+
+                    // 6. Utility libraries
+                    if (id.includes('axios') || id.includes('lodash') || id.includes('zod') || id.includes('dayjs')) {
+                        return 'vendor-utils';
+                    }
+
+                    // 7. Vue core (Put last to avoid catching everything with 'vue' in path)
+                    if (id.includes('node_modules/vue/') ||
+                        id.includes('node_modules/vue-router/') ||
+                        id.includes('node_modules/pinia/') ||
+                        id.includes('node_modules/vue-i18n/') ||
+                        id.includes('node_modules/@vue/')) {
+                        return 'vendor-vue-core';
+                    }
                 },
             },
         },
-        // Builder components are large but acceptable (gzip: ~195KB)
-        chunkSizeWarningLimit: 700,
+        // Builder components are large but acceptable
+        chunkSizeWarningLimit: 1000,
+        sourcemap: false,
+        minify: 'esbuild',
     },
     optimizeDeps: {
         include: ['cropperjs', '@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/vue3'],

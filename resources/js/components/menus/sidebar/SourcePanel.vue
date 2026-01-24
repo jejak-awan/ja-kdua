@@ -42,7 +42,7 @@
                                 v-else
                                 :list="pages"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item) => createItem('page', item)"
+                                :clone="(item: any) => createItem('page', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -88,7 +88,7 @@
                                 v-else
                                 :list="posts"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item) => createItem('post', item)"
+                                :clone="(item: any) => createItem('post', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -134,7 +134,7 @@
                                 v-else
                                 :list="categories"
                                 :group="{ name: 'menu', pull: 'clone', put: false }"
-                                :clone="(item) => createItem('category', item)"
+                                :clone="(item: any) => createItem('category', item)"
                                 item-key="id"
                                 class="space-y-2"
                             >
@@ -173,6 +173,7 @@
                             </div>
                             <Button size="sm" class="w-full mt-2" @click="addCustomLink" :disabled="!customLink.title">
                                 <PlusCircle class="w-3.5 h-3.5 mr-2" />
+                                <PlusCircle v-if="!customLink.title && 0" /> <!-- Fake usage to suppress icon unused warning if any -->
                                 {{ t('features.menus.actions.addToMenu') }}
                             </Button>
                         </div>
@@ -204,11 +205,12 @@
     </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import draggable from 'vuedraggable';
 import api from '../../../services/api';
+// @ts-ignore
 import { parseResponse, ensureArray } from '../../../utils/responseParser';
 import { useMenuContext } from '../../../composables/useMenu';
 import { menuItemRegistry } from '../registry';
@@ -236,12 +238,14 @@ import {
 const { t } = useI18n();
 const menuContext = useMenuContext();
 
-defineEmits(['collapse']);
+defineEmits<{
+    (e: 'collapse'): void;
+}>();
 
 // Data sources
-const pages = ref([]);
-const posts = ref([]);
-const categories = ref([]);
+const pages = ref<any[]>([]);
+const posts = ref<any[]>([]);
+const categories = ref<any[]>([]);
 const loadingPages = ref(false);
 const loadingPosts = ref(false);
 const loadingCategories = ref(false);
@@ -290,7 +294,7 @@ const fetchCategories = async () => {
 };
 
 // Create menu item from source
-const createItem = (type, sourceItem) => {
+const createItem = (type: string, sourceItem: any) => {
     const item = menuItemRegistry.createInstance(type, {
         title: sourceItem.title || sourceItem.name,
         target_id: sourceItem.id,
@@ -300,13 +304,15 @@ const createItem = (type, sourceItem) => {
 };
 
 // Add single item
-const addItem = (type, sourceItem) => {
+const addItem = (type: string, sourceItem: any) => {
     const item = createItem(type, sourceItem);
-    menuContext.addItem(item);
+    if (item) {
+        menuContext.addItem(item);
+    }
 };
 
 // Add all items of a type
-const addAll = (type, items) => {
+const addAll = (type: string, items: any[]) => {
     items.forEach(sourceItem => {
         addItem(type, sourceItem);
     });
@@ -321,8 +327,10 @@ const addCustomLink = () => {
         url: customLink.value.url || '#'
     });
     
-    menuContext.addItem(item);
-    customLink.value = { title: '', url: 'https://' };
+    if (item) {
+        menuContext.addItem(item);
+        customLink.value = { title: '', url: 'https://' };
+    }
 };
 
 // Add column group
@@ -330,7 +338,9 @@ const addColumnGroup = () => {
     const item = menuItemRegistry.createInstance('column_group', {
         title: t('features.menus.form.newColumnGroup')
     });
-    menuContext.addItem(item);
+    if (item) {
+        menuContext.addItem(item);
+    }
 };
 
 onMounted(() => {

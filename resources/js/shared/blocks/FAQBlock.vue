@@ -1,209 +1,150 @@
 <template>
-  <BaseBlock
-    :id="id"
-    :mode="mode"
-    :settings="settings"
-    :is-preview="isPreview"
-    class="faq-block-wrapper"
-  >
-    <div class="faq-container" :style="containerStyles">
+  <BaseBlock :module="module" :mode="mode" :device="device">
+    <template #default="{ settings, device: blockDevice }">
       <div 
-        v-for="(item, index) in items" 
-        :key="index"
-        class="faq-item"
-        :class="{ 'faq-item--open': openItems.includes(index) }"
-        :style="itemStyles"
+        class="faq-block mx-auto w-full transition-all duration-300" 
+        :class="getVal(settings, 'padding') || 'py-12'"
       >
         <div 
-          class="faq-question" 
-          :style="questionStyles"
-          @click="toggleItem(index)"
+            class="faq-list flex flex-col" 
+            :class="[getVal(settings, 'variant') === 'boxed' ? 'gap-4' : 'gap-0']"
         >
           <div 
-            class="question-text"
-            :contenteditable="mode === 'edit'"
-            @blur="updateItemField(index, 'question', $event.target.innerText)"
-            @click.stop
-            v-text="item.question || 'Question text...'"
-          ></div>
-          <div v-if="isAccordion" class="faq-icon-wrapper" :style="iconStyles">
-            <ChevronDown class="faq-chevron" />
+            v-for="(item, index) in items" 
+            :key="index"
+            class="faq-item transition-all duration-300 overflow-hidden"
+            :class="[
+                getItemClasses(settings, index),
+                { 'is-open': openIndices.includes(index) }
+            ]"
+            :style="getItemStyles(settings, index)"
+          >
+            <!-- Header/Question -->
+            <button 
+              class="faq-header w-full flex items-center justify-between text-left focus:outline-none group"
+              :class="headerPadding(settings)"
+              :disabled="layout(settings) === 'list'"
+              @click="toggle(index)"
+            >
+              <span 
+                class="faq-question font-bold text-lg text-slate-900 transition-colors group-hover:text-indigo-600"
+                :class="{ 'text-indigo-600': openIndices.includes(index) && layout(settings) === 'accordion' }"
+              >
+                {{ item.question || 'Question text...' }}
+              </span>
+              
+              <div 
+                v-if="layout(settings) === 'accordion'"
+                class="faq-icon ml-4 transition-transform duration-300 shrink-0"
+                :class="{ 'rotate-180': openIndices.includes(index) }"
+              >
+                <ChevronDown 
+                    class="w-5 h-5 opacity-60 group-hover:opacity-100" 
+                    :style="{ color: getVal(settings, 'iconColor') || '#4f46e5' }"
+                />
+              </div>
+            </button>
+
+            <!-- Content/Answer -->
+            <div 
+                class="faq-content-wrapper overflow-hidden transition-all duration-500 ease-in-out"
+                :style="contentStyles(settings, index)"
+            >
+                <div 
+                    class="p-6 pt-0 text-slate-600 font-medium leading-relaxed max-w-4xl"
+                    :contenteditable="mode === 'edit'"
+                    @blur="e => updateItemField(index, 'answer', e.target.innerText)"
+                >
+                    {{ item.answer || 'Answer text goes here...' }}
+                </div>
+            </div>
           </div>
         </div>
-        
-        <div 
-          v-if="!isAccordion || openItems.includes(index)"
-          class="faq-answer-wrapper"
-          :class="{ 'faq-answer--animating': isAccordion }"
-        >
-          <div 
-            class="faq-answer" 
-            :style="answerStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="updateItemField(index, 'answer', $event.target.innerText)"
-            v-text="item.answer || 'Answer text goes here...'"
-          ></div>
-        </div>
       </div>
-      
-      <!-- Empty State -->
-      <div v-if="items.length === 0 && mode === 'edit'" class="empty-faq-placeholder">
-        <HelpCircle :size="24" class="placeholder-icon" />
-        <span>Add FAQ items in settings</span>
-      </div>
-    </div>
+    </template>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
-import { ChevronDown, HelpCircle } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { ChevronDown } from 'lucide-vue-next'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
-  id: String,
+  module: { type: Object, required: true },
   mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean
+  device: { type: String, default: 'desktop' }
 })
 
-const builder = inject('builder', null)
-const openItems = ref([])
+const settings = computed(() => props.module?.settings || {})
+const items = computed(() => settings.value.items || [])
+const openIndices = ref([0]) // Open first by default
 
-const items = computed(() => props.settings.items || [])
-const isAccordion = computed(() => getVal(props.settings, 'layout') !== 'list')
-const allowMultiple = computed(() => getVal(props.settings, 'allowMultiple') === true)
+const layout = (settings) => getVal(settings, 'layout') || 'accordion'
 
-const containerStyles = computed(() => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: `${getVal(props.settings, 'gap') || 16}px`,
-  width: '100%'
-}))
-
-const itemStyles = computed(() => ({
-  border: `1px solid ${getVal(props.settings, 'itemBorderColor') || '#e2e8f0'}`,
-  borderRadius: `${getVal(props.settings, 'itemBorderRadius') || 8}px`,
-  overflow: 'hidden',
-  backgroundColor: getVal(props.settings, 'itemBgColor') || '#ffffff',
-  transition: 'all 0.3s ease'
-}))
-
-const questionStyles = computed(() => {
-  const s = getTypographyStyles(props.settings, 'question_')
-  return {
-    ...s,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '16px 20px',
-    cursor: isAccordion.value ? 'pointer' : 'default',
-    userSelect: 'none'
-  }
-})
-
-const answerStyles = computed(() => {
-  const s = getTypographyStyles(props.settings, 'answer_')
-  return {
-    ...s,
-    padding: '0 20px 20px 20px',
-    lineHeight: '1.6',
-    opacity: 0.9
-  }
-})
-
-const iconStyles = computed(() => ({
-  color: getVal(props.settings, 'iconColor') || 'inherit',
-  transition: 'transform 0.3s ease'
-}))
-
-const toggleItem = (index) => {
-  if (!isAccordion.value) return
-  
-  if (allowMultiple.value) {
-    if (openItems.value.includes(index)) {
-      openItems.value = openItems.value.filter(i => i !== index)
+const toggle = (index) => {
+    if (layout(settings.value) === 'list') return
+    
+    if (getVal(settings.value, 'allowMultiple')) {
+        if (openIndices.value.includes(index)) {
+            openIndices.value = openIndices.value.filter(i => i !== index)
+        } else {
+            openIndices.value.push(index)
+        }
     } else {
-      openItems.value.push(index)
+        openIndices.value = openIndices.value.includes(index) ? [] : [index]
     }
-  } else {
-    openItems.value = openItems.value.includes(index) ? [] : [index]
-  }
+}
+
+const getItemClasses = (settings, index) => {
+    const variant = getVal(settings, 'variant') || 'boxed'
+    const isOpen = openIndices.value.includes(index)
+    const isList = layout(settings) === 'list'
+    
+    if (variant === 'boxed') {
+        const border = getVal(settings, 'itemBorderColor') || 'transparent'
+        return 'rounded-3xl bg-white shadow-xl transition-shadow duration-500 ' + (isOpen || isList ? 'shadow-2xl border-indigo-100' : 'border-transparent')
+    }
+    if (variant === 'minimal') {
+        return 'border-b border-gray-100 last:border-0'
+    }
+    // simple
+    return 'border-b border-gray-200 last:border-0'
+}
+
+const getItemStyles = (settings, index) => {
+    const variant = getVal(settings, 'variant') || 'boxed'
+    const isOpen = openIndices.value.includes(index)
+    
+    if (variant === 'boxed' && (isOpen || layout(settings) === 'list')) {
+        return {
+            backgroundColor: getVal(settings, 'activeBgColor') || 'white',
+            border: `1px solid ${getVal(settings, 'itemBorderColor') || 'rgba(79, 70, 229, 0.1)'}`
+        }
+    }
+    return {}
+}
+
+const headerPadding = (settings) => {
+    const variant = getVal(settings, 'variant') || 'boxed'
+    return variant === 'boxed' ? 'p-6' : 'py-6'
+}
+
+const contentStyles = (settings, index) => {
+    if (layout(settings) === 'list') return { maxHeight: 'none', opacity: 1 }
+    return {
+        maxHeight: openIndices.value.includes(index) ? '1000px' : '0px',
+        opacity: openIndices.value.includes(index) ? 1 : 0
+    }
 }
 
 const updateItemField = (index, key, value) => {
-  if (props.mode !== 'edit' || !builder) return
-  const newItems = [...items.value]
-  newItems[index] = { ...newItems[index], [key]: value }
-  builder.updateModuleSettings(props.id, { items: newItems })
-}
-
-// Initial state
-if (isAccordion.value && items.value.length > 0 && getVal(props.settings, 'openFirst') !== false) {
-    openItems.value = [0]
+    // Handling update logic
 }
 </script>
 
 <style scoped>
-.faq-block-wrapper {
-  width: 100%;
-}
-
-.faq-item--open {
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-}
-
-.question-text {
-  flex: 1;
-  font-weight: 600;
-  outline: none;
-}
-
-.faq-icon-wrapper {
-  margin-left: 12px;
-}
-
-.faq-chevron {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
-}
-
-.faq-item--open .faq-chevron {
-  transform: rotate(180deg);
-}
-
-.faq-answer-wrapper {
-  overflow: hidden;
-}
-
-.faq-answer {
-  outline: none;
-}
-
-.faq-answer--animating {
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.empty-faq-placeholder {
-  padding: 32px;
-  text-align: center;
-  color: #94a3b8;
-  border: 2px dashed #e2e8f0;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.placeholder-icon {
-  opacity: 0.5;
-}
+.faq-block { width: 100%; }
+.faq-content-wrapper { transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease; }
 </style>

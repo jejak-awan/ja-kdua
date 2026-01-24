@@ -44,8 +44,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { 
   ArrowUpDown, 
   ArrowLeftRight, 
@@ -58,14 +59,11 @@ import {
 } from 'lucide-vue-next'
 import { BaseLabel, BaseToggle } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Object,
-    default: () => ({})
-  },
-  module: Object
-})
+const props = defineProps<{
+  field: any;
+  value: Record<string, any>;
+  module: BlockInstance;
+}>()
 
 const emit = defineEmits(['update:value'])
 
@@ -80,7 +78,7 @@ const tabs = [
   { id: 'blur', label: 'Blur', icon: Droplet }
 ]
 
-const localValue = reactive({
+const localValue = reactive<Record<string, any>>({
   vertical: { enabled: false, level: 0 },
   horizontal: { enabled: false, level: 0 },
   scaling: { enabled: false, level: 0 },
@@ -94,7 +92,7 @@ const activeTabLabel = computed(() => {
   return tabs.find(t => t.id === activeTab.value)?.label
 })
 
-const isTabEnabled = (tabId) => {
+const isTabEnabled = (tabId: string) => {
   return localValue[tabId]?.enabled
 }
 

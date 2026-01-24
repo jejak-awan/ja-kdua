@@ -1,51 +1,90 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ styles: wrapperBaseStyles, settings, getAttributes }">
-      <div class="cta-block" :style="ctaBlockStyles">
-        <div class="cta-content" :style="contentStyles">
-          <h2 
-            v-if="title || mode === 'edit'" 
-            class="cta-title" 
-            :style="titleStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('title', e.target.innerText)"
-            v-bind="getAttributes('title')"
-          >
-            {{ title }}
-          </h2>
-          <p 
-            v-if="content || mode === 'edit'" 
-            class="cta-text" 
-            :style="textStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('content', e.target.innerText)"
-            v-bind="getAttributes('content')"
-          >
-            {{ content }}
-          </p>
+  <BaseBlock :module="module" :mode="mode" :device="device">
+    <template #default="{ settings, device: blockDevice }">
+        <div 
+            class="cta-block relative overflow-hidden transition-all duration-300 group" 
+            :class="[
+                getVal(settings, 'radius') || 'rounded-2xl',
+                getVal(settings, 'padding') || 'py-32 px-12'
+            ]"
+            :style="blockStyles(settings)"
+        >
+            <!-- Background Image & Overlay -->
+            <div 
+                v-if="getVal(settings, 'bgImage')"
+                class="absolute inset-0 z-0"
+            >
+                <img 
+                    :src="getVal(settings, 'bgImage')"
+                    class="w-full h-full object-cover"
+                    alt=""
+                />
+                <div 
+                    class="absolute inset-0 bg-black transition-opacity duration-300"
+                    :style="{ opacity: (getVal(settings, 'overlayOpacity') || 0) / 100 }"
+                ></div>
+            </div>
+
+            <!-- Content Wrapper -->
+            <div 
+                class="cta-content relative z-10 w-full"
+                :class="layoutClasses(settings, blockDevice)"
+            >
+                <!-- Text Area -->
+                <div 
+                    class="cta-text-area max-w-3xl"
+                     :class="{ 
+                        'text-center mx-auto': isCenter(settings, blockDevice),
+                        'text-left': !isCenter(settings, blockDevice)
+                    }"
+                >
+                    <h2 
+                        class="cta-title font-bold leading-tight mb-4" 
+                        :style="titleStyles(settings, blockDevice)"
+                        :contenteditable="mode === 'edit'"
+                        @blur="e => updateResponsiveField('title', e.target.innerText)"
+                    >
+                        {{ getVal(settings, 'title', blockDevice) }}
+                    </h2>
+                     <div 
+                        class="cta-subtitle text-lg opacity-90 leading-relaxed" 
+                        :style="{ color: getVal(settings, 'textColor') || '#ffffff' }"
+                        :contenteditable="mode === 'edit'"
+                        @blur="e => updateResponsiveField('subtitle', e.target.innerText)"
+                    >
+                        {{ getVal(settings, 'subtitle', blockDevice) }}
+                    </div>
+                </div>
+
+                <!-- Button Area -->
+                <div 
+                    class="cta-button-area shrink-0"
+                    :class="{ 'mt-8': !isInline(settings, blockDevice) }"
+                >
+                     <a 
+                        :href="getVal(settings, 'buttonUrl') || '#'" 
+                        class="cta-button inline-flex items-center justify-center font-semibold transition-all duration-200"
+                        :class="[
+                            buttonClasses(settings),
+                            'px-8 py-3 rounded-lg hover:transform hover:-translate-y-0.5'
+                        ]"
+                        :contenteditable="mode === 'edit'"
+                        @blur="e => updateResponsiveField('buttonText', e.target.innerText)"
+                        @click="mode === 'edit' ? e.preventDefault() : null"
+                    >
+                        {{ getVal(settings, 'buttonText', blockDevice) || 'Get Started' }}
+                    </a>
+                </div>
+            </div>
         </div>
-        
-        <div class="cta-button-wrapper">
-          <a 
-            :href="settings.buttonUrl || '#'" 
-            :target="settings.buttonTarget || '_self'"
-            class="cta-button"
-            :style="buttonStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('buttonText', e.target.innerText)"
-            @click="mode === 'edit' ? e => e.preventDefault() : undefined"
-            v-bind="getAttributes('button')"
-          >
-            {{ buttonText || 'Get Started' }}
-          </a>
-        </div>
-      </div>
+    </template>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -54,52 +93,65 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const settings = computed(() => props.module?.settings || {})
 
-const title = computed(() => getVal(settings.value, 'title', props.device) || '')
-const content = computed(() => getVal(settings.value, 'content', props.device) || '')
-const buttonText = computed(() => getVal(settings.value, 'buttonText', props.device) || '')
+const blockStyles = (settings) => {
+    const baseColor = getVal(settings, 'bgColor') || '#4f46e5'
+    return {
+        background: `linear-gradient(135deg, ${baseColor}, #7c3aed)`, // Modern Indigo to Violet pulse
+    }
+}
 
-const layout = computed(() => getVal(settings.value, 'layout', props.device) || 'stacked')
-const alignment = computed(() => getVal(settings.value, 'alignment', props.device) || 'center')
+const titleStyles = (settings, device) => {
+    return {
+        color: getVal(settings, 'textColor') || '#ffffff',
+        fontSize: device === 'mobile' ? '36px' : '56px',
+        fontWeight: '900', // Heavy impact
+        letterSpacing: '-0.025em'
+    }
+}
 
-const ctaBlockStyles = computed(() => {
-  return { 
-    width: '100%',
-    display: 'flex',
-    gap: layout.value === 'stacked' ? '24px' : '32px',
-    flexDirection: layout.value === 'stacked' ? 'column' : 'row',
-    alignItems: layout.value === 'inline' ? 'center' : (alignment.value === 'center' ? 'center' : (alignment.value === 'right' ? 'flex-end' : 'flex-start')),
-    textAlign: alignment.value
-  }
-})
+const isCenter = (settings, device) => {
+    const layout = getVal(settings, 'layout', device) || 'stacked-center'
+    return layout === 'stacked-center'
+}
 
-const contentStyles = computed(() => ({
-  flex: layout.value === 'inline' ? 1 : 'none',
-  textAlign: alignment.value
-}))
+const isInline = (settings, device) => {
+    const layout = getVal(settings, 'layout', device) || 'stacked-center'
+    return layout === 'inline' || layout === 'split'
+}
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', props.device))
+const layoutClasses = (settings, device) => {
+    const layout = getVal(settings, 'layout', device) || 'stacked-center'
+    
+    if (layout === 'split') {
+        return 'flex flex-col md:flex-row items-center justify-between gap-8 text-left'
+    }
+    if (layout === 'inline') {
+        return 'flex flex-col md:flex-row items-center justify-center gap-6 text-center md:text-left'
+    }
+    if (layout === 'stacked-left') {
+        return 'flex flex-col items-start text-left'
+    }
+    // Default: stacked-center
+    return 'flex flex-col items-center text-center'
+}
 
-const buttonStyles = computed(() => {
-  const styles = {
-    display: 'inline-block',
-    padding: '12px 28px',
-    backgroundColor: settings.value.buttonBackgroundColor || 'var(--theme-primary-color, #2059ea)',
-    color: settings.value.buttonTextColor || '#ffffff',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer'
-  }
-  Object.assign(styles, getTypographyStyles(settings.value, 'button_', props.device))
-  return styles
-})
+const buttonClasses = (settings) => {
+    const style = getVal(settings, 'buttonStyle') || 'secondary'
+    
+    if (style === 'primary') {
+        return 'bg-primary text-primary-foreground hover:brightness-110 shadow-lg'
+    }
+    if (style === 'outline') {
+        return 'bg-transparent border-2 border-current hover:bg-white/10'
+    }
+    // Default: secondary (White usually on colored bg)
+    return 'bg-white text-gray-900 hover:bg-gray-50 shadow-lg'
+}
 
 const updateResponsiveField = (fieldName, value) => {
   if (props.mode !== 'edit') return
-  const current = settings.value[fieldName]
+  const current = props.module.settings[fieldName]
   let newValue
   if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
     newValue = { ...current, [props.device]: value }
@@ -112,5 +164,4 @@ const updateResponsiveField = (fieldName, value) => {
 
 <style scoped>
 .cta-block { width: 100%; }
-.cta-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0.9; }
 </style>

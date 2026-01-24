@@ -119,7 +119,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, RemoveFormatting,
@@ -129,12 +129,9 @@ import {
 } from 'lucide-vue-next'
 import { BaseDropdown } from '../ui'
 
-const props = defineProps({
-  editor: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  editor: any;
+}>()
 
 const activeNodeName = computed(() => {
   if (props.editor.isActive('heading', { level: 1 })) return 'H1'

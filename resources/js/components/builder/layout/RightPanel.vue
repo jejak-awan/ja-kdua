@@ -9,7 +9,7 @@
           :icon="ChevronsRight" 
           class="panel-collapse-btn"
           @click="$emit('close')" 
-          :title="$t('builder.rightPanel.collapse')" 
+          :title="t('builder.rightPanel.collapse')" 
         />
         <template v-for="(item, index) in modulePath" :key="item.id">
           <button 
@@ -18,7 +18,7 @@
           >
             {{ getModuleTitle(item.type) }}
           </button>
-          <span v-if="index < modulePath.length - 1" class="breadcrumb-separator">›</span>
+          <span v-if="Number(index) < modulePath.length - 1" class="breadcrumb-separator">›</span>
         </template>
       </div>
       
@@ -29,7 +29,7 @@
           :icon="ArrowLeft" 
           size="md" 
           @click="goBack" 
-          :title="$t('builder.rightPanel.back')"
+          :title="t('builder.rightPanel.back')"
         />
         <h3 class="panel-title">{{ moduleTitle }}</h3>
         
@@ -51,7 +51,7 @@
         :class="{ 'panel-tab--active': activeTab === tab.id }"
         @click="activeTab = tab.id"
       >
-        {{ $t('builder.tabs.' + tab.id) }}
+        {{ t('builder.tabs.' + tab.id) }}
       </button>
       
       <div class="panel-tabs-actions">
@@ -64,7 +64,7 @@
               <IconButton 
                 :icon="currentBreakpointIcon" 
                 :active="open" 
-                :title="$t('builder.rightPanel.responsiveMode')" 
+                :title="t('builder.rightPanel.responsiveMode')" 
               />
             </template>
             
@@ -77,12 +77,12 @@
                 @click="selectBreakpoint(bp); close()"
               >
                 <component :is="bp.icon" :size="16" />
-                {{ $t('builder.breakpoints.' + bp.id) }}
+                {{ t('builder.breakpoints.' + bp.id) }}
               </button>
               <BaseDivider :margin="4" />
               <button class="dropdown-item" @click="openSettings($event); close()">
                 <Settings :size="16" />
-                {{ $t('builder.rightPanel.settings') }}
+                {{ t('builder.rightPanel.settings') }}
               </button>
             </template>
           </BaseDropdown>
@@ -95,7 +95,7 @@
     <div class="panel-search">
       <BaseInput 
         v-model="searchQuery"
-        :placeholder="$t('builder.rightPanel.searchPlaceholder')"
+        :placeholder="t('builder.rightPanel.searchPlaceholder')"
         @clear="searchQuery = ''"
       >
         <template #prefix>
@@ -121,6 +121,7 @@
   
   <!-- Responsive Breakpoints Popover -->
   <ResponsiveBreakpointsModal 
+    v-if="showBreakpointsModal"
     :is-open="showBreakpointsModal"
     :trigger-rect="breakpointsTriggerRect"
     @close="showBreakpointsModal = false"
@@ -128,18 +129,19 @@
   />
 </template>
 
-<script setup>
-import { ref, computed, inject, onMounted, onUnmounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library, ChevronsRight } from 'lucide-vue-next'
 import { SETTINGS_TABS } from '../core/constants'
 import ModuleRegistry from '../core/ModuleRegistry'
 import SettingsPanel from '../settings/SettingsPanel.vue'
 import ResponsiveBreakpointsModal from '../modals/ResponsiveBreakpointsModal.vue'
-import { BaseButton, IconButton, BaseInput, BaseDropdown, BaseDivider } from '../ui'
+import { IconButton, BaseInput, BaseDropdown, BaseDivider } from '../ui'
 import DesignPresetsSelector from '../settings/DesignPresetsSelector.vue'
+import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
-const icons = { X, ArrowLeft, Smartphone, ChevronDown, Copy, Search, Monitor, Tablet, MousePointer, Settings, SlidersHorizontal, Check, Library }
+const { t, te } = useI18n()
 
 // Breakpoints config
 const breakpoints = [
@@ -150,30 +152,26 @@ const breakpoints = [
 ]
 
 // Props
-const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  module: BlockInstance
+}>()
 
 // Emits
-defineEmits(['close'])
+defineEmits<{
+  (e: 'close'): void
+}>()
 
 // Inject
-const builder = inject('builder')
-const { t, te } = useI18n()
+const builder = inject<BuilderInstance>('builder') as any
 
 // State
 const activeTab = ref('content')
 const searchQuery = ref('')
-const showResponsive = ref(false)
-const triggerRef = ref(null)
 const showBreakpointsModal = ref(false)
-const breakpointsTriggerRect = ref(null)
+const breakpointsTriggerRect = ref<DOMRect | null>(null)
 
 // Computed
-const modulePath = computed(() => builder?.modulePath || [])
+const modulePath = computed(() => builder?.modulePath?.value || [])
 
 const moduleTitle = computed(() => {
   if (!props.module) return ''
@@ -188,7 +186,7 @@ const moduleTitle = computed(() => {
 })
 
 const currentBreakpoint = computed(() => {
-  return builder?.device || 'desktop'
+  return builder?.device?.value || 'desktop'
 })
 
 const currentBreakpointIcon = computed(() => {
@@ -199,7 +197,7 @@ const currentBreakpointIcon = computed(() => {
 const tabs = Object.values(SETTINGS_TABS)
 
 // Methods
-const getModuleTitle = (type) => {
+const getModuleTitle = (type: string) => {
   if (te(`builder.modules.${type}`)) {
     return t(`builder.modules.${type}`)
   }
@@ -207,43 +205,37 @@ const getModuleTitle = (type) => {
   return def?.title || type
 }
 
-const selectModule = (id) => {
+const selectModule = (id: string) => {
   builder?.selectModule(id)
 }
 
 const goBack = () => {
-  if (modulePath.value.length > 1) {
-    const parentModule = modulePath.value[modulePath.value.length - 2]
+  const path = modulePath.value
+  if (path.length > 1) {
+    const parentModule = path[path.length - 2]
     selectModule(parentModule.id)
   }
 }
 
-const selectBreakpoint = (bp) => {
-  // Update builder responsive mode (currentBreakpoint is computed from builder.device)
+const selectBreakpoint = (bp: { id: string }) => {
   if (builder?.setDeviceMode) {
     builder.setDeviceMode(bp.id)
   }
 }
 
-const openSettings = (event) => {
-  // Capture trigger position for popover
-  const trigger = event?.target?.closest('.dropdown-item') || event?.target
+const openSettings = (event: MouseEvent) => {
+  const trigger = (event?.target as HTMLElement)?.closest('.dropdown-item') || (event?.target as HTMLElement)
   if (trigger) {
     breakpointsTriggerRect.value = trigger.getBoundingClientRect()
   }
   showBreakpointsModal.value = true
 }
 
-const handleBreakpointsSave = (breakpointsData) => {
-  // Save breakpoints to builder or store
-  // Could emit to parent or save to state
+const handleBreakpointsSave = (_breakpointsData: any) => {
+  // Logic to save breakpoints settings
 }
 
-const toggleDeviceView = () => {
-  showResponsive.value = !showResponsive.value
-}
-
-const handlePresetAction = (payload) => {
+const handlePresetAction = (payload: { type: string, data: any }) => {
   const { type, data } = payload
   if (type === 'addNew' || type === 'newFromCurrent') {
     builder?.openSavePresetModal(props.module.id)
@@ -323,23 +315,6 @@ const handlePresetAction = (payload) => {
   gap: 12px;
 }
 
-.panel-back {
-  padding: 6px;
-  background: transparent;
-  border: 1px solid transparent; /* Prevent jump */
-  color: var(--builder-text-secondary);
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.panel-back:hover {
-  background: var(--builder-bg-tertiary);
-  color: var(--builder-text-primary);
-}
-
 .panel-title {
   flex: 1;
   margin: 0;
@@ -347,23 +322,6 @@ const handlePresetAction = (payload) => {
   font-weight: 700;
   color: var(--builder-text-primary);
   letter-spacing: -0.01em;
-}
-
-.panel-responsive {
-  padding: 6px;
-  background: none;
-  border: 1px solid transparent;
-  color: var(--builder-text-muted);
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.panel-responsive:hover,
-.panel-responsive.active {
-  background: var(--builder-bg-tertiary);
-  color: var(--builder-accent);
-  border-color: var(--builder-border);
 }
 
 /* Tabs */
@@ -405,71 +363,11 @@ const handlePresetAction = (payload) => {
   gap: 4px;
 }
 
-.tab-action {
-  padding: 6px;
-  background: none;
-  border: none;
-  color: var(--builder-text-muted);
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tab-action:hover {
-  background: var(--builder-bg-tertiary);
-  color: var(--builder-text-primary);
-}
-
 /* Search */
 .panel-search {
   display: flex;
   align-items: center;
   margin: 16px 20px;
-}
-
-.panel-search:focus-within {
-  border-color: var(--builder-accent);
-  box-shadow: 0 0 0 2px rgba(var(--builder-accent-rgb), 0.1);
-}
-
-.search-icon {
-  color: var(--builder-text-muted);
-  opacity: 0.8;
-}
-
-.search-input {
-  flex: 1;
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--builder-text-primary);
-  font-size: 13px;
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: var(--builder-text-muted);
-  opacity: 0.7;
-}
-
-.search-clear {
-  padding: 2px;
-  background: var(--builder-bg-secondary); /* Contrast against tertiary */
-  border: none;
-  border-radius: 50%;
-  color: var(--builder-text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.search-clear:hover {
-  color: var(--builder-text-primary);
-  background: var(--builder-bg-primary); 
 }
 
 /* Content */
@@ -484,48 +382,7 @@ const handlePresetAction = (payload) => {
   position: relative;
 }
 
-.responsive-dropdown-trigger {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--builder-bg-secondary);
-  border: 1px solid var(--builder-border);
-  border-radius: 4px;
-  color: var(--builder-text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.responsive-dropdown-trigger:hover,
-.responsive-dropdown-trigger.active {
-  background: var(--builder-bg-tertiary);
-  border-color: var(--builder-accent);
-}
-
-.dropdown-chevron {
-  margin-left: 2px;
-  opacity: 0.6;
-}
-
-.responsive-dropdown-menu {
-  min-width: 140px;
-  background: var(--builder-bg-secondary);
-  border: 1px solid var(--builder-border);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  padding: 4px;
-  animation: fadeIn 0.15s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.responsive-dropdown-item {
+.dropdown-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -538,35 +395,17 @@ const handlePresetAction = (payload) => {
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.15s;
+  text-align: left;
 }
 
-.responsive-dropdown-item:hover {
+.dropdown-item:hover {
   background: var(--builder-bg-tertiary);
   color: var(--builder-text-primary);
 }
 
-.responsive-dropdown-item.active {
+.dropdown-item.active {
   background: var(--builder-accent);
   color: white;
-}
-
-.responsive-dropdown-item.active:hover {
-  background: var(--builder-accent);
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: var(--builder-border);
-  margin: 4px 0;
-}
-
-.device-icon-btn {
-  border: 1px solid var(--builder-border);
-}
-
-.device-icon-btn:hover {
-  border-color: var(--builder-accent);
-  color: var(--builder-accent);
 }
 
 @media (max-width: 768px) {
@@ -575,17 +414,11 @@ const handlePresetAction = (payload) => {
     top: var(--toolbar-height);
     bottom: 0;
     right: 0;
-    z-index: 1000; /* Above everything */
-    width: 90% !important; /* Full width or close to it */
+    z-index: 1000;
+    width: 90% !important;
     max-width: 360px;
     box-shadow: var(--shadow-xl);
     border-left: 1px solid var(--builder-border);
   }
 }
 </style>
-
-
-
-
-
-

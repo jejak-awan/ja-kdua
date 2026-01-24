@@ -53,10 +53,10 @@
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        @click="toggleCategory(category)"
+                                        @click="toggleCategory(category as string)"
                                         class="h-7 text-xs"
                                     >
-                                        {{ isCategorySelected(category) ? $t('features.roles.form.deselectAll') : $t('features.roles.form.selectAll') }}
+                                        {{ isCategorySelected(category as string) ? $t('features.roles.form.deselectAll') : $t('features.roles.form.selectAll') }}
                                     </Button>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -68,13 +68,13 @@
                                         <Checkbox
                                             :id="`perm-${permission.id}`"
                                             :checked="form.permissions.includes(permission.name)"
-                                            @update:checked="(checked) => togglePermission(checked, permission.name)"
+                                            @update:checked="(checked: boolean) => togglePermission(checked, permission.name)"
                                         />
                                         <label
                                             :for="`perm-${permission.id}`"
                                             class="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer pt-0.5"
                                         >
-                                            {{ formatPermissionName(permission.name, category) }}
+                                            {{ formatPermissionName(permission.name, category as string) }}
                                         </label>
                                     </div>
                                 </div>
@@ -107,22 +107,30 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { roleSchema } from '../../../schemas';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Card from '../../../components/ui/card.vue';
-import CardHeader from '../../../components/ui/card-header.vue';
-import CardTitle from '../../../components/ui/card-title.vue';
-import CardContent from '../../../components/ui/card-content.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { roleSchema } from '@/schemas';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Input from '@/components/ui/input.vue';
+// @ts-ignore
+import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
+import Card from '@/components/ui/card.vue';
+// @ts-ignore
+import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
+import CardTitle from '@/components/ui/card-title.vue';
+// @ts-ignore
+import CardContent from '@/components/ui/card-content.vue';
 import { ArrowLeft, Check, Loader2 } from 'lucide-vue-next';
+import type { Permission } from '@/types/auth';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -131,9 +139,12 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(ro
 
 const saving = ref(false);
 const loadingPermissions = ref(false);
-const permissions = ref({});
+const permissions = ref<Record<string, Permission[]>>({});
 
-const form = ref({
+const form = ref<{
+    name: string;
+    permissions: string[];
+}>({
     name: '',
     permissions: []
 });
@@ -147,17 +158,18 @@ const groupedPermissions = computed(() => permissions.value);
 const fetchPermissions = async () => {
     loadingPermissions.value = true;
     try {
-        const response = await api.get('/admin/ja/roles/permissions');
+        const response: any = await api.get('/admin/ja/roles/permissions');
+        // Structure is usually { data: { Category: [{...}] } } or direct object
         permissions.value = response.data?.data || response.data || {};
     } catch (error) {
         console.error('Failed to fetch permissions:', error);
-        toast.error(t('common.messages.error.generic'));
+        toast.error.action(t('common.messages.error.generic'));
     } finally {
         loadingPermissions.value = false;
     }
 };
 
-const toggleCategory = (category) => {
+const toggleCategory = (category: string) => {
     const categoryPerms = permissions.value[category] || [];
     const categoryNames = categoryPerms.map(p => p.name);
     const allSelected = categoryNames.every(name => form.value.permissions.includes(name));
@@ -170,13 +182,13 @@ const toggleCategory = (category) => {
     }
 };
 
-const isCategorySelected = (category) => {
+const isCategorySelected = (category: string) => {
     const categoryPerms = permissions.value[category] || [];
     if (categoryPerms.length === 0) return false;
     return categoryPerms.every(p => form.value.permissions.includes(p.name));
 };
 
-const togglePermission = (checked, permissionName) => {
+const togglePermission = (checked: boolean, permissionName: string) => {
     if (checked) {
         if (!form.value.permissions.includes(permissionName)) {
             form.value.permissions.push(permissionName);
@@ -186,7 +198,7 @@ const togglePermission = (checked, permissionName) => {
     }
 };
 
-const formatPermissionName = (name, category) => {
+const formatPermissionName = (name: string, category: string) => {
     if (!name || !category) return name;
     // Special case for 'manage X' vs 'X' category
     const lowerName = name.toLowerCase();
@@ -210,7 +222,7 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/roles', form.value);
         toast.success.create('Role');
         router.push({ name: 'roles' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

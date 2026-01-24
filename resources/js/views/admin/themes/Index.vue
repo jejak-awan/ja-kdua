@@ -290,7 +290,7 @@ const activateTheme = async (theme) => {
     if (!confirmed) return;
 
     try {
-        await api.post(`/admin/ja/themes/${theme.id}/activate`);
+        await api.post(`/admin/ja/themes/${theme.slug}/activate`);
         await fetchThemes();
         toast.success(t('features.themes.messages.activateSuccess'));
     } catch (error) {
@@ -301,7 +301,7 @@ const activateTheme = async (theme) => {
 
 const validateTheme = async (theme) => {
     try {
-        const response = await api.post(`/admin/ja/themes/${theme.id}/validate`);
+        const response = await api.post(`/admin/ja/themes/${theme.slug}/validate`);
         const data = response.data?.data || response.data;
         
         if (data.valid) {

@@ -178,7 +178,7 @@ const insertTemplate = async (template) => {
             }
             regenerateAll(blocks)
             
-            builder.blocks = blocks
+            builder.blocks.value = blocks
             builder.takeSnapshot()
         }
         return
@@ -186,17 +186,18 @@ const insertTemplate = async (template) => {
 
     // Handle Section Templates (Insertion)
     const block = cloneTemplate(template)
-    if (!builder.blocks) builder.blocks = []
+    // Access the value of the computed ref
+    if (!builder.blocks.value) builder.blocks.value = []
     
-    let index = builder.blocks.length
-    if (builder.selectedModuleId) {
-        const selIndex = builder.blocks.findIndex(b => b.id === builder.selectedModuleId)
+    let index = builder.blocks.value.length
+    if (builder.selectedModuleId.value) {
+        const selIndex = builder.blocks.value.findIndex(b => b.id === builder.selectedModuleId.value)
         if (selIndex !== -1) {
             index = selIndex + 1
         }
     }
     
-    builder.blocks.splice(index, 0, block)
+    builder.blocks.value.splice(index, 0, block)
     builder.takeSnapshot()
     builder.selectModule(block.id)
     

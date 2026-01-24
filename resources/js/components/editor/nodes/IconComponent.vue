@@ -22,28 +22,16 @@
     </node-view-wrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onUnmounted } from 'vue';
-import { NodeViewWrapper } from '@tiptap/vue-3';
+import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import * as LucideIcons from 'lucide-vue-next';
 
-const props = defineProps({
-    node: {
-        type: Object,
-        required: true,
-    },
-    updateAttributes: {
-        type: Function,
-        required: true,
-    },
-    selected: {
-        type: Boolean,
-        default: false,
-    }
-});
+const props = defineProps(nodeViewProps)
 
 const iconComponent = computed(() => {
     const name = props.node.attrs.name;
+    // @ts-ignore
     return LucideIcons[name] || LucideIcons.Circle;
 });
 
@@ -72,7 +60,7 @@ const isResizing = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
 
-const startResize = (event) => {
+const startResize = (event: MouseEvent) => {
     isResizing.value = true;
     startX.value = event.clientX;
     
@@ -94,7 +82,7 @@ const startResize = (event) => {
     document.addEventListener('mouseup', stopResize);
 };
 
-const onResize = (event) => {
+const onResize = (event: MouseEvent) => {
     if (!isResizing.value) return;
     
     const diff = event.clientX - startX.value;

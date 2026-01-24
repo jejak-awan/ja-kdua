@@ -67,9 +67,9 @@ import { BaseInput } from '../../ui'
 
 const { t } = useI18n()
 const builder = inject('builder')
-const pages = computed(() => builder?.pages || [])
-const currentPageId = computed(() => builder?.currentPageId)
-const loading = computed(() => builder?.pagesLoading || false)
+const pages = computed(() => builder?.pages?.value || [])
+const currentPageId = computed(() => builder?.currentPageId?.value)
+const loading = computed(() => builder?.pagesLoading?.value || false)
 
 const searchQuery = ref('')
 

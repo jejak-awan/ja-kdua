@@ -72,26 +72,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
 import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Array,
-    default: () => []
-  },
-  module: Object
-})
+interface AttributeItem {
+  name: string;
+  value: string;
+}
+
+const props = defineProps<{
+  field: any;
+  value: AttributeItem[];
+  module?: any;
+}>()
 
 const emit = defineEmits(['update:value'])
 
-const localValue = ref([...(props.value || [])])
+const localValue = ref<AttributeItem[]>([...(props.value || [])])
 const isPickerOpen = ref(false)
-const pickerRect = ref(null)
-const pickerTrigger = ref(null)
+const pickerRect = ref<DOMRect | undefined>(undefined)
+const pickerTrigger = ref<HTMLElement | null>(null)
 const editingIndex = ref(-1)
 
 const presetOptions = [
@@ -101,11 +104,11 @@ const presetOptions = [
 const togglePicker = () => {
   isPickerOpen.value = !isPickerOpen.value
   if (isPickerOpen.value && pickerTrigger.value) {
-    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
+    pickerRect.value = (pickerTrigger.value as HTMLElement).getBoundingClientRect()
   }
 }
 
-const selectPreset = (name) => {
+const selectPreset = (name: string) => {
   addAttribute(name)
   isPickerOpen.value = false
 }
@@ -115,19 +118,19 @@ const startCustomEntry = () => {
   isPickerOpen.value = false
 }
 
-const addAttribute = (name) => {
+const addAttribute = (name: string) => {
   localValue.value.push({ name, value: '' })
   updateValue()
   editingIndex.value = localValue.value.length - 1
 }
 
-const removeAttribute = (index) => {
+const removeAttribute = (index: number) => {
   localValue.value.splice(index, 1)
   updateValue()
   if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const toggleEdit = (index) => {
+const toggleEdit = (index: number) => {
   editingIndex.value = editingIndex.value === index ? -1 : index
 }
 

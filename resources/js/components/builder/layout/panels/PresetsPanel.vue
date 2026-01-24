@@ -79,8 +79,8 @@ const builder = inject('builder')
 const icons = { Star, Check, Trash, ChevronDown, ChevronRight, Plus }
 
 // builder.presets is already a reactive Proxy, not a ref - don't use .value
-const presets = computed(() => builder?.presets || [])
-const loading = computed(() => builder?.loadingPresets || false)
+const presets = computed(() => builder?.presets?.value || [])
+const loading = computed(() => builder?.loadingPresets?.value || false)
 
 // Accordion state - single open behavior
 const activeType = ref(null)

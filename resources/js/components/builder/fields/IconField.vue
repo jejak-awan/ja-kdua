@@ -44,31 +44,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, inject } from 'vue'
+import type { BuilderInstance } from '../../../types/builder'
 import { Search, Plus, Maximize2 } from 'lucide-vue-next'
 import { BaseInput, BaseButton } from '../ui'
 import LucideIcon from '../../ui/LucideIcon.vue'
-import { commonIcons, allIcons } from '../core/assets/icons'
+import { commonIcons, allIcons } from '../../../shared/assets/icons'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  },
-  placeholderValue: {
-    type: String,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: string;
+  placeholderValue?: string | null;
+}>()
 
 const emit = defineEmits(['update:value'])
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 const searchQuery = ref('')
 
 const activeValue = computed(() => props.value || props.placeholderValue)
@@ -89,12 +81,12 @@ const filteredIcons = computed(() => {
   ).slice(0, 25)
 })
 
-const selectIcon = (iconName) => {
+const selectIcon = (iconName: string) => {
   emit('update:value', iconName)
 }
 
 const openModal = () => {
-  builder?.openIconPickerModal(activeValue.value, (iconName) => {
+  builder?.openIconPickerModal(activeValue.value, (iconName: string) => {
     selectIcon(iconName)
   })
 }

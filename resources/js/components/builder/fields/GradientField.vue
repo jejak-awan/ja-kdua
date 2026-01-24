@@ -288,7 +288,7 @@
                 <input 
                   type="number" 
                   :value="parseInt(localSettings.length) || 100" 
-                  @input="updateControl('length', $event.target.value + '%')"
+                  @input="updateControl('length', ($event.target as HTMLInputElement).value + '%')"
                   class="base-input w-full pr-8"
                 />
                 <div class="input-spinners-inline">
@@ -319,8 +319,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, inject, watch, nextTick } from 'vue'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { Plus, Trash2, Copy, ChevronUp, ChevronDown, RotateCcw } from 'lucide-vue-next'
 import ColorField from './ColorField.vue'
@@ -328,23 +329,23 @@ import SelectField from './SelectField.vue'
 import ToggleField from './ToggleField.vue'
 import { IconButton, BaseSlider, BaseDropdown } from '../ui'
 import FieldActions from './FieldActions.vue'
-import { generateGradientCSS, getHarmoniousGradientColors } from '../core/styleUtils'
+import { generateGradientCSS, getHarmoniousGradientColors } from '../../../shared/utils/styleUtils'
 
-const props = defineProps({
-  field: { type: Object, required: true },
-  value: { type: [Object, String], default: null },
-  placeholderValue: { type: [Object, String], default: null },
-  module: { type: Object, required: true },
-  minimal: { type: Boolean, default: false },
-  hidePreview: { type: Boolean, default: false }
-})
+const props = defineProps<{
+  field: any;
+  value?: any;
+  placeholderValue?: any;
+  module: any;
+  minimal?: boolean;
+  hidePreview?: boolean;
+}>()
 
 const { t } = useI18n()
 const emit = defineEmits(['update:value', 'responsive'])
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
 const sliderRef = ref(null)
-const activeColorFieldRef = ref(null)
+const activeColorFieldRef = ref<any>(null)
 const activeStopIndex = ref(0)
 const isDragging = ref(false)
 const isHovered = ref(false)
@@ -382,19 +383,19 @@ const isDirectionDirty = computed(() => {
     return (localSettings.value.direction || '180deg') !== '180deg'
 })
 
-const handleDirectionNumberInput = (e) => {
+const handleDirectionNumberInput = (e: any) => {
     updateControl('direction', e.target.value + directionUnit.value)
 }
 
-const updateDirectionValue = (delta) => {
+const updateDirectionValue = (delta: number) => {
     updateControl('direction', (directionValue.value + delta) + directionUnit.value)
 }
 
-const updateDirectionValueFromSlider = (val) => {
+const updateDirectionValueFromSlider = (val: number) => {
     updateControl('direction', val + directionUnit.value)
 }
 
-const setDirectionUnit = (unit) => {
+const setDirectionUnit = (unit: string) => {
     let finalUnit = unit === 'css var' ? 'var(--direction)' : unit
     if (['inherit', 'unset'].includes(unit)) {
         updateControl('direction', unit)
@@ -403,8 +404,8 @@ const setDirectionUnit = (unit) => {
     }
 }
 
-const updateLengthValue = (delta) => {
-    let current = parseInt(localSettings.value.length) || 100
+const updateLengthValue = (delta: number) => {
+    let current = parseInt((localSettings.value as any).length) || 100
     let newVal = Math.max(0, Math.min(100, current + delta))
     updateControl('length', newVal + '%')
 }
@@ -458,8 +459,8 @@ const placeholderCSS = computed(() => {
 })
 
 const trackCSS = computed(() => {
-    const stops = [...localStops.value].sort((a, b) => a.position - b.position)
-    const stopString = stops.map(s => `${s.color} ${s.position}%`).join(', ')
+    const stops = [...localStops.value].sort((a: any, b: any) => a.position - b.position)
+    const stopString = stops.map((s: any) => `${s.color} ${s.position}%`).join(', ')
     return `linear-gradient(to right, ${stopString})`
 })
 
@@ -467,15 +468,15 @@ const emitUpdate = () => {
   emit('update:value', { ...localSettings.value })
 }
 
-const updateStopColor = (color) => {
+const updateStopColor = (color: string) => {
   if (activeStop.value) {
     activeStop.value.color = color
     emitUpdate()
   }
 }
 
-const updateControl = (key, val) => {
-  localSettings.value[key] = val
+const updateControl = (key: string, val: any) => {
+  (localSettings.value as any)[key] = val
   emitUpdate()
 }
 
@@ -486,8 +487,8 @@ const clearGradient = () => {
 
 const initDefaultGradient = () => {
     // Standard addition logic (copying from BackgroundField)
-    const colors = builder.globalVariables?.globalColors || []
-    const baseColor = colors.find(c => c.name.toLowerCase().includes('primary'))?.value || '#2EA3F2'
+    const colors: any[] = builder?.globalVariables?.globalColors || []
+    const baseColor = colors.find((c: any) => c.name.toLowerCase().includes('primary'))?.value || '#2EA3F2'
     
     const [c1, c2] = getHarmoniousGradientColors(baseColor)
 
@@ -509,10 +510,10 @@ const initDefaultGradient = () => {
 const duplicateGradient = () => {
     // Implement Duplication as Mirroring for immediate visual change in the same box
     const duplicated = JSON.parse(JSON.stringify(localSettings.value))
-    duplicated.stops = duplicated.stops.map(s => ({
+    duplicated.stops = (duplicated.stops as any[]).map((s: any) => ({
         ...s,
         position: 100 - s.position
-    })).sort((a,b) => a.position - b.position)
+    })).sort((a: any, b: any) => a.position - b.position)
     
     // Update local state immediately for instant visual feedback
     localSettings.value = duplicated
@@ -520,14 +521,14 @@ const duplicateGradient = () => {
     emit('update:value', duplicated)
 }
 
-const handleStopClick = (index) => {
+const handleStopClick = (index: number) => {
     activeStopIndex.value = index
     nextTick(() => {
         activeColorFieldRef.value?.openPicker()
     })
 }
 
-const updatePosition = (delta) => {
+const updatePosition = (delta: number) => {
     if (!activeStop.value) return
     let newPos = (activeStop.value.position || 0) + delta
     newPos = Math.max(0, Math.min(100, newPos))
@@ -535,11 +536,11 @@ const updatePosition = (delta) => {
     emitUpdate()
 }
 
-const addStopAtClick = (e) => {
+const addStopAtClick = (e: MouseEvent) => {
   if (isDragging.value) return
   
-  const rect = sliderRef.value.getBoundingClientRect()
-  const x = e.clientX - rect.left
+  const rect = (sliderRef.value as unknown as HTMLElement).getBoundingClientRect()
+  const x = (e as MouseEvent).clientX - rect.left
   const position = Math.round((x / rect.width) * 100)
   
   // Find color at this position (linear interpolation)
@@ -554,14 +555,14 @@ const addStopAtClick = (e) => {
   emitUpdate()
 }
 
-const removeStop = (index) => {
+const removeStop = (index: number) => {
   if (localStops.value.length <= 2) return
   localSettings.value.stops.splice(index, 1)
   activeStopIndex.value = Math.max(0, index - 1)
   emitUpdate()
 }
 
-const getColorAtPosition = (pos) => {
+const getColorAtPosition = (pos: number) => {
     // Very simple interpolation for now or just take nearest?
     // Let's just find the two nearest stops
     const stops = [...localStops.value].sort((a, b) => a.position - b.position)
@@ -585,7 +586,7 @@ const getColorAtPosition = (pos) => {
 // Drag logic
 let dragStartIndex = -1
 
-const startDrag = (e, index) => {
+const startDrag = (e: MouseEvent, index: number) => {
   isDragging.value = true
   dragStartIndex = index
   activeStopIndex.value = index
@@ -594,11 +595,11 @@ const startDrag = (e, index) => {
   window.addEventListener('mouseup', endDrag)
 }
 
-const onDrag = (e) => {
+const onDrag = (e: MouseEvent) => {
   if (!isDragging.value) return
   
-  const rect = sliderRef.value.getBoundingClientRect()
-  let x = e.clientX - rect.left
+  const rect = (sliderRef.value as unknown as HTMLElement).getBoundingClientRect()
+  let x = (e as MouseEvent).clientX - rect.left
   let position = Math.round((x / rect.width) * 100)
   
   position = Math.max(0, Math.min(100, position))

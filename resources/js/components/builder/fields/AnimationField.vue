@@ -83,35 +83,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { PlayCircle } from 'lucide-vue-next'
 import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Object,
-    default: () => ({
-      effect: '',
-      duration: 1000,
-      delay: 0,
-      repeat: 'once',
-      curve: 'ease'
-    })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+interface AnimationState {
+  effect: string;
+  duration: number;
+  delay: number;
+  repeat: string;
+  curve: string;
+}
+
+const props = defineProps<{
+  field: any;
+  value: AnimationState;
+  placeholderValue?: AnimationState | null;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
 
 // Local state
-const localValue = reactive({ 
+const localValue = reactive<AnimationState>({ 
     effect: '',
     duration: 1000,
     delay: 0,
@@ -122,8 +118,9 @@ const localValue = reactive({
 watch(() => props.value, (newVal) => {
     if (newVal) {
         Object.keys(localValue).forEach(key => {
-            if (newVal[key] !== undefined) {
-                localValue[key] = newVal[key]
+            const k = key as keyof AnimationState
+            if (newVal[k] !== undefined) {
+                (localValue as any)[k] = newVal[k]
             }
         })
     }

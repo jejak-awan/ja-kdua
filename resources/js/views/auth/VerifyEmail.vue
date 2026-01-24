@@ -57,7 +57,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -72,12 +72,12 @@ const messageType = ref('');
 const loading = ref(false);
 const verified = ref(false);
 const resendCooldown = ref(0);
-let cooldownInterval = null;
+let cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
     // Check if there's a verification token in the URL
     if (route.query.token && route.query.email) {
-        await handleVerify(route.query.token, route.query.email);
+        await handleVerify(route.query.token as string, route.query.email as string);
     }
 });
 
@@ -87,7 +87,7 @@ onUnmounted(() => {
     }
 });
 
-const handleVerify = async (token, email) => {
+const handleVerify = async (token: string, email: string) => {
     loading.value = true;
     message.value = '';
     messageType.value = '';
@@ -110,7 +110,7 @@ const handleVerify = async (token, email) => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error) {
+    } catch (error: any) {
         message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
         messageType.value = 'error';
     } finally {
@@ -138,7 +138,7 @@ const handleResend = async () => {
             cooldownInterval = setInterval(() => {
                 resendCooldown.value--;
                 if (resendCooldown.value <= 0) {
-                    clearInterval(cooldownInterval);
+                    if (cooldownInterval) clearInterval(cooldownInterval);
                     cooldownInterval = null;
                 }
             }, 1000);
@@ -146,7 +146,7 @@ const handleResend = async () => {
             message.value = response.data.message || t('features.auth.verifyEmail.failed');
             messageType.value = 'error';
         }
-    } catch (error) {
+    } catch (error: any) {
         message.value = error.response?.data?.message || t('features.auth.verifyEmail.failed');
         messageType.value = 'error';
     } finally {

@@ -9,7 +9,7 @@
                 @blur="handleBlur"
                 @input="handleInput"
                 class="base-input w-full pr-8"
-                :placeholder="placeholderValue || '0'"
+                :placeholder="(placeholderValue as string) || '0'"
             />
             <div class="input-spinners-inline">
                 <button class="spinner-inline-btn" @click="updateNumericValue(step)">
@@ -59,13 +59,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ChevronUp, ChevronDown } from 'lucide-vue-next'
 import { BaseSlider, BaseDropdown } from '../ui'
 
 const props = defineProps({
-  field: { type: Object, default: () => ({}) },
+  field: { type: Object as () => any, default: () => ({}) },
   value: { type: [String, Number], default: '' },
   placeholderValue: { type: [String, Number], default: null }
 })
@@ -91,7 +91,7 @@ const currentOptionLabel = computed(() => {
 })
 
 // Parse initial value
-const parseValue = (val) => {
+const parseValue = (val: any) => {
     if (val === null || val === undefined || val === '') {
         currentOption.value = 'default'
         numericValue.value = 0
@@ -127,8 +127,8 @@ const displayValue = computed({
         }
         return numericValue.value
     },
-    set: (val) => {
-        const num = parseFloat(val)
+    set: (val: any) => {
+        const num = parseFloat(val as string)
         if (!isNaN(num)) {
             numericValue.value = num
             currentOption.value = 'default'
@@ -137,7 +137,7 @@ const displayValue = computed({
     }
 })
 
-const handleInput = (e) => {
+const handleInput = (e: Event) => {
     // Basic validation could be added here
 }
 
@@ -146,19 +146,19 @@ const handleBlur = () => {
     emitUpdate()
 }
 
-const updateNumericValue = (delta) => {
+const updateNumericValue = (delta: number) => {
     numericValue.value += delta
     currentOption.value = 'default'
     emitUpdate()
 }
 
-const updateValueFromSlider = (val) => {
+const updateValueFromSlider = (val: number) => {
     numericValue.value = val
     currentOption.value = 'default'
     emitUpdate()
 }
 
-const setOption = (opt) => {
+const setOption = (opt: string) => {
     currentOption.value = opt
     if (opt === 'default') {
         emitUpdate()

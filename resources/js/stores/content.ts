@@ -1,0 +1,35 @@
+import { defineStore } from 'pinia';
+import api from '@/services/api';
+
+interface ContentState {
+    currentContent: any | null; // Replace 'any' with specific Content interface if available
+    loading: boolean;
+}
+
+export const useContentStore = defineStore('content', {
+    state: (): ContentState => ({
+        currentContent: null,
+        loading: false,
+    }),
+
+    actions: {
+        async fetchContent(slug: string) {
+            this.loading = true;
+            try {
+                // Determine endpoint based on type? 
+                // Currently code uses /cms/contents/{slug} generic endpoint
+                const response = await api.get(`/cms/contents/${slug}`);
+                this.currentContent = response.data.data || response.data;
+            } catch (e) {
+                console.error('Failed to fetch content:', e);
+                this.currentContent = null;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        clearContent() {
+            this.currentContent = null;
+        }
+    }
+});

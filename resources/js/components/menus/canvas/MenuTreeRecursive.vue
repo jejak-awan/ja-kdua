@@ -25,38 +25,36 @@
     </draggable>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import draggable from 'vuedraggable';
 import { useMenuContext } from '../../../composables/useMenu';
 import MenuItemWrapper from './MenuItemWrapper.vue';
+import type { MenuItem } from '../../../types/menu';
 
 const menuContext = useMenuContext();
 
-const props = defineProps({
-    items: {
-        type: Array,
-        default: () => []
-    },
-    depth: {
-        type: Number,
-        default: 0
-    },
-    maxDepth: {
-        type: Number,
-        default: 5
-    }
+const props = withDefaults(defineProps<{
+    items: MenuItem[];
+    depth?: number;
+    maxDepth?: number;
+}>(), {
+    items: () => [],
+    depth: 0,
+    maxDepth: 5
 });
 
-const emit = defineEmits(['update']);
+const emit = defineEmits<{
+    (e: 'update', items: MenuItem[]): void;
+}>();
 
-const getItemKey = (item) => item.id || item._temp_id || Math.random();
+const getItemKey = (item: MenuItem) => item.id || item._temp_id || Math.random();
 
 const handleChange = () => {
     emit('update', props.items);
     menuContext.takeSnapshot();
 };
 
-const handleChildUpdate = (parent, newChildren) => {
+const handleChildUpdate = (parent: MenuItem, newChildren: MenuItem[]) => {
     parent.children = newChildren;
     menuContext.takeSnapshot();
 };

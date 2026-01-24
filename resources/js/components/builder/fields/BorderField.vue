@@ -87,7 +87,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Link2, CornerUpLeft, BoxSelect, Square, ArrowUp, ArrowRight, ArrowDown, ArrowLeft } from 'lucide-vue-next'
@@ -100,26 +100,14 @@ import {
 } from '../ui'
 import ColorField from './ColorField.vue'
 
-const props = defineProps({
-  field: Object,
+const props = defineProps<{
+  field: any;
   value: {
-    type: Object,
-    default: () => ({
-      radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
-      styles: {
-        all: { width: 0, color: '#333333', style: 'solid' },
-        top: { width: 0, color: '#333333', style: 'solid' },
-        right: { width: 0, color: '#333333', style: 'solid' },
-        bottom: { width: 0, color: '#333333', style: 'solid' },
-        left: { width: 0, color: '#333333', style: 'solid' }
-      }
-    })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+    radius: { tl: number | string; tr: number | string; bl: number | string; br: number | string; linked: boolean };
+    styles: Record<string, { width: number | string; color: string; style: string }>;
+  };
+  placeholderValue?: any;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
@@ -148,8 +136,8 @@ const mappedSides = computed(() => {
 const activeSide = ref('all')
 
 // Internal models
-const radius = reactive({ tl: 0, tr: 0, bl: 0, br: 0, linked: true })
-const styles = reactive({
+const radius = reactive<Record<string, any>>({ tl: 0, tr: 0, bl: 0, br: 0, linked: true })
+const styles = reactive<Record<string, any>>({
     all: { width: 0, color: '#333333', style: 'solid' },
     top: { width: 0, color: '#333333', style: 'solid' },
     right: { width: 0, color: '#333333', style: 'solid' },
@@ -170,7 +158,7 @@ const currentStyle = computed(() => {
 })
 
 // Updates
-const updateRadius = (corner) => {
+const updateRadius = (corner: string) => {
     if(radius.linked) {
         const val = radius[corner]
         radius.tl = radius.tr = radius.bl = radius.br = val
@@ -187,7 +175,7 @@ const toggleRadiusLink = () => {
     }
 }
 
-const updateStyle = (prop, val) => {
+const updateStyle = (prop: string, val?: any) => {
     if(activeSide.value === 'all') {
          ['top','right','bottom','left'].forEach(s => {
              styles[s][prop] = styles.all[prop]

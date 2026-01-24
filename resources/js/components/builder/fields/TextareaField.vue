@@ -7,20 +7,14 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { BaseInput } from '../ui'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: string;
+}>()
 
 const emit = defineEmits(['update:value'])
 

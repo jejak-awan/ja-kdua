@@ -91,27 +91,33 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, inject, computed } from 'vue'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { Plus, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
 import { BaseButton, IconButton, BaseLabel, BasePopover } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Array,
-    default: () => []
-  },
-  module: Object
-})
+interface InteractionItem {
+  trigger: string;
+  action: string;
+  targetId: string;
+  className?: string;
+  animationName?: string;
+}
+
+const props = defineProps<{
+  field: any;
+  value: InteractionItem[];
+  module: BlockInstance;
+}>()
 
 const emit = defineEmits(['update:value'])
 
-const builder = inject('builder')
-const localValue = ref([...(props.value || [])])
+const builder = inject<BuilderInstance>('builder')
+const localValue = ref<InteractionItem[]>([...(props.value || [])])
 const isPickerOpen = ref(false)
-const pickerRect = ref(null)
-const pickerTrigger = ref(null)
+const pickerRect = ref<DOMRect | undefined>(undefined)
+const pickerTrigger = ref<HTMLElement | null>(null)
 const editingIndex = ref(-1)
 
 const triggers = [
@@ -132,31 +138,31 @@ const availableActions = [
 const allModules = computed(() => {
     // Collect all modules from builder for target selection
     if (!builder?.allModules) return []
-    return builder.allModules.value.filter(m => m.id !== props.module.id)
+    return builder.allModules.value.filter((m: BlockInstance) => m.id !== props.module.id)
 })
 
-const getInteractionLabel = (id) => {
+const getInteractionLabel = (id: string) => {
   return triggers.find(t => t.id === id)?.label || id
 }
 
-const getActionLabel = (id) => {
+const getActionLabel = (id: string) => {
     return availableActions.find(a => a.id === id)?.label || id || '(no action)'
 }
 
-const getTargetLabel = (id) => {
+const getTargetLabel = (id: string) => {
     if (id === props.module.id) return 'Self'
-    const m = builder?.allModules?.value.find(mod => mod.id === id)
+    const m = builder?.allModules?.value.find((mod: BlockInstance) => mod.id === id)
     return m ? (m.title || m.type) : id.substring(0, 8)
 }
 
 const togglePicker = () => {
   isPickerOpen.value = !isPickerOpen.value
   if (isPickerOpen.value && pickerTrigger.value) {
-    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
+    pickerRect.value = (pickerTrigger.value as HTMLElement).getBoundingClientRect()
   }
 }
 
-const selectTrigger = (trigger) => {
+const selectTrigger = (trigger: string) => {
   localValue.value.push({ 
     trigger, 
     action: 'toggle-class', 
@@ -168,13 +174,13 @@ const selectTrigger = (trigger) => {
   editingIndex.value = localValue.value.length - 1
 }
 
-const removeInteraction = (index) => {
+const removeInteraction = (index: number) => {
   localValue.value.splice(index, 1)
   updateValue()
   if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const toggleEdit = (index) => {
+const toggleEdit = (index: number) => {
   editingIndex.value = editingIndex.value === index ? -1 : index
 }
 

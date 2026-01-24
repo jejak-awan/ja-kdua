@@ -1,6 +1,6 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="row-block">
-    <div class="row-inner flex flex-wrap w-full" :style="rowStyles">
+    <div class="row-inner flex flex-wrap w-full h-full" :style="rowStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
@@ -49,27 +49,45 @@ const device = computed(() => builder?.device || 'desktop')
 const BlockRenderer = inject('BlockRenderer', null)
 
 const rowStyles = computed(() => {
-    const gap = getResponsiveValue(settings.value, 'gap', device.value) || 20
-    const align = getResponsiveValue(settings.value, 'alignItems', device.value) || 'stretch'
-    const justify = getResponsiveValue(settings.value, 'justifyContent', device.value) || 'flex-start'
+    const vAlign = getResponsiveValue(settings.value, 'verticalAlign', device.value) || 'stretch'
+    const gutter = getResponsiveValue(settings.value, 'gutter', device.value) || 0
+    const layout = getResponsiveValue(settings.value, 'columns', device.value) || '1-1'
     
-    // We use CSS variables so the inner draggable container can inherit them
-    return {
-        '--row-gap': `${gap}px`,
-        '--row-align': align,
-        '--row-justify': justify,
-        gap: 'var(--row-gap)',
+    // Parse parts for CSS injection
+    const parts = layout.split('-').map(Number)
+    const totalParts = parts.reduce((a, b) => a + b, 0)
+    
+    const styles = {
+        '--row-align': vAlign === 'start' ? 'flex-start' : (vAlign === 'end' ? 'flex-end' : vAlign),
+        '--row-gutter': `${gutter}px`,
         alignItems: 'var(--row-align)',
-        justifyContent: 'var(--row-justify)'
+        gap: 'var(--row-gutter)',
+        justifyContent: 'flex-start',
+        width: '100%',
+        height: '100%'
     }
+
+    // Inject column widths as CSS variables for deep selection
+    const numColsOnCanvas = props.nestedBlocks.length
+    if (numColsOnCanvas === 1) {
+        styles['--col-width-0'] = '100%'
+    } else {
+        parts.forEach((p, i) => {
+            const percentage = (p / totalParts) * 100
+            const reduction = gutter > 0 && parts.length > 1 ? (gutter * (parts.length - 1)) / parts.length : 0
+            styles[`--col-width-${i}`] = `calc(${percentage}% - ${reduction}px)`
+        })
+    }
+
+    return styles
 })
 
 const getColumnStyles = (index) => {
-    // Basic auto-width columns for now, 
-    // real logic would calculate based on settings.layout
+    // Renderer mode uses this directly
     return {
-        flex: '1 1 0%',
-        minWidth: '200px'
+        width: `var(--col-width-${index}, 100%)`,
+        flexShrink: 0,
+        flexGrow: 0
     }
 }
 </script>
@@ -77,15 +95,30 @@ const getColumnStyles = (index) => {
 <style scoped>
 .row-block { width: 100%; }
 
-/* Builder Mode: Ensure the draggable container inherits the flex layout */
-.row-inner :deep(.children-container) {
+/* Builder Mode: Ensure the draggable container inherits the flex layout and applies widths */
+.row-inner:deep(.children-container) {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Keep columns on one line in builder for structural clarity */
     width: 100%;
-    min-height: 50px; /* Ensure drop zone is visible */
-    gap: var(--row-gap);
-    align-items: var(--row-align);
-    justify-content: var(--row-justify);
+    height: 100%;
+    min-height: 50px;
+    gap: var(--row-gutter);
+    align-items: stretch; /* Enforce full height columns */
+    justify-content: flex-start;
 }
+
+/* Ensure module wrappers inside rows (which are columns) grow to fill height */
+.row-inner:deep(.children-container > .module-wrapper--column) {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Apply specific widths to children in builder mode - allow flex stretching */
+.row-inner:deep(.children-container > :nth-child(1)) { width: var(--col-width-0, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(2)) { width: var(--col-width-1, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(3)) { width: var(--col-width-2, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(4)) { width: var(--col-width-3, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(5)) { width: var(--col-width-4, 100%); height: 100%; }
+.row-inner:deep(.children-container > :nth-child(6)) { width: var(--col-width-5, 100%); height: 100%; }
 
 </style>

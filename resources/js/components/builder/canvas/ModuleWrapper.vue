@@ -1,6 +1,7 @@
 <template>
   <div 
     class="module-wrapper"
+    ref="wrapperRef"
     :class="wrapperClasses"
     :style="[wrapperStyles, animationStyles]"
     @click.stop="selectModule"
@@ -12,19 +13,19 @@
     <div v-if="shouldShowToolbar" class="module-toolbar" :class="`module-toolbar--${moduleType}`" :style="{ zIndex: isSelected ? 150 : 100 }">
       <ModuleActions 
         :label="moduleTitle"
-        :show-edit="false"
+        :show-edit="true"
         :show-layout="isRow"
         :show-duplicate="true"
         :show-delete="true"
         :show-drag="true"
+        @edit="selectModule"
         @layout="openRowLayoutModal"
         @duplicate="duplicateModule"
         @delete="deleteModule"
+        @more="handleContextMenu"
       />
     </div>
 
-
-    
     <!-- Loop Indicator Badge -->
     <div v-if="isLoopEnabled" class="loop-indicator" title="Loop Enabled">
         <component :is="icons.Repeat" :size="10" />
@@ -33,56 +34,65 @@
 
     <!-- Module Content with Children -->
     <div class="module-content" :class="[{ 'is-looping': isLoopEnabled }, ...animationClasses]" :style="animationStyles">
-      <!-- Wireframe Mode: Hide actual renderer content for specific modules -->
-      <template v-if="wireframeMode && !hasChildren">
-        <div class="wireframe-placeholder">
-          {{ moduleTitle }}
-        </div>
-      </template>
+      <template v-if="!isVirtualized">
+        <!-- Wireframe Mode: Hide actual renderer content for specific modules -->
+        <template v-if="wireframeMode && !hasChildren">
+          <div class="wireframe-placeholder">
+            {{ moduleTitle }}
+          </div>
+        </template>
 
-      <template v-else v-for="instance in loopInstances" :key="instance.id">
-        <ModuleRenderer 
-           :module="module"
-           :class="{ 'loop-ghost': instance.isGhost }"
-           :style="instance.isGhost ? { opacity: 0.6, pointerEvents: 'none' } : {}"
-        >
-          <!-- Pass children to the block component via slot -->
-          <template v-if="hasChildren && !instance.isGhost">
-            <draggable
-              v-model="module.children"
-              item-key="id"
-              :group="childType"
-              class="children-container"
-              ghost-class="ja-builder-ghost"
-              drag-class="drag-module"
-            >
-              <template #item="{ element: child, index: idx }">
+        <template v-else v-for="instance in loopInstances" :key="instance.id">
+          <ModuleRenderer 
+             :module="module"
+             :class="{ 'loop-ghost': instance.isGhost }"
+             :style="instance.isGhost ? { opacity: 0.6, pointerEvents: 'none' } : {}"
+          >
+            <!-- Pass children to the block component via slot -->
+            <template v-if="hasChildren && !instance.isGhost">
+              <draggable
+                v-model="module.children"
+                item-key="id"
+                :group="childType"
+                class="children-container"
+                ghost-class="ja-builder-ghost"
+                drag-class="drag-module"
+              >
+                <template #item="{ element: child, index: idx }">
+                  <ModuleWrapper
+                    :module="child"
+                    :index="idx"
+                    :is-ghost="isGhost"
+                  />
+                </template>
+              </draggable>
+            </template>
+            
+            <!-- Static rendering for ghosts to avoid double-binding draggables -->
+            <template v-else-if="hasChildren && instance.isGhost">
+              <div class="children-container loop-ghost-children">
                 <ModuleWrapper
+                  v-for="(child, idx) in (module.children || [])"
+                  :key="child.id + '-' + instance.id"
                   :module="child"
                   :index="idx"
-                  :is-ghost="isGhost"
+                  :is-ghost="true"
                 />
-              </template>
-            </draggable>
-          </template>
-          
-          <!-- Static rendering for ghosts to avoid double-binding draggables -->
-          <template v-else-if="hasChildren && instance.isGhost">
-            <div class="children-container loop-ghost-children">
-              <ModuleWrapper
-                v-for="(child, idx) in module.children"
-                :key="child.id + '-' + instance.id"
-                :module="child"
-                :index="idx"
-                :is-ghost="true"
-              />
-            </div>
-          </template>
-        </ModuleRenderer>
+              </div>
+            </template>
+          </ModuleRenderer>
+        </template>
       </template>
+      
+      <!-- Virtualized Placeholder -->
+      <div v-else class="virtual-placeholder" :style="{ height: lastHeight + 'px' }">
+        <div class="virtual-placeholder-inner">
+           <span>{{ moduleTitle }}</span>
+        </div>
+      </div>
     </div>
     
-    <!-- Section Sibling Button -->
+    <!-- Section Sibling Button (Floating on bottom border) -->
     <AddModuleButton 
        v-if="isSection && (isSelected || isHovered) && !isGhost"
        type="section"
@@ -90,7 +100,7 @@
        @click="addSiblingSection"
     />
 
-    <!-- Row Sibling Button -->
+    <!-- Row Sibling Button (Floating on bottom border) -->
     <AddModuleButton 
        v-if="isRow && (isSelected || isHovered) && !isGhost"
        type="row"
@@ -98,13 +108,14 @@
        @click="addSiblingRow"
     />
 
-    <!-- Column/Module Button (Floating on bottom border) -->
-    <AddModuleButton 
-       v-if="(isColumn || isContent) && (isSelected || isHovered) && !isGhost"
-       :type="isColumn ? 'column' : 'module'"
-       :floating="true"
-       @click="handlePlusClick"
-    />
+    <!-- Module Add Button (Inside Column or below Content Module) -->
+    <div v-if="(isColumn || isContent) && (isSelected || isHovered) && !isGhost" class="module-add-container">
+        <AddModuleButton 
+          :type="isColumn ? 'module' : 'module'"
+          :circular="true"
+          @click="handlePlusClick"
+        />
+    </div>
     
     <!-- Module Label (Grid/Wireframe) -->
     <div v-if="gridViewMode || wireframeMode" class="module-label">
@@ -113,49 +124,79 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, inject, watch } from 'vue'
+<script setup lang="ts">
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
 import { Plus, Repeat } from 'lucide-vue-next'
+// @ts-ignore
 import draggable from 'vuedraggable'
 import ModuleRegistry from '../core/ModuleRegistry'
 import ModuleRenderer from './ModuleRenderer.vue'
 import AddModuleButton from './AddModuleButton.vue'
 import ModuleActions from '../fields/ModuleActions.vue'
+import { useI18n } from 'vue-i18n'
+import { getAnimationStyles, getResponsiveValue } from '@/shared/utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 
 const icons = { Plus, Repeat }
 
 // Props
-const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  },
-  index: {
-    type: Number,
-    default: 0
-  },
-  isGhost: {
-    type: Boolean,
-    default: false
-  }
+interface Props {
+  module: BlockInstance;
+  index?: number;
+  isGhost?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  index: 0,
+  isGhost: false
 })
 
 // Inject
-const builder = inject('builder')
-
-import { useI18n } from 'vue-i18n'
+const builder = inject<BuilderInstance>('builder')
 const { t } = useI18n()
 
-import { getAnimationStyles, getResponsiveValue } from '@/shared/utils/styleUtils'
+// Virtualization State
+const isVirtualized = ref(false)
+const lastHeight = ref(100) // Default estimate
+const wrapperRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
-const currentDevice = computed(() => builder?.device || 'desktop')
+onMounted(() => {
+    if (props.isGhost) return // Don't virtualize ghosts
+
+    observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                isVirtualized.value = false
+            } else {
+                // Before virtualizing, save the current height
+                if (wrapperRef.value) {
+                    lastHeight.value = wrapperRef.value.offsetHeight
+                }
+                isVirtualized.value = true
+            }
+        })
+    }, {
+        rootMargin: '400px', // Buffer zone
+        threshold: 0
+    })
+
+    if (wrapperRef.value) {
+        observer.observe(wrapperRef.value)
+    }
+})
+
+onUnmounted(() => {
+    if (observer) {
+        observer.disconnect()
+    }
+})
+
+const currentDevice = computed(() => builder?.device.value || 'desktop')
 
 const animationClasses = computed(() => {
-    // 1. Try nested object
     const anim = getResponsiveValue(props.module.settings, 'animation', currentDevice.value)
-    // 2. Fallback to flat key
     const effect = (anim && anim.effect) ? anim.effect : getResponsiveValue(props.module.settings, 'animation_effect', currentDevice.value)
-    
     return effect ? [effect] : []
 })
 
@@ -165,27 +206,26 @@ const animationStyles = computed(() => {
 
 // Computed
 const isSelected = computed(() => 
-  !props.isGhost && builder?.selectedModuleId === props.module.id
+  !props.isGhost && builder?.selectedModuleId.value === props.module.id
 )
 
 const isHovered = computed(() => 
-  !props.isGhost && builder?.hoveredModuleId === props.module.id
+  !props.isGhost && builder?.hoveredModuleId.value === props.module.id
 )
 
 const shouldShowToolbar = computed(() => {
   if (props.isGhost) return false
   if (isSelected.value) return true
-  // If something is selected elsewhere, don't show hovered toolbars
-  if (builder?.selectedModuleId && builder.selectedModuleId !== props.module.id) return false
+  if (builder?.selectedModuleId.value && builder.selectedModuleId.value !== props.module.id) return false
   return isHovered.value
 })
 
 const wireframeMode = computed(() => 
-  builder?.wireframeMode || false
+  builder?.wireframeMode.value || false
 )
 
 const gridViewMode = computed(() => 
-  builder?.gridViewMode || false
+  builder?.gridViewMode.value || false
 )
 
 const moduleDefinition = computed(() => 
@@ -209,50 +249,40 @@ const hasChildren = computed(() =>
 
 const canAddChildren = computed(() => {
   const def = moduleDefinition.value
-  if (!def?.children) return false
-  return true
+  return !!def?.children
 })
 
 const childType = computed(() => {
-  // If explicitly defined in registry, use that
   const def = moduleDefinition.value
   if (def?.children) {
       const type = Array.isArray(def.children) ? def.children[0] : def.children
-      if (type === '*') return 'module' // Treat * as generic module insertion
+      if (type === '*') return 'module'
       return type
   }
-  // Fallbacks
   if (isSection.value) return 'row'
   if (isRow.value) return 'column'
   if (isColumn.value) return 'module'
   return null
 })
 
-const shouldShowAddChildButton = computed(() => {
-    // Rows now have their own floating sibling buttons
-    // Columns have internal Add Module button in ColumnBlock.vue
-    // No child buttons needed here
-    return false
-})
-
 const wrapperClasses = computed(() => ({
   'module-wrapper--selected': isSelected.value,
   'module-wrapper--hovered': isHovered.value && !isSelected.value,
   [`module-wrapper--${moduleType.value}`]: true,
-  'module-wrapper--grid': gridViewMode.value, // Grid View (Colored structure)
-  'module-wrapper--wireframe': wireframeMode.value, // Wireframe Mode (Blocks only)
-  'module-wrapper--content': !isSection.value && !isRow.value && !isColumn.value, // Generic content module class
+  'module-wrapper--grid': gridViewMode.value,
+  'module-wrapper--wireframe': wireframeMode.value,
+  'module-wrapper--content': !isSection.value && !isRow.value && !isColumn.value,
   'module-wrapper--loop': isLoopEnabled.value
 }))
 
 const wrapperStyles = computed(() => {
-    const styles = {}
+    const styles: Record<string, any> = {}
     
-    // Column Layout Logic - mimic frontend renderer
     if (isColumn.value) {
-        // Check for specific width settings
         const width = getResponsiveValue(props.module.settings, 'width', currentDevice.value)
         const flexGrow = getResponsiveValue(props.module.settings, 'flexGrow', currentDevice.value)
+        
+        styles.height = '100%' // Force height for divider concept
         
         if (width) {
             styles.flex = `0 0 ${width}`
@@ -260,9 +290,8 @@ const wrapperStyles = computed(() => {
         } else if (flexGrow) {
            styles.flex = `${flexGrow} 1 0%`
         } else {
-           // Default auto-width/equal width behavior
            styles.flex = '1 1 0%' 
-           styles.minWidth = '50px' // Prevent collapse
+           styles.minWidth = '50px'
         }
     }
 
@@ -273,12 +302,8 @@ const isLoopEnabled = computed(() => props.module.settings?.loop_enable === true
 
 const loopInstances = computed(() => {
   if (!isLoopEnabled.value) return [{ id: 'single', isGhost: false }]
-  
-  // Return fixed number of instances for simulation
-  const count = parseInt(props.module.settings?.posts_per_page) || 3
-  // Cap at 6 for builder performance
+  const count = parseInt(props.module.settings.posts_per_page as string) || 3
   const displayCount = Math.min(Math.max(count, 1), 6)
-  
   return Array.from({ length: displayCount }, (_, i) => ({
     id: `loop-${i}`,
     isGhost: i > 0
@@ -298,15 +323,10 @@ const unhoverModule = () => {
   builder?.hoverModule(null)
 }
 
-const handleContextMenu = (e) => {
-    // Only trigger if builder has the method (it should)
+const handleContextMenu = (e: MouseEvent) => {
     if (builder?.openContextMenu) {
         builder.openContextMenu(props.module.id, e, moduleTitle.value, props.module.type)
     }
-}
-
-const openSettings = () => {
-  selectModule()
 }
 
 const handlePlusClick = () => {
@@ -322,50 +342,37 @@ const addChild = () => {
   if (!type) return
 
   if (type === 'row') {
-    builder?.openInsertRowModal(props.module.id)
+    builder?.openInsertRowModal?.(props.module.id)
   } else if (type === 'module') {
-    builder?.openInsertModal(props.module.id)
+    builder?.openInsertModal?.(props.module.id)
   } else {
-    // Direct insertion for specific item types (like accordion_item)
-    builder?.insertModule(type, props.module.id)
+    builder?.insertModule?.(type, props.module.id)
   }
 }
 
 const addSibling = () => {
-    // Find parent and insert after
-    const parent = builder.findParentById(builder.blocks, props.module.id)
+    const parent = builder?.findParentById?.(builder.blocks.value, props.module.id)
     const parentId = parent ? parent.id : null
-    
-    if (parentId) {
-        // If parent is a container, we use openInsertModal with index
-        builder?.openInsertModal(parentId, props.index + 1)
-    } else {
-        // Top level (shouldn't happen for content modules, but just in case)
-        builder?.openInsertModal(null, props.index + 1)
-    }
+    builder?.openInsertModal?.(parentId, props.index + 1)
 }
 
 const addSiblingSection = () => {
-    // Open Insert Section Modal targeting the next index
-    builder?.openInsertSectionModal(props.index + 1)
+    builder?.openInsertSectionModal?.(props.index + 1)
 }
 
 const addSiblingRow = () => {
-    // Open Insert Row Modal to add another row in the same section
-    // Find the parent section ID from the builder's blocks
     const parentSectionId = findParentId(props.module.id)
     if (parentSectionId) {
-        builder?.openInsertRowModal(parentSectionId)
+        builder?.openInsertRowModal?.(parentSectionId)
     }
 }
 
 const openRowLayoutModal = () => {
-    builder?.openUpdateRowModal(props.module.id)
+    builder?.openUpdateRowModal?.(props.module.id)
 }
 
-// Helper to find parent module ID
-const findParentId = (moduleId) => {
-    const blocks = builder?.blocks || []
+const findParentId = (moduleId: string): string | null => {
+    const blocks = builder?.blocks.value || []
     for (const section of blocks) {
         if (section.children) {
             for (const row of section.children) {
@@ -392,47 +399,98 @@ const deleteModule = async () => {
     builder?.removeModule(props.module.id)
   }
 }
-
-
 </script>
 
 <style scoped>
 .module-wrapper {
   position: relative;
-  margin-bottom: var(--spacing-md);
+  /* margin-bottom: var(--spacing-md); -- Removed global margin to allow strict hierarchy */
 }
 
-/* Grid/Wireframe borders */
+.module-wrapper--content {
+    margin-bottom: var(--spacing-md); /* Content modules still need vertical spacing */
+    width: 100%; /* Ensure content modules fill column width */
+}
+
+.module-add-container {
+    position: absolute;
+    bottom: -16px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.module-add-container > * {
+    pointer-events: auto;
+}
+
+.module-wrapper--column > .module-add-container {
+    bottom: 5px; /* Inside the column at the bottom */
+}
+
 .module-wrapper--grid,
 .module-wrapper--wireframe {
-  border: 1px solid transparent; /* Default transparent */
+  border: 1px solid transparent;
   border-radius: var(--border-radius-sm);
-  padding: var(--spacing-sm);
+  padding: 0; /* Changed from var(--spacing-sm) to allow structural elements to fill containers */
 }
 
-/* Section: Blue */
 .module-wrapper--grid.module-wrapper--section,
 .module-wrapper--wireframe.module-wrapper--section {
-  border: 2px solid var(--builder-section);
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: 24px; /* Space for add button */
+  border: 2px solid transparent;
+  margin-bottom: var(--spacing-xl);
+  padding: 0;
 }
 
-/* Row: Emerald Green */
+.module-wrapper--grid.module-wrapper--section:hover,
+.module-wrapper--grid.module-wrapper--section.is-selected {
+  border-color: var(--builder-section);
+}
+
 .module-wrapper--grid.module-wrapper--row,
 .module-wrapper--wireframe.module-wrapper--row {
-  border: 2px solid var(--builder-row);
-  margin-bottom: var(--spacing-md);
+  border: 2px solid transparent;
+  margin: 0 auto var(--spacing-lg) auto;
+  width: 100%;
+  padding: 0;
 }
 
-/* Column: Cyan/Teal */
+.module-wrapper--grid.module-wrapper--row:hover,
+.module-wrapper--grid.module-wrapper--row.is-selected {
+  border-color: var(--builder-row);
+}
+
 .module-wrapper--grid.module-wrapper--column,
 .module-wrapper--wireframe.module-wrapper--column {
-  border: 2px solid var(--builder-column);
+  border: 2px solid transparent;
   min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-/* Module: Blueprint Style in Wireframe */
+.module-wrapper--grid.module-wrapper--column:hover,
+.module-wrapper--grid.module-wrapper--column.is-selected {
+  border-color: var(--builder-column);
+}
+
+.module-wrapper--grid.module-wrapper--content,
+.module-wrapper--wireframe.module-wrapper--content {
+  border: 1px dashed transparent;
+  width: 100%; /* Force content modules to fill column width */
+  display: flex;
+  flex-direction: column;
+}
+
+.module-wrapper--grid.module-wrapper--content:hover,
+.module-wrapper--grid.module-wrapper--content.is-selected {
+  border-color: var(--builder-module);
+  border-style: solid;
+}
+
 .module-wrapper--wireframe.module-wrapper--text,
 .module-wrapper--wireframe.module-wrapper--image,
 .module-wrapper--wireframe.module-wrapper--button {
@@ -440,7 +498,6 @@ const deleteModule = async () => {
     border: 2px dashed var(--builder-module);
 }
 
-/* Selection states - Type-specific outline colors */
 .module-wrapper--selected.module-wrapper--section {
   outline: 2px solid var(--builder-section);
   outline-offset: -2px;
@@ -475,7 +532,7 @@ const deleteModule = async () => {
 .module-wrapper--hovered.module-wrapper--content {
   outline: 1px solid var(--builder-module);
   outline-offset: -1px;
-  z-index: 6; /* Higher z-index for inner modules */
+  z-index: 6;
 }
 
 .module-wrapper--selected.module-wrapper--content {
@@ -484,19 +541,15 @@ const deleteModule = async () => {
   z-index: 6;
 }
 
-/* Inline Toolbar - Base Styles */
 .module-toolbar {
   position: absolute;
   display: flex;
   gap: 2px;
   padding: 4px;
   background: var(--builder-toolbar-bg-module);
-  z-index: 110; /* Above labels */
+  z-index: 110;
 }
 
-/* Specific toolbar positions */
-
-/* Section: Top-Left Inside */
 .module-wrapper--section > .module-toolbar {
     top: 0;
     left: 0;
@@ -505,26 +558,23 @@ const deleteModule = async () => {
     border-bottom-right-radius: var(--border-radius-sm);
 }
 
-/* Row: Top-Right Inside */
 .module-wrapper--row > .module-toolbar {
     top: 0;
-    left: auto;
-    right: 0;
+    left: 0;
+    right: auto;
     background: var(--builder-toolbar-bg-row);
-    border-bottom-left-radius: var(--border-radius-sm);
+    border-bottom-right-radius: var(--border-radius-sm);
 }
 
-/* Column: Top-Right Inside (Moved from Left to prevent clipping) */
 .module-toolbar--column {
     top: 0;
-    left: auto;
-    right: 0;
+    left: 0;
+    right: auto;
     background: var(--builder-toolbar-bg-column);
-    border-bottom-left-radius: var(--border-radius-sm);
-    border-bottom-right-radius: 0;
+    border-bottom-right-radius: var(--border-radius-sm);
+    border-bottom-left-radius: 0;
 }
 
-/* Module/Content: Top-Right Inside */
 .module-wrapper--content > .module-toolbar {
     top: 0;
     left: auto;
@@ -533,7 +583,6 @@ const deleteModule = async () => {
     border-bottom-left-radius: var(--border-radius-sm);
 }
 
-/* Icons inside ModuleActions need to be white on colored toolbars */
 :deep(.module-actions .action-icon) {
     color: white !important;
     opacity: 0.9;
@@ -550,32 +599,34 @@ const deleteModule = async () => {
     color: white !important;
 }
 
-
-/* Module Content */
 .module-content {
   min-height: 40px;
 }
 
-/* Module Label (Grid/Wireframe) */
+.module-wrapper--section > .module-content,
+.module-wrapper--row > .module-content,
+.module-wrapper--column > .module-content,
+.module-wrapper--content > .module-content {
+    height: 100%;
+    width: 100%;
+}
+
 .module-label {
   position: absolute;
   top: 0;
   left: 0;
   padding: 2px 6px;
-  background: var(--builder-module); /* Default to module color */
+  background: var(--builder-module);
   border-bottom-right-radius: 4px;
   color: white;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  z-index: 105; /* Between block and toolbar */
+  z-index: 105;
   pointer-events: none;
   transition: all 0.2s ease;
 }
 
-/* SMART LABEL POSITIONING */
-
-/* Section: Toolbar LEFT -> Label shifts RIGHT on select/hover */
 .module-wrapper--section.module-wrapper--selected > .module-label,
 .module-wrapper--section.module-wrapper--hovered > .module-label {
     left: auto;
@@ -584,11 +635,6 @@ const deleteModule = async () => {
     border-bottom-left-radius: 4px;
 }
 
-/* Row, Column, Module: Toolbar RIGHT -> Label stays LEFT (No shift usually needed) */
-/* But if we want to ensure visibility if something overlaps, we can keep them left 
-   since the toolbar is on the right. */
-
-/* Explicitly keep them left even on select/hover */
 .module-wrapper--row.module-wrapper--selected > .module-label,
 .module-wrapper--row.module-wrapper--hovered > .module-label,
 .module-wrapper--column.module-wrapper--selected > .module-label,
@@ -616,7 +662,6 @@ const deleteModule = async () => {
   z-index: 11;
 }
 
-/* Loop Styles */
 .loop-indicator {
     position: absolute;
     top: -18px;
@@ -640,38 +685,6 @@ const deleteModule = async () => {
     flex-direction: column;
 }
 
-/* If it's a Column being looped, it should probably stay flex-row if the parent is a row? 
-   Actually loop_enable is usually on Section/Row/Column as containers. 
-   If a Row is looped, it creates multiple Rows. 
-   If a Module is looped, it creates multiple Modules within its Column.
-*/
-
-.module-info-panel-canvas {
-    position: absolute;
-    top: 32px;
-    left: 0;
-    background: var(--builder-bg-primary);
-    border: 1px solid var(--builder-border);
-    padding: 8px 12px;
-    border-radius: 4px;
-    box-shadow: var(--shadow-lg);
-    z-index: 110;
-    max-width: 250px;
-    font-size: 11px;
-    color: var(--builder-text-secondary);
-}
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.2s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-5px);
-}
-
 .wireframe-placeholder {
     color: var(--builder-text-secondary);
     font-size: 11px;
@@ -679,5 +692,20 @@ const deleteModule = async () => {
     text-transform: uppercase;
     text-align: center;
     width: 100%;
+}
+.virtual-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--builder-bg-tertiary);
+    border: 1px dashed var(--builder-border);
+    border-radius: var(--border-radius-sm);
+}
+
+.virtual-placeholder-inner {
+    color: var(--builder-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 </style>

@@ -48,12 +48,12 @@ const contentStyles = computed(() => {
 
 <style scoped>
 .post-content-block { width: 100%; }
-.post-content-inner :deep(p) { margin: 0 0 1.5em; }
-.post-content-inner :deep(h2), .post-content-inner :deep(h3) { margin: 2em 0 1em; font-weight: 600; }
-.post-content-inner :deep(a) { 
+.post-content-inner:deep(p) { margin: 0 0 1.5em; }
+.post-content-inner:deep(h2), .post-content-inner:deep(h3) { margin: 2em 0 1em; font-weight: 600; }
+.post-content-inner:deep(a) { 
   color: var(--link-color); 
   font-weight: var(--link-font-weight); 
   text-decoration: var(--link-text-decoration); 
 }
-.post-content-inner :deep(blockquote) { margin: 1.5em 0; padding: 1em 1.5em; border-left: 4px solid #e0e0e0; font-style: italic; color: #666; }
+.post-content-inner:deep(blockquote) { margin: 1.5em 0; padding: 1em 1.5em; border-left: 4px solid #e0e0e0; font-style: italic; color: #666; }
 </style>

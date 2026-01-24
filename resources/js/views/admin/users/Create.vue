@@ -34,7 +34,7 @@
                         </div>
                         <div>
                             <MediaPicker
-                                @selected="(media) => form.avatar = media.url"
+                                @selected="(media: any) => form.avatar = media.url"
                                 :label="$t('features.users.form.selectAvatar')"
                             ></MediaPicker>
                             <Button
@@ -226,21 +226,27 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { createUserSchema } from '../../../schemas';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Textarea from '../../../components/ui/textarea.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import api from '@/services/api';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { createUserSchema } from '@/schemas';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Input from '@/components/ui/input.vue';
+// @ts-ignore
+import Textarea from '@/components/ui/textarea.vue';
+// @ts-ignore
+import Checkbox from '@/components/ui/checkbox.vue';
+import MediaPicker from '@/components/MediaPicker.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
-import { useAuthStore, ROLE_RANKS } from '../../../stores/auth';
+import { useAuthStore, ROLE_RANKS } from '@/stores/auth';
+import type { Role } from '@/types/auth';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -248,23 +254,34 @@ const authStore = useAuthStore();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(createUserSchema);
 
-const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
+const getRoleRank = (roleName: string) => ROLE_RANKS[roleName] || 0;
 
 const saving = ref(false);
 const loadingRoles = ref(false);
-const availableRoles = ref([]);
+const availableRoles = ref<Role[]>([]);
 
-const form = ref({
+const form = ref<{
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    phone: string;
+    bio: string;
+    website: string;
+    location: string;
+    avatar: string | null;
+    roles: number[];
+}>({
     name: '',
     email: '',
     password: '',
+    password_confirmation: '',
     phone: '',
     bio: '',
     website: '',
     location: '',
     avatar: null,
     roles: [],
-    password_confirmation: '',
 });
 
 const isValid = computed(() => {
@@ -306,7 +323,7 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/users', form.value);
         toast.success.create('User');
         router.push({ name: 'users.index' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

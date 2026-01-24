@@ -1,103 +1,193 @@
 <template>
   <div class="upload-field">
     <!-- Image/Video Preview -->
-    <div v-if="!hidePreview && (value || placeholderValue) && isValidMedia" class="preview-container" :class="{ 'is-inherited': !value && placeholderValue }">
-      <video v-if="isVideo" :src="value || placeholderValue" class="preview-image" :style="previewStyle" muted playsinline></video>
-      <div v-else-if="isImage" class="preview-image" :style="{ backgroundImage: `url(${value || placeholderValue})`, ...previewStyle }"></div>
+    <div v-if="!hidePreview && (hasValue || placeholderValue) && isValidMedia" class="preview-container" :class="{ 'is-inherited': !hasValue && placeholderValue }">
+      <video v-if="isVideo" :src="resolvedPreviewValue" class="preview-image" :style="previewStyle" muted playsinline></video>
+      <div v-else-if="isImage" class="preview-image" :style="{ backgroundImage: `url(${resolvedPreviewValue})`, ...previewStyle }"></div>
       <div v-else class="preview-file-icon">
         <File :size="32" />
       </div>
       
-      <div v-if="!value && placeholderValue" class="inherited-badge">{{ $t('builder.fields.inherited') }}</div>
-      <button v-if="value" class="remove-btn" @click="clearValue" :title="$t('builder.fields.actions.remove')">
+      <div v-if="!hasValue && placeholderValue" class="inherited-badge">{{ $t('builder.fields.inherited') }}</div>
+      <button v-if="hasValue" class="remove-btn" @click="clearValue" :title="$t('builder.fields.actions.remove')">
         <X :size="14" />
       </button>
     </div>
 
-    <!-- Input & Upload Button -->
-    <div class="input-row flex gap-2">
-      <BaseInput 
-        :model-value="value" 
-        @update:model-value="handleManualInput"
-        :placeholder="placeholderValue || 'https://'"
-        class="flex-1"
-      />
-      
-      <MediaPicker @selected="handleSelection" :constraints="{ allowedExtensions, maxSize }">
-        <template #trigger="{ open }">
-          <IconButton 
-            :icon="Upload" 
-            @click="open" 
-            :title="$t('builder.fields.actions.select')"
-            variant="secondary"
-          />
-        </template>
-      </MediaPicker>
+    <!-- Controls Row -->
+    <div class="controls-row">
+        <!-- Input Mode Toggle -->
+        <div class="mode-toggle" ref="modeDropdownRef">
+            <button class="mode-btn" @click.stop="toggleModeDropdown" :title="inputMode === 'manual' ? $t('builder.fields.upload.mode.manual') : $t('builder.fields.upload.mode.var')">
+                <LinkIcon v-if="inputMode === 'manual'" :size="14" />
+                <Variable v-else :size="14" />
+            </button>
+            
+            <div 
+              v-if="showModeDropdown" 
+              class="mode-dropdown-menu"
+            >
+                <div 
+                    class="mode-item" 
+                    :class="{ active: inputMode === 'manual' }"
+                    @click="setMode('manual')"
+                >
+                    <LinkIcon :size="12" class="mr-2" />
+                    {{ $t('builder.fields.upload.mode.manual') }}
+                </div>
+                <div 
+                    class="mode-item" 
+                    :class="{ active: inputMode === 'var' }"
+                    @click="setMode('var')"
+                >
+                    <Variable :size="12" class="mr-2" />
+                     {{ $t('builder.fields.upload.mode.var') }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Inputs -->
+        <div class="input-wrapper flex-1">
+             <!-- Manual Mode: Input + Media Picker -->
+            <div v-if="inputMode === 'manual'" class="flex gap-2 w-full">
+                <BaseInput 
+                    :model-value="manualValue" 
+                    @update:model-value="handleManualInput"
+                    :placeholder="placeholderValue || 'https://'"
+                    class="flex-1"
+                />
+                
+                <MediaPicker @selected="handleSelection" :constraints="{ allowedExtensions, maxSize }">
+                    <template #trigger="{ open }">
+                    <IconButton 
+                        :icon="Upload" 
+                        @click="open" 
+                        :title="$t('builder.fields.actions.select')"
+                        variant="secondary"
+                    />
+                    </template>
+                </MediaPicker>
+            </div>
+
+            <!-- Variable Mode: Suggestion Input -->
+            <div v-else class="relative w-full" ref="varInputRef">
+                 <input 
+                    type="text" 
+                    v-model="varValue"
+                    :placeholder="$t('builder.fields.color.placeholder')"
+                    class="var-input"
+                    @focus="showVarSuggestions = true"
+                    @blur="handleVarBlur"
+                    @input="handleVarInput"
+                />
+                
+                <!-- Suggestions Dropdown -->
+                <div 
+                  v-if="showVarSuggestions" 
+                  class="var-suggestions-dropdown"
+                >
+                    <div 
+                      v-for="suggestion in filteredSuggestions" 
+                      :key="suggestion.value" 
+                      class="var-suggestion-item"
+                      @mousedown="selectVar(suggestion.value)"
+                    >
+                        <div class="suggestion-preview">
+                             <img v-if="suggestion.url" :src="suggestion.url" class="suggestion-thumb" />
+                             <div v-else class="suggestion-thumb-placeholder"></div>
+                        </div>
+                        <span class="suggestion-text">{{ suggestion.label }}</span>
+                    </div>
+                    <div v-if="filteredSuggestions.length === 0" class="var-suggestion-empty">
+                        {{ $t('builder.fields.color.noMatches') }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { X, Upload, File, Video } from 'lucide-vue-next'
+<script setup lang="ts">
+import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
+import { X, Upload, File, Video, Link as LinkIcon, Variable } from 'lucide-vue-next'
 import MediaPicker from '../../MediaPicker.vue'
 import { BaseInput, IconButton } from '../ui'
 import { useToast } from '../../../composables/useToast'
+import type { BuilderInstance } from '../../../types/builder'
+import { toCssVarName } from '../core/cssVariables'
+import { useI18n } from 'vue-i18n'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  },
-  placeholderValue: {
-    type: String,
-    default: ''
-  },
-  hidePreview: {
-    type: Boolean,
-    default: false
-  },
-  allowedExtensions: {
-    type: Array,
-    default: () => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
-  },
-  maxSize: {
-    type: Number,
-    default: null
-  },
-  previewStyle: {
-    type: Object,
-    default: () => ({})
-  }
+const props = withDefaults(defineProps<{
+  field: any;
+  value?: string;
+  placeholderValue?: string;
+  hidePreview?: boolean;
+  allowedExtensions?: string[];
+  maxSize?: number | null;
+  previewStyle?: Record<string, any>;
+}>(), {
+  value: '',
+  placeholderValue: '',
+  hidePreview: false,
+  allowedExtensions: () => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+  maxSize: null,
+  previewStyle: () => ({})
 })
 
 const emit = defineEmits(['update:value'])
 const toast = useToast()
+const { t } = useI18n()
+const builder = inject<BuilderInstance>('builder')
+const { globalImages } = builder?.globalVariables || { globalImages: ref([]) }
+
+// State
+const inputMode = ref('manual') // 'manual' | 'var'
+const showModeDropdown = ref(false)
+const modeDropdownRef = ref(null)
+const manualValue = ref('')
+const varValue = ref('')
+const showVarSuggestions = ref(false)
+const varInputRef = ref(null)
 
 // Computed
+const hasValue = computed(() => {
+    return props.value && props.value !== ''
+})
+
+const resolvedPreviewValue = computed(() => {
+    const val = props.value || props.placeholderValue
+    if (!val) return ''
+    
+    if (val.startsWith('var(')) {
+        // Resolve variable
+        const varName = val.replace(/^var\(\s*(.+?)\s*\)$/, '$1')
+        const found = globalImages?.value.find((g: any) => toCssVarName(g.name) === varName)
+        return found ? found.value : '' // Return matched url or empty if not found
+    }
+    
+    return val
+})
+
 const isImage = computed(() => {
-  const val = props.value || props.placeholderValue
+  const val = resolvedPreviewValue.value
   if (!val) return false
   const parts = val.split('.')
   if (parts.length < 2) return val.startsWith('data:image')
   const ext = parts.pop().toLowerCase().split('?')[0]
   
-  // Must be in image extensions list AND allowed for this field (if constraints exist)
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
   const isImg = imageExts.includes(ext) || val.startsWith('data:image')
   
-  if (props.allowedExtensions.length > 0) {
+  if (props.allowedExtensions && props.allowedExtensions.length > 0) {
     return isImg && props.allowedExtensions.includes(ext)
   }
   return isImg
 })
 
 const isVideo = computed(() => {
-  const val = props.value || props.placeholderValue
+  const val = resolvedPreviewValue.value
   if (!val) return false
   const parts = val.split('.')
   if (parts.length < 2) return val.startsWith('data:video')
@@ -106,45 +196,141 @@ const isVideo = computed(() => {
   const videoExts = ['mp4', 'webm', 'ogv', 'mov', 'm4v']
   const isVid = videoExts.includes(ext) || val.startsWith('data:video')
   
-  if (props.allowedExtensions.length > 0) {
+  if (props.allowedExtensions && props.allowedExtensions.length > 0) {
     return isVid && props.allowedExtensions.includes(ext)
   }
   return isVid
 })
 
 const isValidMedia = computed(() => {
-  const val = props.value || props.placeholderValue
-  if (!val) return true // Empty is technically "valid" as in it doesn't show an error
+  const val = resolvedPreviewValue.value
+  if (!val) return true 
   
   const parts = val.split('.')
   if (parts.length < 2) return true 
   
   const ext = parts.pop().toLowerCase().split('?')[0]
-  if (props.allowedExtensions.length > 0) {
+  if (props.allowedExtensions && props.allowedExtensions.length > 0) {
     return props.allowedExtensions.includes(ext)
   }
   return true
 })
 
+// Suggestions
+const allSuggestions = computed(() => {
+    const images = globalImages?.value || []
+    return images.map((img: any) => ({
+        label: toCssVarName(img.name),
+        value: toCssVarName(img.name),
+        url: img.value
+    }))
+})
+
+const filteredSuggestions = computed(() => {
+    if (!varValue.value) return allSuggestions.value
+    const val = varValue.value.toLowerCase()
+    return allSuggestions.value.filter((s: { value: string }) => s.value.includes(val))
+})
+
+// Watchers
+const initFromProp = () => {
+    const val = props.value || ''
+    if (val.startsWith('var(') || val.startsWith('--')) {
+        inputMode.value = 'var'
+        varValue.value = val.startsWith('var(') ? val.replace(/^var\(\s*(.+?)\s*\)$/, '$1') : val
+        manualValue.value = ''
+    } else {
+        inputMode.value = 'manual'
+        manualValue.value = val
+        varValue.value = ''
+    }
+}
+
+watch(() => props.value, initFromProp, { immediate: true })
+
 // Methods
-const handleManualInput = (val) => {
+const handleManualInput = (val: string | number) => {
+  manualValue.value = val as string
   emit('update:value', val)
 }
 
-const handleSelection = (media) => {
+const handleVarInput = () => {
+    let val = varValue.value
+    if (val && val.startsWith('--')) {
+        emit('update:value', `var(${val})`)
+    } else {
+        // Maybe user is typing "brand", we don't emit valid var yet or we emit raw?
+        // Let's stick to valid css var syntax for emit
+        // But if they type "blue", we can't emit "blue".
+        // Use emit only if valid?
+    }
+}
+
+const selectVar = (val: string) => {
+    varValue.value = val
+    showVarSuggestions.value = false
+    emit('update:value', `var(${val})`)
+}
+
+const handleSelection = (media: any) => {
   if (media && media.url) {
-    const ext = media.extension || media.url.split('.').pop().toLowerCase().split('?')[0]
-    if (props.allowedExtensions.length > 0 && !props.allowedExtensions.includes(ext)) {
+    const ext = media.extension || (media.url.split('.').pop() || '').toLowerCase().split('?')[0]
+    if (props.allowedExtensions && props.allowedExtensions.length > 0 && !props.allowedExtensions.includes(ext)) {
       toast.error.validation(`File type .${ext} is not allowed for this field.`)
       return
     }
+    // Force switch to manual if selecting from picker
+    inputMode.value = 'manual' 
+    manualValue.value = media.url
     emit('update:value', media.url)
   }
 }
 
 const clearValue = () => {
+  if (inputMode.value === 'manual') manualValue.value = ''
+  else varValue.value = ''
   emit('update:value', '')
 }
+
+const toggleModeDropdown = () => showModeDropdown.value = !showModeDropdown.value
+
+const setMode = (mode: string) => {
+    if (inputMode.value === mode) {
+        showModeDropdown.value = false
+        return
+    }
+    inputMode.value = mode
+    showModeDropdown.value = false
+    
+    // Clear value when switching to prevent incompatible values
+    manualValue.value = ''
+    varValue.value = ''
+    emit('update:value', '')
+}
+
+const handleVarBlur = () => {
+    setTimeout(() => {
+        showVarSuggestions.value = false
+    }, 200)
+}
+
+// Click Outside
+const handleClickOutside = (event: MouseEvent) => {
+    if (showModeDropdown.value && modeDropdownRef.value && !(modeDropdownRef.value as HTMLElement).contains(event.target as Node)) {
+        showModeDropdown.value = false
+    }
+    if (showVarSuggestions.value && varInputRef.value && !(varInputRef.value as HTMLElement).contains(event.target as Node)) {
+        showVarSuggestions.value = false
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('mousedown', handleClickOutside)
+})
+onUnmounted(() => {
+    window.removeEventListener('mousedown', handleClickOutside)
+})
+
 </script>
 
 <style scoped>
@@ -223,5 +409,144 @@ div.preview-image {
 
 .preview-file-icon {
   color: var(--builder-text-muted);
+}
+
+.controls-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.mode-toggle {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    background: var(--builder-bg-primary);
+    border: 1px solid var(--builder-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.mode-btn {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--builder-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.mode-btn:hover {
+    color: var(--builder-text-primary);
+}
+
+.mode-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 120px;
+    background: var(--builder-bg-popover);
+    border: 1px solid var(--builder-border);
+    border-radius: 4px;
+    margin-top: 4px;
+    z-index: 100;
+    font-size: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.mode-item {
+    padding: 6px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--builder-text-secondary);
+}
+
+.mode-item:hover, .mode-item.active {
+    background: var(--builder-bg-secondary);
+    color: var(--builder-text-primary);
+}
+
+.var-input {
+    width: 100%;
+    height: 32px;
+    background: var(--builder-bg-primary);
+    border: 1px solid var(--builder-border);
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 13px;
+    color: var(--builder-text-primary);
+    font-family: inherit;
+}
+
+.var-input:focus {
+    outline: none;
+    border-color: var(--builder-accent);
+}
+
+.var-suggestions-dropdown {
+  position: absolute;
+  top: 100%; 
+  left: 0; 
+  width: 100%;
+  background-color: var(--builder-bg-popover, #1f2937);
+  border: 1px solid var(--builder-border);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  margin-top: 4px;
+}
+
+.var-suggestion-item {
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.var-suggestion-item:hover {
+  background-color: var(--builder-bg-secondary);
+}
+
+.suggestion-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--builder-bg-tertiary);
+    border: 1px solid var(--builder-border);
+    flex-shrink: 0;
+}
+
+.suggestion-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.suggestion-text {
+    font-size: 12px;
+    color: var(--builder-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.var-suggestion-empty {
+  padding: 8px;
+  font-size: 11px;
+  color: var(--builder-text-muted);
+  text-align: center;
 }
 </style>

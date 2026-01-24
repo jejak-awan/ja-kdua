@@ -67,7 +67,7 @@
                                 type="email"
                                 autocomplete="email"
                                 required
-                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
+                                :class="errors.email ? 'border-destructive focus-visible:ring-destructive' : ''"
                                 :placeholder="t('features.auth.login.emailPlaceholder')"
                             />
                             <p v-if="errors.email" class="text-sm text-destructive font-medium">
@@ -91,7 +91,7 @@
                                 type="password"
                                 autocomplete="current-password"
                                 required
-                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
+                                :class="errors.password ? 'border-destructive focus-visible:ring-destructive' : ''"
                                 :placeholder="t('features.auth.login.passwordPlaceholder')"
                             />
                             <p v-if="errors.password" class="text-sm text-destructive font-medium">
@@ -156,8 +156,8 @@
     </div>
 </template>
 
-<script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick, type Ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
@@ -167,15 +167,25 @@ import { Loader2 } from 'lucide-vue-next';
 import api, { resetLockdown } from '../../services/api';
 
 // Shadcn Components
+// @ts-ignore
 import Card from '../../components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '../../components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '../../components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '../../components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '../../components/ui/card-content.vue';
+// @ts-ignore
 import Button from '../../components/ui/button.vue';
+// @ts-ignore
 import Input from '../../components/ui/input.vue';
+// @ts-ignore
 import Label from '../../components/ui/label.vue';
+// @ts-ignore
 import Checkbox from '../../components/ui/checkbox.vue';
+// @ts-ignore
 import CaptchaWrapper from '../../components/captcha/CaptchaWrapper.vue';
 
 const router = useRouter();
@@ -184,7 +194,7 @@ const authStore = useAuthStore();
 const { t } = useI18n();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(loginSchema);
 
-const captchaRef = ref(null);
+const captchaRef = ref<any>(null);
 const captchaVerified = ref(false);
 const captchaToken = ref('');
 const captchaAnswer = ref('');
@@ -192,7 +202,7 @@ const captchaEnabled = computed(() => captchaRef.value?.enabled || false);
 
 // 2FA State
 const requiresTwoFactor = ref(false);
-const twoFactorUserId = ref(null);
+const twoFactorUserId = ref<number | null>(null);
 const twoFactorCode = ref('');
 
 const form = reactive({
@@ -201,7 +211,12 @@ const form = reactive({
     remember: false,
 });
 
-const onCaptchaVerified = (payload) => {
+interface CaptchaPayload {
+    token: string;
+    answer: string;
+}
+
+const onCaptchaVerified = (payload: CaptchaPayload) => {
     captchaToken.value = payload.token;
     captchaAnswer.value = payload.answer;
     captchaVerified.value = true;
@@ -216,7 +231,7 @@ const messageType = ref('');
 const loading = ref(false);
 const rateLimited = ref(false);
 const retryAfter = ref(0);
-let retryTimer = null;
+let retryTimer: ReturnType<typeof setInterval> | null = null;
 const registrationEnabled = ref(false); // Default: hidden until API confirms enabled
 const registrationDisabledMessage = ref('');
 
@@ -261,7 +276,7 @@ onMounted(async () => {
     }
 });
 
-const formatRetryTime = (seconds) => {
+const formatRetryTime = (seconds: number) => {
     if (seconds <= 0) return t('features.auth.retry.moment');
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -275,7 +290,7 @@ const formatRetryTime = (seconds) => {
     return t('features.auth.retry.seconds', secs);
 };
 
-const startRetryTimer = (initialSeconds) => {
+const startRetryTimer = (initialSeconds: number) => {
     if (retryTimer) {
         clearInterval(retryTimer);
     }
@@ -285,7 +300,7 @@ const startRetryTimer = (initialSeconds) => {
     retryTimer = setInterval(() => {
         retryAfter.value--;
         if (retryAfter.value <= 0) {
-            clearInterval(retryTimer);
+            if (retryTimer) clearInterval(retryTimer);
             retryTimer = null;
             rateLimited.value = false;
         }
@@ -313,7 +328,7 @@ const verifyTwoFactor = async () => {
         // The AuthController.login method handles two_factor_code if provided.
         // This avoids redundant requests and potential 429 Rate Limit errors.
         
-        const payload = {
+        const payload: any = {
             email: form.email.trim(),
             password: form.password,
             remember: form.remember,
@@ -362,7 +377,7 @@ const completeLogin = async () => {
             ? redirectPath 
             : { name: 'dashboard' };
         
-        router.replace(target);
+        router.replace(target as any);
     }, 600);
 }
 
@@ -390,7 +405,7 @@ const handleLogin = async () => {
     }
 
     try {
-        const payload = {
+        const payload: any = {
             email: form.email.trim(),
             password: form.password,
             remember: form.remember,
@@ -406,7 +421,7 @@ const handleLogin = async () => {
         if (result.success) {
             if (result.requiresTwoFactor) {
                 requiresTwoFactor.value = true;
-                twoFactorUserId.value = result.userId;
+                twoFactorUserId.value = result.userId || null;
                 message.value = ''; // Clear any success message
                 // Do not clear password here, we need it for the second attempt!
             } else {

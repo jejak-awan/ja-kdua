@@ -98,11 +98,12 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMenuContext } from '../../../composables/useMenu';
 import { menuItemRegistry } from '../registry';
+import type { MenuItem } from '../../../types/menu';
 
 // UI Components
 import Badge from '../../ui/badge.vue';
@@ -113,12 +114,9 @@ import {
     FileText, File, Tag, Link as LinkIcon, Columns 
 } from 'lucide-vue-next';
 
-const props = defineProps({
-    item: {
-        type: Object,
-        required: true
-    }
-});
+const props = defineProps<{
+    item: MenuItem;
+}>();
 
 const { t } = useI18n();
 const menuContext = useMenuContext();
@@ -140,6 +138,7 @@ const iconComponent = computed(() => {
 const iconColorClass = computed(() => {
     const definition = menuItemRegistry.get(props.item.type);
     const color = definition?.color || 'gray';
+    // Using simple color mapping, ensure these classes exist in your CSS/Tailwind
     return `text-${color}-500`;
 });
 
@@ -167,14 +166,14 @@ const typeLabel = computed(() => {
 });
 
 const handleSelect = () => {
-    menuContext.selectItem(itemId.value);
+    menuContext.selectItem(itemId.value!);
 };
 
 const handleDuplicate = () => {
-    menuContext.duplicateItem(itemId.value);
+    menuContext.duplicateItem(itemId.value!);
 };
 
 const handleDelete = () => {
-    menuContext.deleteItem(itemId.value);
+    menuContext.deleteItem(itemId.value!);
 };
 </script>

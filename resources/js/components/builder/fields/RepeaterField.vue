@@ -51,8 +51,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { ChevronDown, Plus, Trash2, GripVertical } from 'lucide-vue-next'
 import FieldRenderer from './FieldRenderer.vue' // Recursive import
@@ -61,34 +62,25 @@ import FieldRenderer from './FieldRenderer.vue' // Recursive import
 // But since FieldRenderer imports RepeaterField (via dynamic import), we should be fine.
 // Wait, FieldRenderer imports RepeaterField dynamically? I need to add that later.
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: Array,
-    default: () => []
-  },
-  module: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  field: any;
+  value: any[];
+  module: BlockInstance;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
 
-const openIndex = ref(null)
+const openIndex = ref<number | null>(null)
 
-const toggleItem = (index) => {
+const toggleItem = (index: number) => {
     openIndex.value = openIndex.value === index ? null : index
 }
 
 // Map 'key' from definition to 'name' for FieldRenderer
 const mappedFields = computed(() => {
     if (!props.field.fields) return []
-    return props.field.fields.map(f => ({
+    return props.field.fields.map((f: any) => ({
         ...f,
         name: f.name || f.key, // Support both but prefer name
         nativeKey: f.name || f.key, 
@@ -96,12 +88,7 @@ const mappedFields = computed(() => {
     }))
 })
 
-const getItemLabel = (item, index) => {
-    // 1. Try to find a field that is marked as the label source?
-    // 2. Or use the first string field?
-    // 3. Or use itemLabel from definition
-    
-    // Check if there is a 'label' or 'title' or 'text' property in the item
+const getItemLabel = (item: any, index: number) => {
     if (item.label) return item.label
     if (item.title) return item.title
     if (item.text) return item.text
@@ -111,31 +98,27 @@ const getItemLabel = (item, index) => {
 }
 
 const addItem = () => {
-    // Create default object based on fields
-    const newItem = {}
+    const newItem: Record<string, any> = {}
     if (props.field.fields) {
-        props.field.fields.forEach(f => {
+        props.field.fields.forEach((f: any) => {
             newItem[f.name || f.key] = f.default !== undefined ? f.default : ''
         })
     }
     
     const newList = [...(props.value || []), newItem]
     emit('update:value', newList)
-    
-    // Auto open the new item
     openIndex.value = newList.length - 1
 }
 
-const deleteItem = (index) => {
+const deleteItem = (index: number) => {
     const newList = [...props.value]
     newList.splice(index, 1)
     emit('update:value', newList)
     if (openIndex.value === index) openIndex.value = null
 }
 
-const updateItemField = (index, key, val) => {
+const updateItemField = (index: number, key: string, val: any) => {
     const newList = [...props.value]
-    // Clone the item to avoid direct mutation issues
     newList[index] = { ...newList[index], [key]: val }
     emit('update:value', newList)
 }

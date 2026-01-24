@@ -1,64 +1,96 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="testimonial-block" :style="testimonialBlockStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+          class="testimonial-block relative p-8 overflow-hidden transition-all duration-300" 
+          :class="[
+            getVal(settings, 'cardShadow') || 'shadow-sm',
+            getVal(settings, 'radius') || 'rounded-2xl',
+            getVal(settings, 'alignment') || 'text-center'
+          ]"
+          :style="testimonialBlockStyles(settings)"
+      >
         <!-- Quote Icon Overlay -->
         <QuoteIcon 
-          v-if="showQuoteIcon" 
-          class="quote-icon-bg"
-          :style="{ color: quoteIconStyles.color }"
+          v-if="getVal(settings, 'showQuoteIcon') !== false" 
+          class="absolute -top-5 -right-5 w-32 h-32 opacity-5 transform rotate-180 z-0 pointer-events-none"
+          :style="{ color: getVal(settings, 'quoteIconColor') }"
         />
         
         <!-- Content Wrapper -->
-        <div class="testimonial-inner">
+        <div class="testimonial-inner relative z-10 flex flex-col h-full" :class="{ 'items-center': (getVal(settings, 'alignment') || 'text-center') === 'text-center' }">
+          
           <!-- Quote Icon Small -->
           <QuoteIcon 
-            v-if="showQuoteIcon" 
-            class="quote-icon"
-            :style="quoteIconStyles"
+            v-if="getVal(settings, 'showQuoteIcon') !== false" 
+            class="mb-6 transform rotate-180 opacity-80"
+            :style="quoteIconStyles(settings)"
           />
+
+          <!-- Rating -->
+          <div v-if="getVal(settings, 'rating') > 0" class="flex gap-1 mb-6 rating-stars">
+             <StarIcon 
+                v-for="i in 5" 
+                :key="i"
+                class="w-5 h-5"
+                :class="i <= getVal(settings, 'rating') ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'"
+             />
+          </div>
           
           <!-- Content -->
           <div 
-            class="testimonial-content" 
-            :style="contentStyles"
+            class="testimonial-content mb-8 max-w-3xl font-serif italic text-pretty leading-relaxed" 
+            :style="contentStyles(settings, blockDevice)"
             :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('content', e.target.innerText)"
+            @blur="e => updateResponsiveField('quote', e.target.innerText)"
           >
-            {{ contentValue }}
+            "{{ getVal(settings, 'quote', blockDevice) }}"
           </div>
           
-          <!-- Author -->
-          <div class="testimonial-author">
-            <div class="author-image-wrapper">
+          <!-- Author Section -->
+          <div class="testimonial-author mt-auto flex items-center gap-4" :class="{ 'flex-col text-center': (getVal(settings, 'alignment')) === 'text-center' }">
+            <div class="author-image-wrapper relative shrink-0">
               <img 
-                v-if="settings.authorImage"
-                :src="settings.authorImage"
-                :alt="authorNameValue"
-                class="author-image"
+                v-if="getVal(settings, 'avatar')"
+                :src="getVal(settings, 'avatar')"
+                alt="Author"
+                class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
               />
-              <div v-else class="author-image-placeholder">
+              <div v-else class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                   <UserIcon :size="32" />
               </div>
+
+               <!-- Company Logo Badge (optional overlay or separate) -->
+               <!-- If company logo exists and we want it near avatar -->
             </div>
-            <div class="author-info">
+            
+            <div class="author-info" :class="{ 'items-center': (getVal(settings, 'alignment')) === 'text-center' }">
               <div 
-                class="author-name" 
-                :style="authorNameStyles"
+                class="author-name font-bold text-lg text-slate-900"
                 :contenteditable="mode === 'edit'"
-                @blur="e => updateResponsiveField('authorName', e.target.innerText)"
+                @blur="e => updateResponsiveField('author', e.target.innerText)"
               >
-                {{ authorNameValue || 'Author Name' }}
+                {{ getVal(settings, 'author', blockDevice) || 'Author Name' }}
               </div>
-              <div 
-                v-if="authorTitleValue || mode === 'edit'" 
-                class="author-title" 
-                :style="authorTitleStyles"
-                :contenteditable="mode === 'edit'"
-                @blur="e => updateResponsiveField('authorTitle', e.target.innerText)"
-              >
-                {{ authorTitleValue }}
+              <div class="text-sm text-slate-500 font-medium">
+                <span 
+                    :contenteditable="mode === 'edit'"
+                     @blur="e => updateResponsiveField('job_title', e.target.innerText)"
+                >{{ getVal(settings, 'job_title', blockDevice) }}</span>
+                <span v-if="getVal(settings, 'company_name')" class="mx-1">•</span>
+                <span 
+                    v-if="getVal(settings, 'company_name') || mode === 'edit'"
+                    :contenteditable="mode === 'edit'"
+                     @blur="e => updateResponsiveField('company_name', e.target.innerText)"
+                >{{ getVal(settings, 'company_name', blockDevice) }}</span>
               </div>
+              
+               <img 
+                v-if="getVal(settings, 'companyLogo')"
+                :src="getVal(settings, 'companyLogo')"
+                alt="Company Logo"
+                class="h-6 w-auto mt-2 opacity-80 grayscale hover:grayscale-0 transition-all"
+              />
             </div>
           </div>
         </div>
@@ -68,10 +100,10 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
-import { Quote as QuoteIcon, User as UserIcon } from 'lucide-vue-next'
+import { inject } from 'vue'
+import { Quote as QuoteIcon, User as UserIcon, Star as StarIcon } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -80,38 +112,37 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const settings = computed(() => props.module?.settings || {})
 
-const contentValue = computed(() => getVal(settings.value, 'content', props.device))
-const authorNameValue = computed(() => getVal(settings.value, 'authorName', props.device))
-const authorTitleValue = computed(() => getVal(settings.value, 'authorTitle', props.device))
-const showQuoteIcon = computed(() => getVal(settings.value, 'showQuoteIcon', props.device) !== false)
-
-const testimonialBlockStyles = computed(() => {
+const testimonialBlockStyles = (settings) => {
   return { 
-    textAlign: getVal(settings.value, 'alignment', props.device) || 'center',
-    width: '100%',
-    position: 'relative'
+    backgroundColor: getVal(settings, 'cardBgColor') || '#ffffff',
+    borderColor: getVal(settings, 'cardBorderColor') || 'rgba(0,0,0,0.05)',
+    borderWidth: '1px',
+    borderStyle: 'solid'
   }
-})
+}
 
-const quoteIconStyles = computed(() => {
-  const size = getVal(settings.value, 'quoteIconSize', props.device) || 48
-  const color = getVal(settings.value, 'quoteIconColor', props.device) || '#e0e0e0'
+const quoteIconStyles = (settings) => {
+  const size = 48
+  const color = getVal(settings, 'quoteIconColor') || '#e0e0e0'
   return {
     width: `${size}px`,
     height: `${size}px`,
     color: color
   }
-})
+}
 
-const contentStyles = computed(() => getTypographyStyles(settings.value, 'content_', props.device))
-const authorNameStyles = computed(() => getTypographyStyles(settings.value, 'author_name_', props.device))
-const authorTitleStyles = computed(() => getTypographyStyles(settings.value, 'author_title_', props.device))
+const contentStyles = (settings, device) => {
+    return {
+        color: getVal(settings, 'quoteColor') || '#1e293b',
+        fontSize: (getVal(settings, 'quoteSize') || 18) + 'px',
+        lineHeight: 1.6
+    }
+}
 
 const updateResponsiveField = (fieldName, value) => {
   if (props.mode !== 'edit') return
-  const current = settings.value[fieldName]
+  const current = props.module.settings[fieldName]
   let newValue
   if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
     newValue = { ...current, [props.device]: value }
@@ -125,92 +156,5 @@ const updateResponsiveField = (fieldName, value) => {
 <style scoped>
 .testimonial-block { 
   width: 100%; 
-  position: relative; 
-  background: white; 
-  border-radius: 24px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.testimonial-inner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.quote-icon-bg {
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 120px;
-  height: 120px;
-  opacity: 0.05;
-  transform: rotate(180deg);
-  z-index: 1;
-}
-
-.quote-icon { 
-  margin-bottom: 24px; 
-  transform: rotate(180deg); 
-  opacity: 0.8;
-}
-
-.testimonial-content { 
-  margin-bottom: 32px; 
-  max-width: 800px; 
-  line-height: 1.8;
-  font-size: 18px;
-  font-style: italic;
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.testimonial-author { 
-  display: flex; 
-  align-items: center; 
-  gap: 16px; 
-  margin-top: auto;
-}
-
-.author-image-wrapper {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-}
-
-.author-image { 
-  width: 100%; 
-  height: 100%; 
-  border-radius: 50%; 
-  object-fit: cover; 
-}
-
-.author-image-placeholder {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: #f1f5f9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-}
-
-.author-name {
-  font-weight: 700;
-  font-size: 16px;
-  color: #0f172a;
-}
-
-.author-title { 
-  margin-top: 2px; 
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 </style>

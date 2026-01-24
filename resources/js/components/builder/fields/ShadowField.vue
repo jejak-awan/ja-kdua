@@ -69,32 +69,26 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, inject, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Ban, Layers } from 'lucide-vue-next'
 import { BaseLabel, BaseSliderInput, BaseToggle, BaseCollapsible } from '../ui'
 import ColorField from './ColorField.vue'
 
-const props = defineProps({
-  field: Object,
+const props = defineProps<{
+  field: any;
   value: {
-    type: Object,
-    default: () => ({
-      preset: 'none',
-      horizontal: 0, 
-      vertical: 0, 
-      blur: 0, 
-      spread: 0, 
-      color: 'rgba(0,0,0,0.1)', 
-      inset: false
-    })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+    preset: string;
+    horizontal: number; 
+    vertical: number; 
+    blur: number; 
+    spread: number; 
+    color: string; 
+    inset: boolean;
+  };
+  placeholderValue?: any;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
@@ -158,9 +152,9 @@ watch(localValue, (newVal) => {
     emit('update:value', { ...newVal })
 }, { deep: true })
 
-const applyPreset = (key) => {
+const applyPreset = (key: string) => {
     localValue.preset = key
-    const p = presets.value[key].values
+    const p = (presets.value as any)[key].values
     Object.assign(localValue, p)
 }
 </script>

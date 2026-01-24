@@ -82,24 +82,29 @@ import { useI18n } from 'vue-i18n'
 import { BaseToggle, BaseDropdown } from '../../ui'
 import { ChevronDown } from 'lucide-vue-next'
 import { useLanguage } from '../../../../composables/useLanguage'
+import { useCmsStore } from '@/stores/cms'
 
 const { t } = useI18n()
-const darkMode = inject('darkMode')
+const cmsStore = useCmsStore()
+const darkMode = computed({
+  get: () => cmsStore.isDarkMode,
+  set: (val) => cmsStore.toggleDarkMode(val)
+})
 const builder = inject('builder', null)
 
 // Use builder preferences (persisted to localStorage)
 // Note: builder is a reactive object, refs are auto-unwrapped
 const showGrid = computed({
-    get: () => builder?.showGrid ?? false,
-    set: (val) => { if (builder && 'showGrid' in builder) builder.showGrid = val }
+    get: () => builder?.showGrid?.value ?? false,
+    set: (val) => { if (builder && builder.showGrid) builder.showGrid.value = val }
 })
 const snapToObjects = computed({
-    get: () => builder?.snapToObjects ?? true,
-    set: (val) => { if (builder && 'snapToObjects' in builder) builder.snapToObjects = val }
+    get: () => builder?.snapToObjects?.value ?? true,
+    set: (val) => { if (builder && builder.snapToObjects) builder.snapToObjects.value = val }
 })
 const autoSave = computed({
-    get: () => builder?.autoSave ?? true,
-    set: (val) => { if (builder && 'autoSave' in builder) builder.autoSave = val }
+    get: () => builder?.autoSave?.value ?? true,
+    set: (val) => { if (builder && builder.autoSave) builder.autoSave.value = val }
 })
 
 // Language Logic via useLanguage composable for global sync

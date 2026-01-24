@@ -8,6 +8,7 @@
                     class="code-block-copy" 
                     @click="copyCode"
                     :title="copied ? 'Copied!' : 'Copy code'"
+                    type="button"
                 >
                     <Check v-if="copied" class="w-4 h-4" />
                     <Copy v-else class="w-4 h-4" />
@@ -24,21 +25,12 @@
     </node-view-wrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NodeViewWrapper, NodeViewContent } from '@tiptap/vue-3'
+import { NodeViewWrapper, NodeViewContent, nodeViewProps } from '@tiptap/vue-3'
 import { Copy, Check } from 'lucide-vue-next'
 
-const props = defineProps({
-    node: {
-        type: Object,
-        required: true,
-    },
-    updateAttributes: {
-        type: Function,
-        required: true,
-    },
-})
+const props = defineProps(nodeViewProps)
 
 const copied = ref(false)
 

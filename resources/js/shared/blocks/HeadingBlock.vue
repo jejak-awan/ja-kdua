@@ -14,7 +14,7 @@
               contenteditable="true"
               @blur="onTextBlur($event, settings)"
               v-html="displayText(settings)"
-              style="display: inline-block; width: 100%; outline: none;"
+              style="display: block; width: 100%; outline: none;"
             ></div>
           </template>
           <template v-else>
@@ -27,7 +27,7 @@
             :contenteditable="blockMode === 'edit'"
             @blur="onSubtitleBlur($event, settings)"
             v-html="subtitle(settings) || (blockMode === 'edit' ? 'Add a subtitle...' : '')"
-            style="display: inline-block; width: 100%; outline: none;"
+            style="display: block; width: 100%; outline: none;"
           ></div>
         </div>
         
@@ -166,6 +166,9 @@ const onSubtitleBlur = (e, settings) => {
 </script>
 
 <style scoped>
+.heading-container {
+  width: 100%;
+}
 .heading-block {
   margin: 0;
   padding: 0;

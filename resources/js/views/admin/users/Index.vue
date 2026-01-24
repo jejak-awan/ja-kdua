@@ -350,43 +350,61 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
-import api from '../../../services/api';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import { useToast } from '../../../composables/useToast';
-import Button from '../../../components/ui/button.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Input from '../../../components/ui/input.vue';
-import Card from '../../../components/ui/card.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import api from '@/services/api';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
+import { useToast } from '@/composables/useToast';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Pagination from '@/components/ui/pagination.vue';
+// @ts-ignore
+import Input from '@/components/ui/input.vue';
+// @ts-ignore
+import Card from '@/components/ui/card.vue';
+// @ts-ignore
+import Select from '@/components/ui/select.vue';
+// @ts-ignore
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
+import SelectValue from '@/components/ui/select-value.vue';
+// @ts-ignore
+import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
+import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
+import Checkbox from '@/components/ui/checkbox.vue';
 import { Plus, Search, Loader2, Users, LogOut, Pencil, Trash2, CheckCheck, CheckCircle, AlertCircle, UserPlus, Activity, RotateCcw } from 'lucide-vue-next';
-import { useAuthStore } from '../../../stores/auth';
-import { useConfirm } from '../../../composables/useConfirm';
+import { useAuthStore } from '@/stores/auth';
+import { useConfirm } from '@/composables/useConfirm';
+import type { User, Role } from '@/types/auth';
 
 const { t } = useI18n();
 const toast = useToast();
 const router = useRouter();
 const loading = ref(false);
-const users = ref([]);
-const roles = ref([]);
+const users = ref<User[]>([]);
+const roles = ref<Role[]>([]);
 const search = ref('');
 const roleFilter = ref('all');
 const verificationFilter = ref('all');
 const trashedFilter = ref('without');
-const activeStatFilter = ref(null);
-const pagination = ref(null);
+const activeStatFilter = ref<string | null>(null);
+const pagination = ref<any>(null);
 const authStore = useAuthStore();
 
 const { confirm } = useConfirm();
-const stats = ref({
+const stats = ref<{
+    total: number;
+    verified: number;
+    unverified: number;
+    recent: number;
+    active: number;
+    by_role: Record<string, number>;
+}>({
     total: 0,
     verified: 0,
     unverified: 0,
@@ -395,9 +413,9 @@ const stats = ref({
     by_role: {},
 });
 
-const isSuperAdmin = (u) => u.roles?.some(r => r.name === 'super-admin');
+const isSuperAdmin = (u: User) => u.roles?.some(r => r.name === 'super-admin');
 
-const canManage = (targetUser) => {
+const canManage = (targetUser: User) => {
     // Self management is always allowed (for basic edits)
     if (targetUser.id === authStore.user?.id) return true;
     
@@ -408,7 +426,7 @@ const canManage = (targetUser) => {
     return authStore.isHigherThan(targetUser);
 };
 
-const canDelete = (targetUser) => {
+const canDelete = (targetUser: User) => {
     // Cannot delete self
     if (targetUser.id === authStore.user?.id) return false;
     
@@ -423,7 +441,7 @@ const canDelete = (targetUser) => {
     if (isSuperAdmin(targetUser)) {
         const superAdminCount = users.value.filter(u => isSuperAdmin(u)).length;
         // This is only a frontend check, backend will re-verify
-        if (superAdminCount <= 1 && pagination.value?.total <= 1) return false;
+        if (pagination.value?.total <= 1 || superAdminCount <= 1) return false;
     }
     
     return true;
@@ -432,7 +450,7 @@ const canDelete = (targetUser) => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page: pagination.value?.current_page || 1,
             per_page: pagination.value?.per_page || 10,
         };
@@ -468,15 +486,16 @@ const fetchUsers = async () => {
         const response = await api.get('/admin/ja/users', { params });
         const { data, pagination: paginationData } = parseResponse(response);
         // Ensure each user has roles array
-        users.value = ensureArray(data).map(user => ({
+        users.value = ensureArray(data).map((user: any) => ({
             ...user,
             roles: user.roles || [],
         }));
         if (paginationData) {
             pagination.value = paginationData;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch users:', error);
+        toast.error.action(error);
     } finally {
         loading.value = false;
     }
@@ -496,12 +515,12 @@ const fetchStats = async () => {
     }
 };
 
-const setVerificationFilter = (filter) => {
+const setVerificationFilter = (filter: string) => {
     activeStatFilter.value = null;
     verificationFilter.value = filter;
 };
 
-const setStatFilter = (filter) => {
+const setStatFilter = (filter: string) => {
     verificationFilter.value = 'all';
     activeStatFilter.value = activeStatFilter.value === filter ? null : filter;
     fetchUsers();
@@ -538,26 +557,26 @@ const fetchRoles = async () => {
     }
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (pagination.value) {
         pagination.value.current_page = page;
         fetchUsers();
     }
 };
 
-const changePerPage = (perPage) => {
+const changePerPage = (perPage: number | string) => {
     if (pagination.value) {
-        pagination.value.per_page = perPage;
+        pagination.value.per_page = Number(perPage);
         pagination.value.current_page = 1;
         fetchUsers();
     }
 };
 
-const editUser = (user) => {
+const editUser = (user: User) => {
     router.push({ name: 'users.edit', params: { id: user.id } });
 };
 
-const deleteUser = async (user) => {
+const deleteUser = async (user: User) => {
     const confirmed = await confirm({
         title: t('common.messages.confirm.title'),
         message: t('features.users.messages.deleteConfirm', { name: user.name }),
@@ -573,13 +592,13 @@ const deleteUser = async (user) => {
         await api.delete(`/admin/ja/users/${user.id}`);
         await fetchUsers();
         toast.success.delete('User');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete user:', error);
         toast.error.delete(error, 'User');
     }
 };
 
-const forceLogoutUser = async (user) => {
+const forceLogoutUser = async (user: User) => {
     const confirmed = await confirm({
         title: t('features.users.actions.forceLogout'),
         message: t('features.users.messages.forceLogoutConfirm', { name: user.name }),
@@ -592,28 +611,27 @@ const forceLogoutUser = async (user) => {
     }
 
     try {
-        const response = await api.post(`/admin/ja/users/${user.id}/force-logout`);
-        const { data } = parseResponse(response);
+        await api.post(`/admin/ja/users/${user.id}/force-logout`);
         
         toast.success.action('User forced logout');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to force logout user:', error);
         toast.error.action(error);
     }
 };
 
-const verifyUser = async (user) => {
+const verifyUser = async (user: User) => {
     try {
         await api.post(`/admin/ja/users/${user.id}/verify`);
         toast.success.action('User verified');
         await fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to verify user:', error);
         toast.error.action(error);
     }
 };
 
-const restoreUser = async (user) => {
+const restoreUser = async (user: User) => {
     const confirmed = await confirm({
         title: 'Restore User',
         message: `Are you sure you want to restore ${user.name}?`,
@@ -627,13 +645,13 @@ const restoreUser = async (user) => {
         await api.post(`/admin/ja/users/${user.id}/restore`);
         toast.success.action('User restored');
         await fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore user:', error);
         toast.error.action(error);
     }
 };
 
-const forceDeleteUser = async (user) => {
+const forceDeleteUser = async (user: User) => {
     const confirmed = await confirm({
         title: 'Permanently Delete User',
         message: `Are you sure you want to PERMANENTLY delete ${user.name}? This action cannot be undone.`,
@@ -647,19 +665,19 @@ const forceDeleteUser = async (user) => {
         await api.delete(`/admin/ja/users/${user.id}/force-delete`);
         toast.success.action('User permanently deleted');
         await fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to force delete user:', error);
         toast.error.action(error);
     }
 };
 
-const selectedIds = ref([]);
+const selectedIds = ref<number[]>([]);
 
 const isAllSelected = computed(() => {
     return users.value.length > 0 && selectedIds.value.length === users.value.length;
 });
 
-const toggleSelection = (id) => {
+const toggleSelection = (id: number) => {
     const index = selectedIds.value.indexOf(id);
     if (index === -1) {
         selectedIds.value.push(id);
@@ -668,7 +686,7 @@ const toggleSelection = (id) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedIds.value = users.value.map(u => u.id);
     } else {
@@ -678,13 +696,13 @@ const toggleSelectAll = (checked) => {
 
 const bulkActionSelection = ref('');
 
-const handleBulkAction = async (value) => {
+const handleBulkAction = async (value: string) => {
     if (!value) return;
     await bulkAction(value);
     bulkActionSelection.value = '';
 };
 
-const bulkAction = async (action) => {
+const bulkAction = async (action: string) => {
     if (selectedIds.value.length === 0) return;
     
     let confirmMessage = '';
@@ -728,19 +746,18 @@ const bulkAction = async (action) => {
             ids: selectedIds.value,
             action: action
         });
-        const { data } = parseResponse(response);
-
+        
         selectedIds.value = [];
         await fetchUsers();
         
         toast.success.action('Bulk action successful');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Bulk action failed:', error);
         toast.error.action(error);
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',
@@ -762,7 +779,7 @@ const route = useRoute();
 onMounted(() => {
     // Check for search query param from Global Search
     if (route.query.q) {
-        search.value = route.query.q;
+        search.value = route.query.q as string;
     }
     fetchUsers();
     fetchRoles();

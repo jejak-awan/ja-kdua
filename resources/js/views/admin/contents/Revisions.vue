@@ -176,23 +176,36 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
+import api from '@/services/api';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '@/components/ui/card-title.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
 import Label from '@/components/ui/label.vue';
+// @ts-ignore
 import Table from '@/components/ui/table.vue';
+// @ts-ignore
 import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
 import TableCell from '@/components/ui/table-cell.vue';
+// @ts-ignore
 import TableHead from '@/components/ui/table-head.vue';
+// @ts-ignore
 import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
 import TableRow from '@/components/ui/table-row.vue';
 import { 
     ArrowLeft, 
@@ -203,17 +216,17 @@ import {
     X,
     FileText
 } from 'lucide-vue-next';
-import { useConfirm } from '../../../composables/useConfirm';
-import toast from '../../../services/toast';
+import { useConfirm } from '@/composables/useConfirm';
+import toast from '@/services/toast';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const contentId = route.params.id;
-const revisions = ref([]);
+const contentId = route.params.id as string;
+const revisions = ref<any[]>([]);
 const loading = ref(false);
 const contentTitle = ref('');
-const viewingRevision = ref(null);
+const viewingRevision = ref<any>(null);
 const { confirm } = useConfirm();
 
 const fetchRevisions = async () => {
@@ -240,7 +253,7 @@ const fetchRevisions = async () => {
     }
 };
 
-const viewRevision = async (revision) => {
+const viewRevision = async (revision: any) => {
     try {
         const response = await api.get(`/admin/ja/contents/${contentId}/revisions/${revision.id}`);
         viewingRevision.value = response.data.data || response.data;
@@ -250,7 +263,7 @@ const viewRevision = async (revision) => {
     }
 };
 
-const restoreRevision = async (revision) => {
+const restoreRevision = async (revision: any) => {
     const confirmed = await confirm({
         title: 'Restore Revision',
         message: `Are you sure you want to restore revision v${revision.version}? This will replace the current content.`,
@@ -266,17 +279,17 @@ const restoreRevision = async (revision) => {
         await api.post(`/admin/ja/contents/${contentId}/revisions/${revision.id}/restore`);
         toast.success(t('common.messages.success.restored', { item: `v${revision.version}` }));
         router.push({ name: 'contents.edit', params: { id: contentId } });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore revision:', error);
         toast.error(t('common.messages.toast.error'), error.response?.data?.message || t('features.content.messages.restoreFailed'));
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString();
 };
 
-const formatTime = (date) => {
+const formatTime = (date: string) => {
     return new Date(date).toLocaleTimeString();
 };
 

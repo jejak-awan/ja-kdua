@@ -31,7 +31,7 @@
                                 v-model="form.name"
                                 required
                                 @input="generateSlug"
-                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
+                                :class="errors.name ? 'border-destructive focus-visible:ring-destructive' : ''"
                                 :placeholder="$t('features.tags.form.namePlaceholder')"
                             />
                             <p v-if="errors.name" class="text-sm text-destructive">
@@ -47,7 +47,7 @@
                             <Input
                                 v-model="form.slug"
                                 required
-                                :class="{ 'border-destructive focus-visible:ring-destructive': errors.slug }"
+                                :class="errors.slug ? 'border-destructive focus-visible:ring-destructive' : ''"
                                 :placeholder="$t('features.tags.form.slugPlaceholder')"
                             />
                             <p class="text-xs text-muted-foreground">{{ $t('features.tags.form.slugHelp') }}</p>
@@ -83,25 +83,35 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { tagSchema } from '../../../schemas';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { tagSchema } from '@/schemas';
 import { Loader2 } from 'lucide-vue-next';
 
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Label from '@/components/ui/label.vue';
+// @ts-ignore
 import Textarea from '@/components/ui/textarea.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '@/components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '@/components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import CardFooter from '@/components/ui/card-footer.vue';
 
 const { t } = useI18n();
@@ -110,7 +120,7 @@ const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(tagSchema);
 const saving = ref(false);
 
-const form = ref({
+const form = ref<any>({
     name: '',
     slug: '',
     description: '',
@@ -126,7 +136,7 @@ const generateSlug = () => {
     }
 };
 
-const slugify = (text) => {
+const slugify = (text: string) => {
     return text
         .toString()
         .toLowerCase()
@@ -147,7 +157,7 @@ const handleSubmit = async () => {
         await api.post('/admin/ja/tags', form.value);
         toast.success.create('Tag');
         router.push({ name: 'tags.index' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

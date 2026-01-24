@@ -60,7 +60,7 @@
                         <ImageIcon class="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ statistics?.types?.find(t => t.type === 'image')?.count || 0 }}</div>
+                        <div class="text-2xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'image')?.count || 0 }}</div>
                         <p class="text-xs text-muted-foreground">
                             {{ $t('features.media.stats.images') }}
                         </p>
@@ -75,7 +75,7 @@
                         <VideoIcon class="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                        <div class="text-2xl font-bold">{{ statistics?.types?.find(t => t.type === 'video')?.count || 0 }}</div>
+                        <div class="text-2xl font-bold">{{ statistics?.types?.find((t: any) => t.type === 'video')?.count || 0 }}</div>
                         <p class="text-xs text-muted-foreground">
                             {{ $t('features.media.stats.videos') }}
                         </p>
@@ -135,7 +135,7 @@
                                     @click="selectFolder(folder.id)"
                                 >
                                     <button 
-                                        v-if="folder.children?.length > 0"
+                                        v-if="(folder.children?.length || 0) > 0"
                                         @click.stop="toggleFolder(folder.id)"
                                         class="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
                                     >
@@ -161,7 +161,7 @@
                                 </div>
 
                                 <!-- Sub folders -->
-                                <div v-if="expandedFolders.has(folder.id) && folder.children?.length > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
+                                <div v-if="expandedFolders.has(folder.id) && (folder.children?.length || 0) > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
                                     <template v-for="child in folder.children" :key="child.id">
                                         <div 
                                             v-if="!child.is_trashed"
@@ -172,7 +172,7 @@
                                             @click="selectFolder(child.id)"
                                         >
                                             <button 
-                                                v-if="child.children?.length > 0"
+                                                v-if="(child.children?.length || 0) > 0"
                                                 @click.stop="toggleFolder(child.id)"
                                                 class="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground transition-colors"
                                             >
@@ -198,7 +198,7 @@
                                         </div>
                                         
                                         <!-- Level 3 -->
-                                        <div v-if="expandedFolders.has(child.id) && child.children?.length > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
+                                        <div v-if="expandedFolders.has(child.id) && (child.children?.length || 0) > 0" class="ml-4 border-l border-border pl-1 mt-0.5 space-y-0.5">
                                             <div 
                                                 v-for="subChild in child.children" 
                                                 :key="subChild.id"
@@ -318,22 +318,14 @@
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    @click="viewMode = 'grid'"
-                                    :class="[
-                                        'h-8 w-8 p-0 rounded-sm transition-all',
-                                        viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
-                                    ]"
+                                    :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
                                     <LayoutGrid class="w-4 h-4" />
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    @click="viewMode = 'list'"
-                                    :class="[
-                                        'h-8 w-8 p-0 rounded-sm transition-all',
-                                        viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'
-                                    ]"
+                                    :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
                                     <List class="w-4 h-4" />
                                 </Button>
@@ -427,7 +419,7 @@
                                 <div class="aspect-square bg-blue-50/30 dark:bg-blue-900/10 flex flex-col items-center justify-center p-4">
                                     <div class="relative">
                                         <Folder class="w-16 h-16 text-blue-400 fill-blue-400/10 transition-transform group-hover:scale-110" />
-                                        <div v-if="folder.children_count > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
+                                        <div v-if="(folder.children_count || 0) > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
                                             {{ folder.children_count }}
                                         </div>
                                     </div>
@@ -715,7 +707,7 @@
             v-if="showUploadModal"
             @close="showUploadModal = false"
             @uploaded="handleMediaUploaded"
-            :folder-id="selectedFolder"
+            :folder-id="selectedFolder || undefined"
         />
 
         <!-- Edit Modal -->
@@ -807,11 +799,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useToast } from '@/composables/useToast.js';
-import { useConfirm } from '@/composables/useConfirm.js';
+import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
 import { 
     LayoutGrid, 
     List, 
@@ -842,28 +834,49 @@ import {
     RefreshCw
 } from 'lucide-vue-next';
 import Pagination from '@/components/ui/pagination.vue';
-import api from '../../../services/api';
-import MediaUploadModal from '../../../components/media/MediaUploadModal.vue';
-import MediaEditModal from '../../../components/media/MediaEditModal.vue';
-import MediaViewModal from '../../../components/media/MediaViewModal.vue';
-import FolderModal from '../../../components/media/FolderModal.vue';
-import MoveToFolderModal from '../../../components/media/MoveToFolderModal.vue';
-import LazyImage from '../../../components/LazyImage.vue';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
+import api from '@/services/api';
+// @ts-ignore
+import MediaUploadModal from '@/components/media/MediaUploadModal.vue';
+// @ts-ignore
+import MediaEditModal from '@/components/media/MediaEditModal.vue';
+// @ts-ignore
+import MediaViewModal from '@/components/media/MediaViewModal.vue';
+// @ts-ignore
+import FolderModal from '@/components/media/FolderModal.vue';
+// @ts-ignore
+import MoveToFolderModal from '@/components/media/MoveToFolderModal.vue';
+import LazyImage from '@/components/LazyImage.vue';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Select from '@/components/ui/select.vue';
+// @ts-ignore
 import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
 import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
 import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
+// @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '@/components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '@/components/ui/card-description.vue';
+
+import type { Media, MediaFolder } from '@/types/cms';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -871,9 +884,12 @@ const { confirm: confirmDialog } = useConfirm();
 const viewMode = ref('grid');
 const loading = ref(false);
 const isReady = ref(false);
-const mediaList = ref([]);
-const folders = ref([]); // Flattened list of folders for lookups and modals
-const treeFolders = ref([]); // Hierarchical list of folders for sidebar and current view
+const mediaList = ref<Media[]>([]);
+const folders = ref<MediaFolder[]>([]); // Flattened list of folders for lookups and modals
+const treeFolders = ref<MediaFolder[]>([]); // Hierarchical list of folders for sidebar and current view
+const isTrashMode = ref(false);
+const selectedFolder = ref<number | null>(null);
+
 const currentFolders = computed(() => {
     // If in trash mode, show ALL folders that are trashed
     if (isTrashMode.value) {
@@ -893,10 +909,10 @@ const currentFolders = computed(() => {
     
     return (current.children || []).filter(f => !f.is_trashed);
 });
-const selectedFolder = ref(null);
-const selectedMedia = ref([]);
-const pagination = ref(null);
-const statistics = ref(null);
+
+const selectedMedia = ref<number[]>([]);
+const pagination = ref<any>(null);
+const statistics = ref<any>(null);
 const search = ref('');
 const mimeFilter = ref('all');
 const usageFilter = ref('all');
@@ -905,10 +921,10 @@ const breadcrumbs = computed(() => {
     if (selectedFolder.value === null) return [];
     
     const crumbs = [];
-    let currentId = selectedFolder.value;
+    let currentId: number | null | undefined = selectedFolder.value;
     
     while (currentId) {
-        const folder = folders.value.find(f => f.id === currentId);
+        const folder: MediaFolder | undefined = folders.value.find(f => f.id === currentId);
         if (folder) {
             crumbs.unshift({ id: folder.id, name: folder.name });
             currentId = folder.parent_id;
@@ -926,19 +942,19 @@ const showViewModal = ref(false);
 const showFolderModal = ref(false);
 const showMoveFolderModal = ref(false);
 const showUpdateAltModal = ref(false);
-const editingMedia = ref(null);
-const viewingMedia = ref(null);
+const editingMedia = ref<Media | null>(null);
+const viewingMedia = ref<Media | null>(null);
 const bulkProcessing = ref(false);
 const bulkProgress = ref(0);
 const sidebarCollapsed = ref(false);
-const isTrashMode = ref(false);
-const expandedFolders = ref(new Set());
+const expandedFolders = ref(new Set<number>());
+const bulkAltText = ref('');
 
 const toggleSidebar = () => {
     sidebarCollapsed.value = !sidebarCollapsed.value;
 };
 
-const toggleFolder = (folderId) => {
+const toggleFolder = (folderId: number) => {
     if (expandedFolders.value.has(folderId)) {
         expandedFolders.value.delete(folderId);
     } else {
@@ -946,7 +962,7 @@ const toggleFolder = (folderId) => {
     }
 };
 
-const selectFolder = (id) => {
+const selectFolder = (id: number | null) => {
     isTrashMode.value = false;
     selectedFolder.value = id;
 };
@@ -960,7 +976,7 @@ const toggleTrashMode = () => {
 const fetchMedia = async () => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page: pagination.value?.current_page || 1,
             view: viewMode.value,
             trashed: isTrashMode.value ? 'only' : undefined,
@@ -1020,8 +1036,8 @@ const fetchFolders = async () => {
         treeFolders.value = ensureArray(data);
         
         // Flatten folders for breadcrumbs and lookup if needed
-        const flatten = (items) => {
-            let result = [];
+        const flatten = (items: MediaFolder[]): MediaFolder[] => {
+            let result: MediaFolder[] = [];
             items.forEach(item => {
                 result.push(item);
                 if (item.children && item.children.length > 0) {
@@ -1036,7 +1052,7 @@ const fetchFolders = async () => {
     }
 };
 
-const restoreMedia = async (media) => {
+const restoreMedia = async (media: Media) => {
     try {
         await api.post(`/admin/ja/media/${media.id}/restore`);
         await fetchMedia();
@@ -1064,24 +1080,24 @@ const emptyTrash = async () => {
         await fetchMedia();
         await fetchFolders();
         fetchStatistics();
-    } catch (error) {
+    } catch (error: any) {
         // console.error('Failed to empty trash:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (pagination.value) {
         pagination.value.current_page = page;
         fetchMedia();
     }
 };
 
-const isMediaSelected = (mediaId) => {
+const isMediaSelected = (mediaId: number) => {
     return selectedMedia.value.includes(mediaId);
 };
 
-const toggleMediaSelection = (media) => {
+const toggleMediaSelection = (media: Media) => {
     const index = selectedMedia.value.indexOf(media.id);
     if (index > -1) {
         selectedMedia.value.splice(index, 1);
@@ -1109,7 +1125,6 @@ const handleBulkAction = async () => {
     }
 
     const action = bulkAction.value;
-    const count = selectedMedia.value.length;
     
     if (action === 'delete') {
         const confirmed = await confirmDialog({
@@ -1137,7 +1152,7 @@ const handleBulkAction = async () => {
             fetchStatistics();
             selectedMedia.value = [];
             bulkAction.value = '';
-        } catch (error) {
+        } catch (error: any) {
             // console.error('Failed to delete media:', error);
             toast.error.fromResponse(error);
             bulkAction.value = '';
@@ -1155,7 +1170,7 @@ const handleBulkAction = async () => {
             fetchStatistics();
             selectedMedia.value = [];
             bulkAction.value = '';
-        } catch (error) {
+        } catch (error: any) {
             // console.error('Failed to restore media:', error);
             toast.error.fromResponse(error);
         } finally {
@@ -1184,7 +1199,7 @@ const handleBulkAction = async () => {
             fetchStatistics();
             selectedMedia.value = [];
             bulkAction.value = '';
-        } catch (error) {
+        } catch (error: any) {
             // console.error('Failed to delete permanent:', error);
             toast.error.fromResponse(error);
         } finally {
@@ -1220,7 +1235,7 @@ const handleBulkAction = async () => {
             selectedMedia.value = [];
             bulkAction.value = '';
             toast.success.upload();  // Reusing upload success
-        } catch (error) {
+        } catch (error: any) {
             // console.error('Failed to download media:', error);
             toast.error.fromResponse(error);
             bulkAction.value = '';
@@ -1231,8 +1246,7 @@ const handleBulkAction = async () => {
     }
 };
 
-const handleMoveToFolder = async (folderId) => {
-    const count = selectedMedia.value.length;
+const handleMoveToFolder = async (folderId: number | null) => {
     bulkProcessing.value = true;
     bulkProgress.value = 0;
     try {
@@ -1247,7 +1261,7 @@ const handleMoveToFolder = async (folderId) => {
         bulkAction.value = '';
         showMoveFolderModal.value = false;
         toast.success.move();
-    } catch (error) {
+    } catch (error: any) {
         // console.error('Failed to move media:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -1276,7 +1290,7 @@ const handleUpdateAltText = async () => {
         bulkAltText.value = '';
         showUpdateAltModal.value = false;
         toast.success.update();
-    } catch (error) {
+    } catch (error: any) {
         // console.error('Failed to update alt text:', error);
         toast.error.fromResponse(error);
     } finally {
@@ -1285,17 +1299,17 @@ const handleUpdateAltText = async () => {
     }
 };
 
-const viewMedia = (media) => {
+const viewMedia = (media: Media) => {
     viewingMedia.value = media;
     showViewModal.value = true;
 };
 
-const editMedia = (media) => {
+const editMedia = (media: Media) => {
     editingMedia.value = media;
     showEditModal.value = true;
 };
 
-const deleteMedia = async (media) => {
+const deleteMedia = async (media: Media) => {
     const isPermanent = isTrashMode.value;
     
     const confirmed = await confirmDialog({
@@ -1324,13 +1338,13 @@ const deleteMedia = async (media) => {
         }
         await fetchMedia();
         fetchStatistics();
-    } catch (error) {
+    } catch (error: any) {
         // console.error('Failed to delete media:', error);
         toast.error.fromResponse(error);
     }
 };
 
-const deleteFolder = async (folder) => {
+const deleteFolder = async (folder: MediaFolder) => {
     const isPermanent = isTrashMode.value;
     
     const confirmed = await confirmDialog({
@@ -1358,7 +1372,7 @@ const deleteFolder = async (folder) => {
             selectedFolder.value = folder.parent_id || null;
         }
         fetchStatistics();
-    } catch (error) {
+    } catch (error: any) {
         // console.error('Failed to delete folder:', error);
         toast.error.fromResponse(error);
     }
@@ -1390,7 +1404,7 @@ const handleFolderCreated = () => {
     showFolderModal.value = false;
 };
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
     if (!bytes) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -1398,17 +1412,18 @@ const formatFileSize = (bytes) => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
 
-const handleImageError = (event) => {
+const handleImageError = (event: Event) => {
     // If thumbnail fails to load, fallback to original URL
-    const img = event.target;
+    const img = event.target as HTMLImageElement;
     const currentSrc = img.src || img.getAttribute('src');
     
     // Check if this is a thumbnail URL
     if (currentSrc && currentSrc.includes('_thumb.')) {
         // Try to get original URL from media object
-        const mediaId = img.closest('[data-media-id]')?.getAttribute('data-media-id');
+        const mediaContainer = img.closest('[data-media-id]');
+        const mediaId = mediaContainer?.getAttribute('data-media-id');
         if (mediaId) {
-            const media = mediaList.value.find(m => m.id == mediaId);
+            const media = mediaList.value.find(m => m.id == Number(mediaId));
             if (media && media.url && media.url !== currentSrc) {
                 img.src = media.url;
                 return;
@@ -1423,8 +1438,8 @@ const handleImageError = (event) => {
         }
     }
     
-    if (img.src !== img.dataset?.originalUrl) {
-        img.src = img.dataset.originalUrl || img.src;
+    if (img.dataset?.originalUrl && img.src !== img.dataset.originalUrl) {
+        img.src = img.dataset.originalUrl;
     }
 };
 

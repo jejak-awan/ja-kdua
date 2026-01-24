@@ -63,30 +63,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject, ref } from 'vue'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { Plus, Layout } from 'lucide-vue-next'
 import { BaseButton } from '../ui'
 import ModuleActions from './ModuleActions.vue'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  module: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  field: any;
+  module: BlockInstance;
+}>()
 
 const { t, te } = useI18n()
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
-const showInfoId = ref(null)
+const showInfoId = ref<string | null>(null)
 
-const toggleInfo = (id) => {
+const toggleInfo = (id: string) => {
     if (showInfoId.value === id) {
         showInfoId.value = null
     } else {
@@ -94,7 +89,7 @@ const toggleInfo = (id) => {
     }
 }
 
-const getChildInfo = (child) => {
+const getChildInfo = (child: BlockInstance) => {
     // Return some basic info about the child
     const typeLabel = getChildTypeLabel()
     const name = getChildLabel(child)
@@ -109,12 +104,12 @@ const getChildTypeLabel = () => {
 
 // Reactive children logic
 const children = computed(() => {
-    const currentModule = builder.findModule(props.module.id)
+    const currentModule = builder?.findModule(props.module.id)
     if (!currentModule || !currentModule.children || !currentModule.children.length) return []
-    return currentModule.children
+    return currentModule.children as BlockInstance[]
 })
 
-const getChildLabel = (child) => {
+const getChildLabel = (child: BlockInstance) => {
     if (child.type === 'row') return t('builder.fields.types.row')
     if (child.settings?.admin_label) return child.settings.admin_label
     
@@ -126,56 +121,56 @@ const getChildLabel = (child) => {
     return child.type.charAt(0).toUpperCase() + child.type.slice(1)
 }
 
-const isSelected = (id) => {
-    return builder.selectedModule?.id === id
+const isSelected = (id: string) => {
+    return builder?.selectedModule?.id === id
 }
 
 // Actions
-const openSettings = (child) => {
-    builder.selectModule(child.id)
+const openSettings = (child: BlockInstance) => {
+    builder?.selectModule(child.id)
 }
 
-const duplicateChild = (child) => {
-    builder.duplicateModule(child.id)
+const duplicateChild = (child: BlockInstance) => {
+    builder?.duplicateModule(child.id)
 }
 
-const deleteChild = (child) => {
-    builder.removeModule(child.id)
+const deleteChild = (child: BlockInstance) => {
+    builder?.removeModule(child.id)
 }
 
-const copyStyles = (child) => {
+const copyStyles = (child: BlockInstance) => {
     // TODO: Implement copy styles
 }
 
 const addChild = () => {
     if (props.module.type === 'section') {
-        builder.openInsertRowModal(props.module.id)
+        builder?.openInsertRowModal(props.module.id)
     } else if (props.module.type === 'row') {
-        builder.insertModule('column', props.module.id)
+        builder?.insertModule('column', props.module.id)
     } else if (props.module.type === 'column' || isGenericContainer.value) {
         // For columns and generic containers (like Group), open the module selector
-        builder.openInsertModal(props.module.id)
+        builder?.openInsertModal(props.module.id)
     } else {
         // For specialized modules (Accordion, Tabs, Map, etc.), 
         // find the allowed child type from definition and insert it
-        const definition = builder.getModuleDefinition(props.module.type)
+        const definition = builder?.getModuleDefinition(props.module.type)
         if (definition?.children && definition.children.length > 0) {
             const firstChildType = definition.children[0]
             if (firstChildType !== '*') {
-                builder.insertModule(firstChildType, props.module.id)
+                builder?.insertModule(firstChildType, props.module.id)
             }
         }
     }
 }
 
 const isGenericContainer = computed(() => {
-    const definition = builder.getModuleDefinition(props.module.type)
+    const definition = builder?.getModuleDefinition(props.module.type)
     return definition?.children?.includes('*')
 })
 
 const openStructureTemplate = () => {
     // Open the specialized structure template modal instead of the generic row modal
-    builder.openStructureTemplateModal(props.module.id, props.module.type)
+    builder?.openStructureTemplateModal(props.module.id, props.module.type)
 }
 </script>
 

@@ -59,8 +59,9 @@ const activeTab = ref('export')
 const importJson = ref('')
 
 const exportJson = computed(() => {
-  if (!builder?.blocks) return ''
-  return JSON.stringify(builder.blocks, null, 2)
+  const blocks = builder?.blocks?.value || builder?.blocks || []
+  if (!blocks) return ''
+  return JSON.stringify(blocks, null, 2)
 })
 
 const copyToClipboard = () => {
@@ -73,7 +74,11 @@ const handleImport = () => {
     try {
         const blocks = JSON.parse(importJson.value)
         if(Array.isArray(blocks)) {
-            builder.blocks = blocks
+            if (builder.blocks && typeof builder.blocks === 'object' && 'value' in builder.blocks) {
+                builder.blocks.value = blocks
+            } else {
+                builder.blocks = blocks
+            }
             builder.takeSnapshot() // Add to history
             alert(t('builder.panels.portability.import.success'))
         }

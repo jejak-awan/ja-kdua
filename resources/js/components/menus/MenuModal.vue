@@ -57,7 +57,7 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 
 import { useI18n } from 'vue-i18n';
@@ -82,9 +82,12 @@ import { menuSchema } from '../../schemas';
 
 const { t } = useI18n();
 const toast = useToast();
-const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema);
+const { validateWithZod, setErrors, clearErrors } = useFormValidation(menuSchema);
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits<{
+    (e: 'close'): void;
+    (e: 'saved', menu: any): void;
+}>();
 
 const saving = ref(false);
 const form = ref({
@@ -92,7 +95,12 @@ const form = ref({
     location: '',
 });
 
-const locationOptions = ref([]);
+interface LocationOption {
+    value: string;
+    label: string;
+}
+
+const locationOptions = ref<LocationOption[]>([]);
 const loadingLocations = ref(false);
 
 const fetchLocations = async () => {
@@ -104,7 +112,7 @@ const fetchLocations = async () => {
         // Transform { key: label } to [{ value: key, label: label }]
         locationOptions.value = Object.entries(data).map(([key, label]) => ({
             value: key,
-            label: label
+            label: label as string
         }));
     } catch (error) {
         console.error('Failed to fetch menu locations:', error);
@@ -133,7 +141,7 @@ const handleSubmit = async () => {
         toast.success.create('Menu');
         emit('saved', menu);
         emit('close');
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {
@@ -144,4 +152,3 @@ const handleSubmit = async () => {
     }
 };
 </script>
-

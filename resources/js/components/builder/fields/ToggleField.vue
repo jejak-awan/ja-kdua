@@ -5,19 +5,15 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { BaseToggle } from '../ui'
 
-defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: Boolean,
-    default: false
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: boolean;
+}>()
 
-defineEmits(['update:value'])
+const emit = defineEmits<{
+  (e: 'update:value', val: boolean): void;
+}>()
 </script>

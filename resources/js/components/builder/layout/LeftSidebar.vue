@@ -7,7 +7,7 @@
         class="sidebar-btn"
         :class="{ 'sidebar-btn--active': activePanel === panel.id }"
         @click="$emit('change-panel', panel.id)"
-        :title="$t('builder.sidebars.' + panel.id)"
+        :title="t('builder.sidebars.' + panel.id)"
       >
         <component :is="getIcon(panel.icon)" :size="20" />
       </button>
@@ -18,7 +18,7 @@
         class="sidebar-btn" 
         :class="{ 'sidebar-btn--active': activePanel === 'preferences' }"
         @click="$emit('change-panel', 'preferences')"
-        :title="$t('builder.toolbar.preferences')"
+        :title="t('builder.toolbar.preferences')"
       >
         <component :is="icons.Settings2" :size="20" />
       </button>
@@ -26,36 +26,43 @@
   </aside>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { 
   Layers, FileText, Clock, Layout, Settings, Palette, 
   Sparkles, Share2, HelpCircle, Settings2, Database
 } from 'lucide-vue-next'
 import { inject, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { SIDEBAR_PANELS } from '../core/constants'
+import type { BuilderInstance } from '../../../types/builder'
 
 // Props
-defineProps({
-  activePanel: {
-    type: String,
-    default: 'layers'
-  }
+interface Props {
+  activePanel?: string;
+}
+
+withDefaults(defineProps<Props>(), {
+  activePanel: 'layers'
 })
 
 // Emits
-defineEmits(['change-panel'])
+defineEmits<{
+  (e: 'change-panel', panelId: string): void;
+}>()
+
+const { t } = useI18n()
 
 // Icons map
-const icons = {
+const icons: Record<string, any> = {
   Layers, FileText, Clock, Layout, Settings, Palette,
   Sparkles, Share2, HelpCircle, Settings2, Database
 }
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 const panels = SIDEBAR_PANELS
 
 const filteredPanels = computed(() => {
-  if (builder?.mode === 'page') {
+  if (builder?.mode.value === 'page') {
     // Hidden panels in page mode (focused editing)
     const hidden = ['pages', 'portability', 'theme', 'global_variables']
     return panels.filter(p => !hidden.includes(p.id))
@@ -63,7 +70,7 @@ const filteredPanels = computed(() => {
   return panels
 })
 
-const getIcon = (iconName) => {
+const getIcon = (iconName: string) => {
   return icons[iconName] || icons.Layers
 }
 </script>

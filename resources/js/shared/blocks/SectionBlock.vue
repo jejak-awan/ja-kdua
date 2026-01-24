@@ -1,6 +1,6 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="section-block">
-    <div class="section-container relative" :class="[fullWidth ? 'w-full' : 'container mx-auto px-4']" :style="containerStyles">
+    <div class="section-container relative w-full" :style="containerStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
@@ -45,7 +45,7 @@ const device = computed(() => builder?.device || 'desktop')
 
 const BlockRenderer = inject('BlockRenderer', null)
 
-const fullWidth = computed(() => getResponsiveValue(settings.value, 'fullWidth', device.value) === true)
+const fullWidth = computed(() => getResponsiveValue(settings.value, 'full_width', device.value) === true)
 
 const containerStyles = computed(() => {
   const vAlign = getResponsiveValue(settings.value, 'verticalAlign', device.value) || 'start'
@@ -66,5 +66,8 @@ const addRow = () => {
 
 <style scoped>
 .section-block { width: 100%; position: relative; }
+.section-container {
+    min-height: 80px;
+}
 .section-child { width: 100%; }
 </style>

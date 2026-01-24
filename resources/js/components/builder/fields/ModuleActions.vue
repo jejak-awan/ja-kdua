@@ -1,43 +1,71 @@
 <template>
   <div class="module-actions">
-    
-    <!-- Drag Handle -->
-    <div v-if="showDrag" class="action-icon drag-handle" :title="$t('builder.items.drag')">
-        <GripVertical :size="size" />
-    </div>
-
-    <!-- Delete -->
-    <div v-if="showDelete" class="action-icon delete-btn" :title="$t('builder.items.delete')" @click.stop="$emit('delete')">
-        <Trash :size="size" />
+    <!-- Settings (Edit) -->
+    <div v-if="showEdit" class="action-icon" :title="t('builder.items.settings')" @click.stop="$emit('edit')">
+        <Settings :size="size" />
     </div>
 
     <!-- Duplicate -->
-    <div v-if="showDuplicate" class="action-icon" :title="$t('builder.items.duplicate')" @click.stop="$emit('duplicate')">
+    <div v-if="showDuplicate" class="action-icon" :title="t('builder.items.duplicate')" @click.stop="$emit('duplicate')">
         <Copy :size="size" />
     </div>
 
-    <!-- Layout -->
-    <div v-if="showLayout" class="action-icon" :title="$t('builder.items.layout')" @click.stop="$emit('layout')">
-        <LayoutTemplate :size="size" />
+    <!-- Layout (Rows) -->
+    <div v-if="showLayout" class="action-icon" :title="t('builder.items.layout')" @click.stop="$emit('layout')">
+        <Columns :size="size" />
+    </div>
+
+    <!-- Delete -->
+    <div v-if="showDelete" class="action-icon delete-btn" :title="t('builder.items.delete')" @click.stop="$emit('delete')">
+        <Trash :size="size" />
+    </div>
+
+    <!-- More (Meatballs) -->
+    <div class="action-icon" :title="t('builder.items.more')" @click.stop="$emit('more', $event)">
+        <MoreVertical :size="size" />
+    </div>
+    
+    <!-- Drag Handle -->
+    <div v-if="showDrag" class="action-icon drag-handle" :title="t('builder.items.drag')">
+        <GripVertical :size="size" />
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import { Pencil, Copy, Trash, GripVertical, LayoutTemplate } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import { Settings, Copy, Trash, GripVertical, Columns, MoreVertical } from 'lucide-vue-next'
 
-defineProps({
-  label: { type: String, default: 'Item' },
-  size: { type: Number, default: 14 },
-  showEdit: { type: Boolean, default: true },
-  showLayout: { type: Boolean, default: false },
-  showDuplicate: { type: Boolean, default: true },
-  showDelete: { type: Boolean, default: true },
-  showDrag: { type: Boolean, default: false }
+const { t } = useI18n()
+
+interface Props {
+  label?: string;
+  size?: number;
+  showEdit?: boolean;
+  showLayout?: boolean;
+  showDuplicate?: boolean;
+  showDelete?: boolean;
+  showDrag?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  label: 'Item',
+  size: 14,
+  showEdit: true,
+  showLayout: false,
+  showDuplicate: true,
+  showDelete: true,
+  showDrag: false
 })
 
-defineEmits(['edit', 'layout', 'duplicate', 'delete'])
+defineEmits<{
+  (e: 'edit'): void;
+  (e: 'layout'): void;
+  (e: 'duplicate'): void;
+  (e: 'delete'): void;
+  (e: 'more', event: MouseEvent): void;
+}>()
 </script>
 
 <style scoped>

@@ -57,17 +57,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ChevronUp, ChevronDown } from 'lucide-vue-next'
 import { BaseSlider, BaseDropdown } from '../ui'
 
-const props = defineProps({
-  field: { type: Object, default: () => ({}) },
-  value: { type: String, default: '' },
-  placeholderValue: { type: String, default: null },
-  units: { type: Array, default: null }
-})
+const props = defineProps<{
+  field: any;
+  value: string;
+  placeholderValue?: string | null;
+  units?: any[] | null;
+}>()
 
 const activeUnits = computed(() => {
     if (props.units) return props.units
@@ -83,7 +83,7 @@ const unit = ref('px')
 const keywords = ['auto', 'inherit', 'initial', 'unset', 'normal', 'none', 'cover', 'contain']
 
 // Extract numeric value and unit from string
-const parseValue = (val) => {
+const parseValue = (val: string) => {
     if (!val || keywords.includes(val)) {
         numericValue.value = 0
         unit.value = val || 'auto'
@@ -103,8 +103,8 @@ const displayValue = computed({
         if (keywords.includes(unit.value)) return unit.value
         return numericValue.value
     },
-    set: (val) => {
-        const lowerVal = val.toLowerCase()
+    set: (val: any) => {
+        const lowerVal = (val as string).toLowerCase()
         if (keywords.includes(lowerVal)) {
             unit.value = lowerVal
             numericValue.value = 0
@@ -127,13 +127,13 @@ const sliderMax = computed(() => {
     return 1000 // default for px, em, etc.
 })
 
-const setUnit = (u) => {
+const setUnit = (u: string) => {
     unit.value = u
     if (keywords.includes(u)) numericValue.value = 0
     emitUpdate()
 }
 
-const updateNumericValue = (delta) => {
+const updateNumericValue = (delta: number) => {
     numericValue.value += delta
     emitUpdate()
 }
@@ -142,7 +142,7 @@ const showSlider = computed(() => {
     return !keywords.includes(unit.value) && unit.value !== ''
 })
 
-const updateValueFromSlider = (val) => {
+const updateValueFromSlider = (val: number) => {
     numericValue.value = val
     emitUpdate()
 }

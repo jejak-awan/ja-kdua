@@ -38,8 +38,8 @@ const { t } = useI18n()
 const builder = inject('builder')
 
 // History State
-const history = computed(() => builder?.history || [])
-const historyIndex = computed(() => builder?.historyIndex || -1)
+const history = computed(() => builder?.history?.value || [])
+const historyIndex = computed(() => builder?.historyIndex?.value ?? -1)
 
 // Methods
 const jumpTo = (index) => {

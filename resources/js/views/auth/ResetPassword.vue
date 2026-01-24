@@ -39,7 +39,7 @@
                             name="password"
                             type="password"
                             required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
+                            :class="errors.password ? 'border-destructive focus-visible:ring-destructive' : ''"
                         />
                         <p v-if="errors.password" class="text-sm text-destructive font-medium">{{ errors.password[0] }}</p>
                     </div>
@@ -76,7 +76,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -86,13 +86,21 @@ import { resetPasswordSchema } from '../../schemas/auth';
 import { Loader2, ArrowLeft } from 'lucide-vue-next';
 
 // Shadcn Components
+// @ts-ignore
 import Card from '../../components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '../../components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '../../components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '../../components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '../../components/ui/card-content.vue';
+// @ts-ignore
 import Button from '../../components/ui/button.vue';
+// @ts-ignore
 import Input from '../../components/ui/input.vue';
+// @ts-ignore
 import Label from '../../components/ui/label.vue';
 
 const router = useRouter();
@@ -122,10 +130,10 @@ const loading = ref(false);
 
 onMounted(() => {
     if (route.query.token) {
-        form.token = route.query.token;
+        form.token = route.query.token as string;
     }
     if (route.query.email) {
-        form.email = route.query.email;
+        form.email = route.query.email as string;
     }
 });
 
@@ -142,13 +150,13 @@ const handleSubmit = async () => {
     const result = await authStore.resetPassword(form);
 
     if (result.success) {
-        message.value = result.message;
+        message.value = result.message || '';
         messageType.value = 'success';
         setTimeout(() => {
             router.push({ name: 'login' });
         }, 2000);
     } else {
-        message.value = result.message;
+        message.value = result.message || '';
         messageType.value = 'error';
         setErrors(result.errors || {});
     }

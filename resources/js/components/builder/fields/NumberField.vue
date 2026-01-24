@@ -13,7 +13,7 @@
         <select
           class="unit-select-minimal"
           :value="unit"
-          @change="$emit('update:unit', $event.target.value)"
+          @change="$emit('update:unit', ($event.target as HTMLSelectElement).value)"
         >
           <option v-for="u in units" :key="u" :value="u">{{ u }}</option>
         </select>
@@ -22,29 +22,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { CSS_UNITS } from '../core/constants'
 import { BaseInput } from '../ui'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: Number,
-    default: 0
-  },
-  unit: {
-    type: String,
-    default: 'px'
-  },
-  placeholderValue: {
-    type: Number,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value: number;
+  unit?: string;
+  placeholderValue?: number | null;
+}>()
 
 const emit = defineEmits(['update:value', 'update:unit'])
 

@@ -89,33 +89,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Move, Maximize, RefreshCw, Smartphone, GitMerge } from 'lucide-vue-next'
 import { BaseLabel, BaseSliderInput, BaseCollapsible, BaseSegmentedControl } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Object,
-    default: () => ({
-      scale: 100,
-      translate_x: 0,
-      translate_y: 0,
-      rotate_x: 0,
-      rotate_y: 0,
-      rotate_z: 0,
-      skew_x: 0,
-      skew_y: 0,
-      origin: 'center'
-    })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value: Record<string, any>;
+  placeholderValue?: any;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
@@ -130,7 +114,7 @@ const translatedTabs = computed(() => [
 ])
 
 // Local state
-const localValue = reactive({ 
+const localValue = reactive<Record<string, any>>({ 
     scale: 100,
     translate_x: 0,
     translate_y: 0,

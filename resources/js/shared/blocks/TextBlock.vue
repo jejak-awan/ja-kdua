@@ -64,13 +64,14 @@ const onContentUpdate = (newContent, settings) => {
 <style scoped>
 .text-block {
   word-wrap: break-word;
+  width: 100%;
 }
-.text-block :deep(p) {
+.text-block:deep(p) {
   margin: 0 0 1.5em;
   line-height: inherit;
   color: inherit;
 }
-.text-block :deep(p:last-child) {
+.text-block:deep(p:last-child) {
   margin-bottom: 0;
 }
 </style>

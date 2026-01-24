@@ -163,8 +163,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, defineAsyncComponent, inject, nextTick, onMounted, onUnmounted } from 'vue'
+import type { BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { parseColor, rgbToHex } from '../core/colorUtils'
 import { themeVariables, toCssVarName } from '../core/cssVariables'
@@ -173,17 +174,17 @@ import { IconButton, BaseColorSlider } from '../ui'
 
 const ColorPickerModal = defineAsyncComponent(() => import('../modals/ColorPickerModal.vue'))
 const { t } = useI18n()
-const builder = inject('builder')
-const { globalColors } = builder.globalVariables || { globalColors: ref([]) }
+const builder = inject<BuilderInstance>('builder')
+const { globalColors } = builder?.globalVariables || { globalColors: ref([]) }
 
-const props = defineProps({
-  field: { type: Object, required: false },
-  value: { type: String, default: '' },
-  defaultValue: { type: String, default: '' },
-  placeholderValue: { type: String, default: null },
-  hidePreview: { type: Boolean, default: false },
-  showLargePreview: { type: Boolean, default: false }
-})
+const props = defineProps<{
+  field?: any;
+  value?: string;
+  defaultValue?: string;
+  placeholderValue?: string | null;
+  hidePreview?: boolean;
+  showLargePreview?: boolean;
+}>()
 
 const emit = defineEmits(['update:value'])
 
@@ -252,7 +253,7 @@ const alphaTrackColor = computed(() => {
 const allSuggestions = computed(() => {
     const staticVars = themeVariables || []
     const colors = globalColors?.value || []
-    const dynamicVars = colors.map(c => toCssVarName(c?.name || ''))
+    const dynamicVars = colors.map((c: any) => toCssVarName(c?.name || ''))
     return [...new Set([...staticVars, ...dynamicVars])]
 })
 
@@ -262,7 +263,7 @@ const filteredSuggestions = computed(() => {
     return allSuggestions.value.filter(v => v.includes(val))
 })
 
-const selectVar = (val) => {
+const selectVar = (val: string) => {
     cssVarValue.value = val
     showVarSuggestions.value = false
     emitUpdateVar()
@@ -279,7 +280,7 @@ const openPicker = () => showPicker.value = true
 const resetColor = () => emit('update:value', null)
 const clearColor = () => emit('update:value', 'transparent')
 
-const handleModalUpdate = (newValue) => {
+const handleModalUpdate = (newValue: string) => {
     emit('update:value', newValue)
     // Update local state based on new value
     if (newValue && (newValue.startsWith('var(') || newValue.startsWith('--') || newValue.startsWith('color-mix('))) {
@@ -306,7 +307,7 @@ const handleModalUpdate = (newValue) => {
 
 const toggleModeDropdown = () => showModeDropdown.value = !showModeDropdown.value
 
-const setMode = (mode) => {
+const setMode = (mode: string) => {
     if (inputMode.value === mode) {
         showModeDropdown.value = false
         return
@@ -339,11 +340,11 @@ const varSuggestionsStyle = ref({})
 // For now, let's rely on CSS absolute positioning relative to parent.
 
 // Click Outside for Mode Dropdown
-const handleClickOutside = (event) => {
-    if (showModeDropdown.value && modeDropdownRef.value && !modeDropdownRef.value.contains(event.target)) {
+const handleClickOutside = (event: MouseEvent) => {
+    if (showModeDropdown.value && modeDropdownRef.value && !(modeDropdownRef.value as HTMLElement).contains(event.target as Node)) {
         showModeDropdown.value = false
     }
-    if (showVarSuggestions.value && mainInputRef.value && !mainInputRef.value.contains(event.target) && !event.target.closest('.var-suggestions-dropdown')) {
+    if (showVarSuggestions.value && mainInputRef.value && !(mainInputRef.value as HTMLElement).contains(event.target as Node) && !(event.target as HTMLElement).closest('.var-suggestions-dropdown')) {
         showVarSuggestions.value = false
     }
 }
@@ -355,12 +356,12 @@ onUnmounted(() => {
     window.removeEventListener('mousedown', handleClickOutside)
 })
 
-const handleHexInput = (e) => {
+const handleHexInput = (e: any) => {
     hexDisplayValue.value = e.target.value
     emit('update:value', e.target.value)
 }
 
-const handleVarInput = (e) => {
+const handleVarInput = (e: Event) => {
     emitUpdateVar()
 }
 
@@ -382,24 +383,24 @@ const emitUpdateVar = () => {
     emit('update:value', val)
 }
 
-const handleOpacityInput = (e) => {
+const handleOpacityInput = (e: any) => {
     let val = parseInt(e.target.value)
     if (isNaN(val)) return 
     processOpacityUpdate(val)
 }
 
-const handleOpacityBlur = (e) => {
+const handleOpacityBlur = (e: any) => {
     if (e.target.value === '') {
-        e.target.value = opacityPercentage.value
+        e.target.value = (opacityPercentage.value as any).toString()
     }
 }
 
-const updateOpacity = (delta) => {
+const updateOpacity = (delta: number) => {
     const current = opacityPercentage.value
     processOpacityUpdate(current + delta)
 }
 
-const processOpacityUpdate = (alpha) => {
+const processOpacityUpdate = (alpha: number) => {
     if (isNaN(alpha)) alpha = 100
     if (alpha < 0) alpha = 0
     if (alpha > 100) alpha = 100

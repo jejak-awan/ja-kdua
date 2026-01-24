@@ -164,11 +164,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import api from '../../../services/api';
+import api from '@/services/api';
 import { 
     Plus, 
     Search, 
@@ -181,29 +181,49 @@ import {
 import _ from 'lodash';
 
 // Shadcn UI
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import Pagination from '@/components/ui/pagination.vue';
+// @ts-ignore
 import Table from '@/components/ui/table.vue';
+// @ts-ignore
 import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
 import TableCell from '@/components/ui/table-cell.vue';
+// @ts-ignore
 import TableHead from '@/components/ui/table-head.vue';
+// @ts-ignore
 import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
 import TableRow from '@/components/ui/table-row.vue';
+// @ts-ignore
 import Select from '@/components/ui/select.vue';
+// @ts-ignore
 import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
 import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
 import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
-import { useAuthStore } from '../../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
-import { useConfirm } from '../../../composables/useConfirm';
-import { useToast } from '../../../composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { useToast } from '@/composables/useToast';
+import type { Category } from '@/types/cms';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -211,13 +231,13 @@ const authStore = useAuthStore();
 const toast = useToast();
 
 const loading = ref(true);
-const categories = ref([]); // Raw tree data
+const categories = ref<Category[]>([]); // Raw tree data
 const search = ref('');
 const statusFilter = ref('all');
-const selectedIds = ref([]);
-const expandedIds = ref([]); // Track expanded nodes
+const selectedIds = ref<number[]>([]);
+const expandedIds = ref<number[]>([]); // Track expanded nodes
 const perPage = ref(5);
-const pagination = ref({
+const pagination = ref<any>({
     current_page: 1,
     last_page: 1,
     per_page: 5,
@@ -229,7 +249,7 @@ const pagination = ref({
 const { confirm } = useConfirm();
 
 // Toggle expand/collapse
-const toggleExpand = (id) => {
+const toggleExpand = (id: number) => {
     const index = expandedIds.value.indexOf(id);
     if (index > -1) {
         expandedIds.value.splice(index, 1);
@@ -240,14 +260,14 @@ const toggleExpand = (id) => {
 };
 
 // Helper to check if category has children
-const hasChildren = (category) => {
+const hasChildren = (category: Category) => {
     const children = category.all_children || category.children;
     return children && Array.isArray(children) && children.length > 0;
 };
 
 // Helper to collect all parent IDs for auto-expansion
-const getAllParentIds = (nodes) => {
-    let ids = [];
+const getAllParentIds = (nodes: Category[]): number[] => {
+    let ids: number[] = [];
     nodes.forEach(node => {
         const children = node.all_children || node.children;
         if (children && children.length > 0) {
@@ -259,17 +279,17 @@ const getAllParentIds = (nodes) => {
 };
 
 // Flatten tree into array for Table display, calculating depth
-const flattenTree = (nodes, depth = 0) => {
+const flattenTree = (nodes: Category[], depth = 0): any[] => {
     if (!nodes) return [];
-    let result = [];
+    let result: any[] = [];
     nodes.forEach(node => {
         const flatNode = { ...node, _depth: depth };
         result.push(flatNode);
         
         const children = node.all_children || node.children;
-        const hasChildren = children && Array.isArray(children) && children.length > 0;
+        const hasKids = children && Array.isArray(children) && children.length > 0;
         
-        if (hasChildren && (search.value || expandedIds.value.includes(node.id))) {
+        if (hasKids && (search.value || expandedIds.value.includes(node.id))) {
             result = result.concat(flattenTree(children, depth + 1));
         }
     });
@@ -286,7 +306,7 @@ const flatCategories = computed(() => {
 const fetchCategories = async (page = 1) => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page: page,
             per_page: pagination.value.per_page,
             tree: true 
@@ -355,22 +375,22 @@ const onFilterChange = () => {
     fetchCategories(1);
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (page >= 1 && page <= pagination.value.last_page) {
         fetchCategories(page);
     }
 };
 
-const changePerPage = (perPage) => {
-    pagination.value.per_page = parseInt(perPage);
+const changePerPage = (perPage: string | number) => {
+    pagination.value.per_page = typeof perPage === 'string' ? parseInt(perPage) : perPage;
     fetchCategories(1);
 };
 
-const editCategory = (category) => {
+const editCategory = (category: Category) => {
     router.push({ name: 'categories.edit', params: { id: category.id } });
 };
 
-const deleteCategory = async (category) => {
+const deleteCategory = async (category: Category) => {
     const confirmed = await confirm({
         title: t('features.categories.actions.delete'),
         message: t('features.categories.messages.deleteConfirm', { name: category.name }),
@@ -383,7 +403,7 @@ const deleteCategory = async (category) => {
             await api.delete(`/admin/ja/categories/${category.id}`);
             fetchCategories(pagination.value.current_page);
             toast.success.delete('Category');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to delete category:', error);
             toast.error.delete(error, 'Category');
         }
@@ -391,7 +411,7 @@ const deleteCategory = async (category) => {
 };
 
 // Bulk Actions
-const toggleSelect = (checked, id) => {
+const toggleSelect = (checked: boolean, id: number) => {
     if (checked) {
         if (!selectedIds.value.includes(id)) selectedIds.value.push(id);
     } else {
@@ -399,10 +419,10 @@ const toggleSelect = (checked, id) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         // Select all VISIBLE items (flat)
-        selectedIds.value = flatCategories.value.map(c => c.id);
+        selectedIds.value = flatCategories.value.map((c: any) => c.id);
     } else {
         selectedIds.value = [];
     }
@@ -410,7 +430,7 @@ const toggleSelectAll = (checked) => {
 
 const isAllSelected = computed(() => {
     return flatCategories.value.length > 0 && 
-           flatCategories.value.every(c => selectedIds.value.includes(c.id));
+           flatCategories.value.every((c: any) => selectedIds.value.includes(c.id));
 });
 
 const confirmBulkDelete = async () => {
@@ -428,7 +448,7 @@ const confirmBulkDelete = async () => {
             selectedIds.value = [];
             fetchCategories(pagination.value.current_page);
             toast.success.delete(`${count} Categories`);
-        } catch (error) {
+        } catch (error: any) {
            console.error('Bulk delete failed:', error);
            toast.error.action(error);
         }

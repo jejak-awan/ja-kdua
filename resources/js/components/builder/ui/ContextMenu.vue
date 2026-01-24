@@ -244,8 +244,11 @@ const handleAction = (action) => {
 }
 
 onMounted(() => {
-    window.addEventListener('click', handleClickOutside, { capture: true })
-    window.addEventListener('contextmenu', handleClickOutside) 
+    // Delay adding listeners to ensure we don't catch the same event that opened the menu
+    setTimeout(() => {
+        window.addEventListener('click', handleClickOutside, { capture: true })
+        window.addEventListener('contextmenu', handleClickOutside) 
+    }, 10)
 })
 
 onUnmounted(() => {

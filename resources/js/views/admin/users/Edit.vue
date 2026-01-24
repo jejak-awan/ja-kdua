@@ -39,7 +39,7 @@
                         </div>
                         <div>
                             <MediaPicker
-                                @selected="(media) => form.avatar = media.url"
+                                @selected="(media: any) => form.avatar = media.url"
                                 :label="$t('features.users.form.selectAvatar')"
                             ></MediaPicker>
                             <Button
@@ -172,7 +172,7 @@
                         <Checkbox
                             id="is_verified"
                             :checked="form.is_verified"
-                            @update:checked="(checked) => form.is_verified = checked"
+                            @update:checked="(checked: boolean) => form.is_verified = checked"
                         />
                         <label
                             for="is_verified"
@@ -202,7 +202,7 @@
                                 :id="`role-${role.id}`"
                                 :checked="form.roles.includes(role.id)"
                                 :disabled="getRoleRank(role.name) > authStore.getRoleRank()"
-                                @update:checked="(checked) => {
+                                @update:checked="(checked: boolean) => {
                                     if (checked) form.roles.push(role.id);
                                     else form.roles = form.roles.filter(id => id !== role.id);
                                 }"
@@ -244,22 +244,27 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { editUserSchema } from '../../../schemas';
-import Button from '../../../components/ui/button.vue';
-import Input from '../../../components/ui/input.vue';
-import Textarea from '../../../components/ui/textarea.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
+import api from '@/services/api';
+import { parseResponse, ensureArray, parseSingleResponse } from '@/utils/responseParser';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { editUserSchema } from '@/schemas';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Input from '@/components/ui/input.vue';
+// @ts-ignore
+import Textarea from '@/components/ui/textarea.vue';
+// @ts-ignore
+import Checkbox from '@/components/ui/checkbox.vue';
+import MediaPicker from '@/components/MediaPicker.vue';
 import { ArrowLeft, Loader2 } from 'lucide-vue-next';
-import { useAuthStore, ROLE_RANKS } from '../../../stores/auth';
-import { computed } from 'vue';
+import { useAuthStore, ROLE_RANKS } from '@/stores/auth';
+import type { Role, User } from '@/types/auth';
 
 const router = useRouter();
 const route = useRoute();
@@ -268,12 +273,26 @@ const authStore = useAuthStore();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(editUserSchema);
 
+interface UserForm {
+    name: string;
+    email: string;
+    password?: string;
+    password_confirmation?: string;
+    phone: string;
+    bio: string;
+    website: string;
+    location: string;
+    avatar: string | null;
+    roles: number[];
+    is_verified: boolean;
+}
+
 const loading = ref(true);
 const saving = ref(false);
 const loadingRoles = ref(false);
-const availableRoles = ref([]);
+const availableRoles = ref<Role[]>([]);
 
-const form = ref({
+const form = ref<UserForm>({
     name: '',
     email: '',
     password: '',
@@ -287,14 +306,24 @@ const form = ref({
     password_confirmation: '',
 });
 
-const initialForm = ref(null);
+const initialForm = ref<UserForm | null>(null);
 
 const isDirty = computed(() => {
     if (!initialForm.value) return false;
-    return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+    // Create a copy of form to compare, handling optional fields
+    const currentForm = { ...form.value };
+    if (!currentForm.password) delete currentForm.password;
+    if (!currentForm.password_confirmation) delete currentForm.password_confirmation;
+    
+    // Initial form won't have password set usually
+    const compareForm = { ...initialForm.value };
+    if (!compareForm.password) delete compareForm.password;
+    if (!compareForm.password_confirmation) delete compareForm.password_confirmation;
+
+    return JSON.stringify(currentForm) !== JSON.stringify(compareForm); 
 });
 
-const getRoleRank = (roleName) => ROLE_RANKS[roleName] || 0;
+const getRoleRank = (roleName: string) => ROLE_RANKS[roleName] || 0;
 
 const fetchRoles = async () => {
     loadingRoles.value = true;
@@ -334,13 +363,14 @@ const fetchUser = async () => {
             website: data.website || '',
             location: data.location || '',
             avatar: data.avatar || null,
-            roles: data.roles?.map(r => r.id) || [],
+            roles: data.roles?.map((r: Role) => r.id) || [],
             is_verified: !!data.email_verified_at,
+            password_confirmation: '',
         };
         initialForm.value = JSON.parse(JSON.stringify(form.value));
     } catch (error) {
         console.error('Failed to fetch user:', error);
-        toast.error.load();
+        toast.error.load(error);
         router.push({ name: 'users.index' });
     } finally {
         loading.value = false;
@@ -362,8 +392,9 @@ const handleSubmit = async () => {
     clearErrors();
 
     try {
-        const payload = { ...form.value };
+        const payload: Partial<UserForm> = { ...form.value };
         if (!payload.password) delete payload.password;
+        if (!payload.password_confirmation) delete payload.password_confirmation;
         
         await api.put(`/admin/ja/users/${route.params.id}`, payload);
         
@@ -375,7 +406,7 @@ const handleSubmit = async () => {
         toast.success.update('User');
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         router.push({ name: 'users.index' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

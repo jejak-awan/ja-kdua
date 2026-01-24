@@ -9,30 +9,36 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import * as LucideIcons from 'lucide-vue-next'
 import { BaseSegmentedControl } from '../ui'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: [String, Number, Boolean],
-    default: ''
-  }
-})
+interface FieldOption {
+  value: string | number | boolean;
+  label: string;
+  icon?: string;
+}
 
-defineEmits(['update:value'])
+const props = defineProps<{
+  field: {
+    name: string;
+    options: FieldOption[];
+  };
+  value: string | number | boolean;
+}>()
+
+defineEmits<{
+  (e: 'update:value', value: string | number | boolean): void;
+}>()
 
 const { t, te } = useI18n()
-const module = inject('module', {})
+const module = inject<any>('module', {})
 
-const getOptionLabel = (option) => {
-  const type = module.type
+const getOptionLabel = (option: FieldOption) => {
+  const type = module?.type || 'common'
   const name = props.field.name
   const val = option.value
 
@@ -41,7 +47,7 @@ const getOptionLabel = (option) => {
     return t(`builder.settings.${type}.${name}.options.${val}`)
   }
 
-  // 2. Common field: builder.settings.fields.{name}.options.{val}
+  // 2. Common field: builder.settings.fields.${name}.options.{val}
   if (te(`builder.settings.fields.${name}.options.${val}`)) {
     return t(`builder.settings.fields.${name}.options.${val}`)
   }
@@ -50,10 +56,10 @@ const getOptionLabel = (option) => {
 }
 
 const mappedOptions = computed(() => {
-  return (props.field.options || []).map(opt => ({
+  return (props.field.options || []).map((opt: FieldOption) => ({
     ...opt,
     label: getOptionLabel(opt),
-    icon: opt.icon ? LucideIcons[opt.icon] : null,
+    icon: opt.icon ? (LucideIcons as any)[opt.icon] : null,
     iconOnly: !!opt.icon
   }))
 })

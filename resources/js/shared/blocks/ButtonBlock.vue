@@ -12,6 +12,7 @@
           :class="[
             sizeClass(settings, blockDevice),
             !getVal(settings, 'useCustomColors') ? variantClass(settings) : '',
+            getVal(settings, 'useCustomColors') ? 'custom-button' : '',
             hoverEffectClass(settings),
             radiusClass(settings),
             shadowClass(settings)
@@ -131,9 +132,25 @@ const buttonStyles = (settings, device) => {
   }
 
   if (getVal(settings, 'useCustomColors')) {
-    styles.backgroundColor = getVal(settings, 'bgColor', device)
-    styles.color = getVal(settings, 'textColor', device)
-    styles.borderColor = getVal(settings, 'borderColor', device)
+    // Base colors
+    const bg = getVal(settings, 'bgColor', device)
+    const text = getVal(settings, 'textColor', device)
+    const border = getVal(settings, 'borderColor', device)
+
+    // Hover colors (explicitly check for hover independent of current device)
+    // If no hover value explicitly set, fallback to base value
+    const hoverBg = getVal(settings, 'bgColor', 'hover') || getVal(settings, 'hoverBgColor') || bg
+    const hoverText = getVal(settings, 'textColor', 'hover') || text
+    const hoverBorder = getVal(settings, 'borderColor', 'hover') || border
+
+    styles['--btn-bg'] = bg
+    styles['--btn-text'] = text
+    styles['--btn-border'] = border
+    
+    styles['--btn-hover-bg'] = hoverBg
+    styles['--btn-hover-text'] = hoverText
+    styles['--btn-hover-border'] = hoverBorder
+    
     styles.borderWidth = '2px'
     styles.borderStyle = 'solid'
   }
@@ -180,5 +197,17 @@ const onTextBlur = (e, settings) => {
 }
 .group-hover\:animate-shine {
   animation: shine 0.7s forwards;
+}
+
+.custom-button {
+  background-color: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  border-color: var(--btn-border) !important;
+}
+
+.custom-button:hover {
+  background-color: var(--btn-hover-bg) !important;
+  color: var(--btn-hover-text) !important;
+  border-color: var(--btn-hover-border) !important;
 }
 </style>

@@ -129,7 +129,7 @@
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="tag in tags" :key="tag.id" :class="{ 'bg-muted/50': selectedIds.includes(tag.id) }">
+                        <TableRow v-for="tag in tags" :key="tag.id" :class="selectedIds.includes(tag.id) ? 'bg-muted/50' : ''">
                             <TableCell>
                                 <Checkbox 
                                     v-if="authStore.hasPermission('delete tags')"
@@ -177,12 +177,12 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { 
-    Tag, 
+    Tag as TagIcon, 
     BarChart3, 
     MousePointer2, 
     Edit, 
@@ -192,33 +192,53 @@ import {
     Filter,
     Loader2
 } from 'lucide-vue-next';
-import api from '../../../services/api';
-import { useConfirm } from '../../../composables/useConfirm';
-import { useToast } from '../../../composables/useToast';
+import api from '@/services/api';
+import { useConfirm } from '@/composables/useConfirm';
+import { useToast } from '@/composables/useToast';
 import _ from 'lodash';
-import { parseResponse } from '../../../utils/responseParser';
+import { parseResponse } from '@/utils/responseParser';
 
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import Pagination from '@/components/ui/pagination.vue';
+// @ts-ignore
 import Table from '@/components/ui/table.vue';
+// @ts-ignore
 import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
 import TableCell from '@/components/ui/table-cell.vue';
+// @ts-ignore
 import TableHead from '@/components/ui/table-head.vue';
+// @ts-ignore
 import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
 import TableRow from '@/components/ui/table-row.vue';
+// @ts-ignore
 import Select from '@/components/ui/select.vue';
+// @ts-ignore
 import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
 import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
 import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
 
-import { useAuthStore } from '../../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
+import type { Tag } from '@/types/cms';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -226,12 +246,12 @@ const toast = useToast();
 const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(true);
-const tags = ref([]);
-const statistics = ref(null);
+const tags = ref<Tag[]>([]);
+const statistics = ref<any>(null);
 const search = ref('');
 const filterUsage = ref('all');
-const selectedIds = ref([]);
-const pagination = ref({
+const selectedIds = ref<number[]>([]);
+const pagination = ref<any>({
     current_page: 1,
     per_page: 20,
     total: 0,
@@ -247,7 +267,7 @@ const onSearchInput = _.debounce(() => {
 const fetchTags = async (page = 1) => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page: page,
             per_page: pagination.value.per_page,
             search: search.value,
@@ -286,18 +306,18 @@ const fetchTags = async (page = 1) => {
     }
 };
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     if (page >= 1 && page <= (pagination.value.last_page || 1)) {
         fetchTags(page);
     }
 };
 
-const changePerPage = (value) => {
-    pagination.value.per_page = parseInt(value);
+const changePerPage = (value: string | number) => {
+    pagination.value.per_page = typeof value === 'string' ? parseInt(value) : value;
     fetchTags(1);
 };
 
-const toggleSelection = (id, checked) => {
+const toggleSelection = (id: number, checked: boolean) => {
     if (checked) {
         selectedIds.value.push(id);
     } else {
@@ -305,7 +325,7 @@ const toggleSelection = (id, checked) => {
     }
 };
 
-const toggleAll = (checked) => {
+const toggleAll = (checked: boolean) => {
     if (checked) {
         selectedIds.value = tags.value.map(t => t.id);
     } else {
@@ -330,17 +350,17 @@ const bulkDelete = async () => {
         selectedIds.value = [];
         await fetchTags(pagination.value.current_page);
         toast.success.delete('Tags');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Bulk delete failed:', error);
         toast.error.action(error);
     }
 };
 
-const editTag = (tag) => {
+const editTag = (tag: Tag) => {
     router.push({ name: 'tags.edit', params: { id: tag.id } });
 };
 
-const deleteTag = async (tag) => {
+const deleteTag = async (tag: Tag) => {
     const confirmed = await confirm({
         title: t('features.tags.actions.delete'),
         message: t('features.tags.messages.deleteConfirm', { name: tag.name }),
@@ -354,7 +374,7 @@ const deleteTag = async (tag) => {
         await api.delete(`/admin/ja/tags/${tag.id}`);
         await fetchTags();
         toast.success.delete('Tag');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete tag:', error);
         toast.error.delete(error, 'Tag');
     }

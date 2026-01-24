@@ -163,33 +163,50 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { categorySchema } from '../../../schemas';
-import MediaPicker from '../../../components/MediaPicker.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { categorySchema } from '@/schemas';
+import MediaPicker from '@/components/MediaPicker.vue';
 import { Loader2, X } from 'lucide-vue-next';
 
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Label from '@/components/ui/label.vue';
+// @ts-ignore
 import Textarea from '@/components/ui/textarea.vue';
+// @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '@/components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '@/components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '@/components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import CardFooter from '@/components/ui/card-footer.vue';
+// @ts-ignore
 import Select from '@/components/ui/select.vue';
+// @ts-ignore
 import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
 import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
 import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
+import type { Category } from '@/types/cms';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -199,11 +216,11 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(ca
 
 const loading = ref(true);
 const saving = ref(false);
-const categories = ref([]);
-const currentCategory = ref(null);
-const initialForm = ref(null);
+const categories = ref<Category[]>([]);
+const currentCategory = ref<Category | null>(null);
+const initialForm = ref<any>(null);
 
-const form = ref({
+const form = ref<any>({
     name: '',
     slug: '',
     description: '',
@@ -222,9 +239,9 @@ const flattenedCategories = computed(() => {
     return flattenTree(categories.value);
 });
 
-const flattenTree = (nodes, depth = 0) => {
+const flattenTree = (nodes: Category[], depth = 0): any[] => {
     if (!nodes) return [];
-    let result = [];
+    let result: any[] = [];
     nodes.forEach(node => {
         // Exclude current category and its children from parent options (to prevent cycles)
         if (currentCategory.value && node.id === currentCategory.value.id) {
@@ -251,7 +268,7 @@ const generateSlug = () => {
     }
 };
 
-const slugify = (text) => {
+const slugify = (text: string) => {
     return text
         .toString()
         .toLowerCase()
@@ -288,7 +305,7 @@ const fetchCategory = async () => {
         };
         
         initialForm.value = JSON.parse(JSON.stringify(form.value));
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch category:', error);
         toast.error.load(error);
         router.push({ name: 'categories.index' });
@@ -310,7 +327,7 @@ const handleSubmit = async () => {
         initialForm.value = JSON.parse(JSON.stringify(form.value));
         toast.success.update('Category');
         router.push({ name: 'categories' });
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

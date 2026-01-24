@@ -49,4 +49,8 @@ const onContentUpdate = (newContent, settings) => {
 
 <style scoped>
 /* Any block specific overrides */
+.prose {
+  width: 100%;
+  max-width: 100%;
+}
 </style>

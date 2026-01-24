@@ -36,22 +36,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Ban } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
-import { BackgroundMasks } from '../core/AssetLibrary'
+import { BackgroundMasks } from '../../../shared/utils/AssetLibrary'
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: 'none'
-  }
-})
+const props = defineProps<{
+  value?: string;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
 
-const getMaskPreview = (mask) => {
+const getMaskPreview = (mask: any) => {
     if (!mask || !mask.svg) return ''
     const svg = mask.svg
     // Check regular structure first

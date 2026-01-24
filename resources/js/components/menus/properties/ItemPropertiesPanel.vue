@@ -69,7 +69,7 @@
                             <SelectItem 
                                 v-for="p in validParents" 
                                 :key="p.id || p._temp_id" 
-                                :value="(p.id || p._temp_id).toString()"
+                                :value="(p.id || p._temp_id)!.toString()"
                             >
                                 <span :style="{ paddingLeft: (p._depth * 12) + 'px' }">
                                     {{ p.title || 'Untitled' }}
@@ -123,11 +123,12 @@
     </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMenuContext } from '../../../composables/useMenu';
 import { menuItemRegistry } from '../registry';
+import type { MenuItem, MenuItemSetting } from '../../../types/menu';
 
 // UI Components
 import Card from '../../ui/card.vue';
@@ -154,35 +155,34 @@ import {
     PanelRightClose
 } from 'lucide-vue-next';
 
-defineEmits(['collapse']);
+defineEmits<{
+    (e: 'collapse'): void;
+}>();
 
 const { t } = useI18n();
 const menuContext = useMenuContext();
 
 const selectedItem = computed(() => menuContext.selectedItem.value);
 
+interface ParentOption extends MenuItem {
+    _depth: number;
+}
+
 // Flatten items with depth for select options
 const validParents = computed(() => {
     if (!selectedItem.value) return [];
     
     const currentId = selectedItem.value.id || selectedItem.value._temp_id;
-    const result = [];
+    const result: ParentOption[] = [];
     
     // Recursive flatten
-    const traverse = (nodes, depth) => {
+    const traverse = (nodes: MenuItem[], depth: number) => {
         nodes.forEach(node => {
             const nodeId = node.id || node._temp_id;
             
-            // Exclude self
-            if (nodeId === currentId) return;
-            
-            // Exclude descendants of self (if self was in the list, but we excluded it)
-            // But wait, if we are traversing normally from root, 
-            // if we hit 'self', we skip it. But we must also skip its children!
-            // So if nodeId === currentId, we do NOT traverse its children.
-            
+            // Exclude self and its subtree
             if (nodeId === currentId) {
-                return; // Skip this node and its subtree
+                return; 
             }
             
             result.push({ ...node, _depth: depth });
@@ -199,13 +199,13 @@ const validParents = computed(() => {
 
 const currentParentId = computed(() => {
     if (!selectedItem.value) return 'root';
-    const parent = menuContext.findParent(selectedItem.value.id || selectedItem.value._temp_id);
-    return parent ? (parent.id || parent._temp_id).toString() : 'root';
+    const parent = menuContext.findParent(selectedItem.value.id || selectedItem.value._temp_id!);
+    return parent ? (parent.id || parent._temp_id!).toString() : 'root';
 });
 
-const handleParentChange = (val) => {
+const handleParentChange = (val: string) => {
     if (!selectedItem.value) return;
-    const itemId = selectedItem.value.id || selectedItem.value._temp_id;
+    const itemId = selectedItem.value.id || selectedItem.value._temp_id!;
     const newParentId = val === 'root' ? null : val;
     menuContext.moveItem(itemId, newParentId);
 };
@@ -216,10 +216,11 @@ const typeDefinition = computed(() => {
 });
 
 const typeLabel = computed(() => {
-    const key = `features.menus.form.types.${selectedItem.value?.type}`;
+    if (!selectedItem.value) return 'Unknown';
+    const key = `features.menus.form.types.${selectedItem.value.type}`;
     const translated = t(key);
     if (translated !== key) return translated;
-    return typeDefinition.value?.label || selectedItem.value?.type || 'Unknown';
+    return typeDefinition.value?.label || selectedItem.value.type || 'Unknown';
 });
 
 const iconComponent = computed(() => {
@@ -242,8 +243,8 @@ const settingsSchema = computed(() => {
 });
 
 const groupedSettings = computed(() => {
-    const groups = {};
-    settingsSchema.value.forEach(setting => {
+    const groups: Record<string, MenuItemSetting[]> = {};
+    settingsSchema.value.forEach((setting: MenuItemSetting) => {
         if (setting.group) {
             if (!groups[setting.group]) {
                 groups[setting.group] = [];
@@ -254,25 +255,28 @@ const groupedSettings = computed(() => {
     return Object.entries(groups).map(([name, settings]) => ({ name, settings }));
 });
 
-const formatGroupName = (name) => {
+const formatGroupName = (name: string) => {
     const key = `features.menus.form.groups.${name}`;
     const translated = t(key);
     if (translated !== key) return translated;
     return name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-const updateField = (key, value) => {
-    const itemId = selectedItem.value.id || selectedItem.value._temp_id;
+const updateField = (key: string, value: any) => {
+    if (!selectedItem.value) return;
+    const itemId = selectedItem.value.id || selectedItem.value._temp_id!;
     menuContext.updateItem(itemId, { [key]: value });
 };
 
 const handleDuplicate = () => {
-    const itemId = selectedItem.value.id || selectedItem.value._temp_id;
+    if (!selectedItem.value) return;
+    const itemId = selectedItem.value.id || selectedItem.value._temp_id!;
     menuContext.duplicateItem(itemId);
 };
 
 const handleDelete = () => {
-    const itemId = selectedItem.value.id || selectedItem.value._temp_id;
+    if (!selectedItem.value) return;
+    const itemId = selectedItem.value.id || selectedItem.value._temp_id!;
     menuContext.deleteItem(itemId);
 };
 </script>

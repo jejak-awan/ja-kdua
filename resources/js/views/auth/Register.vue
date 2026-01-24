@@ -19,7 +19,7 @@
                             name="name"
                             type="text"
                             required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.name }"
+                            :class="errors.name ? 'border-destructive focus-visible:ring-destructive' : ''"
                             :placeholder="t('features.auth.register.namePlaceholder')"
                         />
                         <p v-if="errors.name" class="text-sm text-destructive font-medium">{{ errors.name[0] }}</p>
@@ -32,7 +32,7 @@
                             name="email"
                             type="email"
                             required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.email }"
+                            :class="errors.email ? 'border-destructive focus-visible:ring-destructive' : ''"
                             :placeholder="t('features.auth.login.emailPlaceholder')"
                         />
                         <p v-if="errors.email" class="text-sm text-destructive font-medium">{{ errors.email[0] }}</p>
@@ -45,7 +45,7 @@
                             name="password"
                             type="password"
                             required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password }"
+                            :class="errors.password ? 'border-destructive focus-visible:ring-destructive' : ''"
                             :placeholder="t('features.auth.login.passwordPlaceholder')"
                         />
                         <p v-if="errors.password" class="text-sm text-destructive font-medium">{{ errors.password[0] }}</p>
@@ -58,7 +58,7 @@
                             name="password_confirmation"
                             type="password"
                             required
-                            :class="{ 'border-destructive focus-visible:ring-destructive': errors.password_confirmation }"
+                            :class="errors.password_confirmation ? 'border-destructive focus-visible:ring-destructive' : ''"
                             :placeholder="t('common.labels.confirmPassword')"
                         />
                         <p v-if="errors.password_confirmation" class="text-sm text-destructive font-medium">{{ errors.password_confirmation[0] }}</p>
@@ -93,7 +93,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -104,14 +104,23 @@ import { Loader2 } from 'lucide-vue-next';
 import api from '../../services/api';
 
 // Shadcn Components
+// @ts-ignore
 import Card from '../../components/ui/card.vue';
+// @ts-ignore
 import CardHeader from '../../components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '../../components/ui/card-title.vue';
+// @ts-ignore
 import CardDescription from '../../components/ui/card-description.vue';
+// @ts-ignore
 import CardContent from '../../components/ui/card-content.vue';
+// @ts-ignore
 import Button from '../../components/ui/button.vue';
+// @ts-ignore
 import Input from '../../components/ui/input.vue';
+// @ts-ignore
 import Label from '../../components/ui/label.vue';
+// @ts-ignore
 import CaptchaWrapper from '../../components/captcha/CaptchaWrapper.vue';
 
 const router = useRouter();
@@ -119,7 +128,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(registerSchema);
 
-const captchaRef = ref(null);
+const captchaRef = ref<any>(null);
 const captchaVerified = ref(false);
 const captchaToken = ref('');
 const captchaAnswer = ref('');
@@ -132,7 +141,12 @@ const form = reactive({
     password_confirmation: '',
 });
 
-const onCaptchaVerified = (payload) => {
+interface CaptchaPayload {
+    token: string;
+    answer: string;
+}
+
+const onCaptchaVerified = (payload: CaptchaPayload) => {
     captchaToken.value = payload.token;
     captchaAnswer.value = payload.answer;
     captchaVerified.value = true;
@@ -186,7 +200,7 @@ const handleRegister = async () => {
     clearErrors();
     message.value = '';
 
-    const payload = { ...form };
+    const payload: any = { ...form };
     
     if (captchaEnabled.value) {
         payload.captcha_token = captchaToken.value;
@@ -202,7 +216,7 @@ const handleRegister = async () => {
             router.push({ name: 'dashboard' });
         }, 2000);
     } else {
-        message.value = result.message;
+        message.value = result.message || '';
         messageType.value = 'error';
         setErrors(result.errors || {});
         

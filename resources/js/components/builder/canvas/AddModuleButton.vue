@@ -2,35 +2,40 @@
   <div class="add-btn-wrapper" :class="{ 'add-btn-wrapper--floating': floating }">
     <button 
       class="add-module-btn"
-      :class="[`add-module-btn--${type}`]"
+      :class="[
+        `add-module-btn--${type}`,
+        { 'add-module-btn--circular': circular }
+      ]"
       @click.stop="$emit('click')"
-      :title="$t('builder.actions.add', { name: label })"
+      :title="t('builder.actions.add', { name: label })"
     >
       <component :is="icons.Plus" :size="type === 'module' ? 14 : 16" />
     </button>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus } from 'lucide-vue-next'
 
 const icons = { Plus }
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: 'module',
-    validator: (v) => ['section', 'row', 'column', 'module'].includes(v)
-  },
-  floating: {
-    type: Boolean,
-    default: false
-  }
+interface Props {
+  type?: 'section' | 'row' | 'column' | 'module';
+  floating?: boolean;
+  circular?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  type: 'module',
+  floating: false,
+  circular: false
 })
 
-defineEmits(['click'])
+defineEmits<{
+  (e: 'click'): void;
+}>()
 
 const { t } = useI18n()
 
@@ -136,5 +141,22 @@ const label = computed(() => {
     color: var(--builder-text-primary);
     border-color: var(--builder-accent);
     transform: none;
+}
+
+/* Circular variant (Divi-style module adder) */
+.add-module-btn--circular {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background-color: var(--builder-bg-topbar, #1a1e25) !important;
+    color: white !important;
+    border: 2px solid white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    z-index: 10;
+}
+
+.add-module-btn--circular:hover {
+    transform: scale(1.1) !important;
+    background-color: var(--builder-accent) !important;
 }
 </style>

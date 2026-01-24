@@ -15,12 +15,13 @@
         <!-- Item Content -->
         <div 
           class="layer-row" 
+          :data-layer-id="block.id"
           :class="{ 
             'layer-row--selected': selectedId === block.id,
             [`layer-row--${block.type}`]: true
           }"
           @click.stop="$emit('select', block.id)"
-          @contextmenu.prevent="handleContextMenu($event, block)"
+          @contextmenu.stop.prevent="handleContextMenu($event, block)"
         >
           <!-- Toggle Collapse -->
           <button 
@@ -37,14 +38,15 @@
           
           <!-- Icon -->
           <span class="layer-icon">
-               <component :is="getIcon(block.type)" :size="12" />
+               <span v-if="block.type === 'column'" class="text-[10px] opacity-40 mr-1 font-mono">[ ]</span>
+               <component v-else :is="getIcon(block.type)" :size="12" />
           </span>
           
           <!-- Name -->
           <span class="layer-name">{{ getTitle(block) }}</span>
 
           <!-- Meatballs Menu (Context Actions) -->
-          <button class="layer-actions-trigger" @click.stop="handleContextMenu($event, block)">
+          <button class="layer-actions-trigger" @click.stop="handleContextMenu($event, block)" @contextmenu.stop.prevent="handleContextMenu($event, block)" @mousedown.stop>
             <component :is="icons.MoreVertical" :size="14" />
           </button>
         </div>
@@ -136,7 +138,7 @@ const getTitle = (block) => {
 const getIcon = (type) => {
     if (type === 'section') return Layout
     if (type === 'row') return Columns
-    if (type === 'column') return Square
+    if (type === 'column') return null // Special case for text [ ]
     if (type.includes('text') || type.includes('heading')) return Type
     if (type.includes('image')) return Image
     return Box
@@ -281,13 +283,15 @@ const filteredBlocks = computed(() => {
     border: none;
     color: inherit;
     cursor: pointer;
-    padding: 2px;
+    padding: 6px;
+    margin: -4px;
     opacity: 0;
     transition: opacity 0.1s;
     position: absolute;
     right: 8px;
     display: flex;
     align-items: center;
+    z-index: 10;
 }
 
 .layer-row:hover .layer-actions-trigger,

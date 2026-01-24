@@ -18,40 +18,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Database, X } from 'lucide-vue-next'
 import { BaseInput } from '../ui'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  },
-  placeholderValue: {
-    type: String,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: string;
+  placeholderValue?: string | null;
+}>()
 
 const emit = defineEmits(['update:value'])
 
 const internalValue = computed({
-  get: () => props.value,
-  set: (val) => emit('update:value', val)
+  get: () => props.value || '',
+  set: (val: string) => emit('update:value', val)
 })
 
 const isDynamic = computed(() => {
-  return typeof props.value === 'string' && props.value.startsWith('@dynamic:')
+  return !!props.value && typeof props.value === 'string' && props.value.startsWith('@dynamic:')
 })
 
 const dynamicLabel = computed(() => {
-  if (!isDynamic.value) return ''
-  const tag = props.value.replace('@dynamic:', '')
+  if (!isDynamic.value || !props.value) return ''
+  const tag = (props.value as string).replace('@dynamic:', '')
   // Convert tag like 'post_title' to 'Post Title'
   return tag.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 })

@@ -328,7 +328,7 @@ const insertTemplate = async (template) => {
             }
             regenerateAll(blocks)
             
-            builder.blocks = blocks
+            builder.blocks.value = blocks
             builder.takeSnapshot()
             emit('inserted')
             emit('close')
@@ -346,9 +346,11 @@ const insertTemplate = async (template) => {
     }
     regenerateIds(clonedSection)
     
-    if (!builder.blocks) builder.blocks = []
+    if (!builder.blocks.value) builder.blocks.value = []
     
-    builder.blocks.splice(props.targetIndex, 0, clonedSection)
+    const targetIndex = props.targetIndex !== -1 ? props.targetIndex : builder.blocks.value.length
+    
+    builder.blocks.value.splice(targetIndex, 0, clonedSection)
     builder.takeSnapshot()
     builder.selectModule(clonedSection.id)
     

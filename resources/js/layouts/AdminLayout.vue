@@ -4,7 +4,7 @@
         <AdminSidebar
             :sidebar-minimized="sidebarMinimized"
             :sidebar-open="sidebarOpen"
-            :user="authStore.user"
+            :user="authStore.user || undefined"
             @toggle-minimize="toggleSidebarMinimize"
             @close="closeSidebar"
             @logout="handleLogout"
@@ -18,7 +18,7 @@
             <!-- Top Navbar -->
             <AdminNavbar
                 :is-authenticated="authStore.isAuthenticated"
-                :user="authStore.user"
+                :user="authStore.user || undefined"
                 @toggle-sidebar="toggleSidebarOpen"
                 @logout="handleLogout"
             />
@@ -31,7 +31,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useSidebar } from '../composables/useSidebar';

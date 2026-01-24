@@ -54,7 +54,7 @@
     </node-view-wrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { nodeViewProps, NodeViewWrapper } from '@tiptap/vue-3'
 
@@ -65,18 +65,18 @@ const resolvedAlign = computed(() => props.node.attrs.textAlign || props.node.at
 let isResizing = false
 let startX = 0
 let startWidth = 0
-let startHeight = 0
+// let startHeight = 0
 let aspectRatio = 1
 
-const startResize = (e) => {
+const startResize = (e: PointerEvent) => {
     isResizing = true
     startX = e.clientX
     
     // Get current dimensions
-    const video = e.target.closest('.relative').querySelector('video')
+    const video = (e.target as HTMLElement).closest('.relative')?.querySelector('video') as HTMLVideoElement
     startWidth = video.clientWidth
-    startHeight = video.clientHeight
-    aspectRatio = startWidth / startHeight
+    // startHeight = video.clientHeight
+    aspectRatio = startWidth / video.clientHeight
     
     document.addEventListener('pointermove', onResize)
     document.addEventListener('pointerup', stopResize)
@@ -84,7 +84,7 @@ const startResize = (e) => {
     document.body.style.userSelect = 'none'
 }
 
-const onResize = (e) => {
+const onResize = (e: PointerEvent) => {
     if (!isResizing) return
     
     const dx = e.clientX - startX

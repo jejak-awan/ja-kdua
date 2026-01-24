@@ -1,50 +1,54 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="accordion-block" :style="accordionBlockStyles">
-        <div class="accordion-list" :style="listStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        class="accordion-block mx-auto" 
+        :class="[
+            getVal(settings, 'width', blockDevice) || 'max-w-4xl',
+            getVal(settings, 'padding', blockDevice) || 'py-20'
+        ]"
+      >
+        <div class="accordion-list flex flex-col gap-5">
           <div 
             v-for="(item, index) in items" 
             :key="index"
-            class="accordion-item"
-            :class="{ 'accordion-item--open': openIndices.includes(index) }"
+            class="accordion-item transition-all duration-500 ease-in-out"
+            :class="[
+                getItemClasses(settings, index),
+                { 'is-open shadow-lg': openIndices.includes(index) && getVal(settings, 'variant') === 'boxed' }
+            ]"
+            :style="getItemStyles(settings, index)"
           >
             <!-- Header -->
             <button 
-              class="accordion-header"
-              :style="getHeaderStyles(index)"
+              class="accordion-header w-full flex items-center justify-between text-left focus:outline-none group"
+              :class="headerPadding(settings)"
               @click="toggle(index)"
             >
-              <!-- Left Icon -->
-              <div 
-                v-if="toggleIcon !== 'none' && iconPosition === 'left'"
-                class="accordion-icon"
-                :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
-                :style="iconStyles"
+              <span 
+                class="accordion-title font-bold text-lg"
+                :class="{ 'text-primary': openIndices.includes(index) }"
               >
-                <LucideIcon :name="getIconName(index)" :size="iconSize" />
-              </div>
-
-              <span class="accordion-title flex-1" :style="titleStyles">{{ item.title || 'Accordion Title' }}</span>
-
-              <!-- Right Icon -->
+                {{ item.question || 'Question' }}
+              </span>
+              
               <div 
-                v-if="toggleIcon !== 'none' && iconPosition === 'right'"
-                class="accordion-icon"
-                :class="{ 'rotate-180': openIndices.includes(index) && shouldRotate }"
-                :style="iconStyles"
+                class="accordion-icon ml-4 transition-transform duration-300 shrink-0"
+                :class="{ 'rotate-180': openIndices.includes(index) }"
               >
-                <LucideIcon :name="getIconName(index)" :size="iconSize" />
+                <component :is="getIcon(settings)" class="w-5 h-5 opacity-60 group-hover:opacity-100" />
               </div>
             </button>
 
             <!-- Content -->
             <div 
-              v-show="openIndices.includes(index)"
-              class="accordion-content prose prose-sm max-w-none"
-              :style="getContentStyles(index)"
-              v-html="item.content || 'Content goes here...'"
-            ></div>
+                class="accordion-content overflow-hidden transition-all duration-300"
+                :style="{ maxHeight: openIndices.includes(index) ? '500px' : '0px' }"
+            >
+                <div class="p-6 pt-0 text-slate-600 leading-relaxed">
+                    {{ item.answer || 'Answer goes here...' }}
+                </div>
+            </div>
           </div>
         </div>
       </div>
@@ -55,8 +59,8 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { ChevronDown, Plus, ArrowDown } from 'lucide-vue-next'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -68,96 +72,54 @@ const settings = computed(() => props.module?.settings || {})
 const items = computed(() => settings.value.items || [])
 const openIndices = ref([])
 
-const allowMultiple = computed(() => getVal(settings.value, 'allowMultiple', props.device) === true)
-const toggleIcon = computed(() => getVal(settings.value, 'toggleIcon', props.device) || 'chevron-down')
-const iconPosition = computed(() => getVal(settings.value, 'iconPosition', props.device) || 'right')
-const iconSize = computed(() => getVal(settings.value, 'iconSize', props.device) || 18)
-
-onMounted(() => {
-    items.value.forEach((item, index) => {
-        if (item.open) openIndices.value.push(index)
-    })
-})
-
 const toggle = (index) => {
-    if (allowMultiple.value) {
-        if (openIndices.value.includes(index)) {
-            openIndices.value = openIndices.value.filter(i => i !== index)
-        } else {
-            openIndices.value.push(index)
-        }
+    // Single open mode by default, unless we add allowMultiple setting back
+    if (openIndices.value.includes(index)) {
+        openIndices.value = []
     } else {
-        openIndices.value = openIndices.value.includes(index) ? [] : [index]
+        openIndices.value = [index]
     }
 }
 
-const getIconName = (index) => {
-    const icon = toggleIcon.value;
-    if (icon === 'plus') return openIndices.value.includes(index) ? 'minus' : 'plus';
-    if (icon === 'chevron') return 'chevron-down'; 
-    return icon;
+const getIcon = (settings) => {
+    const style = getVal(settings, 'iconStyle') || 'chevron-down'
+    if (style === 'plus') return Plus
+    if (style === 'arrow-down') return ArrowDown
+    return ChevronDown
 }
 
-const shouldRotate = computed(() => {
-    const icon = toggleIcon.value.toLowerCase();
-    return icon.includes('chevron') || icon.includes('arrow');
-})
-
-const accordionBlockStyles = computed(() => {
-  return { width: '100%', overflow: 'hidden' }
-})
-
-const listStyles = computed(() => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: `${getVal(settings.value, 'gap', props.device) || 16}px`
-}))
-
-const getHeaderStyles = (index) => {
+const getItemClasses = (settings, index) => {
+    const variant = getVal(settings, 'variant') || 'simple'
     const isOpen = openIndices.value.includes(index)
-    const bgColor = isOpen 
-        ? getVal(settings.value, 'openHeaderBackgroundColor', props.device) || '#f1f5f9'
-        : getVal(settings.value, 'headerBackgroundColor', props.device) || '#f8fafc'
     
-    return {
-        backgroundColor: bgColor,
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        width: '100%',
-        border: 'none',
-        cursor: 'pointer',
-        textAlign: 'left'
+    if (variant === 'boxed') {
+        return 'border rounded-xl bg-white overflow-hidden ' + (isOpen ? 'shadow-sm border-gray-200' : 'border-transparent shadow-sm')
     }
+    if (variant === 'minimal') {
+        return 'border-b border-gray-100 last:border-0'
+    }
+    // simple
+    return 'border-b border-gray-200 last:border-0'
 }
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'header_', props.device))
-
-const iconStyles = computed(() => {
-    const color = getVal(settings.value, 'iconColor', props.device) || 'currentColor'
-    return {
-        color: color,
-        width: `${iconSize.value}px`,
-        height: `${iconSize.value}px`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'transform 0.3s ease'
+const getItemStyles = (settings, index) => {
+    const variant = getVal(settings, 'variant') || 'simple'
+    if (variant === 'boxed' && openIndices.value.includes(index)) {
+        return {
+            backgroundColor: getVal(settings, 'activeBgColor') || '#f8fafc'
+        }
     }
-})
-
-const getContentStyles = (index) => {
-    const styles = {
-        padding: '20px',
-        backgroundColor: getVal(settings.value, 'contentBackgroundColor', props.device) || '#ffffff'
-    }
-    Object.assign(styles, getTypographyStyles(settings.value, 'content_', props.device))
-    return styles
+    return {}
 }
+
+const headerPadding = (settings) => {
+    const variant = getVal(settings, 'variant') || 'simple'
+    return variant === 'boxed' ? 'p-6' : 'py-5'
+}
+
 </script>
 
 <style scoped>
-.accordion-header:hover { opacity: 0.9; }
-.rotate-180 { transform: rotate(180deg); }
+.accordion-block { width: 100%; }
+.accordion-content { transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 </style>

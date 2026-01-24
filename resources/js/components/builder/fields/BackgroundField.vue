@@ -386,6 +386,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
+                                    :field="{}"
                                     :value="getResolvedValue('backgroundImageWidth')"
                                     :placeholder-value="t('builder.fields.common.widthPlaceholder')"
                                     @update:value="updateSetting('backgroundImageWidth', $event)"
@@ -410,6 +411,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
+                                    :field="{}"
                                     :value="getResolvedValue('backgroundImageHeight')"
                                     :placeholder-value="t('builder.fields.common.heightPlaceholder')"
                                     @update:value="updateSetting('backgroundImageHeight', $event)"
@@ -766,6 +768,7 @@
                         </div>
                     </transition>
                     <DimensionField 
+                        :field="{}"
                         :value="getResolvedValue('backgroundVideoWidth')"
                         :placeholder-value="'100%'"
                         @update:value="updateSetting('backgroundVideoWidth', $event)"
@@ -790,6 +793,7 @@
                         </div>
                     </transition>
                     <DimensionField 
+                        :field="{}"
                         :value="getResolvedValue('backgroundVideoHeight')"
                         @update:value="updateSetting('backgroundVideoHeight', $event)"
                     />
@@ -866,6 +870,7 @@
                 </div>
             </transition>
                 <ToggleField 
+                    :field="{ name: 'backgroundVideoLoop', label: t('builder.fields.background.video.loop') }"
                     :value="getResolvedValue('backgroundVideoLoop') !== false" 
                     @update:value="updateSetting('backgroundVideoLoop', $event)"
                 />
@@ -891,6 +896,7 @@
                 </div>
             </transition>
                 <ToggleField 
+                    :field="{ name: 'backgroundVideoMute', label: t('builder.fields.background.video.mute') }"
                     :value="getResolvedValue('backgroundVideoMute') !== false" 
                     @update:value="updateSetting('backgroundVideoMute', $event)"
                 />
@@ -1061,33 +1067,29 @@
                     </transition>
                     <div class="flex gap-2">
                         <IconButton 
+                            :icon="FlipHorizontal"
                             :title="t('builder.fields.background.pattern.flipH')"
-                            :class="{ 'is-active': getResolvedValue('backgroundPatternFlipH') }"
+                            :active="!!getResolvedValue('backgroundPatternFlipH')"
                             @click="updateSetting('backgroundPatternFlipH', !getResolvedValue('backgroundPatternFlipH'))"
-                        >
-                            <FlipHorizontal :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="FlipVertical"
                             :title="t('builder.fields.background.pattern.flipV')"
-                            :class="{ 'is-active': getResolvedValue('backgroundPatternFlipV') }"
+                            :active="!!getResolvedValue('backgroundPatternFlipV')"
                             @click="updateSetting('backgroundPatternFlipV', !getResolvedValue('backgroundPatternFlipV'))"
-                        >
-                            <FlipVertical :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="RefreshCw"
                             :title="t('builder.fields.background.pattern.rotate')"
-                            :class="{ 'is-active': getResolvedValue('backgroundPatternRotate') }"
+                            :active="!!getResolvedValue('backgroundPatternRotate')"
                             @click="updateSetting('backgroundPatternRotate', !getResolvedValue('backgroundPatternRotate'))"
-                        >
-                            <RefreshCw :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="Contrast"
                             :title="t('builder.fields.background.pattern.invert')"
-                            :class="{ 'is-active': getResolvedValue('backgroundPatternInvert') }"
+                            :active="!!getResolvedValue('backgroundPatternInvert')"
                             @click="updateSetting('backgroundPatternInvert', !getResolvedValue('backgroundPatternInvert'))"
-                        >
-                            <Contrast :size="14" />
-                        </IconButton>
+                        />
                     </div>
                 </div>
 
@@ -1156,6 +1158,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
+                                    :field="{}"
                                     :value="getResolvedValue('backgroundPatternWidth')"
                                     :placeholder-value="'auto'"
                                     @update:value="updateSetting('backgroundPatternWidth', $event)"
@@ -1180,6 +1183,7 @@
                                     </div>
                                 </transition>
                                 <DimensionField 
+                                    :field="{}"
                                     :value="getResolvedValue('backgroundPatternHeight')"
                                     :placeholder-value="'auto'"
                                     @update:value="updateSetting('backgroundPatternHeight', $event)"
@@ -1239,6 +1243,7 @@
                             </div>
                         </transition>
                         <DimensionField 
+                            :field="{}"
                             :value="getResolvedValue('backgroundPatternHorizontalOffset')"
                             :placeholder-value="'0%'"
                             @update:value="updateSetting('backgroundPatternHorizontalOffset', $event)"
@@ -1265,6 +1270,7 @@
                             </div>
                         </transition>
                         <DimensionField 
+                            :field="{}"
                             :value="getResolvedValue('backgroundPatternVerticalOffset')"
                             :placeholder-value="'0%'"
                             @update:value="updateSetting('backgroundPatternVerticalOffset', $event)"
@@ -1463,33 +1469,29 @@
                     </transition>
                     <div class="flex gap-2">
                         <IconButton 
+                            :icon="FlipHorizontal"
                             :title="t('builder.fields.background.mask.flipH')"
-                            :class="{ 'is-active': getResolvedValue('backgroundMaskFlipH') }"
+                            :active="!!getResolvedValue('backgroundMaskFlipH')"
                             @click="updateSetting('backgroundMaskFlipH', !getResolvedValue('backgroundMaskFlipH'))"
-                        >
-                            <FlipHorizontal :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="FlipVertical"
                             :title="t('builder.fields.background.mask.flipV')"
-                            :class="{ 'is-active': getResolvedValue('backgroundMaskFlipV') }"
+                            :active="!!getResolvedValue('backgroundMaskFlipV')"
                             @click="updateSetting('backgroundMaskFlipV', !getResolvedValue('backgroundMaskFlipV'))"
-                        >
-                            <FlipVertical :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="RefreshCw"
                             :title="t('builder.fields.background.mask.rotate')"
-                            :class="{ 'is-active': getResolvedValue('backgroundMaskRotate') }"
+                            :active="!!getResolvedValue('backgroundMaskRotate')"
                             @click="updateSetting('backgroundMaskRotate', !getResolvedValue('backgroundMaskRotate'))"
-                        >
-                            <RefreshCw :size="14" />
-                        </IconButton>
+                        />
                         <IconButton 
+                            :icon="Contrast"
                             :title="t('builder.fields.background.mask.invert')"
-                            :class="{ 'is-active': getResolvedValue('backgroundMaskInvert') }"
+                            :active="!!getResolvedValue('backgroundMaskInvert')"
                             @click="updateSetting('backgroundMaskInvert', !getResolvedValue('backgroundMaskInvert'))"
-                        >
-                            <Contrast :size="14" />
-                        </IconButton>
+                        />
                     </div>
                 </div>
 
@@ -1557,6 +1559,7 @@
                                 </div>
                             </transition>
                             <DimensionField 
+                                :field="{}"
                                 :value="getResolvedValue('backgroundMaskWidth')"
                                 :placeholder-value="'auto'"
                                 @update:value="updateSetting('backgroundMaskWidth', $event)"
@@ -1581,6 +1584,7 @@
                                 </div>
                             </transition>
                             <DimensionField 
+                                :field="{}"
                                 :value="getResolvedValue('backgroundMaskHeight')"
                                 :placeholder-value="'auto'"
                                 @update:value="updateSetting('backgroundMaskHeight', $event)"
@@ -1639,12 +1643,11 @@
                         <IconButton 
                             v-for="opt in maskAspectRatioOptions" 
                             :key="opt.value"
+                            :icon="opt.icon"
                             :title="opt.label"
-                            :class="{ 'is-active': getResolvedValue('backgroundMaskAspectRatio') === opt.value }"
+                            :active="getResolvedValue('backgroundMaskAspectRatio') === opt.value"
                             @click="updateSetting('backgroundMaskAspectRatio', opt.value)"
-                        >
-                            <component :is="opt.icon" :size="14" />
-                        </IconButton>
+                        />
                     </div>
                 </div>
 
@@ -1681,8 +1684,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch, inject } from 'vue'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 import { useI18n } from 'vue-i18n'
 import { PaintBucket, Image, Video, Grid3X3, Moon, Plus, Component, RotateCcw, Trash2, Maximize2, Settings, FlipHorizontal, FlipVertical, RefreshCw, RotateCw, Lock, Link, Unlink, Square, RectangleHorizontal, RectangleVertical, ChevronDown, Check, Ban, Contrast } from 'lucide-vue-next'
 import ColorField from './ColorField.vue'
@@ -1699,8 +1703,8 @@ import MediaPicker from '../../MediaPicker.vue'
 import ResponsiveFieldModal from '../modals/ResponsiveFieldModal.vue'
 import FieldActions from './FieldActions.vue'
 import { BaseDropdown } from '../ui'
-import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '../core/styleUtils'
-import { BackgroundPatterns, BackgroundMasks } from '../core/AssetLibrary'
+import { getHarmoniousGradientColors, getBackgroundStyles, generateGradientCSS } from '../../../shared/utils/styleUtils'
+import { BackgroundPatterns, BackgroundMasks } from '../../../shared/utils/AssetLibrary'
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -1709,21 +1713,32 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
 const activeTab = ref('color')
-const colorFieldRef = ref(null)
+const colorFieldRef = ref<any>(null)
 const isColorHovered = ref(false)
 const isImageHovered = ref(false)
 const isVideoHovered = ref(false)
 const isPatternHovered = ref(false)
 const isMaskHovered = ref(false)
 
-const responsiveModal = ref({
+interface ResponsiveModalState {
+    show: boolean;
+    label: string;
+    baseKey: string;
+    type: string;
+    options?: any;
+    subFields?: any;
+}
+
+const responsiveModal = ref<ResponsiveModalState>({
     show: false,
     label: '',
     baseKey: '',
-    type: 'color'
+    type: 'color',
+    options: null,
+    subFields: null
 })
 
 const showColorInfo = ref(false)
@@ -1773,7 +1788,7 @@ const showVideoOverlayInfo = ref(false)
 const showParallaxInfo = ref(false)
 const showParallaxMethodInfo = ref(false)
 
-const getInfoContent = (baseKey) => {
+const getInfoContent = (baseKey: string) => {
     const moduleType = props.module?.type || 'common'
     const key = baseKey.includes('.') ? baseKey.split('.').pop() : baseKey
     
@@ -1794,7 +1809,7 @@ const getInfoContent = (baseKey) => {
     return null
 }
 
-const openResponsiveModal = (label, baseKey, type = 'color', options = null, subFields = null) => {
+const openResponsiveModal = (label: string, baseKey: string, type: string = 'color', options: any = null, subFields: any = null) => {
     responsiveModal.value = {
         show: true,
         label,
@@ -1810,7 +1825,7 @@ const moduleSettings = computed(() => {
     // Explicitly track blocks to ensure reactivity
     if (builder?.blocks) { const _ = builder?.blocks }
     
-    const currentModule = builder.findModule(props.module.id)
+    const currentModule = builder?.findModule(props.module.id)
     return currentModule?.settings || {}
 })
 
@@ -1883,24 +1898,29 @@ const resolvedPatternSvg = computed(() => {
     let path = ''
     
     // Check for Divi 5 nested structure (regular/inverted)
-    if (pattern.svg.regular || pattern.svg.inverted) {
-        const stateKey = invert ? 'inverted' : 'regular'
-        const rotateKey = rotate ? 'rotated' : 'default'
-        const stateObj = pattern.svg[stateKey] || pattern.svg.regular
-        path = stateObj?.[rotateKey] || stateObj?.default || ''
-    } else {
-        // Legacy flat structure
-        if (invert && pattern.svg.inverted) {
-            path = pattern.svg.inverted
-        } else if (rotate && pattern.svg.rotated) {
-            path = pattern.svg.rotated
+    if (pattern.svg && typeof pattern.svg === 'object') {
+        const svg = pattern.svg as any
+        if (svg.regular || svg.inverted) {
+            const stateKey = invert ? 'inverted' : 'regular'
+            const rotateKey = rotate ? 'rotated' : 'default'
+            const stateObj = svg[stateKey] || svg.regular
+            path = stateObj?.[rotateKey] || stateObj?.default || ''
         } else {
-            path = pattern.svg.default || pattern.svg
+            // Legacy flat structure
+            if (invert && svg.inverted) {
+                path = svg.inverted
+            } else if (rotate && svg.rotated) {
+                path = svg.rotated
+            } else {
+                path = svg.default || svg
+            }
         }
+    } else {
+        path = (pattern.svg as any) || ''
     }
     
     if (typeof path === 'object') {
-        path = path.landscape || path.square || path.default || ''
+        path = (path as any).landscape || (path as any).square || (path as any).default || ''
     }
     
     return typeof path === 'string' ? path : ''
@@ -1968,10 +1988,11 @@ const resolvedMaskSvg = computed(() => {
     let svgStr = ''
     
     // Check for Divi 5 nested structure (regular.default/inverted.default)
-    if (mask.svg.regular) {
+    if (mask.svg && typeof mask.svg === 'object' && (mask.svg as any).regular) {
+        const svg = mask.svg as any
         const stateKey = invert ? 'inverted' : 'regular'
         const rotateKey = rotate ? 'rotated' : 'default'
-        const stateObj = mask.svg[stateKey] || mask.svg.regular
+        const stateObj = svg[stateKey] || svg.regular
         const rotateObj = stateObj?.[rotateKey] || stateObj?.default || stateObj
         
         if (typeof rotateObj === 'string') {
@@ -1979,16 +2000,17 @@ const resolvedMaskSvg = computed(() => {
         } else {
             svgStr = rotateObj?.[aspectRatio] || rotateObj?.landscape || rotateObj?.square || ''
         }
-    } else {
+    } else if (mask.svg && typeof mask.svg === 'object') {
+        const svg = mask.svg as any
         // Structure: svg.default/rotated/inverted with aspect ratios directly inside
         let stateKey = 'default'
-        if (invert && mask.svg.inverted) {
+        if (invert && svg.inverted) {
             stateKey = 'inverted'
-        } else if (rotate && mask.svg.rotated) {
+        } else if (rotate && svg.rotated) {
             stateKey = 'rotated'
         }
         
-        const stateObj = mask.svg[stateKey] || mask.svg.default || mask.svg
+        const stateObj = svg[stateKey] || svg.default || svg
         if (typeof stateObj === 'string') {
             svgStr = stateObj
         } else {
@@ -2019,11 +2041,11 @@ const currentDevice = computed(() => {
     // If explicit device prop is passed (e.g. from ResponsiveFieldModal), use it.
     if (props.device) return props.device
     // Otherwise fallback to global builder device
-    return builder?.device || 'desktop'
+    return builder?.device.value || 'desktop'
 })
 
-const getResponsiveValue = (baseKey) => {
-    // builder?.device is a string (primitive) if accessed via useBuilder's return, 
+const getResponsiveValue = (baseKey: string) => {
+    // builder?.device.value is a string (primitive) if accessed via useBuilder's return, 
     // but here we are using the computed wrapper locally.
     const dev = currentDevice.value
     const suffix = dev === 'desktop' ? '' : (dev === 'mobile' ? '_mobile' : `_${dev}`)
@@ -2032,7 +2054,7 @@ const getResponsiveValue = (baseKey) => {
     return (val === undefined || val === null) ? '' : val
 }
 
-const getResolvedValue = (baseKey) => {
+const getResolvedValue = (baseKey: string) => {
     const val = getResponsiveValue(baseKey)
     if (val === '' && currentDevice.value !== 'desktop') {
         const placeholder = getResponsivePlaceholder(baseKey)
@@ -2041,14 +2063,14 @@ const getResolvedValue = (baseKey) => {
     return val
 }
 
-const hasOverride = (baseKey) => {
+const hasOverride = (baseKey: string) => {
     if (currentDevice.value === 'desktop') return false
     const suffix = currentDevice.value === 'mobile' ? '_mobile' : (currentDevice.value === 'tablet' ? '_tablet' : '')
     const val = moduleSettings.value[baseKey + suffix]
     return val !== undefined && val !== null && val !== ''
 }
 
-const getMaskOptionPreview = (mask) => {
+const getMaskOptionPreview = (mask: any) => {
     if (!mask || !mask.svg) return ''
     const aspectRatio = getResolvedValue('backgroundMaskAspectRatio') || 'landscape'
     const svg = mask.svg
@@ -2061,7 +2083,7 @@ const getMaskOptionPreview = (mask) => {
     return rotateObj[aspectRatio] || rotateObj.landscape || rotateObj.square || ''
 }
 
-const getResponsivePlaceholder = (baseKey) => {
+const getResponsivePlaceholder = (baseKey: string) => {
     if (currentDevice.value === 'desktop') return ''
     const settings = moduleSettings.value
     const desktopValue = settings[baseKey] || ''
@@ -2075,9 +2097,9 @@ const getResponsivePlaceholder = (baseKey) => {
     return desktopValue
 }
 
-const getSyncedDimensionData = (key, value, suffix) => {
+const getSyncedDimensionData = (key: string, value: any, suffix: string) => {
     const finalData = { [key + suffix]: value }
-    const syncMap = {
+    const syncMap: Record<string, string> = {
         'backgroundImageWidth': 'backgroundImageHeight',
         'backgroundImageHeight': 'backgroundImageWidth',
         'backgroundVideoWidth': 'backgroundVideoHeight',
@@ -2165,7 +2187,7 @@ const imagePreviewStyle = computed(() => {
     const imageUrl = getResolvedValue('backgroundImage')
     if (!imageUrl) return {}
 
-    const styles = {
+    const styles: Record<string, any> = {
         backgroundImage: `url(${imageUrl})`,
         backgroundRepeat: getResolvedValue('backgroundImageRepeat') || 'no-repeat',
         backgroundPosition: getResolvedValue('backgroundImagePosition') || 'center'
@@ -2188,7 +2210,7 @@ const imagePreviewStyle = computed(() => {
 })
 
 const videoPreviewStyle = computed(() => {
-    const styles = {}
+    const styles: Record<string, any> = {}
     const w = getResolvedValue('backgroundVideoWidth')
     const h = getResolvedValue('backgroundVideoHeight')
     
@@ -2233,7 +2255,7 @@ const combinedBackgroundStyle = computed(() => {
         'backgroundMaskRepeat', 'backgroundMaskRepeatOrigin', 'backgroundMaskBlendMode'
     ]
     
-    const resolvedSettings = {}
+    const resolvedSettings: Record<string, any> = {}
     backgroundKeys.forEach(key => {
         resolvedSettings[key] = getResolvedValue(key)
     })
@@ -2241,13 +2263,14 @@ const combinedBackgroundStyle = computed(() => {
     return getBackgroundStyles(resolvedSettings)
 })
 
-const updateSetting = (key, value) => {
+const updateSetting = (key: string, value: any) => {
     // If key is already responsive-specific (has suffix), use it directly
     if (key.includes('_tablet') || key.includes('_mobile')) {
         const baseKey = key.replace(/(_tablet|_mobile)$/, '')
-        const suffix = key.match(/(_tablet|_mobile)$/)[0]
+        const match = key.match(/(_tablet|_mobile)$/)
+        const suffix = match ? match[0] : ''
         const syncedData = getSyncedDimensionData(baseKey, value, suffix)
-        builder.updateModuleSettings(props.module.id, syncedData)
+        builder?.updateModuleSettings(props.module.id, syncedData)
         lastUpdate.value++
         return
     }
@@ -2256,7 +2279,7 @@ const updateSetting = (key, value) => {
     const suffix = currentDevice.value === 'desktop' ? '' : (currentDevice.value === 'mobile' ? '_mobile' : `_${currentDevice.value}`)
     const syncedData = getSyncedDimensionData(key, value, suffix)
 
-    builder.updateModuleSettings(props.module.id, syncedData)
+    builder?.updateModuleSettings(props.module.id, syncedData)
     lastUpdate.value++
 }
 
@@ -2274,9 +2297,9 @@ const resetBackgroundColor = () => {
     updateSetting('backgroundColor', '')
 }
 
-const handleResponsiveUpdate = (data) => {
+const handleResponsiveUpdate = (data: any) => {
     const finalData = {}
-    const currentSettings = builder.findModule(props.module.id)?.settings || {}
+    const currentSettings = builder?.findModule(props.module.id)?.settings || {}
     
     Object.entries(data).forEach(([key, value]) => {
         lastUpdate.value++
@@ -2289,7 +2312,7 @@ const handleResponsiveUpdate = (data) => {
                 const baseKey = parentPath.replace(/(_tablet|_mobile)$/, '')
                 existingParent = currentSettings[baseKey] || {}
             }
-            finalData[parentPath] = { ...existingParent, [childKey]: value }
+            (finalData as any)[parentPath] = { ...existingParent, [childKey]: value }
         } else {
             // Flat keys - Check for unit sync
             const baseKey = key.replace(/(_tablet|_mobile)$/, '')
@@ -2299,7 +2322,7 @@ const handleResponsiveUpdate = (data) => {
         }
     })
 
-    builder.updateModuleSettings(props.module.id, finalData)
+    builder?.updateModuleSettings(props.module.id, finalData)
 }
 
 const initDefaultGradient = () => {
@@ -2308,8 +2331,8 @@ const initDefaultGradient = () => {
     
     if (!baseColor) {
         // 2. Fallback to Global Variables (Primary Color)
-        const colors = builder.globalVariables?.globalColors || []
-        baseColor = colors.find(c => c.name.toLowerCase().includes('primary'))?.value
+        const colors = builder?.globalVariables?.globalColors || []
+        baseColor = colors.find((c: any) => (c as any).name.toLowerCase().includes('primary'))?.value
     }
 
     if (!baseColor) {
@@ -2496,7 +2519,7 @@ const initDefaultGradient = () => {
     width: 100%;
 }
 
-.select-field-container :deep(.base-dropdown-wrapper) {
+.select-field-container:deep(.base-dropdown-wrapper) {
     display: block;
     width: 100%;
 }

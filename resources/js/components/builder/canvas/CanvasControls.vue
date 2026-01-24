@@ -17,14 +17,48 @@
           :title="$t('builder.toolbar.redo')"
           class="canvas-btn"
         />
+
+        <BaseDivider orientation="vertical" :margin="4" />
+
+        <!-- Theme Switcher -->
+        <BaseDropdown align="center" width="200px">
+          <template #trigger="{ open }">
+            <button class="theme-btn" :class="{ 'theme-btn--active': open }" :title="$t('builder.toolbar.theme')">
+              <Palette :size="14" />
+              <span class="theme-name">{{ currentThemeName }}</span>
+              <ChevronDown :size="12" class="ml-auto" />
+            </button>
+          </template>
+          
+          <template #default="{ close }">
+            <div class="dropdown-header">{{ $t('builder.toolbar.switchTheme', 'Switch Theme') }}</div>
+            <div v-if="loadingThemes" class="dropdown-loading">
+                <Loader2 :size="16" class="animate-spin" />
+            </div>
+            <template v-else>
+               <button 
+                v-for="theme in availableThemes" 
+                :key="theme.slug"
+                class="dropdown-item"
+                :class="{ 'active': activeThemeSlug === theme.slug }"
+                @click="changeTheme(theme.slug); close()"
+              >
+                <div class="flex items-center justify-between w-full">
+                  <span>{{ theme.name }}</span>
+                  <Check v-if="activeThemeSlug === theme.slug" :size="14" />
+                </div>
+              </button>
+            </template>
+          </template>
+        </BaseDropdown>
       </div>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
-import { Undo2, Redo2 } from 'lucide-vue-next'
-import { IconButton } from '../ui'
+import { Undo2, Redo2, Palette, ChevronDown, Check, Loader2 } from 'lucide-vue-next'
+import { IconButton, BaseDivider, BaseDropdown } from '../ui'
 
 // Props & Emits
 const emit = defineEmits(['save'])
@@ -34,8 +68,20 @@ const builder = inject('builder')
 const isMobile = ref(false)
 
 // State
-const canUndo = computed(() => builder?.canUndo || false)
-const canRedo = computed(() => builder?.canRedo || false)
+const canUndo = computed(() => builder?.canUndo?.value || false)
+const canRedo = computed(() => builder?.canRedo?.value || false)
+const activeThemeSlug = computed(() => builder?.activeTheme?.value || 'janari')
+const availableThemes = computed(() => builder?.availableThemes?.value || [])
+const loadingThemes = computed(() => builder?.loadingThemes?.value || false)
+
+const currentThemeName = computed(() => {
+    const theme = availableThemes.value.find(t => t.slug === activeThemeSlug.value)
+    return theme ? theme.name : activeThemeSlug.value
+})
+
+const changeTheme = (slug) => {
+    builder?.loadTheme(slug)
+}
 
 // Window resize listener for responsive class
 const checkMobile = () => {
@@ -45,6 +91,10 @@ const checkMobile = () => {
 onMounted(() => {
     checkMobile()
     window.addEventListener('resize', checkMobile)
+    
+    if (builder && availableThemes.value.length === 0) {
+        builder.fetchThemes()
+    }
 })
 
 onUnmounted(() => {
@@ -62,7 +112,6 @@ onUnmounted(() => {
   gap: 8px;
   padding: 8px 0;
   z-index: 10;
-  /* No background - blends with canvas area background */
 }
 
 .canvas-actions {
@@ -80,6 +129,80 @@ onUnmounted(() => {
     height: 32px;
 }
 
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    height: 32px;
+    min-width: 120px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--builder-text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    background: var(--builder-bg-tertiary, rgba(255,255,255,0.05));
+    color: var(--builder-text-primary);
+}
+
+.theme-btn--active {
+    background: var(--builder-bg-tertiary, rgba(255,255,255,0.05));
+    border-color: var(--builder-border);
+}
+
+.theme-name {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dropdown-header {
+    padding: 8px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--builder-text-muted);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-loading {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    color: var(--builder-text-muted);
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: var(--builder-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background: var(--builder-bg-tertiary, rgba(255,255,255,0.05));
+  color: var(--builder-text-primary);
+}
+
+.dropdown-item.active {
+  background: var(--builder-accent);
+  color: white;
+}
+
 /* Dark mode overrides (default for builder) */
 .ja-builder--dark .canvas-actions {
     background: #2d323b;
@@ -91,7 +214,8 @@ onUnmounted(() => {
     background: #f8fafc;
     border-color: #e2e8f0;
 }
-.ja-builder--light .canvas-btn {
+.ja-builder--light .canvas-btn,
+.ja-builder--light .theme-btn {
     color: #374151;
 }
 
@@ -99,10 +223,5 @@ onUnmounted(() => {
 .canvas-controls--mobile {
     justify-content: center;
     padding: 6px 16px;
-}
-
-/* Hide divider (not used anymore) */
-.canvas-divider {
-    display: none;
 }
 </style>

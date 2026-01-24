@@ -155,62 +155,75 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
-import { useAuthStore } from '../../../stores/auth'; // Import Auth Store
-import { parseSingleResponse } from '../../../utils/responseParser';
+import api from '@/services/api';
+import { useAuthStore } from '@/stores/auth';
+import { parseSingleResponse } from '@/utils/responseParser';
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
 import { 
     ArrowLeft, 
     Save, 
     Loader2, 
-    Eye,
     Lock,
-    Calendar,
+    Unlock,
+    Clock3,
     PanelRightClose,
     PanelRightOpen
 } from 'lucide-vue-next';
+// @ts-ignore
 import Dialog from '@/components/ui/dialog.vue';
+// @ts-ignore
 import DialogContent from '@/components/ui/dialog-content.vue';
+// @ts-ignore
 import DialogHeader from '@/components/ui/dialog-header.vue';
+// @ts-ignore
 import DialogTitle from '@/components/ui/dialog-title.vue';
+// @ts-ignore
 import DialogDescription from '@/components/ui/dialog-description.vue';
+// @ts-ignore
 import DialogFooter from '@/components/ui/dialog-footer.vue';
-import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
-import ContentPreviewModal from '../../../components/admin/ContentPreviewModal.vue';
-import ContentMain from '../../../components/content/ContentMain.vue';
-import ContentSidebar from '../../../components/content/ContentSidebar.vue';
+import AutoSaveIndicator from '@/components/AutoSaveIndicator.vue';
+import ContentPreviewModal from '@/components/admin/ContentPreviewModal.vue';
+import ContentMain from '@/components/content/ContentMain.vue';
+import ContentSidebar from '@/components/content/ContentSidebar.vue';
+// @ts-ignore
 import Alert from '@/components/ui/alert.vue';
+// @ts-ignore
 import AlertTitle from '@/components/ui/alert-title.vue';
+// @ts-ignore
 import AlertDescription from '@/components/ui/alert-description.vue';
-import { useAutoSave } from '../../../composables/useAutoSave';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { contentSchema } from '../../../schemas';
+import { useAutoSave } from '@/composables/useAutoSave';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { contentSchema } from '@/schemas';
+import type { Category, Tag } from '@/types/cms';
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore(); // Initialize Auth Store
+// @ts-ignore
+const authStore = useAuthStore();
 const isSidebarOpen = ref(false);
-const contentId = route.params.id;
+const contentId = route.params.id as string;
 const { t } = useI18n();
 const toast = useToast();
 const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(contentSchema);
 
 const loading = ref(false);
-const categories = ref([]);
-const tags = ref([]);
-const menus = ref([]);
-const selectedTags = ref([]);
-const lockStatus = ref(null);
-const lockInterval = ref(null);
-const initialForm = ref(null);
+const categories = ref<Category[]>([]);
+const tags = ref<Tag[]>([]);
+const menus = ref<any[]>([]);
+const selectedTags = ref<Tag[]>([]);
+const lockStatus = ref<any>(null);
+const lockInterval = ref<any>(null);
+const initialForm = ref<any>(null);
 
-const form = ref({
+const form = ref<any>({
     title: '',
     slug: '',
     excerpt: '',
@@ -227,7 +240,6 @@ const form = ref({
     menu_item: {
         add_to_menu: false,
         menu_id: '',
-        parent_id: null,
         parent_id: null,
         title: ''
     },
@@ -247,8 +259,7 @@ const isDirty = computed(() => {
 
 // Auto-generation logic (Similar to Create but cautious about overwriting existing data)
 watch(() => form.value.title, (newTitle) => {
-    // Only auto-update if slug is empty (unlikely in edit) or user specifically wants sync? 
-    // Usually in Edit, we are more careful. But user asked "jika tidak diisi".
+    // Only auto-update if slug is empty
     if (!form.value.slug) {
          form.value.slug = slugify(newTitle);
     }
@@ -264,7 +275,7 @@ watch(() => form.value.excerpt, (newExcerpt) => {
 });
 
 // Helper for slugify
-const slugify = (text) => {
+const slugify = (text: string) => {
     if (!text) return '';
     return text.toString().toLowerCase().trim()
         .replace(/\s+/g, '-')
@@ -288,17 +299,16 @@ const {
     saveStatus: autoSaveStatus,
     hasChanges,
     startAutoSave,
-} = useAutoSave(formWithTags, contentId, {
+} = useAutoSave(formWithTags as any, contentId as any, {
     interval: 30000, // 30 seconds
     // enabled is a getter that listens to autoSaveEnabled ref
+    // @ts-ignore - complex getter type
     get enabled() {
         return autoSaveEnabled.value;
     },
 });
 
-const handleAutoSaveToggle = (isEnabled) => {
-    // Only update if we are in builder mode to avoid disabling it for classic? 
-    // Actually, if builder emits it, it means we are in builder mode.
+const handleAutoSaveToggle = (isEnabled: boolean) => {
     autoSaveEnabled.value = isEnabled;
 };
 
@@ -361,7 +371,7 @@ const fetchContent = async () => {
         
         // Lock content on edit
         await lockContent();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch content:', error);
         toast.error.load(error);
         router.push({ name: 'contents' });
@@ -404,7 +414,7 @@ const handleUnlock = async () => {
         if (lockInterval.value) {
             clearInterval(lockInterval.value);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to unlock content:', error);
         toast.error.unlock(error);
     }
@@ -434,7 +444,7 @@ const handlePublishFromPreview = async () => {
     await handleSubmit();
 };
 
-const formatDateTimeLocal = (dateString) => {
+const formatDateTimeLocal = (dateString: string) => {
     if (!dateString) return null;
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -476,7 +486,7 @@ const fetchMenus = async () => {
     }
 };
 
-const handleModeSelected = (mode) => {
+const handleModeSelected = (mode: string) => {
     form.value.editor_type = mode;
     // Only auto-open sidebar if classic is selected
     if (mode === 'classic') {
@@ -486,7 +496,7 @@ const handleModeSelected = (mode) => {
     }
 };
 
-const handleSubmit = async (status = null) => {
+const handleSubmit = async (status: string | null = null) => {
     // Update status if provided (from Builder save/publish buttons)
     if (status && (status === 'draft' || status === 'published')) {
         form.value.status = status;
@@ -552,7 +562,7 @@ const handleSubmit = async (status = null) => {
         if (typeof status !== 'string') {
             router.push({ name: 'contents' });
         }
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

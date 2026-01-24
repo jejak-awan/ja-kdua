@@ -82,7 +82,7 @@ const fetchMenus = async () => {
 const fetchThemeDetails = async () => {
     loading.value = true;
     try {
-        const response = await api.get(`/admin/ja/themes/${props.theme.id}`);
+        const response = await api.get(`/admin/ja/themes/${props.theme.slug}`);
         const data = response.data.data || response.data;
         fullTheme.value = data;
         loadSettings();
@@ -243,9 +243,9 @@ const resetSettings = async () => {
 const saveSettings = async () => {
     saving.value = true;
     try {
-        await api.put(`/admin/ja/themes/${props.theme.id}/settings`, { settings: formValues.value });
+        await api.put(`/admin/ja/themes/${props.theme.slug}/settings`, { settings: formValues.value });
         if (customCss.value !== fullTheme.value.custom_css) {
-            await api.put(`/admin/ja/themes/${props.theme.id}/custom-css`, { custom_css: customCss.value });
+            await api.put(`/admin/ja/themes/${props.theme.slug}/custom-css`, { custom_css: customCss.value });
         }
         toast.success('Success', 'Theme settings saved successfully.');
         initialSettings.value = JSON.parse(JSON.stringify(formValues.value));

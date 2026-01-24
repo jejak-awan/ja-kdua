@@ -13,8 +13,8 @@
       <!-- Top Toolbar -->
       <TopToolbar 
         :active-panel="activePanel"
-        @toggle-sidebar="handleToggleSidebar"
-        @change-device="builder.setDevice"
+        @toggle-sidebar="toggleSidebar"
+        @change-device="changeDevice"
         @open-pages="showInsertSectionModal = true"
         @close-builder="handleClose"
         @save="handleSave"
@@ -24,14 +24,14 @@
       <div class="ja-builder__main">
         <!-- Left Sidebar (Always Visible) -->
         <LeftSidebar 
-          :active-panel="activePanel"
+          :active-panel="activePanel || undefined"
           @change-panel="togglePanel"
         />
         
         <!-- Left Panel Drawer -->
         <LeftPanel
           v-if="sidebarVisible"
-          :active-panel="activePanel"
+          :active-panel="activePanel!"
           :visible="!!activePanel"
           @close="activePanel = null"
         />
@@ -45,9 +45,9 @@
             @save="handleSave"
           />
           <CanvasFrame 
-            :device="builder.device" 
-            :zoom="builder.zoom" 
-            :width="builder.customViewportWidth"
+            :device="builder.device.value" 
+            :zoom="builder.zoom.value" 
+            :width="builder.customViewportWidth.value"
           >
             <Canvas />
           </CanvasFrame>
@@ -76,19 +76,19 @@
       />
       <InsertSectionModal
         v-if="showInsertSectionModal"
-        :target-index="insertTargetIndex"
+        :target-index="insertSectionIndex"
         @close="showInsertSectionModal = false"
         @inserted="handleSectionInserted"
       />
       <StructureTemplateModal
         v-if="showStructureTemplateModal"
-        :target-type="structureTemplateTargetType"
+        :target-type="(structureTemplateTargetType as string)"
         @close="showStructureTemplateModal = false"
         @insert="handleStructureTemplateInsert"
       />
       <ResponsiveFieldModal
-        v-if="builder.responsiveModal && builder.responsiveModal.baseKey"
-        v-bind="builder.responsiveModal"
+        v-if="builder.responsiveModal.value && builder.responsiveModal.value.baseKey"
+        v-bind="builder.responsiveModal.value"
         @close="builder.closeResponsiveModal"
         @update="handleResponsiveUpdate"
       />
@@ -112,40 +112,40 @@
         @import="handleImportCanvas"
       />
       <CanvasSettingsModal
-        v-if="showCanvasSettingsModal"
+        v-if="showCanvasSettingsModal && activeCanvasData"
         :canvas="activeCanvasData"
         @close="showCanvasSettingsModal = false"
         @save="handleSaveCanvasSettings"
       />
 
       <SavePresetModal
-        v-if="builder.savePresetModal.visible"
-        :loading="builder.savePresetModal.loading"
+        v-if="builder.savePresetModal.value.visible"
+        :loading="builder.savePresetModal.value.loading"
         @close="builder.closeSavePresetModal"
         @save="builder.handleSavePreset"
       />
 
       <ConfirmModal
-        v-if="builder.confirmModal.visible"
-        :is-open="builder.confirmModal.visible"
-        :title="builder.confirmModal.title"
-        :message="builder.confirmModal.message"
-        :confirm-text="builder.confirmModal.confirmText"
-        :cancel-text="builder.confirmModal.cancelText"
-        :type="builder.confirmModal.type"
+        v-if="builder.confirmModal.value.visible"
+        :is-open="builder.confirmModal.value.visible"
+        :title="builder.confirmModal.value.title"
+        :message="builder.confirmModal.value.message"
+        :confirm-text="builder.confirmModal.value.confirmText"
+        :cancel-text="builder.confirmModal.value.cancelText"
+        :type="builder.confirmModal.value.type"
         @confirm="builder.closeConfirmModal(true)"
         @cancel="builder.closeConfirmModal(false)"
       />
 
       <InputModal
-        v-if="builder.inputModal.visible"
-        :is-open="builder.inputModal.visible"
-        :title="builder.inputModal.title"
-        :message="builder.inputModal.message"
-        :placeholder="builder.inputModal.placeholder"
-        :initial-value="builder.inputModal.initialValue"
-        :confirm-text="builder.inputModal.confirmText"
-        :cancel-text="builder.inputModal.cancelText"
+        v-if="builder.inputModal.value.visible"
+        :is-open="builder.inputModal.value.visible"
+        :title="builder.inputModal.value.title"
+        :message="builder.inputModal.value.message"
+        :placeholder="builder.inputModal.value.placeholder"
+        :initial-value="builder.inputModal.value.initialValue"
+        :confirm-text="builder.inputModal.value.confirmText"
+        :cancel-text="builder.inputModal.value.cancelText"
         @confirm="builder.closeInputModal"
         @cancel="builder.closeInputModal(null)"
       />
@@ -154,7 +154,7 @@
           :visible="contextMenu.visible"
           :x="contextMenu.x"
           :y="contextMenu.y"
-          :module-id="contextMenu.moduleId"
+          :module-id="contextMenu.moduleId || undefined"
           :title="contextMenu.title"
           :type="contextMenu.type"
           :mode="contextMenu.mode"
@@ -165,8 +165,9 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, provide, watch, onMounted, onUnmounted } from 'vue'
+import type { Ref } from 'vue'
 
 // Layout Components
 import TopToolbar from './layout/TopToolbar.vue'
@@ -195,8 +196,9 @@ import InputModal from './modals/InputModal.vue'
 import ContextMenu from './ui/ContextMenu.vue'
 
 // Core
-import { useBuilder, ModuleRegistry } from './core'
+import { useBuilder } from './core'
 import { useCmsStore } from '@/stores/cms'
+import type { BlockInstance, BuilderInstance, Canvas as ICanvas } from '../../types/builder'
 
 // Register Module Definitions (side-effect import)
 import './modules'
@@ -209,30 +211,30 @@ import { registerBlockComponents } from './core/registerBlocks'
 registerBlockComponents()
 
 // Props
-const props = defineProps({
-  initialData: {
-    type: Object,
-    default: () => ({ blocks: [] })
-  },
-  modelValue: { // Added for v-model support
-    type: Array,
-    default: undefined
-  },
-  contentId: { // New prop for CMS integration
-    type: [String, Number],
-    default: null
-  },
-  mode: { // site | page
-    type: String,
-    default: 'site'
-  }
+interface Props {
+  initialData?: { blocks: BlockInstance[] };
+  modelValue?: BlockInstance[];
+  contentId?: string | number | null;
+  mode?: 'site' | 'page';
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  initialData: () => ({ blocks: [] }),
+  contentId: null,
+  mode: 'site'
 })
 
 // Emits
-const emit = defineEmits(['update', 'save', 'update:modelValue', 'close', 'update:fullscreen', 'update:autoSave'])
+const emit = defineEmits<{
+  (e: 'update', payload: { blocks: BlockInstance[] }): void;
+  (e: 'save', status: string | null): void;
+  (e: 'update:modelValue', blocks: BlockInstance[]): void;
+  (e: 'close'): void;
+  (e: 'update:fullscreen', val: boolean): void;
+  (e: 'update:autoSave', val: boolean): void;
+}>()
 
 // Initialize builder state
-// Prefer modelValue (array of blocks) if provided, otherwise fallback to initialData object
 const builderInitialData = computed(() => {
   if (props.modelValue) {
     return { blocks: props.modelValue }
@@ -244,14 +246,13 @@ const builderBase = useBuilder(builderInitialData.value, {
   mode: props.mode
 })
 
-// Expose builder instance (for SiteEditor or other parents)
+// Expose builder instance
 defineExpose({ builder: builderBase })
 
-const globalAction = ref(null)
+const globalAction = ref<string | null>(null)
 const cmsStore = useCmsStore()
 
 // UI State
-// Theme initialization is handled by cmsStore
 watch(() => cmsStore.isDarkMode, (isDark) => {
   if (isDark) {
     document.body.classList.add('ja-builder--dark')
@@ -266,62 +267,58 @@ onUnmounted(() => {
   document.body.classList.remove('ja-builder--dark', 'ja-builder--light')
 })
 
+// Correctly provide dark mode for children
+const darkMode = computed(() => cmsStore.isDarkMode)
+provide('darkMode', darkMode)
+
 const sidebarVisible = ref(true)
-const activePanel = ref(props.mode === 'site' ? 'pages' : 'layers')
-// device is managed by builder
+const activePanel = ref<string | null>(props.mode === 'site' ? 'pages' : 'layers')
+
 const showInsertModal = ref(false)
-const insertTargetId = ref(null)
+const insertTargetId = ref<string | null>(null)
 const insertTargetIndex = ref(-1)
 
 const showInsertRowModal = ref(false)
-const insertRowTargetId = ref(null)
+const insertRowTargetId = ref<string | null>(null)
 
 const showInsertSectionModal = ref(false)
 const insertSectionIndex = ref(-1)
 
 const showStructureTemplateModal = ref(false)
-const structureTemplateTargetId = ref(null)
-const structureTemplateTargetType = ref(null)
+const structureTemplateTargetId = ref<string | null>(null)
+const structureTemplateTargetType = ref<string | null>(null)
 
-const builder = reactive({
+const builder = {
   ...builderBase,
-  darkMode: computed(() => cmsStore.isDarkMode),
+  darkMode,
   sidebarVisible,
   activePanel,
   globalAction,
-})
+} as any as BuilderInstance & { darkMode: Ref<boolean>; sidebarVisible: Ref<boolean>; activePanel: Ref<string | null>; globalAction: Ref<string | null> }
 
 // Provide builder for child components
 provide('builder', builder)
 
-watch(() => builder.isFullscreen, (val) => {
+watch(() => (builder as any).isFullscreen, (val) => {
   emit('update:fullscreen', val)
 })
 
-// Watch for changes in builder blocks and emit updates
 watch(builder.blocks, (newBlocks) => {
   emit('update', { blocks: newBlocks })
   emit('update:modelValue', newBlocks)
 }, { deep: true })
 
-// Watch for autoSave preference
-watch(() => builder.autoSave, (val) => {
+watch(() => (builder as any).autoSave, (val) => {
   emit('update:autoSave', val)
 }, { immediate: true })
 
-
-
-// Watch for external modelValue changes
 watch(() => props.modelValue, (newBlocks) => {
-  if (newBlocks && JSON.stringify(newBlocks) !== JSON.stringify(builder.blocks)) {
-    builder.blocks = newBlocks
+  if (newBlocks && JSON.stringify(newBlocks) !== JSON.stringify(builder.blocks.value)) {
+    builder.blocks.value = newBlocks
   }
 }, { deep: true })
 
-
-
-// Selected Module
-const selectedModule = computed(() => builder.selectedModule)
+const selectedModule = computed(() => builder.selectedModule.value)
 
 watch(selectedModule, (newVal) => {
   if (newVal && window.innerWidth <= 768) {
@@ -334,11 +331,11 @@ const toggleSidebar = () => {
   sidebarVisible.value = !sidebarVisible.value
 }
 
-const changeDevice = (newDevice) => {
-  builder.setDeviceMode(newDevice)
+const changeDevice = (newDevice: string) => {
+  builder.setDeviceMode(newDevice as 'desktop' | 'tablet' | 'mobile')
 }
 
-const togglePanel = (panel) => {
+const togglePanel = (panel: string) => {
   if (activePanel.value === panel) {
     activePanel.value = null
   } else {
@@ -350,21 +347,21 @@ const closeSettings = () => {
   builder.clearSelection()
 }
 
-const openInsertModal = (targetId, index = -1) => {
+const openInsertModal = (targetId: string | null, index = -1) => {
   insertTargetId.value = targetId
   insertTargetIndex.value = index
   showInsertModal.value = true
 }
 
-const insertRowMode = ref('insert') // 'insert' | 'edit'
+const insertRowMode = ref<'insert' | 'edit'>('insert')
 
-const openInsertRowModal = (targetId) => {
+const openInsertRowModal = (targetId: string | null) => {
   insertRowTargetId.value = targetId
   insertRowMode.value = 'insert'
   showInsertRowModal.value = true
 }
 
-const openUpdateRowModal = (rowId) => {
+const openUpdateRowModal = (rowId: string | null) => {
   insertRowTargetId.value = rowId
   insertRowMode.value = 'edit'
   showInsertRowModal.value = true
@@ -378,72 +375,57 @@ const openInsertSectionModal = (index = -1) => {
   showInsertSectionModal.value = true
 }
 
-const openStructureTemplateModal = (targetId, targetType) => {
+const openStructureTemplateModal = (targetId: string | null, targetType: string | null) => {
   structureTemplateTargetId.value = targetId
   structureTemplateTargetType.value = targetType
   showStructureTemplateModal.value = true
 }
 
-const insertModule = (type) => { // Keep for backward compat if needed, but primary logic is below
+const insertModule = (type: string) => {
   builder.insertModule(type, insertTargetId.value, insertTargetIndex.value)
   showInsertModal.value = false
 }
 
-const handleModuleInsert = (type, payload) => {
-  // Handle Row insertion from InsertModuleModal which passes layout object
+const handleModuleInsert = (type: string, payload: any) => {
   if (type === 'row') {
     insertRowTargetId.value = insertTargetId.value
     insertRow(payload)
     return
   }
-
-  // Handle Preset insertion
   if (type === 'preset') {
     builder.insertFromPreset(payload, insertTargetId.value, insertTargetIndex.value)
     showInsertModal.value = false
     return
   }
-
-  // Handle normal module insertion
   insertModule(type)
 }
 
-const handleStructureTemplateInsert = (payload) => {
-    insertRowTargetId.value = structureTemplateTargetId.value
+const handleStructureTemplateInsert = (payload: any) => {
+    structureTemplateTargetId.value = structureTemplateTargetId.value
     insertRow(payload)
     showStructureTemplateModal.value = false
 }
 
-const insertRow = (layout) => {
-  // layout can be:
-  // 1. object {widths}
-  // 2. object {rows: [ {widths:[]}, ... ]} (Multi-row preset)
-  // 3. object {cols: [ {width, rows:[]}, ... ]} (Specialty preset)
-  
-  const createSingleRow = (config, parentId = insertRowTargetId.value) => {
-    // 1. Create Row
+const insertRow = (layout: any) => {
+  const createSingleRow = (config: any, parentId = insertRowTargetId.value) => {
     const row = builder.insertModule('row', parentId)
-    
     if (row) {
       if (config.cols) {
-        // Specialty/Nested structure
-        config.cols.forEach(colConfig => {
+        config.cols.forEach((colConfig: any) => {
           const col = builder.insertModule('column', row.id)
           if (col) {
             builder.updateModuleSettings(col.id, { flexGrow: colConfig.width })
             if (colConfig.rows) {
-              colConfig.rows.forEach(nestedRowConfig => {
+              colConfig.rows.forEach((nestedRowConfig: any) => {
                 createSingleRow(nestedRowConfig, col.id)
               })
             }
           }
         })
       } else {
-        // Standard structure
         const structure = config.structure || config
         const widths = config.widths || (typeof structure === 'string' ? structure.split('-').map(() => 1) : [1])
-        
-        widths.forEach(width => {
+        widths.forEach((width: number) => {
           const col = builder.insertModule('column', row.id)
           if (col) {
             builder.updateModuleSettings(col.id, { flexGrow: width })
@@ -454,46 +436,42 @@ const insertRow = (layout) => {
   }
 
   if (layout.rows) {
-      // Multi-Row Preset
-      layout.rows.forEach(rowConfig => createSingleRow(rowConfig))
+      layout.rows.forEach((rowConfig: any) => createSingleRow(rowConfig))
   } else {
-      // Single Row or Specialty
       createSingleRow(layout)
   }
-  
   showInsertRowModal.value = false
 }
 
-const updateRow = (layout) => {
+const updateRow = (layout: any) => {
+    if (!insertRowTargetId.value) return
     const success = builder.updateRowLayout(insertRowTargetId.value, layout)
     if (!success) {
-        toast.error('Could not update row layout')
+        toast.error.action('Could not update row layout')
     }
     showInsertRowModal.value = false
 }
 
-const handleResponsiveUpdate = (updates) => {
-  if (builder.responsiveModal) {
-    const moduleId = builder.responsiveModal.module.id
+const handleResponsiveUpdate = (updates: any) => {
+  if (builder.responsiveModal.value) {
+    const moduleId = builder.responsiveModal.value.module.id
     builder.updateModuleSettings(moduleId, updates)
   }
 }
 
-// Close Builder
-const handleClose = () => {
-    // Emit close event for parent app to handle (e.g. redirect)
-    emit('close')
-    // Alternatively, could window.history.back() if standalone
+const handleSectionInserted = () => {
+  showInsertSectionModal.value = false
 }
 
-// Keyboard Shortcuts
-const handleKeydown = (e) => {
-  // Check if input/textarea is focused to avoid conflict
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+const handleClose = () => {
+    emit('close')
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || (e.target as HTMLElement).isContentEditable) {
     return
   }
 
-  // Undo/Redo
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
     e.preventDefault()
     if (e.shiftKey) {
@@ -503,10 +481,9 @@ const handleKeydown = (e) => {
     }
   }
   
-  // Save
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
     e.preventDefault()
-    emit('save')
+    emit('save', null)
   }
 }
 
@@ -516,7 +493,7 @@ import { useI18n } from 'vue-i18n'
 const toast = useToast()
 const { t } = useI18n()
 
-const handleDeleteModule = async (id) => {
+const handleDeleteModule = async (id: string) => {
     const confirmed = await builder.confirm({
         title: t('builder.modals.confirm.deleteModule'),
         message: t('builder.modals.confirm.deleteModuleDesc'),
@@ -529,40 +506,33 @@ const handleDeleteModule = async (id) => {
     }
 }
 
-const handleSave = async (status = null) => {
-  // Emit save event to parent (allows external handling)
+const handleSave = async (status: string | null = null) => {
   emit('save', status)
-  
-  // Optimistically mark as saved to disable buttons
   builder.markAsSaved()
 }
 
-const canvasAreaRef = ref(null)
-let resizeObserver = null
+const canvasAreaRef = ref<HTMLElement | null>(null)
+let resizeObserver: ResizeObserver | null = null
 
 onMounted(async () => {
     window.addEventListener('keydown', handleKeydown)
     builder.loadTheme()
     builder.fetchMetadata()
     
-    // Setup ResizeObserver for adaptive device mode
     if (canvasAreaRef.value) {
         resizeObserver = new ResizeObserver((entries) => {
-            if (builder.deviceModeType !== 'auto') return
+            if (builder.deviceModeType.value !== 'auto') return
 
             for (let entry of entries) {
                 const width = entry.contentRect.width
-                
-                // Adaptive thresholds
-                let newDevice = 'desktop'
+                let newDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop'
                 if (width < 768) {
                     newDevice = 'mobile'
                 } else if (width < 1024) {
                     newDevice = 'tablet'
                 }
-                
-                if (builder.device !== newDevice) {
-                    builder.device = newDevice
+                if (builder.device.value !== newDevice) {
+                    builder.device.value = newDevice
                 }
             }
         })
@@ -573,7 +543,7 @@ onMounted(async () => {
       try {
         await builder.loadContent(props.contentId)
       } catch (err) {
-        toast.error('Failed to load content')
+        toast.error.load('Failed to load content')
       }
     }
 })
@@ -590,13 +560,13 @@ const contextMenu = reactive({
     visible: false,
     x: 0,
     y: 0,
-    moduleId: null,
+    moduleId: null as string | null,
     title: '',
     type: '',
     mode: 'module'
 })
 
-const openContextMenu = (moduleId, event, title = '', type = '', mode = 'module') => {
+const openContextMenu = (moduleId: string, event: MouseEvent, title = '', type = '', mode = 'module') => {
     event.preventDefault()
     contextMenu.visible = true
     contextMenu.x = event.clientX
@@ -617,76 +587,46 @@ const showImportExportModal = ref(false)
 const showCanvasSettingsModal = ref(false)
 const showIconPickerModal = ref(false)
 const iconPickerValue = ref('')
-const onIconSelectCallback = ref(null)
-const activeCanvasForModal = ref(null)
+const onIconSelectCallback = ref<((icon: string) => void) | null>(null)
+const activeCanvasForModal = ref<string | null>(null)
 
-const getCanvasById = (id) => {
-    if (!id || !builder || !builder.canvases) return null
-    const list = Array.isArray(builder.canvases) ? builder.canvases : (builder?.canvases || [])
-    return list.find(c => c.id === id)
+const getCanvasById = (id: string | null): ICanvas | null => {
+    if (!id || !builder || !builder.canvases.value) return null
+    return builder.canvases.value.find((c: ICanvas) => c.id === id) || null
 }
 
 const activeCanvasData = computed(() => {
     return getCanvasById(activeCanvasForModal.value)
 })
 
-const handleContextMenuAction = async (action, id, mode = 'module') => {
+const handleContextMenuAction = async (action: string, id: string, mode = 'module') => {
     if (mode === 'canvas') {
         handleCanvasAction(action, id)
         return
     }
 
     switch (action) {
-        // Undo/Redo
-        case 'undo':
-            builder.undo()
-            break
-        case 'redo':
-            builder.redo()
-            break
-            
-        // Module actions
-        case 'duplicate':
-            builder.duplicateModule(id)
-            break
-        case 'delete':
-            handleDeleteModule(id)
-            break
+        case 'undo': builder.undo(); break
+        case 'redo': builder.redo(); break
+        case 'duplicate': builder.duplicateModule(id); break
+        case 'delete': handleDeleteModule(id); break
         case 'add-element':
-            // Open insert modal targeting this container
             insertTargetId.value = id
             insertTargetIndex.value = -1
             showInsertModal.value = true
             break
-            
-        // Copy/Paste
-        case 'copy':
-            builder.copyModule(id)
-            break
-        case 'paste':
-            builder.pasteModule(id)
-            break
-            
-        // Styles
-        case 'copy-style':
-            builder.copyStyles(id)
-            break
-        case 'paste-style':
-            builder.pasteStyles(id)
-            break
-        case 'reset-styles':
-            builder.resetModuleStyles?.(id)
-            break
-            
-        // Navigation
+        case 'copy': builder.copyModule(id); break
+        case 'paste': builder.pasteModule(id); break
+        case 'copy-style': builder.copyStyles(id); break
+        case 'paste-style': builder.pasteStyles(id); break
+        case 'reset-styles': builder.resetModuleStyles?.(id); break
         case 'parent':
-            const parent = builder.findParentById(builder.blocks, id)
+            const parent = builder.findParentById(builder.blocks.value, id)
             if (parent) {
                 builder.selectModule(parent.id)
             }
             break
         case 'go-to-layer':
-            // Open layers panel and scroll to module
             activePanel.value = 'layers'
             setTimeout(() => {
                 const layerEl = document.querySelector(`[data-layer-id="${id}"]`)
@@ -697,15 +637,11 @@ const handleContextMenuAction = async (action, id, mode = 'module') => {
                 }
             }, 100)
             break
-            
-        // Settings
         case 'rename':
             const currentModule = builder.findModule(id)
             const newLabel = await builder.prompt({
                 title: t('builder.contextMenu.renameLabel'),
-                // message: t('builder.modals.input.renameLabelDesc'), // Optional
                 initialValue: currentModule?.settings?._label || '',
-                // placeholder: t('builder.modals.input.renameLabelPlaceholder'),
                 confirmText: 'OK',
                 cancelText: 'Cancel'
             })
@@ -721,13 +657,12 @@ const handleContextMenuAction = async (action, id, mode = 'module') => {
             }
             break
         case 'save-to-library':
-            // Open save preset modal for this module
             builder.openSavePresetModal?.(id)
             break
     }
 }
 
-const handleCanvasAction = (action, id) => {
+const handleCanvasAction = (action: string, id: string) => {
     if (action === 'edit-canvas') {
         builder.switchCanvas(id)
     } else if (action === 'duplicate-canvas') {
@@ -745,63 +680,56 @@ const handleCanvasAction = (action, id) => {
     }
 }
 
-const handleAddCanvas = (data) => {
+const handleAddCanvas = (data: { title: string }) => {
     builder.addCanvas(data.title)
     showAddCanvasModal.value = false
 }
 
-const handleExportCanvas = (data) => {
-    builder.exportCanvas(activeCanvasForModal.value)
+const handleExportCanvas = (_data: any) => {
+    if (activeCanvasForModal.value) {
+        builder.exportCanvas(activeCanvasForModal.value)
+    }
     showImportExportModal.value = false
 }
 
-const handleImportCanvas = (data) => {
-    // Importing to canvas...
+const handleImportCanvas = (_data: any) => {
     showImportExportModal.value = false
 }
 
-const handleSaveCanvasSettings = (data) => {
-    builder.renameCanvas(activeCanvasForModal.value, data.title)
-    // Update global status if needed (mock for now)
-    const canvas = getCanvasById(activeCanvasForModal.value)
-    if (canvas) {
-        canvas.isGlobal = data.isGlobal
-        canvas.append = data.append
+const handleSaveCanvasSettings = (data: { title: string, isGlobal: boolean, append: boolean }) => {
+    if (activeCanvasForModal.value) {
+        builder.renameCanvas(activeCanvasForModal.value, data.title)
+        const canvas = getCanvasById(activeCanvasForModal.value)
+        if (canvas) {
+            (canvas as any).isGlobal = data.isGlobal;
+            (canvas as any).append = data.append;
+        }
     }
     showCanvasSettingsModal.value = false
 }
 
-const handleIconSelect = (iconName) => {
+const handleIconSelect = (iconName: string) => {
     if (onIconSelectCallback.value) {
         onIconSelectCallback.value(iconName)
     }
 }
 
-builder.openIconPickerModal = (value, onSelect) => {
+builder.openIconPickerModal = (value: string, onSelect: (icon: string) => void) => {
     iconPickerValue.value = value
     onIconSelectCallback.value = onSelect
     showIconPickerModal.value = true
 }
 
-// Global openers
 builder.openAddCanvasModal = () => { showAddCanvasModal.value = true }
-builder.openImportExportModal = (id) => { 
+builder.openImportExportModal = (id: string) => { 
     activeCanvasForModal.value = id
     showImportExportModal.value = true 
 }
 
-// Assign modal openers to builder (to avoid TDZ)
 builder.openInsertModal = openInsertModal
 builder.openInsertRowModal = openInsertRowModal
 builder.openUpdateRowModal = openUpdateRowModal
 builder.openInsertSectionModal = openInsertSectionModal
 builder.openStructureTemplateModal = openStructureTemplateModal
 builder.openContextMenu = openContextMenu
-
-// Provide builder to all children
-provide('builder', builder)
-provide('darkMode', computed({
-  get: () => cmsStore.isDarkMode,
-  set: (val) => cmsStore.toggleDarkMode(val)
-}))
 </script>

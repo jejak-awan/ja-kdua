@@ -498,6 +498,8 @@
             "auto": "Otomatis (Adaptif)"
         },
         "toggleTheme": "Ganti Tema",
+        "theme": "Tema",
+        "switchTheme": "Ganti Tema",
         "fullscreen": "Tampilan Penuh",
         "exitFullscreen": "Tampilan Normal",
         "close": "Tutup",

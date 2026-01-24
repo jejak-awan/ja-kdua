@@ -7,7 +7,7 @@
         :icon="sidebarVisible ? ChevronsLeft : Menu" 
         :class="['toolbar-btn-lg', 'toolbar-btn-mobile', 'menu-toggle', { 'menu-toggle--active': sidebarVisible }]" 
         @click="$emit('toggle-sidebar')" 
-        :title="sidebarVisible ? $t('builder.common.close') : $t('builder.toolbar.menu')" 
+        :title="sidebarVisible ? t('builder.common.close') : t('builder.toolbar.menu')" 
       />
       
       <!-- Divider (Mobile Only) -->
@@ -30,7 +30,7 @@
               <IconButton 
                 :icon="Search" 
                 :active="open" 
-                :title="$t('builder.toolbar.zoom')" 
+                :title="t('builder.toolbar.zoom')" 
               />
             </template>
             
@@ -53,8 +53,8 @@
       <div class="device-modes desktop-only">
         <IconButton 
           :icon="Wand2"
-          :active="builder.deviceModeType === 'auto'"
-          :title="$t('builder.toolbar.devices.auto') || 'Auto (Responsive)'"
+          :active="builder.deviceModeType.value === 'auto'"
+          :title="t('builder.toolbar.devices.auto') || 'Auto (Responsive)'"
           @click="builder.setDeviceModeAuto()"
         />
         <BaseDivider orientation="vertical" :margin="2" />
@@ -62,8 +62,8 @@
           v-for="mode in deviceModes"
           :key="mode.id"
           :icon="icons[mode.icon] || mode.icon"
-          :active="device === mode.id && builder.deviceModeType === 'manual'"
-          :title="$t('builder.toolbar.devices.' + mode.id)"
+          :active="device === mode.id && builder.deviceModeType.value === 'manual'"
+          :title="t('builder.toolbar.devices.' + mode.id)"
           @click="builder.setDeviceMode(mode.id)"
         />
       </div>
@@ -73,9 +73,9 @@
         <BaseDropdown align="center" width="auto">
             <template #trigger="{ open }">
               <IconButton 
-                :icon="builder.deviceModeType === 'auto' ? Wand2 : (icons[currentDeviceIcon] || Monitor)" 
+                :icon="builder.deviceModeType.value === 'auto' ? Wand2 : (icons[currentDeviceIcon] || Monitor)" 
                 :active="open" 
-                :title="builder.deviceModeType === 'auto' ? 'Auto Mode' : $t('builder.toolbar.devices.' + device)" 
+                :title="builder.deviceModeType.value === 'auto' ? 'Auto Mode' : t('builder.toolbar.devices.' + device)" 
                 class="device-dropdown-trigger"
               />
             </template>
@@ -83,12 +83,12 @@
             <template #default="{ close }">
               <button 
                 class="dropdown-item"
-                :class="{ 'active': builder.deviceModeType === 'auto' }"
+                :class="{ 'active': builder.deviceModeType.value === 'auto' }"
                 @click="builder.setDeviceModeAuto(); close()"
               >
                 <div class="flex items-center gap-2">
                     <Wand2 class="w-4 h-4" />
-                    {{ $t('builder.toolbar.devices.auto') || 'Auto (Responsive)' }}
+                    {{ t('builder.toolbar.devices.auto') || 'Auto (Responsive)' }}
                 </div>
               </button>
               <BaseDivider orientation="horizontal" :margin="4" />
@@ -96,12 +96,12 @@
                 v-for="mode in deviceModes" 
                 :key="mode.id"
                 class="dropdown-item"
-                :class="{ 'active': mode.id === device && builder.deviceModeType === 'manual' }"
+                :class="{ 'active': mode.id === device && builder.deviceModeType.value === 'manual' }"
                 @click="builder.setDeviceMode(mode.id); close()"
               >
                 <div class="flex items-center gap-2">
                     <component :is="icons[mode.icon] || mode.icon" class="w-4 h-4" />
-                    {{ $t('builder.toolbar.devices.' + mode.id) }}
+                    {{ t('builder.toolbar.devices.' + mode.id) }}
                 </div>
               </button>
             </template>
@@ -114,7 +114,7 @@
       <IconButton 
         :icon="isFullscreen ? Minimize : Maximize" 
         :active="isFullscreen"
-        :title="isFullscreen ? $t('builder.toolbar.exitFullscreen') || 'Exit Full View' : $t('builder.toolbar.fullscreen') || 'Enter Full View'" 
+        :title="isFullscreen ? t('builder.toolbar.exitFullscreen') || 'Exit Full View' : t('builder.toolbar.fullscreen') || 'Enter Full View'" 
         @click="toggleFullscreen"
       />
     </div>
@@ -127,21 +127,21 @@
         <button 
           class="save-draft-btn" 
           @click="$emit('save', 'draft')"
-          :disabled="!builder.isDirty"
-          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty }"
-          :title="$t('builder.toolbar.saveDraft') || 'Save as Draft'"
+          :disabled="!builder.isDirty.value"
+          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty.value }"
+          :title="t('builder.toolbar.saveDraft') || 'Save as Draft'"
         >
-          {{ $t('builder.toolbar.draft') || 'Draft' }}
+          {{ t('builder.toolbar.draft') || 'Draft' }}
         </button>
         <button 
           class="publish-btn" 
           @click="$emit('save', 'published')"
-          :disabled="!builder.isDirty"
-          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty }"
-          :title="builder.content.status === 'published' ? $t('builder.toolbar.update') : $t('builder.toolbar.publish')"
+          :disabled="!builder.isDirty.value"
+          :class="{ 'opacity-50 cursor-not-allowed': !builder.isDirty.value }"
+          :title="builder.content.value.status === 'published' ? t('builder.toolbar.update') : t('builder.toolbar.publish')"
         >
           <Save class="w-3.5 h-3.5 mr-1.5" />
-          {{ builder.content.status === 'published' ? ($t('builder.toolbar.update') || 'Update') : ($t('builder.toolbar.publish') || 'Publish') }}
+          {{ builder.content.value.status === 'published' ? (t('builder.toolbar.update') || 'Update') : (t('builder.toolbar.publish') || 'Publish') }}
         </button>
       </div>
 
@@ -152,71 +152,78 @@
         :icon="X" 
         class="toolbar-btn-lg cancel-btn" 
         @click="$emit('close-builder')" 
-        :title="$t('builder.toolbar.close') || 'Close'" 
+        :title="t('builder.toolbar.close') || 'Close'" 
       />
 
     </div>
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { inject, computed } from 'vue'
 import { 
   Menu, Monitor, Tablet, Smartphone, 
   Search, Save, X, Maximize, Minimize, ChevronsLeft,
   Wand2, Layers
 } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import { DEVICE_MODES } from '../core/constants'
 import { IconButton, BaseDropdown, BaseDivider } from '../ui'
 import AdminLogo from '../../layouts/AdminLogo.vue'
+import type { BuilderInstance } from '../../../types/builder'
 
 // Icons mapping for dynamic components
-const icons = { Monitor, Tablet, Smartphone, Wand2 }
+const icons: Record<string, any> = { Monitor, Tablet, Smartphone, Wand2 }
 
 // Inject builder state
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder') as any // Full typed builder can be complex, using any for now but adding .value
 
 // Props & Emits
-const props = defineProps({
-  sidebarVisible: {
-    type: Boolean,
-    default: false
-  }
-})
-const emit = defineEmits(['toggle-sidebar', 'change-device', 'open-pages', 'close-builder', 'save'])
+const props = defineProps<{
+  sidebarVisible?: boolean
+}>()
+const emit = defineEmits<{
+  (e: 'toggle-sidebar'): void
+  (e: 'change-device', device: string): void
+  (e: 'open-pages'): void
+  (e: 'close-builder'): void
+  (e: 'save', status: 'draft' | 'published'): void
+}>()
+
+const { t } = useI18n()
 
 // State
-const device = computed(() => builder?.device || 'desktop')
-const zoom = computed(() => builder?.zoom || 100)
-const wireframeMode = computed(() => builder?.wireframeMode || false)
+const device = computed(() => builder?.device.value || 'desktop')
+const zoom = computed(() => builder?.zoom.value || 100)
+const wireframeMode = computed(() => builder?.wireframeMode.value || false)
 
 const deviceModes = Object.values(DEVICE_MODES)
 
 const currentDeviceIcon = computed(() => {
     const mode = deviceModes.find(m => m.id === device.value)
-    return mode ? mode.icon : 'Monitor'
+    return mode ? (mode.icon as string) : 'Monitor'
 })
 
 // Zoom Options
 const zoomOptions = [50, 75, 100, 125, 150]
 
-const selectZoom = (val) => {
+const selectZoom = (val: number) => {
     if (builder) {
-        builder.zoom = val
+        builder.zoom.value = val
     }
 }
 
-const isFullscreen = computed(() => !!builder?.isFullscreen)
+const isFullscreen = computed(() => !!builder?.isFullscreen.value)
 
 const toggleFullscreen = () => {
     if (builder) {
-        builder.isFullscreen = !builder.isFullscreen
+        builder.isFullscreen.value = !builder.isFullscreen.value
     }
 }
 
 const toggleWireframe = () => {
   if (builder) {
-    builder.wireframeMode = !builder.wireframeMode
+    builder.wireframeMode.value = !builder.wireframeMode.value
   }
 }
 </script>

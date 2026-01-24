@@ -80,23 +80,23 @@
     --builder-field-border-clean: rgba(255, 255, 255, 0.05);
 
     --builder-toggle-track: rgba(255, 255, 255, 0.06);
-    --builder-section: #312e81;
-    --builder-row: #059669;
-    --builder-column: #0891b2;
-    --builder-module: #64748b;
+    --builder-section: #288dec;
+    --builder-row: #43a728;
+    --builder-column: #1bcacc;
+    --builder-module: #666666;
 
     --builder-input-bg: var(--builder-bg-primary);
     --builder-input-border: var(--builder-border);
     --builder-input-text: var(--builder-text-primary);
 
     /* Toolbar Specific Colors */
-    --builder-toolbar-bg-section: #312e81;
+    --builder-toolbar-bg-section: var(--builder-section);
     --builder-toolbar-text-section: #ffffff;
-    --builder-toolbar-bg-row: #059669;
+    --builder-toolbar-bg-row: var(--builder-row);
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-column: #0891b2;
+    --builder-toolbar-bg-column: var(--builder-column);
     --builder-toolbar-text-column: #ffffff;
-    --builder-toolbar-bg-module: #64748b;
+    --builder-toolbar-bg-module: var(--builder-module);
     --builder-toolbar-text-module: #ffffff;
     --builder-toolbar-icon: #ffffff;
 
@@ -134,23 +134,27 @@
     --builder-field-border-clean: rgba(0, 0, 0, 0.05);
 
     --builder-toggle-track: #e2e8f0;
-    --builder-section: #312e81;
-    --builder-row: #059669;
-    --builder-column: #0891b2;
-    --builder-module: #64748b;
+    --builder-section: #288dec;
+    /* Divi Blue */
+    --builder-row: #43a728;
+    /* Divi Green */
+    --builder-column: #1bcacc;
+    /* Divi Cyan */
+    --builder-module: #666666;
+    /* Divi Module Grey */
 
     --builder-input-bg: #ffffff;
     --builder-input-border: #e2e8f0;
     --builder-input-text: var(--builder-text-primary);
 
     /* Toolbar Specific Colors (Light) */
-    --builder-toolbar-bg-section: #312e81;
+    --builder-toolbar-bg-section: var(--builder-section);
     --builder-toolbar-text-section: #ffffff;
-    --builder-toolbar-bg-row: #059669;
+    --builder-toolbar-bg-row: var(--builder-row);
     --builder-toolbar-text-row: #ffffff;
-    --builder-toolbar-bg-column: #0891b2;
+    --builder-toolbar-bg-column: var(--builder-column);
     --builder-toolbar-text-column: #ffffff;
-    --builder-toolbar-bg-module: #64748b;
+    --builder-toolbar-bg-module: var(--builder-module);
     --builder-toolbar-text-module: #ffffff;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -173,7 +177,6 @@
     color: var(--builder-text-primary);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     letter-spacing: -0.015em;
     line-height: 1.6;

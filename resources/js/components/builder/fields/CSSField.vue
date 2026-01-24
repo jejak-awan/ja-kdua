@@ -58,22 +58,22 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { Plus, Power, ArrowDownUp, BrainCircuit } from 'lucide-vue-next'
 import { BaseSegmentedControl, BaseLabel, IconButton } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Object,
-    default: () => ({
-      free: '',
-      elements: {}
-    })
-  },
-  module: Object
-})
+interface CSSState {
+  free: string;
+  elements: Record<string, string>;
+}
+
+const props = defineProps<{
+  field: any;
+  value: CSSState;
+  module: BlockInstance;
+}>()
 
 const emit = defineEmits(['update:value'])
 
@@ -83,7 +83,7 @@ const tabs = [
   { label: 'Module Elements', value: 'elements' }
 ]
 
-const localValue = reactive({
+const localValue = reactive<CSSState>({
   free: props.value?.free || '',
   elements: props.value?.elements || {}
 })

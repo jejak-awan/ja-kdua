@@ -1,33 +1,58 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="tabs-block" :style="tabsBlockStyles" :class="layoutClass">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        class="tabs-block" 
+        :class="[
+            layoutClasses(settings, blockDevice),
+            getVal(settings, 'padding', blockDevice) || 'py-12'
+        ]"
+      >
         <!-- Tab Headers -->
-        <div class="tabs-header" :style="headerStyles">
+        <div 
+            class="tabs-header shrink-0 no-scrollbar overflow-x-auto" 
+            :class="headerClasses(settings, blockDevice)"
+            :style="headerContainerStyles(settings)"
+        >
           <button 
             v-for="(tab, index) in items" 
             :key="index"
-            class="tab-button"
-            :class="{ 'tab-button--active': activeTabIndex === index }"
-            :style="getTabStyles(index)"
+            class="tab-button group whitespace-nowrap transition-all duration-300 relative"
+            :class="[
+                buttonClasses(settings, index === activeTabIndex),
+                { 'active': index === activeTabIndex }
+            ]"
+            :style="getTabStyles(settings, index === activeTabIndex)"
             @click="activeTabIndex = index"
           >
-            <span class="flex items-center gap-2">
-              <LucideIcon v-if="tab.icon" :name="tab.icon" class="w-4 h-4" />
-              {{ tab.title || 'Tab' }}
-            </span>
+             <span class="flex items-center gap-2 relative z-10">
+               <component 
+                v-if="tab.icon" 
+                :is="getIcon(tab.icon)" 
+                class="w-4 h-4 transition-colors"
+               />
+               {{ tab.title || 'Tab Title' }}
+             </span>
+             
+             <!-- Active Indicator for Underline style -->
+             <div 
+                v-if="isUnderline(settings) && index === activeTabIndex" 
+                class="absolute bottom-0 left-0 w-full h-[2px] bg-primary"
+                :style="{ backgroundColor: getVal(settings, 'activeColor') || '#4f46e5' }"
+             ></div>
           </button>
         </div>
         
         <!-- Tab Content -->
-        <div class="tabs-content" :style="contentStyles">
+        <div class="tabs-content grow pt-8 md:pt-0" :style="contentContainerStyles(settings)">
           <div 
-            v-for="(tab, index) in items" 
-            v-show="activeTabIndex === index"
-            :key="index"
-            class="tab-pane prose prose-sm max-w-none"
-            v-html="tab.content || 'Tab content...'"
-          ></div>
+             v-for="(tab, index) in items" 
+             v-show="activeTabIndex === index"
+             :key="index" 
+             class="tab-pane animate-in fade-in slide-in-from-bottom-3 duration-500"
+          >
+             <div class="prose max-w-none text-slate-600 leading-relaxed font-medium" v-html="tab.content || 'Content goes here...'"></div>
+          </div>
         </div>
       </div>
     </template>
@@ -37,105 +62,109 @@
 <script setup>
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import * as LucideIcons from 'lucide-vue-next'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
   mode: { type: String, default: 'view' },
   device: { type: String, default: 'desktop' }
 })
+// ... (rest unchanged)
+
 
 const settings = computed(() => props.module?.settings || {})
 const items = computed(() => settings.value.items || [])
 const activeTabIndex = ref(0)
 
-const layoutClass = computed(() => {
-  const position = getVal(settings.value, 'tabPosition', props.device) || 'top'
-  return `tabs--${position}`
-})
-
-const tabsBlockStyles = computed(() => {
-  return { 
-    width: '100%', 
-    overflow: 'hidden',
-    borderRadius: '12px'
-  }
-})
-
-const headerStyles = computed(() => {
-  const styles = { display: 'flex' }
-  const alignment = getVal(settings.value, 'tabAlignment', props.device) || 'left'
-  
-  if (alignment === 'center') {
-    styles.justifyContent = 'center'
-  } else if (alignment === 'right') {
-    styles.justifyContent = 'flex-end'
-  }
-  
-  return styles
-})
-
-const getTabStyles = (index) => {
-  const isActive = activeTabIndex.value === index
-  const alignment = getVal(settings.value, 'tabAlignment', props.device) || 'left'
-  
-  const styles = {
-    padding: '14px 24px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    flex: alignment === 'fill' ? '1' : 'none',
-    position: 'relative'
-  }
-  
-  const typographyPrefix = isActive ? 'tab_active_' : 'tab_'
-  Object.assign(styles, getTypographyStyles(settings.value, typographyPrefix, props.device))
-  
-  const activeBg = getVal(settings.value, 'tabActiveBackgroundColor', props.device) || '#ffffff'
-  const normalBg = getVal(settings.value, 'tabBackgroundColor', props.device) || 'transparent'
-  
-  styles.backgroundColor = isActive ? activeBg : normalBg
-    
-  return styles
+const getIcon = (name) => {
+    return LucideIcons[name] || null
 }
 
-const contentStyles = computed(() => {
-  const bgColor = getVal(settings.value, 'contentBackgroundColor', props.device) || '#ffffff'
-  const styles = { 
-    backgroundColor: bgColor,
-    padding: '24px',
-    minHeight: '100px'
-  }
-  Object.assign(styles, getTypographyStyles(settings.value, 'content_', props.device))
-  return styles
-})
+const isVertical = (settings, device) => {
+    return getVal(settings, 'orientation', device) === 'vertical' && device !== 'mobile'
+}
+
+const isUnderline = (settings) => {
+    return (getVal(settings, 'style') || 'underline') === 'underline'
+}
+
+const layoutClasses = (settings, device) => {
+    return isVertical(settings, device) 
+        ? 'flex flex-row gap-8 items-start' 
+        : 'flex flex-col gap-6'
+}
+
+const headerClasses = (settings, device) => {
+    if (isVertical(settings, device)) {
+        return 'flex flex-col w-48 lg:w-64 border-r border-gray-100'
+    }
+    return 'flex w-full border-b border-gray-200'
+}
+
+const headerContainerStyles = (settings) => {
+    // Optional customization
+    return {}
+}
+
+const buttonClasses = (settings, isActive) => {
+    const style = getVal(settings, 'style') || 'underline'
+    
+    let base = 'px-6 py-4 font-medium text-sm focus:outline-none '
+    
+    if (style === 'underline') {
+        return base + (isActive ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50')
+    }
+    
+    if (style === 'pills') {
+        return base + ' rounded-lg mb-1 mr-1 ' + (isActive ? 'text-white shadow-md' : 'text-gray-600 hover:bg-gray-100')
+    }
+    
+    if (style === 'cards') {
+        return base + ' border-t border-l border-r rounded-t-lg -mb-px ' + (isActive ? 'bg-white border-gray-200 text-gray-900' : 'bg-gray-50 border-transparent text-gray-500 hover:text-gray-700')
+    }
+
+    return base
+}
+
+const getTabStyles = (settings, isActive) => {
+    const style = getVal(settings, 'style') || 'underline'
+    const activeColor = getVal(settings, 'activeColor') || '#4f46e5'
+    
+    if (style === 'pills' && isActive) {
+        return { backgroundColor: activeColor }
+    }
+    if (style === 'underline' && isActive) {
+        return { color: activeColor } // text color
+    }
+    
+    return {}
+}
+
+const contentContainerStyles = (settings) => {
+    const style = getVal(settings, 'style') || 'underline'
+    if (style === 'cards') {
+        return { 
+            border: '1px solid #e5e7eb',
+            borderTop: 'none',
+            borderRadius: '0 0 0.5rem 0.5rem',
+            padding: '2rem',
+            backgroundColor: '#ffffff'
+        }
+    }
+    return {}
+}
+
 </script>
 
 <style scoped>
 .tabs-block { width: 100%; }
-.tabs-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-
-.tab-button {
-  color: #64748b;
-  border-bottom: 2px solid transparent;
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-
-.tab-button:hover { background: rgba(0,0,0,0.02); color: #0f172a; }
-
-.tab-button--active { 
-  color: var(--theme-primary-color, #2059ea) !important;
-  border-bottom-color: var(--theme-primary-color, #2059ea);
-}
-
-.tabs--left { display: flex; }
-.tabs--left .tabs-header { flex-direction: column; border-bottom: none; border-right: 1px solid #e2e8f0; width: 220px; }
-.tabs--left .tab-button { border-bottom: none; border-right: 2px solid transparent; text-align: left; }
-.tabs--left .tab-button--active { border-right-color: var(--theme-primary-color, #2059ea); }
-.tabs--left .tabs-content { flex: 1; }
-
-.tabs--bottom { display: flex; flex-direction: column-reverse; }
-.tabs--bottom .tabs-header { border-bottom: none; border-top: 1px solid #e2e8f0; }
-.tabs--bottom .tab-button { border-bottom: none; border-top: 2px solid transparent; }
-.tabs--bottom .tab-button--active { border-top-color: var(--theme-primary-color, #2059ea); }
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

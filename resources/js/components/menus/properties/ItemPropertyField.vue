@@ -72,7 +72,7 @@
                 type="color" 
                 :value="value || '#000000'"
                 class="w-8 h-8 rounded border border-border cursor-pointer"
-                @input="$emit('update', $event.target.value)"
+                @input="$emit('update', ($event.target as HTMLInputElement).value)"
             />
             <Input 
                 :model-value="value"
@@ -127,7 +127,11 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import { X } from 'lucide-vue-next';
+import type { MenuItemSetting } from '../../../types/menu';
+
 // UI Components
 import Input from '../../ui/input.vue';
 import Textarea from '../../ui/textarea.vue';
@@ -140,28 +144,23 @@ import SelectContent from '../../ui/select-content.vue';
 import SelectItem from '../../ui/select-item.vue';
 import Button from '../../ui/button.vue';
 import IconPicker from '../../ui/icon-picker.vue';
+// @ts-ignore
 import MediaPicker from '../../MediaPicker.vue';
 
-import { useI18n } from 'vue-i18n';
-import { X } from 'lucide-vue-next';
-
 const { t } = useI18n();
-const emit = defineEmits(['update']);
 
-const handleMediaSelect = (media) => {
+const emit = defineEmits<{
+    (e: 'update', value: any): void;
+}>();
+
+defineProps<{
+    setting: MenuItemSetting;
+    value?: any;
+}>();
+
+const handleMediaSelect = (media: any) => {
     if (media && media.url) {
         emit('update', media.url);
     }
 };
-
-defineProps({
-    setting: {
-        type: Object,
-        required: true
-    },
-    value: {
-        type: [String, Number, Boolean, Object, Array],
-        default: null
-    }
-});
 </script>

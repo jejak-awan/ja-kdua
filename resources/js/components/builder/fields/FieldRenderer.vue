@@ -59,19 +59,20 @@
   </FieldWrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, defineAsyncComponent, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FieldWrapper from './FieldWrapper.vue'
 import BasePopover from '../ui/BasePopover.vue'
 import DynamicDataPopover from '../ui/DynamicDataPopover.vue'
 import PresetPopoverContent from '../ui/PresetPopoverContent.vue'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 
 // Inject builder
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
 // Dynamic field component imports
-const fieldComponents = {
+const fieldComponents: Record<string, any> = {
   text: defineAsyncComponent(() => import('./TextField.vue')),
   textarea: defineAsyncComponent(() => import('./TextareaField.vue')),
   richtext: defineAsyncComponent(() => import('./RichtextField.vue')),
@@ -103,24 +104,24 @@ const fieldComponents = {
   repeater: defineAsyncComponent(() => import('./RepeaterField.vue'))
 }
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: [String, Number, Boolean, Array, Object],
-    default: null
-  },
-  module: {
-    type: Object,
-    default: () => ({})
-  },
-  device: {
-     type: String,
-     default: null
-  }
-})
+interface FieldConfig {
+  name: string;
+  type: string;
+  label: string;
+  description?: string;
+  responsive?: boolean;
+  show_if?: any;
+  options?: any;
+  default?: any;
+  [key: string]: any;
+}
+
+const props = defineProps<{
+  field: FieldConfig;
+  value?: any;
+  module: BlockInstance;
+  device?: string | null;
+}>()
 
 const emit = defineEmits(['update'])
 
@@ -131,12 +132,10 @@ const translatedLabel = computed(() => {
   const type = props.module.type
   const name = props.field.name
 
-  // 1. Try module-specific: builder.settings.{type}.{name}.label
   if (te(`builder.settings.${type}.${name}.label`)) {
     return t(`builder.settings.${type}.${name}.label`)
   }
 
-  // 2. Try common field: builder.settings.fields.{name}
   if (te(`builder.settings.fields.${name}`)) {
     return t(`builder.settings.fields.${name}`)
   }
@@ -148,22 +147,18 @@ const translatedDescription = computed(() => {
   const type = props.module.type
   const name = props.field.name
 
-  // 1. Try module-specific: builder.settings.{type}.{name}.description
   if (te(`builder.settings.${type}.${name}.description`)) {
     return t(`builder.settings.${type}.${name}.description`)
   }
 
-  // 2. Try loop info: builder.info.loop.{name}
   if (te(`builder.info.loop.${name}`)) {
     return t(`builder.info.loop.${name}`)
   }
 
-  // 3. Try inline info: builder.info.{type}.{name}
   if (te(`builder.info.${type}.${name}`)) {
     return t(`builder.info.${type}.${name}`)
   }
 
-  // 4. Try common info: builder.info.common.{name}
   if (te(`builder.info.common.${name}`)) {
     return t(`builder.info.common.${name}`)
   }
@@ -171,11 +166,8 @@ const translatedDescription = computed(() => {
   return props.field.description
 })
 
-// Inject builder device
-// Prioritize prop, then injected builder state (unwrapped)
-const currentDevice = computed(() => props.device || builder?.device || 'desktop')
+const currentDevice = computed(() => props.device || builder?.device.value || 'desktop')
 
-// Calculate values based on responsive state
 const resolvedValue = computed(() => {
   if (!props.field.responsive || currentDevice.value === 'desktop') {
     return props.value
@@ -191,7 +183,7 @@ const placeholderValue = computed(() => {
     return null
   }
 
-  const settings = props.module.settings || {}
+  const settings: Record<string, any> = props.module.settings || {}
   const desktopValue = settings[props.field.name]
   const tabletValue = settings[props.field.name + '_tablet']
   
@@ -200,7 +192,6 @@ const placeholderValue = computed(() => {
   }
   
   if (currentDevice.value === 'mobile') {
-    // Cascade: Phone inherits from Tablet, then Desktop
     return tabletValue || desktopValue
   }
   
@@ -211,30 +202,24 @@ const placeholderValue = computed(() => {
 const isVisible = computed(() => {
     if (!props.field.show_if) return true;
 
-    const checkCondition = (condition, settings) => {
-        // Handle nested AND
+    const checkCondition = (condition: any, settings: any): boolean => {
         if (condition.AND) {
-            // First check the base condition of this object
             const basePass = checkSingleCondition(condition, settings);
             if (!basePass) return false;
-            
-            // Then check the nested AND condition (recursively)
             return checkCondition(condition.AND, settings);
         }
-        
         return checkSingleCondition(condition, settings);
     }
     
-    const checkSingleCondition = (condition, settings) => {
-        const targetField = condition.field;
+    const checkSingleCondition = (condition: any, settings: any): boolean => {
+        const targetField = condition.field as string;
         const targetValue = condition.value;
         const operator = condition.operator || 'eq';
-        
         const currentValue = settings[targetField];
         
         switch (operator) {
             case 'eq': 
-                if (Array.isArray(targetValue)) return targetValue.includes(currentValue); // Support value: ['flex', 'grid'] as "in" check if operator is missing/eq
+                if (Array.isArray(targetValue)) return targetValue.includes(currentValue);
                 return currentValue === targetValue;
             case 'neq': return currentValue !== targetValue;
             case 'in': return Array.isArray(targetValue) && targetValue.includes(currentValue);
@@ -244,7 +229,6 @@ const isVisible = computed(() => {
         }
     }
     
-    // Support multiple conditions (Array) as AND
     const conditions = Array.isArray(props.field.show_if) ? props.field.show_if : [props.field.show_if];
     const settings = props.module.settings || {};
     
@@ -253,30 +237,24 @@ const isVisible = computed(() => {
 
 // Dynamic Data State
 const isDynamicPopoverOpen = ref(false)
-const dynamicPopoverRect = ref(null)
+const dynamicPopoverRect = ref<any>(null)
 
 // Preset Popover State
 const isPresetPopoverOpen = ref(false)
-const presetPopoverRect = ref(null)
+const presetPopoverRect = ref<any>(null)
 
-const loopContextSource = computed(() => {
-    // Always fetch all sources from API - the popover will display all available data
-    // The loop context is detected for highlighting but we want all sources available
-    return 'all'
-})
+const loopContextSource = computed(() => 'all')
 
 const FieldComponent = computed(() => {
   return fieldComponents[props.field.type] || fieldComponents.text
 })
 
 const supportsDynamicData = computed(() => {
-   // Disable dynamic data for specific field types
    const excludedTypes = ['background', 'select', 'toggle', 'buttonGroup', 'range', 'children_manager', 'shadow', 'border', 'spacing', 'icon', 'number', 'repeater']
    return !excludedTypes.includes(props.field.type)
 })
 
 const supportsContextMenu = computed(() => {
-   // Disable context menu for specific field types
    const excludedTypes = ['background', 'children_manager']
    return !excludedTypes.includes(props.field.type)
 })
@@ -284,14 +262,13 @@ const supportsContextMenu = computed(() => {
 const hasCustomValue = computed(() => {
     if (props.value === null || props.value === undefined || props.value === '') return false
     
-    const moduleDef = builder.getModuleDefinition(props.module.type)
+    const moduleDef = builder?.getModuleDefinition(props.module.type)
     const defaultValue = moduleDef?.defaults?.[props.field.name] ?? props.field.default
     
-    // Simple deep comparison for primitive types or simple objects
     return JSON.stringify(props.value) !== JSON.stringify(defaultValue)
 })
 
-const handleValueUpdate = (val) => {
+const handleValueUpdate = (val: any) => {
   if (!props.field.responsive || currentDevice.value === 'desktop') {
     emit('update', val)
     return
@@ -314,19 +291,16 @@ const handleResponsiveClick = () => {
 }
 
 const resetFullModule = () => {
-    // This could trigger a full module reset if needed, but for now we'll stick to field reset
-    // as per user requirement "trigger reset field yang bekerja khusus hanya reset aksi dirinya sendiri"
     resetSpecificField()
 }
 
 const resetSpecificField = () => {
-    const moduleDef = builder.getModuleDefinition(props.module.type)
+    const moduleDef = builder?.getModuleDefinition(props.module.type)
     const defaultValue = moduleDef?.defaults?.[props.field.name] ?? props.field.default
     
     let valueToSet = defaultValue
     if (valueToSet === undefined) {
-        // Fallback for types if no default is specified
-        const fallbacks = {
+        const fallbacks: Record<string, any> = {
             text: '',
             number: 0,
             toggle: false,
@@ -339,12 +313,11 @@ const resetSpecificField = () => {
 }
 
 const supportsPresets = computed(() => {
-    // Design fields and some others support presets
     const designFieldTypes = ['color', 'spacing', 'border', 'shadow', 'typography', 'background', 'filters', 'transform', 'animation']
     return designFieldTypes.includes(props.field.type)
 })
 
-const handleAssignPreset = (target) => {
+const handleAssignPreset = (target: any) => {
     const el = target && typeof target.getBoundingClientRect === 'function' 
         ? target 
         : (target?.target && typeof target.target.getBoundingClientRect === 'function' ? target.target : null)
@@ -355,12 +328,11 @@ const handleAssignPreset = (target) => {
     }
 }
 
-const handlePresetAction = (payload) => {
+const handlePresetAction = (payload: { type: string, data: any }) => {
     const { type, data } = payload
     if (type === 'addNew' || type === 'newFromCurrent') {
-        builder?.openSavePresetModal(props.module.id, props.field.name)
+        builder?.openSavePresetModal(props.module.id)
     } else if (type === 'apply' && data) {
-        // Apply preset values to the current field
         if (data.settings && data.settings[props.field.name] !== undefined) {
             handleValueUpdate(data.settings[props.field.name])
         }
@@ -368,8 +340,7 @@ const handlePresetAction = (payload) => {
     isPresetPopoverOpen.value = false
 }
 
-const handleDynamicDataClick = (target) => {
-    // target can be an HTMLElement, SVGElement (icon/path), or an event
+const handleDynamicDataClick = (target: any) => {
     const el = target && typeof target.getBoundingClientRect === 'function' 
         ? target 
         : (target.target && typeof target.target.getBoundingClientRect === 'function' ? target.target : null)
@@ -380,8 +351,7 @@ const handleDynamicDataClick = (target) => {
     }
 }
 
-const handleDynamicSelection = (item) => {
-    // Store as a dynamic tag
+const handleDynamicSelection = (item: { tag: string }) => {
     handleValueUpdate(`@dynamic:${item.tag}`)
     isDynamicPopoverOpen.value = false
 }

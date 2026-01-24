@@ -257,13 +257,15 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 
 import { useMenu, provideMenu } from '../../composables/useMenu';
 import { useToast } from '../../composables/useToast';
+import type { Menu } from '../../types/menu';
 
 // Modular Components
 import SourcePanel from './sidebar/SourcePanel.vue';
@@ -288,38 +290,38 @@ import SelectItem from '../ui/select-item.vue';
 
 import { 
     Loader2, Save, Undo2, Redo2, Eye,
-    PanelLeftOpen, Plus, Trash2, RotateCcw, PanelRightOpen
+    PanelLeftOpen, Plus, Trash2, RotateCcw, PanelRightOpen, MenuSquare
 } from 'lucide-vue-next';
 
-const props = defineProps({
-    menuId: {
-        type: [String, Number],
-        required: true
-    },
-    menus: {
-        type: Array,
-        default: () => []
-    },
-    trashedFilter: {
-        type: String,
-        default: 'without'
-    },
-    isTrashed: {
-        type: Boolean,
-        default: false
-    },
-    trashedCount: {
-        type: Number,
-        default: 0
-    }
+interface Props {
+    menuId: string | number;
+    menus: Menu[];
+    trashedFilter?: string;
+    isTrashed?: boolean;
+    trashedCount?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    menus: () => [],
+    trashedFilter: 'without',
+    isTrashed: false,
+    trashedCount: 0
 });
 
-const emit = defineEmits(['menu-updated', 'create-menu', 'delete-menu', 'restore-menu', 'select-menu', 'update:trashedFilter']);
+const emit = defineEmits<{
+    (e: 'menu-updated'): void;
+    (e: 'create-menu'): void;
+    (e: 'delete-menu'): void;
+    (e: 'restore-menu'): void;
+    (e: 'select-menu', id: string): void;
+    (e: 'update:trashedFilter', val: string): void;
+}>();
 
 const { t } = useI18n();
 const toast = useToast();
 
 // Initialize useMenu composable
+// We need a ref that mirrors props.menuId but can change
 const menuIdRef = ref(props.menuId);
 const menuState = useMenu(menuIdRef);
 
@@ -344,14 +346,19 @@ const {
 const isSidebarCollapsed = ref(false);
 const isPropertiesCollapsed = ref(false);
 const showPreview = ref(false);
-const locations = ref([]);
+
+interface LocationOption {
+    value: string;
+    label: string;
+}
+const locations = ref<LocationOption[]>([]);
 
 
 // Draggable Resize State
 const propertiesWidth = ref(400); // Default width
 const isResizing = ref(false);
 
-const startResizing = (e) => {
+const startResizing = (e: MouseEvent) => {
     isResizing.value = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
@@ -363,7 +370,7 @@ const stopResizing = () => {
     document.body.style.userSelect = '';
 };
 
-const doResizing = (e) => {
+const doResizing = (e: MouseEvent) => {
     if (!isResizing.value) return;
     
     // Calculate new width based on mouse position from the right
@@ -374,8 +381,6 @@ const doResizing = (e) => {
         propertiesWidth.value = newWidth;
     }
 };
-
-
 
 // Computed for menu selector with emit
 const selectedMenuIdLocal = computed({
@@ -389,12 +394,6 @@ const menuName = computed({
     set: (val) => {
         if (!menu.value) return;
         menu.value.name = val;
-        // Mark as dirty managed by useMenu watchers usually, or manual
-        // useMenu doesn't auto-watch deep object properties of 'menu', only 'items' for history
-        // But for isDirty, we might need manual trigger if useMenu only tracks items??
-        // Checking useMenu.js: isDirty checks items vs initialState (items).
-        // It seems useMenu PRIMARILY tracks items changes. Menu properties changes might strictly be direct API calls or need separate dirty tracking.
-        // For now, let's assume we just mutate it.
     }
 });
 
@@ -419,7 +418,7 @@ const fetchLocations = async () => {
         const data = response.data?.data || response.data || {};
         locations.value = Object.entries(data).map(([key, label]) => ({
             value: key,
-            label: label
+            label: label as string
         }));
         locations.value.unshift({ value: 'none', label: 'None' });
     } catch (error) {
@@ -443,7 +442,7 @@ const handleSave = async () => {
 };
 
 // Keyboard shortcuts
-const handleKeydown = (e) => {
+const handleKeydown = (e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) {

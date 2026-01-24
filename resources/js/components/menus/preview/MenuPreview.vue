@@ -107,12 +107,12 @@
                                 <ChevronDown 
                                     v-if="item.children && item.children.length > 0" 
                                     class="w-4 h-4 transition-transform"
-                                    :class="{ 'rotate-180': expandedMobile.includes(item.id || item._temp_id) }"
+                                    :class="{ 'rotate-180': expandedMobile.includes(item.id || item._temp_id!) }"
                                 />
                             </div>
                             <!-- Mobile Submenu -->
                             <div 
-                                v-if="item.children && item.children.length > 0 && expandedMobile.includes(item.id || item._temp_id)"
+                                v-if="item.children && item.children.length > 0 && expandedMobile.includes(item.id || item._temp_id!)"
                                 class="ml-4 pl-3 border-l border-border space-y-1"
                             >
                                 <div 
@@ -164,11 +164,12 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import * as LucideIcons from 'lucide-vue-next';
 import { Eye, ChevronDown, Monitor, Smartphone, Menu, LayoutGrid } from 'lucide-vue-next';
+import type { MenuItem } from '../../../types/menu';
 
 // UI Components
 import Dialog from '../../ui/dialog.vue';
@@ -181,21 +182,17 @@ import Button from '../../ui/button.vue';
 
 const { t } = useI18n();
 
-defineProps({
-    open: {
-        type: Boolean,
-        default: false
-    },
-    items: {
-        type: Array,
-        default: () => []
-    }
-});
+defineProps<{
+    open: boolean;
+    items: MenuItem[];
+}>();
 
-defineEmits(['update:open']);
+defineEmits<{
+    (e: 'update:open', value: boolean): void;
+}>();
 
-const activeStyle = ref('header');
-const expandedMobile = ref([]);
+const activeStyle = ref<string>('header');
+const expandedMobile = ref<(number | string)[]>([]);
 
 const previewStyles = [
     { value: 'header', label: 'Header', icon: Monitor },
@@ -203,12 +200,13 @@ const previewStyles = [
     { value: 'footer', label: 'Footer', icon: LayoutGrid }
 ];
 
-const getIcon = (iconName) => {
+const getIcon = (iconName: string) => {
+    // @ts-ignore
     return LucideIcons[iconName] || LucideIcons.Circle;
 };
 
-const toggleMobileItem = (item) => {
-    const id = item.id || item._temp_id;
+const toggleMobileItem = (item: MenuItem) => {
+    const id = item.id || item._temp_id!;
     const index = expandedMobile.value.indexOf(id);
     if (index === -1) {
         expandedMobile.value.push(id);

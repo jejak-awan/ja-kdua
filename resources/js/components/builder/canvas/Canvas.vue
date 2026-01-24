@@ -1,12 +1,14 @@
 <template>
   <div 
-    class="canvas flex flex-col min-h-screen"
+    class="canvas flex flex-col min-h-full"
     :class="[
       { 'canvas--wireframe': wireframeMode },
       { 'canvas--grid': gridViewMode },
-      `theme-${activeTheme}`
+      `theme-${activeTheme}`,
+      `device-${device}`
     ]"
     @click.self="clearSelection"
+    @contextmenu.stop.prevent="handleCanvasContextMenu"
   >
     <CanvasGridView v-if="gridViewMode" />
 
@@ -21,7 +23,7 @@
           <div class="canvas-empty__content">
             <p class="canvas-empty__text">{{ $t('builder.canvas.empty', 'Start your page by adding a section.') }}</p>
             <button class="canvas-empty__btn" @click="addSection">
-              <component :is="icons.Plus" :size="16" />
+              <Plus :size="16" />
               {{ $t('builder.actions.addSection', 'Add New Section') }}
             </button>
           </div>
@@ -53,31 +55,33 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject, watch, onMounted } from 'vue'
 import { Plus } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+// @ts-ignore
 import draggable from 'vuedraggable'
 import ModuleWrapper from './ModuleWrapper.vue'
 import CanvasGridView from './CanvasGridView.vue'
-import AddModuleButton from './AddModuleButton.vue'
 import ThemePageResolver from '@/components/ThemePageResolver.vue'
-
-const icons = { Plus }
+import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
 // Inject builder
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
+const { t } = useI18n()
 
 // Computed
-const blocks = computed({
-  get: () => builder?.blocks || [],
-  set: (val) => { if (builder) builder.blocks = val }
+const blocks = computed<BlockInstance[]>({
+  get: () => builder?.blocks.value || [],
+  set: (val) => { if (builder) builder.blocks.value = val }
 })
-const wireframeMode = computed(() => builder?.wireframeMode || false)
-const gridViewMode = computed(() => builder?.gridViewMode || false)
-const activeTheme = computed(() => builder?.activeTheme || 'janari')
+const wireframeMode = computed(() => builder?.wireframeMode.value || false)
+const gridViewMode = computed(() => builder?.gridViewMode.value || false)
+const activeTheme = computed(() => builder?.activeTheme.value || 'janari')
+const device = computed(() => builder?.device.value || 'desktop')
 
 // Theme Style Injection
-const hexToHsl = (hex) => {
+const hexToHsl = (hex: string): string | null => {
   if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return null
   let r = 0, g = 0, b = 0
   if (hex.length === 4) {
@@ -105,13 +109,13 @@ const hexToHsl = (hex) => {
 }
 
 const injectThemeStyles = () => {
-    if (!builder?.themeData) return
+    if (!builder?.themeData.value) return
 
-    const variables = []
-    const builderOverrides = []
-    const settings = builder.themeSettings || {}
-    const manifest = builder.themeData.manifest || {}
-    const themeSlug = builder.activeTheme || 'janari'
+    const variables: string[] = []
+    const builderOverrides: string[] = []
+    const settings = builder.themeSettings.value || {}
+    const manifest = (builder.themeData.value as any).manifest || {}
+    const themeSlug = builder.activeTheme.value || 'janari'
 
     if (manifest.settings_schema) {
         Object.keys(manifest.settings_schema).forEach(key => {
@@ -124,11 +128,10 @@ const injectThemeStyles = () => {
             
             if (schema.type === 'color') {
                 variables.push(`${cssKey}: ${value};`)
-                const hslValue = hexToHsl(value)
+                const hslValue = hexToHsl(value as string)
                 if (hslValue) {
                     variables.push(`${cssKey}-hsl: ${hslValue};`)
                     
-                    // Map to Shadcn/Tailwind standard variable names if they match
                     if (key === 'color_primary' || key === 'primary_color') {
                         variables.push(`--primary: ${hslValue};`)
                         builderOverrides.push(`--builder-section: ${value};`)
@@ -146,12 +149,10 @@ const injectThemeStyles = () => {
         })
     }
 
-    // Default fallbacks for common Tailwind variables if not set
     if (!variables.some(v => v.startsWith('--primary:'))) {
-        variables.push('--primary: 221.2 83.2% 53.3%;') // Default blue
+        variables.push('--primary: 221.2 83.2% 53.3%;')
     }
 
-    // Inject CSS variables scoped to .canvas.theme-[slug]
     const styleId = `builder-theme-styles`
     let styleTag = document.getElementById(styleId)
     if (!styleTag) {
@@ -165,7 +166,6 @@ const injectThemeStyles = () => {
             ${variables.join('\n            ')}
             ${builderOverrides.join('\n            ')}
         }
-        /* Debug indicator if theme is active */
         .canvas.theme-${themeSlug}::after {
             content: "Theme: ${themeSlug}";
             position: absolute;
@@ -179,9 +179,9 @@ const injectThemeStyles = () => {
     `
     styleTag.textContent = cssContent
 
-    // Inject Theme Assets (CSS Files)
-    if (builder.themeData.assets && builder.themeData.assets.css) {
-        builder.themeData.assets.css.forEach((cssFile, index) => {
+    const themeData = builder.themeData.value as any
+    if (themeData.assets && themeData.assets.css) {
+        themeData.assets.css.forEach((cssFile: string, index: number) => {
             const linkId = `builder-theme-asset-${index}`
             if (!document.getElementById(linkId)) {
                 const link = document.createElement('link')
@@ -195,14 +195,14 @@ const injectThemeStyles = () => {
 }
 
 // Watchers
-watch(() => builder?.themeData, (data) => {
+watch(() => builder?.themeData.value, (data) => {
     if (data) {
         injectThemeStyles()
     }
 }, { immediate: true })
 
-watch(() => builder?.themeSettings, injectThemeStyles, { deep: true })
-watch(() => builder?.activeTheme, injectThemeStyles)
+watch(() => builder?.themeSettings.value, injectThemeStyles, { deep: true })
+watch(() => builder?.activeTheme.value, injectThemeStyles)
 
 // Methods
 const clearSelection = () => {
@@ -213,12 +213,18 @@ const addSection = () => {
   builder?.insertModule('section')
 }
 
+const handleCanvasContextMenu = (e: MouseEvent) => {
+    if (builder?.openContextMenu) {
+        builder.openContextMenu('canvas', e, t('builder.fields.contextMenu.canvasSettings', 'Canvas Settings'), 'Main', 'canvas')
+    }
+}
+
 // Initialize default section if empty
 onMounted(() => {
-    if (builder && builder.blocks.length === 0) {
+    if (builder && builder.blocks.value.length === 0) {
         addSection()
     }
-    if (builder?.themeData) {
+    if (builder?.themeData.value) {
         injectThemeStyles()
     }
 })
@@ -229,13 +235,11 @@ onMounted(() => {
   min-height: 100%;
   padding: var(--spacing-lg);
 
-  /* Force Light Mode Context for Content */
   --builder-text-primary: #0f172a;
   --builder-text-secondary: #475569;
   --builder-text-muted: #64748b;
   --builder-border: #e2e8f0;
 
-  /* Apply defaults or theme overrides */
   background-color: var(--theme-color-background, #ffffff);
   color: var(--theme-color-text, var(--builder-text-primary));
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -252,11 +256,9 @@ onMounted(() => {
 }
 
 .canvas--grid {
-  /* Grid View Styles - mostly handled in ModuleWrapper but adding container styles here */
   background-color: #f8fafc;
 }
 
-/* Empty State */
 .canvas-empty {
   display: flex;
   align-items: center;
@@ -269,11 +271,6 @@ onMounted(() => {
 
 .canvas-empty__content {
   text-align: center;
-}
-
-.canvas-empty__icon {
-  color: var(--builder-text-muted);
-  margin-bottom: var(--spacing-md);
 }
 
 .canvas-empty__text {

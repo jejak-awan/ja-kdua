@@ -100,31 +100,42 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import type { BlockInstance } from '../../../types/builder'
 import { Plus, Search, Settings2, Trash2, ChevronUp } from 'lucide-vue-next'
 import { BaseButton, BasePopover, IconButton, BaseLabel } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Array,
-    default: () => []
-  },
-  module: Object
-})
+interface ConditionItem {
+  type: string;
+  enabled: boolean;
+  condition: string;
+  value: string;
+  key: string;
+}
+
+interface ConditionGroup {
+  label: string;
+  items: { id: string; label: string }[];
+}
+
+const props = defineProps<{
+  field: any;
+  value: ConditionItem[];
+  module: BlockInstance;
+}>()
 
 const emit = defineEmits(['update:value'])
 
-const localValue = ref([...(props.value || [])])
+const localValue = ref<ConditionItem[]>([...(props.value || [])])
 const editingIndex = ref(-1)
 
 const isPickerOpen = ref(false)
-const pickerRect = ref(null)
-const pickerTrigger = ref(null)
+const pickerRect = ref<DOMRect | undefined>(undefined)
+const pickerTrigger = ref<HTMLElement | null>(null)
 const searchQuery = ref('')
 
-const conditionGroups = {
+const conditionGroups: Record<string, ConditionGroup> = {
   post_info: {
     label: 'Post Info',
     items: [
@@ -171,13 +182,13 @@ const conditionGroups = {
   }
 }
 
-const filteredGroups = computed(() => {
+const filteredGroups = computed<Record<string, ConditionGroup>>(() => {
   if (!searchQuery.value) return conditionGroups
   const query = searchQuery.value.toLowerCase()
-  const result = {}
+  const result: Record<string, ConditionGroup> = {}
   
   Object.entries(conditionGroups).forEach(([key, group]) => {
-    const items = group.items.filter(item => 
+    const items = group.items.filter((item: { id: string; label: string }) => 
       item.label.toLowerCase().includes(query)
     )
     if (items.length > 0) {
@@ -188,7 +199,7 @@ const filteredGroups = computed(() => {
   return result
 })
 
-const getConditionLabel = (condition) => {
+const getConditionLabel = (condition: ConditionItem) => {
   for (const group of Object.values(conditionGroups)) {
     const item = group.items.find(i => i.id === condition.type)
     if (item) return item.label
@@ -196,7 +207,7 @@ const getConditionLabel = (condition) => {
   return condition.type
 }
 
-const getConditionSummary = (condition) => {
+const getConditionSummary = (condition: ConditionItem) => {
   if (!condition.condition) return 'Click settings to configure'
   let summary = `${condition.condition} ${condition.value || ''}`
   if (condition.key) summary = `${condition.key}: ${summary}`
@@ -206,11 +217,11 @@ const getConditionSummary = (condition) => {
 const togglePicker = () => {
   isPickerOpen.value = !isPickerOpen.value
   if (isPickerOpen.value && pickerTrigger.value) {
-    pickerRect.value = pickerTrigger.value.getBoundingClientRect()
+    pickerRect.value = (pickerTrigger.value as HTMLElement).getBoundingClientRect()
   }
 }
 
-const selectCondition = (item) => {
+const selectCondition = (item: { id: string; label: string }) => {
   localValue.value.push({
     type: item.id,
     enabled: true,
@@ -223,13 +234,13 @@ const selectCondition = (item) => {
   editingIndex.value = localValue.value.length - 1
 }
 
-const removeCondition = (index) => {
+const removeCondition = (index: number) => {
   localValue.value.splice(index, 1)
   updateValue()
   if (editingIndex.value === index) editingIndex.value = -1
 }
 
-const toggleEdit = (index) => {
+const toggleEdit = (index: number) => {
   editingIndex.value = editingIndex.value === index ? -1 : index
 }
 

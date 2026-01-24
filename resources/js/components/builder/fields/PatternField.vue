@@ -36,17 +36,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Ban } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
-import { BackgroundPatterns } from '../core/AssetLibrary'
+import { BackgroundPatterns } from '../../../shared/utils/AssetLibrary'
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: 'none'
-  }
-})
+const props = defineProps<{
+  value?: string;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()

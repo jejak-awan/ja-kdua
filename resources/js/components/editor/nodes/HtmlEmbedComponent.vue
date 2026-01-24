@@ -44,6 +44,7 @@
                     @click="fitToContent"
                     class="p-1.5 bg-background text-foreground rounded-md shadow-sm border border-border/50 hover:bg-muted transition-colors"
                     :title="t('features.editor.actions.fit')"
+                    type="button"
                 >
                     <Maximize2 class="w-4 h-4" />
                 </button>
@@ -53,6 +54,7 @@
                     @click="startInteraction" 
                     class="flex items-center gap-1.5 px-2 py-1.5 bg-background text-foreground rounded-md shadow-sm border border-border/50 hover:bg-muted transition-colors text-xs font-medium"
                     :title="t('features.editor.actions.interact')"
+                    type="button"
                 >
                     <MousePointerClick class="w-3.5 h-3.5" />
                     <span>Interact</span>
@@ -62,6 +64,7 @@
                     @click="stopInteraction" 
                     class="flex items-center gap-1.5 px-2 py-1.5 bg-primary text-primary-foreground rounded-md shadow-sm hover:bg-primary/90 transition-colors text-xs font-medium"
                     :title="t('features.editor.actions.stopInteraction')"
+                    type="button"
                 >
                     <X class="w-3.5 h-3.5" />
                     <span>Close</span>
@@ -75,43 +78,25 @@
                 :class="{ 'is-interactive': isInteractive }"
                 v-html="sanitizedHtml"
             ></div>
-            <div class="flex flex-col items-center gap-2 text-muted-foreground select-none">
-            <Code class="w-8 h-8 opacity-50" />
-            <div class="text-sm font-medium">{{ t('features.editor.embed.empty') }}</div>
-            <div class="text-xs opacity-75">{{ t('features.editor.embed.configure') }}</div>
-        </div>
+            <div v-else class="flex flex-col items-center gap-2 text-muted-foreground select-none pointer-events-none">
+                <Code class="w-8 h-8 opacity-50" />
+                <div class="text-sm font-medium">{{ t('features.editor.embed.empty') }}</div>
+                <div class="text-xs opacity-75">{{ t('features.editor.embed.configure') }}</div>
+            </div>
         </div>
     </node-view-wrapper>
 </template>
 
-<script setup>
-import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { NodeViewWrapper } from '@tiptap/vue-3'
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Code, MousePointerClick, X, Maximize2 } from 'lucide-vue-next'
 import DOMPurify from 'dompurify'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const props = defineProps({
-// ... (props unchanged)
-    node: {
-        type: Object,
-        required: true,
-    },
-    updateAttributes: {
-        type: Function,
-        required: true,
-    },
-    selected: {
-        type: Boolean,
-        default: false,
-    },
-    editor: {
-        type: Object,
-        required: true
-    }
-})
+const props = defineProps(nodeViewProps)
 
 const isInteractive = ref(false)
 
@@ -156,7 +141,7 @@ const fitToContent = () => {
     }
 }
 
-const contentRef = ref(null)
+const contentRef = ref<HTMLElement | null>(null)
 
 const sanitizedHtml = computed(() => {
     let html = props.node.attrs.html || ''
@@ -173,6 +158,7 @@ const sanitizedHtml = computed(() => {
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'] // Event handlers
     }
 
+    // @ts-ignore
     return DOMPurify.sanitize(html, config)
 })
 
@@ -188,7 +174,7 @@ const justifyContent = computed(() => {
 })
 
 // Helper to ensure pixel units
-const toPx = (val) => {
+const toPx = (val: string | number | undefined) => {
     if (!val) return undefined
     const str = String(val)
     return str.endsWith('px') ? str : `${str}px`
@@ -214,7 +200,7 @@ let startHeight = 0
 let aspectRatio = 1 // Store aspect ratio
 let activeHandle = ''
 
-const startResize = (e, handle) => {
+const startResize = (e: MouseEvent, handle: string) => {
     if (isInteractive.value) return // Disable resize in interactive mode
     e.preventDefault() // Prevent text selection
     resizing = true
@@ -223,7 +209,7 @@ const startResize = (e, handle) => {
     startY = e.clientY
     
     // Get current dimensions
-    const container = e.target.parentElement
+    const container = (e.target as HTMLElement).parentElement as HTMLElement
     const rect = container.getBoundingClientRect()
     startWidth = rect.width
     startHeight = rect.height
@@ -233,7 +219,7 @@ const startResize = (e, handle) => {
     document.addEventListener('mouseup', stopResize)
 }
 
-const onResize = (e) => {
+const onResize = (e: MouseEvent) => {
     if (!resizing) return
 
     const dx = e.clientX - startX

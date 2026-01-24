@@ -185,8 +185,8 @@ import { Monitor, Tablet, Smartphone, MousePointer, ChevronDown, Plus, Trash2, F
 import { useI18n } from 'vue-i18n'
 import { BaseModal, BaseButton, BaseDropdown } from '../ui'
 import FieldActions from '../fields/FieldActions.vue'
-import { getBackgroundStyles } from '../core/styleUtils'
-import { BackgroundPatterns, BackgroundMasks } from '../core/AssetLibrary'
+import { getBackgroundStyles } from '../../../shared/utils/styleUtils'
+import { BackgroundPatterns, BackgroundMasks } from '../../../shared/utils/AssetLibrary'
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -239,7 +239,7 @@ const liveSettings = computed(() => {
 })
 
 const changeMode = (id) => {
-    if (id === 'hover') return // Hover is not a device mode
+    // if (id === 'hover') return // Hover is not a device mode
     if (builder && builder.device) {
         builder.device = id
     }

@@ -104,31 +104,37 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, Pencil, Copy, Trash2, ChevronDown } from 'lucide-vue-next'
 import { BaseButton, BaseInput, BaseDropdown } from '../ui'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: Array,
-    default: () => []
-  }
-})
+interface MetaQueryItem {
+  key: string;
+  value: string;
+  compare: string;
+  type: string;
+}
+
+const props = defineProps<{
+  field: any;
+  value: MetaQueryItem[];
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
 
 // Local state
-const localValue = ref([...(props.value || [])])
+const localValue = ref<MetaQueryItem[]>([...(props.value || [])])
 const isEditing = ref(false)
 const editingIndex = ref(-1)
-const editingQuery = ref({})
+const editingQuery = ref<MetaQueryItem>({
+    key: '',
+    value: '',
+    compare: '=',
+    type: 'CHAR'
+})
 
 // Watch for external updates
 watch(() => props.value, (newVal) => {
@@ -187,20 +193,20 @@ const addQuery = () => {
     isEditing.value = true
 }
 
-const editQuery = (index) => {
+const editQuery = (index: number) => {
     editingQuery.value = { ...localValue.value[index] }
     editingIndex.value = index
     isEditing.value = true
 }
 
-const duplicateQuery = (index) => {
+const duplicateQuery = (index: number) => {
     const newVal = [...localValue.value]
     newVal.splice(index + 1, 0, { ...newVal[index] })
     localValue.value = newVal
     emitUpdates()
 }
 
-const removeQuery = (index) => {
+const removeQuery = (index: number) => {
     const newVal = [...localValue.value]
     newVal.splice(index, 1)
     localValue.value = newVal
@@ -209,16 +215,21 @@ const removeQuery = (index) => {
 
 const cancelEdit = () => {
     isEditing.value = false
-    editingQuery.value = {}
+    editingQuery.value = {
+        key: '',
+        value: '',
+        compare: '=',
+        type: 'CHAR'
+    }
     editingIndex.value = -1
 }
 
 const applyEdit = () => {
     const newVal = [...localValue.value]
     if (editingIndex.value === -1) {
-        newVal.push(editingQuery.value)
+        newVal.push(editingQuery.value as MetaQueryItem)
     } else {
-        newVal[editingIndex.value] = editingQuery.value
+        newVal[editingIndex.value] = editingQuery.value as MetaQueryItem
     }
     localValue.value = newVal
     emitUpdates()

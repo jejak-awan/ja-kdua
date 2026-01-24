@@ -1,42 +1,47 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="blurb-block" :style="blurbBlockStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div 
+        class="blurb-block transition-all duration-300 group" 
+        :style="blurbContainerStyles(settings, blockDevice)"
+      >
         <!-- Media (Icon/Image) -->
-        <div v-if="mediaType !== 'none'" class="blurb-media" :style="mediaStyles">
+        <div 
+            v-if="mediaType(settings) !== 'none'" 
+            class="blurb-media flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-500" 
+            :style="mediaWrapperStyles(settings)"
+        >
           <LucideIcon 
-            v-if="mediaType === 'icon'"
-            :name="iconName" 
-            :size="iconSize" 
-            :style="iconStyles"
+            v-if="mediaType(settings) === 'icon'"
+            :name="getVal(settings, 'iconName') || 'Zap'" 
+            :size="getVal(settings, 'iconSize') || 48" 
+            :style="{ color: getVal(settings, 'iconColor') || '#4f46e5' }"
           />
           <img 
-            v-else-if="mediaType === 'image' && settings.image"
-            :src="settings.image" 
-            alt=""
-            class="blurb-image"
+            v-else-if="mediaType(settings) === 'image' && getVal(settings, 'image')"
+            :src="getVal(settings, 'image')" 
+            alt="Feature"
+            class="blurb-image object-cover w-full h-full rounded-lg"
           />
         </div>
         
         <!-- Content -->
-        <div class="blurb-content" :style="contentWrapperStyles">
+        <div class="blurb-content flex flex-col" :style="contentStyles(settings, blockDevice)">
           <h3 
-            v-if="title || mode === 'edit'" 
-            class="blurb-title" 
-            :style="titleStyles"
+            v-if="getVal(settings, 'title')" 
+            class="blurb-title font-bold text-xl mb-3 text-slate-900 leading-tight" 
             :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('title', e.target.innerText)"
+            @blur="e => updateField('title', e.target.innerText)"
           >
-            {{ title }}
+            {{ getVal(settings, 'title') }}
           </h3>
           <div 
-            v-if="content || mode === 'edit'" 
-            class="blurb-text" 
-            :style="textStyles"
+            v-if="getVal(settings, 'content')" 
+            class="blurb-text text-slate-500 font-medium leading-relaxed" 
             :contenteditable="mode === 'edit'"
-            @blur="e => updateResponsiveField('content', e.target.innerText)"
+            @blur="e => updateField('content', e.target.innerText)"
           >
-            {{ content }}
+            {{ getVal(settings, 'content') }}
           </div>
         </div>
       </div>
@@ -45,10 +50,10 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -57,85 +62,55 @@ const props = defineProps({
 })
 
 const builder = inject('builder')
-const settings = computed(() => props.module?.settings || {})
 
-const mediaType = computed(() => settings.value.mediaType || 'icon')
-const iconName = computed(() => settings.value.iconName || 'Star')
-const iconSize = computed(() => {
-    const size = getVal(settings.value, 'iconSize', props.device) || 48
-    return typeof size === 'number' ? size : parseInt(size) || 48
-})
+const mediaType = (settings) => getVal(settings, 'mediaType') || 'icon'
 
-const title = computed(() => getVal(settings.value, 'title', props.device) || '')
-const content = computed(() => getVal(settings.value, 'content', props.device) || '')
-
-const blurbBlockStyles = computed(() => {
-  const position = getVal(settings.value, 'iconPosition', props.device) || 'top'
-  const alignment = getVal(settings.value, 'alignment', props.device) || 'center'
-  
-  return { 
-    width: '100%',
-    display: 'flex',
-    gap: position === 'top' ? '16px' : '20px',
-    flexDirection: position === 'top' ? 'column' : (position === 'right' ? 'row-reverse' : 'row'),
-    alignItems: position === 'top' ? (alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start')) : 'flex-start'
-  }
-})
-
-const contentWrapperStyles = computed(() => ({
-  flex: 1,
-  textAlign: getVal(settings.value, 'alignment', props.device) || 'center'
-}))
-
-const mediaStyles = computed(() => {
-  const styles = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0
-  }
-  
-  const bgColor = getVal(settings.value, 'iconBackgroundColor', props.device)
-  const shape = getVal(settings.value, 'iconBackgroundShape', props.device)
-  
-  if (bgColor && shape !== 'none') {
-    styles.backgroundColor = bgColor
-    styles.padding = '16px'
+const blurbContainerStyles = (settings, device) => {
+    const pos = getVal(settings, 'iconPosition', device) || 'top'
+    const align = getVal(settings, 'alignment', device) || 'center'
     
-    if (shape === 'circle') {
-      styles.borderRadius = '50%'
-    } else if (shape === 'rounded') {
-      styles.borderRadius = '12px'
+    return {
+        width: '100%',
+        display: 'flex',
+        flexDirection: pos === 'top' ? 'column' : 'row',
+        alignItems: pos === 'top' 
+            ? (align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')) 
+            : 'flex-start',
+        gap: '24px',
+        textAlign: align
     }
-  }
-  
-  return styles
-})
+}
 
-const iconStyles = computed(() => {
-  return {
-    color: getVal(settings.value, 'iconColor', props.device) || '#2059ea'
-  }
-})
+const mediaWrapperStyles = (settings) => {
+    const shape = getVal(settings, 'iconShape') || 'rounded'
+    const bgColor = getVal(settings, 'iconBgColor') || 'rgba(79, 70, 229, 0.08)'
+    const size = (getVal(settings, 'iconSize') || 48) + 32 // Add padding to wrapper
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const textStyles = computed(() => getTypographyStyles(settings.value, 'content_', props.device))
+    const style = {
+        backgroundColor: bgColor,
+        width: `${size}px`,
+        height: `${size}px`
+    }
 
-const updateResponsiveField = (fieldName, value) => {
-  if (props.mode !== 'edit') return
-  const current = settings.value[fieldName]
-  let newValue
-  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
-    newValue = { ...current, [props.device]: value }
-  } else {
-    newValue = { [props.device]: value }
-  }
-  builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+    if (shape === 'circle') style.borderRadius = '50%'
+    if (shape === 'rounded') style.borderRadius = '1.25rem'
+    
+    return style
+}
+
+const contentStyles = (settings, device) => {
+    const align = getVal(settings, 'alignment', device) || 'center'
+    return {
+        alignItems: align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start')
+    }
+}
+
+const updateField = (key, value) => {
+  if (props.mode !== 'edit' || !builder) return
+  builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 </script>
 
 <style scoped>
-.blurb-block { width: 100%; }
-.blurb-image { max-width: 80px; height: auto; border-radius: 4px; }
-.blurb-media { transition: all 0.3s ease; }
+.blurb-title { letter-spacing: -0.01em; }
 </style>

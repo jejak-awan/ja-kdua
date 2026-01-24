@@ -39,7 +39,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Link2 } from 'lucide-vue-next'
@@ -47,30 +47,21 @@ import { BaseLabel, BaseInput, BaseSegmentedControl } from '../ui'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: [Object, String],
-    default: () => ({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value: Record<string, any> | string;
+  placeholderValue?: Record<string, any> | null;
+}>()
 
 const emit = defineEmits(['update:value'])
 
 // State
 const sideKeys = ['top', 'right', 'bottom', 'left']
-const localValue = ref({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
+const localValue = ref<Record<string, any>>({ top: 0, right: 0, bottom: 0, left: 0, unit: 'px' })
 const isLinked = ref(false)
 
 const unitOptions = computed(() => {
-    return (props.field.units || []).map(u => ({ label: u, value: u }))
+    return (props.field.units || []).map((u: string) => ({ label: u, value: u }))
 })
 
 // Sync with prop
@@ -87,8 +78,8 @@ watch(() => props.value, (newVal) => {
   }
 }, { immediate: true, deep: true })
 
-const updateValue = (side, val) => {
-  const num = parseFloat(val) || 0
+const updateValue = (side: string, val: any) => {
+  const num = parseFloat(val as string) || 0
   
   if (isLinked.value) {
     localValue.value.top = num
@@ -102,7 +93,7 @@ const updateValue = (side, val) => {
   emitUpdate()
 }
 
-const updateUnit = (unit) => {
+const updateUnit = (unit: string) => {
   localValue.value.unit = unit
   emitUpdate()
 }

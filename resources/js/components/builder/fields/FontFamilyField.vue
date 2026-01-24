@@ -2,7 +2,7 @@
   <div class="font-family-field">
     <SelectField 
       :field="fontField" 
-      :value="value" 
+      :value="value || ''" 
       :placeholder-value="placeholderValue"
       searchable
       @update:value="val => emit('update:value', val)"
@@ -10,28 +10,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
+import type { BuilderInstance } from '../../../types/builder'
 import SelectField from './SelectField.vue'
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true
-  },
-  value: {
-    type: String,
-    default: ''
-  },
-  placeholderValue: {
-    type: String,
-    default: null
-  }
-})
+const props = defineProps<{
+  field: any;
+  value?: string;
+  placeholderValue?: string;
+}>()
 
 const emit = defineEmits(['update:value'])
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
 
 // Standard Web-Safe Fonts + Some Popular Google Fonts
 const standardFonts = [
@@ -49,8 +41,8 @@ const standardFonts = [
 
 const fontField = computed(() => {
   // Combine standard fonts with global variables if available
-  const globalFonts = builder?.globalFonts?.value || []
-  const customFonts = globalFonts.map(f => ({
+  const globalFonts = (builder?.globalFonts as any)?.value || []
+  const customFonts = globalFonts.map((f: any) => ({
     label: f.name || f.family,
     value: f.family,
     group: 'Global Fonts'

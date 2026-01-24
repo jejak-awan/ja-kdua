@@ -1,7 +1,7 @@
 <template>
   <div class="canvas-grid-view">
     <div class="grid-header">
-      <h2>{{ $t('builder.canvas.gridViewTitle', 'All Canvases') }}</h2>
+      <h2>{{ t('builder.canvas.gridViewTitle', 'All Canvases') }}</h2>
     </div>
     
     <div class="canvas-grid">
@@ -44,23 +44,30 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import { Layout, MoreVertical, Plus } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import type { BuilderInstance, Canvas } from '../../../types/builder'
 
-const builder = inject('builder')
+const builder = inject<BuilderInstance>('builder')
+const { t } = useI18n()
 const icons = { Layout, MoreVertical, Plus }
 
-const canvases = computed(() => builder?.canvases?.value || builder?.canvases || [])
+const canvases = computed<Canvas[]>(() => {
+    const val = builder?.canvases?.value || builder?.canvases
+    return Array.isArray(val) ? val : []
+})
+
 const activeCanvasId = computed(() => builder?.activeCanvasId?.value || builder?.activeCanvasId)
 
-const switchCanvas = (id) => {
+const switchCanvas = (id: string) => {
     if (builder?.switchCanvas) {
         builder.switchCanvas(id)
     }
 }
 
-const openMenu = (canvas, event) => {
+const openMenu = (canvas: Canvas, event: MouseEvent) => {
     if (builder?.openContextMenu) {
         builder.openContextMenu(
             canvas.id, 

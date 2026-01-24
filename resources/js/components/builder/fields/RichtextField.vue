@@ -55,7 +55,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
 import { Image, Sparkles } from 'lucide-vue-next'
 import { Editor, EditorContent } from '@tiptap/vue-3'
@@ -69,28 +69,22 @@ import { Image as ImageExt } from '@tiptap/extension-image'
 
 import RichtextToolbar from './RichtextToolbar.vue'
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
-  },
-  label: {
-    type: String,
-    default: ''
-  }
-})
+const props = defineProps<{
+  value?: string;
+  label?: string;
+}>()
 
 const emit = defineEmits(['update:value', 'add-media'])
 
 const mode = ref('visual') // visual | text
 const isFocused = ref(false)
 const rawHtml = ref(props.value)
-const editor = ref(null)
+const editor = ref<Editor | undefined>()
 
 // Initialize Tiptap
 onMounted(() => {
     editor.value = new Editor({
-        content: props.value,
+        content: props.value || '',
         extensions: [
             StarterKit,
             Underline,
@@ -129,16 +123,16 @@ onBeforeUnmount(() => {
 watch(() => props.value, (newVal) => {
     // Only update if content is different to avoid cursor jumps
     if (editor.value && newVal !== editor.value.getHTML()) {
-        editor.value.commands.setContent(newVal, false)
-        rawHtml.value = newVal
+        editor.value.commands.setContent(newVal || '', { emitUpdate: false })
+        rawHtml.value = newVal || ''
     }
 })
 
-const setMode = (m) => {
+const setMode = (m: string) => {
     mode.value = m
     if (m === 'visual' && editor.value) {
         // Sync raw html back to visual editor
-        editor.value.commands.setContent(rawHtml.value, false)
+        editor.value.commands.setContent(rawHtml.value || '', { emitUpdate: false })
     }
 }
 

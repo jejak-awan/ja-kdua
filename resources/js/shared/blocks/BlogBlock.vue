@@ -146,6 +146,6 @@ const updateResponsiveField = (fieldName, value) => {
 .post-content { padding: 24px; flex: 1; display: flex; flex-direction: column; }
 .post-category { display: inline-block; margin-bottom: 12px; text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--theme-primary-color, #2059ea); }
 .post-title { margin: 0 0 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
-.post-excerpt { margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #64748b; display: -webkit-box; overflow: hidden; line-clamp: 3; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.post-excerpt { margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #64748b; display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; }
 .post-meta { display: flex; gap: 8px; font-size: 12px; color: #94a3b8; margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 16px; }
 </style>

@@ -12,7 +12,7 @@
                     <h1 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('features.content.list.createNew') }}</h1>
                     <AutoSaveIndicator
                         :status="autoSaveStatus"
-                        :last-saved="lastSaved"
+                        :last-saved="lastSaved || undefined"
                     />
                 </div>
             </div>
@@ -93,11 +93,12 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import api from '../../../services/api';
+import api from '@/services/api';
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
 import {
     ArrowLeft, 
@@ -106,20 +107,27 @@ import {
     PanelRightClose, 
     PanelRightOpen 
 } from 'lucide-vue-next';
+// @ts-ignore
 import Dialog from '@/components/ui/dialog.vue';
+// @ts-ignore
 import DialogContent from '@/components/ui/dialog-content.vue';
+// @ts-ignore
 import DialogHeader from '@/components/ui/dialog-header.vue';
+// @ts-ignore
 import DialogTitle from '@/components/ui/dialog-title.vue';
+// @ts-ignore
 import DialogDescription from '@/components/ui/dialog-description.vue';
+// @ts-ignore
 import DialogFooter from '@/components/ui/dialog-footer.vue';
-import { parseResponse, ensureArray } from '../../../utils/responseParser';
-import AutoSaveIndicator from '../../../components/AutoSaveIndicator.vue';
-import ContentMain from '../../../components/content/ContentMain.vue';
-import ContentSidebar from '../../../components/content/ContentSidebar.vue';
-import { useAutoSave } from '../../../composables/useAutoSave';
-import { useToast } from '../../../composables/useToast';
-import { useFormValidation } from '../../../composables/useFormValidation';
-import { contentSchema } from '../../../schemas';
+import { parseResponse, ensureArray } from '@/utils/responseParser';
+import AutoSaveIndicator from '@/components/AutoSaveIndicator.vue';
+import ContentMain from '@/components/content/ContentMain.vue';
+import ContentSidebar from '@/components/content/ContentSidebar.vue';
+import { useAutoSave } from '@/composables/useAutoSave';
+import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { contentSchema } from '@/schemas';
+import type { Category, Tag } from '@/types/cms';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -129,13 +137,13 @@ const { errors, validateWithZod, setErrors, clearErrors } = useFormValidation(co
 const isSidebarOpen = ref(false);
 
 const loading = ref(false);
-const categories = ref([]);
-const tags = ref([]);
-const menus = ref([]);
-const selectedTags = ref([]);
-const contentId = ref(null);
+const categories = ref<Category[]>([]);
+const tags = ref<Tag[]>([]);
+const menus = ref<any[]>([]);
+const selectedTags = ref<Tag[]>([]);
+const contentId = ref<number | null>(null);
 
-const form = ref({
+const form = ref<any>({
     title: '',
     slug: '',
     excerpt: '',
@@ -147,7 +155,6 @@ const form = ref({
     published_at: null,
     meta_title: '',
     meta_description: '',
-    meta_keywords: '',
     meta_keywords: '',
     og_image: null,
     menu_item: {
@@ -183,7 +190,7 @@ watch(() => form.value.excerpt, (newExcerpt) => {
 });
 
 // Helper for slugify
-const slugify = (text) => {
+const slugify = (text: string) => {
     if (!text) return '';
     return text.toString().toLowerCase().trim()
         .replace(/\s+/g, '-')
@@ -211,10 +218,10 @@ const {
     lastSaved,
     saveStatus: autoSaveStatus,
     hasChanges,
-} = useAutoSave(formWithTags, contentId, {
+} = useAutoSave(formWithTags as any, contentId as any, {
     interval: 30000, 
     enabled: computed(() => autoSaveEnabled.value),
-    onSave: (response) => {
+    onSave: (response: any) => {
         // Update contentId if new content was created
         if (response?.data?.id && !contentId.value) {
             contentId.value = response.data.id;
@@ -222,7 +229,7 @@ const {
     },
 });
 
-const handleAutoSaveToggle = (isEnabled) => {
+const handleAutoSaveToggle = (isEnabled: boolean) => {
     autoSaveEnabled.value = isEnabled;
 };
 
@@ -257,7 +264,7 @@ const fetchMenus = async () => {
     }
 };
 
-const handleModeSelected = (mode) => {
+const handleModeSelected = (mode: string) => {
     form.value.editor_type = mode;
     // Only auto-open sidebar if classic is selected
     if (mode === 'classic') {
@@ -267,7 +274,7 @@ const handleModeSelected = (mode) => {
     }
 };
 
-const handleSubmit = async (status = null) => {
+const handleSubmit = async (status: string | null = null) => {
     // Update status if provided (from Builder save/publish buttons)
     if (status && (status === 'draft' || status === 'published')) {
         form.value.status = status;
@@ -305,9 +312,9 @@ const handleSubmit = async (status = null) => {
             : '/admin/ja/contents';
         const method = contentId.value ? 'put' : 'post';
 
-        const response = await method === 'put'
-            ? await api.put(endpoint, payload)
-            : await api.post(endpoint, payload);
+        const response = await (method === 'put'
+            ? api.put(endpoint, payload)
+            : api.post(endpoint, payload));
         
         if (response.data?.updated_at) {
             lastSaved.value = new Date(response.data.updated_at);
@@ -324,7 +331,7 @@ const handleSubmit = async (status = null) => {
                  contentId.value = response.data.id;
              }
         }
-    } catch (error) {
+    } catch (error: any) {
         if (error.response?.status === 422) {
             setErrors(error.response.data.errors || {});
         } else {

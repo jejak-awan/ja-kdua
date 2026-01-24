@@ -15,19 +15,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import ModuleRegistry from '../core/ModuleRegistry'
+import type { BlockInstance, BuilderInstance } from '../../../types/builder'
 
-const props = defineProps({
-  module: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<{
+  module: BlockInstance
+}>()
 
-const builder = inject('builder')
-const currentDevice = computed(() => builder?.device || 'desktop')
+const builder = inject<BuilderInstance>('builder')
+const currentDevice = computed(() => builder?.device.value || 'desktop')
 
 const BlockComponent = computed(() => {
   return ModuleRegistry.getComponent(props.module.type)

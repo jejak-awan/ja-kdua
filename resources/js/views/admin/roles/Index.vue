@@ -146,7 +146,7 @@
                     <div class="absolute top-3 left-3 z-10" v-if="!isProtectedRole(role.name)">
                         <Checkbox 
                             :checked="selectedRoles.includes(role.id)"
-                            @update:checked="(checked) => toggleSelection(role.id)"
+                            @update:checked="(checked: boolean) => toggleSelection(role.id)"
                             class="bg-card/80 backdrop-blur-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-muted-foreground/30"
                         />
                     </div>
@@ -184,7 +184,7 @@
                                     {{ permission.name }}
                                 </Badge>
                                 <span v-if="(role.permissions?.length || 0) > 5" class="text-xs text-muted-foreground py-0.5 px-1.5 flex items-center">
-                                    +{{ role.permissions.length - 5 }} more
+                                    +{{ (role.permissions?.length || 0) - 5 }} more
                                 </span>
                                  <span v-if="(role.permissions?.length || 0) === 0" class="text-xs text-muted-foreground italic">
                                     No permissions
@@ -262,7 +262,7 @@
                                      <Checkbox 
                                         v-if="!isProtectedRole(role.name)"
                                         :checked="selectedRoles.includes(role.id)"
-                                        @update:checked="(checked) => toggleSelection(role.id)"
+                                        @update:checked="(checked: boolean) => toggleSelection(role.id)"
                                     />
                                      <div v-else class="w-4 h-4"></div> <!-- Spacer for protected roles -->
                                 </td>
@@ -290,7 +290,7 @@
                                             {{ permission.name }}
                                         </Badge>
                                         <Badge v-if="(role.permissions?.length || 0) > 3" variant="secondary" class="text-xs font-normal">
-                                            +{{ role.permissions.length - 3 }}
+                                            +{{ (role.permissions?.length || 0) - 3 }}
                                         </Badge>
                                         <span v-if="(role.permissions?.length || 0) === 0" class="text-xs text-muted-foreground italic">
                                             No permissions
@@ -343,8 +343,8 @@
                 <Pagination
                     v-if="pagination.total > 0"
                     :total="pagination.total"
-                    :per-page="pagination.per_page"
-                    :current-page="pagination.current_page"
+                    :per-page="Number(pagination.per_page)"
+                    :current-page="Number(pagination.current_page)"
                     @page-change="changePage"
                 />
             </div>
@@ -352,23 +352,33 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash';
-import api from '../../../services/api';
-import { useToast } from '../../../composables/useToast';
-import Button from '../../../components/ui/button.vue';
-import Badge from '../../../components/ui/badge.vue';
-import Input from '../../../components/ui/input.vue';
-import Checkbox from '../../../components/ui/checkbox.vue';
-import Pagination from '../../../components/ui/pagination.vue';
-import Select from '../../../components/ui/select.vue';
-import SelectContent from '../../../components/ui/select-content.vue';
-import SelectItem from '../../../components/ui/select-item.vue';
-import SelectTrigger from '../../../components/ui/select-trigger.vue';
-import SelectValue from '../../../components/ui/select-value.vue';
+import api from '@/services/api';
+import { useToast } from '@/composables/useToast';
+// @ts-ignore
+import Button from '@/components/ui/button.vue';
+// @ts-ignore
+import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
+import Input from '@/components/ui/input.vue';
+// @ts-ignore
+import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
+import Pagination from '@/components/ui/pagination.vue';
+// @ts-ignore
+import Select from '@/components/ui/select.vue';
+// @ts-ignore
+import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
+import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
+import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
+import SelectValue from '@/components/ui/select-value.vue';
 import {
     Edit,
     Copy,
@@ -380,32 +390,34 @@ import {
     Search,
     CheckSquare
 } from 'lucide-vue-next';
-import { useAuthStore } from '../../../stores/auth';
+import { useAuthStore } from '@/stores/auth';
+import { useConfirm } from '@/composables/useConfirm';
+import type { Role } from '@/types/auth';
 
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
-import { useConfirm } from '../../../composables/useConfirm';
+const { confirm } = useConfirm();
 
 const loading = ref(true);
-const roles = ref([]);
-const viewMode = ref(localStorage.getItem('rolesViewMode') || 'grid');
+const roles = ref<Role[]>([]); // Use Role type
+const viewMode = ref<string>(localStorage.getItem('rolesViewMode') || 'grid');
 const search = ref('');
 const bulkActionSelection = ref('');
-const selectedRoles = ref([]);
+const selectedRoles = ref<number[]>([]);
 
 // Pagination State
 const pagination = ref({
-    currentPage: 1,
-    lastPage: 1,
-    perPage: 10,
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
     total: 0
 });
 
 const protectedRoles = ['super-admin'];
 
-const isProtectedRole = (name) => protectedRoles.includes(name);
+const isProtectedRole = (name: string) => protectedRoles.includes(name);
 
 watch(viewMode, (newMode) => {
     localStorage.setItem('rolesViewMode', newMode);
@@ -425,12 +437,10 @@ const fetchRoles = async (page = 1) => {
             search: search.value,
             limit: 12 // Adjust generic limit
         };
-        const response = await api.get('/admin/ja/roles', { params });
+        const response: any = await api.get('/admin/ja/roles', { params });
         
         // Handle pagination response structure
         const data = response.data?.data || response.data || [];
-        const meta = response.data?.meta || {};
-        const links = response.data?.links || {};
 
         roles.value = Array.isArray(data) ? data : (data.data || []);
         
@@ -443,7 +453,7 @@ const fetchRoles = async (page = 1) => {
                 total: response.data.total
             };
         } else {
-            // Fallback if backend doesn't return pagination meta standardly yet (though we updated it)
+            // Fallback
             pagination.value = {
                 current_page: 1,
                 last_page: 1,
@@ -455,7 +465,7 @@ const fetchRoles = async (page = 1) => {
         // Reset selection on page change
         selectedRoles.value = [];
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch roles:', error);
         toast.error.load(error);
     } finally {
@@ -467,11 +477,11 @@ const debouncedSearch = debounce(() => {
     fetchRoles(1);
 }, 300);
 
-const changePage = (page) => {
+const changePage = (page: number) => {
     fetchRoles(page);
 };
 
-const toggleSelection = (id) => {
+const toggleSelection = (id: number) => {
     if (selectedRoles.value.includes(id)) {
         selectedRoles.value = selectedRoles.value.filter(roleId => roleId !== id);
     } else {
@@ -479,7 +489,7 @@ const toggleSelection = (id) => {
     }
 };
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         // Select all non-protected roles
         selectedRoles.value = roles.value
@@ -490,10 +500,8 @@ const toggleSelectAll = (checked) => {
     }
 };
 
-const { confirm } = useConfirm();
-
 // Bulk Actions
-const handleBulkAction = async (action) => {
+const handleBulkAction = async (action: string) => {
     if (!action) return;
 
     if (action === 'delete') {
@@ -521,18 +529,18 @@ const handleBulkAction = async (action) => {
             selectedRoles.value = []; // Clear selection
             bulkActionSelection.value = ''; // Reset dropdown
             fetchRoles(pagination.value.current_page); // Refresh list
-        } catch (error) {
+        } catch (error: any) {
             console.error('Bulk action failed:', error);
             toast.error.action(error);
         }
     }
 };
 
-const editRole = (role) => {
+const editRole = (role: Role) => {
     router.push({ name: 'roles.edit', params: { id: role.id } });
 };
 
-const deleteRole = async (role) => {
+const deleteRole = async (role: Role) => {
     const confirmed = await confirm({
         title: t('common.messages.confirm.title'),
         message: t('features.roles.messages.deleteConfirm', { name: role.name }),
@@ -546,18 +554,18 @@ const deleteRole = async (role) => {
         await api.delete(`/admin/ja/roles/${role.id}`);
         toast.success.delete('Role');
          fetchRoles(pagination.value.current_page);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete role:', error);
         toast.error.delete(error, 'Role');
     }
 };
 
-const duplicateRole = async (role) => {
+const duplicateRole = async (role: Role) => {
     try {
         await api.post(`/admin/ja/roles/${role.id}/duplicate`);
         toast.success.duplicate();
         fetchRoles(pagination.value.current_page);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to duplicate role:', error);
         toast.error.action(error);
     }

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -6,25 +6,15 @@ import { useHead } from '@vueuse/head';
 import { 
     Plus, 
     Search, 
-    Filter, 
-    MoreHorizontal, 
-    FileText, 
-    Calendar,
     CheckCircle2,
     XCircle,
     Clock3,
-    AlertCircle,
     Pencil,
     FileEdit,
     Archive,
     RotateCcw,
     Trash2,
-    Eye,
-    Copy,
     LayoutTemplate,
-    History,
-    FileX2,
-    Loader2,
     Type,
     Layout
 } from 'lucide-vue-next';
@@ -34,25 +24,46 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
 import api from '@/services/api';
 import { parseResponse, ensureArray } from '@/utils/responseParser';
+import type { Content } from '@/types/cms';
 
+// Shadcn Components
+// @ts-ignore
 import Button from '@/components/ui/button.vue';
+// @ts-ignore
 import Input from '@/components/ui/input.vue';
+// @ts-ignore
 import Badge from '@/components/ui/badge.vue';
+// @ts-ignore
 import Card from '@/components/ui/card.vue';
+// @ts-ignore
 import CardContent from '@/components/ui/card-content.vue';
+// @ts-ignore
 import Checkbox from '@/components/ui/checkbox.vue';
+// @ts-ignore
 import Switch from '@/components/ui/switch.vue';
+// @ts-ignore
 import Pagination from '@/components/ui/pagination.vue';
+// @ts-ignore
 import Select from '@/components/ui/select.vue';
+// @ts-ignore
 import SelectContent from '@/components/ui/select-content.vue';
+// @ts-ignore
 import SelectItem from '@/components/ui/select-item.vue';
+// @ts-ignore
 import SelectTrigger from '@/components/ui/select-trigger.vue';
+// @ts-ignore
 import SelectValue from '@/components/ui/select-value.vue';
+// @ts-ignore
 import Table from '@/components/ui/table.vue';
+// @ts-ignore
 import TableBody from '@/components/ui/table-body.vue';
+// @ts-ignore
 import TableCell from '@/components/ui/table-cell.vue';
+// @ts-ignore
 import TableHead from '@/components/ui/table-head.vue';
+// @ts-ignore
 import TableHeader from '@/components/ui/table-header.vue';
+// @ts-ignore
 import TableRow from '@/components/ui/table-row.vue';
 
 const { t } = useI18n();
@@ -68,12 +79,12 @@ useHead({
 });
 
 const loading = ref(true);
-const contents = ref([]);
-const pagination = ref({});
+const contents = ref<Content[]>([]);
+const pagination = ref<any>({});
 const search = ref('');
 const statusFilter = ref('all');
 const perPage = ref('10');
-const selectedContents = ref([]);
+const selectedContents = ref<number[]>([]);
 const bulkAction = ref('');
 
 const stats = ref({
@@ -88,7 +99,7 @@ const stats = ref({
 const fetchContents = async (page = 1) => {
     loading.value = true;
     try {
-        const params = {
+        const params: any = {
             page,
             per_page: perPage.value,
             sort: 'created_at',
@@ -107,7 +118,7 @@ const fetchContents = async (page = 1) => {
         contents.value = ensureArray(data);
         pagination.value = meta || {};
         
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch contents:', error);
         toast.error.action(error);
         contents.value = [];
@@ -137,7 +148,7 @@ const allSelected = computed(() => {
     return contents.value.length > 0 && selectedContents.value.length === contents.value.length;
 });
 
-const toggleSelectAll = (checked) => {
+const toggleSelectAll = (checked: boolean) => {
     if (checked) {
         selectedContents.value = contents.value.map(c => c.id);
     } else {
@@ -145,20 +156,20 @@ const toggleSelectAll = (checked) => {
     }
 };
 
-const toggleFeatured = async (content) => {
+const toggleFeatured = async (content: Content) => {
     const previousState = content.is_featured;
     content.is_featured = !content.is_featured;
 
     try {
         await api.patch(`/admin/ja/contents/${content.id}/toggle-featured`);
         toast.success.action(t('common.messages.success.updated'));
-    } catch (error) {
+    } catch (error: any) {
         content.is_featured = previousState;
         toast.error.action(error);
     }
 };
 
-const getStatusBadgeClass = (status) => {
+const getStatusBadgeClass = (status: string) => {
     switch (status) {
         case 'published': return 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20';
         case 'draft': return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
@@ -169,15 +180,15 @@ const getStatusBadgeClass = (status) => {
     }
 };
 
-const getUserInitials = (name) => {
+const getUserInitials = (name?: string) => {
     if (!name) return '??';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 };
 
-const handleBulkAction = async (action) => {
+const handleBulkAction = async (action: string) => {
     if (!action) return;
     
-    const confirmConfig = {
+    const confirmConfig: any = {
         title: t('features.content.list.bulkActions'),
         message: t('common.messages.confirm.bulkAction', { action: action, count: selectedContents.value.length }),
     };
@@ -216,7 +227,7 @@ const handleBulkAction = async (action) => {
         await fetchStats();
         toast.success.update();
         bulkAction.value = '';
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to perform bulk action:', error);
         toast.error.action(error);
         bulkAction.value = '';
@@ -238,13 +249,13 @@ const handleEmptyTrash = async () => {
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.deleted') || 'Trash emptied successfully');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to empty trash:', error);
-        toast.error(error);
+        toast.error.action(error);
     }
 };
 
-const handleDelete = async (content) => {
+const handleDelete = async (content: Content) => {
     const confirmed = await confirm({
         title: t('common.actions.delete'),
         message: t('common.messages.confirm.delete', { item: content.title }),
@@ -256,13 +267,13 @@ const handleDelete = async (content) => {
         await api.delete(`/admin/ja/contents/${content.id}`);
         await fetchContents();
         await fetchStats();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete content:', error);
-        toast.error(error);
+        toast.error.delete(error, content.title);
     }
 };
 
-const handleRestore = async (content) => {
+const handleRestore = async (content: Content) => {
     const confirmed = await confirm({
         title: t('common.actions.restore'),
         message: t('common.messages.confirm.restore', { item: content.title }),
@@ -277,13 +288,13 @@ const handleRestore = async (content) => {
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.restored') || 'Content restored');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to restore content:', error);
-        toast.error(error);
+        toast.error.action(error);
     }
 };
 
-const handleForceDelete = async (content) => {
+const handleForceDelete = async (content: Content) => {
     const confirmed = await confirm({
         title: t('common.actions.deletePermanently'),
         message: t('common.messages.confirm.deletePermanently', { item: content.title }),
@@ -295,46 +306,46 @@ const handleForceDelete = async (content) => {
         await api.delete(`/admin/ja/contents/${content.id}/force-delete`);
         await fetchContents();
         await fetchStats();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to force delete content:', error);
-        toast.error(error);
+        toast.error.delete(error, content.title);
     }
 };
 
-const handleEdit = (content) => {
+const handleEdit = (content: Content) => {
     router.push({ name: 'contents.edit', params: { id: content.id } });
 };
 
-const handlePreview = (content) => {
+const handlePreview = (content: Content) => {
     const routeData = router.resolve({ name: 'posts.show', params: { slug: content.slug } });
     window.open(routeData.href, '_blank');
 };
 
-const handleDuplicate = async (content) => {
+const handleDuplicate = async (content: Content) => {
     try {
         await api.post(`/admin/ja/contents/${content.id}/duplicate`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('common.messages.success.duplicated') || 'Content duplicated');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to duplicate content:', error);
-        toast.error(error);
+        toast.error.action(error);
     }
 };
 
-const handleApprove = async (content) => {
+const handleApprove = async (content: Content) => {
     try {
         await api.patch(`/admin/ja/contents/${content.id}/approve`);
         await fetchContents();
         await fetchStats();
         toast.success.action(t('features.content.messages.approved') || 'Content approved');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to approve content:', error);
-        toast.error(error);
+        toast.error.action(error);
     }
 };
 
-const handleReject = async (content) => {
+const handleReject = async (content: Content) => {
     const reason = await confirm({
         title: t('features.content.actions.reject'),
         message: t('features.content.messages.rejectReason'),
@@ -349,13 +360,14 @@ const handleReject = async (content) => {
         await fetchContents();
         await fetchStats();
         toast.success.action(t('features.content.messages.rejected') || 'Content rejected');
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to reject content:', error);
-        toast.error(error);
+        toast.error.action(error);
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string | undefined) => {
+    if (!date) return '-';
     return new Date(date).toLocaleDateString();
 };
 
@@ -365,7 +377,7 @@ watch([search, statusFilter], () => {
 
 onMounted(() => {
     if (route.query.q) {
-        search.value = route.query.q;
+        search.value = route.query.q as string;
     }
     fetchContents();
     fetchStats();
@@ -606,7 +618,7 @@ onMounted(() => {
                                 </div>
                             </TableCell>
                             <TableCell class="px-6 py-4">
-                                <Badge variant="outline" :class="getStatusBadgeClass(content.status)" class="capitalize border-none px-2 py-0.5">
+                                <Badge variant="outline" :class="getStatusBadgeClass(content.status || '')" class="capitalize border-none px-2 py-0.5">
                                     {{ content.status }}
                                 </Badge>
                             </TableCell>

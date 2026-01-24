@@ -28,7 +28,7 @@
                         <div class="flex items-center gap-x-6">
                              <div class="relative">
                                 <Avatar class="h-24 w-24">
-                                    <AvatarImage :src="profileForm.avatar" alt="Avatar" />
+                                    <AvatarImage :src="profileForm.avatar || undefined" alt="Avatar" />
                                     <AvatarFallback class="text-lg">{{ getInitials(profileForm.name) }}</AvatarFallback>
                                 </Avatar>
                                  <button
@@ -44,7 +44,7 @@
                              <div>
                                 <MediaPicker
                                     :label="$t('features.users.form.selectAvatar')"
-                                    @selected="(media) => profileForm.avatar = media.url"
+                                    @selected="(media: any) => profileForm.avatar = media.url"
                                 />
                                 <p class="mt-2 text-xs text-muted-foreground">
                                     JPG, GIF or PNG. 1MB max.
@@ -153,35 +153,54 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../../services/api';
 import toast from '../../services/toast';
 import { useAuthStore } from '../../stores/auth';
+// @ts-ignore - TODO: Migrate components
 import LoginHistory from '../../components/admin/LoginHistory.vue';
+// @ts-ignore - TODO: Migrate components
 import TwoFactorSettings from '../../components/admin/TwoFactorSettings.vue';
+// @ts-ignore - TODO: Migrate components
 import MediaPicker from '../../components/MediaPicker.vue';
 
 // Shadcn Components
+// @ts-ignore
 import Card from '../../components/ui/card.vue';
+// @ts-ignore
 import CardContent from '../../components/ui/card-content.vue';
+// @ts-ignore
 import CardDescription from '../../components/ui/card-description.vue';
+// @ts-ignore
 import CardHeader from '../../components/ui/card-header.vue';
+// @ts-ignore
 import CardTitle from '../../components/ui/card-title.vue';
 
+// @ts-ignore
 import Tabs from '../../components/ui/tabs.vue';
+// @ts-ignore
 import TabsContent from '../../components/ui/tabs-content.vue';
+// @ts-ignore
 import TabsList from '../../components/ui/tabs-list.vue';
+// @ts-ignore
 import TabsTrigger from '../../components/ui/tabs-trigger.vue';
 
+// @ts-ignore
 import Input from '../../components/ui/input.vue';
+// @ts-ignore
 import Button from '../../components/ui/button.vue';
+// @ts-ignore
 import Label from '../../components/ui/label.vue';
+// @ts-ignore
 import Textarea from '../../components/ui/textarea.vue';
 
+// @ts-ignore
 import Avatar from '../../components/ui/avatar.vue';
+// @ts-ignore
 import AvatarImage from '../../components/ui/avatar-image.vue';
+// @ts-ignore
 import AvatarFallback from '../../components/ui/avatar-fallback.vue';
 
 import { Loader2, X } from 'lucide-vue-next';
@@ -191,6 +210,16 @@ const Separator = { // Minimal local component or just use div
   template: '<div class="h-px bg-border w-full" />'
 }
 
+interface ProfileForm {
+    name: string;
+    email: string;
+    phone: string;
+    bio: string;
+    location: string;
+    website: string;
+    avatar: string | null;
+}
+
 const { t } = useI18n();
 const authStore = useAuthStore();
 
@@ -198,7 +227,7 @@ const activeTab = ref('profile');
 const saving = ref(false);
 const changingPassword = ref(false);
 
-const profileForm = ref({
+const profileForm: Ref<ProfileForm> = ref({
     name: '',
     email: '',
     phone: '',
@@ -208,7 +237,7 @@ const profileForm = ref({
     avatar: null,
 });
 
-const initialProfileForm = ref(null);
+const initialProfileForm: Ref<ProfileForm | null> = ref(null);
 
 const passwordForm = ref({
     current_password: '',
@@ -216,7 +245,7 @@ const passwordForm = ref({
     password_confirmation: '',
 });
 
-const getInitials = (name) => {
+const getInitials = (name: string | null | undefined): string => {
     if (!name) return 'U';
     return name
         .split(' ')
@@ -267,7 +296,7 @@ const updateProfile = async () => {
         toast.success(t('features.profile.messages.updateSuccess'));
         await authStore.fetchUser();
         await fetchProfile(); // Re-fetch to update initial state
-    } catch (error) {
+    } catch (error: any) {
         const msg = error.response?.data?.message || t('features.profile.messages.updateFailed');
         toast.error(msg);
     } finally {
@@ -285,7 +314,7 @@ const updatePassword = async () => {
             password: '',
             password_confirmation: '',
         };
-    } catch (error) {
+    } catch (error: any) {
         const msg = error.response?.data?.message || t('features.profile.messages.passwordFailed');
         toast.error(msg);
     } finally {

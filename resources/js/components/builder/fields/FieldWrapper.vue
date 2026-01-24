@@ -38,53 +38,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Info } from 'lucide-vue-next'
 import FieldActions from './FieldActions.vue'
 
-const props = defineProps({
-  label: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    default: ''
-  },
-  responsive: {
-    type: Boolean,
-    default: false
-  },
-  showResponsive: {
-    type: Boolean,
-    default: false
-  },
-  showDynamicData: {
-    type: Boolean,
-    default: true
-  },
-  showContextMenu: {
-    type: Boolean,
-    default: true
-  },
-  hideActions: {
-    type: Boolean,
-    default: false
-  },
-  hasCustomValue: {
-    type: Boolean,
-    default: false
-  },
-  showPresets: {
-    type: Boolean,
-    default: false
-  },
-  activeDevice: {
-    type: String,
-    default: 'desktop'
-  }
-})
+const props = defineProps<{
+  label: string;
+  description?: string;
+  responsive?: boolean;
+  showResponsive?: boolean;
+  showDynamicData?: boolean;
+  showContextMenu?: boolean;
+  hideActions?: boolean;
+  hasCustomValue?: boolean;
+  showPresets?: boolean;
+  activeDevice?: string;
+}>()
 
 defineEmits(['reset', 'responsive', 'reset-field', 'assign-preset', 'select-dynamic-data'])
 

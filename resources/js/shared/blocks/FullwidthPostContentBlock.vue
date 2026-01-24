@@ -78,12 +78,12 @@ const blockquoteStyles = computed(() => ({
 
 <style scoped>
 .fullwidth-post-content-block { width: 100%; }
-.content-inner :deep(a) { 
+.content-inner:deep(a) { 
   color: v-bind('linkStyles.color || "#2059ea"'); 
   text-decoration: v-bind('linkStyles.textDecoration || "underline"');
 }
-.content-inner :deep(a:hover) { opacity: 0.8; }
-.content-inner :deep(img) { 
+.content-inner:deep(a:hover) { opacity: 0.8; }
+.content-inner:deep(img) { 
   max-width: 100%; 
   height: auto; 
   border-radius: v-bind('(settings.imageBorderRadius || 8) + "px"');

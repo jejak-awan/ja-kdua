@@ -18,38 +18,25 @@
     </div>
 </template>
 
-<script setup>
-import { computed, provide, getCurrentInstance } from 'vue';
+<script setup lang="ts">
+import { computed, provide, getCurrentInstance, type Component } from 'vue';
 import { blockRegistry } from './BlockRegistry';
 import { dynamicContent } from '@/services/DynamicContentService';
-import { ConditionEvaluator } from '@/services/ConditionEvaluator.js';
+import { ConditionEvaluator, type RenderingContext } from '@/services/ConditionEvaluator';
+import SanitizationService from '@/shared/utils/SanitizationService';
+import type { BlockInstance } from '@/types/builder';
 
-const props = defineProps({
-    blocks: {
-        type: Array,
-        default: () => []
-    },
+const props = defineProps<{
+    blocks?: BlockInstance[];
     // Support single block for recursion
-    block: {
-        type: Object,
-        default: null
-    },
-    context: {
-        type: Object,
-        default: () => ({})
-    },
-    isPreview: {
-        type: Boolean,
-        default: false
-    },
+    block?: BlockInstance | null;
+    context?: RenderingContext;
+    isPreview?: boolean;
     // Pass mode for shared blocks
-    mode: {
-        type: String,
-        default: 'view'
-    }
-});
+    mode?: 'view' | 'edit';
+}>();
 
-const internalBlocks = computed(() => {
+const internalBlocks = computed<BlockInstance[]>(() => {
     if (props.block) return [props.block];
     return props.blocks || [];
 });
@@ -60,32 +47,37 @@ if (instance) {
     provide('BlockRenderer', instance.type);
 }
 
-const resolveBlockSettings = (block) => {
+const resolveBlockSettings = (block: BlockInstance) => {
     // Simplified: Pass module, settings, and children.
     // Legacy prop flattening is removed as we expect blocks to use BaseBlock or access module/settings directly.
     
     const settings = { ...block.settings };
     
     // Process dynamic settings
-    if (block.dynamicSettings) {
-        Object.entries(block.dynamicSettings).forEach(([key, sourceId]) => {
+    const dynamicSettings = (block as any).dynamicSettings;
+    if (dynamicSettings) {
+        Object.entries(dynamicSettings).forEach(([key, sourceId]) => {
             if (sourceId) {
-                const resolvedValue = dynamicContent.resolve(sourceId, props.context);
+                const resolvedValue = dynamicContent.resolve(sourceId as string, props.context || {});
                 if (resolvedValue !== null && resolvedValue !== undefined) {
                     settings[key] = resolvedValue;
                 }
             }
         });
     }
+
+    // 2. Wrap resolved settings in a security layer
+    // We sanitize the key functional fields to prevent XSS.
+    const sanitizedSettings = SanitizationService.sanitizeObject(settings);
     
     return {
         module: block,
-        settings: settings,
+        settings: sanitizedSettings,
         nestedBlocks: block.children || []
     };
 };
 
-const getBlockComponent = (type) => {
+const getBlockComponent = (type: string): Component | undefined => {
     return blockRegistry.getComponent(type);
 };
 </script>

@@ -92,41 +92,37 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Droplets } from 'lucide-vue-next'
 import { BaseLabel, BaseSliderInput, BaseCollapsible } from '../ui'
 
-const props = defineProps({
-  field: Object,
-  value: {
-    type: Object,
-    default: () => ({
-      opacity: 100,
-      blur: 0,
-      brightness: 100,
-      contrast: 100,
-      saturate: 100,
-      grayscale: 0,
-      sepia: 0,
-      hue_rotate: 0,
-      invert: 0,
-      blend_mode: 'normal'
-    })
-  },
-  placeholderValue: {
-    type: Object,
-    default: null
-  }
-})
+interface FilterState {
+  opacity: number;
+  blur: number;
+  brightness: number;
+  contrast: number;
+  saturate: number;
+  grayscale: number;
+  sepia: number;
+  hue_rotate: number;
+  invert: number;
+  blend_mode: string;
+}
+
+const props = defineProps<{
+  field: any;
+  value: FilterState;
+  placeholderValue?: FilterState | null;
+}>()
 
 const emit = defineEmits(['update:value'])
 const { t } = useI18n()
 
 // Use a local reactive object to track values. 
 // We merge props.value into it.
-const localValue = reactive({ 
+const localValue = reactive<FilterState>({ 
     opacity: 100,
     blur: 0,
     brightness: 100,
@@ -141,11 +137,10 @@ const localValue = reactive({
 
 watch(() => props.value, (newVal) => {
     if (newVal) {
-        // Only update if different to avoid loops? 
-        // Or just assign.
         Object.keys(localValue).forEach(key => {
-            if (newVal[key] !== undefined) {
-                localValue[key] = newVal[key]
+            const k = key as keyof FilterState
+            if (newVal[k] !== undefined) {
+                (localValue as any)[k] = newVal[k]
             }
         })
     }

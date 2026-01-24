@@ -523,6 +523,8 @@
             "auto": "Auto (Responsive)"
         },
         "toggleTheme": "Toggle Theme",
+        "theme": "Theme",
+        "switchTheme": "Switch Theme",
         "fullscreen": "Full View",
         "exitFullscreen": "Normal View",
         "close": "Close",
