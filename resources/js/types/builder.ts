@@ -158,6 +158,7 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     handleSavePreset: (name: string) => Promise<void>;
     confirm: (options: any) => Promise<boolean>;
     prompt: (options: any) => Promise<string | null>;
+    openResponsiveModal: (config: any) => void;
 
     // External
     markAsSaved: () => void;

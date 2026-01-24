@@ -21,10 +21,19 @@ export const headingSchema = z.object({
 
 export const buttonSchema = z.object({
     text: z.string().min(1, "Button text cannot be empty"),
-    url: z.string().url("Invalid URL").or(z.string().startsWith('/')).or(z.string().startsWith('#')).optional(),
+    url: z.string().optional().or(z.literal('')),
+    link_url: z.string().optional().or(z.literal('')),
+    link_target: z.enum(['_self', '_blank']).default('_self'),
     size: z.enum(['sm', 'md', 'lg']).default('md'),
-    variant: z.enum(['primary', 'secondary', 'outline', 'ghost']).default('primary'),
-    color: colorSchema
+    variant: z.string().default('solid'),
+    color: colorSchema,
+    use_icon: z.boolean().optional(),
+    iconName: z.string().optional(),
+    iconPosition: z.string().optional(),
+    iconSize: z.number().optional(),
+    use_custom_styles: z.boolean().optional(),
+    alignment: z.string().optional(),
+    hover_effect: z.string().optional()
 })
 
 export const imageSchema = z.object({

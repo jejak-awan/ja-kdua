@@ -14,13 +14,18 @@
         variant="none"
         :class="cn(
             'button-element group relative',
+            `btn-variant-${getVal(settings, 'variant', blockDevice) || 'solid'}`,
             `btn-hover-${getVal(settings, 'hover_effect', blockDevice) || 'lift'}`,
             { 'overflow-hidden': getVal(settings, 'hover_effect', blockDevice) === 'shine' || getVal(settings, 'hover_effect', blockDevice) === 'sweep' }
         )"
         :style="buttonStyles(settings, blockDevice, baseStyles)"
         :as="mode === 'edit' ? 'button' : 'a'"
-        :href="mode === 'edit' ? undefined : (getVal(settings, 'url') || '#')"
-        :target="getVal(settings, 'openNewTab') ? '_blank' : '_self'"
+        :href="mode === 'edit' ? undefined : (getVal(settings, 'url', blockDevice) || getVal(settings, 'link_url', blockDevice) || '#')"
+        :target="getVal(settings, 'openNewTab', blockDevice) || getVal(settings, 'link_target', blockDevice) ? '_blank' : '_self'"
+        :rel="Array.isArray(getVal(settings, 'link_rel', blockDevice)) ? getVal(settings, 'link_rel', blockDevice).join(' ') : undefined"
+        :download="getVal(settings, 'download', blockDevice) ? '' : undefined"
+        :aria-label="getVal(settings, 'aria_label', blockDevice)"
+        :type="getVal(settings, 'button_type', blockDevice) || 'button'"
         @click="onButtonClick"
         v-bind="getAttributes('button')"
       >
@@ -32,10 +37,10 @@
 
         <!-- Icon Left -->
         <component 
-          v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'left'"
-          :is="getIconComponent(getVal(settings, 'iconName'))"
+          v-if="getVal(settings, 'use_icon', blockDevice) && getVal(settings, 'iconName', blockDevice) && getVal(settings, 'iconPosition', blockDevice) === 'left'"
+          :is="getIconComponent(getVal(settings, 'iconName', blockDevice))"
           class="btn-icon-left transition-transform duration-300 group-hover:-translate-x-1"
-          :style="iconStyles(settings)"
+          :style="iconStyles(settings, blockDevice)"
         />
 
         <!-- Editable Text -->
@@ -43,15 +48,15 @@
           :contenteditable="blockMode === 'edit'"
           @blur="onTextBlur($event, settings)"
           class="outline-none relative z-10"
-          v-html="getVal(settings, 'text') || 'Button Text'"
+          v-html="getVal(settings, 'text', blockDevice) || 'Button Text'"
         ></span>
 
         <!-- Icon Right -->
         <component 
-          v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'right'"
-          :is="getIconComponent(getVal(settings, 'iconName'))"
+          v-if="getVal(settings, 'use_icon', blockDevice) && getVal(settings, 'iconName', blockDevice) && getVal(settings, 'iconPosition', blockDevice) === 'right'"
+          :is="getIconComponent(getVal(settings, 'iconName', blockDevice))"
           class="btn-icon-right transition-transform duration-300 group-hover:translate-x-1"
-          :style="iconStyles(settings)"
+          :style="iconStyles(settings, blockDevice)"
         />
       </Button>
     </div>
@@ -100,48 +105,91 @@ const alignmentClass = (settings: any, device: string) => {
 const buttonStyles = (settings: any, device: string, baseStyles: any) => {
     let styles: Record<string, any> = {}
     const variant = getVal(settings, 'variant', device) || 'solid'
+    const useCustom = getVal(settings, 'use_custom_styles', device)
 
-    // 1. Inherit all design properties from BaseBlock (background, spacing, border, shadow, etc.)
-    Object.assign(styles, baseStyles)
+    // 1. Inherit all design properties from BaseBlock if custom styles are enabled
+    if (useCustom) {
+        Object.assign(styles, baseStyles)
+    } else {
+        // Only inherit spacing and basic visibility
+        if (baseStyles.margin) styles.margin = baseStyles.margin
+        if (baseStyles.padding) styles.padding = baseStyles.padding
+        if (baseStyles.width) styles.width = baseStyles.width
+    }
 
     // 2. Typography
     const typography = getTypographyStyles(settings, '', device)
     Object.assign(styles, typography)
 
     // 3. Variant Overrides & Color Defaults
+    const defaultWhite = '#ffffff'
+    const defaultDark = '#111827'
+
     if (variant === 'glass') {
-        Object.assign(styles, getGlassStyles(settings, '', device))
-        styles.color = styles.color || '#ffffff'
+        const glass = getGlassStyles(settings, '', device)
+        if (Object.keys(glass).length === 0) {
+            // Premium Default Glass
+            styles.backdropFilter = 'blur(12px)'
+            styles.webkitBackdropFilter = 'blur(12px)'
+            styles.backgroundColor = 'rgba(0, 0, 0, 0.1)' // Darken slightly for better visibility
+            styles.border = '1px solid rgba(255, 255, 255, 0.2)'
+            styles.color = styles.color || defaultWhite
+        } else {
+            Object.assign(styles, glass)
+        }
     } else if (variant === 'gradient') {
         const gradient = getVal(settings, 'gradient', device)
-        if (gradient) {
+        if (gradient && gradient.stops) {
             styles.backgroundImage = generateGradientCSS(gradient)
-            styles.border = 'none'
-            styles.color = styles.color || '#ffffff'
+        } else {
+            // Premium Default Gradient (Indigo to Purple)
+            styles.backgroundImage = 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
         }
-    } else if (variant === 'outline') {
-        styles.backgroundColor = 'transparent'
-        styles.borderWidth = styles.borderWidth || '2px'
-        styles.borderStyle = 'solid'
-        styles.borderColor = styles.color || styles.backgroundColor || '#111827'
-    } else if (variant === 'ghost') {
-        styles.backgroundColor = 'transparent'
         styles.border = 'none'
+        styles.color = styles.color || defaultWhite
+    } else if (variant === 'outline' || variant === 'ghost') {
+        styles.backgroundColor = 'transparent'
+        
+        // If color is the default white, change it to dark for visibility on transparent variants
+        if (!styles.color || styles.color === defaultWhite) {
+            styles.color = defaultDark
+        }
+
+        if (variant === 'outline') {
+            styles.borderWidth = styles.borderWidth || '2px'
+            styles.borderStyle = 'solid'
+            styles.borderColor = styles.color
+        } else {
+            styles.border = 'none'
+        }
     } else {
         // Solid
-        styles.color = styles.color || '#ffffff'
+        if (!useCustom) {
+            styles.backgroundColor = styles.backgroundColor || defaultDark
+            styles.color = styles.color || defaultWhite
+            styles.border = 'none'
+        }
     }
+
+    // Default transition for all buttons
+    styles.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+
+    // 4. Hover Colors (Via CSS Variables)
+    const hoverBg = getVal(settings, 'hover_background_color', device)
+    const hoverText = getVal(settings, 'hover_text_color', device)
+    if (hoverBg) styles['--hover-bg'] = hoverBg
+    if (hoverText) styles['--hover-color'] = hoverText
 
     return styles
 }
 
-const iconStyles = (settings: any) => {
-  const size = getVal(settings, 'iconSize') || 16
+const iconStyles = (settings: any, device: string) => {
+  const size = getVal(settings, 'iconSize', device) || 16
   return {
     width: `${size}px`,
     height: `${size}px`,
-    marginLeft: getVal(settings, 'iconPosition') === 'right' ? '8px' : '0',
-    marginRight: getVal(settings, 'iconPosition') === 'left' ? '8px' : '0',
+    marginLeft: getVal(settings, 'iconPosition', device) === 'right' ? '8px' : '0',
+    marginRight: getVal(settings, 'iconPosition', device) === 'left' ? '8px' : '0',
   }
 }
 
@@ -219,5 +267,31 @@ const onTextBlur = (e: any, settings: any) => {
 }
 .btn-hover-sweep:hover .btn-sweep-overlay {
     width: 100%;
+}
+
+/* Variant Specific Hover Fixes */
+.button-element {
+    transition: all 0.3s ease;
+}
+
+/* Custom Hover Colors */
+.button-element:hover {
+    background-color: var(--hover-bg) !important;
+    color: var(--hover-color) !important;
+}
+
+/* Outline hover: fill background slightly (if no custom hover bg) */
+.btn-variant-outline:not([style*="--hover-bg"]):hover {
+    background-color: rgba(var(--primary-rgb, 17, 24, 39), 0.05) !important;
+}
+
+/* Ghost hover: fill background slightly (if no custom hover bg) */
+.btn-variant-ghost:not([style*="--hover-bg"]):hover {
+    background-color: rgba(var(--primary-rgb, 17, 24, 39), 0.08) !important;
+}
+
+/* Glass hover: increase brightness (if no custom hover bg) */
+.btn-variant-glass:not([style*="--hover-bg"]):hover {
+    filter: brightness(1.1);
 }
 </style>

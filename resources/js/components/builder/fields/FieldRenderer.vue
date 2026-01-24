@@ -101,7 +101,9 @@ const fieldComponents: Record<string, any> = {
   custom_css: defineAsyncComponent(() => import('./CSSField.vue')),
   interactions: defineAsyncComponent(() => import('./InteractionField.vue')),
   scroll_effects: defineAsyncComponent(() => import('./ScrollEffectsField.vue')),
-  repeater: defineAsyncComponent(() => import('./RepeaterField.vue'))
+  repeater: defineAsyncComponent(() => import('./RepeaterField.vue')),
+  gradient: defineAsyncComponent(() => import('./GradientField.vue')),
+  group: defineAsyncComponent(() => import('./GroupField.vue'))
 }
 
 interface FieldConfig {
@@ -331,7 +333,7 @@ const handleAssignPreset = (target: any) => {
 const handlePresetAction = (payload: { type: string, data: any }) => {
     const { type, data } = payload
     if (type === 'addNew' || type === 'newFromCurrent') {
-        builder?.openSavePresetModal(props.module.id)
+        builder?.openSavePresetModal?.(props.module.id)
     } else if (type === 'apply' && data) {
         if (data.settings && data.settings[props.field.name] !== undefined) {
             handleValueUpdate(data.settings[props.field.name])
