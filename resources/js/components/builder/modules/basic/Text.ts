@@ -20,7 +20,8 @@ import {
     conditionsSettings,
     interactionsSettings,
     scrollEffectsSettings,
-    attributesSettings
+    attributesSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -43,11 +44,14 @@ const TextModule: ModuleDefinition = {
         showTitle: false,
         title: '',
         titleTag: 'h2',
-        column_count: 1,
-        column_gap: '30px',
-        column_rule_width: 0,
-        column_rule_color: '#eeeeee',
-        column_rule_style: 'solid',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        text_column_count: 1,
+        text_column_gap: '30px',
+        text_column_rule_width: 0,
+        text_column_rule_color: '#eeeeee',
+        text_column_rule_style: 'solid',
         use_drop_cap: false,
         drop_cap_color: '',
         drop_cap_font_size: '',
@@ -91,12 +95,13 @@ const TextModule: ModuleDefinition = {
             adminLabelSettings('Text')
         ],
         design: [
+            layoutSettings,
             {
-                id: 'text_layout',
-                label: 'Layout',
+                id: 'text_columns',
+                label: 'Text Columns',
                 fields: [
                     {
-                        name: 'column_count',
+                        name: 'text_column_count',
                         type: 'range',
                         label: 'Column Count',
                         min: 1,
@@ -106,23 +111,23 @@ const TextModule: ModuleDefinition = {
                         responsive: true
                     },
                     {
-                        name: 'column_gap',
+                        name: 'text_column_gap',
                         type: 'dimension',
                         label: 'Column Gap',
                         default: '30px',
                         responsive: true,
-                        show_if: { field: 'column_count', value: [2, 3, 4] }
+                        show_if: { field: 'text_column_count', value: [2, 3, 4] }
                     },
                     {
-                        name: 'column_rule',
+                        name: 'text_column_rule',
                         type: 'group',
                         label: 'Column Rule / Line',
-                        show_if: { field: 'column_count', value: [2, 3, 4] },
+                        show_if: { field: 'text_column_count', value: [2, 3, 4] },
                         fields: [
-                            { name: 'column_rule_width', type: 'range', label: 'Rule Width', min: 0, max: 10, unit: 'px' },
-                            { name: 'column_rule_color', type: 'color', label: 'Rule Color' },
+                            { name: 'text_column_rule_width', type: 'range', label: 'Rule Width', min: 0, max: 10, unit: 'px' },
+                            { name: 'text_column_rule_color', type: 'color', label: 'Rule Color' },
                             {
-                                name: 'column_rule_style',
+                                name: 'text_column_rule_style',
                                 type: 'select',
                                 label: 'Rule Style',
                                 options: [

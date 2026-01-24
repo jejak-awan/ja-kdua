@@ -1,6 +1,6 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device" v-slot="{ mode: blockMode, settings, device: blockDevice, getAttributes }">
-      <div class="heading-container">
+      <div class="heading-container" :style="getLayoutStyles(settings, blockDevice)">
         <component 
           :is="tag(settings)"
           :id="getVal(settings, 'html_id') || undefined"
@@ -72,7 +72,8 @@ import {
     getTypographyStyles, 
     getVal,
     getTextGradientStyles,
-    generateGradientCSS
+    generateGradientCSS,
+    getLayoutStyles
 } from '../utils/styleUtils'
 import type { BlockInstance, BuilderInstance } from '../../types/builder'
 

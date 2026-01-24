@@ -19,7 +19,8 @@ import {
     interactionsSettings,
     scrollEffectsSettings,
     attributesSettings,
-    linkSettings
+    linkSettings,
+    layoutSettings
 } from '../commonSettings';
 
 /**
@@ -42,6 +43,9 @@ const HeadingModule: ModuleDefinition = {
         aria_label: '',
         size: 'large',
         alignment: 'left',
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
         use_gradient: false,
         background_clip_text: false,
         use_stroke: false,
@@ -128,6 +132,7 @@ const HeadingModule: ModuleDefinition = {
             adminLabelSettings('Heading')
         ],
         design: [
+            layoutSettings,
             {
                 id: 'heading_styling',
                 label: 'Premium Styling',

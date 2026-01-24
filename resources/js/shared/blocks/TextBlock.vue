@@ -3,7 +3,7 @@
     <template #default="{ mode: blockMode, settings, device: blockDevice }">
       <div 
         class="text-block text-content"
-        :style="textStyles(settings, blockDevice)"
+        :style="[textStyles(settings, blockDevice), getLayoutStyles(settings, blockDevice)]"
       >
         <component
           :is="getVal(settings, 'titleTag') || 'h2'"
@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getTypographyStyles, getVal } from '../utils/styleUtils'
+import { getTypographyStyles, getVal, getLayoutStyles } from '../utils/styleUtils'
 import InlineRichtext from '../../components/builder/canvas/InlineRichtext.vue'
 import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
@@ -49,16 +49,16 @@ const builder = inject<BuilderInstance>('builder', null as any)
 const textStyles = (settings: any, device: string) => {
   const styles: Record<string, any> = getTypographyStyles(settings, '', device)
   
-  // 1. Columns
-  const cols = getVal(settings, 'column_count', device)
+  // 1. Text Columns (Flow logic)
+  const cols = getVal(settings, 'text_column_count', device)
   if (cols && cols > 1) {
     styles.columnCount = cols
-    styles.columnGap = getVal(settings, 'column_gap', device) || '30px'
+    styles.columnGap = getVal(settings, 'text_column_gap', device) || '30px'
     
-    const ruleWidth = getVal(settings, 'column_rule_width', device)
+    const ruleWidth = getVal(settings, 'text_column_rule_width', device)
     if (ruleWidth > 0) {
-      const ruleColor = getVal(settings, 'column_rule_color', device) || '#eeeeee'
-      const ruleStyle = getVal(settings, 'column_rule_style', device) || 'solid'
+      const ruleColor = getVal(settings, 'text_column_rule_color', device) || '#eeeeee'
+      const ruleStyle = getVal(settings, 'text_column_rule_style', device) || 'solid'
       styles.columnRule = `${ruleWidth}px ${ruleStyle} ${ruleColor}`
     }
   }
