@@ -37,12 +37,18 @@ const HeadingModule: ModuleDefinition = {
         subtitle: '',
         tag: 'h2',
         size: 'large',
-        decoration: 'none',
+        alignment: 'left',
+        use_gradient: false,
+        use_stroke: false,
+        stroke_width: 1,
+        stroke_color: '#000000',
+        shadow_preset: 'none', // none, soft, hard, glow
         background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
         padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
-        margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
+        margin: { top: 0, bottom: 10, left: 0, right: 0, unit: 'px' },
         border: { radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true }, styles: { all: { width: 0, color: '#333333', style: 'solid' } } },
-        boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false }
+        boxShadow: { preset: 'none', horizontal: 0, vertical: 0, blur: 0, spread: 0, color: 'rgba(0,0,0,0)', inset: false },
+        width: '100%'
     },
 
     settings: {
@@ -62,9 +68,18 @@ const HeadingModule: ModuleDefinition = {
                             { value: 'h5', label: 'H5' },
                             { value: 'h6', label: 'H6' }
                         ]
-                    },
+                    }
+                ]
+            },
+            adminLabelSettings('Heading')
+        ],
+        design: [
+            {
+                id: 'styling_presets',
+                label: 'Premium Styling',
+                fields: [
                     {
-                        name: 'size', type: 'select', label: 'Size', responsive: true, options: [
+                        name: 'size', type: 'select', label: 'Heading Size', responsive: true, options: [
                             { value: 'small', label: 'Small' },
                             { value: 'medium', label: 'Medium' },
                             { value: 'large', label: 'Large' },
@@ -72,21 +87,21 @@ const HeadingModule: ModuleDefinition = {
                             { value: 'display', label: 'Display' }
                         ]
                     },
+                    { name: 'use_gradient', type: 'toggle', label: 'Enable Text Gradient' },
+                    { name: 'gradient', type: 'gradient', label: 'Text Gradient', show_if: { field: 'use_gradient', value: true } },
+                    { name: 'use_stroke', type: 'toggle', label: 'Enable Text Stroke' },
+                    { name: 'stroke_width', type: 'range', label: 'Stroke Width', min: 0, max: 10, unit: 'px', show_if: { field: 'use_stroke', value: true } },
+                    { name: 'stroke_color', type: 'color', label: 'Stroke Color', show_if: { field: 'use_stroke', value: true } },
                     {
-                        name: 'decoration', type: 'select', label: 'Decoration', options: [
+                        name: 'shadow_preset', type: 'select', label: 'Shadow Preset', options: [
                             { value: 'none', label: 'None' },
-                            { value: 'underline', label: 'Underline' },
-                            { value: 'highlight', label: 'Highlight' },
-                            { value: 'gradient', label: 'Gradient Text' }
+                            { value: 'soft', label: 'Soft Depth' },
+                            { value: 'hard', label: 'Hard Shadow' },
+                            { value: 'glow', label: 'Neon Glow' }
                         ]
                     }
                 ]
             },
-            backgroundSettings,
-            orderSettings,
-            adminLabelSettings('Heading')
-        ],
-        design: [
             {
                 id: 'typography',
                 label: 'Typography',
@@ -95,6 +110,7 @@ const HeadingModule: ModuleDefinition = {
                     name: f.name === 'text_align' ? 'alignment' : f.name
                 }))
             },
+            backgroundSettings,
             spacingSettings,
             borderSettings,
             boxShadowSettings,

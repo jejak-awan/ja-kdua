@@ -86,7 +86,18 @@ const StarRatingModule: ModuleDefinition = {
                 fields: [
                     { name: 'starSize', type: 'range', label: 'Star Size', min: 16, max: 48, step: 2, unit: 'px', responsive: true },
                     { name: 'starColor', type: 'color', label: 'Star Color', responsive: true },
-                    { name: 'emptyStarColor', type: 'color', label: 'Empty Star Color', responsive: true }
+                    { name: 'emptyStarColor', type: 'color', label: 'Empty Star Color', responsive: true },
+                    {
+                        name: 'alignment',
+                        type: 'buttonGroup',
+                        label: 'Alignment',
+                        options: [
+                            { value: 'left', label: 'Left', icon: 'AlignLeft' },
+                            { value: 'center', label: 'Center', icon: 'AlignCenter' },
+                            { value: 'right', label: 'Right', icon: 'AlignRight' }
+                        ],
+                        responsive: true
+                    }
                 ]
             },
             {

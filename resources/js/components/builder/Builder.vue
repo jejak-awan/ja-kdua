@@ -1,12 +1,12 @@
 <template>
-  <Teleport to="body" :disabled="!builder.isFullscreen">
+  <Teleport to="body" :disabled="!builder.isFullscreen.value">
     <div 
-      class="ja-builder" 
+      class="ja-builder ja-builder-main" 
       :class="[
         cmsStore.isDarkMode ? 'ja-builder--dark' : 'ja-builder--light',
         { 
-          'ja-builder--fullscreen': builder.isFullscreen,
-          'ja-builder--wireframe': builder.wireframeMode
+          'ja-builder--fullscreen': builder.isFullscreen.value,
+          'ja-builder--wireframe': builder.wireframeMode.value
         }
       ]"
     >
@@ -255,9 +255,11 @@ const cmsStore = useCmsStore()
 // UI State
 watch(() => cmsStore.isDarkMode, (isDark) => {
   if (isDark) {
+    document.documentElement.classList.add('dark')
     document.body.classList.add('ja-builder--dark')
     document.body.classList.remove('ja-builder--light')
   } else {
+    document.documentElement.classList.remove('dark')
     document.body.classList.add('ja-builder--light')
     document.body.classList.remove('ja-builder--dark')
   }

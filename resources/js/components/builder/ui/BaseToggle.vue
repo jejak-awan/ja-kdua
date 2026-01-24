@@ -1,31 +1,28 @@
 <template>
-  <button
-    class="base-toggle"
-    :class="{ 
-      'base-toggle--active': modelValue, 
-      'base-toggle--disabled': disabled,
-      'base-toggle--placeholder-active': !modelValue && placeholderValue === true 
-    }"
+  <div 
+    class="flex items-center gap-3 cursor-pointer select-none group py-1"
     @click="toggle"
-    :disabled="disabled"
-    type="button"
+    :class="{ 'opacity-50 pointer-events-none': disabled }"
   >
-    <span class="toggle-track">
-      <span class="toggle-thumb" />
-    </span>
-    <span v-if="label" class="toggle-label">{{ label }}</span>
-  </button>
+    <Switch 
+      :checked="modelValue" 
+      :disabled="disabled"
+      class="pointer-events-none"
+    />
+    <Label v-if="label" class="cursor-pointer font-medium text-[13px] text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors">
+      {{ label }}
+    </Label>
+  </div>
 </template>
 
 <script setup>
+import Switch from './Switch.vue'
+import Label from './Label.vue'
+
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
-  },
-  placeholderValue: {
-    type: Boolean,
-    default: null
   },
   label: {
     type: String,
@@ -47,69 +44,3 @@ const toggle = () => {
 }
 </script>
 
-<style scoped>
-.base-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-}
-
-.toggle-track {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  background-color: var(--builder-toggle-track);
-  border: 1px solid var(--builder-border);
-  border-radius: 20px;
-  transition: var(--transition-fast);
-}
-
-.toggle-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  background-color: white;
-  border-radius: 50%;
-  transition: transform var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.base-toggle--active .toggle-track {
-  background-color: var(--builder-accent);
-  border-color: var(--builder-accent);
-}
-
-.base-toggle--active .toggle-thumb {
-  transform: translateX(16px);
-}
-
-.base-toggle--placeholder-active .toggle-track {
-  background-color: var(--builder-bg-secondary);
-  border-color: var(--builder-border);
-  opacity: 0.6;
-}
-
-.base-toggle--placeholder-active .toggle-thumb {
-  transform: translateX(16px);
-  background-color: var(--builder-text-muted);
-  opacity: 0.5;
-}
-
-.base-toggle--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.toggle-label {
-  font-size: 13px;
-  color: var(--builder-text-primary);
-}
-</style>

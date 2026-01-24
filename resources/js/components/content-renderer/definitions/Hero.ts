@@ -58,12 +58,43 @@ export default {
             tab: 'content'
         },
 
-        { type: 'header', label: 'Subtitle', tab: 'content' },
         {
             key: 'subtitle',
             type: 'textarea',
             label: 'Subtitle Text',
             default: 'Experience the next generation of visual editing.',
+            tab: 'content'
+        },
+        {
+            key: 'eyebrow',
+            type: 'text',
+            label: 'Eyebrow / Badge Text',
+            default: '',
+            tab: 'content'
+        },
+        {
+            key: 'layout',
+            type: 'select',
+            label: 'Layout Variant',
+            options: [
+                { label: 'Centered', value: 'centered' },
+                { label: 'Split (Image Right)', value: 'split' }
+            ],
+            default: 'centered',
+            tab: 'content'
+        },
+        {
+            key: 'image',
+            type: 'image',
+            label: 'Split Layout Image',
+            showIf: { key: 'layout', value: 'split' },
+            tab: 'content'
+        },
+        {
+            key: 'useGlass',
+            type: 'boolean',
+            label: 'Use Glassmorphism',
+            default: false,
             tab: 'content'
         },
 

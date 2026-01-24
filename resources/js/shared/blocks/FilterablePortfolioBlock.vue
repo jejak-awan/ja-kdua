@@ -2,36 +2,57 @@
   <BaseBlock :module="module" :settings="settings" class="filterable-portfolio-block">
     <div class="container mx-auto">
       <!-- Filter Tabs -->
-      <div v-if="settings.showFilter !== false" class="portfolio-filter mb-12 flex flex-wrap gap-2" :style="filterStyles">
-        <button 
+      <div v-if="settings.showFilter !== false" class="portfolio-filter mb-12 flex flex-wrap gap-3" :style="filterStyles">
+        <Button 
           v-for="cat in categories" 
           :key="cat" 
-          class="filter-btn px-6 py-2 rounded-full text-sm font-medium transition-all" 
-          :class="activeFilter === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'" 
+          :variant="activeFilter === cat ? 'default' : 'outline'"
+          class="rounded-full px-6 transition-all duration-300" 
           :style="activeFilter === cat ? {} : filterBtnStyles"
           @click="activeFilter = cat"
         >
           {{ cat }}
-        </button>
+        </Button>
       </div>
       
       <!-- Portfolio Grid -->
-      <div class="portfolio-grid grid gap-6" :style="gridStyles">
-        <article 
+      <div class="portfolio-grid grid gap-8" :style="gridStyles">
+        <Card 
             v-for="(item, i) in filteredItems" 
             :key="i" 
-            class="portfolio-item relative aspect-square rounded-xl overflow-hidden group cursor-pointer"
+            class="portfolio-item relative aspect-square rounded-[30px] overflow-hidden group cursor-pointer border-none shadow-lg hover:shadow-2xl transition-all duration-500"
             @click="handleItemClick(item)"
         >
-          <div class="item-image w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+          <div class="item-image w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
             <img v-if="item.image" :src="item.image" :alt="item.title" class="w-full h-full object-cover" />
-            <FolderOpen v-else class="w-10 h-10 text-gray-300" />
+            <FolderOpen v-else class="w-16 h-16 text-slate-300 opacity-50" />
           </div>
-          <div class="item-overlay absolute inset-0 flex flex-col items-center justify-center p-6 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" :style="overlayStyles">
-            <h4 v-if="settings.showTitle !== false" class="item-title mb-1 font-bold text-white" :style="itemTitleStyles">{{ item.title }}</h4>
-            <span v-if="settings.showCategories !== false" class="item-category text-sm text-white/80" :style="itemCategoryStyles">{{ item.category }}</span>
+          
+          <div 
+            class="item-overlay absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-md bg-primary/80" 
+            :style="overlayStyles"
+          >
+            <Badge 
+                v-if="settings.showCategories !== false" 
+                variant="secondary"
+                class="mb-3 rounded-full uppercase tracking-widest text-[10px] font-bold py-1 px-4 bg-white/20 text-white border-white/30 backdrop-blur-md"
+                :style="itemCategoryStyles"
+            >
+                {{ item.category }}
+            </Badge>
+            <h4 
+                v-if="settings.showTitle !== false" 
+                class="item-title text-white text-2xl font-black tracking-tighter" 
+                :style="itemTitleStyles"
+            >
+                {{ item.title }}
+            </h4>
+            
+            <div class="mt-6 w-12 h-12 rounded-full bg-white text-primary flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
+                 <LucideIcon name="ArrowUpRight" :size="20" />
+            </div>
           </div>
-        </article>
+        </Card>
       </div>
     </div>
   </BaseBlock>
@@ -40,7 +61,9 @@
 <script setup>
 import { computed, ref, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { FolderOpen } from 'lucide-vue-next'
+import { Button, Badge, Card } from '../ui'
+import { FolderOpen, ArrowUpRight } from 'lucide-vue-next'
+import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { 
   getTypographyStyles,
   getResponsiveValue
@@ -48,12 +71,13 @@ import {
 
 const props = defineProps({
   module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+  mode: { type: String, default: 'view' },
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device?.value || props.device)
 
 const activeFilter = ref('All')
 
@@ -105,7 +129,7 @@ const gridStyles = computed(() => ({
 }))
 
 const overlayStyles = computed(() => ({ 
-  backgroundColor: settings.value.overlayColor || 'rgba(59, 130, 246, 0.9)' 
+  backgroundColor: settings.value.overlayColor || '' 
 }))
 
 const itemTitleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))

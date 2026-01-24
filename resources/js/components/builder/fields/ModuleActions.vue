@@ -21,7 +21,7 @@
     </div>
 
     <!-- More (Meatballs) -->
-    <div class="action-icon" :title="t('builder.items.more')" @click.stop="$emit('more', $event)">
+    <div v-if="showMore" class="action-icon" :title="t('builder.items.more')" @click.stop="$emit('more', $event)">
         <MoreVertical :size="size" />
     </div>
     
@@ -47,6 +47,7 @@ interface Props {
   showDuplicate?: boolean;
   showDelete?: boolean;
   showDrag?: boolean;
+  showMore?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
@@ -56,7 +57,8 @@ withDefaults(defineProps<Props>(), {
   showLayout: false,
   showDuplicate: true,
   showDelete: true,
-  showDrag: false
+  showDrag: false,
+  showMore: true
 })
 
 defineEmits<{

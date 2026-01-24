@@ -1,20 +1,12 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="column-block">
+  <BaseBlock :module="module" :mode="mode" :device="device" class="column-block">
     <div class="column-inner w-full h-full flex flex-col" :style="columnStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
-        <div v-if="module.children?.length" class="column-content w-full h-full">
-          <slot />
-        </div>
-        <!-- Empty State / Add Module Button Area -->
-        <div 
-          v-else 
-          class="column-empty flex-grow flex items-center justify-center p-4 min-h-[60px] cursor-pointer group/col-empty"
-          @click.stop="openInsertModal"
-        >
-           <div class="add-module-ui flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 group-hover/col-empty:bg-gray-200 dark:group-hover/col-empty:bg-gray-700 transition-colors">
-              <Plus class="w-5 h-5 text-gray-400 group-hover/col-empty:text-gray-600 dark:group-hover/col-empty:text-gray-300" />
-           </div>
+        <slot />
+        <!-- Empty State -->
+        <div v-if="!module.children?.length" class="column-empty flex-grow flex items-center justify-center p-6 border-2 border-dashed border-gray-50 dark:border-gray-900 rounded-lg text-gray-200">
+           <Plus class="w-5 h-5 opacity-30" />
         </div>
       </template>
 
@@ -31,65 +23,77 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Plus } from 'lucide-vue-next'
 import { 
-  getResponsiveValue
+  getResponsiveValue,
+  getVal,
+  getLayoutStyles
 } from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+  nestedBlocks?: BlockInstance[];
+}>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const BlockRenderer = inject('BlockRenderer', null)
 
 const columnStyles = computed(() => {
+    const layout = getVal(settings.value, 'layout_type', device.value) || 'flex'
     const align = getVal(settings.value, 'align_items', device.value) || 'stretch'
     const justify = getVal(settings.value, 'justify_content', device.value) || 'flex-start'
     const gap = getVal(settings.value, 'gap', device.value) || 20
 
-    return {
+    const styles: Record<string, any> = {
         '--col-align': align,
         '--col-justify': justify,
         '--col-gap': `${gap}px`,
-        alignItems: 'var(--col-align)', // Fallback for view mode
-        justifyContent: 'var(--col-justify)',
-        gap: 'var(--col-gap)',
         width: '100%',
         height: '100%',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column' as const,
+        ...getLayoutStyles(settings.value, device.value) // Use standard layout styles if available
     }
-})
 
-const openInsertModal = () => {
-    if (builder?.openInsertModal) {
-        builder.openInsertModal(props.module.id)
+    if (layout === 'flex') {
+        styles.alignItems = 'var(--col-align)'
+        styles.justifyContent = 'var(--col-justify)'
+        styles.gap = 'var(--col-gap)'
+    } else if (layout === 'grid') {
+        styles.display = 'grid'
+        styles.gap = 'var(--col-gap)'
     }
-}
+
+    return styles
+})
 </script>
 
 <style scoped>
-.column-block { height: 100%; display: flex; flex-direction: column; }
+.column-block { height: 100% !important; display: flex; flex-direction: column; width: 100%; }
 .column-child { width: 100%; }
 
 /* Builder Mode: Ensure the draggable container inherits layout */
-.column-inner:deep(.children-container) {
-    display: flex;
-    flex-direction: column;
+.column-inner :deep(.children-container) {
+    display: inherit;
+    flex-direction: inherit;
     width: 100%;
     height: 100%;
     min-height: 50px;
-    gap: var(--col-gap);
-    align-items: var(--col-align);
-    justify-content: var(--col-justify);
+    gap: inherit;
+    align-items: inherit;
+    justify-content: inherit;
 }
 </style>

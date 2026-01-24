@@ -1,75 +1,73 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="video-slider-block">
-    <div class="slider-viewport relative overflow-hidden p-2" :style="viewportStyles">
-      <div 
-        class="slider-track flex transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)" 
-        :style="trackStyles"
-      >
-        <div 
-          v-for="(video, index) in items" 
-          :key="index"
-          class="video-slide flex-shrink-0 min-w-0 px-2"
-          :style="slideStyles"
+    <div class="carousel-container relative">
+        <Carousel 
+            class="w-full" 
+            :opts="carouselOptions"
+            :plugins="carouselPlugins"
         >
-          <div 
-            class="video-card bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700 transition-all hover:shadow-2xl hover:-translate-y-1 group cursor-pointer"
-            @click="handlePlay(video)"
-          >
-            <div class="video-thumbnail relative overflow-hidden aspect-video bg-gray-900" :style="thumbnailContainerStyles(video)">
-              <img v-if="getThumb(video)" :src="getThumb(video)" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div v-else class="thumbnail-placeholder absolute inset-0 flex items-center justify-center text-gray-500">
-                <Film class="w-12 h-12 opacity-20" />
-              </div>
-              
-              <div v-if="showPlayButton" class="play-overlay absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div class="play-button w-16 h-16 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-2xl transition-transform duration-300 group-hover:scale-110" :style="playButtonStyles">
-                  <Play class="w-8 h-8 fill-current translate-x-0.5" />
-                </div>
-              </div>
-            </div>
-            <div class="video-info p-5">
-              <h4 v-if="video.title" class="video-title text-lg font-bold line-clamp-1" :style="titleStyles">{{ video.title }}</h4>
-              <p v-if="video.description" class="text-sm opacity-60 mt-2 line-clamp-2">{{ video.description }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+            <CarouselContent class="-ml-4">
+                <CarouselItem 
+                    v-for="(video, index) in items" 
+                    :key="index"
+                    class="pl-4 pb-4"
+                    :class="slideBasisClass"
+                >
+                    <Card 
+                        class="video-card group bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-lg border-none hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer h-full flex flex-col"
+                        @click="handlePlay(video)"
+                    >
+                        <div class="video-thumbnail relative overflow-hidden aspect-video bg-slate-900">
+                             <img v-if="getThumb(video)" :src="getThumb(video)" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                             <div v-else class="thumbnail-placeholder absolute inset-0 flex items-center justify-center text-slate-700">
+                                <Film class="w-12 h-12 opacity-30" />
+                             </div>
+                             
+                             <!-- Play Icon Overlay -->
+                             <div class="absolute inset-0 z-10 flex items-center justify-center bg-primary/20 opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-sm">
+                                <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-500">
+                                    <Play class="w-10 h-10 fill-current translate-x-0.5" />
+                                </div>
+                             </div>
+                             
+                             <Badge v-if="video.type" class="absolute top-4 left-4 z-20 rounded-full bg-black/50 backdrop-blur-md border-white/20 text-white font-bold px-4 py-1">
+                                {{ video.type }}
+                             </Badge>
+                        </div>
+                        
+                        <CardContent class="p-8 flex flex-col flex-grow">
+                             <CardTitle class="text-xl font-black mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors border-none" :style="titleStyles">
+                                {{ video.title }}
+                             </CardTitle>
+                             <CardDescription v-if="video.description" class="text-sm font-medium text-slate-500 line-clamp-2 leading-relaxed">
+                                {{ video.description }}
+                             </CardDescription>
+                        </CardContent>
+                    </Card>
+                </CarouselItem>
+            </CarouselContent>
+
+            <!-- Navigation -->
+            <template v-if="items.length > slidesPerView">
+                <CarouselPrevious v-if="showArrows" class="left-0 -translate-x-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <CarouselNext v-if="showArrows" class="right-0 translate-x-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </template>
+        </Carousel>
     </div>
-    
-    <!-- Navigation Buttons -->
-    <template v-if="items.length > slidesPerView">
-        <button 
-            v-if="showArrows" 
-            class="slider-arrow prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 z-10 transition-all hover:scale-110 active:scale-95" 
-            @click="prev"
-        >
-            <ChevronLeft class="w-6 h-6" />
-        </button>
-        <button 
-            v-if="showArrows" 
-            class="slider-arrow next absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-xl border border-gray-100 dark:border-gray-700 z-10 transition-all hover:scale-110 active:scale-95" 
-            @click="next"
-        >
-            <ChevronRight class="w-6 h-6" />
-        </button>
-        
-        <div v-if="showDots" class="slider-dots flex justify-center gap-3 mt-8">
-            <button 
-                v-for="i in Math.ceil(items.length / slidesPerView)" 
-                :key="i" 
-                class="slider-dot h-2 rounded-full transition-all duration-300" 
-                :class="currentPage === i - 1 ? 'w-8 bg-blue-500' : 'w-2 bg-gray-300 dark:bg-gray-700'" 
-                @click="currentPage = i - 1" 
-            />
-        </div>
-    </template>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Film, Play, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import Carousel from '../ui/Carousel.vue'
+import CarouselContent from '../ui/CarouselContent.vue'
+import CarouselItem from '../ui/CarouselItem.vue'
+import CarouselNext from '../ui/CarouselNext.vue'
+import CarouselPrevious from '../ui/CarouselPrevious.vue'
+import { Card, CardContent, CardTitle, CardDescription, Badge } from '../ui'
+import Autoplay from 'embla-carousel-autoplay'
+import { Film, Play } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
   getResponsiveValue
@@ -77,25 +75,47 @@ import {
 
 const props = defineProps({
   module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+  mode: { type: String, default: 'view' },
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
+const device = computed(() => builder?.device?.value || props.device)
 
 const items = computed(() => settings.value.items || [
-    { title: 'Sample Video 1', type: 'youtube', videoId: 'dQw4w9WgXcQ' },
-    { title: 'Sample Video 2', type: 'youtube', videoId: 'dQw4w9WgXcQ' },
-    { title: 'Sample Video 3', type: 'youtube', videoId: 'dQw4w9WgXcQ' }
+    { title: 'Designing the Future of CMS', description: 'Take a deep dive into modern component architecture and user experience design.', type: 'YouTube', videoId: 'dQw4w9WgXcQ' },
+    { title: 'Unmatched Performance with Vue 3', description: 'Exploring how script setup and reactivity transform web development workflows.', type: 'Vimeo', videoId: 'dQw4w9WgXcQ' },
+    { title: 'Mastering Tailwind Layouts', description: 'Learn the secrets to building highly responsive, premium interfaces in record time.', type: 'YouTube', videoId: 'dQw4w9WgXcQ' }
 ])
-const currentPage = ref(0)
 
 const slidesPerView = computed(() => parseInt(getResponsiveValue(settings.value, 'slidesPerView', device.value)) || 1)
-const gap = computed(() => parseInt(getResponsiveValue(settings.value, 'gap', device.value)) || 20)
 const showArrows = computed(() => getResponsiveValue(settings.value, 'showArrows', device.value) !== false)
-const showDots = computed(() => getResponsiveValue(settings.value, 'showDots', device.value) !== false)
-const showPlayButton = computed(() => getResponsiveValue(settings.value, 'showPlayButton', device.value) !== false)
+
+const slideBasisClass = computed(() => {
+    const spv = slidesPerView.value
+    if (spv === 1) return 'basis-full'
+    if (spv === 2) return 'basis-1/2'
+    if (spv === 3) return 'basis-1/3'
+    return 'basis-full'
+})
+
+const carouselOptions = computed(() => ({
+    align: 'start',
+    loop: settings.value.loop !== false,
+    slidesToScroll: slidesPerView.value
+}))
+
+const carouselPlugins = computed(() => {
+    const plugins = []
+    if (settings.value.autoplay && props.mode === 'view') {
+        plugins.push(Autoplay({
+            delay: parseInt(settings.value.autoplaySpeed) || 5000,
+            stopOnInteraction: false
+        }))
+    }
+    return plugins
+})
 
 const handlePlay = (video) => {
     if (props.mode === 'edit') return
@@ -104,42 +124,11 @@ const handlePlay = (video) => {
 
 const getThumb = (video) => {
     if (video.thumbnail) return video.thumbnail
-    if (video.type === 'youtube' && video.videoId) {
+    if (video.videoId) {
         return `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`
     }
     return null
 }
-
-const next = () => { 
-  const maxPage = Math.ceil(items.value.length / slidesPerView.value) - 1
-  currentPage.value = (currentPage.value + 1) % (maxPage + 1)
-}
-const prev = () => { 
-  const maxPage = Math.ceil(items.value.length / slidesPerView.value) - 1
-  currentPage.value = (currentPage.value - 1 + (maxPage + 1)) % (maxPage + 1)
-}
-
-const viewportStyles = computed(() => ({}))
-
-const trackStyles = computed(() => ({
-    transform: `translateX(-${currentPage.value * 100}%)`
-}))
-
-const slideStyles = computed(() => ({
-    flex: `0 0 ${100 / slidesPerView.value}%`
-}))
-
-const thumbnailContainerStyles = (video) => ({})
-
-const playButtonStyles = computed(() => {
-    const size = getResponsiveValue(settings.value, 'playButtonSize', device.value) || 64
-    const color = getResponsiveValue(settings.value, 'playButtonColor', device.value) || '#ffffff'
-    return {
-        width: `${size}px`,
-        height: `${size}px`,
-        color: color
-    }
-})
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 </script>

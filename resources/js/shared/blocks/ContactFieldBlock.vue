@@ -1,63 +1,62 @@
 <template>
   <div class="contact-field" :class="{ 'contact-field--full': isFullWidth }" :style="fieldStyles">
-    <label v-if="settings.label" class="field-label block text-sm font-medium mb-2" :style="labelStyles">
+    <Label v-if="settings.label" class="mb-2 block" :style="labelStyles">
       {{ settings.label }} 
-      <span v-if="settings.required" class="text-red-500">*</span>
-    </label>
+      <span v-if="settings.required" class="text-destructive font-bold ml-0.5">*</span>
+    </Label>
 
     <!-- Text / Email / Password / Tel -->
-    <input 
+    <Input 
       v-if="['text', 'email', 'password', 'tel'].includes(settings.type || 'text')"
       :type="settings.type || 'text'"
       :placeholder="settings.placeholder"
       :required="settings.required"
-      class="field-input w-full px-4 py-3 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+      class="h-12"
       :style="inputStyles"
     />
 
     <!-- Textarea -->
-    <textarea 
+    <Textarea 
       v-else-if="settings.type === 'textarea'"
       :placeholder="settings.placeholder"
       :required="settings.required"
       rows="4"
-      class="field-input w-full px-4 py-3 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-y"
+      class="min-h-[120px] resize-y"
       :style="inputStyles"
-    ></textarea>
+    />
 
     <!-- Select -->
-    <select 
-      v-else-if="settings.type === 'select'"
-      :required="settings.required"
-      class="field-input w-full px-4 py-3 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all appearance-none"
-      :style="inputStyles"
-    >
-      <option value="" disabled selected>{{ settings.placeholder || 'Select an option' }}</option>
-      <option 
-        v-for="opt in optionsList" 
-        :key="opt" 
-        :value="opt"
-      >
-        {{ opt }}
-      </option>
-    </select>
+    <Select v-else-if="settings.type === 'select'" :required="settings.required">
+      <SelectTrigger class="h-12 w-full" :style="inputStyles">
+        <SelectValue :placeholder="settings.placeholder || 'Select an option'" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem 
+          v-for="opt in optionsList" 
+          :key="opt" 
+          :value="opt"
+        >
+          {{ opt }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
 
     <!-- Checkbox -->
-    <div v-else-if="settings.type === 'checkbox'" class="flex items-center gap-3">
-      <input 
-        type="checkbox" 
+    <div v-else-if="settings.type === 'checkbox'" class="flex items-center space-x-3 mt-1">
+      <Checkbox 
+        :id="`field-${module.id}`"
         :required="settings.required"
-        class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
       />
-      <span class="text-sm cursor-pointer opacity-80" :style="labelStyles">
+      <Label :for="`field-${module.id}`" class="text-sm cursor-pointer font-normal opacity-80" :style="labelStyles">
         {{ settings.placeholder || 'Yes, I agree' }}
-      </span>
+      </Label>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue'
+import { Label, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Checkbox } from '../ui'
 import { 
   getTypographyStyles,
   getResponsiveValue

@@ -1,6 +1,6 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="row-block">
-    <div class="row-inner flex flex-wrap w-full h-full" :style="rowStyles">
+  <BaseBlock :module="module" :mode="mode" :device="device" class="row-block">
+    <div class="row-inner flex flex-wrap w-full" :style="rowStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
         <slot />
@@ -28,89 +28,118 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Layout } from 'lucide-vue-next'
 import { 
-  getResponsiveValue
+  getResponsiveValue,
+  getVal
 } from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+  nestedBlocks?: BlockInstance[];
+}>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const BlockRenderer = inject('BlockRenderer', null)
 
 const rowStyles = computed(() => {
-    const vAlign = getResponsiveValue(settings.value, 'verticalAlign', device.value) || 'stretch'
-    const gutter = getResponsiveValue(settings.value, 'gutter', device.value) || 0
-    const layout = getResponsiveValue(settings.value, 'columns', device.value) || '1-1'
+    const layout = getVal(settings.value, 'layout_type', device.value) || 'flex'
+    const gutterX = getVal(settings.value, 'gap_x', device.value) || 0
+    const gutterY = getVal(settings.value, 'gap_y', device.value) || 0
+    const vAlign = getVal(settings.value, 'align_items', device.value) || 'stretch'
+    const justify = getVal(settings.value, 'justify_content', device.value) || 'flex-start'
     
-    // Parse parts for CSS injection
-    const parts = layout.split('-').map(Number)
-    const totalParts = parts.reduce((a, b) => a + b, 0)
+    // Auto-stacking logic for mobile/tablet
+    const isMobile = device.value === 'mobile'
+    const isTablet = device.value === 'tablet'
+    const hasResponsiveColumns = settings.value[`columns_${device.value}`] || (isMobile && settings.value.columns_mobile)
     
-    const styles = {
-        '--row-align': vAlign === 'start' ? 'flex-start' : (vAlign === 'end' ? 'flex-end' : vAlign),
-        '--row-gutter': `${gutter}px`,
-        alignItems: 'var(--row-align)',
-        gap: 'var(--row-gutter)',
-        justifyContent: 'flex-start',
+    const styles: Record<string, any> = {
+        '--row-align': vAlign,
+        '--row-gutter-x': typeof gutterX === 'number' ? `${gutterX}px` : gutterX,
+        '--row-gutter-y': typeof gutterY === 'number' ? `${gutterY}px` : gutterY,
         width: '100%',
         height: '100%'
     }
 
-    // Inject column widths as CSS variables for deep selection
-    const numColsOnCanvas = props.nestedBlocks.length
-    if (numColsOnCanvas === 1) {
-        styles['--col-width-0'] = '100%'
+    if (layout === 'grid') {
+        styles.display = 'grid'
+        styles.gap = `var(--row-gutter-y) var(--row-gutter-x)`
+        styles.alignItems = 'var(--row-align)'
+        styles.justifyContent = justify
+        
+        const columns = getVal(settings.value, 'columns', device.value) || '1-1'
+        const colCount = (!hasResponsiveColumns && (isMobile || isTablet)) ? 1 : columns.split('-').length
+        styles.gridTemplateColumns = `repeat(${colCount}, 1fr)`
+    } else if (layout === 'block') {
+        styles.display = 'block'
     } else {
-        parts.forEach((p, i) => {
-            const percentage = (p / totalParts) * 100
-            const reduction = gutter > 0 && parts.length > 1 ? (gutter * (parts.length - 1)) / parts.length : 0
-            styles[`--col-width-${i}`] = `calc(${percentage}% - ${reduction}px)`
-        })
+        // Default Flex
+        styles.display = 'flex'
+        styles.flexDirection = (!hasResponsiveColumns && (isMobile || isTablet)) ? 'column' : 'row'
+        styles.flexWrap = 'wrap' // Allow wrapping on responsive
+        styles.alignItems = 'var(--row-align)'
+        styles.gap = 'var(--row-gutter-x)'
+        styles.justifyContent = justify
     }
+    
+    // Legacy column widths support (for flex mode)
+    const columns = getVal(settings.value, 'columns', device.value) || '1-1'
+    const colWidths = columns.split('-').map((fraction: string) => {
+        const parts = fraction.split('/').map(Number)
+        if (parts.length === 2) return `${(parts[0] / parts[1]) * 100}%`
+        return `${100 / columns.split('-').length}%`
+    })
+
+    colWidths.forEach((width: string, i: number) => {
+        // If auto-stacking, override width to 100%
+        styles[`--col-width-${i}`] = (!hasResponsiveColumns && (isMobile || isTablet)) ? '100%' : width
+    })
 
     return styles
 })
 
-const getColumnStyles = (index) => {
-    // Renderer mode uses this directly
+const getColumnStyles = (index: number) => {
     return {
         width: `var(--col-width-${index}, 100%)`,
-        flexShrink: 0,
-        flexGrow: 0
+        height: '100%'
     }
 }
 </script>
 
 <style scoped>
-.row-block { width: 100%; }
-
-/* Builder Mode: Ensure the draggable container inherits the flex layout and applies widths */
-.row-inner:deep(.children-container) {
-    display: flex;
-    flex-wrap: nowrap; /* Keep columns on one line in builder for structural clarity */
-    width: 100%;
-    height: 100%;
-    min-height: 50px;
-    gap: var(--row-gutter);
-    align-items: stretch; /* Enforce full height columns */
-    justify-content: flex-start;
+.row-block { 
+    width: 100% !important; 
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: auto;
+    position: relative;
 }
 
-/* Ensure module wrappers inside rows (which are columns) grow to fill height */
-.row-inner:deep(.children-container > .module-wrapper--column) {
-    display: flex;
-    flex-direction: column;
+/* Builder Mode: Ensure the draggable container inherits the flex layout */
+.row-inner :deep(.children-container) {
+    display: inherit; /* Should be flex/grid based on row-inner */
+    flex-direction: inherit;
+    flex-wrap: inherit;
+    width: 100%;
+    min-height: 50px;
+    gap: inherit;
+    align-items: var(--row-align);
+    justify-content: inherit;
+    grid-template-columns: inherit;
 }
 
 /* Apply specific widths to children in builder mode - allow flex stretching */

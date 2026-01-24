@@ -26,16 +26,16 @@
         
         <!-- Submit Button -->
         <div class="form-footer col-span-full text-center mt-6">
-          <button 
+          <Button 
             type="submit" 
-            class="form-button inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            class="h-14 px-12 rounded-full font-bold shadow-xl shadow-primary/20"
             :style="buttonStyles"
             :disabled="isSubmitting"
           >
-            <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin" />
-            <Send v-else class="w-5 h-5" />
+            <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
+            <Send v-else class="w-5 h-5 mr-2" />
             <span>{{ isSubmitting ? (settings.submittingText || 'Sending...') : (settings.buttonText || 'Send Message') }}</span>
-          </button>
+          </Button>
           
           <div v-if="submitted" class="success-message mt-6 p-4 rounded-lg bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
             {{ settings.successMessage || 'Thank you! Your message has been sent.' }}
@@ -50,6 +50,7 @@
 import { computed, inject, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import ContactFieldBlock from './ContactFieldBlock.vue'
+import { Button } from '../ui'
 import { Send, Loader2 } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
@@ -90,8 +91,8 @@ const buttonStyles = computed(() => {
     const styles = getTypographyStyles(settings.value, 'button_', device.value)
     return {
         ...styles,
-        backgroundColor: settings.value.buttonBackgroundColor || '#3b82f6',
-        color: settings.value.buttonTextColor || '#ffffff'
+        backgroundColor: settings.value.buttonBackgroundColor || '',
+        color: settings.value.buttonTextColor || ''
     }
 })
 </script>

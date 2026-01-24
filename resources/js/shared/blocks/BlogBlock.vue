@@ -1,53 +1,68 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="blog-block" :style="blogBlockStyles">
+    <template #default="{ settings }">
+      <div class="blog-block w-full">
         <h2 
           v-if="settings.title || mode === 'edit'" 
-          class="blog-title" 
-          :style="titleStyles"
+          class="blog-title mb-12" 
+          :style="titleDisplayStyles"
           :contenteditable="mode === 'edit'"
           @blur="e => updateResponsiveField('title', e.target.innerText)"
+          v-text="settings.title"
         >
-          {{ settings.title }}
         </h2>
+
         <div class="blog-grid" :style="gridStyles">
-          <article 
+          <Card 
             v-for="post in mockPosts" 
             :key="post.id"
-            class="blog-post"
+            class="blog-post group flex flex-col border-none shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden rounded-[24px]"
             :style="postStyles"
           >
             <!-- Featured Image -->
-            <div v-if="settings.showImage !== false" class="post-image" :style="imageStyles">
-              <div class="post-image-placeholder">
-                <LucideIcon name="Image" class="placeholder-icon" />
+            <div v-if="settings.showImage !== false" class="post-image relative overflow-hidden" :style="imageStyles">
+              <div class="absolute inset-0 bg-slate-100 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                <LucideIcon name="Image" class="w-12 h-12 text-slate-300 opacity-50" />
               </div>
+              <Badge 
+                v-if="settings.showCategory !== false" 
+                class="absolute top-4 left-4 z-10 rounded-full font-bold px-4"
+              >
+                {{ post.category }}
+              </Badge>
             </div>
             
             <!-- Content -->
-            <div class="post-content">
-              <!-- Category -->
-              <span v-if="settings.showCategory !== false" class="post-category" :style="categoryStyles">
-                {{ post.category }}
-              </span>
+            <CardContent class="p-8 flex flex-col flex-grow">
+              <CardTitle 
+                class="post-title text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-primary transition-colors border-none" 
+                :style="itemTitleStyles"
+              >
+                {{ post.title }}
+              </CardTitle>
               
-              <!-- Title -->
-              <h3 class="post-title" :style="titleStyles">{{ post.title }}</h3>
-              
-              <!-- Excerpt -->
-              <p v-if="settings.showExcerpt !== false" class="post-excerpt" :style="excerptStyles">
+              <CardDescription 
+                v-if="settings.showExcerpt !== false" 
+                class="post-excerpt mb-8 line-clamp-3 text-slate-500 font-medium leading-relaxed" 
+                :style="excerptStyles"
+              >
                 {{ post.excerpt }}
-              </p>
+              </CardDescription>
               
-              <!-- Meta -->
-              <div class="post-meta" :style="metaStyles">
-                <span v-if="settings.showAuthor !== false">{{ post.author }}</span>
-                <span v-if="settings.showAuthor !== false && settings.showDate !== false">•</span>
-                <span v-if="settings.showDate !== false">{{ post.date }}</span>
+              <!-- Meta / Author -->
+              <div class="mt-auto pt-6 border-t border-slate-100 flex items-center gap-3">
+                 <Avatar v-if="settings.showAuthor !== false" class="w-8 h-8">
+                    <AvatarFallback class="bg-primary/10 text-primary text-[10px] font-bold">
+                        {{ post.author.split(' ').map(n => n[0]).join('') }}
+                    </AvatarFallback>
+                 </Avatar>
+                 <div class="flex flex-col">
+                    <span v-if="settings.showAuthor !== false" class="text-xs font-bold text-slate-900">{{ post.author }}</span>
+                    <span v-if="settings.showDate !== false" class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{{ post.date }}</span>
+                 </div>
               </div>
-            </div>
-          </article>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </template>
@@ -57,6 +72,7 @@
 <script setup>
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card, CardTitle, CardDescription, CardContent, Badge, Avatar, AvatarFallback } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
@@ -66,7 +82,7 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
-const builder = inject('builder')
+const builder = inject('builder', null)
 const settings = computed(() => props.module?.settings || {})
 
 // Mock posts for preview
@@ -74,20 +90,18 @@ const mockPosts = computed(() => {
   const count = getVal(settings.value, 'itemsPerPage', props.device) || 6
   return Array.from({ length: Math.min(count, 12) }, (_, i) => ({
     id: i + 1,
-    title: `Blog Post Title ${i + 1}`,
-    excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
-    category: 'Category',
-    author: 'John Doe',
-    date: 'Jan 10, 2026'
+    title: `How to Build Premium CMS Blocks with Shadcn and Vue`,
+    excerpt: 'Explore the latest techniques in modern web design, focus on accessibility, performance, and unmatched aesthetics for your next project.',
+    category: 'Design',
+    author: 'Antigravity AI',
+    date: 'JAN 24, 2026'
   }))
 })
-
-const blogBlockStyles = computed(() => ({ width: '100%' }))
 
 const gridStyles = computed(() => {
   const layout = getVal(settings.value, 'layout', props.device) || 'grid'
   const columns = getVal(settings.value, 'columns', props.device) || 3
-  const gap = getVal(settings.value, 'gap', props.device) || 24
+  const gap = getVal(settings.value, 'gap', props.device) || 32
   
   if (layout === 'list') {
     return { display: 'flex', flexDirection: 'column', gap: `${gap}px` }
@@ -99,31 +113,22 @@ const gridStyles = computed(() => {
   }
 })
 
-const postStyles = computed(() => {
-  const styles = {
+const postStyles = computed(() => ({
     backgroundColor: settings.value.cardBackgroundColor || '#ffffff',
-    overflow: 'hidden',
-    borderRadius: '12px',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    flexDirection: 'column'
-  }
-  return styles
-})
+}))
 
 const imageStyles = computed(() => {
   const ratio = settings.value.imageAspectRatio || '16:9'
   const ratioMap = { '16:9': '56.25%', '4:3': '75%', '1:1': '100%' }
-  return { paddingTop: ratioMap[ratio] || '56.25%', position: 'relative' }
+  return { paddingTop: ratioMap[ratio] || '56.25%' }
 })
 
-const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
-const categoryStyles = computed(() => getTypographyStyles(settings.value, 'category_', props.device))
+const titleDisplayStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const itemTitleStyles = computed(() => getTypographyStyles(settings.value, 'item_title_', props.device))
 const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', props.device))
-const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', props.device))
 
 const updateResponsiveField = (fieldName, value) => {
-  if (props.mode !== 'edit') return
+  if (props.mode !== 'edit' || !builder) return
   const current = settings.value[fieldName]
   let newValue
   if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
@@ -131,21 +136,10 @@ const updateResponsiveField = (fieldName, value) => {
   } else {
     newValue = { [props.device]: value }
   }
-  builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+  builder.updateModuleSettings(props.module.id, { [fieldName]: newValue })
 }
 </script>
 
 <style scoped>
 .blog-block { width: 100%; }
-.blog-title { margin-bottom: 32px; width: 100%; }
-.blog-post { background: white; border: 1px solid #e2e8f0; }
-.blog-post:hover { transform: translateY(-8px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-.post-image { background: #f8fafc; overflow: hidden; }
-.post-image-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-.placeholder-icon { width: 48px; height: 48px; color: #cbd5e1; }
-.post-content { padding: 24px; flex: 1; display: flex; flex-direction: column; }
-.post-category { display: inline-block; margin-bottom: 12px; text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--theme-primary-color, #2059ea); }
-.post-title { margin: 0 0 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
-.post-excerpt { margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #64748b; display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; }
-.post-meta { display: flex; gap: 8px; font-size: 12px; color: #94a3b8; margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 16px; }
 </style>

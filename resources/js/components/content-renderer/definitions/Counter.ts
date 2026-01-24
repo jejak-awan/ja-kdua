@@ -21,12 +21,9 @@ export default {
             label: 'Prefix',
             default: ''
         },
-        {
-            key: 'suffix',
-            type: 'text',
-            label: 'Suffix',
-            default: ''
-        },
+        { key: 'suffix', type: 'text', label: 'Suffix', default: '' },
+        { key: 'decimals', type: 'number', label: 'Decimals', default: 0 },
+        { key: 'separator', type: 'boolean', label: 'Thousands Separator', default: true },
         {
             key: 'label',
             type: 'text',

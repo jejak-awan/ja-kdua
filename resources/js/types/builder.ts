@@ -189,6 +189,7 @@ export interface BlockProps {
     module: BlockInstance;
     mode: 'edit' | 'view';
     device?: 'desktop' | 'tablet' | 'mobile' | null;
+    manualStyles?: boolean;
 }
 
 export interface SettingOption {

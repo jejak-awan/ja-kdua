@@ -10,19 +10,19 @@
       <div 
         v-for="(item, index) in items" 
         :key="index"
-        class="icon-list-item"
+        class="icon-list-item group flex items-start gap-4"
         :style="itemStyles"
       >
-        <div class="icon-wrapper" :style="iconWrapperStyles">
+        <div class="icon-wrapper shrink-0 transition-transform duration-300 group-hover:scale-110" :style="iconWrapperStyles">
           <LucideIcon 
             :name="item.icon || defaultIcon" 
             :size="iconSize" 
             :style="iconStyles"
           />
         </div>
-        <div class="icon-list-content">
+        <div class="icon-list-content flex-1">
           <div 
-            class="icon-list-text" 
+            class="icon-list-text font-bold" 
             :style="textStyles"
             :contenteditable="mode === 'edit'"
             @blur="updateItemText(index, $event.target.innerText)"
@@ -30,7 +30,7 @@
           ></div>
           <div 
             v-if="item.description || mode === 'edit'" 
-            class="icon-list-desc"
+            class="icon-list-desc mt-1 text-sm text-slate-500 leading-relaxed font-medium"
             :contenteditable="mode === 'edit'"
             @blur="updateItemDesc(index, $event.target.innerText)"
             v-text="item.description"
@@ -39,9 +39,9 @@
       </div>
       
       <!-- Empty State -->
-      <div v-if="items.length === 0 && mode === 'edit'" class="empty-list-placeholder">
-        <LucideIcon name="List" :size="24" class="placeholder-icon" />
-        <span>Add items in settings</span>
+      <div v-if="items.length === 0 && mode === 'edit'" class="empty-list-placeholder p-8 text-center border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center gap-3 text-slate-400">
+        <LucideIcon name="List" :size="24" class="opacity-30" />
+        <span class="font-bold">Add items in settings</span>
       </div>
     </div>
   </BaseBlock>
@@ -57,31 +57,31 @@ const props = defineProps({
   id: String,
   mode: { type: String, default: 'view' },
   settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean
+  isPreview: Boolean,
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 
 const items = computed(() => props.settings.items || [])
-const defaultIcon = computed(() => getVal(props.settings, 'defaultIcon') || 'check')
-const iconSize = computed(() => parseInt(getVal(props.settings, 'iconSize')) || 20)
+const defaultIcon = computed(() => getVal(props.settings, 'defaultIcon', currentDevice.value) || 'check')
+const iconSize = computed(() => parseInt(getVal(props.settings, 'iconSize', currentDevice.value)) || 20)
 
 const listStyles = computed(() => ({
   display: 'flex',
-  flexDirection: getVal(props.settings, 'layout') === 'horizontal' ? 'row' : 'column',
+  flexDirection: getVal(props.settings, 'layout', currentDevice.value) === 'horizontal' ? 'row' : 'column',
   flexWrap: 'wrap',
-  gap: `${getVal(props.settings, 'gap') || 12}px`
+  gap: `${getVal(props.settings, 'gap', currentDevice.value) || 12}px`,
+  width: '100%'
 }))
 
 const itemStyles = computed(() => {
-  const align = getVal(props.settings, 'alignment') || 'left'
+  const align = getVal(props.settings, 'alignment', currentDevice.value) || 'left'
   return {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '12px',
     justifyContent: align === 'center' ? 'center' : 'flex-start',
     textAlign: align,
-    flex: getVal(props.settings, 'layout') === 'horizontal' ? '1 1 auto' : '0 0 auto'
+    flex: getVal(props.settings, 'layout', currentDevice.value) === 'horizontal' ? '1 1 auto' : '0 0 auto'
   }
 })
 
@@ -89,26 +89,25 @@ const iconWrapperStyles = computed(() => {
   const s = {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0
+    justifyContent: 'center'
   }
   
-  const bgColor = getVal(props.settings, 'iconBgColor')
+  const bgColor = getVal(props.settings, 'iconBgColor', currentDevice.value)
   if (bgColor && bgColor !== 'transparent') {
     s.backgroundColor = bgColor
     s.padding = '8px'
-    const shape = getVal(props.settings, 'iconBackgroundShape')
-    s.borderRadius = shape === 'circle' ? '50%' : shape === 'square' ? '4px' : '0'
+    const shape = getVal(props.settings, 'iconBackgroundShape', currentDevice.value)
+    s.borderRadius = shape === 'circle' ? '50%' : shape === 'square' ? '8px' : '0'
   }
   
   return s
 })
 
 const iconStyles = computed(() => ({
-  color: getVal(props.settings, 'iconColor') || 'inherit'
+  color: getVal(props.settings, 'iconColor', currentDevice.value) || 'inherit'
 }))
 
-const textStyles = computed(() => getTypographyStyles(props.settings, 'text_'))
+const textStyles = computed(() => getTypographyStyles(props.settings, 'text_', currentDevice.value))
 
 const updateItemText = (index, value) => {
   if (props.mode !== 'edit' || !builder) return
@@ -126,52 +125,11 @@ const updateItemDesc = (index, value) => {
 </script>
 
 <style scoped>
-.icon-list-container {
-  width: 100%;
-}
-
-.icon-list-item {
-  width: 100%;
-}
-
-.icon-wrapper {
-  transition: all 0.2s ease;
-}
-
-.icon-list-content {
-  flex: 1;
-}
-
-.icon-list-text {
-  font-weight: 600;
-  outline: none;
-}
-
-.icon-list-desc {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin-top: 4px;
-  outline: none;
-}
-
+.icon-list-wrapper { width: 100%; }
+.icon-list-text { outline: none; transition: color 0.2s ease; }
+.icon-list-desc { outline: none; }
 .icon-list-desc[contenteditable="true"]:empty:before {
   content: 'Add description...';
   opacity: 0.3;
-}
-
-.empty-list-placeholder {
-  padding: 24px;
-  text-align: center;
-  color: #94a3b8;
-  border: 2px dashed #e2e8f0;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.placeholder-icon {
-  opacity: 0.5;
 }
 </style>

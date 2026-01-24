@@ -1,22 +1,24 @@
 <template>
-  <button
-    class="icon-button"
-    :class="[
-      `icon-button--${size}`,
-      `icon-button--${variant}`,
-      { 'is-active': active, 'is-disabled': disabled }
-    ]"
+  <Button
+    :variant="mappedVariant"
+    size="icon"
     :title="title"
     :disabled="disabled"
     @click="$emit('click', $event)"
+    :class="[
+        active && 'border border-white/20 shadow-sm',
+        sizeClasses,
+        props.class
+    ]"
   >
     <component :is="icon" :size="iconSize" />
     <slot />
-  </button>
+  </Button>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import Button from './Button.vue'
 
 const props = defineProps({
   icon: {
@@ -26,12 +28,10 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'secondary', // ghost, secondary, primary
-    validator: (value) => ['ghost', 'secondary', 'primary'].includes(value)
   },
   size: {
     type: String,
     default: 'md', // sm, md, lg
-    validator: (value) => ['sm', 'md', 'lg'].includes(value)
   },
   active: {
     type: Boolean,
@@ -44,10 +44,24 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  class: {
+    type: null,
+    default: ''
   }
 })
 
 defineEmits(['click'])
+
+const mappedVariant = computed(() => {
+  if (props.active) return 'default'
+  const map = {
+    'primary': 'default',
+    'secondary': 'secondary',
+    'ghost': 'ghost'
+  }
+  return map[props.variant] || 'secondary'
+})
 
 const iconSize = computed(() => {
   switch (props.size) {
@@ -56,75 +70,12 @@ const iconSize = computed(() => {
     default: return 16
   }
 })
+
+const sizeClasses = computed(() => {
+    switch (props.size) {
+        case 'sm': return 'w-7 h-7'
+        case 'lg': return 'w-10 h-10'
+        default: return 'w-8 h-8'
+    }
+})
 </script>
-
-<style scoped>
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
-  color: var(--builder-text-primary);
-}
-
-/* Variants */
-.icon-button--secondary {
-  background-color: var(--builder-bg-primary);
-  border-color: var(--builder-border);
-}
-
-.icon-button--secondary:hover:not(:disabled) {
-  background-color: var(--builder-bg-tertiary);
-  border-color: var(--builder-accent);
-}
-
-.icon-button--ghost {
-  background-color: transparent;
-  color: var(--builder-text-secondary);
-}
-
-.icon-button--ghost:hover:not(:disabled) {
-  background-color: var(--builder-bg-tertiary);
-  color: var(--builder-text-primary);
-}
-
-.icon-button--primary {
-  background-color: var(--builder-accent);
-  color: white;
-}
-
-.icon-button--primary:hover:not(:disabled) {
-  background-color: var(--builder-accent-hover);
-}
-
-.icon-button.is-active {
-  background-color: var(--builder-bg-primary);
-  color: var(--builder-accent);
-  border-color: var(--builder-accent);
-}
-
-.icon-button.is-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Sizes */
-.icon-button--sm {
-  width: 24px;
-  height: 24px;
-}
-
-.icon-button--md {
-  width: 32px;
-  height: 32px;
-}
-
-.icon-button--lg {
-  width: 40px;
-  height: 40px;
-}
-</style>

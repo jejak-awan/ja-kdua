@@ -295,8 +295,9 @@ class ContentController extends BaseApiController
                 'global_variables' => 'nullable|array',
             ];
 
-            // If publishing, require body OR blocks
-            if ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published')) {
+            // If publishing, require body OR blocks (unless it's a builder page)
+            $isBuilder = $request->input('editor_type') === 'builder' || ($request->input('editor_type') === null && $content->editor_type === 'builder');
+            if (!$isBuilder && ($request->input('status') === 'published' || ($request->input('status') === null && $content->status === 'published'))) {
                 $rules['body'] = 'nullable|required_without:blocks|string';
             }
 

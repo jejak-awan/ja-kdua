@@ -1,31 +1,38 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="social-links-block" :style="socialLinksBlockStyles">
-        <a 
+    <template #default="{ settings }">
+      <div class="social-links-block w-full flex flex-wrap" :style="containerStyles">
+        <Button 
           v-for="(link, index) in links" 
           :key="index"
-          :href="link.url || '#'"
+          as="a"
+          :href="mode === 'view' ? (link.url || '#') : null"
           target="_blank"
           rel="noopener noreferrer"
-          class="social-link"
-          :style="getLinkStyles(link)"
-          @click="mode === 'edit' ? e => e.preventDefault() : undefined"
+          class="social-link-btn group transition-all duration-300 hover:scale-110 active:scale-95 shadow-md hover:shadow-xl"
+          :class="buttonClass(link)"
+          :style="getButtonStyle(link)"
+          variant="outline"
+          @click="mode === 'edit' ? $event.preventDefault() : null"
         >
           <LucideIcon 
             :name="getIconName(link.network)" 
+            class="transition-transform duration-500 group-hover:rotate-[360deg]" 
             :size="iconSize" 
-            :style="iconStyles" 
           />
-        </a>
+          <span v-if="showLabels" class="ml-2 font-black text-[10px] uppercase tracking-widest">
+            {{ link.network }}
+          </span>
+        </Button>
       </div>
     </template>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Button } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
 import { getVal } from '../utils/styleUtils'
 
@@ -35,9 +42,18 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
+const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 const settings = computed(() => props.module?.settings || {})
 
-const links = computed(() => settings.value.links || [])
+const links = computed(() => settings.value.links || [
+    { network: 'facebook', url: '#' },
+    { network: 'twitter', url: '#' },
+    { network: 'instagram', url: '#' },
+    { network: 'linkedin', url: '#' }
+])
+
+const showLabels = computed(() => getVal(settings.value, 'showLabels', currentDevice.value))
 
 const iconMap = {
   facebook: 'Facebook',
@@ -54,66 +70,46 @@ const iconMap = {
 
 const getIconName = (network) => iconMap[network] || 'Globe'
 
-const socialLinksBlockStyles = computed(() => {
-  const gap = parseInt(getVal(settings.value, 'gap', props.device)) || 16
-  const align = getVal(settings.value, 'alignment', props.device) || 'center'
+const containerStyles = computed(() => {
+  const gap = parseInt(getVal(settings.value, 'gap', currentDevice.value)) || 16
+  const align = getVal(settings.value, 'alignment', currentDevice.value) || 'center'
   
   return {
-    display: 'flex',
     gap: `${gap}px`,
-    flexWrap: 'wrap',
     justifyContent: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start',
-    width: '100%'
   }
 })
 
-const iconSize = computed(() => {
-    const size = parseInt(getVal(settings.value, 'iconSize', props.device)) || 24
-    return size
-})
+const iconSize = computed(() => parseInt(getVal(settings.value, 'iconSize', currentDevice.value)) || 20)
 
-const getLinkStyles = (link) => {
-  const color = getVal(settings.value, 'color', props.device) || 'currentColor'
-  const hoverColor = getVal(settings.value, 'hoverColor', props.device) || 'var(--theme-primary-color, #2059ea)'
-  const hoverBg = getVal(settings.value, 'hoverBackgroundColor', props.device) || ''
-  
-  const styles = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: link.useCustomColor ? link.iconColor : color,
-    textDecoration: 'none',
-    transition: 'all 0.2s ease',
-    '--hover-color': hoverColor,
-    '--hover-bg': hoverBg
-  }
-  
-  const style = getVal(settings.value, 'displayStyle', props.device) || 'icon-only'
-  const size = iconSize.value
-  
-  if (style === 'icon-circle' || style === 'icon-square') {
-    const dim = size * 1.8
-    styles.width = `${dim}px`
-    styles.height = `${dim}px`
-    styles.borderRadius = style === 'icon-circle' ? '50%' : '8px'
-    styles.backgroundColor = link.useCustomColor ? link.backgroundColor : 'rgba(0,0,0,0.05)'
-  }
-  
-  return styles
+const buttonClass = (link) => {
+    const style = getVal(settings.value, 'displayStyle', currentDevice.value) || 'icon-circle'
+    const spv = iconSize.value
+    const res = []
+    
+    if (style === 'icon-circle') res.push('rounded-full aspect-square p-0')
+    else if (style === 'icon-square') res.push('rounded-2xl aspect-square p-0')
+    else res.push('rounded-full px-6') // with label or default
+
+    if (spv < 20) res.push('w-10 h-10')
+    else if (spv < 26) res.push('w-12 h-12')
+    else res.push('w-16 h-16')
+
+    return res
 }
 
-const iconStyles = computed(() => {
+const getButtonStyle = (link) => {
+  const color = getVal(settings.value, 'color', currentDevice.value) || 'currentColor'
+  const bgColor = getVal(settings.value, 'backgroundColor', currentDevice.value) || 'rgba(var(--primary), 0.05)'
+  
   return {
-    display: 'block'
+    color: link.useCustomColor ? link.iconColor : color,
+    backgroundColor: link.useCustomColor ? (link.backgroundColor || 'transparent') : bgColor,
+    borderColor: 'transparent'
   }
-})
+}
 </script>
 
 <style scoped>
 .social-links-block { width: 100%; }
-.social-link:hover { 
-  color: var(--hover-color) !important; 
-  background-color: var(--hover-bg); 
-  transform: translateY(-3px); 
-}
 </style>

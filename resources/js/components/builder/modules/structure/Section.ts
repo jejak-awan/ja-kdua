@@ -1,3 +1,4 @@
+import type { ModuleDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -25,7 +26,7 @@ import {
 /**
  * Section Module Definition
  */
-export default {
+const SectionModule: ModuleDefinition = {
     name: 'section',
     title: 'Section',
     icon: 'Layout',
@@ -39,9 +40,9 @@ export default {
 
     // Default settings
     defaults: {
-        full_width: true,
-        background: { color: 'transparent', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
-        padding: { top: 50, bottom: 50, left: 0, right: 0, unit: 'px' },
+        fullWidth: false,
+        background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
+        padding: { top: 60, bottom: 60, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: {
             radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
@@ -103,3 +104,5 @@ export default {
         ]
     }
 }
+
+export default SectionModule;

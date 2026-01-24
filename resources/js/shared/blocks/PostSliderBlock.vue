@@ -2,53 +2,86 @@
   <BaseBlock :module="module" :settings="settings" class="post-slider-block">
     <h2 
       v-if="settings.title || mode === 'edit'" 
-      class="slider-title-main" 
+      class="slider-title-main text-3xl font-black mb-10 tracking-tighter" 
       :style="titleStyles"
       :contenteditable="mode === 'edit'"
       @blur="updateText('title', $event)"
     >
-      {{ settings.title || (mode === 'edit' ? 'Featured Posts' : '') }}
+      {{ settings.title || (mode === 'edit' ? 'Featured Stories' : '') }}
     </h2>
-    <div class="slider-container" :style="containerStyles">
-      <div 
-        v-for="(post, index) in displayPosts" 
-        :key="index" 
-        class="slider-slide" 
-        :class="{ 'slider-slide--active': currentSlide === index }"
-        :style="{ zIndex: currentSlide === index ? 10 : 1 }"
-      >
-        <div v-if="post.image" class="slide-image-bg" :style="{ backgroundImage: `url(${post.image})` }" />
-        <div v-if="overlayEnabled" class="slide-overlay" :style="overlayStyles" />
-        <div class="slide-content" :style="contentStyles">
-          <span v-if="settings.showMeta !== false" class="slide-meta mb-4 block" :style="metaStyles">{{ post.date }} • {{ post.readTime }}</span>
-          <h2 class="slide-title mb-6" :style="titleStyles">{{ post.title }}</h2>
-          <p v-if="settings.showExcerpt !== false" class="slide-excerpt mb-8" :style="excerptStyles">{{ post.excerpt }}</p>
-          <a v-if="settings.showButton !== false" :href="mode === 'view' ? post.url : null" class="slide-button" :style="buttonStyles" @click="handleLinkClick">
-            {{ settings.buttonText || 'Read More' }}
-          </a>
-        </div>
-      </div>
-      
-      <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--prev" @click="prevSlide"><ChevronLeft /></button>
-      <button v-if="settings.showArrows !== false" class="slider-arrow slider-arrow--next" @click="nextSlide"><ChevronRight /></button>
-      
-      <div v-if="settings.showDots !== false" class="slider-dots">
-        <button 
-            v-for="(_, index) in displayPosts" 
-            :key="index" 
-            class="slider-dot" 
-            :class="{ 'slider-dot--active': currentSlide === index }" 
-            @click="currentSlide = index" 
-        />
-      </div>
+
+    <div class="carousel-wrapper relative group/main">
+        <Carousel 
+            class="w-full" 
+            :opts="carouselOptions"
+            :plugins="carouselPlugins"
+        >
+            <CarouselContent class="-ml-0">
+                <CarouselItem 
+                    v-for="(post, index) in displayPosts" 
+                    :key="index" 
+                    class="pl-0 basis-full"
+                >
+                    <div class="relative overflow-hidden rounded-[40px] shadow-2xl" :style="containerStyles">
+                        <div v-if="post.image" class="absolute inset-0 z-0 scale-105 group-hover:scale-110 transition-transform duration-1000">
+                             <img :src="post.image" class="w-full h-full object-cover" />
+                        </div>
+                        <div v-if="overlayEnabled" class="absolute inset-0 z-10" :style="overlayStyles" />
+                        
+                        <div class="relative z-20 h-full flex flex-col justify-center items-center text-center p-12 md:p-24 text-white">
+                            <Badge 
+                                v-if="settings.showMeta !== false" 
+                                class="mb-6 bg-white/20 backdrop-blur-md border-white/30 text-white rounded-full px-6 py-1.5"
+                                :style="metaStyles"
+                            >
+                                {{ post.date }} • {{ post.readTime }}
+                            </Badge>
+                            
+                            <h2 class="text-4xl md:text-6xl font-black mb-8 leading-none tracking-tighter max-w-4xl" :style="titleStyles">
+                                {{ post.title }}
+                            </h2>
+                            
+                            <p v-if="settings.showExcerpt !== false" class="text-lg md:text-xl font-medium opacity-90 mb-10 max-w-2xl leading-relaxed" :style="excerptStyles">
+                                {{ post.excerpt }}
+                            </p>
+                            
+                            <Button 
+                                v-if="settings.showButton !== false" 
+                                as="a"
+                                :href="mode === 'view' ? post.url : null" 
+                                class="h-14 px-12 rounded-full font-bold shadow-xl hover:scale-110 active:scale-95 transition-all text-lg" 
+                                :style="buttonDisplayStyles"
+                                @click="handleLinkClick"
+                            >
+                                {{ settings.buttonText || 'Read Story' }}
+                                <ArrowRight class="ml-2 w-5 h-5" />
+                            </Button>
+                        </div>
+                    </div>
+                </CarouselItem>
+            </CarouselContent>
+
+            <!-- Controls -->
+            <template v-if="settings.showArrows !== false">
+                <CarouselPrevious class="left-6 opacity-0 group-hover/main:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20" />
+                <CarouselNext class="right-6 opacity-0 group-hover/main:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20" />
+            </template>
+        </Carousel>
     </div>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, inject } from 'vue'
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import Carousel from '../ui/Carousel.vue'
+import CarouselContent from '../ui/CarouselContent.vue'
+import CarouselItem from '../ui/CarouselItem.vue'
+import CarouselNext from '../ui/CarouselNext.vue'
+import CarouselPrevious from '../ui/CarouselPrevious.vue'
+import { Badge, Button } from '../ui'
+import Autoplay from 'embla-carousel-autoplay'
+import { ArrowRight } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
   getResponsiveValue
@@ -56,23 +89,21 @@ import {
 
 const props = defineProps({
   module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+  mode: { type: String, default: 'view' },
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
-
-const currentSlide = ref(0)
-let interval = null
+const device = computed(() => builder?.device?.value || props.device)
 
 const overlayEnabled = computed(() => settings.value.overlayEnabled !== false)
 
 // Dynamic data injection
 const injectedPosts = inject('injectedPosts', [
-    { title: 'Amazing Blog Post One', excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.', date: 'Jan 10, 2026', readTime: '5 min read', image: 'https://picsum.photos/1200/600?random=1', url: '#' },
-    { title: 'The Future of Web Design', excerpt: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.', date: 'Jan 12, 2026', readTime: '8 min read', image: 'https://picsum.photos/1200/600?random=2', url: '#' },
-    { title: 'Mastering the Builder', excerpt: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.', date: 'Jan 15, 2026', readTime: '12 min read', image: 'https://picsum.photos/1200/600?random=3', url: '#' }
+    { title: 'The Art of Minimalist Web Design', excerpt: 'Discover how stripping away the non-essential can create more impactful digital experiences.', date: 'Jan 10, 2026', readTime: '5 min read', image: 'https://picsum.photos/1200/600?random=1', url: '#' },
+    { title: 'Future-Proofing Your Frontend Tech Stack', excerpt: 'Stay ahead of the curve with the latest trends in Vue, Radix, and Tailwind ecosystem.', date: 'Jan 12, 2026', readTime: '8 min read', image: 'https://picsum.photos/1200/600?random=2', url: '#' },
+    { title: 'Building Immersive Landing Pages', excerpt: 'Learn the secrets to high-converting hero sections and interactive storytelling.', date: 'Jan 15, 2026', readTime: '12 min read', image: 'https://picsum.photos/1200/600?random=3', url: '#' }
 ])
 
 const displayPosts = computed(() => {
@@ -80,19 +111,25 @@ const displayPosts = computed(() => {
     return injectedPosts.slice(0, count)
 })
 
-const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % displayPosts.value.length }
-const prevSlide = () => { currentSlide.value = currentSlide.value === 0 ? displayPosts.value.length - 1 : currentSlide.value - 1 }
+const carouselOptions = computed(() => ({
+    align: 'start',
+    loop: settings.value.loop !== false,
+}))
 
-onMounted(() => { 
-    if (settings.value.autoplay !== false) {
-        interval = setInterval(nextSlide, settings.value.autoplaySpeed || 5000) 
+const carouselPlugins = computed(() => {
+    const plugins = []
+    if (settings.value.autoplay !== false && props.mode === 'view') {
+        plugins.push(Autoplay({
+            delay: settings.value.autoplaySpeed || 5000,
+            stopOnInteraction: false
+        }))
     }
+    return plugins
 })
-onUnmounted(() => { if (interval) clearInterval(interval) })
 
 const updateText = (key, event) => {
-    if (props.mode !== 'edit') return
-    builder?.updateModuleSettings(props.module.id, { [key]: event.target.innerText })
+    if (props.mode !== 'edit' || !builder) return
+    builder.updateModuleSettings(props.module.id, { [key]: event.target.innerText })
 }
 
 const handleLinkClick = (event) => {
@@ -100,73 +137,32 @@ const handleLinkClick = (event) => {
 }
 
 const containerStyles = computed(() => {
-    const height = getResponsiveValue(settings.value, 'height', device.value) || 500
+    const height = getResponsiveValue(settings.value, 'height', device.value) || 600
     return {
-        position: 'relative',
         height: typeof height === 'number' ? `${height}px` : height,
-        borderRadius: '12px',
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
     }
 })
 
 const overlayStyles = computed(() => ({ 
-    position: 'absolute',
-    inset: 0,
-    backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.4)',
-    zIndex: 2
-}))
-
-const contentStyles = computed(() => ({ 
-    position: 'relative',
-    zIndex: 10,
-    padding: '60px',
-    maxWidth: '800px',
-    margin: '0 auto',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    textAlign: 'center',
-    color: '#ffffff'
+    backgroundColor: settings.value.overlayColor || 'rgba(0,0,0,0.5)',
 }))
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const metaStyles = computed(() => getTypographyStyles(settings.value, 'meta_', device.value))
 const excerptStyles = computed(() => getTypographyStyles(settings.value, 'excerpt_', device.value))
 
-const buttonStyles = computed(() => {
+const buttonDisplayStyles = computed(() => {
     const styles = getTypographyStyles(settings.value, 'button_', device.value)
     return {
         ...styles,
         backgroundColor: settings.value.buttonBackgroundColor || '#ffffff',
-        color: settings.value.buttonTextColor || '#333333',
-        display: 'inline-block',
-        padding: '12px 32px',
-        borderRadius: '6px',
-        textDecoration: 'none',
-        alignSelf: 'center',
-        fontWeight: '600'
+        color: settings.value.buttonTextColor || '#1e293b',
     }
 })
 </script>
 
 <style scoped>
 .post-slider-block { width: 100%; }
-.slider-title-main { margin-bottom: 24px; text-align: center; outline: none; }
-.slider-container { width: 100%; }
-.slider-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s ease-in-out; }
-.slider-slide--active { opacity: 1; }
-.slide-image-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 1; }
-.slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 20; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
-.slider-arrow:hover { background: rgba(255,255,255,0.4); }
-.slider-arrow--prev { left: 24px; }
-.slider-arrow--next { right: 24px; }
-.slider-dots { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 8px; }
-.slider-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); border: none; cursor: pointer; transition: background 0.2s; }
-.slider-dot--active { background: white; width: 24px; border-radius: 5px; }
-[contenteditable]:focus {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
+.slider-title-main { text-align: center; outline: none; }
 </style>

@@ -33,18 +33,9 @@ export default {
             ],
             default: 'bordered'
         },
-        {
-            key: 'padding',
-            type: 'select',
-            label: 'Padding',
-            options: [
-                { label: 'None', value: '' },
-                { label: 'Small', value: 'py-2' },
-                { label: 'Medium', value: 'py-4' },
-                { label: 'Large', value: 'py-8' }
-            ],
-            default: 'py-4'
-        }
+        { key: 'padding', type: 'select', label: 'Padding', options: [{ label: 'None', value: '' }, { label: 'Small', value: 'py-2' }, { label: 'Medium', value: 'py-4' }, { label: 'Large', value: 'py-8' }], default: 'py-4' },
+        { key: 'headerBackgroundColor', type: 'color', label: 'Header Background' },
+        { key: 'contentBackgroundColor', type: 'color', label: 'Content Background' }
     ],
     defaultSettings: {
         title: 'Toggle Title',

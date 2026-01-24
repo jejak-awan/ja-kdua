@@ -36,6 +36,45 @@ export default {
             tab: 'content'
         },
         {
+            key: 'columns',
+            type: 'range',
+            label: 'Columns',
+            min: 1,
+            max: 4,
+            default: 3,
+            tab: 'style'
+        },
+        {
+            key: 'gap',
+            type: 'range',
+            label: 'Gap',
+            min: 0,
+            max: 80,
+            default: 32,
+            tab: 'style'
+        },
+        {
+            key: 'accentColor',
+            type: 'color',
+            label: 'Accent Color',
+            default: '#4f46e5',
+            tab: 'style'
+        },
+        {
+            key: 'cardBackgroundColor',
+            type: 'color',
+            label: 'Card Background',
+            default: '#ffffff',
+            tab: 'style'
+        },
+        {
+            key: 'featuredCardBackgroundColor',
+            type: 'color',
+            label: 'Featured Card Background',
+            default: '#ffffff',
+            tab: 'style'
+        },
+        {
             key: 'width',
             type: 'select',
             label: 'Width',

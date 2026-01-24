@@ -6,40 +6,49 @@
     :is-preview="isPreview"
     class="quote-block-wrapper"
   >
-    <blockquote class="quote-container" :class="[`quote--${quoteStyle}`]">
-      <div v-if="quoteStyle === 'classic'" class="quote-icon-wrapper">
-        <QuoteIcon class="quote-icon" :style="iconStyles" />
+    <Card class="quote-container relative overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[40px] p-10 md:p-16 group transition-all duration-700 hover:-translate-y-2">
+      <!-- Background Decorative Quote -->
+      <div class="absolute -top-10 -left-10 text-slate-100 dark:text-slate-800 transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+          <QuoteIcon :size="200" />
       </div>
-      
-      <div 
-        class="quote-content" 
-        :style="contentStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateField('content', $event.target.innerText)"
-        v-text="getVal(settings, 'content') || 'Your quote here...'"
-      ></div>
-      
-      <footer v-if="hasAuthor" class="quote-footer">
-        <cite class="quote-author-wrapper">
-          <span 
-            class="quote-author" 
-            :style="authorStyles"
+
+      <div class="relative z-10 flex flex-col h-full">
+          <div class="quote-header mb-10">
+              <div class="w-16 h-1 bg-primary rounded-full mb-8 transform origin-left transition-transform duration-700 group-hover:scale-x-150"></div>
+          </div>
+          
+          <div 
+            class="quote-content font-black italic tracking-tight leading-[1.2] text-slate-800 dark:text-slate-100 mb-10 transition-colors duration-500 group-hover:text-primary" 
+            :style="contentStyles"
             :contenteditable="mode === 'edit'"
-            @blur="updateField('author', $event.target.innerText)"
-            v-text="getVal(settings, 'author') || 'Author Name'"
-          ></span>
-          <span v-if="hasTitle" class="author-title-separator">, </span>
-          <span 
-            v-if="hasTitle" 
-            class="author-title" 
-            :style="authorTitleStyles"
-            :contenteditable="mode === 'edit'"
-            @blur="updateField('authorTitle', $event.target.innerText)"
-            v-text="getVal(settings, 'authorTitle')"
-          ></span>
-        </cite>
-      </footer>
-    </blockquote>
+            @blur="updateField('content', $event.target.innerText)"
+            v-text="getVal(settings, 'content', currentDevice) || 'Your voice, amplified with style and precision through our premium design system.'"
+          ></div>
+          
+          <footer v-if="hasAuthor" class="quote-footer flex items-center gap-6 mt-auto">
+             <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary font-bold text-xl uppercase">
+                {{ (getVal(settings, 'author', currentDevice) || 'A')[0] }}
+             </div>
+             <cite class="quote-author-wrapper not-italic flex flex-col">
+               <span 
+                 class="quote-author font-black text-slate-900 dark:text-white text-lg tracking-tight" 
+                 :style="authorStyles"
+                 :contenteditable="mode === 'edit'"
+                 @blur="updateField('author', $event.target.innerText)"
+                 v-text="getVal(settings, 'author', currentDevice) || 'Antigravity AI'"
+               ></span>
+               <span 
+                 v-if="hasTitle" 
+                 class="author-title text-sm font-bold text-slate-400 uppercase tracking-widest mt-1" 
+                 :style="authorTitleStyles"
+                 :contenteditable="mode === 'edit'"
+                 @blur="updateField('authorTitle', $event.target.innerText)"
+                 v-text="getVal(settings, 'authorTitle', currentDevice) || 'Lead Software Engineer'"
+               ></span>
+             </cite>
+          </footer>
+      </div>
+    </Card>
   </BaseBlock>
 </template>
 
@@ -47,127 +56,45 @@
 import { computed, inject } from 'vue'
 import { Quote as QuoteIcon } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card } from '../ui'
 import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
 const props = defineProps({
   id: String,
   mode: { type: String, default: 'view' },
   settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean
+  isPreview: Boolean,
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 
-const quoteStyle = computed(() => getVal(props.settings, 'quoteStyle') || 'modern')
-const hasAuthor = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'author'))
-const hasTitle = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'authorTitle'))
+const hasAuthor = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'author', currentDevice.value))
+const hasTitle = computed(() => props.mode === 'edit' || !!getVal(props.settings, 'authorTitle', currentDevice.value))
 
-const contentStyles = computed(() => ({
-  ...getTypographyStyles(props.settings, 'quote_'),
-  textAlign: getVal(props.settings, 'alignment') || 'left',
-  outline: 'none'
-}))
-
-const authorStyles = computed(() => ({
-  ...getTypographyStyles(props.settings, 'author_'),
-  outline: 'none'
-}))
-
-const authorTitleStyles = computed(() => ({
-  opacity: 0.7,
-  fontStyle: 'normal',
-  outline: 'none'
-}))
-
-const iconStyles = computed(() => {
-  const s = getTypographyStyles(props.settings, 'quote_')
-  return {
-    color: s.color || 'var(--theme-primary-color, #2059ea)',
-    opacity: 0.2
-  }
+const contentStyles = computed(() => {
+    const defaultSize = currentDevice.value === 'mobile' ? '32px' : '48px'
+    const styles = getTypographyStyles(props.settings, 'quote_', currentDevice.value)
+    return {
+        fontSize: styles.fontSize || defaultSize,
+        textAlign: getVal(props.settings, 'alignment', currentDevice.value) || 'left',
+        ...styles
+    }
 })
+
+const authorStyles = computed(() => getTypographyStyles(props.settings, 'author_', currentDevice.value))
+const authorTitleStyles = computed(() => getTypographyStyles(props.settings, 'author_title_', currentDevice.value))
 
 const updateField = (key, value) => {
   if (props.mode !== 'edit' || !builder) return
-  
-  const current = props.settings[key]
-  let newValue
-  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
-    newValue = { ...current, [builder.device.value]: value }
-  } else {
-    newValue = { [builder.device.value]: value }
-  }
-  
-  builder.updateModuleSettings(props.id, { [key]: newValue })
+  builder.updateModuleSettings(props.id, { [key]: value })
 }
 </script>
 
 <style scoped>
-.quote-block-wrapper {
-  width: 100%;
-}
-
-.quote-container {
-  margin: 0;
-  position: relative;
-  width: 100%;
-}
-
-.quote-icon-wrapper {
-  margin-bottom: 16px;
-}
-
-.quote-icon {
-  width: 48px;
-  height: 48px;
-}
-
-.quote-content {
-  font-style: italic;
-  line-height: 1.6;
-}
-
-.quote--modern {
-  border-left: 4px solid var(--theme-primary-color, #2059ea);
-  padding-left: 24px;
-}
-
-.quote--minimal::before {
-  content: '"';
-  font-size: 5rem;
-  position: absolute;
-  left: -20px;
-  top: -30px;
-  opacity: 0.1;
-  font-family: serif;
-}
-
-.quote-footer {
-  margin-top: 20px;
-}
-
-.quote-author-wrapper {
-  font-style: normal;
-}
-
-.quote-author {
-  font-weight: 700;
-}
-
-.author-title {
-  font-size: 0.9em;
-}
-
-.quote-content[contenteditable="true"]:empty:before {
-  content: 'Enter quote content...';
-  opacity: 0.3;
-}
-.quote-author[contenteditable="true"]:empty:before {
-  content: 'Author Name';
-  opacity: 0.3;
-}
-.author-title[contenteditable="true"]:empty:before {
-  content: 'Job Title';
-  opacity: 0.3;
-}
+.quote-block-wrapper { width: 100%; }
+.quote-content:focus { outline: none; }
+.quote-author:focus { outline: none; }
+.author-title:focus { outline: none; }
 </style>

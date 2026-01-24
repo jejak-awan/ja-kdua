@@ -32,11 +32,12 @@ const DividerModule: ModuleDefinition = {
 
     defaults: {
         visible: true,
-        lineStyle: 'solid',
-        lineWeight: 1,
+        pattern: 'classic', // classic, waves, zigzag, dots
+        lineWeight: 2,
         lineColor: '#cccccc',
         lineWidth: '100%',
         alignment: 'center',
+        use_gradient: false,
         padding: { top: 20, bottom: 20, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' }
     },
@@ -56,18 +57,21 @@ const DividerModule: ModuleDefinition = {
         design: [
             {
                 id: 'style',
-                label: 'Style',
+                label: 'Premium Line Style',
                 fields: [
                     {
-                        name: 'lineStyle', type: 'select', label: 'Line Style', responsive: true, options: [
-                            { value: 'solid', label: 'Solid' },
-                            { value: 'dashed', label: 'Dashed' },
-                            { value: 'dotted', label: 'Dotted' },
-                            { value: 'double', label: 'Double' }
+                        name: 'pattern', type: 'select', label: 'Line Pattern', responsive: true, options: [
+                            { value: 'classic', label: 'Classic Solid' },
+                            { value: 'waves', label: 'Modern Waves' },
+                            { value: 'zigzag', label: 'Sharp Zig-zag' },
+                            { value: 'dots', label: 'Elegant Dots' },
+                            { value: 'dashed', label: 'Standard Dashed' }
                         ]
                     },
-                    { name: 'lineWeight', type: 'range', label: 'Line Weight', min: 1, max: 20, step: 1, unit: 'px', responsive: true },
-                    { name: 'lineColor', type: 'color', label: 'Line Color', responsive: true },
+                    { name: 'lineWeight', type: 'range', label: 'Thickness', min: 1, max: 20, step: 1, unit: 'px', responsive: true },
+                    { name: 'lineColor', type: 'color', label: 'Line Color', responsive: true, show_if: { field: 'use_gradient', value: false } },
+                    { name: 'use_gradient', type: 'toggle', label: 'Enable Gradient Line' },
+                    { name: 'gradient', type: 'gradient', label: 'Line Gradient', show_if: { field: 'use_gradient', value: true } },
                     { name: 'lineWidth', type: 'text', label: 'Width (e.g., 100%, 200px)', responsive: true },
                     {
                         name: 'alignment', type: 'buttonGroup', label: 'Alignment', responsive: true, options: [

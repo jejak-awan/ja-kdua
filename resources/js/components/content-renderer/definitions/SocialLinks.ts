@@ -45,6 +45,8 @@ export default {
             ],
             tab: 'style'
         },
+        { key: 'gap', type: 'text', label: 'Gap (e.g. 16px)', tab: 'style' },
+        { key: 'showLabels', type: 'boolean', label: 'Show Labels', default: false, tab: 'style' },
         { key: 'icon_size', type: 'text', label: 'Icon Size (e.g. 24px)', tab: 'style' },
         {
             key: 'shape',

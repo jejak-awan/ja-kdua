@@ -6,28 +6,32 @@
         :class="alignmentClass(settings, blockDevice)"
       >
         <figure 
-          class="image-figure relative overflow-hidden group transition-all duration-300"
+          ref="figureRef"
+          class="image-figure relative transition-all duration-500"
           :class="[
             radiusClass(settings),
             shadowClass(settings),
             hoverEffectClass(settings)
           ]"
           :style="figureStyles(settings, blockDevice)"
+          @mousemove="handleMouseMove"
+          @mouseleave="handleMouseLeave"
         >
           <!-- The Link or Div -->
           <component
             :is="getVal(settings, 'linkUrl') ? 'a' : 'div'"
-            class="image-link-wrapper block relative h-full"
+            class="image-link-wrapper block relative h-full w-full overflow-hidden"
             :href="getVal(settings, 'linkUrl') || undefined"
             :target="getVal(settings, 'linkNewTab') ? '_blank' : '_self'"
             @click="onLinkClick"
+            :style="maskStyles(settings, blockDevice)"
           >
             <!-- Image Element -->
             <img 
               v-if="getVal(settings, 'url')"
               :src="getVal(settings, 'url')"
               :alt="getVal(settings, 'alt') || 'Image'"
-              class="block w-full transition-all duration-500"
+              class="block w-full h-full transition-all duration-700 ease-out"
               :class="[objectFitClass(settings), filterClasses(settings)]"
               :style="imageElementStyles(settings, blockDevice)"
               :loading="getVal(settings, 'lazyLoad') !== false ? 'lazy' : 'eager'"
@@ -36,22 +40,21 @@
             <!-- Placeholder -->
             <div 
               v-else 
-              class="image-placeholder bg-muted/20 border-2 border-dashed border-primary/10 flex flex-col items-center justify-center p-8 text-center"
+              class="image-placeholder bg-gray-100 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-8 text-center"
               :style="{ height: getVal(settings, 'height', blockDevice) || '300px' }"
             >
-              <div class="p-4 rounded-full bg-background shadow-sm mb-4">
-                <ImageIcon class="w-8 h-8 text-muted-foreground/50" />
+              <div class="p-4 rounded-full bg-white shadow-sm mb-4">
+                <ImageIcon class="w-8 h-8 text-gray-300" />
               </div>
-              <p class="text-sm font-medium text-muted-foreground">
+              <p class="text-sm font-medium text-gray-400">
                 {{ blockMode === 'edit' ? 'Select an image' : '' }}
               </p>
             </div>
 
-            <!-- Hover Overlay (Unified) -->
+            <!-- Hover Overlay -->
             <div 
               v-if="hasOverlay(settings)"
-              class="absolute inset-0 transition-opacity duration-300"
-              :class="blockMode === 'edit' ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'"
+              class="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
               :style="overlayStyles(settings, blockDevice)"
             >
               <div v-if="getVal(settings, 'showZoomIcon')" class="flex items-center justify-center h-full">
@@ -75,20 +78,51 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getTypographyStyles, getVal, getResponsiveValue } from '../utils/styleUtils'
+import { 
+    getTypographyStyles, 
+    getVal,
+    getMaskStyles 
+} from '../utils/styleUtils'
 import { Image as ImageIcon, ZoomIn } from 'lucide-vue-next'
+import type { BlockInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-// Logic derived from both builder and renderer
-const alignmentClass = (settings, device) => {
+const figureRef = ref<HTMLElement | null>(null)
+const tiltStyle = ref({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)' })
+
+const handleMouseMove = (e: MouseEvent) => {
+    const effect = getVal(props.module.settings, 'hover_effect')
+    if (effect !== 'tilt' || !figureRef.value) return
+
+    const rect = figureRef.value.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    
+    const rotateX = ((y - centerY) / centerY) * -10 // Max 10 degrees
+    const rotateY = ((x - centerX) / centerX) * 10 // Max 10 degrees
+    
+    tiltStyle.value.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`
+}
+
+const handleMouseLeave = () => {
+    tiltStyle.value.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+}
+
+const alignmentClass = (settings: any, device: string) => {
   const align = getVal(settings, 'alignment', device) || 'center'
   return {
     'flex justify-start text-left': align === 'left',
@@ -97,24 +131,37 @@ const alignmentClass = (settings, device) => {
   }
 }
 
-const figureStyles = (settings, device) => {
+const figureStyles = (settings: any, device: string) => {
   const width = getVal(settings, 'width', device)
   const height = getVal(settings, 'height', device)
   const aspectRatio = getVal(settings, 'aspectRatio', device) || 'auto'
   
-  const style = {
-    maxWidth: width > 0 ? `min(${width}px, 100%)` : '100%',
+  const style: Record<string, any> = {
+    maxWidth: width > 0 && width !== '100%' ? toWidth(width) : '100%',
     width: '100%',
-    position: 'relative'
+    position: 'relative',
+    display: 'inline-block'
   }
   
   if (aspectRatio !== 'auto') style.aspectRatio = aspectRatio
   else if (height) style.height = height
 
+  // Add 3D Tilt transform if active
+  if (getVal(settings, 'hover_effect') === 'tilt') {
+      style.transform = tiltStyle.value.transform
+      style.transformStyle = 'preserve-3d'
+  }
+
   return style
 }
 
-const imageElementStyles = (settings, device) => {
+const toWidth = (val: any) => typeof val === 'number' ? `${val}px` : val
+
+const maskStyles = (settings: any, device: string) => {
+    return getMaskStyles(settings, '', device)
+}
+
+const imageElementStyles = (settings: any, device: string) => {
   const filters = []
   const b = getVal(settings, 'brightness', device)
   const c = getVal(settings, 'contrast', device)
@@ -135,7 +182,7 @@ const imageElementStyles = (settings, device) => {
   }
 }
 
-const objectFitClass = (settings) => {
+const objectFitClass = (settings: any) => {
   const fit = getVal(settings, 'objectFit') || 'cover'
   return {
     'object-cover': fit === 'cover',
@@ -145,50 +192,51 @@ const objectFitClass = (settings) => {
   }
 }
 
-const radiusClass = (settings) => getVal(settings, 'radius') || 'rounded-lg'
-const shadowClass = (settings) => {
+const radiusClass = (settings: any) => getVal(settings, 'radius') || 'rounded-lg'
+const shadowClass = (settings: any) => {
   const s = getVal(settings, 'shadow')
   return s && s !== 'none' ? s : ''
 }
 
-const hoverEffectClass = (settings) => {
-  const effect = getVal(settings, 'hoverEffect') || 'none'
+const hoverEffectClass = (settings: any) => {
+  const effect = getVal(settings, 'hover_effect') || 'none'
   return {
+    'group': true,
     'hover:scale-[1.02]': effect === 'zoom',
-    'overflow-hidden': true
+    'hover:-translate-y-2 hover:shadow-2xl': effect === 'lift',
   }
 }
 
-const filterClasses = (settings) => {
-  const effect = getVal(settings, 'hoverEffect') || 'none'
+const filterClasses = (settings: any) => {
+  const effect = getVal(settings, 'hover_effect') || 'none'
   const classes = []
+  if (effect === 'reveal') classes.push('grayscale group-hover:grayscale-0')
   if (effect === 'colorize') classes.push('grayscale group-hover:grayscale-0')
   if (effect === 'desaturate') classes.push('group-hover:grayscale')
   if (effect === 'brighten') classes.push('group-hover:brightness-110')
   return classes.join(' ')
 }
 
-const hasOverlay = (settings) => {
-  const effect = getVal(settings, 'hoverEffect')
-  return effect === 'overlay' || effect === 'brighten' || getVal(settings, 'overlayEnabled')
+const hasOverlay = (settings: any) => {
+  return getVal(settings, 'overlayEnabled')
 }
 
-const overlayStyles = (settings, device) => {
+const overlayStyles = (settings: any, device: string) => {
   const color = getVal(settings, 'overlayColor', device) || 'rgba(0,0,0,0.3)'
   return {
     backgroundColor: color
   }
 }
 
-const captionStyles = (settings, device) => {
+const captionStyles = (settings: any, device: string) => {
   return getTypographyStyles(settings, 'caption_', device)
 }
 
-const captionStaticClass = (settings) => {
+const captionStaticClass = (settings: any) => {
   return 'absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white p-4 text-sm text-center transform translate-y-full group-hover:translate-y-0'
 }
 
-const onLinkClick = (e) => {
+const onLinkClick = (e: MouseEvent) => {
   if (props.mode === 'edit') {
     e.preventDefault()
   }
@@ -202,7 +250,7 @@ const onLinkClick = (e) => {
 }
 .image-figure {
   margin: 0;
-  display: inline-block;
   vertical-align: top;
+  will-change: transform;
 }
 </style>

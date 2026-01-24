@@ -1,180 +1,155 @@
 <template>
-  <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ mode: blockMode, settings, device: blockDevice }">
-      <div 
-        class="button-block-container w-full" 
-        :class="alignmentClass(settings, blockDevice)"
+  <BaseBlock 
+    :module="module" 
+    :mode="mode" 
+    :device="device" 
+    :manual-styles="true"
+    v-slot="{ mode: blockMode, settings, device: blockDevice, getAttributes, styles: baseStyles }"
+  >
+    <div 
+      class="button-block-container w-full" 
+      :class="alignmentClass(settings, blockDevice)"
+    >
+      <Button
+        variant="none"
+        :class="cn(
+            'button-element group relative',
+            `btn-hover-${getVal(settings, 'hover_effect', blockDevice) || 'lift'}`,
+            { 'overflow-hidden': getVal(settings, 'hover_effect', blockDevice) === 'shine' || getVal(settings, 'hover_effect', blockDevice) === 'sweep' }
+        )"
+        :style="buttonStyles(settings, blockDevice, baseStyles)"
+        :as="mode === 'edit' ? 'button' : 'a'"
+        :href="mode === 'edit' ? undefined : (getVal(settings, 'url') || '#')"
+        :target="getVal(settings, 'openNewTab') ? '_blank' : '_self'"
+        @click="onButtonClick"
+        v-bind="getAttributes('button')"
       >
-        <a 
-          :href="getVal(settings, 'url') || '#'" 
-          :target="getVal(settings, 'openNewTab') ? '_blank' : '_self'"
-          class="button-element inline-flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden group"
-          :class="[
-            sizeClass(settings, blockDevice),
-            !getVal(settings, 'useCustomColors') ? variantClass(settings) : '',
-            getVal(settings, 'useCustomColors') ? 'custom-button' : '',
-            hoverEffectClass(settings),
-            radiusClass(settings),
-            shadowClass(settings)
-          ]"
-          :style="buttonStyles(settings, blockDevice)"
-          @click="onButtonClick"
-        >
-          <!-- Background FX (e.g. shine) -->
-          <div 
-            v-if="getVal(settings, 'hoverEffect') === 'shine'"
-            class="absolute inset-0 -translate-x-full group-hover:animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"
-          ></div>
+        <!-- Shine Element -->
+        <div v-if="getVal(settings, 'hover_effect', blockDevice) === 'shine'" class="btn-shine-overlay"></div>
+        
+        <!-- Sweep Element -->
+        <div v-if="getVal(settings, 'hover_effect', blockDevice) === 'sweep'" class="btn-sweep-overlay"></div>
 
-          <!-- Icon Left -->
-          <LucideIcon 
-            v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'left'" 
-            :name="getVal(settings, 'iconName')" 
-            class="button-icon z-10 transition-transform duration-300 shrink-0"
-            :style="iconStyles(settings, 'left')"
-          />
+        <!-- Icon Left -->
+        <component 
+          v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'left'"
+          :is="getIconComponent(getVal(settings, 'iconName'))"
+          class="btn-icon-left transition-transform duration-300 group-hover:-translate-x-1"
+          :style="iconStyles(settings)"
+        />
 
-          <!-- Text content -->
-          <div 
-            v-if="blockMode === 'edit'"
-            ref="editableRef"
-            contenteditable="true"
-            class="button-text z-10 outline-none"
-            @blur="onTextBlur($event, settings)"
-            @click.stop
-            v-html="getVal(settings, 'text') || 'Click Here'"
-          ></div>
-          <span v-else class="button-text z-10">{{ getVal(settings, 'text') || 'Click Here' }}</span>
+        <!-- Editable Text -->
+        <span 
+          :contenteditable="blockMode === 'edit'"
+          @blur="onTextBlur($event, settings)"
+          class="outline-none relative z-10"
+          v-html="getVal(settings, 'text') || 'Button Text'"
+        ></span>
 
-          <!-- Icon Right -->
-          <LucideIcon 
-            v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'right'" 
-            :name="getVal(settings, 'iconName')" 
-            class="button-icon z-10 transition-transform duration-300 shrink-0"
-            :style="iconStyles(settings, 'right')"
-          />
-        </a>
-      </div>
-    </template>
+        <!-- Icon Right -->
+        <component 
+          v-if="getVal(settings, 'iconName') && getVal(settings, 'iconPosition') === 'right'"
+          :is="getIconComponent(getVal(settings, 'iconName'))"
+          class="btn-icon-right transition-transform duration-300 group-hover:translate-x-1"
+          :style="iconStyles(settings)"
+        />
+      </Button>
+    </div>
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject, ref } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getTypographyStyles, getVal, getResponsiveValue } from '../utils/styleUtils'
+import { Button } from '../ui'
+import { cn } from '../../lib/utils'
+import { 
+    getTypographyStyles, 
+    getVal, 
+    getGlassStyles, 
+    getTextGradientStyles,
+    generateGradientCSS
+} from '../utils/styleUtils'
+import * as LucideIcons from 'lucide-vue-next'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
-const editableRef = ref(null)
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const alignmentClass = (settings, device) => {
+const getIconComponent = (name: string) => {
+    return (LucideIcons as any)[name] || LucideIcons.ArrowRight
+}
+
+const alignmentClass = (settings: any, device: string) => {
   const align = getVal(settings, 'alignment', device) || 'left'
   return {
-    'flex justify-start': align === 'left',
-    'flex justify-center': align === 'center',
-    'flex justify-end': align === 'right'
+    'flex justify-start text-left': align === 'left',
+    'flex justify-center text-center': align === 'center',
+    'flex justify-end text-right': align === 'right'
   }
 }
 
-const sizeClass = (settings, device) => {
-  const size = getVal(settings, 'size', device) || 'medium'
-  return {
-    'px-3 py-1.5 text-xs h-7': size === 'xs',
-    'px-4 py-2 text-sm h-9': size === 'small',
-    'px-6 py-3 text-base h-11': size === 'medium',
-    'px-8 py-4 text-lg h-14': size === 'large',
-    'px-10 py-5 text-xl h-16': size === 'xl'
-  }
+const buttonStyles = (settings: any, device: string, baseStyles: any) => {
+    let styles: Record<string, any> = {}
+    const variant = getVal(settings, 'variant', device) || 'solid'
+
+    // 1. Inherit all design properties from BaseBlock (background, spacing, border, shadow, etc.)
+    Object.assign(styles, baseStyles)
+
+    // 2. Typography
+    const typography = getTypographyStyles(settings, '', device)
+    Object.assign(styles, typography)
+
+    // 3. Variant Overrides & Color Defaults
+    if (variant === 'glass') {
+        Object.assign(styles, getGlassStyles(settings, '', device))
+        styles.color = styles.color || '#ffffff'
+    } else if (variant === 'gradient') {
+        const gradient = getVal(settings, 'gradient', device)
+        if (gradient) {
+            styles.backgroundImage = generateGradientCSS(gradient)
+            styles.border = 'none'
+            styles.color = styles.color || '#ffffff'
+        }
+    } else if (variant === 'outline') {
+        styles.backgroundColor = 'transparent'
+        styles.borderWidth = styles.borderWidth || '2px'
+        styles.borderStyle = 'solid'
+        styles.borderColor = styles.color || styles.backgroundColor || '#111827'
+    } else if (variant === 'ghost') {
+        styles.backgroundColor = 'transparent'
+        styles.border = 'none'
+    } else {
+        // Solid
+        styles.color = styles.color || '#ffffff'
+    }
+
+    return styles
 }
 
-const variantClass = (settings) => {
-  const variant = getVal(settings, 'variant') || 'primary'
-  return {
-    'bg-primary text-primary-foreground border-2 border-primary hover:bg-primary/90': variant === 'primary',
-    'bg-secondary text-secondary-foreground border-2 border-secondary hover:bg-secondary/80': variant === 'secondary',
-    'border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground': variant === 'outline',
-    'bg-transparent text-primary hover:bg-primary/10 border-2 border-transparent': variant === 'ghost',
-    'bg-transparent text-primary underline-offset-4 hover:underline border-none p-0 h-auto': variant === 'link'
-  }
-}
-
-const hoverEffectClass = (settings) => {
-  const effect = getVal(settings, 'hoverEffect') || 'none'
-  return {
-    'hover:-translate-y-1 hover:shadow-lg': effect === 'lift',
-    'hover:scale-105': effect === 'scale',
-    'hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]': effect === 'glow'
-  }
-}
-
-const radiusClass = (settings) => {
-  const radius = getVal(settings, 'radius') || 'rounded-lg'
-  return radius
-}
-
-const shadowClass = (settings) => {
-  const shadow = getVal(settings, 'shadow')
-  return shadow && shadow !== 'none' ? shadow : ''
-}
-
-const buttonStyles = (settings, device) => {
-  const styles = {
-    fontWeight: getVal(settings, 'fontWeight') || '600',
-    textTransform: getVal(settings, 'textTransform') || 'none',
-    width: getVal(settings, 'fullWidth', device) ? '100%' : 'auto'
-  }
-
-  if (getVal(settings, 'useCustomColors')) {
-    // Base colors
-    const bg = getVal(settings, 'bgColor', device)
-    const text = getVal(settings, 'textColor', device)
-    const border = getVal(settings, 'borderColor', device)
-
-    // Hover colors (explicitly check for hover independent of current device)
-    // If no hover value explicitly set, fallback to base value
-    const hoverBg = getVal(settings, 'bgColor', 'hover') || getVal(settings, 'hoverBgColor') || bg
-    const hoverText = getVal(settings, 'textColor', 'hover') || text
-    const hoverBorder = getVal(settings, 'borderColor', 'hover') || border
-
-    styles['--btn-bg'] = bg
-    styles['--btn-text'] = text
-    styles['--btn-border'] = border
-    
-    styles['--btn-hover-bg'] = hoverBg
-    styles['--btn-hover-text'] = hoverText
-    styles['--btn-hover-border'] = hoverBorder
-    
-    styles.borderWidth = '2px'
-    styles.borderStyle = 'solid'
-  }
-
-  // Merge typography if needed for more complex scenarios
-  const typography = getTypographyStyles(settings, '', device)
-  if (typography.fontFamily) styles.fontFamily = typography.fontFamily
-
-  return styles
-}
-
-const iconStyles = (settings, pos) => {
+const iconStyles = (settings: any) => {
   const size = getVal(settings, 'iconSize') || 16
   return {
     width: `${size}px`,
-    height: `${size}px`
+    height: `${size}px`,
+    marginLeft: getVal(settings, 'iconPosition') === 'right' ? '8px' : '0',
+    marginRight: getVal(settings, 'iconPosition') === 'left' ? '8px' : '0',
   }
 }
 
-const onButtonClick = (e) => {
+const onButtonClick = (e: MouseEvent) => {
   if (props.mode === 'edit') e.preventDefault()
 }
 
-const onTextBlur = (e, settings) => {
+const onTextBlur = (e: any, settings: any) => {
   if (props.mode !== 'edit' || !builder) return
   const newText = e.target.innerText
   if (newText !== getVal(settings, 'text')) {
@@ -189,25 +164,60 @@ const onTextBlur = (e, settings) => {
 .button-element {
   text-decoration: none;
   cursor: pointer;
-}
-@keyframes shine {
-  100% {
-    transform: translateX(100%);
-  }
-}
-.group-hover\:animate-shine {
-  animation: shine 0.7s forwards;
+  min-width: 120px;
 }
 
-.custom-button {
-  background-color: var(--btn-bg) !important;
-  color: var(--btn-text) !important;
-  border-color: var(--btn-border) !important;
+/* Hover Animations */
+.btn-hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-.custom-button:hover {
-  background-color: var(--btn-hover-bg) !important;
-  color: var(--btn-hover-text) !important;
-  border-color: var(--btn-hover-border) !important;
+.btn-hover-zoom:hover {
+    transform: scale(1.05);
+}
+
+.btn-hover-pulse:hover {
+    animation: btn-pulse 1.5s infinite;
+}
+
+@keyframes btn-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb, 32, 89, 234), 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(var(--primary-rgb, 32, 89, 234), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb, 32, 89, 234), 0); }
+}
+
+/* Shine Effect */
+.btn-shine-overlay {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-25deg);
+    transition: none;
+}
+.btn-hover-shine:hover .btn-shine-overlay {
+    animation: btn-shine 0.8s forwards;
+}
+
+@keyframes btn-shine {
+    100% { left: 150%; }
+}
+
+/* Sweep Effect */
+.btn-sweep-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: rgba(0,0,0,0.1);
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+.btn-hover-sweep:hover .btn-sweep-overlay {
+    width: 100%;
 }
 </style>

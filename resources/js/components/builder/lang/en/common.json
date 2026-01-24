@@ -415,6 +415,7 @@
             }
         },
         "spacing": {
+            "link": "Link Values",
             "sides": {
                 "top": "Top",
                 "right": "Right",
@@ -425,7 +426,7 @@
         "children": {
             "empty": "No {type} found.",
             "add": "Add {type}",
-            "applyTemplate": "Apply Structure Template"
+            "applyTemplate": "Insert from Library"
         },
         "icon": {
             "search": "Search icons...",
@@ -755,15 +756,16 @@
         "noResults": "No modules found matching \"{query}\"",
         "libraryEmpty": "No saved layouts yet.",
         "tabs": {
-            "module": "New Module",
-            "row": "New Row",
-            "section": "New Section",
-            "library": "Add From Library",
-            "presets": "Design Presets"
+            "module": "Module",
+            "row": "Row",
+            "section": "Section",
+            "library": "Library",
+            "presets": "Preset"
         },
         "layoutGroups": {
             "equal": "Equal Columns",
             "offset": "Offset Columns",
+            "multi-row": "Multi-Row",
             "multiRow": "Multi-Row",
             "multiCol": "Multi-Column",
             "grid-multi-row": "Grid Multi-Row",
@@ -782,7 +784,7 @@
         }
     },
     "structureTemplateModal": {
-        "title": "Apply Structure Template",
+        "title": "Insert from Library",
         "noResults": "No templates available for this context."
     },
     "categories": {

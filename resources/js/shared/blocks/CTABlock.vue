@@ -2,13 +2,16 @@
   <BaseBlock :module="module" :mode="mode" :device="device">
     <template #default="{ settings, device: blockDevice }">
         <div 
-            class="cta-block relative overflow-hidden transition-all duration-300 group" 
+            class="cta-block relative overflow-hidden transition-all duration-500 group rounded-[48px]" 
             :class="[
-                getVal(settings, 'radius') || 'rounded-2xl',
                 getVal(settings, 'padding') || 'py-32 px-12'
             ]"
             :style="blockStyles(settings)"
         >
+            <!-- Decorative Orbs / Gradients -->
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125"></div>
+
             <!-- Background Image & Overlay -->
             <div 
                 v-if="getVal(settings, 'bgImage')"
@@ -16,7 +19,7 @@
             >
                 <img 
                     :src="getVal(settings, 'bgImage')"
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     alt=""
                 />
                 <div 
@@ -32,22 +35,29 @@
             >
                 <!-- Text Area -->
                 <div 
-                    class="cta-text-area max-w-3xl"
+                    class="cta-text-area max-w-4xl"
                      :class="{ 
                         'text-center mx-auto': isCenter(settings, blockDevice),
                         'text-left': !isCenter(settings, blockDevice)
                     }"
                 >
+                    <Badge 
+                        v-if="getVal(settings, 'eyebrow')"
+                        class="mb-6 rounded-full bg-white/10 text-white border-white/20 backdrop-blur-md px-4 py-1"
+                    >
+                        {{ getVal(settings, 'eyebrow') }}
+                    </Badge>
+
                     <h2 
-                        class="cta-title font-bold leading-tight mb-4" 
-                        :style="titleStyles(settings, blockDevice)"
+                        class="cta-title font-black leading-none mb-6 tracking-tighter" 
+                        :style="titleDisplayStyles(settings, blockDevice)"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateResponsiveField('title', e.target.innerText)"
                     >
                         {{ getVal(settings, 'title', blockDevice) }}
                     </h2>
                      <div 
-                        class="cta-subtitle text-lg opacity-90 leading-relaxed" 
+                        class="cta-subtitle text-xl opacity-90 leading-relaxed font-medium" 
                         :style="{ color: getVal(settings, 'textColor') || '#ffffff' }"
                         :contenteditable="mode === 'edit'"
                         @blur="e => updateResponsiveField('subtitle', e.target.innerText)"
@@ -59,21 +69,19 @@
                 <!-- Button Area -->
                 <div 
                     class="cta-button-area shrink-0"
-                    :class="{ 'mt-8': !isInline(settings, blockDevice) }"
+                    :class="{ 'mt-12': !isInline(settings, blockDevice) }"
                 >
-                     <a 
-                        :href="getVal(settings, 'buttonUrl') || '#'" 
-                        class="cta-button inline-flex items-center justify-center font-semibold transition-all duration-200"
-                        :class="[
-                            buttonClasses(settings),
-                            'px-8 py-3 rounded-lg hover:transform hover:-translate-y-0.5'
-                        ]"
-                        :contenteditable="mode === 'edit'"
-                        @blur="e => updateResponsiveField('buttonText', e.target.innerText)"
-                        @click="mode === 'edit' ? e.preventDefault() : null"
+                    <Button 
+                        as="a"
+                        :href="mode === 'view' ? (getVal(settings, 'buttonUrl') || '#') : null"
+                        class="h-14 px-12 rounded-full font-bold shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+                        :style="buttonDisplayStyles"
+                        :variant="getVal(settings, 'buttonStyle') === 'outline' ? 'outline' : 'default'"
+                        @click="mode === 'edit' ? $event.preventDefault() : null"
                     >
                         {{ getVal(settings, 'buttonText', blockDevice) || 'Get Started' }}
-                    </a>
+                        <LucideIcon name="ArrowRight" class="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
                 </div>
             </div>
         </div>
@@ -82,9 +90,11 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getVal } from '../utils/styleUtils'
+import { Button, Badge } from '../ui'
+import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -92,21 +102,21 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
-const builder = inject('builder')
+const builder = inject('builder', null)
+const settings = computed(() => props.module?.settings || {})
 
 const blockStyles = (settings) => {
     const baseColor = getVal(settings, 'bgColor') || '#4f46e5'
     return {
-        background: `linear-gradient(135deg, ${baseColor}, #7c3aed)`, // Modern Indigo to Violet pulse
+        background: `linear-gradient(135deg, ${baseColor}, #7c3aed)`,
     }
 }
 
-const titleStyles = (settings, device) => {
+const titleDisplayStyles = (settings, device) => {
+    const defaultSize = device === 'mobile' ? '42px' : '72px'
     return {
         color: getVal(settings, 'textColor') || '#ffffff',
-        fontSize: device === 'mobile' ? '36px' : '56px',
-        fontWeight: '900', // Heavy impact
-        letterSpacing: '-0.025em'
+        fontSize: getVal(settings, 'titleSize', device) || defaultSize,
     }
 }
 
@@ -124,41 +134,39 @@ const layoutClasses = (settings, device) => {
     const layout = getVal(settings, 'layout', device) || 'stacked-center'
     
     if (layout === 'split') {
-        return 'flex flex-col md:flex-row items-center justify-between gap-8 text-left'
+        return 'flex flex-col lg:flex-row items-center justify-between gap-12 text-left'
     }
     if (layout === 'inline') {
-        return 'flex flex-col md:flex-row items-center justify-center gap-6 text-center md:text-left'
+        return 'flex flex-col lg:flex-row items-center justify-center gap-8 text-center lg:text-left'
     }
     if (layout === 'stacked-left') {
         return 'flex flex-col items-start text-left'
     }
-    // Default: stacked-center
     return 'flex flex-col items-center text-center'
 }
 
-const buttonClasses = (settings) => {
-    const style = getVal(settings, 'buttonStyle') || 'secondary'
+const buttonDisplayStyles = computed(() => {
+    const styles = getTypographyStyles(settings.value, 'button_', props.device)
+    const style = getVal(settings.value, 'buttonStyle') || 'secondary'
     
-    if (style === 'primary') {
-        return 'bg-primary text-primary-foreground hover:brightness-110 shadow-lg'
+    const res = { ...styles }
+    if (style === 'secondary') {
+        res.backgroundColor = '#ffffff'
+        res.color = '#1e293b'
     }
-    if (style === 'outline') {
-        return 'bg-transparent border-2 border-current hover:bg-white/10'
-    }
-    // Default: secondary (White usually on colored bg)
-    return 'bg-white text-gray-900 hover:bg-gray-50 shadow-lg'
-}
+    return res
+})
 
 const updateResponsiveField = (fieldName, value) => {
-  if (props.mode !== 'edit') return
-  const current = props.module.settings[fieldName]
+  if (props.mode !== 'edit' || !builder) return
+  const current = settings.value[fieldName]
   let newValue
   if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
     newValue = { ...current, [props.device]: value }
   } else {
     newValue = { [props.device]: value }
   }
-  builder?.updateModuleSettings(props.module.id, { [fieldName]: newValue })
+  builder.updateModuleSettings(props.module.id, { [fieldName]: newValue })
 }
 </script>
 

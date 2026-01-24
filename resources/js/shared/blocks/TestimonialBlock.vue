@@ -1,11 +1,10 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
     <template #default="{ settings, device: blockDevice }">
-      <div 
-          class="testimonial-block relative p-8 overflow-hidden transition-all duration-300" 
+      <Card 
+          class="testimonial-block relative p-8 overflow-hidden transition-all duration-300 border-none" 
           :class="[
             getVal(settings, 'cardShadow') || 'shadow-sm',
-            getVal(settings, 'radius') || 'rounded-2xl',
             getVal(settings, 'alignment') || 'text-center'
           ]"
           :style="testimonialBlockStyles(settings)"
@@ -18,7 +17,7 @@
         />
         
         <!-- Content Wrapper -->
-        <div class="testimonial-inner relative z-10 flex flex-col h-full" :class="{ 'items-center': (getVal(settings, 'alignment') || 'text-center') === 'text-center' }">
+        <CardContent class="p-0 relative z-10 flex flex-col h-full" :class="{ 'items-center': (getVal(settings, 'alignment') || 'text-center') === 'text-center' }">
           
           <!-- Quote Icon Small -->
           <QuoteIcon 
@@ -49,30 +48,27 @@
           
           <!-- Author Section -->
           <div class="testimonial-author mt-auto flex items-center gap-4" :class="{ 'flex-col text-center': (getVal(settings, 'alignment')) === 'text-center' }">
-            <div class="author-image-wrapper relative shrink-0">
-              <img 
+            <Avatar class="h-16 w-16">
+              <AvatarImage 
                 v-if="getVal(settings, 'avatar')"
                 :src="getVal(settings, 'avatar')"
                 alt="Author"
-                class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                class="object-cover"
               />
-              <div v-else class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                  <UserIcon :size="32" />
-              </div>
-
-               <!-- Company Logo Badge (optional overlay or separate) -->
-               <!-- If company logo exists and we want it near avatar -->
-            </div>
+              <AvatarFallback class="bg-slate-100 text-slate-400">
+                  <UserIcon class="w-2/3 h-2/3" />
+              </AvatarFallback>
+            </Avatar>
             
-            <div class="author-info" :class="{ 'items-center': (getVal(settings, 'alignment')) === 'text-center' }">
-              <div 
-                class="author-name font-bold text-lg text-slate-900"
+            <div class="author-info flex flex-col" :class="{ 'items-center': (getVal(settings, 'alignment')) === 'text-center' }">
+              <CardTitle 
+                class="author-name font-bold text-lg text-slate-900 border-none"
                 :contenteditable="mode === 'edit'"
                 @blur="e => updateResponsiveField('author', e.target.innerText)"
               >
                 {{ getVal(settings, 'author', blockDevice) || 'Author Name' }}
-              </div>
-              <div class="text-sm text-slate-500 font-medium">
+              </CardTitle>
+              <CardDescription class="text-sm text-slate-500 font-medium">
                 <span 
                     :contenteditable="mode === 'edit'"
                      @blur="e => updateResponsiveField('job_title', e.target.innerText)"
@@ -83,7 +79,7 @@
                     :contenteditable="mode === 'edit'"
                      @blur="e => updateResponsiveField('company_name', e.target.innerText)"
                 >{{ getVal(settings, 'company_name', blockDevice) }}</span>
-              </div>
+              </CardDescription>
               
                <img 
                 v-if="getVal(settings, 'companyLogo')"
@@ -93,8 +89,8 @@
               />
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </template>
   </BaseBlock>
 </template>
@@ -103,6 +99,7 @@
 import { inject } from 'vue'
 import { Quote as QuoteIcon, User as UserIcon, Star as StarIcon } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card, CardContent, CardTitle, CardDescription, Avatar, AvatarImage, AvatarFallback } from '../ui'
 import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
@@ -111,14 +108,15 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
-const builder = inject('builder')
+const builder = inject('builder', null)
 
 const testimonialBlockStyles = (settings) => {
   return { 
     backgroundColor: getVal(settings, 'cardBgColor') || '#ffffff',
     borderColor: getVal(settings, 'cardBorderColor') || 'rgba(0,0,0,0.05)',
     borderWidth: '1px',
-    borderStyle: 'solid'
+    borderStyle: 'solid',
+    borderRadius: getVal(settings, 'radius') || '1rem'
   }
 }
 
@@ -141,7 +139,7 @@ const contentStyles = (settings, device) => {
 }
 
 const updateResponsiveField = (fieldName, value) => {
-  if (props.mode !== 'edit') return
+  if (props.mode !== 'edit' || !builder) return
   const current = props.module.settings[fieldName]
   let newValue
   if (typeof current === 'object' && current !== null && !Array.isArray(current)) {

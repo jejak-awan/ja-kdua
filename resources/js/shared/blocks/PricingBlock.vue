@@ -1,58 +1,63 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ settings, device: blockDevice }">
+    <template #default="{ settings }">
       <div 
         class="pricing-block mx-auto w-full px-6" 
         :class="[getVal(settings, 'width') || 'max-w-6xl', getVal(settings, 'padding') || 'py-20']"
       >
-        <div class="pricing-grid grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          <div 
+        <div class="pricing-grid grid items-stretch" :style="gridStyles">
+          <Card 
             v-for="(item, index) in items" 
             :key="index"
-            class="pricing-card flex flex-col transition-all duration-500 hover:-translate-y-4 group"
+            class="flex flex-col transition-all duration-500 hover:-translate-y-4 group rounded-[2.5rem] p-10 relative overflow-visible"
             :class="[
-                item.isFeatured ? 'featured-card shadow-2xl relative z-10' : 'bg-white shadow-xl',
-                'rounded-[2.5rem] p-10 border border-slate-100'
+                item.isFeatured ? 'shadow-2xl z-10 border-primary' : 'bg-white shadow-xl border-slate-100',
             ]"
-            :style="item.isFeatured ? featuredCardStyle : {}"
+            :style="getCardStyle(item)"
           >
             <!-- Featured Badge -->
-            <div 
+            <Badge 
               v-if="item.isFeatured" 
-              class="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-indigo-600 text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg"
+              class="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 uppercase tracking-widest"
+              variant="default"
             >
               Most Popular
-            </div>
+            </Badge>
 
-            <div class="mb-10 text-center">
-              <h3 class="text-xl font-bold text-slate-900 mb-6">{{ item.name || 'Plan Name' }}</h3>
+            <CardHeader class="p-0 mb-10 text-center">
+              <CardTitle class="text-xl font-bold text-slate-900 mb-6" :style="titleStyles">{{ item.title || item.name || 'Plan Name' }}</CardTitle>
               <div class="flex items-baseline justify-center gap-1">
                 <span class="text-2xl font-bold opacity-40">$</span>
-                <span class="text-6xl font-black tracking-tighter">{{ item.price || '0' }}</span>
-                <span class="text-slate-400 font-medium">/mo</span>
+                <span class="text-6xl font-black tracking-tighter" :style="priceStyles">{{ item.price || '0' }}</span>
+                <span class="text-slate-400 font-medium">{{ item.period || '/mo' }}</span>
               </div>
-            </div>
+            </CardHeader>
 
-            <ul class="flex flex-col gap-5 mb-12 flex-grow">
-              <li 
-                v-for="(feature, fIndex) in parseFeatures(item.features)" 
-                :key="fIndex"
-                class="flex items-center gap-4 text-slate-600 font-medium"
-              >
-                <div class="flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
-                    <CheckIcon class="w-4 h-4 text-indigo-600" />
-                </div>
-                <span>{{ feature }}</span>
-              </li>
-            </ul>
+            <CardContent class="p-0 flex flex-col flex-grow">
+              <ul class="flex flex-col gap-5 mb-12">
+                <li 
+                  v-for="(feature, fIndex) in parseFeatures(item.features)" 
+                  :key="fIndex"
+                  class="flex items-center gap-4 text-slate-600 font-medium text-left"
+                >
+                  <div class="flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center" :style="{ backgroundColor: getVal(settings, 'accentColor') + '10' }">
+                      <CheckIcon class="w-4 h-4" :style="{ color: getVal(settings, 'accentColor') || 'currentColor' }" />
+                  </div>
+                  <span>{{ feature }}</span>
+                </li>
+              </ul>
+            </CardContent>
 
-            <button 
-              class="w-full py-5 rounded-2xl font-bold transition-all duration-300 transform active:scale-95 shadow-lg active:shadow-none"
-              :class="item.isFeatured ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-900 text-white hover:bg-slate-800'"
-            >
-              {{ item.buttonText || 'Get Started' }}
-            </button>
-          </div>
+            <CardFooter class="p-0">
+                <Button 
+                  class="w-full py-8 rounded-2xl font-bold shadow-lg"
+                  :variant="item.isFeatured ? 'default' : 'secondary'"
+                  :style="item.isFeatured ? { backgroundColor: getVal(settings, 'accentColor') } : {}"
+                >
+                  {{ item.buttonText || 'Get Started' }}
+                </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </template>
@@ -62,8 +67,9 @@
 <script setup>
 import { computed } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Badge } from '../ui'
 import { Check as CheckIcon } from 'lucide-vue-next'
-import { getVal } from '../utils/styleUtils'
+import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -80,19 +86,29 @@ const parseFeatures = (features) => {
   return features.split('\n').filter(f => f.trim() !== '')
 }
 
-const featuredCardStyle = computed(() => {
+const gridStyles = computed(() => {
+    const cols = getVal(settings.value, 'columns', props.device) || 3
+    const gap = getVal(settings.value, 'gap', props.device) || 32
     return {
-        background: 'linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)',
-        borderColor: '#4f46e5',
-        borderWidth: '2px'
+        gridTemplateColumns: props.device === 'mobile' ? '1fr' : `repeat(${cols}, minmax(0, 1fr))`,
+        gap: `${gap}px`
     }
 })
+
+const getCardStyle = (item) => {
+    const bgColor = item.isFeatured 
+        ? (getVal(settings.value, 'featuredCardBackgroundColor', props.device) || '#ffffff')
+        : (getVal(settings.value, 'cardBackgroundColor', props.device) || '#ffffff')
+    
+    return {
+        backgroundColor: bgColor
+    }
+}
+
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))
+const priceStyles = computed(() => getTypographyStyles(settings.value, 'price_', props.device))
 </script>
 
 <style scoped>
-.pricing-card { transform-style: preserve-3d; }
-.featured-card { 
-    border-color: #4f46e5;
-    background: white;
-}
+.pricing-block { width: 100%; }
 </style>

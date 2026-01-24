@@ -1,46 +1,60 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="author-block" :class="`author-block--${layout}`">
-    <div class="author-image-wrapper">
-      <div v-if="authorImage || mode === 'edit'" class="author-image" :style="imageStyles">
-          <img v-if="authorImage" :src="authorImage" :alt="authorName" />
-          <UserCircle v-else class="placeholder-icon" />
-      </div>
-    </div>
-    <div class="author-content" :style="contentStyles">
-      <h4 
-        class="author-name" 
-        :style="nameStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateText('name', $event)"
-      >{{ authorName || (mode === 'edit' ? 'Author Name' : '') }}</h4>
-      
-      <p 
-        v-if="authorTitle || mode === 'edit'" 
-        class="author-title" 
-        :style="titleStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateText('title', $event)"
-      >{{ authorTitle || (mode === 'edit' ? 'Author Title/Role' : '') }}</p>
-      
-      <p 
-        v-if="authorBio || mode === 'edit'" 
-        class="author-bio" 
-        :style="bioStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateText('bio', $event)"
-      >{{ authorBio || (mode === 'edit' ? 'Author bio goes here...' : '') }}</p>
-      
-      <div v-if="settings.showSocial !== false && activeSocialLinks.length" class="author-social">
-        <a 
-            v-for="(link, i) in activeSocialLinks" 
-            :key="i" 
-            :href="mode === 'view' ? link.url : null" 
-            class="social-link" 
-            target="_blank"
-            @click="handleLinkClick"
-        >
-            <component :is="getSocialIcon(link.platform)" class="social-icon" />
-        </a>
+  <BaseBlock :module="module" :settings="settings" class="author-block">
+    <div :class="[
+      'flex gap-6',
+      layout === 'vertical' ? 'flex-col items-center text-center' : 'items-start text-left'
+    ]">
+      <Avatar :style="imageStyles" class="flex-shrink-0">
+        <AvatarImage 
+          v-if="authorImage" 
+          :src="authorImage" 
+          :alt="authorName" 
+          class="object-cover"
+        />
+        <AvatarFallback class="bg-gray-100 text-gray-400">
+          <UserCircle class="w-2/3 h-2/3" />
+        </AvatarFallback>
+      </Avatar>
+
+      <div class="author-content flex-1 max-w-full">
+        <h4 
+          class="font-bold mb-1 outline-none" 
+          :style="nameStyles"
+          :contenteditable="mode === 'edit'"
+          @blur="updateText('name', $event)"
+          v-text="authorName || (mode === 'edit' ? 'Author Name' : '')"
+        ></h4>
+        
+        <p 
+          v-if="authorTitle || mode === 'edit'" 
+          class="text-sm opacity-80 mb-3 outline-none" 
+          :style="titleStyles"
+          :contenteditable="mode === 'edit'"
+          @blur="updateText('title', $event)"
+          v-text="authorTitle || (mode === 'edit' ? 'Author Title/Role' : '')"
+        ></p>
+        
+        <div 
+          v-if="authorBio || mode === 'edit'" 
+          class="mb-4 leading-relaxed outline-none" 
+          :style="bioStyles"
+          :contenteditable="mode === 'edit'"
+          @blur="updateText('bio', $event)"
+          v-text="authorBio || (mode === 'edit' ? 'Author bio goes here...' : '')"
+        ></div>
+        
+        <div v-if="settings.showSocial !== false && activeSocialLinks.length" class="flex gap-3" :class="layout === 'vertical' ? 'justify-center' : ''">
+          <a 
+              v-for="(link, i) in activeSocialLinks" 
+              :key="i" 
+              :href="mode === 'view' ? link.url : null" 
+              class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-primary hover:text-white hover:-translate-y-0.5 transition-all"
+              target="_blank"
+              @click="handleLinkClick"
+          >
+              <component :is="getSocialIcon(link.platform)" class="w-4 h-4" />
+          </a>
+        </div>
       </div>
     </div>
   </BaseBlock>
@@ -49,6 +63,7 @@
 <script setup>
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import { UserCircle, Twitter, Linkedin, Facebook, Instagram, Github, Globe } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
@@ -104,12 +119,6 @@ const imageStyles = computed(() => {
   return { width: `${size}px`, height: `${size}px` }
 })
 
-const contentStyles = computed(() => {
-    const styles = {}
-    if (layout.value === 'vertical') styles.textAlign = 'center'
-    return styles
-})
-
 const nameStyles = computed(() => getTypographyStyles(settings.value, 'name_', device.value))
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const bioStyles = computed(() => getTypographyStyles(settings.value, 'bio_', device.value))
@@ -117,21 +126,9 @@ const bioStyles = computed(() => getTypographyStyles(settings.value, 'bio_', dev
 
 <style scoped>
 .author-block { width: 100%; }
-.author-block--horizontal { display: flex; gap: 24px; align-items: flex-start; }
-.author-block--vertical { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.author-block--vertical .author-image-wrapper { margin-bottom: 16px; }
-.author-image { border-radius: 50%; overflow: hidden; flex-shrink: 0; background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
-.author-image img { width: 100%; height: 100%; object-fit: cover; }
-.placeholder-icon { width: 60%; height: 60%; color: #ccc; }
-.author-name { margin: 0 0 4px; outline: none; }
-.author-title { margin: 0 0 12px; outline: none; opacity: 0.8; }
-.author-bio { margin: 0 0 16px; outline: none; }
-.author-social { display: flex; gap: 12px; justify-content: inherit; }
-.social-link { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #f0f0f0; color: #666; transition: all 0.2s; }
-.social-link:hover { background: #3b82f6; color: white; }
-.social-icon { width: 16px; height: 16px; }
-[contenteditable]:focus {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+/* Edit mode placeholder overrides */
+[contenteditable="true"]:empty:before {
+  content: 'Add details...';
+  opacity: 0.3;
 }
 </style>

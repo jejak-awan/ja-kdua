@@ -1,18 +1,19 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperStyles, settings }">
-      <div class="icon-block" :style="iconBlockStyles">
+    <template #default="{ settings, device: blockDevice }">
+      <div class="icon-block" :style="iconBlockStyles(settings, blockDevice)">
         <component
-          :is="settings.linkUrl ? 'a' : 'div'"
-          class="icon-wrapper"
-          :href="settings.linkUrl || undefined"
-          :target="settings.linkUrl ? (settings.linkTarget || '_self') : undefined"
-          :style="iconWrapperStyles"
+          :is="getVal(settings, 'linkUrl') ? 'a' : 'div'"
+          class="icon-wrapper transition-all duration-300 group"
+          :href="getVal(settings, 'linkUrl') || undefined"
+          :target="getVal(settings, 'linkTarget') || '_self'"
+          :style="iconWrapperStyles(settings, blockDevice)"
         >
           <LucideIcon 
-            :name="iconName" 
-            :size="iconSize" 
-            :style="iconStyles"
+            :name="iconName(settings, blockDevice)" 
+            :size="iconSize(settings, blockDevice)" 
+            :style="iconStyles(settings, blockDevice)"
+            class="transition-transform duration-300 group-hover:scale-110"
           />
         </component>
       </div>
@@ -20,52 +21,86 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
 import BaseBlock from '../components/BaseBlock.vue'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
-import { getVal, toCSS } from '../utils/styleUtils'
+import { 
+    getVal, 
+    getTextGradientStyles,
+    getMaskStyles 
+} from '../utils/styleUtils'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: any;
+  mode?: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const settings = computed(() => props.module?.settings || {})
-
-const iconName = computed(() => getVal(settings.value, 'icon', props.device) || 'Star')
-const iconSize = computed(() => {
-    const size = getVal(settings.value, 'size', props.device) || 48
+const iconName = (settings: any, device: string) => {
+    const icon = getVal(settings, 'icon', device) || 'Star'
+    return typeof icon === 'string' ? icon.replace('lucide:', '') : 'Star'
+}
+const iconSize = (settings: any, device: string) => {
+    const size = getVal(settings, 'size', device) || 48
     return typeof size === 'number' ? size : parseInt(size) || 48
-})
+}
 
-const iconBlockStyles = computed(() => {
+const iconBlockStyles = (settings: any, device: string) => {
   return {
     width: '100%',
-    textAlign: getVal(settings.value, 'alignment', props.device) || 'center'
+    textAlign: (getVal(settings, 'alignment', device) || 'center') as any
   }
-})
+}
 
-const iconWrapperStyles = computed(() => {
-  return {
+const iconWrapperStyles = (settings: any, device: string) => {
+  const styles: Record<string, any> = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     textDecoration: 'none',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+    position: 'relative'
   }
-})
 
-const iconStyles = computed(() => {
-  return {
-    color: getVal(settings.value, 'color', props.device) || 'currentColor',
-    display: 'block'
+  // 1. Background Shape
+  if (getVal(settings, 'use_background', device)) {
+      styles.backgroundColor = getVal(settings, 'background_color', device) || '#f3f4f6'
+      styles.padding = '20px'
+      Object.assign(styles, getMaskStyles(settings, 'background', device))
   }
-})
+
+  // 2. Glow Effect
+  if (getVal(settings, 'use_glow', device)) {
+      const glow = getVal(settings, 'glow_color', device) || 'rgba(32, 89, 234, 0.5)'
+      styles.filter = `drop-shadow(0 0 15px ${glow})`
+  }
+
+  return styles
+}
+
+const iconStyles = (settings: any, device: string) => {
+    const styles: Record<string, any> = {
+        display: 'block'
+    }
+
+    if (getVal(settings, 'use_gradient', device)) {
+        Object.assign(styles, getTextGradientStyles(settings, '', device))
+    } else {
+        styles.color = getVal(settings, 'color', device) || '#2059ea'
+    }
+
+    return styles
+}
 </script>
 
 <style scoped>
 .icon-block { width: 100%; }
-.icon-wrapper:hover { transform: scale(1.05); }
+.icon-wrapper {
+    cursor: default;
+}
+a.icon-wrapper {
+    cursor: pointer;
+}
 </style>

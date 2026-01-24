@@ -11,14 +11,12 @@
       
       <div class="radius-controls grid grid-cols-2 gap-2">
         <div v-for="corner in cornerKeys" :key="corner" class="control-group">
-            <BaseInput 
-              v-model.number="radius[corner]" 
-              type="number" 
-              @input="updateRadius(corner)" 
+            <BaseNumberInput 
+              v-model="radius[corner]" 
+              :label="t(`builder.fields.border.radius.${corner}`)"
               :placeholder="String(placeholderValue?.radius?.[corner] ?? 0)"
-              class="text-center"
+              @update:model-value="updateRadius(corner)"
             />
-           <span class="label-corner">{{ t(`builder.fields.border.radius.${corner}`) }}</span>
         </div>
         
         <!-- Link Button -->
@@ -96,7 +94,7 @@ import {
   BaseLabel, 
   BaseSegmentedControl, 
   BaseSliderInput, 
-  BaseInput 
+  BaseNumberInput
 } from '../ui'
 import ColorField from './ColorField.vue'
 
@@ -216,14 +214,6 @@ const emitUpdate = () => {
     background: var(--builder-accent);
     color: white;
     border-color: var(--builder-accent);
-}
-.label-corner {
-    font-size: 9px;
-    color: var(--builder-text-muted);
-    position: absolute;
-    right: 8px; top: 10px;
-    pointer-events: none;
-    opacity: 0.5;
 }
 .control-group { position: relative; }
 

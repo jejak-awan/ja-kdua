@@ -1,29 +1,34 @@
 <template>
   <BaseBlock
-    :id="id"
+    :module="module"
     :mode="mode"
-    :settings="settings"
-    :is-preview="isPreview"
+    :device="device"
     class="progressbar-block"
   >
-    <!-- Title above -->
-    <div v-if="titlePosition === 'above'" class="progressbar-header">
-      <span 
-        class="progressbar-title" 
-        :style="titleStyles"
-        :contenteditable="mode === 'edit'"
-        @blur="updateField('title', $event.target.innerText)"
-        v-text="titleValue"
-      ></span>
-      <span v-if="showPercentage" class="progressbar-percentage" :style="percentageStyles">{{ percentageValue }}%</span>
-    </div>
-    
-    <!-- Bar -->
-    <div class="progressbar-track" :style="trackStyles">
-      <div class="progressbar-fill" :style="fillStyles">
-        <span v-if="titlePosition === 'inside'" class="progressbar-inside-text">
-          {{ titleValue }} {{ showPercentage ? percentageValue + '%' : '' }}
-        </span>
+    <div class="w-full">
+      <!-- Title above -->
+      <div v-if="titlePosition === 'above'" class="flex justify-between items-end mb-2">
+        <span 
+          class="font-semibold block" 
+          :style="titleStyles"
+          :contenteditable="mode === 'edit'"
+          @blur="updateField('title', $event.target.innerText)"
+          v-text="titleValue"
+        ></span>
+        <span v-if="showPercentage" class="font-bold block" :style="percentageStyles">{{ percentageValue }}%</span>
+      </div>
+      
+      <!-- Progress Bar -->
+      <Progress 
+        :model-value="percentageValue" 
+        :class="progressBarClass"
+        :style="trackStyles"
+      />
+            
+      <!-- Inside Text (if implemented via Overlay, though standard Progress doesn't slot inside content easily without custom styling) -->
+      <div v-if="titlePosition === 'inside'" class="relative -mt-5 px-3 flex justify-between items-center text-xs font-bold text-white z-10 w-full" :style="{ marginTop: `-${parseInt(getVal(settings, 'height') || 20) / 2 + 6}px` }">
+          <span>{{ titleValue }}</span>
+          <span v-if="showPercentage">{{ percentageValue }}%</span>
       </div>
     </div>
   </BaseBlock>
@@ -32,70 +37,56 @@
 <script setup>
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Progress } from '../ui'
 import { getVal, getTypographyStyles } from '../utils/styleUtils'
+import { cn } from '../../lib/utils'
 
 const props = defineProps({
-  id: String,
+  module: { type: Object, required: true },
   mode: { type: String, default: 'view' },
-  settings: { type: Object, default: () => ({}) },
-  isPreview: Boolean
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
+const settings = computed(() => props.module.settings || {})
 
 const percentageValue = computed(() => {
-  const p = parseInt(getVal(props.settings, 'percentage')) || 75
+  const p = parseInt(getVal(settings.value, 'percentage')) || 75
   return Math.min(100, Math.max(0, p))
 })
 
-const showPercentage = computed(() => getVal(props.settings, 'showPercentage') !== false)
-const titlePosition = computed(() => getVal(props.settings, 'titlePosition') || 'above')
-const titleValue = computed(() => getVal(props.settings, 'title') || 'Progress')
+const showPercentage = computed(() => getVal(settings.value, 'showPercentage') !== false)
+const titlePosition = computed(() => getVal(settings.value, 'titlePosition') || 'above')
+const titleValue = computed(() => getVal(settings.value, 'title') || 'Progress')
+
+const progressBarClass = computed(() => {
+    return cn(
+        "w-full overflow-hidden rounded-full bg-secondary",
+        getVal(settings.value, 'striped') ? 'progress-striped' : '',
+        getVal(settings.value, 'animated') ? 'progress-animated' : ''
+    )
+})
 
 const trackStyles = computed(() => {
-  const height = parseInt(getVal(props.settings, 'height')) || 20
-  const radius = parseInt(getVal(props.settings, 'borderRadius')) || 10
-  const trackColor = getVal(props.settings, 'trackColor') || '#e0e0e0'
+  const height = parseInt(getVal(settings.value, 'height')) || 20
+  const radius = parseInt(getVal(settings.value, 'borderRadius')) || 10
+  const trackColor = getVal(settings.value, 'trackColor') || '#e0e0e0'
+  const barColor = getVal(settings.value, 'barColor') || 'var(--primary)'
+  
   return {
-    backgroundColor: trackColor,
     height: `${height}px`,
     borderRadius: `${radius}px`,
-    overflow: 'hidden',
-    width: '100%'
+    backgroundColor: trackColor,
+    '--progress-background': barColor 
   }
 })
 
-const fillStyles = computed(() => {
-  const radius = parseInt(getVal(props.settings, 'borderRadius')) || 10
-  const barColor = getVal(props.settings, 'barColor') || 'var(--theme-primary-color, #2059ea)'
-  return {
-    backgroundColor: barColor,
-    width: `${percentageValue.value}%`,
-    height: '100%',
-    borderRadius: `${radius}px`,
-    transition: 'width 1.5s cubic-bezier(0.1, 0.5, 0.5, 1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingRight: '12px'
-  }
-})
-
-const titleStyles = computed(() => getTypographyStyles(props.settings, 'title_'))
-const percentageStyles = computed(() => getTypographyStyles(props.settings, 'percentage_'))
+const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_'))
+const percentageStyles = computed(() => getTypographyStyles(settings.value, 'percentage_'))
 
 const updateField = (key, value) => {
   if (props.mode !== 'edit' || !builder) return
-  
-  const current = props.settings[key]
-  let newValue
-  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
-    newValue = { ...current, [builder.device.value]: value }
-  } else {
-    newValue = { [builder.device.value]: value }
-  }
-  
-  builder.updateModuleSettings(props.id, { [key]: newValue })
+  builder.updateModuleSettings(props.module.id, { [key]: value })
 }
 </script>
 
@@ -103,32 +94,8 @@ const updateField = (key, value) => {
 .progressbar-block {
   width: 100%;
 }
-
-.progressbar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 8px;
-}
-
-.progressbar-title {
-  font-weight: 600;
-  outline: none;
-}
-
-.progressbar-percentage {
-  font-weight: 700;
-}
-
-.progressbar-track {
-  width: 100%;
-}
-
-.progressbar-inside-text {
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+/* Custom styles to override shadcn Progress defaults using vars */
+:deep(.bg-primary) {
+    background-color: var(--progress-background);
 }
 </style>

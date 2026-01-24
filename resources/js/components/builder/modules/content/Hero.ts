@@ -32,10 +32,12 @@ const HeroModule: ModuleDefinition = {
     children: null,
 
     defaults: {
+        eyebrow: 'New Era of Design',
         title: 'Build the Future of the Web\nwith Infinite Precision.',
         subtitle: 'The world\'s most flexible visual builder for creators who demand pixel-perfect execution.',
         content: '',
-        // Buttons
+        image: '', // For split layout
+        // Buttons (Deprecated but kept for compat)
         buttonText: 'Get Started for Free',
         buttonUrl: '#',
         button2Text: 'Learn More',
@@ -43,9 +45,12 @@ const HeroModule: ModuleDefinition = {
         showButton1: true,
         showButton2: true,
         // Layout
+        layout: 'centered',
+        useGlass: false,
+        verticalAlign: 'center',
         minHeight: 700,
         alignment: 'center',
-        contentWidth: 1200,
+        contentMaxWidth: 1200,
         // Background - Modified to support gradient keys
         gradientStart: '#4f46e5',
         gradientEnd: '#7c3aed',
@@ -62,10 +67,12 @@ const HeroModule: ModuleDefinition = {
         title_font_weight: '900',
         title_color: '#ffffff',
         title_text_shadow: { horizontal: 0, vertical: 4, blur: 20, color: 'rgba(0,0,0,0.2)' },
+        title_tag: 'h1',
 
         // Subtitle Typography Defaults
         subtitle_font_size: 22,
         subtitle_color: 'rgba(255, 255, 255, 0.9)',
+        subtitle_max_width: 800,
 
         // Border
         border: {
@@ -86,14 +93,32 @@ const HeroModule: ModuleDefinition = {
                 id: 'text',
                 label: 'Text',
                 fields: [
+                    { name: 'eyebrow', type: 'text', label: 'Eyebrow / Badge' },
                     { name: 'title', type: 'text', label: 'Title' },
                     { name: 'subtitle', type: 'text', label: 'Subtitle' },
                     { name: 'content', type: 'richtext', label: 'Content' }
                 ]
             },
             {
+                id: 'layout_content',
+                label: 'Layout & Media',
+                fields: [
+                    {
+                        name: 'layout',
+                        type: 'select',
+                        label: 'Layout Variant',
+                        options: [
+                            { value: 'centered', label: 'Centered' },
+                            { value: 'split', label: 'Split (Image Right)' }
+                        ]
+                    },
+                    { name: 'image', type: 'upload', label: 'Split Image', show_if: { field: 'layout', value: 'split' } },
+                    { name: 'useGlass', type: 'toggle', label: 'Use Glassmorphism' }
+                ]
+            },
+            {
                 id: 'buttons',
-                label: 'Buttons',
+                label: 'Legacy Buttons',
                 fields: [
                     { name: 'showButton1', type: 'toggle', label: 'Show Primary Button' },
                     { name: 'buttonText', type: 'text', label: 'Primary Text', show_if: { field: 'showButton1', value: true } },
@@ -111,16 +136,28 @@ const HeroModule: ModuleDefinition = {
                 id: 'layout',
                 label: 'Layout',
                 fields: [
-                    { name: 'contentWidth', type: 'range', label: 'Content Max Width', min: 400, max: 1600, step: 50, unit: 'px' },
+                    { name: 'minHeight', type: 'range', label: 'Min Height', min: 400, max: 1000, step: 50, unit: 'px', responsive: true },
+                    { name: 'contentMaxWidth', type: 'range', label: 'Content Max Width', min: 400, max: 1600, step: 50, unit: 'px', responsive: true },
+                    {
+                        name: 'verticalAlign',
+                        type: 'select',
+                        label: 'Vertical Alignment',
+                        options: [
+                            { value: 'start', label: 'Top' },
+                            { value: 'center', label: 'Center' },
+                            { value: 'end', label: 'Bottom' }
+                        ]
+                    },
                     {
                         name: 'alignment',
                         type: 'buttonGroup',
-                        label: 'Alignment',
+                        label: 'Text Alignment',
                         options: [
                             { value: 'left', label: 'Left', icon: 'AlignLeft' },
                             { value: 'center', label: 'Center', icon: 'AlignCenter' },
                             { value: 'right', label: 'Right', icon: 'AlignRight' }
-                        ]
+                        ],
+                        responsive: true
                     }
                 ]
             },

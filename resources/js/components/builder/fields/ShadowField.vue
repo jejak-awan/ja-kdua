@@ -11,7 +11,7 @@
       <div class="field-content px-3 pb-2">
         <!-- Presets -->
         <BaseLabel class="mb-3">{{ t('builder.fields.shadow.presets.label') }}</BaseLabel>
-        <div class="presets-grid grid grid-cols-4 gap-3 mb-6">
+        <div class="presets-grid grid grid-cols-4 gap-3 mb-2">
           <button 
             v-for="(preset, key) in presets" 
             :key="key"
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Manual Controls -->
-        <div v-if="localValue.preset !== 'none'" class="manual-controls flex flex-col gap-5">
+        <div v-if="localValue.preset !== 'none'" class="manual-controls flex flex-col gap-4 mt-4">
             
             <div class="control-row">
                 <BaseLabel>{{ t('builder.fields.shadow.controls.horizontal') }}</BaseLabel>

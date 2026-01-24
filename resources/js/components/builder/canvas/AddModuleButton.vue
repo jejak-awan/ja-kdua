@@ -148,11 +148,15 @@ const label = computed(() => {
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
-    background-color: var(--builder-bg-topbar, #1a1e25) !important;
+    /* Use background from type if available */
     color: white !important;
     border: 2px solid white !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
     z-index: 10;
+}
+
+.add-module-btn--circular:not(.add-module-btn--section):not(.add-module-btn--row):not(.add-module-btn--column) {
+    background-color: var(--builder-bg-topbar, #1a1e25) !important;
 }
 
 .add-module-btn--circular:hover {

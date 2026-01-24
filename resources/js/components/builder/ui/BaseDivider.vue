@@ -1,23 +1,30 @@
 <template>
   <div 
-    class="base-divider"
-    :class="[`base-divider--${orientation}`]"
+    :class="cn(
+        'bg-slate-200 dark:bg-slate-800 shrink-0',
+        orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+        props.class
+    )"
     :style="dividerStyle"
   ></div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { cn } from '../../../lib/utils'
 
 const props = defineProps({
   orientation: {
     type: String,
     default: 'horizontal', // horizontal, vertical
-    validator: (value) => ['horizontal', 'vertical'].includes(value)
   },
   margin: {
     type: [String, Number],
     default: 8
+  },
+  class: {
+    type: String,
+    default: ''
   }
 })
 
@@ -28,20 +35,3 @@ const dividerStyle = computed(() => {
     : { marginLeft: marginValue, marginRight: marginValue }
 })
 </script>
-
-<style scoped>
-.base-divider {
-  background-color: var(--builder-border, #374151);
-}
-
-.base-divider--horizontal {
-  height: 1px;
-  width: 100%;
-}
-
-.base-divider--vertical {
-  width: 1px;
-  height: 100%;
-  display: inline-block;
-}
-</style>

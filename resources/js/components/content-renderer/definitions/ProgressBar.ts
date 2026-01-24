@@ -52,14 +52,28 @@ export default {
         },
         {
             key: 'height',
-            type: 'select',
+            type: 'range',
             label: 'Bar Height',
-            options: [
-                { label: 'Small', value: 'small' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Large', value: 'large' }
-            ],
-            default: 'medium'
+            min: 8,
+            max: 40,
+            default: 20,
+            tab: 'style'
+        },
+        {
+            key: 'borderRadius',
+            type: 'range',
+            label: 'Bar Roundness',
+            min: 0,
+            max: 20,
+            default: 10,
+            tab: 'style'
+        },
+        {
+            key: 'trackColor',
+            type: 'color',
+            label: 'Track Color',
+            default: '#e0e0e0',
+            tab: 'style'
         },
         {
             key: 'striped',

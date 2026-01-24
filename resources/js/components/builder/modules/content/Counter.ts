@@ -71,30 +71,12 @@ const CounterModule: ModuleDefinition = {
                 id: 'counter',
                 label: 'Counter',
                 fields: [
-                    {
-                        name: 'number',
-                        type: 'text',
-                        label: 'Number',
-                        responsive: true
-                    },
-                    {
-                        name: 'prefix',
-                        type: 'text',
-                        label: 'Prefix (e.g., $)',
-                        responsive: true
-                    },
-                    {
-                        name: 'suffix',
-                        type: 'text',
-                        label: 'Suffix (e.g., %)',
-                        responsive: true
-                    },
-                    {
-                        name: 'title',
-                        type: 'text',
-                        label: 'Title',
-                        responsive: true
-                    }
+                    { name: 'number', type: 'text', label: 'Number', responsive: true },
+                    { name: 'prefix', type: 'text', label: 'Prefix (e.g., $)', responsive: true },
+                    { name: 'suffix', type: 'text', label: 'Suffix (e.g., %)', responsive: true },
+                    { name: 'decimals', type: 'range', label: 'Decimals', min: 0, max: 4, step: 1, responsive: true },
+                    { name: 'separator', type: 'toggle', label: 'Thousands Separator', responsive: true },
+                    { name: 'title', type: 'text', label: 'Title', responsive: true }
                 ]
             },
             {

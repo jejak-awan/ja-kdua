@@ -1,6 +1,7 @@
 <template>
   <BaseToggle 
     :model-value="value" 
+    :label="''"
     @update:model-value="$emit('update:value', $event)"
   />
 </template>

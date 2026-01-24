@@ -8,17 +8,17 @@
     @close="$emit('close')"
   >
     <template #header>
-      <div class="modal-tabs">
-        <button 
-          v-for="tab in tabs"
-          :key="tab.id"
-          class="modal-tab"
-          :class="{ 'modal-tab--active': activeTab === tab.id }"
-          @click="handleTabChange(tab.id)"
-        >
-          {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
-        </button>
-      </div>
+      <Tabs v-model="activeTab" class="modal-tabs-container" @update:modelValue="handleTabChange">
+        <TabsList class="modal-tabs-list">
+          <TabsTrigger 
+            v-for="tab in tabs" 
+            :key="tab.id" 
+            :value="tab.id"
+          >
+            {{ te('builder.insertModal.tabs.' + tab.id) ? $t('builder.insertModal.tabs.' + tab.id) : tab.label }}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </template>
 
     <div class="modal-body-content">
@@ -123,7 +123,7 @@
         <div v-if="activeTab === 'presets'" class="library-content">
           <div v-if="loadingPresets" class="no-results">
             <div class="loading-spinner"></div>
-            <p>{{ $t('common.messages.loading') }}</p>
+            <p>{{ $t('builder.messages.loading') }}</p>
           </div>
           <div v-else-if="filteredPresets.length === 0" class="no-results">
             {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
@@ -170,7 +170,7 @@ import {
   Box, BarChart2, Newspaper, MessageCircle, Timer, 
   Download, Mail, Calendar, Bookmark, User, Hash, Percent, Sparkles
 } from 'lucide-vue-next'
-import { BaseModal, BaseInput } from '../ui'
+import { BaseModal, BaseInput, Tabs, TabsList, TabsTrigger } from '../ui'
 import ModuleRegistry from '../core/ModuleRegistry'
 import { 
     equalLayouts, 
@@ -205,10 +205,10 @@ const { t, te } = useI18n()
 
 // Tabs
 const tabs = [
-  { id: 'module', label: 'New Module' },
-  { id: 'row', label: 'New Row' },
-  { id: 'presets', label: 'Design Presets' },
-  { id: 'library', label: 'Add From Library' }
+  { id: 'module', label: 'Module' },
+  { id: 'row', label: 'Row' },
+  { id: 'presets', label: 'Preset' },
+  { id: 'library', label: 'Library' }
 ]
 
 // Group all presets for a unified loop
@@ -252,8 +252,8 @@ const groupedModules = computed(() => {
 })
 
 // Presets - builder.presets is already a reactive Proxy, not a ref
-const loadingPresets = computed(() => builder?.loadingPresets || false)
-const presets = computed(() => builder?.presets || [])
+const loadingPresets = computed(() => builder?.loadingPresets?.value || false)
+const presets = computed(() => builder?.presets?.value || [])
 
 const filteredPresets = computed(() => {
   if (!searchQuery.value) return presets.value
@@ -303,29 +303,37 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.modal-tabs {
-  display: flex;
-  margin-left: 20px;
+.modal-tabs-container {
+  margin-left: 16px;
 }
 
-.modal-tab {
-  background: none;
-  border: none;
-  padding: 12px 16px;
-  color: var(--builder-text-secondary);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  font-weight: 500;
-  font-size: 14px;
+.modal-tabs-list {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  gap: 4px !important;
 }
 
-.modal-tab:hover {
-  color: var(--builder-text-primary);
+.modal-tabs-list :deep([data-radix-collection-item]) {
+  background: transparent !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--builder-text-secondary) !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
 }
 
-.modal-tab--active {
-  color: var(--builder-accent);
-  border-bottom-color: var(--builder-accent);
+.modal-tabs-list :deep([data-radix-collection-item]:hover) {
+  color: var(--builder-text-primary) !important;
+  background: var(--builder-bg-secondary) !important;
+}
+
+.modal-tabs-list :deep([data-radix-collection-item][data-state="active"]) {
+  color: var(--builder-accent) !important;
+  background: rgba(var(--builder-accent-rgb, 32, 89, 234), 0.1) !important;
+  font-weight: 600 !important;
 }
 
 .modal-search-wrapper {

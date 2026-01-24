@@ -103,6 +103,23 @@
     --builder-shadow-color: rgba(0, 0, 0, 0.4);
     --glass-bg: rgba(20, 24, 31, 0.75);
     --glass-border: rgba(255, 255, 255, 0.08);
+
+    /* --- Shadcn UI Token Mapping (Dark) --- */
+    --background: 218 17% 12%;
+    /* #1a1e25 */
+    --foreground: 210 40% 98%;
+    /* #f8fafc */
+    --card: 220 14% 16%;
+    /* #242830 */
+    --popover: 218 17% 12%;
+    /* #1a1e25 */
+    --border: 220 14% 16%;
+    /* #242830 */
+    --muted: 217 19% 27%;
+    --accent: 220 14% 20%;
+    --primary: 223 82% 52%;
+    /* #2059ea */
+    --primary-foreground: 210 40% 98%;
 }
 
 /* --- Theme: Light --- */
@@ -162,24 +179,43 @@
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
 
     --builder-shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* --- Shadcn UI Token Mapping (Light) --- */
+    --background: 0 0% 100%;
+    /* Pure White - Fix for inconsistent modals */
+    --foreground: 222 47% 11%;
+    /* Slate 900 */
+    --card: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --border: 214 32% 91%;
+    /* Slate 200 */
+    --muted: 210 40% 96.1%;
+    --accent: 210 40% 96.1%;
+    --primary: 223 82% 52%;
+    /* #2059ea */
+    --primary-foreground: 0 0% 100%;
 }
 
-/* Base Builder Styles */
+/* Base Builder Styles - Purely for variable and base style inheritance */
 .ja-builder {
+    background: var(--builder-bg-primary);
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    color: var(--builder-text-primary);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.015em;
+    line-height: 1.6;
+}
+
+/* Main Application Container - Handles layout and frame */
+.ja-builder-main {
     display: flex;
     flex-direction: column;
     height: 800px;
     min-height: 500px;
     width: 100%;
-    background: var(--builder-bg-primary);
-    font-family: var(--font-family);
-    font-size: var(--font-size-sm);
-    color: var(--builder-text-primary);
     overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    letter-spacing: -0.015em;
-    line-height: 1.6;
 
     /* Workspace Frame - Prevent blending into parent */
     border: 1px solid var(--builder-border);
@@ -188,7 +224,7 @@
 }
 
 /* Fullscreen Mode - Escapes everything via Teleport to body */
-.ja-builder--fullscreen {
+.ja-builder-main.ja-builder--fullscreen {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -559,8 +595,8 @@
     border: 1px dashed #cbd5e1 !important;
     min-height: 44px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    width: 100% !important;
 }
 
 /* Ensure children are visible but simplified */
@@ -641,6 +677,7 @@
 .ja-builder--wireframe .wireframe-placeholder {
     min-height: 28px !important;
     padding: 6px 8px !important;
+    width: 100% !important;
 }
 
 /* Reduce minimum height of content modules */

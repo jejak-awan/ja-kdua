@@ -12,4 +12,8 @@ export { default as BaseSegmentedControl } from './BaseSegmentedControl.vue'
 export { default as BaseSlider } from './BaseSlider.vue'
 export { default as BaseSliderInput } from './BaseSliderInput.vue'
 export { default as BaseToggle } from './BaseToggle.vue'
+export { default as BaseNumberInput } from './BaseNumberInput.vue'
 export { default as IconButton } from './IconButton.vue'
+
+// Re-exporting all Shadcn components from shared UI
+export * from '../../../shared/ui'

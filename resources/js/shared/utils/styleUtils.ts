@@ -56,12 +56,24 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
         'minWidth': ['min_width'],
         'maxWidth': ['max_width'],
         'layoutType': ['layout_type'],
+        'displayStyle': ['display_style', 'style'],
         'direction': ['flexDirection', 'flex_direction', 'grid_direction'],
         'flexWrap': ['flex_wrap', 'wrap'],
         'justifyContent': ['justify_content'],
         'alignItems': ['align_items'],
         'gapX': ['gap_x', 'columnGap', 'column_gap'],
         'gapY': ['gap_y', 'rowGap', 'row_gap'],
+        'fontSize': ['font_size', 'size'],
+        'fontWeight': ['font_weight', 'weight'],
+        'lineHeight': ['line_height'],
+        'letterSpacing': ['letter_spacing'],
+        'textAlign': ['text_align', 'alignment', 'align'],
+        'textDecoration': ['text_decoration'],
+        'textTransform': ['text_transform'],
+        'fontFamily': ['font_family', 'font'],
+        'fontStyle': ['font_style', 'style'],
+        'verticalAlign': ['vertical_align', 'vAlign'],
+        'value': ['percentage', 'percent', 'progress'],
     }
 
     const tryKeys = [key]
@@ -96,6 +108,26 @@ export function getVal(settings: ModuleSettings, key: string, device: string = '
     for (const k of tryKeys) {
         const val = getResponsiveValue(settings, k, device)
         if (val !== undefined && val !== null && val !== '') return val
+    }
+
+    // Secondary Check: Nested objects (e.g. background.color)
+    const backgroundProps: Record<string, string> = {
+        'backgroundColor': 'color',
+        'backgroundImage': 'image',
+        'backgroundPosition': 'position',
+        'backgroundRepeat': 'repeat',
+        'backgroundSize': 'size'
+    }
+
+    const bgObj = settings.background
+    if (bgObj && typeof bgObj === 'object') {
+        for (const k of tryKeys) {
+            if (backgroundProps[k]) {
+                const subKey = backgroundProps[k]
+                const val = getResponsiveValue(bgObj, subKey, device)
+                if (val !== undefined && val !== null && val !== '') return val
+            }
+        }
     }
 
     return undefined
@@ -722,4 +754,79 @@ export function getColorVariables(settings: ModuleSettings, hoverSettings: Modul
     if (hoverBgColor) styles['--hover-bg-color'] = hoverBgColor
 
     return styles
+}
+
+/**
+ * Premium Utility: Glassmorphism Styles
+ */
+export function getGlassStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
+    const css: Record<string, any> = {}
+    const p = prefix ? `${prefix}_` : ''
+
+    if (getVal(settings, `${p}enable_glass`, device)) {
+        const blur = getVal(settings, `${p}glass_blur`, device) || 10
+        const opacity = getVal(settings, `${p}glass_opacity`, device) || 10
+        const color = getVal(settings, `${p}glass_color`, device) || '#ffffff'
+        const border = getVal(settings, `${p}glass_border`, device) || 1
+
+        css.backdropFilter = `blur(${blur}px)`
+        css.webkitBackdropFilter = `blur(${blur}px)`
+
+        // Convert hex to rgba for background
+        const { h, s, l } = hexToHsl(color)
+        css.backgroundColor = `hsla(${h}, ${s}%, ${l}%, ${opacity / 100})`
+
+        if (border > 0) {
+            css.border = `${border}px solid hsla(${h}, ${s}%, ${l}%, 0.2)`
+        }
+    }
+
+    return css
+}
+
+/**
+ * Premium Utility: Text Gradient Styles
+ */
+export function getTextGradientStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
+    const css: Record<string, any> = {}
+    const p = prefix ? `${prefix}_` : ''
+
+    if (getVal(settings, `${p}use_gradient`, device)) {
+        const g = getVal(settings, `${p}gradient`, device)
+        if (g && g.stops && g.stops.length >= 2) {
+            css.backgroundImage = generateGradientCSS(g)
+            css.webkitBackgroundClip = 'text'
+            css.backgroundClip = 'text'
+            css.color = 'transparent'
+            css.display = 'inline-block' // Required for clip to work well
+        }
+    }
+
+    return css
+}
+
+/**
+ * Premium Utility: Mask Styles
+ */
+export function getMaskStyles(settings: ModuleSettings, prefix: string = '', device: string = 'desktop'): Record<string, any> {
+    const css: Record<string, any> = {}
+    const p = prefix ? `${prefix}_` : ''
+    const shape = getVal(settings, `${p}mask_shape`, device)
+
+    if (shape && shape !== 'none') {
+        const masks: Record<string, string> = {
+            circle: 'circle(50% at 50% 50%)',
+            squircle: 'polygon(33% 0%, 67% 0%, 100% 33%, 100% 67%, 67% 100%, 33% 100%, 0% 67%, 0% 33%)',
+            diamond: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+            triangle: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+            blob1: 'path("M48.5,-57.7C61.4,-48.4,69.5,-31.2,71.2,-13.6C72.9,4,68.2,22,57.7,35.5C47.2,49,30.9,58,13.7,62.1C-3.5,66.1,-21.5,65.2,-36.8,57.1C-52,49,-64.5,33.7,-68.6,16.5C-72.7,-0.7,-68.4,-19.8,-57.9,-32.1C-47.3,-44.4,-30.5,-49.9,-15.1,-57.4C0.4,-64.9,24.3,-71.1,48.5,-57.7Z")',
+        }
+
+        if (masks[shape]) {
+            css.clipPath = masks[shape]
+            css.webkitClipPath = masks[shape]
+        }
+    }
+
+    return css
 }

@@ -1,34 +1,54 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="video-popup-block">
-    <div 
-        class="video-popup-container relative group h-[400px] rounded-2xl overflow-hidden cursor-pointer shadow-xl border border-gray-100 dark:border-gray-800" 
-        :style="containerStyles"
-        @click="openPopup"
-    >
-      <!-- Thumbnail Overlay -->
-      <div v-if="settings.thumbnailImage" class="thumbnail-layer absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" :style="{ backgroundImage: `url(${settings.thumbnailImage})` }"></div>
-      
-      <!-- Overlay -->
-      <div class="video-popup-overlay absolute inset-0 transition-opacity group-hover:opacity-80" :style="overlayStyles" />
-      
-      <!-- Play Button -->
-      <div class="video-content-wrap relative z-10 flex flex-col items-center justify-center h-full gap-6">
-          <button class="video-popup-button flex items-center justify-center transition-all group-hover:scale-110 active:scale-95 shadow-2xl" :style="buttonStyles">
-            <Play class="play-icon drop-shadow-lg" :style="iconStyles" />
-          </button>
-          
-          <span v-if="settings.buttonStyle === 'text'" class="button-text font-bold text-lg tracking-tight text-white drop-shadow-md" :style="buttonTextStyles">
-            {{ settings.buttonText || 'Watch Video' }}
-          </span>
-      </div>
-    </div>
+    <template #default="{ settings: blockSettings }">
+      <Card 
+          class="video-popup-container relative group h-[500px] rounded-[48px] overflow-hidden cursor-pointer shadow-2xl border-none transition-all duration-700 hover:-translate-y-2 bg-slate-900" 
+          :style="containerStyles"
+          @click="openPopup"
+      >
+        <!-- Thumbnail Overlay -->
+        <div 
+            v-if="blockSettings.thumbnailImage" 
+            class="thumbnail-layer absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110" 
+            :style="{ backgroundImage: `url(${blockSettings.thumbnailImage})` }"
+        ></div>
+        <div v-else class="absolute inset-0 flex items-center justify-center text-slate-800">
+             <Film :size="120" class="opacity-10" />
+        </div>
+        
+        <!-- Glass Overlay -->
+        <div class="video-popup-overlay absolute inset-0 transition-all duration-700 bg-slate-900/40 group-hover:bg-primary/20 backdrop-blur-[2px] group-hover:backdrop-blur-none" :style="overlayStyles" />
+        
+        <!-- Content Wrap -->
+        <div class="video-content-wrap relative z-10 flex flex-col items-center justify-center h-full gap-8 p-12 text-center">
+            <!-- Pulsing Play Button -->
+            <div class="relative">
+                <div class="absolute inset-0 bg-white/20 rounded-full animate-ping group-hover:bg-primary/40"></div>
+                <Button 
+                    class="video-popup-button relative w-24 h-24 rounded-full bg-white text-primary hover:bg-white hover:scale-110 shadow-[0_0_50px_rgba(255,255,255,0.3)] transition-all duration-500 flex items-center justify-center p-0 border-none"
+                    :style="buttonStyles"
+                >
+                  <Play class="play-icon fill-current translate-x-1" :size="32" />
+                </Button>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <h4 v-if="blockSettings.buttonText" class="button-text font-black text-3xl md:text-4xl text-white tracking-tighter drop-shadow-2xl mb-2 group-hover:text-primary transition-colors duration-500" :style="buttonTextStyles">
+                    {{ blockSettings.buttonText || 'Experience the Vision' }}
+                </h4>
+                <div class="w-12 h-1.5 bg-white/30 rounded-full group-hover:bg-primary group-hover:w-24 transition-all duration-700"></div>
+            </div>
+        </div>
+      </Card>
+    </template>
   </BaseBlock>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { Play } from 'lucide-vue-next'
+import { Card, Button } from '../ui'
+import { Play, Film } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
   getResponsiveValue
@@ -36,55 +56,40 @@ import {
 
 const props = defineProps({
   module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+  mode: { type: String, default: 'view' },
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
 
 const openPopup = () => {
     if (props.mode === 'edit') return
     const videoUrl = settings.value.videoUrl
     if (!videoUrl) return
-    // In a real implementation, this would trigger a global modal
-    console.log('Opening video:', videoUrl)
+    console.log('Opening video popup:', videoUrl)
 }
 
-const iconSizeValue = computed(() => getResponsiveValue(settings.value, 'iconSize', device.value) || 96)
-const iconColorValue = computed(() => getResponsiveValue(settings.value, 'iconColor', device.value) || '#ffffff')
-const iconBackgroundColorValue = computed(() => getResponsiveValue(settings.value, 'iconBackgroundColor', device.value) || 'rgba(59, 130, 246, 0.95)')
-const overlayColorValue = computed(() => getResponsiveValue(settings.value, 'overlayColor', device.value) || 'rgba(0, 0, 0, 0.4)')
-
 const containerStyles = computed(() => {
-  const height = getResponsiveValue(settings.value, 'height', device.value) || 450
+  const height = getResponsiveValue(settings.value, 'height', currentDevice.value) || 500
   return {
     height: typeof height === 'number' ? `${height}px` : height
   }
 })
 
 const overlayStyles = computed(() => ({ 
-    backgroundColor: overlayColorValue.value 
+    backgroundColor: settings.value.overlayColor || '' 
 }))
 
-const buttonStyles = computed(() => ({
-  background: iconBackgroundColorValue.value,
-  borderRadius: '50%',
-  width: `${iconSizeValue.value}px`,
-  height: `${iconSizeValue.value}px`,
-  minWidth: `${iconSizeValue.value}px`
-}))
+const buttonStyles = computed(() => {
+    const color = settings.value.iconBackgroundColor || ''
+    return color ? { backgroundColor: color } : {}
+})
 
-const iconStyles = computed(() => ({ 
-    width: `${iconSizeValue.value * 0.4}px`, 
-    height: `${iconSizeValue.value * 0.4}px`, 
-    color: iconColorValue.value 
-}))
-
-const buttonTextStyles = computed(() => getTypographyStyles(settings.value, 'button_', device.value))
+const buttonTextStyles = computed(() => getTypographyStyles(settings.value, 'button_', currentDevice.value))
 </script>
 
 <style scoped>
 .video-popup-block { width: 100%; }
-.video-popup-button { border: none; cursor: pointer; }
 </style>

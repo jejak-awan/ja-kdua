@@ -42,6 +42,33 @@ export default {
             tab: 'style'
         },
         {
+            key: 'gap',
+            type: 'range',
+            label: 'Gap',
+            min: 0,
+            max: 80,
+            default: 24,
+            tab: 'style'
+        },
+        {
+            key: 'showCaptions',
+            type: 'boolean',
+            label: 'Show Captions',
+            default: true,
+            tab: 'style'
+        },
+        {
+            key: 'captionPosition',
+            type: 'select',
+            label: 'Caption Position',
+            options: [
+                { label: 'Overlay (On Hover)', value: 'overlay' },
+                { label: 'Below Image', value: 'below' }
+            ],
+            default: 'overlay',
+            tab: 'style'
+        },
+        {
             key: 'padding',
             type: 'select',
             label: 'Padding',

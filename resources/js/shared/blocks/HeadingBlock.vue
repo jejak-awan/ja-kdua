@@ -3,9 +3,9 @@
       <div class="heading-container">
         <component 
           :is="tag(settings)"
-          class="heading-block"
+          class="heading-block transition-all duration-300"
           :style="headingStyles(settings, blockDevice)"
-          :class="[sizeClass(settings), decorationClass(settings)]"
+          :class="[sizeClass(settings)]"
           v-bind="getAttributes('title')"
         >
           <template v-if="blockMode === 'edit' && !isDynamic(settings)">
@@ -35,47 +35,77 @@
   </BaseBlock>
 </template>
 
-<script setup>
-import { computed, inject, ref, watch } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { getTypographyStyles, getVal, getResponsiveValue } from '../utils/styleUtils'
-// We might need to handle dynamic resolution differently in a shared component
-// For now, let's keep the core logic simple and adapt the dynamic resolver if needed.
+import { 
+    getTypographyStyles, 
+    getVal,
+    getTextGradientStyles,
+} from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  device: { type: String, default: 'desktop' }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+}>(), {
+  mode: 'view',
+  device: 'desktop'
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 
-const tag = (settings) => getVal(settings, 'tag') || 'h2'
-const subtitle = (settings) => getVal(settings, 'subtitle') || ''
-const isDynamic = (settings) => {
+const tag = (settings: any) => getVal(settings, 'tag') || 'h2'
+const subtitle = (settings: any) => getVal(settings, 'subtitle') || ''
+const isDynamic = (settings: any) => {
     const text = getVal(settings, 'text')
     return typeof text === 'string' && text.startsWith('{{')
 }
 
-const displayText = (settings) => {
+const displayText = (settings: any) => {
     return getVal(settings, 'text') || 'Heading Text'
 }
 
-const headingStyles = (settings, device) => {
-  const styles = { width: '100%' }
-  const typography = getTypographyStyles(settings, '', device)
-  
-  const alignment = getVal(settings, 'alignment', device)
-  if (alignment) typography.textAlign = alignment
-  
-  Object.assign(styles, typography)
-  return styles
+const headingStyles = (settings: any, device: string) => {
+    const styles: Record<string, any> = { width: '100%' }
+    
+    // 1. Core Typography
+    Object.assign(styles, getTypographyStyles(settings, '', device))
+
+    // 2. Gradients
+    if (getVal(settings, 'use_gradient', device)) {
+        Object.assign(styles, getTextGradientStyles(settings, '', device))
+    }
+
+    // 3. Stroke
+    if (getVal(settings, 'use_stroke', device)) {
+        const width = getVal(settings, 'stroke_width', device) || 1
+        const color = getVal(settings, 'stroke_color', device) || '#000000'
+        styles.webkitTextStroke = `${width}px ${color}`
+    }
+
+    // 4. Shadow Presets
+    const shadowPreset = getVal(settings, 'shadow_preset', device)
+    if (shadowPreset && shadowPreset !== 'none') {
+        const presets: Record<string, string> = {
+            soft: '0 2px 10px rgba(0,0,0,0.1)',
+            hard: '4px 4px 0px rgba(0,0,0,0.2)',
+            glow: '0 0 20px rgba(var(--primary-rgb, 32, 89, 234), 0.5)'
+        }
+        styles.textShadow = presets[shadowPreset]
+    }
+
+    const alignment = getVal(settings, 'alignment', device)
+    if (alignment) styles.textAlign = alignment
+    
+    return styles
 }
 
-const sizeClass = (settings) => {
+const sizeClass = (settings: any) => {
     const size = getVal(settings, 'size') || 'large'
     
-    const sizes = {
+    const sizes: Record<string, { mobile: string; desktop: string }> = {
         small: { mobile: 'text-lg', desktop: 'text-2xl' },
         medium: { mobile: 'text-xl', desktop: 'text-3xl' },
         large: { mobile: 'text-2xl', desktop: 'text-4xl' },
@@ -83,27 +113,21 @@ const sizeClass = (settings) => {
         display: { mobile: 'text-4xl', desktop: 'text-7xl' }
     }
     
-    // Fallback
     const s = sizes[size] || sizes.large
 
-    // Builder Mode: Force specific class based on simulated device
     if (props.mode === 'edit') {
         if (props.device === 'mobile') return s.mobile
-        // Tablet usually inherits mobile or has intermediate, but for now map to mobile or desktop
-        // Let's use mobile size for tablet to be safe/compact, or define tablet specific if needed.
         if (props.device === 'tablet') return s.mobile 
-        return s.desktop // default to desktop
+        return s.desktop
     }
 
-    // Frontend: Use responsive classes
     return `${s.mobile} md:${s.desktop}`
 }
 
-const subtitleSizeClass = (settings) => {
+const subtitleSizeClass = (settings: any) => {
     const size = getVal(settings, 'size') || 'large'
     
-    // Mappings for subtitle relative to heading size
-    const sizes = {
+    const sizes: Record<string, { mobile: string; desktop: string }> = {
         small: { mobile: 'text-sm', desktop: 'text-sm' },
         medium: { mobile: 'text-sm', desktop: 'text-base' },
         large: { mobile: 'text-base', desktop: 'text-lg' },
@@ -113,28 +137,17 @@ const subtitleSizeClass = (settings) => {
 
     const s = sizes[size] || sizes.large
 
-    // Builder Mode
     if (props.mode === 'edit') {
         if (props.device === 'mobile') return s.mobile
         if (props.device === 'tablet') return s.mobile
         return s.desktop
     }
 
-    // Frontend (simplified responsive behavior for subtitle)
     if (s.mobile === s.desktop) return s.desktop
     return `${s.mobile} md:${s.desktop}`
 }
 
-const decorationClass = (settings) => {
-    const dec = getVal(settings, 'decoration') || 'none'
-    return {
-        'underline underline-offset-8 decoration-primary decoration-4': dec === 'underline',
-        'bg-gradient-to-r from-primary/20 to-primary/10 px-4 py-2 rounded-lg inline-block': dec === 'highlight',
-        'bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent': dec === 'gradient'
-    }
-}
-
-const subtitleStyles = (settings, device) => {
+const subtitleStyles = (settings: any, device: string) => {
     const s = getTypographyStyles(settings, '', device)
     return {
         textAlign: s.textAlign || 'left',
@@ -144,7 +157,7 @@ const subtitleStyles = (settings, device) => {
     }
 }
 
-const onTextBlur = (e, settings) => {
+const onTextBlur = (e: any, settings: any) => {
   if (props.mode !== 'edit' || !builder) return
   const newText = e.target.innerText
   if (newText !== getVal(settings, 'text')) {
@@ -154,7 +167,7 @@ const onTextBlur = (e, settings) => {
   }
 }
 
-const onSubtitleBlur = (e, settings) => {
+const onSubtitleBlur = (e: any, settings: any) => {
   if (props.mode !== 'edit' || !builder) return
   const newSubtitle = e.target.innerText
   if (newSubtitle !== getVal(settings, 'subtitle') && newSubtitle !== 'Add a subtitle...') {

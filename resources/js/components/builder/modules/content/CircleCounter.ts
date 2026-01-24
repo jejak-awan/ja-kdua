@@ -91,6 +91,16 @@ const CircleCounterModule: ModuleDefinition = {
                         type: 'toggle',
                         label: 'Show Value',
                         responsive: true
+                    },
+                    {
+                        name: 'duration',
+                        type: 'range',
+                        label: 'Animation Duration',
+                        min: 500,
+                        max: 5000,
+                        step: 100,
+                        unit: 'ms',
+                        responsive: true
                     }
                 ]
             },

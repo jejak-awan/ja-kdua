@@ -96,7 +96,7 @@
         <div v-if="activeTab === 'presets'" class="library-content">
           <div v-if="loadingPresets" class="no-results">
             <div class="loading-spinner"></div>
-            <p>{{ $t('common.messages.loading') }}</p>
+            <p>{{ $t('builder.messages.loading') }}</p>
           </div>
           <div v-else-if="filteredPresets.length === 0" class="no-results">
             {{ $t('builder.insertModal.noResults', { query: searchQuery }) }}
@@ -196,8 +196,8 @@ const tabs = [
 
 // Search/Filter logic
 const searchQuery = ref('')
-const loadingPresets = computed(() => builder?.loadingPresets || false)
-const presets = computed(() => builder?.presets || [])
+const loadingPresets = computed(() => builder?.loadingPresets?.value || false)
+const presets = computed(() => builder?.presets?.value || [])
 
 const filteredPresets = computed(() => {
   const allPresets = presets.value.filter(p => p.type === 'section')

@@ -1,12 +1,20 @@
 <template>
-  <div class="base-label" :class="{ 'is-muted': muted, 'is-uppercase': uppercase }">
-    <slot name="prefix"></slot>
-    <span><slot></slot></span>
-    <slot name="suffix"></slot>
-  </div>
+  <Label 
+    class="flex items-center gap-1.5 text-[11px] font-semibold tracking-wider transition-colors"
+    :class="[
+        muted ? 'text-slate-500' : 'text-slate-900',
+        uppercase && 'uppercase'
+    ]"
+  >
+    <slot name="prefix" />
+    <slot />
+    <slot name="suffix" />
+  </Label>
 </template>
 
 <script setup>
+import Label from './Label.vue'
+
 defineProps({
   muted: {
     type: Boolean,
@@ -18,24 +26,3 @@ defineProps({
   }
 })
 </script>
-
-<style scoped>
-.base-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--builder-text-primary);
-  margin-bottom: 4px;
-}
-
-.base-label.is-muted {
-  color: var(--builder-text-muted);
-}
-
-.base-label.is-uppercase {
-  text-transform: uppercase;
-}
-</style>

@@ -81,28 +81,59 @@ const isSelected = computed(() => props.mode === 'edit' && builder?.selectedModu
 const wrapperStyles = computed(() => {
   const s: Record<string, any> = {}
   
-  Object.assign(s, getBackgroundStyles(settings.value, device.value))
-  Object.assign(s, getSpacingStyles(settings.value, 'padding', device.value, 'padding'))
-  Object.assign(s, getSpacingStyles(settings.value, 'margin', device.value, 'margin'))
-  Object.assign(s, getBorderStyles(settings.value, 'border', device.value))
-  Object.assign(s, getBoxShadowStyles(settings.value, 'boxShadow', device.value))
-  Object.assign(s, getSizingStyles(settings.value, device.value))
-  Object.assign(s, getLayoutStyles(settings.value, device.value))
-  Object.assign(s, getFilterStyles(settings.value, device.value))
-  Object.assign(s, getTransformStyles(settings.value, device.value))
+  const background = getBackgroundStyles(settings.value, device.value)
+  const padding = getSpacingStyles(settings.value, 'padding', device.value, 'padding')
+  const margin = getSpacingStyles(settings.value, 'margin', device.value, 'margin')
+  const border = getBorderStyles(settings.value, 'border', device.value)
+  const boxShadow = getBoxShadowStyles(settings.value, 'boxShadow', device.value)
+  const sizing = getSizingStyles(settings.value, device.value)
+  const layout = getLayoutStyles(settings.value, device.value)
+  const filters = getFilterStyles(settings.value, device.value)
+  const transform = getTransformStyles(settings.value, device.value)
+  const visibility = getVisibilityStyles(settings.value, device.value)
+  const positioning = getPositioningStyles(settings.value, device.value)
+  const animation = getAnimationStyles(settings.value, device.value)
+  const transition = getTransitionStyles(settings.value, device.value)
+  const colors = getColorVariables(settings.value, (props.module as any).hoverSettings || {}, device.value)
+
+  if (props.manualStyles) {
+      // Properties that define outer layout stays on wrapper
+      Object.assign(s, visibility, positioning, margin, sizing, layout, animation, colors)
+  } else {
+      // Everything on wrapper
+      Object.assign(s, background, padding, margin, border, boxShadow, sizing, layout, filters, transform, visibility, positioning, animation, transition, colors)
+  }
   
-  Object.assign(s, getVisibilityStyles(settings.value, device.value))
-  Object.assign(s, getPositioningStyles(settings.value, device.value))
-  Object.assign(s, getAnimationStyles(settings.value, device.value))
-  Object.assign(s, getTransitionStyles(settings.value, device.value))
-  
-  Object.assign(s, getColorVariables(settings.value, (props.module as any).hoverSettings || {}, device.value))
+  // Ensure structural blocks fill containers while keeping content blocks responsive
+  const isStructural = ['section', 'row', 'column'].includes(props.module.type)
+  if (isStructural) {
+      s.width = '100%'
+      s.height = '100%'
+      if (props.mode === 'edit') {
+          s.overflow = 'visible !important'
+      }
+  } else {
+      s.width = s.width || '100%' // Content modules default to 100%
+      if (props.mode === 'edit') {
+          s.overflow = 'visible !important'
+      }
+  }
   
   return s
 })
 
 const contentStyles = computed(() => {
-  return {} 
+    if (!props.manualStyles) return {}
+    
+    return {
+        ...getBackgroundStyles(settings.value, device.value),
+        ...getSpacingStyles(settings.value, 'padding', device.value, 'padding'),
+        ...getBorderStyles(settings.value, 'border', device.value),
+        ...getBoxShadowStyles(settings.value, 'boxShadow', device.value),
+        ...getFilterStyles(settings.value, device.value),
+        ...getTransformStyles(settings.value, device.value),
+        ...getTransitionStyles(settings.value, device.value),
+    }
 })
 
 const cssId = computed(() => getVal(settings.value, 'cssId', device.value) || getVal(settings.value, '_css_id', device.value))
@@ -245,18 +276,21 @@ onUnmounted(() => {
 }
 
 .ja-block-edit:hover {
-  outline: 1px dashed rgba(var(--primary), 0.5);
+  outline: 1px solid rgba(var(--builder-accent-rgb, 32, 89, 234), 0.3);
+  transition: outline 0.2s ease;
 }
 
-.ja-block-selected {
-  outline: 2px solid rgb(var(--primary)) !important;
-}
-
+/* Ensure controls are always on top */
 .ja-block-controls {
   position: absolute;
   top: -30px;
   right: 0;
   display: flex;
   gap: 4px;
+  z-index: 50;
 }
+
+/* When selected in edit mode, ensure we can still interact with inner fields if any, 
+   but usually we want to capture click for selection. 
+   The issue might be the overlay in edit mode. */
 </style>

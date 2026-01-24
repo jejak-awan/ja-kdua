@@ -1,40 +1,46 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperBaseStyles, settings }">
-      <div class="gallery-block" :style="galleryBlockStyles">
+    <template #default="{ settings }">
+      <div class="gallery-block w-full">
         <div class="gallery-grid" :style="gridStyles">
-          <div 
+          <Card 
             v-for="(image, index) in galleryImages" 
             :key="index"
-            class="gallery-item group relative aspect-square overflow-hidden rounded-2xl bg-muted/50 border border-primary/5 cursor-pointer shadow-lg transition-all duration-500 hover:shadow-2xl hover:border-primary/20"
-            :style="itemStyles"
+            class="gallery-item group relative aspect-square overflow-hidden rounded-[32px] bg-slate-100 dark:bg-slate-900 border-none shadow-lg cursor-pointer transition-all duration-700 hover:shadow-2xl hover:-translate-y-2"
           >
-            <div class="gallery-image-wrapper w-full h-full" :style="imageWrapperStyles">
+            <div class="gallery-image-wrapper w-full h-full relative">
                 <img 
                     v-if="image.url"
                     :src="image.url" 
                     :alt="image.alt || 'Gallery Image'"
-                    class="gallery-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    class="gallery-image w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 >
-                 <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
-                    <ImageIcon :size="48" />
+                 <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
+                    <ImageIcon :size="48" class="opacity-30" />
                  </div>
 
-                <div v-if="showCaptions && image.caption && captionPosition === 'overlay'" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 text-white">
-                    <p class="text-sm font-semibold tracking-wide" :style="captionStyles">{{ image.caption }}</p>
+                <!-- Overlay -->
+                <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-primary/20 opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-sm">
+                    <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-500">
+                        <Plus class="w-6 h-6" />
+                    </div>
                 </div>
+
+                <CardContent v-if="showCaptions && image.caption && captionPosition === 'overlay'" class="absolute inset-x-0 bottom-0 z-20 p-8 pt-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 text-white pointer-events-none">
+                    <p class="text-sm font-bold tracking-tight line-clamp-2" :style="captionStyles">{{ image.caption }}</p>
+                </CardContent>
             </div>
-            <p v-if="showCaptions && image.caption && captionPosition === 'below'" class="mt-2 text-center text-sm" :style="captionStyles">{{ image.caption }}</p>
-          </div>
+            <p v-if="showCaptions && image.caption && captionPosition === 'below'" class="mt-4 text-center text-xs font-bold text-slate-500 px-2" :style="captionStyles">{{ image.caption }}</p>
+          </Card>
           
           <!-- Placeholder when empty (Mode Edit Only) -->
           <template v-if="galleryImages.length === 0 && mode === 'edit'">
-            <div v-for="i in 3" :key="i" class="gallery-item gallery-placeholder" :style="itemStyles">
-              <div class="gallery-image-wrapper p-8">
-                <ImageIcon class="placeholder-icon text-gray-300" :size="32" />
-                <span class="text-xs text-gray-400 mt-2">Add images in settings</span>
+            <Card v-for="i in 3" :key="i" class="gallery-item gallery-placeholder aspect-square rounded-[32px] border-2 border-dashed border-slate-200 bg-transparent flex items-center justify-center p-8 text-center text-slate-300">
+              <div class="flex flex-col items-center gap-3">
+                <ImageIcon :size="32" class="opacity-30" />
+                <span class="text-[10px] font-black uppercase tracking-widest">Empty Slot</span>
               </div>
-            </div>
+            </Card>
           </template>
         </div>
       </div>
@@ -43,9 +49,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Image as ImageIcon } from 'lucide-vue-next'
+import { computed, inject } from 'vue'
+import { Image as ImageIcon, Plus } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card, CardContent } from '../ui'
 import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
 const props = defineProps({
@@ -54,25 +61,22 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
+const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
+
 const settings = computed(() => props.module?.settings || {})
 
 const galleryImages = computed(() => {
-  const imgs = getVal(settings.value, 'images', props.device)
+  const imgs = getVal(settings.value, 'images', currentDevice.value)
   return Array.isArray(imgs) ? imgs : []
 })
 
-const showCaptions = computed(() => getVal(settings.value, 'showCaptions', props.device))
-const captionPosition = computed(() => getVal(settings.value, 'captionPosition', props.device) || 'below')
-
-const galleryBlockStyles = computed(() => {
-  return {
-    width: '100%'
-  }
-})
+const showCaptions = computed(() => getVal(settings.value, 'showCaptions', currentDevice.value))
+const captionPosition = computed(() => getVal(settings.value, 'captionPosition', currentDevice.value) || 'overlay')
 
 const gridStyles = computed(() => {
-  const cols = getVal(settings.value, 'columns', props.device) || 3
-  const gap = getVal(settings.value, 'gap', props.device) || 16
+  const cols = getVal(settings.value, 'columns', currentDevice.value) || 3
+  const gap = getVal(settings.value, 'gap', currentDevice.value) || 24
   return {
     display: 'grid',
     gridTemplateColumns: `repeat(${cols}, 1fr)`,
@@ -80,32 +84,9 @@ const gridStyles = computed(() => {
   }
 })
 
-const itemStyles = computed(() => {
-  return {
-    overflow: 'hidden'
-  }
-})
-
-const imageWrapperStyles = computed(() => {
-  const ratio = getVal(settings.value, 'aspectRatio', props.device) || '1:1'
-  const ratioMap = {
-    '1:1': '100%',
-    '4:3': '75%',
-    '16:9': '56.25%',
-    'auto': 'auto'
-  }
-  // If we want to support dynamic ratio via paddingTop hack:
-  // return { paddingTop: ratioMap[ratio] || '100%' }
-  // But the class 'aspect-square' is already there for 1:1. 
-  // Let's make it more robust in the next step if needed.
-  return {}
-})
-
-const captionStyles = computed(() => getTypographyStyles(settings.value, 'caption_', props.device))
+const captionStyles = computed(() => getTypographyStyles(settings.value, 'caption_', currentDevice.value))
 </script>
 
 <style scoped>
-.gallery-block { width: 100%; box-sizing: border-box; }
-.gallery-placeholder { display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 8px; aspect-ratio: 1; }
-.gallery-item { transition: all 0.3s ease; }
+.gallery-block { width: 100%; }
 </style>

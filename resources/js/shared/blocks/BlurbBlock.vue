@@ -8,7 +8,7 @@
         <!-- Media (Icon/Image) -->
         <div 
             v-if="mediaType(settings) !== 'none'" 
-            class="blurb-media flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-500" 
+            class="blurb-media flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110" 
             :style="mediaWrapperStyles(settings)"
         >
           <LucideIcon 
@@ -17,12 +17,16 @@
             :size="getVal(settings, 'iconSize') || 48" 
             :style="{ color: getVal(settings, 'iconColor') || '#4f46e5' }"
           />
-          <img 
-            v-else-if="mediaType(settings) === 'image' && getVal(settings, 'image')"
-            :src="getVal(settings, 'image')" 
-            alt="Feature"
-            class="blurb-image object-cover w-full h-full rounded-lg"
-          />
+          <Avatar v-else-if="mediaType(settings) === 'image' && getVal(settings, 'image')" class="w-full h-full rounded-none">
+            <AvatarImage 
+              :src="getVal(settings, 'image')" 
+              alt="Feature"
+              class="object-cover"
+            />
+            <AvatarFallback class="bg-slate-100 rounded-none">
+              <Layers class="w-1/2 h-1/2 opacity-20" />
+            </AvatarFallback>
+          </Avatar>
         </div>
         
         <!-- Content -->
@@ -40,8 +44,8 @@
             class="blurb-text text-slate-500 font-medium leading-relaxed" 
             :contenteditable="mode === 'edit'"
             @blur="e => updateField('content', e.target.innerText)"
+            v-text="getVal(settings, 'content')"
           >
-            {{ getVal(settings, 'content') }}
           </div>
         </div>
       </div>
@@ -52,7 +56,9 @@
 <script setup>
 import { inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Avatar, AvatarImage, AvatarFallback } from '../ui'
 import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { Layers } from 'lucide-vue-next'
 import { getVal } from '../utils/styleUtils'
 
 const props = defineProps({
@@ -61,7 +67,7 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
-const builder = inject('builder')
+const builder = inject('builder', null)
 
 const mediaType = (settings) => getVal(settings, 'mediaType') || 'icon'
 
@@ -89,7 +95,8 @@ const mediaWrapperStyles = (settings) => {
     const style = {
         backgroundColor: bgColor,
         width: `${size}px`,
-        height: `${size}px`
+        height: `${size}px`,
+        overflow: 'hidden'
     }
 
     if (shape === 'circle') style.borderRadius = '50%'

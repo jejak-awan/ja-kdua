@@ -1,3 +1,4 @@
+import type { ModuleDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -25,7 +26,7 @@ import {
 /**
  * Row Module Definition
  */
-export default {
+const RowModule: ModuleDefinition = {
     name: 'row',
     title: 'Row',
     icon: 'Columns',
@@ -39,12 +40,12 @@ export default {
 
     // Default settings
     defaults: {
-        columns: '1-1',
+        columns: '1-1', // Column structure: 1, 1-1, 1-1-1, 2-1, 1-2, etc
         gutterWidth: 30,
-        equalizeColumns: true, // Default to true for Divi behavior
-        maxWidth: '100%',
-        background: { color: 'transparent', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
-        padding: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
+        equalizeColumns: true, // Refined to true for Divi behavior
+        maxWidth: '100%',     // Refined to 100% for Divi behavior
+        background: { color: '', image: '', repeat: 'no-repeat', position: 'center', size: 'cover' },
+        padding: { top: 30, bottom: 30, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' },
         border: {
             radius: { tl: 0, tr: 0, bl: 0, br: 0, linked: true },
@@ -106,3 +107,5 @@ export default {
         ]
     }
 }
+
+export default RowModule;

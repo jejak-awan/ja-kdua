@@ -8,20 +8,25 @@
             getVal(settings, 'padding', blockDevice) || 'py-20'
         ]"
       >
-        <div class="accordion-list flex flex-col gap-5">
-          <div 
+        <Accordion 
+          :type="getVal(settings, 'allowMultiple') ? 'multiple' : 'single'" 
+          :collapsible="true"
+          class="accordion-list flex flex-col"
+          :style="{ gap: (getVal(settings, 'gap', blockDevice) || 16) + 'px' }"
+        >
+          <AccordionItem 
             v-for="(item, index) in items" 
             :key="index"
-            class="accordion-item transition-all duration-500 ease-in-out"
+            :value="`item-${index}`"
+            class="accordion-item transition-all duration-300 border-none"
             :class="[
                 getItemClasses(settings, index),
-                { 'is-open shadow-lg': openIndices.includes(index) && getVal(settings, 'variant') === 'boxed' }
             ]"
             :style="getItemStyles(settings, index)"
           >
             <!-- Header -->
-            <button 
-              class="accordion-header w-full flex items-center justify-between text-left focus:outline-none group"
+            <AccordionTrigger 
+              class="accordion-header w-full flex items-center justify-between text-left focus:outline-none group hover:no-underline"
               :class="headerPadding(settings)"
               @click="toggle(index)"
             >
@@ -29,28 +34,27 @@
                 class="accordion-title font-bold text-lg"
                 :class="{ 'text-primary': openIndices.includes(index) }"
               >
-                {{ item.question || 'Question' }}
+                {{ item.title || 'Question' }}
               </span>
               
-              <div 
-                class="accordion-icon ml-4 transition-transform duration-300 shrink-0"
-                :class="{ 'rotate-180': openIndices.includes(index) }"
-              >
-                <component :is="getIcon(settings)" class="w-5 h-5 opacity-60 group-hover:opacity-100" />
-              </div>
-            </button>
+              <template #icon>
+                <div 
+                  class="accordion-icon ml-4 transition-all duration-300 shrink-0 [&[data-state=open]]:rotate-180"
+                  :style="iconStyles(settings)"
+                >
+                  <LucideIcon :name="getIconName(settings)" class="w-full h-full opacity-60 group-hover:opacity-100" />
+                </div>
+              </template>
+            </AccordionTrigger>
 
             <!-- Content -->
-            <div 
-                class="accordion-content overflow-hidden transition-all duration-300"
-                :style="{ maxHeight: openIndices.includes(index) ? '500px' : '0px' }"
-            >
-                <div class="p-6 pt-0 text-slate-600 leading-relaxed">
-                    {{ item.answer || 'Answer goes here...' }}
+            <AccordionContent class="accordion-content" :style="contentContainerStyles(settings)">
+                <div class="p-6 pt-0">
+                    <div class="prose max-w-none text-slate-600 leading-relaxed" :style="contentTypographyStyles(settings)" v-html="item.content || 'Answer goes here...'"></div>
                 </div>
-            </div>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </template>
   </BaseBlock>
@@ -59,8 +63,9 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
-import { ChevronDown, Plus, ArrowDown } from 'lucide-vue-next'
-import { getVal } from '../utils/styleUtils'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../ui'
+import LucideIcon from '../../components/ui/LucideIcon.vue'
+import { getVal, getTypographyStyles } from '../utils/styleUtils'
 
 const props = defineProps({
   module: { type: Object, required: true },
@@ -73,19 +78,31 @@ const items = computed(() => settings.value.items || [])
 const openIndices = ref([])
 
 const toggle = (index) => {
-    // Single open mode by default, unless we add allowMultiple setting back
-    if (openIndices.value.includes(index)) {
-        openIndices.value = []
+    if (getVal(settings.value, 'allowMultiple')) {
+        if (openIndices.value.includes(index)) {
+             openIndices.value = openIndices.value.filter(i => i !== index)
+        } else {
+             openIndices.value.push(index)
+        }
     } else {
-        openIndices.value = [index]
+        openIndices.value = openIndices.value.includes(index) ? [] : [index]
     }
 }
 
-const getIcon = (settings) => {
-    const style = getVal(settings, 'iconStyle') || 'chevron-down'
-    if (style === 'plus') return Plus
-    if (style === 'arrow-down') return ArrowDown
-    return ChevronDown
+const getIconName = (settings) => {
+    const icon = getVal(settings, 'toggleIcon')
+    if (typeof icon === 'string') return icon.replace('lucide:', '')
+    return 'ChevronDown'
+}
+
+const iconStyles = (settings) => {
+    const size = parseInt(getVal(settings, 'iconSize')) || 20
+    const color = getVal(settings, 'iconColor') || 'currentColor'
+    return {
+        width: `${size}px`,
+        height: `${size}px`,
+        color: color
+    }
 }
 
 const getItemClasses = (settings, index) => {
@@ -103,14 +120,26 @@ const getItemClasses = (settings, index) => {
 }
 
 const getItemStyles = (settings, index) => {
-    const variant = getVal(settings, 'variant') || 'simple'
-    if (variant === 'boxed' && openIndices.value.includes(index)) {
-        return {
-            backgroundColor: getVal(settings, 'activeBgColor') || '#f8fafc'
-        }
+    const isOpen = openIndices.value.includes(index)
+    const bgColor = isOpen 
+        ? (getVal(settings, 'openHeaderBackgroundColor') || getVal(settings, 'headerBackgroundColor') || '#f1f5f9')
+        : (getVal(settings, 'headerBackgroundColor') || '#f8fafc')
+        
+    const styles = {
+        backgroundColor: bgColor
     }
-    return {}
+    
+    // Apply header typography to the outer item if needed, but usually we apply to specific span
+    return styles
 }
+
+const contentContainerStyles = (settings) => ({
+    backgroundColor: getVal(settings, 'contentBackgroundColor') || 'transparent'
+})
+
+const contentTypographyStyles = (settings) => getTypographyStyles(settings, 'content_', props.device)
+
+const headerTypographyStyles = (settings) => getTypographyStyles(settings, 'header_', props.device)
 
 const headerPadding = (settings) => {
     const variant = getVal(settings, 'variant') || 'simple'
@@ -121,5 +150,4 @@ const headerPadding = (settings) => {
 
 <style scoped>
 .accordion-block { width: 100%; }
-.accordion-content { transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 </style>

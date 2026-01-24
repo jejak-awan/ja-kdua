@@ -37,6 +37,7 @@
           group="section"
           class="canvas-blocks flex-1"
           ghost-class="ja-builder-ghost"
+          style="padding-bottom: 100px;"
         >
           <template #item="{ element: block, index }">
             <ModuleWrapper

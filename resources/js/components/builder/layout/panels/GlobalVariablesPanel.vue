@@ -40,67 +40,23 @@
                            
                            <div class="number-control-group">
                                <div class="value-input-group">
-                                    <BaseInput 
-                                        v-model="number.value" 
-                                        class="value-input"
-                                        :placeholder="t('builder.panels.globalVariables.placeholders.none')"
-                                    />
+                                     <input 
+                                         v-model="number.value" 
+                                         type="number"
+                                         class="value-input flex-grow"
+                                         :placeholder="t('builder.panels.globalVariables.placeholders.none')"
+                                     />
                                     
-                                    <!-- Unit Selector -->
-                                    <div class="unit-selector-wrapper">
-                                        <button 
-                                            class="unit-btn" 
-                                            @click.stop="toggleUnitDropdown(index)"
+                                    <!-- Unit Selector (Native) -->
+                                    <select v-model="number.unit" class="unit-select-native flex-shrink-0">
+                                        <option 
+                                            v-for="unit in ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'deg', 'grad', 'ms', 'rad', 's', 'turn', 'calc', 'min', 'max', 'clamp', 'auto', 'none', 'css var']" 
+                                            :key="unit" 
+                                            :value="unit"
                                         >
-                                            {{ number.unit || '-' }}
-                                            <ChevronDown :size="10" />
-                                        </button>
-                                        
-                                        <teleport to="body">
-                                            <div 
-                                                v-if="activeUnitDropdown === index" 
-                                                class="unit-dropdown-menu"
-                                                :style="unitDropdownPosition"
-                                                ref="unitDropdown"
-                                            >
-                                                <div class="unit-group">
-                                                    <div 
-                                                        v-for="unit in ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'deg', 'grad', 'ms', 'rad', 's', 'turn']" 
-                                                        :key="unit"
-                                                        class="unit-option"
-                                                        :class="{ active: number.unit === unit }"
-                                                        @click="selectUnit(index, unit)"
-                                                    >
-                                                        {{ unit }}
-                                                    </div>
-                                                </div>
-                                                <div class="unit-divider"></div>
-                                                <div class="unit-group">
-                                                    <div 
-                                                        v-for="unit in ['calc', 'min', 'max', 'clamp']" 
-                                                        :key="unit"
-                                                        class="unit-option"
-                                                        :class="{ active: number.unit === unit }"
-                                                        @click="selectUnit(index, unit)"
-                                                    >
-                                                        {{ unit }}
-                                                    </div>
-                                                </div>
-                                                <div class="unit-divider"></div>
-                                                <div class="unit-group">
-                                                    <div 
-                                                        v-for="unit in ['auto', 'none', 'inherit', 'unset', 'css var']" 
-                                                        :key="unit"
-                                                        class="unit-option"
-                                                        :class="{ active: number.unit === unit }"
-                                                        @click="selectUnit(index, unit)"
-                                                    >
-                                                        {{ unit }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </teleport>
-                                    </div>
+                                            {{ unit }}
+                                        </option>
+                                    </select>
                                </div>
                                
                                <!-- Scrubber/Slider -->
@@ -317,41 +273,39 @@
                            />
                            
                            <div class="color-control-group">
-                               <div class="color-input-group">
-                                   <div 
-                                       class="color-swatch" 
-                                       :style="{ backgroundColor: color.value }"
-                                       @click="openColorPicker(index)"
-                                   ></div>
-                                   <span class="color-hash">#</span>
-                                   <BaseInput 
-                                       v-model="color.hex" 
-                                       class="hex-input"
-                                       @update:model-value="updateColorFromHex(index, $event)"
-                                   />
-                                   <div class="opacity-separator"></div>
-                                   <div class="opacity-input-wrapper">
-                                       <BaseInput 
-                                           type="number" 
-                                           v-model="color.opacity" 
-                                           class="opacity-input"
-                                           :min="0"
-                                           :max="100"
-                                       />
-                                   </div>
-                                   <span class="opacity-unit">%</span>
-                               </div>
-                               <!-- Slider for Opacity -->
-                               <div class="opacity-slider-container">
-                                   <BaseColorSlider 
-                                       v-model="color.opacity" 
-                                       variant="alpha"
-                                       :color="color.value"
-                                       :min="0" 
-                                       :max="100" 
-                                   />
-                               </div>
-                           </div>
+                                <div class="color-input-group">
+                                    <div 
+                                        class="color-swatch" 
+                                        :style="{ backgroundColor: color.value }"
+                                        @click="openColorPicker(index)"
+                                    ></div>
+                                    <span class="color-hash">#</span>
+                                    <input 
+                                        v-model="color.hex" 
+                                        class="hex-input"
+                                        @input="updateColorFromHex(index, $event.target.value)"
+                                    />
+                                    <div class="opacity-separator"></div>
+                                    <input 
+                                        type="number" 
+                                        v-model="color.opacity" 
+                                        class="opacity-input"
+                                        :min="0"
+                                        :max="100"
+                                    />
+                                    <span class="opacity-unit">%</span>
+                                </div>
+                                <!-- Slider for Opacity -->
+                                <div class="opacity-slider-container">
+                                    <BaseColorSlider 
+                                        v-model="color.opacity" 
+                                        variant="alpha"
+                                        :color="color.value"
+                                        :min="0" 
+                                        :max="100" 
+                                    />
+                                </div>
+                            </div>
                            
                            <IconButton 
                                :icon="Trash2" 
@@ -452,7 +406,10 @@ import { ref, computed, nextTick, onMounted, inject, watch, defineAsyncComponent
 import { useI18n } from 'vue-i18n'
 import { ChevronRight, ChevronUp, ChevronDown, Plus, GripVertical, Trash2, Image as ImageIcon, Upload } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
-import { BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider } from '../../ui'
+import { 
+    BaseCollapsible, BaseInput, BaseSlider, IconButton, BaseButton, BaseColorSlider,
+    Select, SelectTrigger, SelectValue, SelectContent, SelectItem
+} from '../../ui'
 const ColorPickerModal = defineAsyncComponent(() => import('../../modals/ColorPickerModal.vue'))
 import MediaPicker from '../../../MediaPicker.vue'
 
@@ -493,36 +450,8 @@ const toggleCategory = (id) => {
 }
 
 // Unit Dropdown Logic
-const activeUnitDropdown = ref(null)
-const unitDropdownPosition = ref({ top: '0px', left: '0px' })
-
-const toggleUnitDropdown = (index) => {
-    if (activeUnitDropdown.value === index) {
-        closeUnitDropdown()
-    } else {
-        // Calculate position
-        const btn = document.querySelectorAll('.unit-btn')[index]
-        if (btn) {
-            const rect = btn.getBoundingClientRect()
-            unitDropdownPosition.value = {
-                top: `${rect.bottom + 4}px`,
-                left: `${rect.right - 100}px` // Align to right somewhat
-            }
-            activeUnitDropdown.value = index
-            window.addEventListener('click', closeUnitDropdown)
-        }
-    }
-}
-
 const selectUnit = (index, unit) => {
     globalNumbers.value[index].unit = unit
-    closeUnitDropdown()
-}
-
-const closeUnitDropdown = (e) => {
-   if (e && e.target.closest('.unit-dropdown-menu')) return
-   activeUnitDropdown.value = null
-   window.removeEventListener('click', closeUnitDropdown)
 }
 
 // Validation helper
@@ -931,44 +860,50 @@ input[type=number]:hover {
     align-items: center;
     background-color: var(--builder-bg-secondary);
     border: 1px solid var(--builder-border);
-    border-radius: 4px;
-    padding: 4px;
-    height: 32px;
+    border-radius: 6px;
+    padding: 2px 8px;
+    height: 34px;
     box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.color-input-group:focus-within {
+    border-color: var(--builder-accent);
+    box-shadow: 0 0 0 1px var(--builder-accent-light);
 }
 
 .color-swatch {
-    width: 18px;
-    height: 18px;
-    border-radius: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
     margin-right: 8px;
     flex-shrink: 0;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.1);
 }
 
 .color-hash {
     color: var(--builder-text-muted);
-    font-size: 11px;
-    margin-right: 2px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .hex-input {
     border: none;
     background: transparent;
-    padding: 0;
-    width: 48px;
-    font-family: monospace;
-    height: 22px;
-}
-
-.hex-input:focus {
-    border: none;
-    box-shadow: none;
+    padding: 0 4px;
+    width: 60px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--builder-text-primary);
+    height: 100%;
+    outline: none;
 }
 
 .opacity-separator {
     width: 1px;
-    height: 14px;
-    background-color: var(--builder-bg-tertiary);
+    height: 16px;
+    background-color: var(--builder-border);
     margin: 0 8px;
 }
 
@@ -976,29 +911,35 @@ input[type=number]:hover {
     border: none;
     background: transparent;
     padding: 0;
-    width: 28px;
+    width: 32px;
     text-align: right;
-    height: 22px;
+    height: 100%;
+    font-size: 13px;
+    color: var(--builder-text-primary);
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: none;
 }
 
-.opacity-input:focus {
-    border: none;
-    box-shadow: none;
+.opacity-input::-webkit-inner-spin-button,
+.opacity-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
 }
 
 .opacity-unit {
     color: var(--builder-text-muted);
-    font-size: 11px;
+    font-size: 12px;
     margin-left: 2px;
+    font-weight: 500;
 }
 
 /* Opacity Slider Scrubber */
 .opacity-slider-container {
-    margin-top: 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; /* Align to right side */
-    width: 100%;
+    margin-top: 6px;
+    padding: 0 2px;
 }
 
 /* Fonts Select */
@@ -1049,64 +990,70 @@ input[type=number]:hover {
     align-items: center;
     background-color: var(--builder-bg-secondary);
     border: 1px solid var(--builder-border);
-    border-radius: 4px;
-    height: 32px;
+    border-radius: 6px;
+    height: 34px;
     box-sizing: border-box;
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s;
 }
 
 .value-input-group:focus-within {
     border-color: var(--builder-accent);
-    box-shadow: 0 0 0 1px var(--builder-accent);
+    box-shadow: 0 0 0 1px var(--builder-accent-light);
 }
 
-.value-input-group :deep(.base-input-wrapper) {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 30px;
-}
-
-.value-input-group :deep(.base-input) {
-    height: 30px;
+.value-input {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
     padding: 0 12px;
     font-size: 13px;
     color: var(--builder-text-primary);
+    background: transparent;
+    border: none;
+    outline: none;
 }
 
-.value-input-group :deep(.base-input::placeholder) {
+.value-input::placeholder {
     color: var(--builder-text-muted);
     opacity: 0.6;
 }
 
-
-.unit-selector-wrapper {
-    position: relative;
+/* Native Unit Select Styles */
+.unit-select-native {
     height: 100%;
-}
-
-.unit-btn {
-    height: 100%;
-    min-width: 32px;
+    min-width: 60px;
     padding: 0 8px;
-    background: transparent;
-    border: none;
-    color: var(--builder-text-muted);
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.unit-btn:hover {
-    color: var(--builder-text-primary);
-}
-
-.unit-btn:hover {
     background: var(--builder-bg-tertiary);
-    color: white;
+    border: none;
+    border-left: 1px solid var(--builder-border);
+    border-radius: 0 5px 5px 0;
+    color: var(--builder-text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 24px;
+}
+
+.unit-select-native:hover {
+    background: var(--builder-bg-secondary);
+}
+
+.unit-select-native:focus {
+    border-color: var(--builder-accent);
+}
+
+.unit-select-native option {
+    background: var(--builder-bg-primary);
+    color: var(--builder-text-primary);
+    padding: 8px;
 }
 
 .delete-btn {
@@ -1127,49 +1074,6 @@ input[type=number]:hover {
 
 .scrubber-container {
     margin-top: 8px;
-}
-
-/* Unit Dropdown Custom */
-.unit-dropdown-menu {
-    position: fixed;
-    z-index: 9999;
-    background: var(--builder-bg-primary);
-    border: 1px solid var(--builder-border);
-    border-radius: 4px;
-    width: 60px;
-    max-height: 400px;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    padding: 0;
-}
-
-.unit-group {
-    padding: 4px 0;
-}
-
-.unit-divider {
-    height: 1px;
-    background: var(--builder-border);
-    margin: 0;
-}
-
-.unit-option {
-    padding: 6px 12px;
-    font-size: 11px;
-    color: var(--builder-text-secondary);
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.1s;
-}
-
-.unit-option:hover {
-    background: var(--builder-bg-tertiary);
-    color: var(--builder-text-primary);
-}
-
-.unit-option.active {
-    background: var(--builder-accent);
-    color: white;
 }
 
 .variable-item-placeholder {

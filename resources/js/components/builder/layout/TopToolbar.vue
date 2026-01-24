@@ -4,8 +4,10 @@
     <div class="top-toolbar__left">
       <!-- Menu Button (Mobile Only) -->
       <IconButton 
+        variant="ghost"
         :icon="sidebarVisible ? ChevronsLeft : Menu" 
-        :class="['toolbar-btn-lg', 'toolbar-btn-mobile', 'menu-toggle', { 'menu-toggle--active': sidebarVisible }]" 
+        :active="sidebarVisible"
+        :class="['toolbar-btn-lg', 'toolbar-btn-mobile', 'menu-toggle']" 
         @click="$emit('toggle-sidebar')" 
         :title="sidebarVisible ? t('builder.common.close') : t('builder.toolbar.menu')" 
       />
@@ -28,6 +30,7 @@
        <BaseDropdown align="center" width="auto">
             <template #trigger="{ open }">
               <IconButton 
+                variant="ghost"
                 :icon="Search" 
                 :active="open" 
                 :title="t('builder.toolbar.zoom')" 
@@ -52,6 +55,7 @@
       <!-- Device Modes (Desktop) -->
       <div class="device-modes desktop-only">
         <IconButton 
+          variant="ghost"
           :icon="Wand2"
           :active="builder.deviceModeType.value === 'auto'"
           :title="t('builder.toolbar.devices.auto') || 'Auto (Responsive)'"
@@ -61,6 +65,7 @@
         <IconButton 
           v-for="mode in deviceModes"
           :key="mode.id"
+          variant="ghost"
           :icon="icons[mode.icon] || mode.icon"
           :active="device === mode.id && builder.deviceModeType.value === 'manual'"
           :title="t('builder.toolbar.devices.' + mode.id)"
@@ -73,6 +78,7 @@
         <BaseDropdown align="center" width="auto">
             <template #trigger="{ open }">
               <IconButton 
+                variant="ghost"
                 :icon="builder.deviceModeType.value === 'auto' ? Wand2 : (icons[currentDeviceIcon] || Monitor)" 
                 :active="open" 
                 :title="builder.deviceModeType.value === 'auto' ? 'Auto Mode' : t('builder.toolbar.devices.' + device)" 
@@ -112,6 +118,7 @@
 
       <!-- Fullview Toggle -->
       <IconButton 
+        variant="ghost"
         :icon="isFullscreen ? Minimize : Maximize" 
         :active="isFullscreen"
         :title="isFullscreen ? t('builder.toolbar.exitFullscreen') || 'Exit Full View' : t('builder.toolbar.fullscreen') || 'Enter Full View'" 
@@ -149,6 +156,7 @@
 
       <!-- Cancel/Close Button -->
       <IconButton 
+        variant="ghost"
         :icon="X" 
         class="toolbar-btn-lg cancel-btn" 
         @click="$emit('close-builder')" 
@@ -474,25 +482,20 @@ const toggleWireframe = () => {
 
 /* Force specific button styling for Toolbar to prevent "White Block" on light mode */
 /* Force specific button styling for Toolbar to prevent "White Block" on light mode */
-/* Target both secondary (default) and ghost variants */
-:deep(.icon-button--secondary),
-:deep(.icon-button--ghost) {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+:deep(.icon-button) {
+    background: transparent !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
-:deep(.icon-button--secondary:hover),
-:deep(.icon-button--ghost:hover) {
+:deep(.icon-button:hover) {
     background-color: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
 }
 
-:deep(.icon-button--secondary.is-active),
-:deep(.icon-button--ghost.is-active) {
-    background-color: rgba(32, 89, 234, 0.2) !important;
-    border-color: #2059ea !important;
-    color: #2059ea !important;
+/* Active state now handled by IconButton switching to primary (default) variant */
+:deep(.icon-button.border-white\/20) {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 10px rgba(32, 89, 234, 0.3) !important;
 }
 </style>

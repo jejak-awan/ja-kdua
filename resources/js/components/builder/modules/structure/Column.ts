@@ -1,3 +1,4 @@
+import type { ModuleDefinition } from '@/types/builder';
 import {
     backgroundSettings,
     spacingSettings,
@@ -25,7 +26,7 @@ import {
 /**
  * Column Module Definition
  */
-export default {
+const ColumnModule: ModuleDefinition = {
     name: 'column',
     title: 'Column',
     icon: 'Square',
@@ -102,3 +103,5 @@ export default {
         ]
     }
 }
+
+export default ColumnModule;

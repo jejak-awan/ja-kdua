@@ -1,5 +1,5 @@
 <template>
-  <BaseBlock :module="module" :settings="settings" class="section-block">
+  <BaseBlock :module="module" :mode="mode" :device="device" class="section-block">
     <div class="section-container relative w-full" :style="containerStyles">
       <!-- Builder Mode -->
       <template v-if="mode === 'edit'">
@@ -25,33 +25,37 @@
   </BaseBlock>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
 import { Plus } from 'lucide-vue-next'
 import { 
   getResponsiveValue
 } from '../utils/styleUtils'
+import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
-const props = defineProps({
-  module: { type: Object, required: true },
-  mode: { type: String, default: 'view' },
-  nestedBlocks: { type: Array, default: () => [] }
+const props = withDefaults(defineProps<{
+  module: BlockInstance;
+  mode: 'view' | 'edit';
+  device?: 'desktop' | 'tablet' | 'mobile' | null;
+  nestedBlocks?: BlockInstance[];
+}>(), {
+  mode: 'view',
+  device: 'desktop',
+  nestedBlocks: () => []
 })
 
-const builder = inject('builder', null)
+const builder = inject<BuilderInstance>('builder', null as any)
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device || 'desktop')
+const device = computed(() => builder?.device?.value || 'desktop')
 
 const BlockRenderer = inject('BlockRenderer', null)
 
-const fullWidth = computed(() => getResponsiveValue(settings.value, 'full_width', device.value) === true)
-
 const containerStyles = computed(() => {
-  const vAlign = getResponsiveValue(settings.value, 'verticalAlign', device.value) || 'start'
+  const vAlign = getResponsiveValue(settings.value, 'verticalAlignment', device.value) || 'start'
   return {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     justifyContent: vAlign === 'center' ? 'center' : (vAlign === 'end' ? 'flex-end' : 'flex-start'),
     minHeight: 'inherit'
   }

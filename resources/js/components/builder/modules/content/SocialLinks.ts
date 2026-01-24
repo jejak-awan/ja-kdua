@@ -62,6 +62,7 @@ const SocialLinksModule: ModuleDefinition = {
                 id: 'links',
                 label: 'Social Links',
                 fields: [
+                    { name: 'showLabels', type: 'toggle', label: 'Show Labels' },
                     {
                         name: 'links',
                         type: 'repeater',
@@ -108,7 +109,8 @@ const SocialLinksModule: ModuleDefinition = {
                         options: [
                             { value: 'icon-only', label: 'Icon Only' },
                             { value: 'icon-circle', label: 'Icon with Circle' },
-                            { value: 'icon-square', label: 'Icon with Square' }
+                            { value: 'icon-square', label: 'Icon with Square' },
+                            { value: 'with-label', label: 'With Label' }
                         ]
                     },
                     {

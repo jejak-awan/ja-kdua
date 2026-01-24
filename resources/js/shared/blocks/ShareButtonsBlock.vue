@@ -1,19 +1,24 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="share-buttons-block">
-    <div class="share-buttons-container flex flex-wrap items-center gap-4" :style="wrapperStyles">
-        <span v-if="labelValue" class="share-label font-bold text-sm tracking-wide uppercase opacity-60" :style="labelStyles">{{ labelValue }}</span>
-        <div class="share-buttons-list flex flex-wrap" :style="buttonListStyles">
-          <button 
+    <div class="share-buttons-container flex flex-wrap items-center w-full" :style="wrapperStyles">
+        <Badge v-if="labelValue" variant="secondary" class="share-label mr-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] px-4 py-1.5 border-none" :style="labelStyles">{{ labelValue }}</Badge>
+        
+        <div class="share-buttons-list flex flex-wrap gap-3">
+          <Button 
             v-for="(item, index) in platformList" 
             :key="index" 
-            class="share-button-item flex items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 shadow-sm"
-            :class="buttonClasses" 
+            class="share-button-item group transition-all duration-500 hover:scale-110 active:scale-95 shadow-md hover:shadow-xl rounded-full"
+            :class="[
+                showLabels ? 'px-6 h-12' : 'p-0 w-12 h-12',
+                currentSize === 'small' ? 'h-10 w-10' : (currentSize === 'large' ? 'h-16 w-16' : 'h-12 w-12')
+            ]"
             :style="buttonStyles(item.network)"
+            variant="ghost"
             @click="handleShare(item.network)"
           >
-            <component :is="getIcon(item.network)" class="share-icon" :class="iconSizeClass" />
-            <span v-if="showLabels" class="share-text font-semibold text-sm">{{ item.label || item.network }}</span>
-          </button>
+            <component :is="getIcon(item.network)" class="share-icon transition-transform duration-500 group-hover:rotate-12" :class="iconSizeClass" />
+            <span v-if="showLabels" class="share-text font-black text-[10px] uppercase tracking-widest ml-2">{{ item.label || item.network }}</span>
+          </Button>
         </div>
     </div>
   </BaseBlock>
@@ -22,6 +27,7 @@
 <script setup>
 import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Button, Badge } from '../ui'
 import { Facebook, Twitter, Linkedin, Mail, MessageCircle, Link2 } from 'lucide-vue-next'
 import { 
   getTypographyStyles,
@@ -30,28 +36,35 @@ import {
 
 const props = defineProps({
   module: { type: Object, required: true },
-  mode: { type: String, default: 'view' }
+  mode: { type: String, default: 'view' },
+  device: { type: String, default: 'desktop' }
 })
 
 const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 const settings = computed(() => props.module.settings || {})
-const device = computed(() => builder?.device?.value || 'desktop')
 
-const labelValue = computed(() => getResponsiveValue(settings.value, 'label', device.value))
-const showLabels = computed(() => getResponsiveValue(settings.value, 'showLabels', device.value))
-const currentStyle = computed(() => getResponsiveValue(settings.value, 'style', device.value) || 'filled')
-const currentShape = computed(() => getResponsiveValue(settings.value, 'shape', device.value) || 'rounded')
-const currentSize = computed(() => getResponsiveValue(settings.value, 'size', device.value) || 'medium')
+const labelValue = computed(() => getResponsiveValue(settings.value, 'label', currentDevice.value))
+const showLabels = computed(() => getResponsiveValue(settings.value, 'showLabels', currentDevice.value))
+const currentStyle = computed(() => getResponsiveValue(settings.value, 'style', currentDevice.value) || 'filled')
+const currentSize = computed(() => getResponsiveValue(settings.value, 'size', currentDevice.value) || 'medium')
 
 const platformList = computed(() => {
-  // In builder mode, children are managed by ModuleWrapper slot
-  // But for the logic of style and platform, we might need a list
-  // Let's assume children define the platforms
   return (props.module.children || []).map(child => ({
     network: child.settings.network || 'facebook',
     label: child.settings.customLabel || ''
   }))
 })
+
+if (platformList.value.length === 0) {
+    // Fallback/Demo platforms if no children defined yet
+    platformList.value = [
+        { network: 'facebook' },
+        { network: 'twitter' },
+        { network: 'linkedin' },
+        { network: 'whatsapp' }
+    ]
+}
 
 const platformColors = { 
     facebook: '#1877f2', 
@@ -87,30 +100,13 @@ const handleShare = (network) => {
 }
 
 const wrapperStyles = computed(() => {
-  const styles = {}
-  const alignment = getResponsiveValue(settings.value, 'alignment', device.value) || 'left'
-  if (alignment === 'center') styles.justifyContent = 'center'
-  else if (alignment === 'right') styles.justifyContent = 'flex-end'
-  else styles.justifyContent = 'flex-start'
-  return styles
-})
-
-const buttonListStyles = computed(() => {
-  const gap = getResponsiveValue(settings.value, 'gap', device.value) || 12
+  const alignment = getResponsiveValue(settings.value, 'alignment', currentDevice.value) || 'left'
   return { 
-    gap: `${gap}px`
+    justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start')
   }
 })
 
-const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', device.value))
-
-const buttonClasses = computed(() => [
-  currentShape.value === 'rounded' ? 'rounded-lg' : 
-  currentShape.value === 'circle' ? 'rounded-full' : '',
-  currentSize.value === 'small' ? 'px-3 py-1.5' : 
-  currentSize.value === 'medium' ? 'px-4 py-2.5' : 
-  'px-6 py-4'
-])
+const labelStyles = computed(() => getTypographyStyles(settings.value, 'label_', currentDevice.value))
 
 const iconSizeClass = computed(() => [
     currentSize.value === 'small' ? 'w-4 h-4' : 
@@ -120,17 +116,12 @@ const iconSizeClass = computed(() => [
 
 const buttonStyles = (platform) => {
   const color = platformColors[platform] || '#666'
-  if (currentStyle.value === 'filled') return { backgroundColor: color, color: '#fff' }
+  if (currentStyle.value === 'filled') return { backgroundColor: color, color: '#fff', borderColor: 'transparent' }
   if (currentStyle.value === 'outline') return { border: `2px solid ${color}`, color, backgroundColor: 'transparent' }
-  return { color, backgroundColor: 'transparent' }
+  return { color, backgroundColor: 'transparent', borderColor: 'transparent' }
 }
 </script>
 
 <style scoped>
 .share-buttons-block { width: 100%; }
-.share-button-item { border: none; cursor: pointer; }
-/* Circle shape should be square aspect ratio if no label */
-.rounded-full:not(:has(.share-text)) { aspect-ratio: 1/1; padding: 0; width: 3rem; }
-.share-button-item--small.rounded-full:not(:has(.share-text)) { width: 2.25rem; }
-.share-button-item--large.rounded-full:not(:has(.share-text)) { width: 4rem; }
 </style>

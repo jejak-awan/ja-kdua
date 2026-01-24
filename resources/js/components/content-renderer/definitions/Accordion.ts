@@ -57,10 +57,48 @@ export default {
             tab: 'style'
         },
         {
-            key: 'activeBgColor',
+            key: 'gap',
+            type: 'range',
+            label: 'Gap',
+            min: 0,
+            max: 50,
+            default: 16,
+            tab: 'style'
+        },
+        {
+            key: 'iconSize',
+            type: 'range',
+            label: 'Icon Size',
+            min: 12,
+            max: 40,
+            default: 20,
+            tab: 'style'
+        },
+        {
+            key: 'iconColor',
             type: 'color',
-            label: 'Active Background',
+            label: 'Icon Color',
+            tab: 'style'
+        },
+        {
+            key: 'headerBackgroundColor',
+            type: 'color',
+            label: 'Header Background',
             default: '#f8fafc',
+            tab: 'style'
+        },
+        {
+            key: 'openHeaderBackgroundColor',
+            type: 'color',
+            label: 'Open Header Background',
+            default: '#f1f5f9',
+            tab: 'style'
+        },
+        {
+            key: 'contentBackgroundColor',
+            type: 'color',
+            label: 'Content Background',
+            default: 'transparent',
             tab: 'style'
         },
         { type: 'header', label: 'Dimensions', tab: 'style' },

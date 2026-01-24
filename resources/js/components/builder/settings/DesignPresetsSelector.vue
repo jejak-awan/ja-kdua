@@ -96,10 +96,10 @@ const emit = defineEmits(['action'])
 // Inject builder
 const builder = inject('builder')
 
-// Computed - builder.presets is already a reactive Proxy, not a ref
+// Computed - builder.presets is a ref, needs .value
 const filteredPresets = computed(() => {
-  if (!builder?.presets) return []
-  return builder.presets.filter(p => p.type === props.type)
+  if (!builder?.presets?.value) return []
+  return builder.presets.value.filter(p => p.type === props.type)
 })
 
 const handleAction = (type, close, data = null) => {

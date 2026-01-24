@@ -4,56 +4,61 @@
       <div 
         class="tabs-block" 
         :class="[
-            layoutClasses(settings, blockDevice),
             getVal(settings, 'padding', blockDevice) || 'py-12'
         ]"
       >
-        <!-- Tab Headers -->
-        <div 
-            class="tabs-header shrink-0 no-scrollbar overflow-x-auto" 
-            :class="headerClasses(settings, blockDevice)"
-            :style="headerContainerStyles(settings)"
+        <Tabs 
+          v-model="activeTabValue" 
+          :orientation="getVal(settings, 'orientation', blockDevice) === 'vertical' && blockDevice !== 'mobile' ? 'vertical' : 'horizontal'"
+          :class="layoutClasses(settings, blockDevice)"
         >
-          <button 
-            v-for="(tab, index) in items" 
-            :key="index"
-            class="tab-button group whitespace-nowrap transition-all duration-300 relative"
-            :class="[
-                buttonClasses(settings, index === activeTabIndex),
-                { 'active': index === activeTabIndex }
-            ]"
-            :style="getTabStyles(settings, index === activeTabIndex)"
-            @click="activeTabIndex = index"
+          <!-- Tab Headers -->
+          <TabsList 
+              class="tabs-header shrink-0 no-scrollbar overflow-x-auto bg-transparent border-none p-0 h-auto" 
+              :class="headerClasses(settings, blockDevice)"
+              :style="headerContainerStyles(settings)"
           >
-             <span class="flex items-center gap-2 relative z-10">
-               <component 
-                v-if="tab.icon" 
-                :is="getIcon(tab.icon)" 
-                class="w-4 h-4 transition-colors"
-               />
-               {{ tab.title || 'Tab Title' }}
-             </span>
-             
-             <!-- Active Indicator for Underline style -->
-             <div 
-                v-if="isUnderline(settings) && index === activeTabIndex" 
-                class="absolute bottom-0 left-0 w-full h-[2px] bg-primary"
-                :style="{ backgroundColor: getVal(settings, 'activeColor') || '#4f46e5' }"
-             ></div>
-          </button>
-        </div>
-        
-        <!-- Tab Content -->
-        <div class="tabs-content grow pt-8 md:pt-0" :style="contentContainerStyles(settings)">
-          <div 
-             v-for="(tab, index) in items" 
-             v-show="activeTabIndex === index"
-             :key="index" 
-             class="tab-pane animate-in fade-in slide-in-from-bottom-3 duration-500"
-          >
-             <div class="prose max-w-none text-slate-600 leading-relaxed font-medium" v-html="tab.content || 'Content goes here...'"></div>
+            <TabsTrigger 
+              v-for="(tab, index) in items" 
+              :key="index"
+              :value="`tab-${index}`"
+              class="tab-button group whitespace-nowrap transition-all duration-300 relative shadow-none"
+              :class="[
+                  buttonClasses(settings, activeTabIndex === index),
+              ]"
+              :style="getTabStyles(settings, activeTabIndex === index)"
+              @click="activeTabIndex = index"
+            >
+               <span class="flex items-center gap-2 relative z-10">
+                 <component 
+                  v-if="tab.icon" 
+                  :is="getIcon(tab.icon)" 
+                  class="w-4 h-4 transition-colors"
+                 />
+                 {{ tab.title || 'Tab Title' }}
+               </span>
+               
+               <!-- Active Indicator for Underline style -->
+               <div 
+                  v-if="isUnderline(settings) && activeTabIndex === index" 
+                  class="absolute bottom-0 left-0 w-full h-[2px] bg-primary"
+                  :style="{ backgroundColor: getVal(settings, 'activeColor') || '#4f46e5' }"
+               ></div>
+            </TabsTrigger>
+          </TabsList>
+          
+          <!-- Tab Content -->
+          <div class="tabs-content grow pt-8 md:pt-0" :style="contentContainerStyles(settings)">
+            <TabsContent 
+               v-for="(tab, index) in items" 
+               :key="index"
+               :value="`tab-${index}`"
+               class="tab-pane animate-in fade-in slide-in-from-bottom-3 duration-500 mt-0"
+            >
+               <div class="prose max-w-none text-slate-600 leading-relaxed font-medium" v-html="tab.content || 'Content goes here...'"></div>
+            </TabsContent>
           </div>
-        </div>
+        </Tabs>
       </div>
     </template>
   </BaseBlock>
@@ -62,6 +67,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui'
 import * as LucideIcons from 'lucide-vue-next'
 import { getVal } from '../utils/styleUtils'
 
@@ -74,11 +80,19 @@ const props = defineProps({
 
 
 const settings = computed(() => props.module?.settings || {})
-const items = computed(() => settings.value.items || [])
+const items = computed(() => settings.value.tabs || [])
 const activeTabIndex = ref(0)
+const activeTabValue = computed({
+    get: () => `tab-${activeTabIndex.value}`,
+    set: (val) => {
+        const index = parseInt(val.split('-')[1])
+        if (!isNaN(index)) activeTabIndex.value = index
+    }
+})
 
 const getIcon = (name) => {
-    return LucideIcons[name] || null
+    const cleanName = typeof name === 'string' ? name.replace('lucide:', '') : name
+    return LucideIcons[cleanName] || null
 }
 
 const isVertical = (settings, device) => {

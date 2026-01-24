@@ -38,8 +38,7 @@
           
           <!-- Icon -->
           <span class="layer-icon">
-               <span v-if="block.type === 'column'" class="text-[10px] opacity-40 mr-1 font-mono">[ ]</span>
-               <component v-else :is="getIcon(block.type)" :size="12" />
+               <component :is="getIcon(block.type)" :size="12" />
           </span>
           
           <!-- Name -->
@@ -138,7 +137,7 @@ const getTitle = (block) => {
 const getIcon = (type) => {
     if (type === 'section') return Layout
     if (type === 'row') return Columns
-    if (type === 'column') return null // Special case for text [ ]
+    if (type === 'column') return Square
     if (type.includes('text') || type.includes('heading')) return Type
     if (type.includes('image')) return Image
     return Box

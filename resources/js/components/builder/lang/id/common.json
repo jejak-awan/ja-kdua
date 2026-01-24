@@ -390,6 +390,7 @@
             }
         },
         "spacing": {
+            "link": "Tautkan Nilai",
             "sides": {
                 "top": "Atas",
                 "right": "Kanan",
@@ -400,7 +401,7 @@
         "children": {
             "empty": "Tidak ada {type} ditemukan.",
             "add": "Tambah {type}",
-            "applyTemplate": "Terapkan Templat Struktur"
+            "applyTemplate": "Sisipkan dari Pustaka"
         },
         "icon": {
             "search": "Cari ikon...",
@@ -730,15 +731,16 @@
         "noResults": "Tidak ada modul yang cocok dengan \"{query}\"",
         "libraryEmpty": "Belum ada tata letak yang tersimpan.",
         "tabs": {
-            "module": "Modul Baru",
-            "row": "Baris Baru",
-            "section": "Bagian Baru",
-            "library": "Dari Pustaka",
-            "presets": "Preset Desain"
+            "module": "Modul",
+            "row": "Baris",
+            "section": "Bagian",
+            "library": "Pustaka",
+            "presets": "Preset"
         },
         "layoutGroups": {
             "equal": "Kolom Sama",
             "offset": "Kolom Offset",
+            "multi-row": "Multi-Baris",
             "multiRow": "Multi-Baris",
             "multiCol": "Multi-Kolom",
             "grid-multi-row": "Grid Multi-Baris",
@@ -757,7 +759,7 @@
         }
     },
     "structureTemplateModal": {
-        "title": "Terapkan Templat Struktur",
+        "title": "Sisipkan dari Pustaka",
         "noResults": "Tidak ada templat yang tersedia untuk konteks ini."
     },
     "categories": {

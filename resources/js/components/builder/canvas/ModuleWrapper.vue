@@ -13,16 +13,15 @@
     <div v-if="shouldShowToolbar" class="module-toolbar" :class="`module-toolbar--${moduleType}`" :style="{ zIndex: isSelected ? 150 : 100 }">
       <ModuleActions 
         :label="moduleTitle"
-        :show-edit="true"
+        :show-edit="false"
         :show-layout="isRow"
         :show-duplicate="true"
         :show-delete="true"
         :show-drag="true"
-        @edit="selectModule"
+        :show-more="false"
         @layout="openRowLayoutModal"
         @duplicate="duplicateModule"
         @delete="deleteModule"
-        @more="handleContextMenu"
       />
     </div>
 
@@ -44,9 +43,9 @@
 
         <template v-else v-for="instance in loopInstances" :key="instance.id">
           <ModuleRenderer 
-             :module="module"
-             :class="{ 'loop-ghost': instance.isGhost }"
-             :style="instance.isGhost ? { opacity: 0.6, pointerEvents: 'none' } : {}"
+            :module="module"
+            :class="{ 'loop-ghost': instance.isGhost }"
+            :style="instance.isGhost ? { opacity: 0.6, pointerEvents: 'none' } : {}"
           >
             <!-- Pass children to the block component via slot -->
             <template v-if="hasChildren && !instance.isGhost">
@@ -92,7 +91,8 @@
       </div>
     </div>
     
-    <!-- Section Sibling Button (Floating on bottom border) -->
+    <!-- Module Add Button UX -->
+    <!-- 1. Sibling Section Button -->
     <AddModuleButton 
        v-if="isSection && (isSelected || isHovered) && !isGhost"
        type="section"
@@ -100,7 +100,7 @@
        @click="addSiblingSection"
     />
 
-    <!-- Row Sibling Button (Floating on bottom border) -->
+    <!-- 2. Sibling Row Button -->
     <AddModuleButton 
        v-if="isRow && (isSelected || isHovered) && !isGhost"
        type="row"
@@ -108,14 +108,26 @@
        @click="addSiblingRow"
     />
 
-    <!-- Module Add Button (Inside Column or below Content Module) -->
-    <div v-if="(isColumn || isContent) && (isSelected || isHovered) && !isGhost" class="module-add-container">
+    <!-- 3. Module Add Button (Inside/Below) -->
+    <template v-if="(isColumn || isContent) && (isSelected || isHovered) && !isGhost">
+        <!-- Center Button for Empty Column (Matching Module Style) -->
+        <div v-if="isColumn && !hasChildrenContent" class="module-center-add">
+            <AddModuleButton 
+                type="module"
+                :circular="true"
+                @click="handlePlusClick"
+            />
+        </div>
+        
+        <!-- Floating Bottom Button for Populated Column or Module -->
         <AddModuleButton 
-          :type="isColumn ? 'module' : 'module'"
-          :circular="true"
-          @click="handlePlusClick"
+            v-else
+            :type="isColumn ? 'column' : 'module'"
+            :floating="true"
+            :circular="true"
+            @click="handlePlusClick"
         />
-    </div>
+    </template>
     
     <!-- Module Label (Grid/Wireframe) -->
     <div v-if="gridViewMode || wireframeMode" class="module-label">
@@ -157,19 +169,18 @@ const { t } = useI18n()
 
 // Virtualization State
 const isVirtualized = ref(false)
-const lastHeight = ref(100) // Default estimate
+const lastHeight = ref(100)
 const wrapperRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
 onMounted(() => {
-    if (props.isGhost) return // Don't virtualize ghosts
+    if (props.isGhost) return 
 
     observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 isVirtualized.value = false
             } else {
-                // Before virtualizing, save the current height
                 if (wrapperRef.value) {
                     lastHeight.value = wrapperRef.value.offsetHeight
                 }
@@ -177,7 +188,7 @@ onMounted(() => {
             }
         })
     }, {
-        rootMargin: '400px', // Buffer zone
+        rootMargin: '400px',
         threshold: 0
     })
 
@@ -247,6 +258,10 @@ const hasChildren = computed(() =>
   Array.isArray(props.module.children)
 )
 
+const hasChildrenContent = computed(() => 
+  props.module.children && props.module.children.length > 0
+)
+
 const canAddChildren = computed(() => {
   const def = moduleDefinition.value
   return !!def?.children
@@ -282,7 +297,7 @@ const wrapperStyles = computed(() => {
         const width = getResponsiveValue(props.module.settings, 'width', currentDevice.value)
         const flexGrow = getResponsiveValue(props.module.settings, 'flexGrow', currentDevice.value)
         
-        styles.height = '100%' // Force height for divider concept
+        styles.height = '100%' 
         
         if (width) {
             styles.flex = `0 0 ${width}`
@@ -404,12 +419,12 @@ const deleteModule = async () => {
 <style scoped>
 .module-wrapper {
   position: relative;
-  /* margin-bottom: var(--spacing-md); -- Removed global margin to allow strict hierarchy */
+  overflow: visible !important;
 }
 
 .module-wrapper--content {
-    margin-bottom: var(--spacing-md); /* Content modules still need vertical spacing */
-    width: 100%; /* Ensure content modules fill column width */
+    margin-bottom: var(--spacing-md);
+    width: 100% !important;
 }
 
 .module-add-container {
@@ -428,14 +443,24 @@ const deleteModule = async () => {
 }
 
 .module-wrapper--column > .module-add-container {
-    bottom: 5px; /* Inside the column at the bottom */
+    bottom: -15px; /* Match section/row floating position */
+}
+
+.module-center-add {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 50;
 }
 
 .module-wrapper--grid,
 .module-wrapper--wireframe {
   border: 1px solid transparent;
   border-radius: var(--border-radius-sm);
-  padding: 0; /* Changed from var(--spacing-sm) to allow structural elements to fill containers */
+  padding: 0;
 }
 
 .module-wrapper--grid.module-wrapper--section,
@@ -480,7 +505,7 @@ const deleteModule = async () => {
 .module-wrapper--grid.module-wrapper--content,
 .module-wrapper--wireframe.module-wrapper--content {
   border: 1px dashed transparent;
-  width: 100%; /* Force content modules to fill column width */
+  width: 100%; 
   display: flex;
   flex-direction: column;
 }

@@ -1,13 +1,13 @@
 <template>
   <BaseBlock :module="module" :mode="mode" :device="device">
-    <template #default="{ styles: wrapperStyles, settings }">
-      <div class="video-block" :style="videoBlockStyles">
-        <div class="video-container" :style="containerStyles">
+    <template #default="{ settings }">
+      <div class="video-block w-full">
+        <div class="video-container relative group overflow-hidden rounded-[40px] shadow-2xl bg-slate-900 border border-slate-100/10" :style="containerStyles">
           <!-- YouTube -->
           <iframe 
             v-if="videoType === 'youtube' && youtubeId"
             :src="youtubeEmbedUrl"
-            class="video-iframe"
+            class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
@@ -17,7 +17,7 @@
           <iframe 
             v-else-if="videoType === 'vimeo' && vimeoId"
             :src="vimeoEmbedUrl"
-            class="video-iframe"
+            class="video-iframe absolute inset-0 w-full h-full grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             allowfullscreen
@@ -32,13 +32,15 @@
             :loop="settings.loop"
             :muted="settings.muted"
             :controls="settings.controls !== false"
-            class="video-element"
+            class="video-element absolute inset-0 w-full h-full object-cover"
           />
           
           <!-- Placeholder (Mode Edit Only or empty URL) -->
-          <div v-else class="video-placeholder">
-            <Play class="placeholder-icon" />
-            <span>{{ mode === 'edit' ? 'Add a video URL' : '' }}</span>
+          <div v-else class="video-placeholder absolute inset-0 flex flex-col items-center justify-center gap-6 bg-slate-900 text-slate-700">
+            <div class="w-20 h-20 rounded-full border-2 border-slate-800 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:text-primary">
+                <Play :size="32" class="translate-x-0.5" />
+            </div>
+            <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{{ mode === 'edit' ? 'Video Stream Ready' : 'No Source' }}</span>
           </div>
         </div>
       </div>
@@ -47,7 +49,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { Play } from 'lucide-vue-next'
 import BaseBlock from '../components/BaseBlock.vue'
 import { getVal } from '../utils/styleUtils'
@@ -58,10 +60,12 @@ const props = defineProps({
   device: { type: String, default: 'desktop' }
 })
 
+const builder = inject('builder', null)
+const currentDevice = computed(() => builder?.device?.value || props.device || 'desktop')
 const settings = computed(() => props.module?.settings || {})
 
 // Unified URL
-const videoUrl = computed(() => getVal(settings.value, 'url', props.device) || '')
+const videoUrl = computed(() => getVal(settings.value, 'url', currentDevice.value) || '')
 
 // Detect Type
 const videoType = computed(() => {
@@ -86,7 +90,7 @@ const youtubeEmbedUrl = computed(() => {
     loop: settings.value.loop ? '1' : '0',
     mute: settings.value.muted ? '1' : '0',
     controls: settings.value.controls !== false ? '1' : '0',
-    playlist: settings.value.loop ? youtubeId.value : '' // Needed for looping
+    playlist: settings.value.loop ? youtubeId.value : '' 
   })
   return `https://www.youtube.com/embed/${youtubeId.value}?${params.toString()}`
 })
@@ -117,65 +121,17 @@ const aspectRatioPadding = computed(() => {
     '9:16': '177.78%',
     '21:9': '42.86%'
   }
-  const ratio = getVal(settings.value, 'aspectRatio', props.device) || '16:9'
+  const ratio = getVal(settings.value, 'aspectRatio', currentDevice.value) || '16:9'
   return ratioMap[ratio] || '56.25%'
-})
-
-const videoBlockStyles = computed(() => {
-  return {
-    width: '100%',
-    textAlign: getVal(settings.value, 'alignment', props.device) || 'center'
-  }
 })
 
 const containerStyles = computed(() => {
   return {
-    position: 'relative',
-    display: 'inline-block',
-    width: '100%',
-    overflow: 'hidden',
     paddingTop: aspectRatioPadding.value,
-    backgroundColor: '#000'
   }
 })
 </script>
 
 <style scoped>
-.video-block {
-  width: 100%;
-}
-
-.video-container {
-  background: #000;
-}
-
-.video-iframe,
-.video-element {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #1a1a1a;
-  color: #666;
-}
-
-.placeholder-icon {
-  width: 48px;
-  height: 48px;
-}
+.video-block { width: 100%; }
 </style>

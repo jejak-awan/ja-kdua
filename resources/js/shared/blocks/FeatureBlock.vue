@@ -1,6 +1,7 @@
 <template>
   <BaseBlock :module="module" :settings="settings" class="feature-block">
-    <div 
+    <Card :class="cardClasses" :style="cardStyles">
+      <div 
         class="feature-inner flex transition-all duration-300 group" 
         :class="[
             layout === 'top' ? 'flex-col items-center text-center gap-6' : 
@@ -8,25 +9,27 @@
             'flex-row items-start gap-6',
             alignment === 'left' ? 'text-left' : (alignment === 'right' ? 'text-right' : 'text-center')
         ]"
-    >
-      <div class="feature-icon-wrap relative flex-shrink-0" :style="iconWrapperStyles">
-        <div class="icon-glow absolute inset-0 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" :style="{ backgroundColor: settings.iconColor || '#3b82f6' }"></div>
-        <div class="icon-container relative z-10 flex items-center justify-center" :style="iconStyles">
-          <component :is="iconComponent" class="w-full h-full transition-transform duration-500 group-hover:scale-110" />
+      >
+        <div class="feature-icon-wrap relative flex-shrink-0" :style="iconWrapperStyles">
+          <div class="icon-glow absolute inset-0 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" :style="{ backgroundColor: settings.iconColor || '#3b82f6' }"></div>
+          <div class="icon-container relative z-10 flex items-center justify-center" :style="iconStyles">
+            <component :is="iconComponent" class="w-full h-full transition-transform duration-500 group-hover:scale-110" />
+          </div>
+        </div>
+        
+        <div class="feature-content flex-1 pt-1">
+          <CardTitle class="text-xl font-bold mb-3 tracking-tight" :style="titleStyles">{{ settings.title || 'Feature Title' }}</CardTitle>
+          <CardDescription class="opacity-70 leading-relaxed text-sm" :style="descriptionStyles">{{ settings.description || 'Describe the unique value of this feature or service here.' }}</CardDescription>
         </div>
       </div>
-      
-      <div class="feature-content flex-1 pt-1">
-        <h4 class="feature-title text-xl font-bold mb-3 tracking-tight" :style="titleStyles">{{ settings.title || 'Feature Title' }}</h4>
-        <p class="feature-description opacity-70 leading-relaxed text-sm" :style="descriptionStyles">{{ settings.description || 'Describe the unique value of this feature or service here.' }}</p>
-      </div>
-    </div>
+    </Card>
   </BaseBlock>
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, inject } from 'vue'
+import { computed, inject } from 'vue'
 import BaseBlock from '../components/BaseBlock.vue'
+import { Card, CardTitle, CardDescription } from '../ui'
 import * as LucideIcons from 'lucide-vue-next'
 import { 
   getTypographyStyles,
@@ -78,6 +81,15 @@ const iconStyles = computed(() => {
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', device.value))
 const descriptionStyles = computed(() => getTypographyStyles(settings.value, 'description_', device.value))
+
+const cardClasses = computed(() => {
+    // If the card style 'boxed' is selected, apply card styling, otherwise keep it transparent
+    return getResponsiveValue(settings.value, 'variant', device.value) === 'boxed' 
+        ? 'p-6 border bg-card text-card-foreground shadow-sm' 
+        : 'border-none shadow-none bg-transparent p-0'
+})
+
+const cardStyles = computed(() => ({}))
 </script>
 
 <style scoped>
