@@ -89,7 +89,6 @@ const TextModule: ModuleDefinition = {
                 ]
             },
             linkSettings,
-            backgroundSettings,
             loopSettings,
             orderSettings,
             adminLabelSettings('Text')
