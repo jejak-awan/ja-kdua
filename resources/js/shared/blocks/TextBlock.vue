@@ -47,7 +47,39 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance>('builder', null as any)
 
 const textStyles = (settings: any, device: string) => {
-  return getTypographyStyles(settings, '', device)
+  const styles: Record<string, any> = getTypographyStyles(settings, '', device)
+  
+  // 1. Columns
+  const cols = getVal(settings, 'column_count', device)
+  if (cols && cols > 1) {
+    styles.columnCount = cols
+    styles.columnGap = getVal(settings, 'column_gap', device) || '30px'
+    
+    const ruleWidth = getVal(settings, 'column_rule_width', device)
+    if (ruleWidth > 0) {
+      const ruleColor = getVal(settings, 'column_rule_color', device) || '#eeeeee'
+      const ruleStyle = getVal(settings, 'column_rule_style', device) || 'solid'
+      styles.columnRule = `${ruleWidth}px ${ruleStyle} ${ruleColor}`
+    }
+  }
+
+  // 2. Hover Variables
+  const hoverColor = getVal(settings, 'hover_text_color', device)
+  if (hoverColor) styles['--hover-color'] = hoverColor
+
+  // 3. Drop Cap Variables
+  if (getVal(settings, 'use_drop_cap', device)) {
+    styles['--use-drop-cap'] = 'block'
+    const dcColor = getVal(settings, 'drop_cap_color', device)
+    const dcSize = getVal(settings, 'drop_cap_font_size', device)
+    const dcFont = getVal(settings, 'drop_cap_font_family', device)
+    
+    if (dcColor) styles['--dc-color'] = dcColor
+    if (dcSize) styles['--dc-size'] = dcSize
+    if (dcFont) styles['--dc-font'] = dcFont
+  }
+
+  return styles
 }
 
 const updateTitle = (e: any, settings: any) => {
@@ -69,7 +101,26 @@ const onContentUpdate = (newContent: string, settings: any) => {
 .text-block {
   word-wrap: break-word;
   width: 100%;
+  transition: all 0.3s ease;
 }
+
+/* Hover Effect */
+.text-block:hover {
+  color: var(--hover-color) !important;
+}
+
+/* Drop Cap Styling */
+.text-block:deep(p:first-of-type::first-letter) {
+  display: var(--use-drop-cap, none);
+  float: left;
+  font-size: var(--dc-size, 3em);
+  line-height: 0.8;
+  margin: 0.1em 0.1em 0.1em 0;
+  color: var(--dc-color, inherit);
+  font-family: var(--dc-font, inherit);
+  font-weight: 700;
+}
+
 .text-block:deep(p) {
   margin: 0 0 1.5em;
   line-height: inherit;
