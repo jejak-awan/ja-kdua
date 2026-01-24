@@ -3,34 +3,64 @@
       <div class="heading-container">
         <component 
           :is="tag(settings)"
+          :id="getVal(settings, 'html_id') || undefined"
           class="heading-block transition-all duration-300"
           :style="headingStyles(settings, blockDevice)"
           :class="[sizeClass(settings)]"
+          :aria-label="getVal(settings, 'aria_label') || undefined"
           v-bind="getAttributes('title')"
         >
-          <template v-if="blockMode === 'edit' && !isDynamic(settings)">
-            <div 
-              ref="editableRef"
-              contenteditable="true"
-              @blur="onTextBlur($event, settings)"
-              v-html="displayText(settings)"
-              style="display: block; width: 100%; outline: none;"
-            ></div>
+          <template v-if="getVal(settings, 'use_link')">
+             <a 
+               :href="getVal(settings, 'link_url') || '#'" 
+               :target="getVal(settings, 'link_target') || '_self'"
+               :rel="Array.isArray(getVal(settings, 'link_rel')) ? getVal(settings, 'link_rel').join(' ') : undefined"
+             >
+                <template v-if="blockMode === 'edit' && !isDynamic(settings)">
+                  <div 
+                    ref="editableRef"
+                    contenteditable="true"
+                    @blur="onTextBlur($event, settings)"
+                    v-html="displayText(settings)"
+                    style="display: inline-block; width: 100%; outline: none;"
+                  ></div>
+                </template>
+                <template v-else>
+                  {{ displayText(settings) }}
+                </template>
+             </a>
           </template>
           <template v-else>
-            {{ displayText(settings) }}
+            <template v-if="blockMode === 'edit' && !isDynamic(settings)">
+              <div 
+                ref="editableRef"
+                contenteditable="true"
+                @blur="onTextBlur($event, settings)"
+                v-html="displayText(settings)"
+                style="display: block; width: 100%; outline: none;"
+              ></div>
+            </template>
+            <template v-else>
+              {{ displayText(settings) }}
+            </template>
           </template>
         </component>
 
-        <div v-if="subtitle(settings) || blockMode === 'edit'" class="heading-subtitle" :class="subtitleSizeClass(settings)" :style="subtitleStyles(settings, blockDevice)" v-bind="getAttributes('subtitle')">
+        <component 
+          :is="subtitleTag(settings)"
+          v-if="subtitle(settings) || blockMode === 'edit'" 
+          class="heading-subtitle" 
+          :class="subtitleSizeClass(settings)" 
+          :style="subtitleStyles(settings, blockDevice)" 
+          v-bind="getAttributes('subtitle')"
+        >
           <div 
             :contenteditable="blockMode === 'edit'"
             @blur="onSubtitleBlur($event, settings)"
             v-html="subtitle(settings) || (blockMode === 'edit' ? 'Add a subtitle...' : '')"
             style="display: block; width: 100%; outline: none;"
           ></div>
-        </div>
-        
+        </component>
       </div>
   </BaseBlock>
 </template>
@@ -42,6 +72,7 @@ import {
     getTypographyStyles, 
     getVal,
     getTextGradientStyles,
+    generateGradientCSS
 } from '../utils/styleUtils'
 import type { BlockInstance, BuilderInstance } from '../../types/builder'
 
@@ -57,6 +88,7 @@ const props = withDefaults(defineProps<{
 const builder = inject<BuilderInstance>('builder', null as any)
 
 const tag = (settings: any) => getVal(settings, 'tag') || 'h2'
+const subtitleTag = (settings: any) => getVal(settings, 'subtitle_tag') || 'div'
 const subtitle = (settings: any) => getVal(settings, 'subtitle') || ''
 const isDynamic = (settings: any) => {
     const text = getVal(settings, 'text')
@@ -98,6 +130,25 @@ const headingStyles = (settings: any, device: string) => {
 
     const alignment = getVal(settings, 'alignment', device)
     if (alignment) styles.textAlign = alignment
+
+    // 5. Background Clip Text (Uses module background as text fill)
+    if (getVal(settings, 'background_clip_text', device)) {
+        styles.webkitBackgroundClip = 'text'
+        styles.backgroundClip = 'text'
+        styles.webkitTextFillColor = 'transparent'
+        styles.color = 'transparent'
+    }
+
+    // 6. Hover States (Via CSS Variables)
+    const hoverColor = getVal(settings, 'hover_text_color', device)
+    if (hoverColor) styles['--hover-color'] = hoverColor
+
+    if (getVal(settings, 'hover_use_gradient', device)) {
+        const hg = getVal(settings, 'hover_gradient', device)
+        if (hg && hg.stops && hg.stops.length >= 2) {
+            styles['--hover-gradient'] = generateGradientCSS(hg)
+        }
+    }
     
     return styles
 }
@@ -188,5 +239,29 @@ const onSubtitleBlur = (e: any, settings: any) => {
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-weight: 700;
+}
+
+/* Custom Hover Effects */
+.heading-block {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.heading-block:hover {
+    color: var(--hover-color) !important;
+    -webkit-text-fill-color: var(--hover-color) !important;
+}
+
+/* Hover Gradient Support */
+.heading-block[style*="--hover-gradient"]:hover {
+    background-image: var(--hover-gradient) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
+/* Background Clip Text Fixes */
+.heading-block[style*="background-clip: text"] {
+    background-color: transparent !important;
 }
 </style>
