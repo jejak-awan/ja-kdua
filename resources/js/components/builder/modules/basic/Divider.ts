@@ -17,6 +17,9 @@ import {
     scrollEffectsSettings,
     attributesSettings,
     adminLabelSettings,
+    layoutSettings,
+    typographySettings,
+    linkSettings
 } from '../commonSettings';
 
 /**
@@ -32,12 +35,24 @@ const DividerModule: ModuleDefinition = {
 
     defaults: {
         visible: true,
-        pattern: 'classic', // classic, waves, zigzag, dots
+        pattern: 'classic',
         lineWeight: 2,
         lineColor: '#cccccc',
         lineWidth: '100%',
         alignment: 'center',
         use_gradient: false,
+        layout_type: 'block',
+        gap_x: '0px',
+        gap_y: '0px',
+        // Icon/Text Elements
+        add_icon: false,
+        icon: 'Star',
+        icon_size: '24px',
+        icon_color: '#333333',
+        add_text: false,
+        text: 'Divider',
+        text_gap: '15px',
+        divider_element_position: 'center', // left, center, right
         padding: { top: 20, bottom: 20, left: 0, right: 0, unit: 'px' },
         margin: { top: 0, bottom: 0, left: 0, right: 0, unit: 'px' }
     },
@@ -45,19 +60,39 @@ const DividerModule: ModuleDefinition = {
     settings: {
         content: [
             {
-                id: 'divider',
-                label: 'Divider',
+                id: 'divider_elements',
+                label: 'Elements',
                 fields: [
-                    { name: 'visible', type: 'toggle', label: 'Show Divider Line' }
+                    { name: 'visible', type: 'toggle', label: 'Show Divider Line', default: true },
+                    {
+                        name: 'icon_group',
+                        type: 'group',
+                        label: 'Icon',
+                        fields: [
+                            { name: 'add_icon', type: 'toggle', label: 'Add Icon' },
+                            { name: 'icon', type: 'icon', label: 'Select Icon', show_if: { field: 'add_icon', value: true } }
+                        ]
+                    },
+                    {
+                        name: 'text_group',
+                        type: 'group',
+                        label: 'Text',
+                        fields: [
+                            { name: 'add_text', type: 'toggle', label: 'Add Text' },
+                            { name: 'text', type: 'text', label: 'Divider Text', show_if: { field: 'add_text', value: true } }
+                        ]
+                    }
                 ]
             },
+            linkSettings,
             backgroundSettings,
             adminLabelSettings('Divider')
         ],
         design: [
+            layoutSettings,
             {
                 id: 'style',
-                label: 'Premium Line Style',
+                label: 'Line Style',
                 fields: [
                     {
                         name: 'pattern', type: 'select', label: 'Line Pattern', responsive: true, options: [
@@ -72,13 +107,51 @@ const DividerModule: ModuleDefinition = {
                     { name: 'lineColor', type: 'color', label: 'Line Color', responsive: true, show_if: { field: 'use_gradient', value: false } },
                     { name: 'use_gradient', type: 'toggle', label: 'Enable Gradient Line' },
                     { name: 'gradient', type: 'gradient', label: 'Line Gradient', show_if: { field: 'use_gradient', value: true } },
-                    { name: 'lineWidth', type: 'text', label: 'Width (e.g., 100%, 200px)', responsive: true },
+                    { name: 'lineWidth', type: 'dimension', label: 'Line Width', responsive: true },
                     {
-                        name: 'alignment', type: 'buttonGroup', label: 'Alignment', responsive: true, options: [
+                        name: 'alignment', type: 'buttonGroup', label: 'Line Alignment', responsive: true, options: [
                             { value: 'left', label: 'Left', icon: 'AlignLeft' },
                             { value: 'center', label: 'Center', icon: 'AlignCenter' },
                             { value: 'right', label: 'Right', icon: 'AlignRight' }
                         ]
+                    }
+                ]
+            },
+            {
+                id: 'element_styling',
+                label: 'Icon & Text Style',
+                show_if: [
+                    { field: 'add_icon', value: true },
+                    { field: 'add_text', value: true }
+                ],
+                fields: [
+                    {
+                        name: 'divider_element_position',
+                        type: 'select',
+                        label: 'Element Position',
+                        options: [
+                            { label: 'Left', value: 'left' },
+                            { label: 'Center', value: 'center' },
+                            { label: 'Right', value: 'right' }
+                        ]
+                    },
+                    { name: 'text_gap', type: 'dimension', label: 'Gap Around Element', default: '15px' },
+                    {
+                        name: 'icon_styling',
+                        type: 'group',
+                        label: 'Icon Styling',
+                        show_if: { field: 'add_icon', value: true },
+                        fields: [
+                            { name: 'icon_size', type: 'dimension', label: 'Icon Size' },
+                            { name: 'icon_color', type: 'color', label: 'Icon Color' }
+                        ]
+                    },
+                    {
+                        name: 'text_styling',
+                        type: 'group',
+                        label: 'Text Styling',
+                        show_if: { field: 'add_text', value: true },
+                        fields: typographySettings.fields!
                     }
                 ]
             },
