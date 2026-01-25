@@ -191,7 +191,7 @@
 <style scoped>
 .dynamic-data-popover {
   width: 280px;
-  max-height: calc(100vh - 80px); /* Adaptive max height */
+  max-height: 320px; /* Limited height to prevent overflow as per user request */
 }
 
 /* Custom Scrollbar for a pro feel */
