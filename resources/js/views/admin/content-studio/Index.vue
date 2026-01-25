@@ -82,7 +82,7 @@ const authStore = useAuthStore();
 const cmsStore = useCmsStore();
 
 useHead({
-    title: computed(() => `${t('features.content_studio.title')} | ${cmsStore.siteSettings?.site_name || 'JA CMS'}`)
+    title: computed(() => `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${t('features.content_studio.title')}`)
 });
 
 const activeTab = ref(route.query.tab || 'contents');

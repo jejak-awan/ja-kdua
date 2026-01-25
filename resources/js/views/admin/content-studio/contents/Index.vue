@@ -81,9 +81,11 @@ const props = defineProps({
     }
 });
 
-useHead({
-    title: computed(() => props.isEmbedded ? null : `${t('features.content.list.title')} | ${cmsStore.siteSettings?.site_name || t('app.name')}`)
-});
+if (!props.isEmbedded) {
+    useHead({
+        title: computed(() => `${cmsStore.siteSettings?.site_name || t('app.name')} | ${t('features.content.list.title')}`)
+    });
+}
 
 const loading = ref(true);
 const contents = ref<Content[]>([]);

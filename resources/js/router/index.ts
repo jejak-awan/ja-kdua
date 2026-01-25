@@ -496,7 +496,7 @@ router.afterEach((to) => {
     api.post('/analytics/track-visit', {
         url: window.location.href,
         path: to.path,
-        title: to.meta.title || document.title
+        title: document.title
     }).catch(err => {
         // Silently fail for analytics errors
         console.debug('Analytics tracking failed:', err);

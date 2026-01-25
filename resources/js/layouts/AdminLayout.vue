@@ -48,19 +48,62 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useCmsStore } from '../stores/cms';
 import { useSidebar } from '../composables/useSidebar';
 import { useLayoutMount } from '../composables/useLayoutMount';
+import { useHead } from '@vueuse/head';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminSidebar from '../components/layouts/AdminSidebar.vue';
 import AdminNavbar from '../components/layouts/AdminNavbar.vue';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+const cmsStore = useCmsStore();
+const { t, te } = useI18n();
 const { sidebarMinimized, sidebarOpen, toggleSidebarMinimize, toggleSidebarOpen, closeSidebar } = useSidebar();
 
 // Use shared mounted state for synchronized transitions
 const { mounted } = useLayoutMount();
+
+// Reactive Global Title Management
+useHead({
+    title: computed(() => {
+        // 1. Priority: Child components with useHead will override this (handled by library)
+        // BUT if no child sets title, this is the default.
+        
+        // 2. Route Meta Title
+        if (route.meta?.title) {
+            return `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${route.meta.title}`;
+        }
+        
+        // 3. Auto-generated from Route Name (Fallback)
+        // Tries to find translation 'common.navigation.menu.[name]' or just capitalizes name
+        if (route.name) {
+            const name = String(route.name);
+            // Handle dotted names like 'content-templates.create' -> just 'Create' or similar logic?
+            // Simple approach: check specific translation or usage
+            const camelName = name.replace(/-([a-z])/g, (g) => g[1].toUpperCase()).split('.')[0]; 
+            const key = `common.navigation.menu.${camelName}`;
+            
+            let label = name;
+            if (te(key)) {
+                label = t(key);
+            } else {
+                // Fallback formatter
+                label = name.split('.').pop() || name; // 'users.create' -> 'create'
+                label = label.charAt(0).toUpperCase() + label.slice(1);
+            }
+            
+            return `${cmsStore.siteSettings?.site_name || 'JA CMS'} | ${label}`;
+        }
+
+        return cmsStore.siteSettings?.site_name || 'JA CMS';
+    })
+});
 
 const handleLogout = async () => {
     await authStore.logout();
