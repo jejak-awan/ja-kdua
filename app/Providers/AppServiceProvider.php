@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Logout;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -222,5 +228,51 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Silently fail if database is not available
         }
+
+        // --- Logging Implementations ---
+
+        // 1. Slow Query Logging (> 1 second)
+        try {
+            DB::listen(function ($query) {
+                if ($query->time > 1000) {
+                    Log::channel('slow-queries')->warning('Slow query detected', [
+                        'sql' => $query->sql,
+                        'bindings' => $query->bindings,
+                        'time_ms' => $query->time,
+                        'url' => request()->fullUrl(),
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
+            // Ignore if DB not ready
+        }
+
+        // 2. Security Logging (Auth Events)
+        Event::listen(Login::class, function ($event) {
+            Log::channel('security')->info('User logged in', [
+                'user_id' => $event->user->id,
+                'email' => $event->user->email,
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
+        Event::listen(Failed::class, function ($event) {
+            Log::channel('security')->warning('Login failed', [
+                'email' => $event->credentials['email'] ?? null,
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
+        Event::listen(Logout::class, function ($event) {
+            if ($event->user) {
+                Log::channel('security')->info('User logged out', [
+                    'user_id' => $event->user->id,
+                    'email' => $event->user->email,
+                    'ip' => request()->ip(),
+                ]);
+            }
+        });
     }
 }
