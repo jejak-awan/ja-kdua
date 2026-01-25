@@ -178,7 +178,7 @@ import {
     ChevronRight,
     Filter
 } from 'lucide-vue-next';
-import _ from 'lodash';
+import { debounce } from '@/utils/debounce';
 
 // Shadcn UI
 // @ts-ignore
@@ -361,7 +361,7 @@ const fetchCategories = async (page = 1) => {
     }
 };
 
-const debouncedSearch = _.debounce(() => {
+const debouncedSearch = debounce(() => {
     fetchCategories(1);
 }, 300);
 

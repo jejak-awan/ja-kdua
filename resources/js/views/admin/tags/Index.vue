@@ -195,7 +195,7 @@ import {
 import api from '@/services/api';
 import { useConfirm } from '@/composables/useConfirm';
 import { useToast } from '@/composables/useToast';
-import _ from 'lodash';
+import { debounce } from '@/utils/debounce';
 import { parseResponse } from '@/utils/responseParser';
 
 // @ts-ignore
@@ -260,7 +260,7 @@ const pagination = ref<any>({
     to: 0
 });
 
-const onSearchInput = _.debounce(() => {
+const onSearchInput = debounce(() => {
     fetchTags(1);
 }, 500);
 

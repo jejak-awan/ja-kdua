@@ -356,7 +356,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { debounce } from 'lodash';
+import { debounce } from '@/utils/debounce';
 import api from '@/services/api';
 import { useToast } from '@/composables/useToast';
 // @ts-ignore

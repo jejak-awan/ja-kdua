@@ -208,7 +208,7 @@ import api from '../../../services/api';
 import { useConfirm } from '../../../composables/useConfirm';
 import { useToast } from '../../../composables/useToast';
 import { parseResponse, ensureArray, parseSingleResponse } from '../../../utils/responseParser';
-import { debounce } from 'lodash';
+import { debounce } from '@/utils/debounce';
 import Card from '../../../components/ui/card.vue';
 import CardHeader from '../../../components/ui/card-header.vue';
 import CardContent from '../../../components/ui/card-content.vue';

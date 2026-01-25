@@ -213,7 +213,7 @@ import TableBody from '../../../components/ui/table-body.vue';
 import TableCell from '../../../components/ui/table-cell.vue';
 import Pagination from '../../../components/ui/pagination.vue';
 import { Download, Search, Trash2, RotateCcw } from 'lucide-vue-next';
-import _ from 'lodash';
+import { debounce } from '@/utils/debounce';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -254,7 +254,7 @@ const fetchSubscribers = async () => {
     }
 };
 
-const debounceSearch = _.debounce(() => {
+const debounceSearch = debounce(() => {
     filters.value.page = 1;
     fetchSubscribers();
 }, 300);

@@ -7,7 +7,21 @@ import en from '../lang/en/index.js';
 import id from '../lang/id/index.js';
 // @ts-ignore
 import builderTranslations from './components/builder/lang/index.js';
-import _ from 'lodash';
+/**
+ * Deep merge utility for translation objects
+ */
+const deepMerge = <T extends Record<string, any>>(target: T, ...sources: Record<string, any>[]): T => {
+    for (const source of sources) {
+        for (const key in source) {
+            if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
+                deepMerge(target[key], source[key]);
+            } else {
+                (target as any)[key] = source[key];
+            }
+        }
+    }
+    return target;
+};
 
 /**
  * Detect the best locale to use
@@ -38,8 +52,8 @@ const detectedLocale = detectLocale();
 
 // Merge global messages with builder-specific translations
 const messages = {
-    en: _.merge({}, en, builderTranslations.en),
-    id: _.merge({}, id, builderTranslations.id)
+    en: deepMerge({}, en, builderTranslations.en),
+    id: deepMerge({}, id, builderTranslations.id)
 };
 
 const i18n = createI18n({
