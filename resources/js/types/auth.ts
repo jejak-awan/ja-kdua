@@ -8,6 +8,7 @@ export interface Role {
     id: number;
     name: string;
     permissions?: Permission[];
+    users_count?: number;
 }
 
 export interface User {

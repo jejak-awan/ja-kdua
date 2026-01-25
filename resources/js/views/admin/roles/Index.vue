@@ -342,7 +342,7 @@
             <div class="mt-6">
                 <Pagination
                     v-if="pagination.total > 0"
-                    :total="pagination.total"
+                    :total-items="pagination.total"
                     :per-page="Number(pagination.per_page)"
                     :current-page="Number(pagination.current_page)"
                     @page-change="changePage"
