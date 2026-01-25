@@ -318,6 +318,7 @@
                                 <Button
                                     variant="ghost"
                                     size="sm"
+                                    @click="viewMode = 'grid'"
                                     :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
                                     <LayoutGrid class="w-4 h-4" />
@@ -325,6 +326,7 @@
                                 <Button
                                     variant="ghost"
                                     size="sm"
+                                    @click="viewMode = 'list'"
                                     :class="`h-8 w-8 p-0 rounded-sm transition-all ${viewMode === 'list' ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`"
                                 >
                                     <List class="w-4 h-4" />

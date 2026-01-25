@@ -20,6 +20,11 @@ class ThemeController extends BaseApiController
         $type = $request->get('type', 'frontend');
         $themes = Theme::ofType($type)->latest()->get();
 
+        // Attach manifest to each theme
+        $themes->each(function ($theme) {
+            $theme->manifest = $theme->getManifest();
+        });
+
         return $this->success($themes, 'Themes retrieved successfully');
     }
 

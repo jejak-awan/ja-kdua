@@ -82,9 +82,11 @@ export const SETTINGS_TABS = {
 // Left Sidebar Panels
 export const SIDEBAR_PANELS = [
     { id: 'pages', label: 'Pages', icon: 'FileText' },
+    { id: 'templates', label: 'Templates', icon: 'Layout' },
+    { id: 'theme', label: 'Theme', icon: 'Palette' },
     { id: 'settings', label: 'Settings', icon: 'Settings' },
     { id: 'layers', label: 'Layers', icon: 'Layers' },
-    { id: 'layouts', label: 'Layouts', icon: 'Layout' },
+    { id: 'layouts', label: 'Layouts', icon: 'Grid' },
     { id: 'presets', label: 'Presets', icon: 'Sparkles' },
     { id: 'history', label: 'History', icon: 'Clock' },
     { id: 'global_variables', label: 'Global Variables', icon: 'Database' },

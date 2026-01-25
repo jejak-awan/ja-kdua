@@ -78,6 +78,7 @@ export interface BuilderState {
     gridViewMode: Ref<boolean>;
     isFullscreen: Ref<boolean>;
     activeTheme: Ref<string>;
+    selectedThemeSlug: Ref<string | null>;
     themeData: Ref<any>;
     themeSettings: Ref<Record<string, any>>;
     responsiveModal: Ref<any>;
@@ -165,6 +166,7 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     loadContent: (id: string | number) => Promise<void>;
     fetchMetadata: () => Promise<void>;
     setDeviceMode: (mode: 'desktop' | 'tablet' | 'mobile') => void;
+    applyThemeStyles: () => void;
 
     // Modals helpers (runtime injected)
     openIconPickerModal?: (value: string, onSelect: (icon: string) => void) => void;
@@ -184,6 +186,14 @@ export interface BuilderInstance extends BuilderState, ModuleManager {
     fetchPresets: () => Promise<void>;
     savePreset: (module: any, name: string) => Promise<any>;
     deletePreset: (id: number | string) => Promise<boolean | undefined>;
+
+    // Theme & Templates
+    updateThemeSettings: (themeSlug: string, settings: any) => Promise<void>;
+    fetchTemplates: () => Promise<any[]>;
+    createTemplate: (data: { name: string; type: string }) => Promise<any>;
+    deleteTemplate: (id: number | string) => Promise<boolean>;
+    updateContentMeta: (id: number | string, meta: any) => Promise<any>;
+    fetchThemes: () => Promise<void>;
 }
 
 export interface BlockProps {

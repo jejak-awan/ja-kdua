@@ -60,17 +60,30 @@ class LogController extends BaseApiController
 
     public function clear(Request $request)
     {
-        // Default to laravel.log or specific file
-        $filename = $request->input('filename', 'laravel.log');
-        $logFile = storage_path('logs/'.basename($filename));
+        $filename = $request->input('filename');
+        $logPath = storage_path('logs');
 
-        if (File::exists($logFile)) {
-            File::put($logFile, '');
-
-            return $this->success(null, 'Log file cleared successfully');
+        if ($filename) {
+            $logFile = $logPath . '/' . basename($filename);
+            if (File::exists($logFile)) {
+                File::put($logFile, '');
+                return $this->success(null, 'Log file cleared successfully');
+            }
+            return $this->notFound('Log file');
         }
 
-        return $this->notFound('Log file');
+        // Clear all .log files if no filename provided
+        if (File::isDirectory($logPath)) {
+            $files = File::files($logPath);
+            foreach ($files as $file) {
+                if ($file->getExtension() === 'log') {
+                    File::put($file->getPathname(), '');
+                }
+            }
+            return $this->success(null, 'All log files cleared successfully');
+        }
+
+        return $this->error('Log directory not found', 404);
     }
 
     protected function tailFile($filepath, $lines = 100)

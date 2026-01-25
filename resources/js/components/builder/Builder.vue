@@ -55,7 +55,7 @@
         
         <!-- Right Panel (Settings) -->
         <RightPanel 
-          v-if="selectedModule"
+          v-if="selectedModule || activePanel === 'theme'"
           :module="selectedModule"
           @close="closeSettings"
         />

@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="panel-header">
       <!-- Breadcrumb -->
-      <div class="panel-breadcrumb">
+      <div v-if="module && activePanel !== 'theme'" class="panel-breadcrumb">
         <!-- Collapse Button (Before Breadcrumb) -->
         <IconButton 
           :icon="ChevronsRight" 
@@ -25,16 +25,17 @@
       <!-- Title Row -->
       <div class="panel-title-row">
         <IconButton 
-          v-if="modulePath.length > 1" 
+          v-if="modulePath.length > 1 && activePanel !== 'theme'" 
           :icon="ArrowLeft" 
           size="md" 
           @click="goBack" 
           :title="t('builder.rightPanel.back')"
         />
-        <h3 class="panel-title">{{ moduleTitle }}</h3>
+        <h3 class="panel-title">{{ activePanel === 'theme' ? t('builder.sidebars.theme') : moduleTitle }}</h3>
         
         <!-- New: Presets Dropdown (Moved to Header) -->
         <DesignPresetsSelector 
+          v-if="module && activePanel !== 'theme'"
           style="margin-left: auto;"
           :type="module.type"
           @action="handlePresetAction"
@@ -43,7 +44,7 @@
     </header>
     
     <!-- Tabs -->
-    <div class="panel-tabs">
+    <div v-if="module && activePanel !== 'theme'" class="panel-tabs">
       <button
         v-for="tab in tabs"
         :key="tab.id"
@@ -92,7 +93,7 @@
     </div>
     
     <!-- Search -->
-    <div class="panel-search">
+    <div v-if="module && activePanel !== 'theme'" class="panel-search">
       <BaseInput 
         v-model="searchQuery"
         :placeholder="t('builder.rightPanel.searchPlaceholder')"
@@ -109,8 +110,11 @@
     
     <!-- Content -->
     <div class="panel-content">
+      <ThemeSettingsPanel 
+        v-if="activePanel === 'theme'"
+      />
       <SettingsPanel 
-        v-if="module"
+        v-else-if="module"
         :module="module"
         :active-tab="activeTab"
         :search-query="searchQuery"
@@ -139,6 +143,7 @@ import SettingsPanel from '../settings/SettingsPanel.vue'
 import ResponsiveBreakpointsModal from '../modals/ResponsiveBreakpointsModal.vue'
 import { IconButton, BaseInput, BaseDropdown, BaseDivider } from '../ui'
 import DesignPresetsSelector from '../settings/DesignPresetsSelector.vue'
+import ThemeSettingsPanel from './panels/ThemeSettingsPanel.vue'
 import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
 const { t, te } = useI18n()
@@ -153,7 +158,7 @@ const breakpoints = [
 
 // Props
 const props = defineProps<{
-  module: BlockInstance
+  module: BlockInstance | null
 }>()
 
 // Emits
@@ -163,6 +168,9 @@ defineEmits<{
 
 // Inject
 const builder = inject<BuilderInstance>('builder') as any
+
+// State
+const activePanel = computed(() => builder?.activePanel?.value)
 
 // State
 const activeTab = ref('content')
@@ -238,9 +246,13 @@ const handleBreakpointsSave = (_breakpointsData: any) => {
 const handlePresetAction = (payload: { type: string, data: any }) => {
   const { type, data } = payload
   if (type === 'addNew' || type === 'newFromCurrent') {
-    builder?.openSavePresetModal(props.module.id)
+    if (props.module) {
+      builder?.openSavePresetModal(props.module.id)
+    }
   } else if (type === 'apply' && data) {
-    builder?.applyPreset(props.module.id, data)
+    if (props.module) {
+      builder?.applyPreset(props.module.id, data)
+    }
   }
 }
 </script>

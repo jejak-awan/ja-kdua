@@ -63,6 +63,7 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
     const gridViewMode = ref(false)
     const isFullscreen = ref(false)
     const activeTheme = ref('janari')
+    const selectedThemeSlug = ref<string | null>(null)
     const themeData = ref<any>(null)
     const themeSettings = ref<Record<string, any>>({})
 
@@ -184,6 +185,7 @@ export function useBuilderState(initialData = { blocks: [] as BlockInstance[] },
         gridViewMode,
         isFullscreen,
         activeTheme,
+        selectedThemeSlug,
         themeData,
         themeSettings,
         responsiveModal,

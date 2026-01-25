@@ -97,6 +97,12 @@
         <!-- Global Variables Panel -->
         <GlobalVariablesPanel v-else-if="activePanel === 'global_variables'" />
         
+        <!-- Theme Panel -->
+        <ThemeListPanel v-else-if="activePanel === 'theme'" />
+
+        <!-- Templates Panel -->
+        <TemplatesPanel v-else-if="activePanel === 'templates'" />
+        
         <!-- Fallback -->
         <div v-else class="panel-placeholder">
           <component :is="icons.Construction" :size="32" />
@@ -122,6 +128,8 @@ import PortabilityPanel from './panels/PortabilityPanel.vue'
 import HelpPanel from './panels/HelpPanel.vue'
 import PreferencesPanel from './panels/PreferencesPanel.vue'
 import GlobalVariablesPanel from './panels/GlobalVariablesPanel.vue'
+import ThemeListPanel from './panels/ThemeListPanel.vue'
+import TemplatesPanel from './panels/TemplatesPanel.vue'
 import type { BuilderInstance, BlockInstance } from '../../../types/builder'
 
 const icons: Record<string, any> = { X, Construction, ChevronsLeft, Plus, LayoutGrid, Eye, Search, Filter, MoreVertical }
@@ -160,6 +168,7 @@ const title = computed(() => {
 // Dynamic width based on active panel
 const currentWidth = computed(() => {
     if (props.activePanel === 'global_variables') return '500px'
+    if (props.activePanel === 'theme' || props.activePanel === 'templates') return '360px'
     return '300px'
 })
 

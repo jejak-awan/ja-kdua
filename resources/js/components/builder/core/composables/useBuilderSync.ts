@@ -297,6 +297,67 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         }
     }
 
+    async function updateThemeSettings(themeSlug: string, settings: any): Promise<void> {
+        try {
+            await api.put(`/admin/ja/themes/${themeSlug}/settings`, { settings })
+            themeSettings.value = { ...settings }
+        } catch (error) {
+            console.error('Failed to update theme settings:', error)
+            throw error
+        }
+    }
+
+    async function fetchTemplates(): Promise<any[]> {
+        try {
+            const response = await api.get('/admin/ja/contents', {
+                params: { type: 'layout', per_page: 100 }
+            })
+            const data = response.data?.data || response.data
+            return data.data || data || []
+        } catch (error) {
+            console.error('Failed to fetch templates:', error)
+            return []
+        }
+    }
+
+    async function createTemplate(data: { name: string, type: string }): Promise<any> {
+        try {
+            const payload = {
+                title: data.name,
+                type: 'layout',
+                status: 'published',
+                editor_type: 'builder',
+                blocks: [],
+                meta: { template_type: data.type }
+            }
+            const response = await api.post('/admin/ja/contents', payload)
+            return response.data?.data || response.data
+        } catch (error) {
+            console.error('Failed to create template:', error)
+            throw error
+        }
+    }
+
+    async function deleteTemplate(id: number | string): Promise<boolean> {
+        try {
+            await api.delete(`/admin/ja/contents/${id}`)
+            return true
+        } catch (error) {
+            console.error('Failed to delete template:', error)
+            throw error
+        }
+    }
+
+    async function updateContentMeta(id: number | string, meta: any): Promise<any> {
+        try {
+            const response = await api.put(`/admin/ja/contents/${id}`, { meta })
+            return response.data?.data || response.data
+        } catch (error) {
+            console.error('Failed to update content meta:', error)
+            throw error
+        }
+    }
+
     return {
         fetchPages,
         setCurrentPage,
@@ -309,6 +370,11 @@ export function useBuilderSync(state: BuilderState, historyManager: HistoryManag
         fetchThemes,
         markAsSaved,
         startAutoSave,
-        stopAutoSave
+        stopAutoSave,
+        updateThemeSettings,
+        fetchTemplates,
+        createTemplate,
+        deleteTemplate,
+        updateContentMeta
     }
 }

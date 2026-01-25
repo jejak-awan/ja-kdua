@@ -142,10 +142,17 @@ export default function useBuilder(initialData = { blocks: [] as BlockInstance[]
         globalVariables,
         loadTheme,
         handleSavePreset,
+        updateThemeSettings: syncManager.updateThemeSettings,
+        fetchTemplates: syncManager.fetchTemplates,
+        createTemplate: syncManager.createTemplate,
+        deleteTemplate: syncManager.deleteTemplate,
+        updateContentMeta: syncManager.updateContentMeta,
+        fetchThemes: syncManager.fetchThemes,
 
         // Modal Prompt Aliases
         confirm: uiManager.confirm,
         prompt: uiManager.prompt,
+        applyThemeStyles,
 
         // External Composables re-exposing
         presets,

@@ -517,6 +517,7 @@ Route::prefix('v1')->group(function () {
 
         // Logs
         Route::get('logs', [App\Http\Controllers\Api\V1\LogController::class, 'index'])->middleware('permission:manage settings');
+        Route::delete('logs', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
         Route::post('logs/clear', [App\Http\Controllers\Api\V1\LogController::class, 'clear'])->middleware('permission:manage settings');
         Route::get('logs/{filename}', [App\Http\Controllers\Api\V1\LogController::class, 'show'])->middleware('permission:manage settings');
         Route::get('logs/{filename}/download', [App\Http\Controllers\Api\V1\LogController::class, 'download'])->middleware('permission:manage settings');

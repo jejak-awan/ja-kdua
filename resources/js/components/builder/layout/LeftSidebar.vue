@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { 
   Layers, FileText, Clock, Layout, Settings, Palette, 
-  Sparkles, Share2, HelpCircle, Settings2, Database
+  Sparkles, Share2, HelpCircle, Settings2, Database, Grid
 } from 'lucide-vue-next'
 import { inject, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -55,7 +55,7 @@ const { t } = useI18n()
 // Icons map
 const icons: Record<string, any> = {
   Layers, FileText, Clock, Layout, Settings, Palette,
-  Sparkles, Share2, HelpCircle, Settings2, Database
+  Sparkles, Share2, HelpCircle, Settings2, Database, Grid
 }
 
 const builder = inject<BuilderInstance>('builder')
@@ -64,7 +64,7 @@ const panels = SIDEBAR_PANELS
 const filteredPanels = computed(() => {
   if (builder?.mode.value === 'page') {
     // Hidden panels in page mode (focused editing)
-    const hidden = ['pages', 'portability', 'theme', 'global_variables']
+    const hidden = ['pages', 'portability', 'theme', 'global_variables', 'templates']
     return panels.filter(p => !hidden.includes(p.id))
   }
   return panels

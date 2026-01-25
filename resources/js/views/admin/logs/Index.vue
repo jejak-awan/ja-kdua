@@ -152,7 +152,7 @@ const highlightedLogContent = computed(() => {
 
 const fetchLogFiles = async () => {
     try {
-        const response = await api.get('/admin/ja/logs');
+        const response = await api.get('admin/ja/logs');
         const { data } = parseResponse(response);
         logFiles.value = ensureArray(data);
     } catch (error) {
@@ -165,7 +165,7 @@ const selectLogFile = async (logFile) => {
     selectedLogFile.value = logFile;
     loadingLog.value = true;
     try {
-        const response = await api.get(`/admin/ja/logs/${logFile.name}`);
+        const response = await api.get(`admin/ja/logs/${logFile.name}`);
         const data = parseSingleResponse(response) || {};
         logContent.value = data.content || '';
     } catch (error) {
@@ -184,7 +184,7 @@ const refreshLog = () => {
 
 const downloadLog = async (logFile) => {
     try {
-        const response = await api.get(`/admin/ja/logs/${logFile.name}/download`, {
+        const response = await api.get(`admin/ja/logs/${logFile.name}/download`, {
             responseType: 'blob',
         });
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -212,7 +212,7 @@ const clearLogs = async () => {
 
     clearing.value = true;
     try {
-        await api.delete('/admin/ja/logs');
+        await api.delete('admin/ja/logs');
         toast.success.action(t('features.system.logs.messages.cleared'));
         logContent.value = '';
         fetchLogFiles();

@@ -1114,7 +1114,7 @@ const clearLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.delete('/admin/ja/security/logs');
+        await api.delete('admin/ja/security/logs');
         toast.success.action(t('features.system.logs.messages.cleared'));
         fetchLogs();
     } catch (error) {
@@ -1125,7 +1125,7 @@ const clearLogs = async () => {
 
 const fetchStats = async () => {
     try {
-        const response = await api.get('/admin/ja/security/stats');
+        const response = await api.get('admin/ja/security/stats');
         statistics.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -1134,7 +1134,7 @@ const fetchStats = async () => {
 
 const fetchBlocklist = async () => {
     try {
-        const response = await api.get('/admin/ja/security/blocklist');
+        const response = await api.get('admin/ja/security/blocklist');
         blocklist.value = ensureArray(parseSingleResponse(response));
     } catch (error) {
         console.error('Failed to fetch blocklist:', error);
@@ -1143,7 +1143,7 @@ const fetchBlocklist = async () => {
 
 const fetchWhitelist = async () => {
     try {
-        const response = await api.get('/admin/ja/security/whitelist');
+        const response = await api.get('admin/ja/security/whitelist');
         whitelist.value = ensureArray(parseSingleResponse(response));
     } catch (error) {
         console.error('Failed to fetch whitelist:', error);
@@ -1167,7 +1167,7 @@ const blockIP = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/security/block-ip', { ip_address: ipToBlock.value });
+        await api.post('admin/ja/security/block-ip', { ip_address: ipToBlock.value });
         toast.success.action(t('features.security.messages.blockSuccess'));
         ipToBlock.value = '';
         await fetchBlocklist();
@@ -1185,7 +1185,7 @@ const checkIPStatus = async () => {
     }
 
     try {
-        const response = await api.get('/admin/ja/security/check-ip', { params: { ip_address: ipToCheck.value } });
+        const response = await api.get('admin/ja/security/check-ip', { params: { ip_address: ipToCheck.value } });
         ipStatus.value = parseSingleResponse(response) || {};
     } catch (error) {
         console.error('Failed to check IP status:', error);
@@ -1209,8 +1209,8 @@ const unblockIP = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/security/unblock-ip', { ip_address: ipToUnblock.value });
-        await api.post('/admin/ja/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
+        await api.post('admin/ja/security/unblock-ip', { ip_address: ipToUnblock.value });
+        await api.post('admin/ja/security/clear-failed-attempts', { ip_address: ipToUnblock.value });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         ipToUnblock.value = '';
         await fetchBlocklist();
@@ -1232,7 +1232,7 @@ const blockIPFromLog = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/security/block-ip', { ip_address: ip });
+        await api.post('admin/ja/security/block-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.blockSuccess'));
         await fetchBlocklist();
         await fetchLogs();
@@ -1256,7 +1256,7 @@ const bulkBlockFromLogs = async () => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/security/bulk-block', { ips: selectedLogIds.value });
+        await api.post('admin/ja/security/bulk-block', { ips: selectedLogIds.value });
         toast.success.action(t('features.security.messages.bulkBlockSuccess'));
         selectedLogIds.value = [];
         await fetchBlocklist();
@@ -1295,7 +1295,7 @@ const removeFromBlocklist = async (ip) => {
     if (!confirmed) return;
 
     try {
-        await api.post('/admin/ja/security/unblock-ip', { ip_address: ip });
+        await api.post('admin/ja/security/unblock-ip', { ip_address: ip });
         toast.success.action(t('features.security.messages.unblockSuccess'));
         await fetchBlocklist();
     } catch (error) {
@@ -1522,7 +1522,7 @@ const fetchCspReports = async () => {
         const params = { ...cspFilters.value };
         if (params.status === 'all') params.status = '';
         
-        const response = await api.get('/admin/ja/security/csp-reports', { params });
+        const response = await api.get('admin/ja/security/csp-reports', { params });
         const result = response.data?.data ? response.data.data : response.data;
         cspReports.value = result.data || [];
         cspPagination.value = {
@@ -1539,7 +1539,7 @@ const fetchCspReports = async () => {
 
 const fetchCspStats = async () => {
     try {
-        const response = await api.get('/admin/ja/security/csp-reports/statistics');
+        const response = await api.get('admin/ja/security/csp-reports/statistics');
         cspStats.value = response.data?.data || {};
     } catch (error) {
         console.error('Failed to fetch CSP stats:', error);

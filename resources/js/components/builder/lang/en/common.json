@@ -539,6 +539,7 @@
         "settings": "Settings",
         "global_variables": "Global Variables",
         "theme": "Theme",
+        "templates": "Templates",
         "presets": "Presets",
         "portability": "Import/Export",
         "help": "Help",
@@ -557,6 +558,25 @@
                 "edit": "Edit",
                 "delete": "Delete"
             }
+        },
+        "templates": {
+            "searchPlaceholder": "Search templates...",
+            "loading": "Loading templates...",
+            "empty": "No templates found.",
+            "addNew": "Add New Template",
+            "promptTitle": "Enter template name:",
+            "assignmentTitle": "Assignment Rules",
+            "applyTo": "Apply To",
+            "contentType": "Content Type",
+            "category": "Category"
+        },
+        "theme": {
+            "loading": "Loading theme settings...",
+            "noActive": "No active theme found.",
+            "save": "Save Theme Settings",
+            "settings": "Settings",
+            "selectHint": "Select a theme from the left to configure its properties.",
+            "activate": "Activate Theme"
         },
         "history": {
             "initial": "Initial State",
@@ -806,6 +826,8 @@
     },
     "module": "Module",
     "common": {
+        "cancel": "Cancel",
+        "save": "Save",
         "select": "Select...",
         "none": "None",
         "delete": "Delete",
