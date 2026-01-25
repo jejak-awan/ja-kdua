@@ -10,7 +10,8 @@
       :align="mappedAlign" 
       :side-offset="offset"
       :avoid-collisions="true"
-      :collision-padding="10"
+      :collision-padding="20"
+      sticky="always"
       :class="cn(
         'p-0 overflow-hidden border-slate-200 dark:border-slate-800 shadow-xl z-[999]',
         props.class
