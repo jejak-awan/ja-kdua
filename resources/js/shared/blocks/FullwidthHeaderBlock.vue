@@ -114,7 +114,7 @@ const contentStyles = computed(() => {
         textAlign: alignment,
         justifyContent: vAlign === 'top' ? 'flex-start' : vAlign === 'bottom' ? 'flex-end' : 'center',
         margin: alignment === 'center' ? '0 auto' : alignment === 'right' ? '0 0 0 auto' : '0 auto 0 0',
-    }
+    } as any
 })
 
 const titleStyles = computed(() => getTypographyStyles(settings.value, 'title_', props.device))

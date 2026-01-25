@@ -33,7 +33,7 @@
                   buttonClasses(blockSettings, activeTabIndex === index),
               ]"
               :style="getTabStyles(blockSettings, activeTabIndex === index)"
-              @click="activeTabIndex = index"
+              @click="activeTabIndex = (index as number)"
             >
                <span class="flex items-center gap-2 relative z-10" :style="tabTypographyStyles(blockSettings, activeTabIndex === index)">
                  <component 

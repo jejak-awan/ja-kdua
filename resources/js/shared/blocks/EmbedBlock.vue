@@ -76,14 +76,14 @@ const containerStyles = computed(() => {
             ...layoutStyles,
             height: typeof height === 'number' ? `${height}px` : height,
             position: 'relative'
-        }
+        } as any
     }
     
     return { 
         ...layoutStyles,
         paddingTop: aspectRatios[ratio] || '56.25%',
         position: 'relative'
-    }
+    } as any
 })
 </script>
 
