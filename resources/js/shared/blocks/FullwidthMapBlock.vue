@@ -8,15 +8,6 @@
     :aria-label="settings.aria_label || 'Fullwidth Map'"
     :style="cardStyles"
   >
-    <template #default="{ settings: blockSettings }">
-      <div class="map-container relative w-full overflow-hidden transition-all duration-300" :style="containerStyles">
-        <iframe
-          :src="mapUrl"
-          class="map-iframe w-full h-full border-0 transition-all duration-500"
-          :class="{ 'grayscale': blockSettings.grayscale }"
-          frameborder="0"
-          allowfullscreen
-          loading="lazy"
     <div class="map-wrapper relative w-full overflow-hidden" :style="containerStyles">
       <div v-if="mode === 'edit'" class="builder-placeholder h-full bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-12 text-center">
           <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 shadow-2xl">

@@ -71,9 +71,3 @@ const containerStyles = computed(() => getLayoutStyles(settings.value, props.dev
     filter: brightness(var(--hover-brightness, 100%));
 }
 </style>
-nteditable]:focus {
-  outline: 1px solid #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
-  border-radius: 4px;
-}
-</style>
