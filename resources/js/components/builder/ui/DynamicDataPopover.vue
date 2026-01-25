@@ -1,63 +1,63 @@
 <template>
   <div class="dynamic-data-popover flex flex-col h-full bg-body overflow-hidden">
     <!-- Close button if showClose is true (for mobile or specific modals) -->
-    <div v-if="showClose" class="flex items-center justify-between px-6 py-4 border-b border-border">
-      <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{{ $t('builder.dynamic.title', 'Dynamic Data') }}</h3>
+    <div v-if="showClose" class="flex items-center justify-between px-4 py-3 border-b border-border">
+      <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">{{ $t('builder.dynamic.title', 'Dynamic Data') }}</h3>
       <button @click="$emit('close')" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-full transition-colors text-muted-foreground">
-        <X :size="16" />
+        <X :size="14" />
       </button>
     </div>
 
     <!-- Search Section -->
-    <div class="p-4 border-b border-border/50">
+    <div class="p-3 border-b border-border/50">
       <div class="relative group">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <Input 
           v-model="searchQuery" 
           :placeholder="$t('builder.dynamic.search', 'Search dynamic data...')"
-          class="pl-10 h-10 bg-slate-50 dark:bg-slate-900/50 border-none focus-visible:ring-1 focus-visible:ring-primary rounded-xl text-sm"
+          class="pl-8 h-8 bg-slate-50 dark:bg-slate-900/50 border-none focus-visible:ring-1 focus-visible:ring-primary rounded-lg text-[13px]"
           autofocus
         />
       </div>
     </div>
 
     <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto no-scrollbar custom-scrollbar pt-2 pb-6">
+    <div class="flex-1 overflow-y-auto no-scrollbar custom-scrollbar pt-1 pb-4">
       <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center p-12 gap-4">
-        <Loader2 class="w-8 h-8 text-primary animate-spin" />
-        <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest animate-pulse">{{ $t('builder.dynamic.loading', 'Scanning Sources...') }}</span>
+      <div v-if="loading" class="flex flex-col items-center justify-center p-8 gap-3">
+        <Loader2 class="w-6 h-6 text-primary animate-spin" />
+        <span class="text-[9px] font-black text-muted-foreground uppercase tracking-widest animate-pulse">{{ $t('builder.dynamic.loading', 'Scanning...') }}</span>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <AlertCircle class="w-10 h-10 text-destructive opacity-50" />
-        <p class="text-xs font-bold text-destructive/80 uppercase tracking-widest">{{ error }}</p>
-        <Button variant="outline" size="sm" class="rounded-full" @click="fetchDynamicSources">
+      <div v-else-if="error" class="flex flex-col items-center justify-center p-8 text-center gap-3">
+        <AlertCircle class="w-8 h-8 text-destructive opacity-50" />
+        <p class="text-[10px] font-bold text-destructive/80 uppercase tracking-widest">{{ error }}</p>
+        <Button variant="outline" size="sm" class="h-7 rounded-full text-[10px] px-3" @click="fetchDynamicSources">
           {{ $t('builder.common.retry', 'Retry') }}
         </Button>
       </div>
 
       <!-- Content -->
       <template v-else>
-        <div v-for="(group, groupName) in filteredGroups" :key="groupName" class="mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div class="px-6 py-2">
-            <h4 class="text-[9px] font-black uppercase tracking-[0.3em] text-primary/70 dark:text-primary/50">{{ group.label }}</h4>
+        <div v-for="(group, groupName) in filteredGroups" :key="groupName" class="mb-1 animate-in fade-in slide-in-from-bottom-1 duration-300">
+          <div class="px-3 py-1">
+            <h4 class="text-[8px] font-black uppercase tracking-[0.2em] text-primary/60 dark:text-primary/40">{{ group.label }}</h4>
           </div>
           
           <div class="flex flex-col">
             <button 
               v-for="item in group.items" 
               :key="item.id"
-              class="group flex items-center justify-between px-6 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300 active:scale-[0.98] text-left"
+              class="group flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-200 active:scale-[0.98] text-left"
               @click="selectItem(item)"
             >
-              <div class="flex flex-col items-start gap-1">
-                <span class="text-sm font-black text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors tracking-tight leading-none">{{ item.label }}</span>
-                <span v-if="item.description" class="text-[10px] text-muted-foreground line-clamp-1 opacity-60 group-hover:opacity-100 transition-opacity">{{ item.description }}</span>
+              <div class="flex flex-col items-start gap-0 min-w-0 flex-1 mr-3">
+                <span class="text-[12px] font-bold text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors tracking-tight leading-tight truncate w-full">{{ item.label }}</span>
+                <span v-if="item.description" class="text-[8px] text-muted-foreground line-clamp-1 opacity-50 group-hover:opacity-100 transition-opacity truncate w-full">{{ item.description }}</span>
               </div>
               
-              <Badge variant="outline" class="bg-slate-100/50 dark:bg-slate-800/30 border-slate-200/60 dark:border-slate-800/60 text-[10px] font-mono font-medium px-2 py-0.5 text-slate-500 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all duration-300">
+              <Badge variant="outline" class="shrink-0 bg-slate-100/30 dark:bg-slate-800/20 border-slate-200/50 dark:border-slate-800/50 text-[8px] font-mono font-medium px-1 py-0 text-slate-500 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all duration-200">
                 {{ item.tag }}
               </Badge>
             </button>
@@ -65,9 +65,9 @@
         </div>
         
         <!-- Empty State -->
-        <div v-if="Object.keys(filteredGroups).length === 0" class="flex flex-col items-center justify-center p-12 text-center opacity-40 animate-in fade-in duration-500">
-          <SearchX class="w-12 h-12 mb-4 text-muted-foreground" />
-          <p class="text-[10px] font-black uppercase tracking-widest">{{ $t('builder.dynamic.noResults', 'No dynamic data found') }}</p>
+        <div v-if="Object.keys(filteredGroups).length === 0" class="flex flex-col items-center justify-center p-10 text-center opacity-40 animate-in fade-in duration-300">
+          <SearchX class="w-10 h-10 mb-3 text-muted-foreground" />
+          <p class="text-[9px] font-black uppercase tracking-widest">{{ $t('builder.dynamic.noResults', 'None found') }}</p>
         </div>
       </template>
     </div>
@@ -190,14 +190,13 @@
 
 <style scoped>
 .dynamic-data-popover {
-  width: 320px;
-  max-height: 500px;
-  min-height: 400px;
+  width: 280px;
+  max-height: calc(100vh - 80px); /* Adaptive max height */
 }
 
 /* Custom Scrollbar for a pro feel */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
